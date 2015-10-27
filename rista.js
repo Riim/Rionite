@@ -2786,8 +2786,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		Static: {
 			KEY_VIEW: KEY_VIEW,
 
-			get: getViewClass,
-			register: registerViewClass,
+			getClass: getViewClass,
+			registerClass: registerViewClass,
 
 			define: defineView
 		},
@@ -3540,7 +3540,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _require = __webpack_require__(4);
 
 	var KEY_VIEW = _require.KEY_VIEW;
-	var getViewClass = _require.get;
+	var getViewClass = _require.getClass;
 
 	/**
 	 * @typesign (el: HTMLElement): Array<HTMLElement>;

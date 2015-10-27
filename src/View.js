@@ -68,8 +68,8 @@ let View = createClass({
 	Static: {
 		KEY_VIEW,
 
-		get: getViewClass,
-		register: registerViewClass,
+		getClass: getViewClass,
+		registerClass: registerViewClass,
 
 		define: defineView
 	},

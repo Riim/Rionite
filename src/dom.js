@@ -1,4 +1,4 @@
-let { KEY_VIEW, get: getViewClass } = require('./View');
+let { KEY_VIEW, getClass: getViewClass } = require('./View');
 
 /**
  * @typesign (el: HTMLElement): Array<HTMLElement>;
