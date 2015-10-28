@@ -7,6 +7,15 @@ if (window.Symbol && typeof Symbol.iterator == 'symbol') {
 	KEY_VIEW = Symbol(KEY_VIEW);
 }
 
+/**
+ * @typesign (str: string): string;
+ */
+function toCamelCase(str) {
+	return str.replace(/[^$0-9a-zA-Z]([$0-9a-zA-Z])/g, function(match, chr) {
+		return chr.toUpperCase();
+	});
+}
+
 let viewClasses = Object.create(null);
 
 /**
@@ -50,7 +59,11 @@ function defineView(name, description) {
 	mixin(proto, description);
 	proto.constructor = CustomView;
 
-	if (description.render) {
+	if (!proto.blockName) {
+		proto.blockName = toCamelCase(name);
+	}
+
+	if (proto.render && !proto._content) {
 		proto._content = cellx(function() {
 			return this.render();
 		});
@@ -78,6 +91,11 @@ let View = createClass({
 	 * @type {Array<{ dispose: () }>}
 	 */
 	_disposables: null,
+
+	/**
+	 * @type {string}
+	 */
+	blockName: undefined,
 
 	/**
 	 * Корневой элемент вьюшки.
@@ -135,7 +153,7 @@ let View = createClass({
 	 * @typesign (selector: string): $;
 	 */
 	$(selector) {
-		return $(this.block).find(selector);
+		return $(this.block).find(selector.split('&').join(`.${this.blockName}__`));
 	},
 
 	/**

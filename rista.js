@@ -97,10 +97,11 @@ return /******/ (function(modules) { // webpackBootstrap
 				var view = node[KEY_VIEW];
 
 				for (var i = 0, l = targets.length; i < l; i++) {
-					var handler = view[targets[i].getAttribute(attrName)];
+					var target = targets[i];
+					var handler = view[target.getAttribute(attrName)];
 
 					if (handler) {
-						handler.call(view, evt);
+						handler.call(view, evt, target);
 					}
 				}
 
@@ -2725,6 +2726,15 @@ return /******/ (function(modules) { // webpackBootstrap
 		KEY_VIEW = Symbol(KEY_VIEW);
 	}
 
+	/**
+	 * @typesign (str: string): string;
+	 */
+	function toCamelCase(str) {
+		return str.replace(/[^$0-9a-zA-Z]([$0-9a-zA-Z])/g, function (match, chr) {
+			return chr.toUpperCase();
+		});
+	}
+
 	var viewClasses = Object.create(null);
 
 	/**
@@ -2768,7 +2778,11 @@ return /******/ (function(modules) { // webpackBootstrap
 		mixin(proto, description);
 		proto.constructor = CustomView;
 
-		if (description.render) {
+		if (!proto.blockName) {
+			proto.blockName = toCamelCase(name);
+		}
+
+		if (proto.render && !proto._content) {
 			proto._content = cellx(function () {
 				return this.render();
 			});
@@ -2796,6 +2810,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @type {Array<{ dispose: () }>}
 	  */
 		_disposables: null,
+
+		/**
+	  * @type {string}
+	  */
+		blockName: undefined,
 
 		/**
 	  * Корневой элемент вьюшки.
@@ -2863,7 +2882,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return $;
 		})(function (selector) {
-			return $(this.block).find(selector);
+			return $(this.block).find(selector.split('&').join('.' + this.blockName + '__'));
 		}),
 
 		/**

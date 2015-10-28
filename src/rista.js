@@ -42,10 +42,11 @@ function onDocumentEvent(evt) {
 			let view = node[KEY_VIEW];
 
 			for (let i = 0, l = targets.length; i < l; i++) {
-				let handler = view[targets[i].getAttribute(attrName)];
+				let target = targets[i];
+				let handler = view[target.getAttribute(attrName)];
 
 				if (handler) {
-					handler.call(view, evt);
+					handler.call(view, evt, target);
 				}
 			}
 
