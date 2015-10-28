@@ -50,9 +50,10 @@ function registerViewClass(name, viewClass) {
  * });
  */
 function defineView(name, description) {
-	function CustomView(block) {
-		View.call(this, block);
-	}
+	let CustomView = Function(
+		'View',
+		`return function ${toCamelCase('.' + name)}(block) { View.call(this, block); };`
+	)(View);
 
 	let proto = CustomView.prototype = Object.create(View.prototype);
 
@@ -61,12 +62,6 @@ function defineView(name, description) {
 
 	if (!proto.blockName) {
 		proto.blockName = toCamelCase(name);
-	}
-
-	if (proto.render && !proto._content) {
-		proto._content = cellx(function() {
-			return this.render();
-		});
 	}
 
 	registerViewClass(name, CustomView);
@@ -104,9 +99,12 @@ let View = createClass({
 	block: null,
 
 	/**
+	 * @final
 	 * @type {cellx<string>}
 	 */
-	_content: undefined,
+	_content: cellx(function() {
+		return this.render();
+	}),
 
 	destroyed: false,
 
@@ -120,7 +118,7 @@ let View = createClass({
 		this.block = block;
 		block[KEY_VIEW] = this;
 
-		if (this._content) {
+		if (this.render) {
 			block.innerHTML = this._content();
 			this._content('on', 'change', this._onContentChange);
 		}
@@ -148,6 +146,9 @@ let View = createClass({
 		el.innerHTML = this._content();
 		morphdom(this.block, el, { childrenOnly: true });
 	},
+
+	render: null,
+	init: null,
 
 	/**
 	 * @typesign (selector: string): $;
@@ -265,7 +266,7 @@ let View = createClass({
 	 *     context?: Object
 	 * );
 	 */
-	_listenTo: function(target, type, listener, context) {
+	_listenTo(target, type, listener, context) {
 		if (!context) {
 			context = this;
 		}
@@ -380,15 +381,15 @@ let View = createClass({
 		return interval;
 	},
 
+	dispose: null,
+
 	/**
 	 * @typesign ();
 	 */
 	destroy() {
 		this.block[KEY_VIEW] = null;
 
-		if (this._content) {
-			this._content('off', 'change', this._onContentChange);
-		}
+		this._content('off', 'change', this._onContentChange);
 
 		let disposables = this._disposables;
 
