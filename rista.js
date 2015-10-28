@@ -2774,7 +2774,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			});
 		}
 
-		viewClasses[name] = CustomView;
+		registerViewClass(name, CustomView);
 	}
 
 	/**
@@ -2815,7 +2815,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				throw new TypeError('Element is already used as a block of view');
 			}
 
-			this._disposables = Object.create(null);
+			this._disposables = {};
 
 			this.block = block;
 			block[KEY_VIEW] = this;
@@ -2848,6 +2848,23 @@ return /******/ (function(modules) { // webpackBootstrap
 			el.innerHTML = this._content();
 			morphdom(this.block, el, { childrenOnly: true });
 		},
+
+		/**
+	  * @typesign (selector: string): $;
+	  */
+		$: (function (_$) {
+			function $(_x) {
+				return _$.apply(this, arguments);
+			}
+
+			$.toString = function () {
+				return _$.toString();
+			};
+
+			return $;
+		})(function (selector) {
+			return $(this.block).find(selector);
+		}),
 
 		/**
 	  * @typesign (method: string, ...args?: Array): Array;
@@ -3035,7 +3052,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
 	  */
 		setTimeout: (function (_setTimeout) {
-			function setTimeout(_x, _x2) {
+			function setTimeout(_x2, _x3) {
 				return _setTimeout.apply(this, arguments);
 			}
 
@@ -3073,7 +3090,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
 	  */
 		setInterval: (function (_setInterval) {
-			function setInterval(_x3, _x4) {
+			function setInterval(_x4, _x5) {
 				return _setInterval.apply(this, arguments);
 			}
 

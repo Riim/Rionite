@@ -56,7 +56,7 @@ function defineView(name, description) {
 		});
 	}
 
-	viewClasses[name] = CustomView;
+	registerViewClass(name, CustomView);
 }
 
 /**
@@ -97,7 +97,7 @@ let View = createClass({
 			throw new TypeError('Element is already used as a block of view');
 		}
 
-		this._disposables = Object.create(null);
+		this._disposables = {};
 
 		this.block = block;
 		block[KEY_VIEW] = this;
@@ -129,6 +129,13 @@ let View = createClass({
 		let el = document.createElement('div');
 		el.innerHTML = this._content();
 		morphdom(this.block, el, { childrenOnly: true });
+	},
+
+	/**
+	 * @typesign (selector: string): $;
+	 */
+	$(selector) {
+		return $(this.block).find(selector);
 	},
 
 	/**
