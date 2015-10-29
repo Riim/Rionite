@@ -1,4 +1,4 @@
-let { map, list, cellx, d, utils } = require('cellx');
+let { EventEmitter, map, list, cellx, d, utils } = require('cellx');
 let settings = require('./settings');
 let observeDOM = require('./observeDOM');
 let View = require('./View');
@@ -24,6 +24,7 @@ function view(name, description) {
 }
 
 let rista = {
+	EventEmitter,
 	map,
 	list,
 	cellx,

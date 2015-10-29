@@ -70,6 +70,9 @@ function defineView(name, description) {
 }
 
 /**
+ * @class rista.View
+ * @extends {cellx.EventEmitter}
+ *
  * @typesign new (block: HTMLElement): rista.View;
  */
 let View = createClass({
@@ -159,15 +162,11 @@ let View = createClass({
 			onBeforeMorphEl(fromEl, toEl) {
 				let view = fromEl[KEY_VIEW];
 
-				if (view && view._onBeforeBlockMorph) {
-					view._onBeforeBlockMorph(fromEl, toEl);
+				if (view && view.constructor.$viewClass === toEl.getAttribute('rt-view')) {
+					return false;
 				}
 			}
 		});
-	},
-
-	_onBeforeBlockMorph(fromEl, toEl) {
-		toEl.className = fromEl.className;
 	},
 
 	render: null,

@@ -58,6 +58,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _require = __webpack_require__(1);
 
+	var EventEmitter = _require.EventEmitter;
 	var map = _require.map;
 	var list = _require.list;
 	var cellx = _require.cellx;
@@ -93,6 +94,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var rista = {
+		EventEmitter: EventEmitter,
 		map: map,
 		list: list,
 		cellx: cellx,
@@ -2832,6 +2834,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
+	 * @class rista.View
+	 * @extends {cellx.EventEmitter}
+	 *
 	 * @typesign new (block: HTMLElement): rista.View;
 	 */
 	var View = createClass({
@@ -2921,15 +2926,11 @@ return /******/ (function(modules) { // webpackBootstrap
 				onBeforeMorphEl: function onBeforeMorphEl(fromEl, toEl) {
 					var view = fromEl[KEY_VIEW];
 
-					if (view && view._onBeforeBlockMorph) {
-						view._onBeforeBlockMorph(fromEl, toEl);
+					if (view && view.constructor.$viewClass === toEl.getAttribute('rt-view')) {
+						return false;
 					}
 				}
 			});
-		},
-
-		_onBeforeBlockMorph: function _onBeforeBlockMorph(fromEl, toEl) {
-			toEl.className = fromEl.className;
 		},
 
 		render: null,
