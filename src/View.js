@@ -1,6 +1,8 @@
 let { EventEmitter, cellx, utils: { logError, mixin, createClass } } = require('cellx');
 let morphdom = require('morphdom');
+let settings = require('./settings');
 let { next: nextUID } = require('./uid');
+let hasClass = require('./hasClass');
 
 let KEY_VIEW = '__rista_View_view__';
 if (window.Symbol && typeof Symbol.iterator == 'symbol') {
@@ -118,6 +120,10 @@ let View = createClass({
 		this.block = block;
 		block[KEY_VIEW] = this;
 
+		if (!hasClass(block, this.blockName)) {
+			block.className = `${this.blockName} ${block.className}`;
+		}
+
 		if (this.render) {
 			block.innerHTML = this._content();
 			this._content('on', 'change', this._onContentChange);
@@ -137,14 +143,31 @@ let View = createClass({
 		let parent = this.getParent();
 
 		if (parent && evt.bubbles !== false && !evt.isPropagationStopped) {
-			parent._handleEvent(evt);
+			if (!parent.destroyed) {
+				parent._handleEvent(evt);
+			}
 		}
 	},
 
 	_onContentChange() {
 		let el = document.createElement('div');
 		el.innerHTML = this._content();
-		morphdom(this.block, el, { childrenOnly: true });
+
+		morphdom(this.block, el, {
+			childrenOnly: true,
+
+			onBeforeMorphEl(fromEl, toEl) {
+				let view = fromEl[KEY_VIEW];
+
+				if (view && view._onBeforeBlockMorph) {
+					view._onBeforeBlockMorph(fromEl, toEl);
+				}
+			}
+		});
+	},
+
+	_onBeforeBlockMorph(fromEl, toEl) {
+		toEl.className = fromEl.className;
 	},
 
 	render: null,
@@ -154,7 +177,13 @@ let View = createClass({
 	 * @typesign (selector: string): $;
 	 */
 	$(selector) {
-		return $(this.block).find(selector.split('&').join(`.${this.blockName}__`));
+		selector = selector.split('&').join(`.${this.blockName}${settings.blockElementDelimiter}`);
+
+		if (typeof $ == 'function' && $.fn) {
+			return $(this.block).find(selector);
+		}
+
+		return this.block.querySelectorAll(selector);
 	},
 
 	/**
@@ -164,8 +193,12 @@ let View = createClass({
 		let args = Array.prototype.slice.call(arguments, 1);
 
 		return this.getDescendants().map(descendant => {
-			if (typeof descendant[method] == 'function' && !descendant.destroyed) {
-				return descendant[method].apply(descendant, args);
+			if (!descendant.destroyed) {
+				let methodDescr = Object.getOwnPropertyDescriptor(descendant, method);
+
+				if (methodDescr && typeof methodDescr.value == 'function') {
+					return descendant[method].apply(descendant, args);
+				}
 			}
 		});
 	},
@@ -387,6 +420,10 @@ let View = createClass({
 	 * @typesign ();
 	 */
 	destroy() {
+		if (this.destroyed) {
+			return;
+		}
+
 		this.block[KEY_VIEW] = null;
 
 		this._content('off', 'change', this._onContentChange);

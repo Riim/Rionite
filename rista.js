@@ -56,22 +56,51 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var cellx = __webpack_require__(1);
-	var observeDOM = __webpack_require__(2);
-	var View = __webpack_require__(4);
+	var _require = __webpack_require__(1);
 
-	var _require = __webpack_require__(6);
+	var map = _require.map;
+	var list = _require.list;
+	var cellx = _require.cellx;
+	var d = _require.d;
+	var utils = _require.utils;
 
-	var initViews = _require.initViews;
-	var destroyViews = _require.destroyViews;
+	var settings = __webpack_require__(2);
+	var observeDOM = __webpack_require__(3);
+	var View = __webpack_require__(5);
+
+	var _require2 = __webpack_require__(8);
+
+	var initViews = _require2.initViews;
+	var destroyViews = _require2.destroyViews;
 	var KEY_VIEW = View.KEY_VIEW;
 	var defineView = View.define;
 
+	var inited = false;
+
+	/**
+	 * @typesign (name: string, description: {
+	 *     render?: (): string,
+	 *     init?: (),
+	 *     dispose?: ()
+	 * });
+	 */
+	function view(name, description) {
+		defineView(name, description);
+
+		if (inited) {
+			initViews(document.documentElement);
+		}
+	}
+
 	var rista = {
+		map: map,
+		list: list,
 		cellx: cellx,
-		d: cellx.d,
+		d: d,
+		utils: utils,
+		settings: settings,
 		View: View,
-		view: defineView
+		view: view
 	};
 	rista.rista = rista; // for destructuring
 
@@ -94,14 +123,14 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 
 			if (node[KEY_VIEW]) {
-				var view = node[KEY_VIEW];
+				var _view = node[KEY_VIEW];
 
 				for (var i = 0, l = targets.length; i < l; i++) {
 					var target = targets[i];
-					var handler = view[target.getAttribute(attrName)];
+					var handler = _view[target.getAttribute(attrName)];
 
 					if (handler) {
-						handler.call(view, evt, target);
+						handler.call(_view, evt, target);
 					}
 				}
 
@@ -113,29 +142,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 		document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
-		eventTypes.forEach(function (type) {
-			document.addEventListener(type, onDocumentEvent);
-		});
+		utils.nextTick(function () {
+			eventTypes.forEach(function (type) {
+				document.addEventListener(type, onDocumentEvent);
+			});
 
-		observeDOM(function (removedNodes, addedNodes) {
-			for (var i = 0, l = removedNodes.length; i < l; i++) {
-				var removedNode = removedNodes[i];
+			observeDOM(function (removedNodes, addedNodes) {
+				for (var i = 0, l = removedNodes.length; i < l; i++) {
+					var removedNode = removedNodes[i];
 
-				if (removedNode.nodeType == 1) {
-					destroyViews(removedNode);
+					if (removedNode.nodeType == 1) {
+						destroyViews(removedNode);
+					}
 				}
-			}
 
-			for (var i = 0, l = addedNodes.length; i < l; i++) {
-				var addedNode = addedNodes[i];
+				for (var i = 0, l = addedNodes.length; i < l; i++) {
+					var addedNode = addedNodes[i];
 
-				if (addedNode.nodeType == 1) {
-					initViews(addedNode);
+					if (addedNode.nodeType == 1) {
+						initViews(addedNode);
+					}
 				}
-			}
-		});
+			});
 
-		initViews(document.documentElement);
+			initViews(document.documentElement);
+
+			inited = true;
+		});
 	});
 
 	module.exports = rista;
@@ -2551,6 +2584,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var settings = {
+		blockElementDelimiter: '__'
+	};
+
+	module.exports = settings;
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2559,7 +2604,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var nextTick = _require.utils.nextTick;
 
-	var _require2 = __webpack_require__(3);
+	var _require2 = __webpack_require__(4);
 
 	var getUID = _require2.get;
 
@@ -2669,7 +2714,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = observeDOM;
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2701,7 +2746,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2715,11 +2760,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	var mixin = _require$utils.mixin;
 	var createClass = _require$utils.createClass;
 
-	var morphdom = __webpack_require__(5);
+	var morphdom = __webpack_require__(6);
+	var settings = __webpack_require__(2);
 
-	var _require2 = __webpack_require__(3);
+	var _require2 = __webpack_require__(4);
 
 	var nextUID = _require2.next;
+
+	var hasClass = __webpack_require__(7);
 
 	var KEY_VIEW = '__rista_View_view__';
 	if (window.Symbol && typeof Symbol.iterator == 'symbol') {
@@ -2834,6 +2882,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.block = block;
 			block[KEY_VIEW] = this;
 
+			if (!hasClass(block, this.blockName)) {
+				block.className = this.blockName + ' ' + block.className;
+			}
+
 			if (this.render) {
 				block.innerHTML = this._content();
 				this._content('on', 'change', this._onContentChange);
@@ -2853,14 +2905,31 @@ return /******/ (function(modules) { // webpackBootstrap
 			var parent = this.getParent();
 
 			if (parent && evt.bubbles !== false && !evt.isPropagationStopped) {
-				parent._handleEvent(evt);
+				if (!parent.destroyed) {
+					parent._handleEvent(evt);
+				}
 			}
 		},
 
 		_onContentChange: function _onContentChange() {
 			var el = document.createElement('div');
 			el.innerHTML = this._content();
-			morphdom(this.block, el, { childrenOnly: true });
+
+			morphdom(this.block, el, {
+				childrenOnly: true,
+
+				onBeforeMorphEl: function onBeforeMorphEl(fromEl, toEl) {
+					var view = fromEl[KEY_VIEW];
+
+					if (view && view._onBeforeBlockMorph) {
+						view._onBeforeBlockMorph(fromEl, toEl);
+					}
+				}
+			});
+		},
+
+		_onBeforeBlockMorph: function _onBeforeBlockMorph(fromEl, toEl) {
+			toEl.className = fromEl.className;
 		},
 
 		render: null,
@@ -2880,7 +2949,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return $;
 		})(function (selector) {
-			return $(this.block).find(selector.split('&').join('.' + this.blockName + '__'));
+			selector = selector.split('&').join('.' + this.blockName + settings.blockElementDelimiter);
+
+			if (typeof $ == 'function' && $.fn) {
+				return $(this.block).find(selector);
+			}
+
+			return this.block.querySelectorAll(selector);
 		}),
 
 		/**
@@ -2890,8 +2965,12 @@ return /******/ (function(modules) { // webpackBootstrap
 			var args = Array.prototype.slice.call(arguments, 1);
 
 			return this.getDescendants().map(function (descendant) {
-				if (typeof descendant[method] == 'function' && !descendant.destroyed) {
-					return descendant[method].apply(descendant, args);
+				if (!descendant.destroyed) {
+					var methodDescr = Object.getOwnPropertyDescriptor(descendant, method);
+
+					if (methodDescr && typeof methodDescr.value == 'function') {
+						return descendant[method].apply(descendant, args);
+					}
 				}
 			});
 		},
@@ -3146,6 +3225,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign ();
 	  */
 		destroy: function destroy() {
+			if (this.destroyed) {
+				return;
+			}
+
 			this.block[KEY_VIEW] = null;
 
 			this._content('off', 'change', this._onContentChange);
@@ -3171,7 +3254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = View;
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	// Create a range object for efficently rendering strings to elements.
@@ -3566,12 +3649,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = morphdom;
 
 /***/ },
-/* 6 */
+/* 7 */
+/***/ function(module, exports) {
+
+	/**
+	 * @typesign (el: HTMLElement, name: string): boolean;
+	 */
+	"use strict";
+
+	var hasClass = undefined;
+
+	if (document.documentElement.classList) {
+		hasClass = function (el, name) {
+			el.classList.contains(name);
+		};
+	} else {
+		(function () {
+			var reNotWhite = /\S+/g;
+
+			hasClass = function (el, name) {
+				return (el.className.match(reNotWhite) || []).indexOf(name) != -1;
+			};
+		})();
+	}
+
+	module.exports = hasClass;
+
+/***/ },
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var _require = __webpack_require__(4);
+	var _require = __webpack_require__(5);
 
 	var KEY_VIEW = _require.KEY_VIEW;
 	var getViewClass = _require.getClass;
@@ -3599,10 +3709,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		for (var i = blocks.length; i;) {
 			var block = blocks[--i];
-			var viewClass = getViewClass(block.getAttribute('rt-view'));
 
-			if (viewClass) {
-				new viewClass(block);
+			if (!block[KEY_VIEW]) {
+				var viewClass = getViewClass(block.getAttribute('rt-view'));
+
+				if (viewClass) {
+					new viewClass(block);
+				}
 			}
 		}
 	}

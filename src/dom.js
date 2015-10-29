@@ -23,10 +23,13 @@ function initViews(el) {
 
 	for (let i = blocks.length; i;) {
 		let block = blocks[--i];
-		let viewClass = getViewClass(block.getAttribute('rt-view'));
 
-		if (viewClass) {
-			new viewClass(block);
+		if (!block[KEY_VIEW]) {
+			let viewClass = getViewClass(block.getAttribute('rt-view'));
+
+			if (viewClass) {
+				new viewClass(block);
+			}
 		}
 	}
 }

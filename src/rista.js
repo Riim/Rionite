@@ -1,15 +1,37 @@
-let cellx = require('cellx');
+let { map, list, cellx, d, utils } = require('cellx');
+let settings = require('./settings');
 let observeDOM = require('./observeDOM');
 let View = require('./View');
 let { initViews, destroyViews } = require('./dom');
 
 let { KEY_VIEW, define: defineView } = View;
 
+let inited = false;
+
+/**
+ * @typesign (name: string, description: {
+ *     render?: (): string,
+ *     init?: (),
+ *     dispose?: ()
+ * });
+ */
+function view(name, description) {
+	defineView(name, description);
+
+	if (inited) {
+		initViews(document.documentElement);
+	}
+}
+
 let rista = {
+	map,
+	list,
 	cellx,
-	d: cellx.d,
-	View: View,
-	view: defineView
+	d,
+	utils,
+	settings,
+	View,
+	view
 };
 rista.rista = rista; // for destructuring
 
@@ -58,29 +80,33 @@ function onDocumentEvent(evt) {
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
-	eventTypes.forEach(type => {
-		document.addEventListener(type, onDocumentEvent);
-	});
+	utils.nextTick(() => {
+		eventTypes.forEach(type => {
+			document.addEventListener(type, onDocumentEvent);
+		});
 
-	observeDOM((removedNodes, addedNodes) => {
-		for (let i = 0, l = removedNodes.length; i < l; i++) {
-			let removedNode = removedNodes[i];
+		observeDOM((removedNodes, addedNodes) => {
+			for (let i = 0, l = removedNodes.length; i < l; i++) {
+				let removedNode = removedNodes[i];
 
-			if (removedNode.nodeType == 1) {
-				destroyViews(removedNode);
+				if (removedNode.nodeType == 1) {
+					destroyViews(removedNode);
+				}
 			}
-		}
 
-		for (let i = 0, l = addedNodes.length; i < l; i++) {
-			let addedNode = addedNodes[i];
+			for (let i = 0, l = addedNodes.length; i < l; i++) {
+				let addedNode = addedNodes[i];
 
-			if (addedNode.nodeType == 1) {
-				initViews(addedNode);
+				if (addedNode.nodeType == 1) {
+					initViews(addedNode);
+				}
 			}
-		}
-	});
+		});
 
-	initViews(document.documentElement);
+		initViews(document.documentElement);
+
+		inited = true;
+	});
 });
 
 module.exports = rista;
