@@ -1,5 +1,5 @@
 let { EventEmitter, cellx, utils: { logError, mixin, createClass } } = require('cellx');
-let morphdom = require('morphdom');
+let morphdom = require('../lib/morphdom');
 let settings = require('./settings');
 let { next: nextUID } = require('./uid');
 let hasClass = require('./hasClass');
@@ -159,10 +159,24 @@ let View = createClass({
 		morphdom(this.block, el, {
 			childrenOnly: true,
 
-			onBeforeMorphEl(fromEl, toEl) {
-				let view = fromEl[KEY_VIEW];
+			getNodeKey(node) {
+				if (node.id) {
+					return node.id;
+				}
 
-				if (view && view.constructor.$viewClass === toEl.getAttribute('rt-view')) {
+				if (node.nodeType == 1) {
+					if (node.hasAttribute('key')) {
+						return node.getAttribute('key');
+					}
+
+					if (node.hasAttribute('rt-view')) {
+						return node.getAttribute('rt-view') + JSON.stringify(node.dataset);
+					}
+				}
+			},
+
+			onBeforeMorphEl(fromEl, toEl) {
+				if (fromEl[KEY_VIEW]) {
 					return false;
 				}
 			}

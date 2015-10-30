@@ -2923,10 +2923,24 @@ return /******/ (function(modules) { // webpackBootstrap
 			morphdom(this.block, el, {
 				childrenOnly: true,
 
-				onBeforeMorphEl: function onBeforeMorphEl(fromEl, toEl) {
-					var view = fromEl[KEY_VIEW];
+				getNodeKey: function getNodeKey(node) {
+					if (node.id) {
+						return node.id;
+					}
 
-					if (view && view.constructor.$viewClass === toEl.getAttribute('rt-view')) {
+					if (node.nodeType == 1) {
+						if (node.hasAttribute('key')) {
+							return node.getAttribute('key');
+						}
+
+						if (node.hasAttribute('rt-view')) {
+							return node.getAttribute('rt-view') + JSON.stringify(node.dataset);
+						}
+					}
+				},
+
+				onBeforeMorphEl: function onBeforeMorphEl(fromEl, toEl) {
+					if (fromEl[KEY_VIEW]) {
 						return false;
 					}
 				}
@@ -3259,6 +3273,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	// Create a range object for efficently rendering strings to elements.
+	'use strict';
+
 	var range;
 
 	function toElement(str) {
@@ -3283,8 +3299,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * that "selected" is an attribute when reading
 	     * over the attributes using selectEl.attributes
 	     */
-	    OPTION: function(fromEl, toEl) {
-	        if ((fromEl.selected = toEl.selected)) {
+	    OPTION: function OPTION(fromEl, toEl) {
+	        if (fromEl.selected = toEl.selected) {
 	            fromEl.setAttribute('selected', '');
 	        } else {
 	            fromEl.removeAttribute('selected', '');
@@ -3297,7 +3313,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * no effect since it is only used to the set the initial value.
 	     * Similar for the "checked" attribute.
 	     */
-	    INPUT: function(fromEl, toEl) {
+	    INPUT: function INPUT(fromEl, toEl) {
 	        fromEl.checked = toEl.checked;
 
 	        if (fromEl.value != toEl.value) {
@@ -3313,7 +3329,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 
-	    TEXTAREA: function(fromEl, toEl) {
+	    TEXTAREA: function TEXTAREA(fromEl, toEl) {
 	        var newValue = toEl.value;
 	        if (fromEl.value != newValue) {
 	            fromEl.value = newValue;
@@ -3343,7 +3359,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var attrValue;
 	    var foundAttrs = {};
 
-	    for (i=attrs.length-1; i>=0; i--) {
+	    for (i = attrs.length - 1; i >= 0; i--) {
 	        attr = attrs[i];
 	        if (attr.specified !== false) {
 	            attrName = attr.name;
@@ -3360,7 +3376,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // found on the target element.
 	    attrs = fromNode.attributes;
 
-	    for (i=attrs.length-1; i>=0; i--) {
+	    for (i = attrs.length - 1; i >= 0; i--) {
 	        attr = attrs[i];
 	        if (attr.specified !== false) {
 	            attrName = attr.name;
@@ -3376,12 +3392,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function moveChildren(fromEl, toEl) {
 	    var curChild = fromEl.firstChild;
-	    while(curChild) {
+	    while (curChild) {
 	        var nextChild = curChild.nextSibling;
 	        toEl.appendChild(curChild);
 	        curChild = nextChild;
 	    }
 	    return toEl;
+	}
+
+	function defaultGetNodeKey(node) {
+	    return node.id;
 	}
 
 	function morphdom(fromNode, toNode, options) {
@@ -3395,6 +3415,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var savedEls = {}; // Used to save off DOM elements with IDs
 	    var unmatchedEls = {};
+	    var getNodeKey = options.getNodeKey || defaultGetNodeKey;
 	    var onNodeDiscarded = options.onNodeDiscarded || noop;
 	    var onBeforeMorphEl = options.onBeforeMorphEl || noop;
 	    var onBeforeMorphElChildren = options.onBeforeMorphElChildren || noop;
@@ -3402,7 +3423,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var childrenOnly = options.childrenOnly === true;
 
 	    function removeNodeHelper(node, nestedInSavedEl) {
-	        var id = node.id;
+	        var id = getNodeKey(node);
 	        // If the node has an ID then save it off since we will want
 	        // to reuse it in case the target DOM tree has a DOM element
 	        // with the same ID
@@ -3416,7 +3437,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (node.nodeType === 1) {
 	            var curChild = node.firstChild;
-	            while(curChild) {
+	            while (curChild) {
 	                removeNodeHelper(curChild, nestedInSavedEl || id);
 	                curChild = curChild.nextSibling;
 	            }
@@ -3426,10 +3447,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function walkDiscardedChildNodes(node) {
 	        if (node.nodeType === 1) {
 	            var curChild = node.firstChild;
-	            while(curChild) {
+	            while (curChild) {
 
-
-	                if (!curChild.id) {
+	                if (!getNodeKey(curChild)) {
 	                    // We only want to handle nodes that don't have an ID to avoid double
 	                    // walking the same saved element.
 
@@ -3451,7 +3471,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        parentNode.removeChild(node);
 	        if (alreadyVisited) {
-	            if (!node.id) {
+	            if (!getNodeKey(node)) {
 	                onNodeDiscarded(node);
 	                walkDiscardedChildNodes(node);
 	            }
@@ -3461,10 +3481,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    function morphEl(fromEl, toEl, alreadyVisited, childrenOnly) {
-	        if (toEl.id) {
+	        if (getNodeKey(toEl)) {
 	            // If an element with an ID is being morphed then it is will be in the final
 	            // DOM so clear it out of the saved elements collection
-	            delete savedEls[toEl.id];
+	            delete savedEls[getNodeKey(toEl)];
 	        }
 
 	        if (!childrenOnly) {
@@ -3489,12 +3509,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var savedEl;
 	            var unmatchedEl;
 
-	            outer: while(curToNodeChild) {
+	            outer: while (curToNodeChild) {
 	                toNextSibling = curToNodeChild.nextSibling;
-	                curToNodeId = curToNodeChild.id;
+	                curToNodeId = getNodeKey(curToNodeChild);
 
-	                while(curFromNodeChild) {
-	                    var curFromNodeId = curFromNodeChild.id;
+	                while (curFromNodeChild) {
+	                    var curFromNodeId = getNodeKey(curFromNodeChild);
 	                    fromNextSibling = curFromNodeChild.nextSibling;
 
 	                    if (!alreadyVisited) {
@@ -3511,7 +3531,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (curFromNodeType === curToNodeChild.nodeType) {
 	                        var isCompatible = false;
 
-	                        if (curFromNodeType === 1) { // Both nodes being compared are Element nodes
+	                        if (curFromNodeType === 1) {
+	                            // Both nodes being compared are Element nodes
 	                            if (curFromNodeChild.tagName === curToNodeChild.tagName) {
 	                                // We have compatible DOM elements
 	                                if (curFromNodeId || curToNodeId) {
@@ -3531,7 +3552,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                // to match the current target DOM node.
 	                                morphEl(curFromNodeChild, curToNodeChild, alreadyVisited);
 	                            }
-	                        } else if (curFromNodeType === 3) { // Both nodes being compared are Text nodes
+	                        } else if (curFromNodeType === 3) {
+	                            // Both nodes being compared are Text nodes
 	                            isCompatible = true;
 	                            // Simply update nodeValue on the original node to change the text value
 	                            curFromNodeChild.nodeValue = curToNodeChild.nodeValue;
@@ -3551,18 +3573,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                if (curToNodeId) {
-	                    if ((savedEl = savedEls[curToNodeId])) {
+	                    if (savedEl = savedEls[curToNodeId]) {
 	                        morphEl(savedEl, curToNodeChild, true);
 	                        curToNodeChild = savedEl; // We want to append the saved element instead
 	                    } else {
-	                        // The current DOM element in the target tree has an ID
-	                        // but we did not find a match in any of the corresponding
-	                        // siblings. We just put the target element in the old DOM tree
-	                        // but if we later find an element in the old DOM tree that has
-	                        // a matching ID then we will replace the target element
-	                        // with the corresponding old element and morph the old element
-	                        unmatchedEls[curToNodeId] = curToNodeChild;
-	                    }
+	                            // The current DOM element in the target tree has an ID
+	                            // but we did not find a match in any of the corresponding
+	                            // siblings. We just put the target element in the old DOM tree
+	                            // but if we later find an element in the old DOM tree that has
+	                            // a matching ID then we will replace the target element
+	                            // with the corresponding old element and morph the old element
+	                            unmatchedEls[curToNodeId] = curToNodeChild;
+	                        }
 	                }
 
 	                // If we got this far then we did not find a candidate match for our "to node"
@@ -3576,7 +3598,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // We have processed all of the "to nodes". If curFromNodeChild is non-null then
 	            // we still have some from nodes left over that need to be removed
-	            while(curFromNodeChild) {
+	            while (curFromNodeChild) {
 	                fromNextSibling = curFromNodeChild.nextSibling;
 	                removeNode(curFromNodeChild, fromEl, alreadyVisited);
 	                curFromNodeChild = fromNextSibling;
@@ -3606,7 +3628,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // Going from an element node to a text node
 	                morphedNode = toNode;
 	            }
-	        } else if (morphedNodeType === 3) { // Text node
+	        } else if (morphedNodeType === 3) {
+	            // Text node
 	            if (toNodeType === 3) {
 	                morphedNode.nodeValue = toNode.nodeValue;
 	                return morphedNode;

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+
+	<style>
+
+.todo._done .todo__text {
+	text-decoration: line-through;
+}
+
+	</style>
+</head>
+<body>
+
+<script type="text/ecmascript-7">
+
+let d = rista.d;
+
+let idCounter = 0;
+
+function nextId() {
+	return String(++idCounter);
+}
+
+let appModel = {
+	@d.observable todos: rista.map({
+		[nextId()]: { text: 'Сходить в магаз', @d.observable done: false },
+		[nextId()]: { text: 'Накормить кота', @d.observable done: false },
+		[nextId()]: { text: 'Убить Билла', @d.observable done: false }
+	}),
+
+	@d.computed doneTodoCount: function() {
+		let count = 0;
+
+		this.todos.forEach(todo => {
+			if (todo.done) {
+				count++;
+			}
+		});
+
+		return count;
+	}
+};
+
+rista.view('todo', {
+	render() {
+		let todo = appModel.todos.get(this.block.dataset.todoId);
+
+		if (!todo) {
+			return '';
+		}
+
+		return `
+			<input class="todo__cbDone" type="checkbox" rt-change="_onCbDoneChange">
+			<span class="todo__text">${todo.text}</span>
+			<button rt-click="_onBtnRemoveClick">remove</button>
+		`;
+	},
+
+	_onCbDoneChange() {
+		let done = this.$('&cbDone')[0].checked;
+
+		appModel.todos.get(this.block.dataset.todoId).done = done;
+
+		if (done) {
+			this.block.classList.add('_done');
+		} else {
+			this.block.classList.remove('_done');
+		}
+	},
+
+	_onBtnRemoveClick() {
+		appModel.todos.delete(this.block.dataset.todoId);
+	}
+});
+
+rista.view('todolist', {
+	render() {
+		let t = [];
+
+		appModel.todos.forEach((todo, key) => {
+			t.push(`<div rt-view="todo" data-todo-id="${key}"></div>`);
+		});
+
+		return `
+			${t.join('')}
+			<input class="todolist__tfNewTodo" type="text">
+			<button rt-click="_onBtnAddClick">Add #${appModel.todos.size + 1}</button>
+			<div>all: ${appModel.todos.size} done: ${appModel.doneTodoCount}</div>
+		`;
+	},
+
+	_onBtnAddClick() {
+		let value = this.$('&tfNewTodo')[0].value;
+
+		appModel.todos.set(nextId(), {
+			text: value,
+			@d.observable done: false
+		});
+	}
+});
+
+</script>
+
+<div rt-view="todolist"></div>
+
+<script src="../rista.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.32/browser.min.js"></script>
+<script>
+
+Array.prototype.forEach.call(document.querySelectorAll('script[type="text/ecmascript-7"]'), function(script) {
+	babel.run(script.innerHTML, {
+		optional: ['es7.classProperties', 'es7.decorators', 'es7.functionBind']
+	});
+});
+
+</script>
+
+</body>
+</html>
