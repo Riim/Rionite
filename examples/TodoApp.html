@@ -76,7 +76,7 @@ rista.view('todo', {
 	}
 });
 
-rista.view('todolist', {
+rista.view('todoApp', {
 	render() {
 		let t = [];
 
@@ -86,7 +86,7 @@ rista.view('todolist', {
 
 		return `
 			${t.join('')}
-			<input class="todolist__tfNewTodo" type="text">
+			<input class="todoApp__tfNewTodo" type="text">
 			<button rt-click="_onBtnAddClick">Add #${appModel.todos.size + 1}</button>
 			<div>all: ${appModel.todos.size} done: ${appModel.doneTodoCount}</div>
 		`;
@@ -104,7 +104,7 @@ rista.view('todolist', {
 
 </script>
 
-<div rt-view="todolist"></div>
+<div rt-view="todoApp"></div>
 
 <script src="../rista.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.32/browser.min.js"></script>

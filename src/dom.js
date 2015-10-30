@@ -1,3 +1,4 @@
+let { utils: { logError } } = require('cellx');
 let { KEY_VIEW, getClass: getViewClass } = require('./View');
 
 /**
@@ -21,14 +22,18 @@ function findBlocks(el) {
 function initViews(el) {
 	let blocks = findBlocks(el);
 
-	for (let i = blocks.length; i;) {
-		let block = blocks[--i];
+	for (let i = 0, l = blocks.length; i < l; i++) {
+		let block = blocks[i];
 
 		if (!block[KEY_VIEW]) {
 			let viewClass = getViewClass(block.getAttribute('rt-view'));
 
 			if (viewClass) {
-				new viewClass(block);
+				try {
+					new viewClass(block);
+				} catch (err) {
+					logError(err);
+				}
 			}
 		}
 	}

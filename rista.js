@@ -220,7 +220,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return cell;
 		}
-		cellx.cellx = cellx;
+		cellx.cellx = cellx; // for destructuring
 
 		var KEY_CELLS = '__cellx_cells__';
 		if (global.Symbol && typeof Symbol.iterator == 'symbol') {
@@ -1750,8 +1750,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		
 							var slaves = cell._slaves;
 		
-							for (var i = slaves.length; i;) {
-								var slave = slaves[--i];
+							for (var i = 0, l = slaves.length; i < l; i++) {
+								var slave = slaves[i];
 		
 								if (slave._fixed) {
 									(releasePlan[1] || (releasePlan[1] = [])).push(slave);
@@ -2294,8 +2294,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		
 							var slaves = this._slaves;
 		
-							for (var k = slaves.length; k;) {
-								var slave = slaves[--k];
+							for (var k = 0, n = slaves.length; k < n; k++) {
+								var slave = slaves[k];
 		
 								if (slave._fixed) {
 									var slaveLevel = slave._level;
@@ -2366,12 +2366,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		
 					var slaves = this._slaves;
 		
-					for (var i = slaves.length; i;) {
+					for (var i = 0, l = slaves.length; i < l; i++) {
 						if (evt.isPropagationStopped) {
 							break;
 						}
 		
-						slaves[--i]._handleErrorEvent(evt);
+						slaves[i]._handleErrorEvent(evt);
 					}
 				},
 		
@@ -2397,8 +2397,8 @@ return /******/ (function(modules) { // webpackBootstrap
 					if (this._active) {
 						var slaves = this._slaves;
 		
-						for (var i = slaves.length; i;) {
-							slaves[--i]._dispose();
+						for (var i = 0, l = slaves.length; i < l; i++) {
+							slaves[i]._dispose();
 						}
 					}
 				}
@@ -3705,10 +3705,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _require = __webpack_require__(5);
+	var _require = __webpack_require__(1);
 
-	var KEY_VIEW = _require.KEY_VIEW;
-	var getViewClass = _require.getClass;
+	var logError = _require.utils.logError;
+
+	var _require2 = __webpack_require__(5);
+
+	var KEY_VIEW = _require2.KEY_VIEW;
+	var getViewClass = _require2.getClass;
 
 	/**
 	 * @typesign (el: HTMLElement): Array<HTMLElement>;
@@ -3731,14 +3735,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	function initViews(el) {
 		var blocks = findBlocks(el);
 
-		for (var i = blocks.length; i;) {
-			var block = blocks[--i];
+		for (var i = 0, l = blocks.length; i < l; i++) {
+			var block = blocks[i];
 
 			if (!block[KEY_VIEW]) {
 				var viewClass = getViewClass(block.getAttribute('rt-view'));
 
 				if (viewClass) {
-					new viewClass(block);
+					try {
+						new viewClass(block);
+					} catch (err) {
+						logError(err);
+					}
 				}
 			}
 		}
