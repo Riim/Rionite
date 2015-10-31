@@ -1725,15 +1725,17 @@ return /******/ (function(modules) { // webpackBootstrap
 						var cell = bundle.shift();
 		
 						if (releasePlanIndex) {
-							var index = releasePlanIndex;
+							if (cell._active) {
+								var index = releasePlanIndex;
 		
-							cell._recalc();
+								cell._recalc();
 		
-							if (!releasePlan[index].length) {
-								releasePlan[index] = null;
+								if (!releasePlan[index].length) {
+									releasePlan[index] = null;
 		
-								if (releasePlanIndex) {
-									releasePlanIndex++;
+									if (releasePlanIndex) {
+										releasePlanIndex++;
+									}
 								}
 							}
 						} else {
@@ -2943,6 +2945,12 @@ return /******/ (function(modules) { // webpackBootstrap
 					if (fromEl[KEY_VIEW]) {
 						return false;
 					}
+				},
+
+				onNodeDiscarded: function onNodeDiscarded(node) {
+					if (node[KEY_VIEW]) {
+						node[KEY_VIEW].destroy();
+					}
 				}
 			});
 		},
@@ -3246,7 +3254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			this.block[KEY_VIEW] = null;
 
-			this._content('off', 'change', this._onContentChange);
+			this._content('dispose', 0);
 
 			var disposables = this._disposables;
 

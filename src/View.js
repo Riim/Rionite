@@ -179,6 +179,12 @@ let View = createClass({
 				if (fromEl[KEY_VIEW]) {
 					return false;
 				}
+			},
+
+			onNodeDiscarded(node) {
+				if (node[KEY_VIEW]) {
+					node[KEY_VIEW].destroy();
+				}
 			}
 		});
 	},
@@ -439,7 +445,7 @@ let View = createClass({
 
 		this.block[KEY_VIEW] = null;
 
-		this._content('off', 'change', this._onContentChange);
+		this._content('dispose', 0);
 
 		let disposables = this._disposables;
 

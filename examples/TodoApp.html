@@ -48,10 +48,6 @@ rista.view('todo', {
 	render() {
 		let todo = appModel.todos.get(this.block.dataset.todoId);
 
-		if (!todo) {
-			return '';
-		}
-
 		return `
 			<input class="todo__cbDone" type="checkbox" rt-change="_onCbDoneChange">
 			<span class="todo__text">${todo.text}</span>
