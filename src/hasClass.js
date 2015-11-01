@@ -5,7 +5,7 @@ let hasClass;
 
 if (document.documentElement.classList) {
 	hasClass = (el, name) => {
-		el.classList.contains(name);
+		return el.classList.contains(name);
 	};
 } else {
 	let reNotWhite = /\S+/g;

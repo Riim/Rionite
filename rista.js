@@ -1725,17 +1725,17 @@ return /******/ (function(modules) { // webpackBootstrap
 						var cell = bundle.shift();
 		
 						if (releasePlanIndex) {
+							var index = releasePlanIndex;
+		
 							if (cell._active) {
-								var index = releasePlanIndex;
-		
 								cell._recalc();
+							}
 		
-								if (!releasePlan[index].length) {
-									releasePlan[index] = null;
+							if (!releasePlan[index].length) {
+								releasePlan[index] = null;
 		
-									if (releasePlanIndex) {
-										releasePlanIndex++;
-									}
+								if (releasePlanIndex) {
+									releasePlanIndex++;
 								}
 							}
 						} else {
@@ -3693,7 +3693,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	if (document.documentElement.classList) {
 		hasClass = function (el, name) {
-			el.classList.contains(name);
+			return el.classList.contains(name);
 		};
 	} else {
 		(function () {
