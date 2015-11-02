@@ -80,6 +80,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * @typesign (name: string, description: {
+	 *     construct?: (),
 	 *     render?: (): string,
 	 *     init?: (),
 	 *     dispose?: ()
@@ -2804,10 +2805,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			throw new TypeError('ViewClass "' + name + '" is already registered');
 		}
 
-		Object.defineProperty(viewClass, '$viewClass', {
-			value: name
-		});
-
 		viewClasses[name] = viewClass;
 
 		return viewClass;
@@ -2815,6 +2812,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * @typesign (name: string, description: {
+	 *     construct?: (),
 	 *     render?: (): string,
 	 *     init?: (),
 	 *     dispose?: ()
@@ -2891,6 +2889,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			if (!hasClass(block, this.blockName)) {
 				block.className = this.blockName + ' ' + block.className;
+			}
+
+			if (this.construct) {
+				this.construct();
 			}
 
 			if (this.render) {
@@ -3252,7 +3254,11 @@ return /******/ (function(modules) { // webpackBootstrap
 				return;
 			}
 
-			this.block[KEY_VIEW] = null;
+			var block = this.block;
+
+			if (block.parentNode) {
+				block.parentNode.removeChild(block);
+			}
 
 			this._content('dispose', 0);
 
@@ -3269,6 +3275,8 @@ return /******/ (function(modules) { // webpackBootstrap
 					logError(err);
 				}
 			}
+
+			block[KEY_VIEW] = null;
 
 			this.destroyed = true;
 		}

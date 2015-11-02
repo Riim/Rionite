@@ -10,6 +10,7 @@ let inited = false;
 
 /**
  * @typesign (name: string, description: {
+ *     construct?: (),
  *     render?: (): string,
  *     init?: (),
  *     dispose?: ()

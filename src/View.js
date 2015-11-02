@@ -35,10 +35,6 @@ function registerViewClass(name, viewClass) {
 		throw new TypeError('ViewClass "' + name + '" is already registered');
 	}
 
-	Object.defineProperty(viewClass, '$viewClass', {
-		value: name
-	});
-
 	viewClasses[name] = viewClass;
 
 	return viewClass;
@@ -46,6 +42,7 @@ function registerViewClass(name, viewClass) {
 
 /**
  * @typesign (name: string, description: {
+ *     construct?: (),
  *     render?: (): string,
  *     init?: (),
  *     dispose?: ()
@@ -125,6 +122,10 @@ let View = createClass({
 
 		if (!hasClass(block, this.blockName)) {
 			block.className = `${this.blockName} ${block.className}`;
+		}
+
+		if (this.construct) {
+			this.construct();
 		}
 
 		if (this.render) {
@@ -443,7 +444,11 @@ let View = createClass({
 			return;
 		}
 
-		this.block[KEY_VIEW] = null;
+		let block = this.block;
+
+		if (block.parentNode) {
+			block.parentNode.removeChild(block);
+		}
 
 		this._content('dispose', 0);
 
@@ -460,6 +465,8 @@ let View = createClass({
 				logError(err);
 			}
 		}
+
+		block[KEY_VIEW] = null;
 
 		this.destroyed = true;
 	}
