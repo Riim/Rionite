@@ -45,8 +45,8 @@ function initViews(el) {
 function destroyViews(el) {
 	let blocks = findBlocks(el);
 
-	for (let i = blocks.length; i;) {
-		let view = blocks[--i][KEY_VIEW];
+	for (let i = 0, l = blocks.length; i < l; i++) {
+		let view = blocks[i][KEY_VIEW];
 
 		if (view) {
 			view.destroy();

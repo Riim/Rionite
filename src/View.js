@@ -444,12 +444,6 @@ let View = createClass({
 			return;
 		}
 
-		let block = this.block;
-
-		if (block.parentNode) {
-			block.parentNode.removeChild(block);
-		}
-
 		this._content('dispose', 0);
 
 		let disposables = this._disposables;
@@ -466,7 +460,7 @@ let View = createClass({
 			}
 		}
 
-		block[KEY_VIEW] = null;
+		this.block[KEY_VIEW] = null;
 
 		this.destroyed = true;
 	}

@@ -3254,12 +3254,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				return;
 			}
 
-			var block = this.block;
-
-			if (block.parentNode) {
-				block.parentNode.removeChild(block);
-			}
-
 			this._content('dispose', 0);
 
 			var disposables = this._disposables;
@@ -3276,7 +3270,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 
-			block[KEY_VIEW] = null;
+			this.block[KEY_VIEW] = null;
 
 			this.destroyed = true;
 		}
@@ -3774,8 +3768,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function destroyViews(el) {
 		var blocks = findBlocks(el);
 
-		for (var i = blocks.length; i;) {
-			var view = blocks[--i][KEY_VIEW];
+		for (var i = 0, l = blocks.length; i < l; i++) {
+			var view = blocks[i][KEY_VIEW];
 
 			if (view) {
 				view.destroy();
