@@ -1,7 +1,7 @@
 let { EventEmitter, cellx, utils: { logError, mixin, createClass } } = require('cellx');
 let morphdom = require('../lib/morphdom');
 let settings = require('./settings');
-let { next: nextUID } = require('./uid');
+let nextUID = require('./nextUID');
 let hasClass = require('./hasClass');
 
 let KEY_VIEW = '__rista_View_view__';
@@ -42,16 +42,16 @@ function registerViewClass(name, viewClass) {
 
 /**
  * @typesign (name: string, description: {
- *     construct?: (),
- *     render?: (): string,
  *     init?: (),
+ *     render?: (): string,
+ *     bind?: (),
  *     dispose?: ()
- * });
+ * }): Function;
  */
 function defineView(name, description) {
 	let CustomView = Function(
 		'View',
-		`return function ${toCamelCase('.' + name)}(block) { View.call(this, block); };`
+		`return function ${toCamelCase('#' + name)}(block) { View.call(this, block); };`
 	)(View);
 
 	let proto = CustomView.prototype = Object.create(View.prototype);
@@ -63,7 +63,7 @@ function defineView(name, description) {
 		proto.blockName = toCamelCase(name);
 	}
 
-	registerViewClass(name, CustomView);
+	return registerViewClass(name, CustomView);
 }
 
 /**
@@ -90,6 +90,7 @@ let View = createClass({
 	_disposables: null,
 
 	/**
+	 * For override.
 	 * @type {string}
 	 */
 	blockName: undefined,
@@ -124,8 +125,8 @@ let View = createClass({
 			block.className = `${this.blockName} ${block.className}`;
 		}
 
-		if (this.construct) {
-			this.construct();
+		if (this.init) {
+			this.init();
 		}
 
 		if (this.render) {
@@ -133,8 +134,8 @@ let View = createClass({
 			this._content('on', 'change', this._onContentChange);
 		}
 
-		if (this.init) {
-			this.init();
+		if (this.bind) {
+			this.bind();
 		}
 	},
 
@@ -152,6 +153,26 @@ let View = createClass({
 			}
 		}
 	},
+
+	/**
+	 * For override.
+	 */
+	init: null,
+
+	/**
+	 * For override.
+	 */
+	render: null,
+
+	/**
+	 * For override.
+	 */
+	bind: null,
+
+	/**
+	 * For override.
+	 */
+	dispose: null,
 
 	_onContentChange() {
 		let el = document.createElement('div');
@@ -190,11 +211,30 @@ let View = createClass({
 		});
 	},
 
-	render: null,
-	init: null,
+	/**
+	 * @typesign (): HTMLElement|null;
+	 */
+	getParent() {
+		let node = this.block;
+
+		while (node = node.parentNode) {
+			if (node[KEY_VIEW]) {
+				return node[KEY_VIEW];
+			}
+		}
+
+		return null;
+	},
 
 	/**
-	 * @typesign (selector: string): $;
+	 * @typesign (): Array<HTMLElement>;
+	 */
+	getDescendants() {
+		return Array.prototype.filter.call(this.block.querySelectorAll('[rt-view]'), block => block[KEY_VIEW]);
+	},
+
+	/**
+	 * @typesign (selector: string): $|NodeList;
 	 */
 	$(selector) {
 		selector = selector.split('&').join(`.${this.blockName}${settings.blockElementDelimiter}`);
@@ -223,28 +263,6 @@ let View = createClass({
 		});
 	},
 
-	/**
-	 * @typesign (): HTMLElement|null;
-	 */
-	getParent() {
-		let node = this.block;
-
-		while (node = node.parentNode) {
-			if (node[KEY_VIEW]) {
-				return node[KEY_VIEW];
-			}
-		}
-
-		return null;
-	},
-
-	/**
-	 * @typesign (): Array<HTMLElement>;
-	 */
-	getDescendants() {
-		return Array.prototype.filter.call(this.block.querySelectorAll('[rt-view]'), block => block[KEY_VIEW]);
-	},
-
 	listenTo(target, type, listener, context) {
 		let listenings;
 
@@ -255,10 +273,10 @@ let View = createClass({
 				listenings.push(this.listenTo(target[i], type, listener, context));
 			}
 		} else if (typeof type == 'object') {
+			listenings = [];
+
 			if (Array.isArray(type)) {
 				let types = type;
-
-				listenings = [];
 
 				for (let i = 0, l = types.length; i < l; i++) {
 					listenings.push(this.listenTo(target, types[i], listener, context));
@@ -267,24 +285,23 @@ let View = createClass({
 				let listeners = type;
 
 				context = listener;
-				listenings = [];
 
 				for (let type in listeners) {
 					listenings.push(this.listenTo(target, type, listeners[type], context));
 				}
 			}
 		} else if (Array.isArray(listener)) {
-			let listeners = listener;
-
 			listenings = [];
+
+			let listeners = listener;
 
 			for (let i = 0, l = listeners.length; i < l; i++) {
 				listenings.push(this.listenTo(target, type, listeners[i], context));
 			}
 		} else if (typeof listener == 'object') {
-			let listeners = listener;
-
 			listenings = [];
+
+			let listeners = listener;
 
 			for (let name in listeners) {
 				listenings.push(this.listenTo(target[name]('unwrap', 0), type, listeners[name], context));
@@ -317,7 +334,7 @@ let View = createClass({
 	 *     type: string,
 	 *     listener: (evt: cellx~Event): boolean|undefined,
 	 *     context?: Object
-	 * );
+	 * ): { stop: (), dispose: () };
 	 */
 	_listenTo(target, type, listener, context) {
 		if (!context) {
@@ -359,6 +376,57 @@ let View = createClass({
 	},
 
 	/**
+	 * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
+	 */
+	setTimeout(cb, delay) {
+		let id = nextUID();
+
+		let timeoutId = setTimeout(() => {
+			delete this._disposables[id];
+			cb.call(this);
+		}, delay);
+
+		let _clearTimeout = () => {
+			if (this._disposables[id]) {
+				clearTimeout(timeoutId);
+				delete this._disposables[id];
+			}
+		};
+
+		let timeout = this._disposables[id] = {
+			clear: _clearTimeout,
+			dispose: _clearTimeout
+		};
+
+		return timeout;
+	},
+
+	/**
+	 * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
+	 */
+	setInterval(cb, delay) {
+		let id = nextUID();
+
+		let intervalId = setInterval(() => {
+			cb.call(this);
+		}, delay);
+
+		let _clearInterval = () => {
+			if (this._disposables[id]) {
+				clearInterval(intervalId);
+				delete this._disposables[id];
+			}
+		};
+
+		let interval = this._disposables[id] = {
+			clear: _clearInterval,
+			dispose: _clearInterval
+		};
+
+		return interval;
+	},
+
+	/**
 	 * @typesign (cb: Function): Function{ cancel: (), dispose: () };
 	 */
 	registerCallback(cb) {
@@ -382,59 +450,6 @@ let View = createClass({
 
 		return callback;
 	},
-
-	/**
-	 * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
-	 */
-	setTimeout(cb, delay) {
-		let id = nextUID();
-
-		let timeoutId = setTimeout(() => {
-			delete this._disposables[id];
-			cb.call(this);
-		}, delay);
-
-		let clearTimeout_ = () => {
-			if (this._disposables[id]) {
-				clearTimeout(timeoutId);
-				delete this._disposables[id];
-			}
-		};
-
-		let timeout = this._disposables[id] = {
-			clear: clearTimeout_,
-			dispose: clearTimeout_
-		};
-
-		return timeout;
-	},
-
-	/**
-	 * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
-	 */
-	setInterval(cb, delay) {
-		let id = nextUID();
-
-		let intervalId = setInterval(() => {
-			cb.call(this);
-		}, delay);
-
-		let clearInterval_ = () => {
-			if (this._disposables[id]) {
-				clearInterval(intervalId);
-				delete this._disposables[id];
-			}
-		};
-
-		let interval = this._disposables[id] = {
-			clear: clearInterval_,
-			dispose: clearInterval_
-		};
-
-		return interval;
-	},
-
-	dispose: null,
 
 	/**
 	 * @typesign ();

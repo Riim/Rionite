@@ -2,40 +2,9 @@ let { EventEmitter, map, list, cellx, d, utils } = require('cellx');
 let settings = require('./settings');
 let observeDOM = require('./observeDOM');
 let View = require('./View');
-let { initViews, destroyViews } = require('./dom');
+let { applyViews, destroyViews } = require('./dom');
 
 let { KEY_VIEW, define: defineView } = View;
-
-let inited = false;
-
-/**
- * @typesign (name: string, description: {
- *     construct?: (),
- *     render?: (): string,
- *     init?: (),
- *     dispose?: ()
- * });
- */
-function view(name, description) {
-	defineView(name, description);
-
-	if (inited) {
-		initViews(document.documentElement);
-	}
-}
-
-let rista = {
-	EventEmitter,
-	map,
-	list,
-	cellx,
-	d,
-	utils,
-	settings,
-	View,
-	view
-};
-rista.rista = rista; // for destructuring
 
 let eventTypes = [
 	'click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mousemove', 'mouseout',
@@ -45,6 +14,24 @@ let eventTypes = [
 	'select', 'change', 'submit', 'reset',
 	'focusin', 'focusout'
 ];
+
+let inited = false;
+
+/**
+ * @typesign (name: string, description: {
+ *     init?: (),
+ *     render?: (): string,
+ *     bind?: (),
+ *     dispose?: ()
+ * });
+ */
+function view(name, description) {
+	defineView(name, description);
+
+	if (inited) {
+		applyViews(document.documentElement);
+	}
+}
 
 function onDocumentEvent(evt) {
 	let node = evt.target;
@@ -62,9 +49,9 @@ function onDocumentEvent(evt) {
 			break;
 		}
 
-		if (node[KEY_VIEW]) {
-			let view = node[KEY_VIEW];
+		let view = node[KEY_VIEW];
 
+		if (view) {
 			for (let i = 0, l = targets.length; i < l; i++) {
 				let target = targets[i];
 				let handler = view[target.getAttribute(attrName)];
@@ -88,27 +75,34 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 		});
 
 		observeDOM((removedNodes, addedNodes) => {
-			for (let i = 0, l = removedNodes.length; i < l; i++) {
-				let removedNode = removedNodes[i];
-
-				if (removedNode.nodeType == 1) {
-					destroyViews(removedNode);
+			removedNodes.forEach(node => {
+				if (node.nodeType == 1) {
+					destroyViews(node);
 				}
-			}
+			});
 
-			for (let i = 0, l = addedNodes.length; i < l; i++) {
-				let addedNode = addedNodes[i];
-
-				if (addedNode.nodeType == 1) {
-					initViews(addedNode);
+			addedNodes.forEach(node => {
+				if (node.nodeType == 1) {
+					applyViews(node);
 				}
-			}
+			});
 		});
 
-		initViews(document.documentElement);
+		applyViews(document.documentElement);
 
 		inited = true;
 	});
 });
 
-module.exports = rista;
+let rista = module.exports = {
+	EventEmitter,
+	map,
+	list,
+	cellx,
+	d,
+	utils,
+	settings,
+	View,
+	view
+};
+rista.rista = rista; // for destructuring

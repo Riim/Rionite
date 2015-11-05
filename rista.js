@@ -69,20 +69,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	var observeDOM = __webpack_require__(3);
 	var View = __webpack_require__(5);
 
-	var _require2 = __webpack_require__(8);
+	var _require2 = __webpack_require__(9);
 
-	var initViews = _require2.initViews;
+	var applyViews = _require2.applyViews;
 	var destroyViews = _require2.destroyViews;
 	var KEY_VIEW = View.KEY_VIEW;
 	var defineView = View.define;
+
+	var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mousemove', 'mouseout', 'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend', 'keydown', 'keypress', 'keyup', 'abort', 'error', 'resize', 'select', 'change', 'submit', 'reset', 'focusin', 'focusout'];
 
 	var inited = false;
 
 	/**
 	 * @typesign (name: string, description: {
-	 *     construct?: (),
-	 *     render?: (): string,
 	 *     init?: (),
+	 *     render?: (): string,
+	 *     bind?: (),
 	 *     dispose?: ()
 	 * });
 	 */
@@ -90,24 +92,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		defineView(name, description);
 
 		if (inited) {
-			initViews(document.documentElement);
+			applyViews(document.documentElement);
 		}
 	}
-
-	var rista = {
-		EventEmitter: EventEmitter,
-		map: map,
-		list: list,
-		cellx: cellx,
-		d: d,
-		utils: utils,
-		settings: settings,
-		View: View,
-		view: view
-	};
-	rista.rista = rista; // for destructuring
-
-	var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mousemove', 'mouseout', 'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend', 'keydown', 'keypress', 'keyup', 'abort', 'error', 'resize', 'select', 'change', 'submit', 'reset', 'focusin', 'focusout'];
 
 	function onDocumentEvent(evt) {
 		var node = evt.target;
@@ -125,9 +112,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				break;
 			}
 
-			if (node[KEY_VIEW]) {
-				var _view = node[KEY_VIEW];
+			var _view = node[KEY_VIEW];
 
+			if (_view) {
 				for (var i = 0, l = targets.length; i < l; i++) {
 					var target = targets[i];
 					var handler = _view[target.getAttribute(attrName)];
@@ -151,30 +138,37 @@ return /******/ (function(modules) { // webpackBootstrap
 			});
 
 			observeDOM(function (removedNodes, addedNodes) {
-				for (var i = 0, l = removedNodes.length; i < l; i++) {
-					var removedNode = removedNodes[i];
-
-					if (removedNode.nodeType == 1) {
-						destroyViews(removedNode);
+				removedNodes.forEach(function (node) {
+					if (node.nodeType == 1) {
+						destroyViews(node);
 					}
-				}
+				});
 
-				for (var i = 0, l = addedNodes.length; i < l; i++) {
-					var addedNode = addedNodes[i];
-
-					if (addedNode.nodeType == 1) {
-						initViews(addedNode);
+				addedNodes.forEach(function (node) {
+					if (node.nodeType == 1) {
+						applyViews(node);
 					}
-				}
+				});
 			});
 
-			initViews(document.documentElement);
+			applyViews(document.documentElement);
 
 			inited = true;
 		});
 	});
 
-	module.exports = rista;
+	var rista = module.exports = {
+		EventEmitter: EventEmitter,
+		map: map,
+		list: list,
+		cellx: cellx,
+		d: d,
+		utils: utils,
+		settings: settings,
+		View: View,
+		view: view
+	};
+	rista.rista = rista; // for destructuring
 
 /***/ },
 /* 1 */
@@ -2609,24 +2603,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var nextTick = _require.utils.nextTick;
 
-	var _require2 = __webpack_require__(4);
+	var Set = __webpack_require__(4);
 
-	var getUID = _require2.get;
-
-	var removedNodes = {};
-	var addedNodes = {};
+	var removedNodes = new Set();
+	var addedNodes = new Set();
 
 	var releaseIsPlanned = false;
 
 	var listeners = [];
 
 	function registerRemovedNode(node) {
-		var id = getUID(node);
-
-		if (addedNodes[id]) {
-			delete addedNodes[id];
+		if (addedNodes.has(node)) {
+			addedNodes.delete(node);
 		} else {
-			removedNodes[id] = node;
+			removedNodes.add(node);
 
 			if (!releaseIsPlanned) {
 				releaseIsPlanned = true;
@@ -2636,12 +2626,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	function registerAddedNode(node) {
-		var id = getUID(node);
-
-		if (removedNodes[id]) {
-			delete removedNodes[id];
+		if (removedNodes.has(node)) {
+			removedNodes.delete(node);
 		} else {
-			addedNodes[id] = node;
+			addedNodes.add(node);
 
 			if (!releaseIsPlanned) {
 				releaseIsPlanned = true;
@@ -2653,23 +2641,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	function release() {
 		releaseIsPlanned = false;
 
-		var removedNodes_ = [];
-		var addedNodes_ = [];
-
-		for (var id in removedNodes) {
-			removedNodes_.push(removedNodes[id]);
-		}
-		for (var id in addedNodes) {
-			addedNodes_.push(addedNodes[id]);
-		}
-
-		if (removedNodes_.length || addedNodes_.length) {
-			removedNodes = {};
-			addedNodes = {};
-
+		if (removedNodes.size || addedNodes.size) {
 			for (var i = 0, l = listeners.length; i < l; i++) {
-				listeners[i](removedNodes_, addedNodes_);
+				listeners[i](removedNodes, addedNodes);
 			}
+
+			removedNodes.clear();
+			addedNodes.clear();
 		}
 	}
 
@@ -2720,45 +2698,64 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+	var _require = __webpack_require__(1);
 
-	var uidCounter = 0;
+	var Map = _require.Map;
+	var createClass = _require.utils.createClass;
 
-	/**
-	 * @typesign (): string;
-	 */
-	function nextUID() {
-		return String(++uidCounter);
+	var Set = window.Set;
+
+	if (!Set || Set.toString().indexOf('[native code]') == -1) {
+		Set = createClass({
+			constructor: function constructor() {
+				this._entries = new Map();
+				this.size = 0;
+			},
+			has: function has(value) {
+				return this._entries.has(value);
+			},
+			add: function add(value) {
+				this._entries.set(value, value);
+				this.size = this._entries.size;
+				return this;
+			},
+			delete: function _delete(value) {
+				if (this._entries.delete(value)) {
+					this.size--;
+					return true;
+				}
+
+				return false;
+			},
+			clear: function clear() {
+				this._entries.clear();
+				this.size = 0;
+			},
+			forEach: function forEach(cb, context) {
+				var _this = this;
+
+				if (context == null) {
+					context = window;
+				}
+
+				this._entries.forEach(function (value) {
+					cb.call(context, value, value, _this);
+				});
+			}
+		});
 	}
 
-	var KEY_UID = '__rista_uid__';
-	if (window.Symbol && _typeof(Symbol.iterator) == 'symbol') {
-		KEY_UID = Symbol(KEY_UID);
-	}
-
-	/**
-	 * @typesign (obj: Object): string;
-	 */
-	function getUID(obj) {
-		return obj[KEY_UID] || Object.defineProperty(obj, KEY_UID, { value: nextUID() })[KEY_UID];
-	}
-
-	module.exports = {
-		next: nextUID,
-		get: getUID
-	};
+	module.exports = Set;
 
 /***/ },
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
-
-	function _instanceof(left, right) { if (right != null && right[Symbol.hasInstance]) { return right[Symbol.hasInstance](left); } else { return left instanceof right; } }
 
 	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
 
@@ -2773,12 +2770,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var morphdom = __webpack_require__(6);
 	var settings = __webpack_require__(2);
-
-	var _require2 = __webpack_require__(4);
-
-	var nextUID = _require2.next;
-
-	var hasClass = __webpack_require__(7);
+	var nextUID = __webpack_require__(7);
+	var hasClass = __webpack_require__(8);
 
 	var KEY_VIEW = '__rista_View_view__';
 	if (window.Symbol && _typeof(Symbol.iterator) == 'symbol') {
@@ -2818,14 +2811,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * @typesign (name: string, description: {
-	 *     construct?: (),
-	 *     render?: (): string,
 	 *     init?: (),
+	 *     render?: (): string,
+	 *     bind?: (),
 	 *     dispose?: ()
-	 * });
+	 * }): Function;
 	 */
 	function defineView(name, description) {
-		var CustomView = Function('View', 'return function ' + toCamelCase('.' + name) + '(block) { View.call(this, block); };')(View);
+		var CustomView = Function('View', 'return function ' + toCamelCase('#' + name) + '(block) { View.call(this, block); };')(View);
 
 		var proto = CustomView.prototype = Object.create(View.prototype);
 
@@ -2836,7 +2829,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			proto.blockName = toCamelCase(name);
 		}
 
-		registerViewClass(name, CustomView);
+		return registerViewClass(name, CustomView);
 	}
 
 	/**
@@ -2863,6 +2856,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		_disposables: null,
 
 		/**
+	  * For override.
 	  * @type {string}
 	  */
 		blockName: undefined,
@@ -2897,8 +2891,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				block.className = this.blockName + ' ' + block.className;
 			}
 
-			if (this.construct) {
-				this.construct();
+			if (this.init) {
+				this.init();
 			}
 
 			if (this.render) {
@@ -2906,8 +2900,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				this._content('on', 'change', this._onContentChange);
 			}
 
-			if (this.init) {
-				this.init();
+			if (this.bind) {
+				this.bind();
 			}
 		},
 
@@ -2925,6 +2919,27 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 		},
+
+		/**
+	  * For override.
+	  */
+		init: null,
+
+		/**
+	  * For override.
+	  */
+		render: null,
+
+		/**
+	  * For override.
+	  */
+		bind: null,
+
+		/**
+	  * For override.
+	  */
+		dispose: null,
+
 		_onContentChange: function _onContentChange() {
 			var el = document.createElement('div');
 			el.innerHTML = this._content();
@@ -2960,11 +2975,32 @@ return /******/ (function(modules) { // webpackBootstrap
 			});
 		},
 
-		render: null,
-		init: null,
+		/**
+	  * @typesign (): HTMLElement|null;
+	  */
+		getParent: function getParent() {
+			var node = this.block;
+
+			while (node = node.parentNode) {
+				if (node[KEY_VIEW]) {
+					return node[KEY_VIEW];
+				}
+			}
+
+			return null;
+		},
 
 		/**
-	  * @typesign (selector: string): $;
+	  * @typesign (): Array<HTMLElement>;
+	  */
+		getDescendants: function getDescendants() {
+			return Array.prototype.filter.call(this.block.querySelectorAll('[rt-view]'), function (block) {
+				return block[KEY_VIEW];
+			});
+		},
+
+		/**
+	  * @typesign (selector: string): $|NodeList;
 	  */
 		$: (function (_$) {
 			function $(_x) {
@@ -3002,30 +3038,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			});
 		},
-
-		/**
-	  * @typesign (): HTMLElement|null;
-	  */
-		getParent: function getParent() {
-			var node = this.block;
-
-			while (node = node.parentNode) {
-				if (node[KEY_VIEW]) {
-					return node[KEY_VIEW];
-				}
-			}
-
-			return null;
-		},
-
-		/**
-	  * @typesign (): Array<HTMLElement>;
-	  */
-		getDescendants: function getDescendants() {
-			return Array.prototype.filter.call(this.block.querySelectorAll('[rt-view]'), function (block) {
-				return block[KEY_VIEW];
-			});
-		},
 		listenTo: function listenTo(target, type, listener, context) {
 			var _this = this;
 
@@ -3038,10 +3050,10 @@ return /******/ (function(modules) { // webpackBootstrap
 					listenings.push(this.listenTo(target[i], type, listener, context));
 				}
 			} else if ((typeof type === 'undefined' ? 'undefined' : _typeof(type)) == 'object') {
+				listenings = [];
+
 				if (Array.isArray(type)) {
 					var types = type;
-
-					listenings = [];
 
 					for (var i = 0, l = types.length; i < l; i++) {
 						listenings.push(this.listenTo(target, types[i], listener, context));
@@ -3050,24 +3062,23 @@ return /******/ (function(modules) { // webpackBootstrap
 					var listeners = type;
 
 					context = listener;
-					listenings = [];
 
 					for (var _type in listeners) {
 						listenings.push(this.listenTo(target, _type, listeners[_type], context));
 					}
 				}
 			} else if (Array.isArray(listener)) {
-				var listeners = listener;
-
 				listenings = [];
+
+				var listeners = listener;
 
 				for (var i = 0, l = listeners.length; i < l; i++) {
 					listenings.push(this.listenTo(target, type, listeners[i], context));
 				}
 			} else if ((typeof listener === 'undefined' ? 'undefined' : _typeof(listener)) == 'object') {
-				var listeners = listener;
-
 				listenings = [];
+
+				var listeners = listener;
 
 				for (var name in listeners) {
 					listenings.push(this.listenTo(target[name]('unwrap', 0), type, listeners[name], context));
@@ -3100,7 +3111,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  *     type: string,
 	  *     listener: (evt: cellx~Event): boolean|undefined,
 	  *     context?: Object
-	  * );
+	  * ): { stop: (), dispose: () };
 	  */
 		_listenTo: function _listenTo(target, type, listener, context) {
 			var _this2 = this;
@@ -3109,7 +3120,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				context = this;
 			}
 
-			if (_instanceof(target, EventEmitter)) {
+			if (target instanceof EventEmitter) {
 				target.on(type, listener, context);
 			} else if (typeof target.addEventListener == 'function') {
 				if (target != context) {
@@ -3125,7 +3136,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			var stopListening = function stopListening() {
 				if (_this2._disposables[id]) {
-					if (_instanceof(target, EventEmitter)) {
+					if (target instanceof EventEmitter) {
 						target.off(type, listener, context);
 					} else {
 						target.removeEventListener(type, listener);
@@ -3144,34 +3155,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		/**
-	  * @typesign (cb: Function): Function{ cancel: (), dispose: () };
-	  */
-		registerCallback: function registerCallback(cb) {
-			var _this3 = this,
-			    _arguments = arguments;
-
-			var id = nextUID();
-
-			var callback = function callback() {
-				if (_this3._disposables[id]) {
-					delete _this3._disposables[id];
-					return cb.apply(_this3, _arguments);
-				}
-			};
-
-			var cancelCallback = function cancelCallback() {
-				delete _this3._disposables[id];
-			};
-
-			callback.cancel = cancelCallback;
-			callback.dispose = cancelCallback;
-
-			this._disposables[id] = callback;
-
-			return callback;
-		},
-
-		/**
 	  * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
 	  */
 		setTimeout: (function (_setTimeout) {
@@ -3185,25 +3168,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return setTimeout;
 		})(function (cb, delay) {
-			var _this4 = this;
+			var _this3 = this;
 
 			var id = nextUID();
 
 			var timeoutId = setTimeout(function () {
-				delete _this4._disposables[id];
-				cb.call(_this4);
+				delete _this3._disposables[id];
+				cb.call(_this3);
 			}, delay);
 
-			var clearTimeout_ = function clearTimeout_() {
-				if (_this4._disposables[id]) {
+			var _clearTimeout = function _clearTimeout() {
+				if (_this3._disposables[id]) {
 					clearTimeout(timeoutId);
-					delete _this4._disposables[id];
+					delete _this3._disposables[id];
 				}
 			};
 
 			var timeout = this._disposables[id] = {
-				clear: clearTimeout_,
-				dispose: clearTimeout_
+				clear: _clearTimeout,
+				dispose: _clearTimeout
 			};
 
 			return timeout;
@@ -3223,30 +3206,56 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return setInterval;
 		})(function (cb, delay) {
-			var _this5 = this;
+			var _this4 = this;
 
 			var id = nextUID();
 
 			var intervalId = setInterval(function () {
-				cb.call(_this5);
+				cb.call(_this4);
 			}, delay);
 
-			var clearInterval_ = function clearInterval_() {
-				if (_this5._disposables[id]) {
+			var _clearInterval = function _clearInterval() {
+				if (_this4._disposables[id]) {
 					clearInterval(intervalId);
-					delete _this5._disposables[id];
+					delete _this4._disposables[id];
 				}
 			};
 
 			var interval = this._disposables[id] = {
-				clear: clearInterval_,
-				dispose: clearInterval_
+				clear: _clearInterval,
+				dispose: _clearInterval
 			};
 
 			return interval;
 		}),
 
-		dispose: null,
+		/**
+	  * @typesign (cb: Function): Function{ cancel: (), dispose: () };
+	  */
+		registerCallback: function registerCallback(cb) {
+			var _this5 = this,
+			    _arguments = arguments;
+
+			var id = nextUID();
+
+			var callback = function callback() {
+				if (_this5._disposables[id]) {
+					delete _this5._disposables[id];
+					return cb.apply(_this5, _arguments);
+				}
+			};
+
+			var cancelCallback = function cancelCallback() {
+				delete _this5._disposables[id];
+			};
+
+			callback.cancel = cancelCallback;
+			callback.dispose = cancelCallback;
+
+			this._disposables[id] = callback;
+
+			return callback;
+		},
 
 		/**
 	  * @typesign ();
@@ -3690,6 +3699,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 
+	var uidCounter = 0;
+
+	/**
+	 * @typesign (): string;
+	 */
+	function nextUID() {
+	  return String(++uidCounter);
+	}
+
+	module.exports = nextUID;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	"use strict";
+
 	/**
 	 * @typesign (el: HTMLElement, name: string): boolean;
 	 */
@@ -3712,7 +3738,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = hasClass;
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3745,7 +3771,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @typesign (el: HTMLElement);
 	 */
-	function initViews(el) {
+	function applyViews(el) {
 		var blocks = findBlocks(el);
 
 		for (var i = blocks.length; i;) {
@@ -3781,7 +3807,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = {
-		initViews: initViews,
+		applyViews: applyViews,
 		destroyViews: destroyViews
 	};
 

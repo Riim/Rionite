@@ -1,20 +1,18 @@
 let { utils: { nextTick } } = require('cellx');
-let { get: getUID } = require('./uid');
+let Set = require('./Set');
 
-let removedNodes = {};
-let addedNodes = {};
+let removedNodes = new Set();
+let addedNodes = new Set();
 
 let releaseIsPlanned = false;
 
 let listeners = [];
 
 function registerRemovedNode(node) {
-	let id = getUID(node);
-
-	if (addedNodes[id]) {
-		delete addedNodes[id];
+	if (addedNodes.has(node)) {
+		addedNodes.delete(node);
 	} else {
-		removedNodes[id] = node;
+		removedNodes.add(node);
 
 		if (!releaseIsPlanned) {
 			releaseIsPlanned = true;
@@ -24,12 +22,10 @@ function registerRemovedNode(node) {
 }
 
 function registerAddedNode(node) {
-	let id = getUID(node);
-
-	if (removedNodes[id]) {
-		delete removedNodes[id];
+	if (removedNodes.has(node)) {
+		removedNodes.delete(node);
 	} else {
-		addedNodes[id] = node;
+		addedNodes.add(node);
 
 		if (!releaseIsPlanned) {
 			releaseIsPlanned = true;
@@ -41,23 +37,13 @@ function registerAddedNode(node) {
 function release() {
 	releaseIsPlanned = false;
 
-	let removedNodes_ = [];
-	let addedNodes_ = [];
-
-	for (let id in removedNodes) {
-		removedNodes_.push(removedNodes[id]);
-	}
-	for (let id in addedNodes) {
-		addedNodes_.push(addedNodes[id]);
-	}
-
-	if (removedNodes_.length || addedNodes_.length) {
-		removedNodes = {};
-		addedNodes = {};
-
+	if (removedNodes.size || addedNodes.size) {
 		for (let i = 0, l = listeners.length; i < l; i++) {
-			listeners[i](removedNodes_, addedNodes_);
+			listeners[i](removedNodes, addedNodes);
 		}
+
+		removedNodes.clear();
+		addedNodes.clear();
 	}
 }
 

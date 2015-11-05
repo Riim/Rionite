@@ -19,7 +19,7 @@ function findBlocks(el) {
 /**
  * @typesign (el: HTMLElement);
  */
-function initViews(el) {
+function applyViews(el) {
 	let blocks = findBlocks(el);
 
 	for (let i = blocks.length; i;) {
@@ -55,6 +55,6 @@ function destroyViews(el) {
 }
 
 module.exports = {
-	initViews,
+	applyViews,
 	destroyViews
 };
