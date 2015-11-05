@@ -82,9 +82,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * @typesign (name: string, description: {
-	 *     init?: (),
+	 *     preinit?: (),
 	 *     render?: (): string,
-	 *     bind?: (),
+	 *     init?: (),
 	 *     dispose?: ()
 	 * });
 	 */
@@ -2811,9 +2811,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * @typesign (name: string, description: {
-	 *     init?: (),
+	 *     preinit?: (),
 	 *     render?: (): string,
-	 *     bind?: (),
+	 *     init?: (),
 	 *     dispose?: ()
 	 * }): Function;
 	 */
@@ -2891,8 +2891,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				block.className = this.blockName + ' ' + block.className;
 			}
 
-			if (this.init) {
-				this.init();
+			if (this.preinit) {
+				this.preinit();
 			}
 
 			if (this.render) {
@@ -2900,8 +2900,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				this._content('on', 'change', this._onContentChange);
 			}
 
-			if (this.bind) {
-				this.bind();
+			if (this.init) {
+				this.init();
 			}
 		},
 
@@ -2923,7 +2923,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		/**
 	  * For override.
 	  */
-		init: null,
+		preinit: null,
 
 		/**
 	  * For override.
@@ -2933,7 +2933,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		/**
 	  * For override.
 	  */
-		bind: null,
+		init: null,
 
 		/**
 	  * For override.

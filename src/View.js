@@ -42,9 +42,9 @@ function registerViewClass(name, viewClass) {
 
 /**
  * @typesign (name: string, description: {
- *     init?: (),
+ *     preinit?: (),
  *     render?: (): string,
- *     bind?: (),
+ *     init?: (),
  *     dispose?: ()
  * }): Function;
  */
@@ -125,8 +125,8 @@ let View = createClass({
 			block.className = `${this.blockName} ${block.className}`;
 		}
 
-		if (this.init) {
-			this.init();
+		if (this.preinit) {
+			this.preinit();
 		}
 
 		if (this.render) {
@@ -134,8 +134,8 @@ let View = createClass({
 			this._content('on', 'change', this._onContentChange);
 		}
 
-		if (this.bind) {
-			this.bind();
+		if (this.init) {
+			this.init();
 		}
 	},
 
@@ -157,7 +157,7 @@ let View = createClass({
 	/**
 	 * For override.
 	 */
-	init: null,
+	preinit: null,
 
 	/**
 	 * For override.
@@ -167,7 +167,7 @@ let View = createClass({
 	/**
 	 * For override.
 	 */
-	bind: null,
+	init: null,
 
 	/**
 	 * For override.

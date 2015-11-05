@@ -19,9 +19,9 @@ let inited = false;
 
 /**
  * @typesign (name: string, description: {
- *     init?: (),
+ *     preinit?: (),
  *     render?: (): string,
- *     bind?: (),
+ *     init?: (),
  *     dispose?: ()
  * });
  */
