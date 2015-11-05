@@ -22,8 +22,8 @@ function findBlocks(el) {
 function initViews(el) {
 	let blocks = findBlocks(el);
 
-	for (let i = 0, l = blocks.length; i < l; i++) {
-		let block = blocks[i];
+	for (let i = blocks.length; i;) {
+		let block = blocks[--i];
 
 		if (!block[KEY_VIEW]) {
 			let viewClass = getViewClass(block.getAttribute('rt-view'));
@@ -45,8 +45,8 @@ function initViews(el) {
 function destroyViews(el) {
 	let blocks = findBlocks(el);
 
-	for (let i = 0, l = blocks.length; i < l; i++) {
-		let view = blocks[i][KEY_VIEW];
+	for (let i = blocks.length; i;) {
+		let view = blocks[--i][KEY_VIEW];
 
 		if (view) {
 			view.destroy();

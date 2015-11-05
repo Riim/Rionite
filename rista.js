@@ -2724,6 +2724,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
 	var uidCounter = 0;
 
 	/**
@@ -2734,7 +2736,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var KEY_UID = '__rista_uid__';
-	if (window.Symbol && typeof Symbol.iterator == 'symbol') {
+	if (window.Symbol && _typeof(Symbol.iterator) == 'symbol') {
 		KEY_UID = Symbol(KEY_UID);
 	}
 
@@ -2756,6 +2758,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	function _instanceof(left, right) { if (right != null && right[Symbol.hasInstance]) { return right[Symbol.hasInstance](left); } else { return left instanceof right; } }
+
+	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
 	var _require = __webpack_require__(1);
 
 	var EventEmitter = _require.EventEmitter;
@@ -2775,7 +2781,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var hasClass = __webpack_require__(7);
 
 	var KEY_VIEW = '__rista_View_view__';
-	if (window.Symbol && typeof Symbol.iterator == 'symbol') {
+	if (window.Symbol && _typeof(Symbol.iterator) == 'symbol') {
 		KEY_VIEW = Symbol(KEY_VIEW);
 	}
 
@@ -2919,7 +2925,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 		},
-
 		_onContentChange: function _onContentChange() {
 			var el = document.createElement('div');
 			el.innerHTML = this._content();
@@ -2942,13 +2947,11 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					}
 				},
-
 				onBeforeMorphEl: function onBeforeMorphEl(fromEl, toEl) {
 					if (fromEl[KEY_VIEW]) {
 						return false;
 					}
 				},
-
 				onNodeDiscarded: function onNodeDiscarded(node) {
 					if (node[KEY_VIEW]) {
 						node[KEY_VIEW].destroy();
@@ -3023,7 +3026,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				return block[KEY_VIEW];
 			});
 		},
-
 		listenTo: function listenTo(target, type, listener, context) {
 			var _this = this;
 
@@ -3035,7 +3037,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				for (var i = 0, l = target.length; i < l; i++) {
 					listenings.push(this.listenTo(target[i], type, listener, context));
 				}
-			} else if (typeof type == 'object') {
+			} else if ((typeof type === 'undefined' ? 'undefined' : _typeof(type)) == 'object') {
 				if (Array.isArray(type)) {
 					var types = type;
 
@@ -3062,13 +3064,13 @@ return /******/ (function(modules) { // webpackBootstrap
 				for (var i = 0, l = listeners.length; i < l; i++) {
 					listenings.push(this.listenTo(target, type, listeners[i], context));
 				}
-			} else if (typeof listener == 'object') {
+			} else if ((typeof listener === 'undefined' ? 'undefined' : _typeof(listener)) == 'object') {
 				var listeners = listener;
 
 				listenings = [];
 
-				for (var _name in listeners) {
-					listenings.push(this.listenTo(target[_name]('unwrap', 0), type, listeners[_name], context));
+				for (var name in listeners) {
+					listenings.push(this.listenTo(target[name]('unwrap', 0), type, listeners[name], context));
 				}
 			} else {
 				return this._listenTo(target, type, listener, context);
@@ -3107,7 +3109,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				context = this;
 			}
 
-			if (target instanceof EventEmitter) {
+			if (_instanceof(target, EventEmitter)) {
 				target.on(type, listener, context);
 			} else if (typeof target.addEventListener == 'function') {
 				if (target != context) {
@@ -3123,7 +3125,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			var stopListening = function stopListening() {
 				if (_this2._disposables[id]) {
-					if (target instanceof EventEmitter) {
+					if (_instanceof(target, EventEmitter)) {
 						target.off(type, listener, context);
 					} else {
 						target.removeEventListener(type, listener);
@@ -3282,9 +3284,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 6 */
 /***/ function(module, exports) {
 
-	// Create a range object for efficently rendering strings to elements.
 	'use strict';
 
+	// Create a range object for efficently rendering strings to elements.
 	var range;
 
 	function toElement(str) {
@@ -3686,11 +3688,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 7 */
 /***/ function(module, exports) {
 
+	"use strict";
+
 	/**
 	 * @typesign (el: HTMLElement, name: string): boolean;
 	 */
-	"use strict";
-
 	var hasClass = undefined;
 
 	if (document.documentElement.classList) {
@@ -3727,6 +3729,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @typesign (el: HTMLElement): Array<HTMLElement>;
 	 */
+
 	function findBlocks(el) {
 		var blocks = [];
 
@@ -3745,8 +3748,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function initViews(el) {
 		var blocks = findBlocks(el);
 
-		for (var i = 0, l = blocks.length; i < l; i++) {
-			var block = blocks[i];
+		for (var i = blocks.length; i;) {
+			var block = blocks[--i];
 
 			if (!block[KEY_VIEW]) {
 				var viewClass = getViewClass(block.getAttribute('rt-view'));
@@ -3768,8 +3771,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function destroyViews(el) {
 		var blocks = findBlocks(el);
 
-		for (var i = 0, l = blocks.length; i < l; i++) {
-			var view = blocks[i][KEY_VIEW];
+		for (var i = blocks.length; i;) {
+			var view = blocks[--i][KEY_VIEW];
 
 			if (view) {
 				view.destroy();
