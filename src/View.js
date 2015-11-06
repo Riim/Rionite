@@ -230,14 +230,19 @@ let View = createClass({
 	 * @typesign (): Array<HTMLElement>;
 	 */
 	getDescendants() {
-		return Array.prototype.filter.call(this.block.querySelectorAll('[rt-view]'), block => block[KEY_VIEW]);
+		return Array.prototype.map.call(this.block.querySelectorAll('[rt-view]'), block => block[KEY_VIEW])
+			.filter(view => view);
 	},
 
 	/**
 	 * @typesign (selector: string): $|NodeList;
 	 */
 	$(selector) {
-		selector = selector.split('&').join(`.${this.blockName}${settings.blockElementDelimiter}`);
+		selector = selector.split('&');
+
+		selector = selector.length == 1 ?
+			selector[0] :
+			selector.join(`.${this.blockName}${settings.blockElementDelimiter}`);
 
 		if (typeof $ == 'function' && $.fn) {
 			return $(this.block).find(selector);
@@ -253,12 +258,8 @@ let View = createClass({
 		let args = Array.prototype.slice.call(arguments, 1);
 
 		return this.getDescendants().map(descendant => {
-			if (!descendant.destroyed) {
-				let methodDescr = Object.getOwnPropertyDescriptor(descendant, method);
-
-				if (methodDescr && typeof methodDescr.value == 'function') {
-					return descendant[method].apply(descendant, args);
-				}
+			if (!descendant.destroyed && typeof descendant[method] == 'function') {
+				return descendant[method].apply(descendant, args);
 			}
 		});
 	},

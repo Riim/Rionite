@@ -2994,8 +2994,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (): Array<HTMLElement>;
 	  */
 		getDescendants: function getDescendants() {
-			return Array.prototype.filter.call(this.block.querySelectorAll('[rt-view]'), function (block) {
+			return Array.prototype.map.call(this.block.querySelectorAll('[rt-view]'), function (block) {
 				return block[KEY_VIEW];
+			}).filter(function (view) {
+				return view;
 			});
 		},
 
@@ -3013,7 +3015,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return $;
 		})(function (selector) {
-			selector = selector.split('&').join('.' + this.blockName + settings.blockElementDelimiter);
+			selector = selector.split('&');
+
+			selector = selector.length == 1 ? selector[0] : selector.join('.' + this.blockName + settings.blockElementDelimiter);
 
 			if (typeof $ == 'function' && $.fn) {
 				return $(this.block).find(selector);
@@ -3029,12 +3033,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			var args = Array.prototype.slice.call(arguments, 1);
 
 			return this.getDescendants().map(function (descendant) {
-				if (!descendant.destroyed) {
-					var methodDescr = Object.getOwnPropertyDescriptor(descendant, method);
-
-					if (methodDescr && typeof methodDescr.value == 'function') {
-						return descendant[method].apply(descendant, args);
-					}
+				if (!descendant.destroyed && typeof descendant[method] == 'function') {
+					return descendant[method].apply(descendant, args);
 				}
 			});
 		},
