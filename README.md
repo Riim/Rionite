@@ -18,7 +18,7 @@ npm install rista --save
 
 ### Пример
 
-```html
+```js
 <div rt-is="helloWorld">Hello, World!</div>
 
 <script type="text/ecmascript-7">
@@ -43,7 +43,7 @@ rista.component('helloWorld', {
 
 [jsfiddle](http://jsfiddle.net/91y8vcym/)
 
-```html
+```js
 <div rt-is="userAge"></div>
 
 <script type="text/ecmascript-7">
@@ -89,7 +89,7 @@ rista.component('userAge', {
 
 Иногда нужно что бы компонент не только определял собственное содержимое, но и использовал переданное ему:
 
-```html
+```js
 <div rt-is="header">Title</div>
 
 <script type="text/ecmascript-7">
@@ -110,7 +110,7 @@ rista.component('header', {
 
 [jsfiddle](http://jsfiddle.net/z8xtLqts/)
 
-```html
+```js
 <div rt-is="header2">Title</div>
 
 <script type="text/ecmascript-7">
@@ -140,7 +140,7 @@ rista.component('header2', {
 
 [jsfiddle](http://jsfiddle.net/v72b10or/)
 
-```html
+```js
 <div rt-is="header3">Title</div>
 
 <script type="text/ecmascript-7">
@@ -178,7 +178,7 @@ rista.component('header3', {
 
 [jsfiddle](http://jsfiddle.net/ayx3ae4r/)
 
-```html
+```js
 <div rt-is="counter"></div>
 
 <script type="text/ecmascript-7">
@@ -205,7 +205,7 @@ rista.component('counter', {
 
 В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.elementName')` можно сократить до `this.$('.elementName')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на имя блока с разделителем между именем блока и именем элемента. Например, запись `$(this.block).find('.blockName__elementName')` можно сократить до `this.$('&elementName')`. Имя блока соответствует имени компонента, но, при наличии в нём недопустимых символов, они удаляются с приведением в верхнему регистру последующего допустимого символа:
 
-```html
+```js
 <div rt-is="company.project.component"></div>
 
 <script type="text/ecmascript-7">
@@ -223,10 +223,10 @@ rista.component('company.project.component', {
 
 ```js
 rista.component('company.project.component', {
-    blockName: 'customBlockName',
+    blockName: 'someBlockName',
 
     init() {
-        console.log(this.blockName); // 'customBlockName'
+        console.log(this.blockName); // 'someBlockName'
     }
 });
 ```
@@ -270,7 +270,7 @@ rista.component('example', {
 Можно передать объект, ключи которого будут типами событий, а значения - обработчиками:
 
 ```js
-rista.component('exampleNoListenTo', {
+rista.component('example', {
     init() {
         this.listenTo(document, {
             mousedown: this._onDocumentMouseDown,
