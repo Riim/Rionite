@@ -1,12 +1,12 @@
 let { EventEmitter, cellx, utils: { logError, mixin, createClass } } = require('cellx');
-let morphdom = require('../lib/morphdom');
+let morphdom = require('morphdom');
 let settings = require('./settings');
 let nextUID = require('./nextUID');
 let hasClass = require('./hasClass');
 
-let KEY_VIEW = '__rista_View_view__';
+let KEY_COMPONENT = '__rista_Component_component__';
 if (window.Symbol && typeof Symbol.iterator == 'symbol') {
-	KEY_VIEW = Symbol(KEY_VIEW);
+	KEY_COMPONENT = Symbol(KEY_COMPONENT);
 }
 
 /**
@@ -18,70 +18,70 @@ function toCamelCase(str) {
 	});
 }
 
-let viewClasses = Object.create(null);
+let componentSubclasses = Object.create(null);
 
 /**
- * @typesign (name: string): Function|undefined;
+ * @typesign (id: string): Function|undefined;
  */
-function getViewClass(name) {
-	return viewClasses[name];
+function getComponentSubclass(id) {
+	return componentSubclasses[id];
 }
 
 /**
- * @typesign (name: string, viewClass: Function): Function;
+ * @typesign (id: string, componentSubclass: Function): Function;
  */
-function registerViewClass(name, viewClass) {
-	if (viewClasses[name]) {
-		throw new TypeError('ViewClass "' + name + '" is already registered');
+function registerComponentSubclass(id, componentSubclass) {
+	if (componentSubclasses[id]) {
+		throw new TypeError('Component "' + id + '" is already registered');
 	}
 
-	viewClasses[name] = viewClass;
+	componentSubclasses[id] = componentSubclass;
 
-	return viewClass;
+	return componentSubclass;
 }
 
 /**
- * @typesign (name: string, description: {
+ * @typesign (id: string, description: {
  *     preinit?: (),
  *     render?: (): string,
  *     init?: (),
  *     dispose?: ()
  * }): Function;
  */
-function defineView(name, description) {
-	let CustomView = Function(
-		'View',
-		`return function ${toCamelCase('#' + name)}(block) { View.call(this, block); };`
-	)(View);
+function defineComponentSubclass(id, description) {
+	let constr = Function(
+		'Component',
+		`return function ${toCamelCase('#' + id)}(block) { Component.call(this, block); };`
+	)(Component);
 
-	let proto = CustomView.prototype = Object.create(View.prototype);
+	let proto = constr.prototype = Object.create(Component.prototype);
 
 	mixin(proto, description);
-	proto.constructor = CustomView;
+	proto.constructor = constr;
 
 	if (!proto.blockName) {
-		proto.blockName = toCamelCase(name);
+		proto.blockName = toCamelCase(id);
 	}
 
-	return registerViewClass(name, CustomView);
+	return registerComponentSubclass(id, constr);
 }
 
 /**
- * @class rista.View
+ * @class rista.Component
  * @extends {cellx.EventEmitter}
  *
- * @typesign new (block: HTMLElement): rista.View;
+ * @typesign new (block: HTMLElement): rista.Component;
  */
-let View = createClass({
+let Component = createClass({
 	Extends: EventEmitter,
 
 	Static: {
-		KEY_VIEW,
+		KEY_COMPONENT,
 
-		getClass: getViewClass,
-		registerClass: registerViewClass,
+		getSubclass: getComponentSubclass,
+		registerSubclass: registerComponentSubclass,
 
-		define: defineView
+		defineSubclass: defineComponentSubclass
 	},
 
 	/**
@@ -96,7 +96,7 @@ let View = createClass({
 	blockName: undefined,
 
 	/**
-	 * Корневой элемент вьюшки.
+	 * Корневой элемент компонента.
 	 * @type {HTMLElement}
 	 */
 	block: null,
@@ -112,14 +112,14 @@ let View = createClass({
 	destroyed: false,
 
 	constructor(block) {
-		if (block[KEY_VIEW]) {
-			throw new TypeError('Element is already used as a block of view');
+		if (block[KEY_COMPONENT]) {
+			throw new TypeError('Element is already used as a block of component');
 		}
 
 		this._disposables = {};
 
 		this.block = block;
-		block[KEY_VIEW] = this;
+		block[KEY_COMPONENT] = this;
 
 		if (!hasClass(block, this.blockName)) {
 			block.className = `${this.blockName} ${block.className}`;
@@ -191,21 +191,21 @@ let View = createClass({
 						return node.getAttribute('key');
 					}
 
-					if (node.hasAttribute('rt-view')) {
-						return node.getAttribute('rt-view') + JSON.stringify(node.dataset);
+					if (node.hasAttribute('rt-is')) {
+						return node.getAttribute('rt-is') + JSON.stringify(node.dataset);
 					}
 				}
 			},
 
 			onBeforeMorphEl(fromEl, toEl) {
-				if (fromEl[KEY_VIEW]) {
+				if (fromEl[KEY_COMPONENT]) {
 					return false;
 				}
 			},
 
 			onNodeDiscarded(node) {
-				if (node[KEY_VIEW]) {
-					node[KEY_VIEW].destroy();
+				if (node[KEY_COMPONENT]) {
+					node[KEY_COMPONENT].destroy();
 				}
 			}
 		});
@@ -218,8 +218,8 @@ let View = createClass({
 		let node = this.block;
 
 		while (node = node.parentNode) {
-			if (node[KEY_VIEW]) {
-				return node[KEY_VIEW];
+			if (node[KEY_COMPONENT]) {
+				return node[KEY_COMPONENT];
 			}
 		}
 
@@ -230,8 +230,8 @@ let View = createClass({
 	 * @typesign (): Array<HTMLElement>;
 	 */
 	getDescendants() {
-		return Array.prototype.map.call(this.block.querySelectorAll('[rt-view]'), block => block[KEY_VIEW])
-			.filter(view => view);
+		return Array.prototype.map.call(this.block.querySelectorAll('[rt-is]'), block => block[KEY_COMPONENT])
+			.filter(component => component);
 	},
 
 	/**
@@ -476,10 +476,10 @@ let View = createClass({
 			}
 		}
 
-		this.block[KEY_VIEW] = null;
+		this.block[KEY_COMPONENT] = null;
 
 		this.destroyed = true;
 	}
 });
 
-module.exports = View;
+module.exports = Component;

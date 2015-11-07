@@ -10,41 +10,41 @@ npm install rista --save
 
 ## TodoApp
 
-Пример намеренно немного усложнён: [jsfiddle](http://jsfiddle.net/aw7j9mxk/).
+Пример намеренно немного усложнён: [jsfiddle](http://jsfiddle.net/mk9ws2qo/).
 
 ## Принцип работы
 
-Используя [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `rista` отслеживает появляющиеся в документе элементы с атрибутом `rt-view` и применяет к ним въюшки с заданными в значении атрибута именами.
+Используя [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `rista` отслеживает появляющиеся в документе элементы с атрибутом `rt-is` и применяет к ним компоненты с заданными в значении атрибута именами.
 
 ### Пример
 
 ```html
-<div rt-view="helloWorld">Hello, World!</div>
+<div rt-is="helloWorld">Hello, World!</div>
 
 <script type="text/ecmascript-7">
     
-rista.view('helloWorld', {
+rista.component('helloWorld', {
     init() {
-        // Сработает при появлении элемента с `rt-view="helloWorld"` в документе.
+        // Сработает при появлении элемента с `rt-is="helloWorld"` в документе.
         // `this.block` - ссылка на появившийся элемент.
     },
 
     dispose() {
-        // Сработает при удалении элемента с `rt-view="helloWorld"` из документа.
+        // Сработает при удалении элемента с `rt-is="helloWorld"` из документа.
     }
 });
 
 </script>
 ```
 
-Если въюшка должна задавать собственное содержимое, можно определить метод `render`, который должен вернуть html-строку. Содержимое элемента будет заменено на результат его вызова. Далее `rista`, используя возможности [cellx](https://github.com/Riim/cellx)-а, начинает  отслеживать изменения всех используемых в методе `render` наблюдаемых свойств и при их изменении перерендеривает содержимое применяя изменения с помощью [morphdom](https://github.com/patrick-steele-idem/morphdom)-а.
+Если компонент должен задавать собственное содержимое, можно определить метод `render`, который должен вернуть html-строку. Содержимое элемента будет заменено на результат его вызова. Далее `rista`, используя возможности [cellx](https://github.com/Riim/cellx)-а, начинает  отслеживать изменения всех используемых в методе `render` наблюдаемых свойств и при их изменении перерендеривает содержимое применяя изменения с помощью [morphdom](https://github.com/patrick-steele-idem/morphdom)-а.
 
 ### Пример
 
-[jsfiddle](http://jsfiddle.net/s722vL27/)
+[jsfiddle](http://jsfiddle.net/91y8vcym/)
 
 ```html
-<div rt-view="userAge"></div>
+<div rt-is="userAge"></div>
 
 <script type="text/ecmascript-7">
 
@@ -66,8 +66,8 @@ setInterval(() => {
     appModel.userAge++;
 }, 1000);
 
-rista.view('userAge', {
-    // Собственное свойство въюшки, вычисляемое из свойства модели.
+rista.component('userAge', {
+    // Собственное свойство компонента, вычисляемое из свойства модели.
     @d.computed userAgeTwoYearsLater: function() {
         return appModel.userAgeYearLater + 1;
     },
@@ -87,14 +87,14 @@ rista.view('userAge', {
 
 ## preinit
 
-Иногда нужно что бы въюшка не только определяла собственное содержимое, но и использовала переданное ей:
+Иногда нужно что бы компонент не только определял собственное содержимое, но и использовал переданное ему:
 
 ```html
-<div rt-view="header">Title</div>
+<div rt-is="header">Title</div>
 
 <script type="text/ecmascript-7">
 
-rista.view('header', {
+rista.component('header', {
     render() {
         return `
             <img src="/logo.png">
@@ -108,14 +108,14 @@ rista.view('header', {
 
 Но использование `this.block.innerHTML` прямо в `render`-е будет приводить к постоянному лишнему обёртыванию при перерендеривании:
 
-[jsfiddle](http://jsfiddle.net/2k1tL2jh/)
+[jsfiddle](http://jsfiddle.net/z8xtLqts/)
 
 ```html
-<div rt-view="header2">Title</div>
+<div rt-is="header2">Title</div>
 
 <script type="text/ecmascript-7">
 
-rista.view('header2', {
+rista.component('header2', {
     @rista.d.observable counter: 0,
 
     render() {
@@ -138,14 +138,14 @@ rista.view('header2', {
 
 `preinit` срабатывает один раз при инициализации компонента, но в отличии от `init` срабатывает перед `render`. Это позволяет запомнить исходное содержимое перед `render`-ом и использовать его в дальнейшем:
 
-[jsfiddle](http://jsfiddle.net/daL2swe9/)
+[jsfiddle](http://jsfiddle.net/v72b10or/)
 
 ```html
-<div rt-view="header3">Title</div>
+<div rt-is="header3">Title</div>
 
 <script type="text/ecmascript-7">
 
-rista.view('header3', {
+rista.component('header3', {
     @rista.d.observable counter: 0,
 
     title: undefined,
@@ -176,14 +176,14 @@ rista.view('header3', {
 
 `rista` позволяет добавлять обработчики событий элементов в декларативном стиле:
 
-[jsfiddle](http://jsfiddle.net/b6vsL1bx/)
+[jsfiddle](http://jsfiddle.net/ayx3ae4r/)
 
 ```html
-<div rt-view="eventExample"></div>
+<div rt-is="counter"></div>
 
 <script type="text/ecmascript-7">
 
-rista.view('eventExample', {
+rista.component('counter', {
     @rista.d.observable counter: 0,
 
     render() {
@@ -203,26 +203,26 @@ rista.view('eventExample', {
 
 ## Выбор элементов
 
-В методах въюшки доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.elementName')` можно сократить до `this.$('.elementName')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на имя блока с разделителем между именем блока и именем элемента. Например, запись `$(this.block).find('.blockName__elementName')` можно сократить до `this.$('&elementName')`. Имя блока соответствует имени въюшки, но, при наличии в нём недопустимых символов, они удаляются с приведением в верхнему регистру последующего допустимого символа:
+В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.elementName')` можно сократить до `this.$('.elementName')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на имя блока с разделителем между именем блока и именем элемента. Например, запись `$(this.block).find('.blockName__elementName')` можно сократить до `this.$('&elementName')`. Имя блока соответствует имени компонента, но, при наличии в нём недопустимых символов, они удаляются с приведением в верхнему регистру последующего допустимого символа:
 
 ```html
-<div rt-view="company.project.view"></div>
+<div rt-is="company.project.component"></div>
 
 <script type="text/ecmascript-7">
 
-rista.view('company.project.view', {
+rista.component('company.project.component', {
     init() {
-        console.log(this.blockName); // 'companyProjectView'
+        console.log(this.blockName); // 'companyProjectComponent'
     }
 });
 
 </script>
 ```
 
-Можно вручную задать имя блока при определении въюшки:
+Можно вручную задать имя блока при определении компонента:
 
 ```js
-rista.view('company.project.view', {
+rista.component('company.project.component', {
     blockName: 'customBlockName',
 
     init() {
@@ -240,13 +240,13 @@ rista.settings.blockElementDelimiter = '--';
 
 ## Контроль памяти
 
-### View#listenTo
+### Component#listenTo
 
-Добавляет обработчик собития, который будет автоматически снят при очистке (`dispose`) въюшки.  
+Добавляет обработчик собития, который будет автоматически снят при очистке (`dispose`) компонента.  
 Следующие два примера равносильны:
 
 ```js
-rt.view('example', {
+rista.component('example', {
     init() {
         this._onDocumentScroll = this._onDocumentScroll.bind(this);
         document.addEventListener('scroll', this._onDocumentScroll);
@@ -259,7 +259,7 @@ rt.view('example', {
 ```
 
 ```js
-rt.view('example', {
+rista.component('example', {
     init() {
         this.listenTo(document, 'scroll', this._onDocumentScroll);
     }
@@ -270,7 +270,7 @@ rt.view('example', {
 Можно передать объект, ключи которого будут типами событий, а значения - обработчиками:
 
 ```js
-rt.view('exampleNoListenTo', {
+rista.component('exampleNoListenTo', {
     init() {
         this.listenTo(document, {
             mousedown: this._onDocumentMouseDown,
@@ -282,13 +282,13 @@ rt.view('exampleNoListenTo', {
 
 Возвращает объект с методом `stop`, при вызове которого обработчик будет снят (если один `listenTo` добавил сразу несколько обработчиков, то `stop` снимет их все).
 
-### View#setTimeout
+### Component#setTimeout
 
-Устанавливает таймер, который будет автоматически снят при очистке (`dispose`) въюшки (в случае если он ещё не отработал).  
+Устанавливает таймер, который будет автоматически снят при очистке (`dispose`) компонента (в случае если он ещё не отработал).  
 Следующие два примера равносильны:
 
 ```js
-rt.view('example', {
+rista.component('example', {
     _timerId: undefined,
 
     init() {
@@ -307,7 +307,7 @@ rt.view('example', {
 ```
 
 ```js
-rt.view('example', {
+rista.component('example', {
     init() {
         this.setTimeout(this._onTimer, 10000);
     }
@@ -316,20 +316,20 @@ rt.view('example', {
 
 Возвращает объект с методом `clear`, при вызове которого таймер будет снят.
 
-### View#setInterval
+### Component#setInterval
 
-Аналогично с `View#setTimeout`.
+Аналогично с `Component#setTimeout`.
 
-### View#registerCallback
+### Component#registerCallback
 
-Аналогично с `View#listenTo` и `View#setTimeout` хотелось бы прерывать запрос при очистке въюшки создавшей его. Но есть ли смысл прерывать его с помощью [XMLHTTPRequest#abort](https://developer.mozilla.org/ru/docs/Web/API/XMLHttpRequest#abort())? На самом деле нет. `abort` вовсе не "догоняет" уже отправленный запрос в сети и не остановливает его, он просто отменяет его обработку на клиенте, но полная отмена часто скорее вредна, например, вместо голого `XMLHttpRequest` используется умная обёртка, способная один и тот же запрос, отправленный двумя разными въюшками, отправить лишь один раз, или, при поддержке такой возможности сервером, сгрупировать несколько запросов в один (для этого запрос отправляется не мгновенно, а с небольшой задержкой, позволяющей накопить несколько запросов). Если, в таком случае, отменять запрос `abort`-ом, то очищающаяся въюшка будет отменять запросы для других въюшек, которые ещё работают. То есть, по сути, отменять нужно не сам запрос, а только лишь его обработчик - callback. Для этого обработчик пропускается через `View#registerCallback` который запоминает его в замыкании. Возвращённая `registerCallback`-ом функция запустит исходный callback (и вернёт результат его вызова) только в случае, если въюшка не быдет очищена до ответа.
+Аналогично с `Component#listenTo` и `Component#setTimeout` хотелось бы прерывать запрос при очистке компонента создавшего его. Но есть ли смысл прерывать его с помощью [XMLHTTPRequest#abort](https://developer.mozilla.org/ru/docs/Web/API/XMLHttpRequest#abort())? На самом деле нет. `abort` вовсе не "догоняет" уже отправленный запрос в сети и не остановливает его, он просто отменяет его обработку на клиенте, но полная отмена часто скорее вредна, например, вместо голого `XMLHttpRequest` используется умная обёртка, способная один и тот же запрос, отправленный двумя разными компонентами, отправить лишь один раз, или, при поддержке такой возможности сервером, сгрупировать несколько запросов в один (для этого запрос отправляется не мгновенно, а с небольшой задержкой, позволяющей накопить несколько запросов). Если, в таком случае, отменять запрос `abort`-ом, то очищающийся компонент будет отменять запросы отправленные другими компонентами, которые ещё работают. То есть, по сути, отменять нужно не сам запрос, а только лишь его обработчик - callback. Для этого обработчик пропускается через `Component#registerCallback` который запоминает его в замыкании. Возвращённая `registerCallback`-ом функция запустит исходный callback (и вернёт результат его вызова) только в случае, если компонент не будет очищен до ответа.
 
 #### Пример
 
 ```js
 let BackendProvider = require('../../../Proxy/BackendProvider');
 
-rt.view('userCard', {
+rista.component('userCard', {
     init() {
         BackendProvider.getUser(this.registerCallback((err, user) => {
             //
@@ -338,28 +338,28 @@ rt.view('userCard', {
 });
 ```
 
-## Передача сигналов между въюшками
+## Передача сигналов между компонентами
 
-Сложное взаимодействие между несколькими въюшками обычно делается через модель приложения, но простейшее взаимодействие, видящих друг-друга напрямую въюшек, обычно допустимо и удобнее делать без использования модели.
+Сложное взаимодействие между несколькими компонентами обычно делается через модель приложения, но простейшее взаимодействие, видящих друг-друга напрямую компонентов, обычно допустимо и удобнее делать без использования модели.
 
-### View#emit
+### Component#emit
 
-Создаёт всплывающее событие на въюшке, что позволяет отправить сигнал от въюшки-потомка к въюшкам-предкам.
+Создаёт всплывающее событие на компоненте, что позволяет отправить сигнал от компонента-потомка к компонентам-предкам.
 
 #### Пример
 
-[jsfiddle](http://jsfiddle.net/pxmwxe22/)
+[jsfiddle](http://jsfiddle.net/3cymk78L/)
 
 ```js
-<div rt-view="parent"></div>
+<div rt-is="parent"></div>
 
 <script type="text/ecmascript-7">
 
-rista.view('parent', {
+rista.component('parent', {
     render() {
         return `
-            <div rt-view="child" data-id="1"></div>
-            <div rt-view="child" data-id="2"></div>
+            <div rt-is="child" data-id="1"></div>
+            <div rt-is="child" data-id="2"></div>
         `;
     },
 
@@ -372,7 +372,7 @@ rista.view('parent', {
     }
 });
 
-rista.view('child', {
+rista.component('child', {
     init() {
         this.setInterval(() => {
             this.emit({
@@ -386,25 +386,25 @@ rista.view('child', {
 </script>
 ```
 
-### View#broadcast
+### Component#broadcast
 
-Позволяет отправить сигнал от въюшки-предка к въюшкам-потомкам. Первый аргумент - имя вызываемого метода, остальные - передаваемые в метод аргументы. Если въюшка-потомок не содержит нужного метода, она пропускается.  
+Позволяет отправить сигнал от компонента-предка к компонентам-потомкам. Первый аргумент - имя вызываемого метода, остальные - передаваемые в метод аргументы. Если компонент-потомок не содержит нужного метода, он пропускается.  
 Возвращает массив результатов.
 
 #### Пример
 
-[jsfiddle](http://jsfiddle.net/a5ta2z6q/)
+[jsfiddle](http://jsfiddle.net/2hsnr0et/)
 
 ```js
-<div rt-view="parent"></div>
+<div rt-is="parent"></div>
 
 <script type="text/ecmascript-7">
 
-rista.view('parent', {
+rista.component('parent', {
     render() {
         return `
-            <div rt-view="child"></div>
-            <div rt-view="child"></div>
+            <div rt-is="child"></div>
+            <div rt-is="child"></div>
         `;
     },
 
@@ -415,7 +415,7 @@ rista.view('parent', {
     }
 });
 
-rista.view('child', {
+rista.component('child', {
     method(num) {
         console.log(num);
     }

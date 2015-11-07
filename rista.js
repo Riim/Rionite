@@ -67,32 +67,32 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var settings = __webpack_require__(2);
 	var observeDOM = __webpack_require__(3);
-	var View = __webpack_require__(5);
+	var Component = __webpack_require__(5);
 
 	var _require2 = __webpack_require__(9);
 
-	var applyViews = _require2.applyViews;
-	var destroyViews = _require2.destroyViews;
-	var KEY_VIEW = View.KEY_VIEW;
-	var defineView = View.define;
+	var applyComponents = _require2.applyComponents;
+	var destroyComponents = _require2.destroyComponents;
+	var KEY_COMPONENT = Component.KEY_COMPONENT;
+	var defineComponentSubclass = Component.defineSubclass;
 
 	var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mousemove', 'mouseout', 'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend', 'keydown', 'keypress', 'keyup', 'abort', 'error', 'resize', 'select', 'change', 'submit', 'reset', 'focusin', 'focusout'];
 
 	var inited = false;
 
 	/**
-	 * @typesign (name: string, description: {
+	 * @typesign (id: string, description: {
 	 *     preinit?: (),
 	 *     render?: (): string,
 	 *     init?: (),
 	 *     dispose?: ()
 	 * });
 	 */
-	function view(name, description) {
-		defineView(name, description);
+	function component(id, description) {
+		defineComponentSubclass(id, description);
 
 		if (inited) {
-			applyViews(document.documentElement);
+			applyComponents(document.documentElement);
 		}
 	}
 
@@ -112,15 +112,15 @@ return /******/ (function(modules) { // webpackBootstrap
 				break;
 			}
 
-			var _view = node[KEY_VIEW];
+			var _component = node[KEY_COMPONENT];
 
-			if (_view) {
+			if (_component) {
 				for (var i = 0, l = targets.length; i < l; i++) {
 					var target = targets[i];
-					var handler = _view[target.getAttribute(attrName)];
+					var handler = _component[target.getAttribute(attrName)];
 
 					if (handler) {
-						handler.call(_view, evt, target);
+						handler.call(_component, evt, target);
 					}
 				}
 
@@ -140,18 +140,18 @@ return /******/ (function(modules) { // webpackBootstrap
 			observeDOM(function (removedNodes, addedNodes) {
 				removedNodes.forEach(function (node) {
 					if (node.nodeType == 1) {
-						destroyViews(node);
+						destroyComponents(node);
 					}
 				});
 
 				addedNodes.forEach(function (node) {
 					if (node.nodeType == 1) {
-						applyViews(node);
+						applyComponents(node);
 					}
 				});
 			});
 
-			applyViews(document.documentElement);
+			applyComponents(document.documentElement);
 
 			inited = true;
 		});
@@ -165,8 +165,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		d: d,
 		utils: utils,
 		settings: settings,
-		View: View,
-		view: view
+		Component: Component,
+		component: component
 	};
 	rista.rista = rista; // for destructuring
 
@@ -2773,9 +2773,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var nextUID = __webpack_require__(7);
 	var hasClass = __webpack_require__(8);
 
-	var KEY_VIEW = '__rista_View_view__';
+	var KEY_COMPONENT = '__rista_Component_component__';
 	if (window.Symbol && _typeof(Symbol.iterator) == 'symbol') {
-		KEY_VIEW = Symbol(KEY_VIEW);
+		KEY_COMPONENT = Symbol(KEY_COMPONENT);
 	}
 
 	/**
@@ -2787,67 +2787,67 @@ return /******/ (function(modules) { // webpackBootstrap
 		});
 	}
 
-	var viewClasses = Object.create(null);
+	var componentSubclasses = Object.create(null);
 
 	/**
-	 * @typesign (name: string): Function|undefined;
+	 * @typesign (id: string): Function|undefined;
 	 */
-	function getViewClass(name) {
-		return viewClasses[name];
+	function getComponentSubclass(id) {
+		return componentSubclasses[id];
 	}
 
 	/**
-	 * @typesign (name: string, viewClass: Function): Function;
+	 * @typesign (id: string, componentSubclass: Function): Function;
 	 */
-	function registerViewClass(name, viewClass) {
-		if (viewClasses[name]) {
-			throw new TypeError('ViewClass "' + name + '" is already registered');
+	function registerComponentSubclass(id, componentSubclass) {
+		if (componentSubclasses[id]) {
+			throw new TypeError('Component "' + id + '" is already registered');
 		}
 
-		viewClasses[name] = viewClass;
+		componentSubclasses[id] = componentSubclass;
 
-		return viewClass;
+		return componentSubclass;
 	}
 
 	/**
-	 * @typesign (name: string, description: {
+	 * @typesign (id: string, description: {
 	 *     preinit?: (),
 	 *     render?: (): string,
 	 *     init?: (),
 	 *     dispose?: ()
 	 * }): Function;
 	 */
-	function defineView(name, description) {
-		var CustomView = Function('View', 'return function ' + toCamelCase('#' + name) + '(block) { View.call(this, block); };')(View);
+	function defineComponentSubclass(id, description) {
+		var constr = Function('Component', 'return function ' + toCamelCase('#' + id) + '(block) { Component.call(this, block); };')(Component);
 
-		var proto = CustomView.prototype = Object.create(View.prototype);
+		var proto = constr.prototype = Object.create(Component.prototype);
 
 		mixin(proto, description);
-		proto.constructor = CustomView;
+		proto.constructor = constr;
 
 		if (!proto.blockName) {
-			proto.blockName = toCamelCase(name);
+			proto.blockName = toCamelCase(id);
 		}
 
-		return registerViewClass(name, CustomView);
+		return registerComponentSubclass(id, constr);
 	}
 
 	/**
-	 * @class rista.View
+	 * @class rista.Component
 	 * @extends {cellx.EventEmitter}
 	 *
-	 * @typesign new (block: HTMLElement): rista.View;
+	 * @typesign new (block: HTMLElement): rista.Component;
 	 */
-	var View = createClass({
+	var Component = createClass({
 		Extends: EventEmitter,
 
 		Static: {
-			KEY_VIEW: KEY_VIEW,
+			KEY_COMPONENT: KEY_COMPONENT,
 
-			getClass: getViewClass,
-			registerClass: registerViewClass,
+			getSubclass: getComponentSubclass,
+			registerSubclass: registerComponentSubclass,
 
-			define: defineView
+			defineSubclass: defineComponentSubclass
 		},
 
 		/**
@@ -2862,7 +2862,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		blockName: undefined,
 
 		/**
-	  * Корневой элемент вьюшки.
+	  * Корневой элемент компонента.
 	  * @type {HTMLElement}
 	  */
 		block: null,
@@ -2878,14 +2878,14 @@ return /******/ (function(modules) { // webpackBootstrap
 		destroyed: false,
 
 		constructor: function constructor(block) {
-			if (block[KEY_VIEW]) {
-				throw new TypeError('Element is already used as a block of view');
+			if (block[KEY_COMPONENT]) {
+				throw new TypeError('Element is already used as a block of component');
 			}
 
 			this._disposables = {};
 
 			this.block = block;
-			block[KEY_VIEW] = this;
+			block[KEY_COMPONENT] = this;
 
 			if (!hasClass(block, this.blockName)) {
 				block.className = this.blockName + ' ' + block.className;
@@ -2957,19 +2957,19 @@ return /******/ (function(modules) { // webpackBootstrap
 							return node.getAttribute('key');
 						}
 
-						if (node.hasAttribute('rt-view')) {
-							return node.getAttribute('rt-view') + JSON.stringify(node.dataset);
+						if (node.hasAttribute('rt-is')) {
+							return node.getAttribute('rt-is') + JSON.stringify(node.dataset);
 						}
 					}
 				},
 				onBeforeMorphEl: function onBeforeMorphEl(fromEl, toEl) {
-					if (fromEl[KEY_VIEW]) {
+					if (fromEl[KEY_COMPONENT]) {
 						return false;
 					}
 				},
 				onNodeDiscarded: function onNodeDiscarded(node) {
-					if (node[KEY_VIEW]) {
-						node[KEY_VIEW].destroy();
+					if (node[KEY_COMPONENT]) {
+						node[KEY_COMPONENT].destroy();
 					}
 				}
 			});
@@ -2982,8 +2982,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			var node = this.block;
 
 			while (node = node.parentNode) {
-				if (node[KEY_VIEW]) {
-					return node[KEY_VIEW];
+				if (node[KEY_COMPONENT]) {
+					return node[KEY_COMPONENT];
 				}
 			}
 
@@ -2994,10 +2994,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (): Array<HTMLElement>;
 	  */
 		getDescendants: function getDescendants() {
-			return Array.prototype.map.call(this.block.querySelectorAll('[rt-view]'), function (block) {
-				return block[KEY_VIEW];
-			}).filter(function (view) {
-				return view;
+			return Array.prototype.map.call(this.block.querySelectorAll('[rt-is]'), function (block) {
+				return block[KEY_COMPONENT];
+			}).filter(function (component) {
+				return component;
 			});
 		},
 
@@ -3281,19 +3281,17 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 
-			this.block[KEY_VIEW] = null;
+			this.block[KEY_COMPONENT] = null;
 
 			this.destroyed = true;
 		}
 	});
 
-	module.exports = View;
+	module.exports = Component;
 
 /***/ },
 /* 6 */
 /***/ function(module, exports) {
-
-	'use strict';
 
 	// Create a range object for efficently rendering strings to elements.
 	var range;
@@ -3320,8 +3318,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * that "selected" is an attribute when reading
 	     * over the attributes using selectEl.attributes
 	     */
-	    OPTION: function OPTION(fromEl, toEl) {
-	        if (fromEl.selected = toEl.selected) {
+	    OPTION: function(fromEl, toEl) {
+	        if ((fromEl.selected = toEl.selected)) {
 	            fromEl.setAttribute('selected', '');
 	        } else {
 	            fromEl.removeAttribute('selected', '');
@@ -3334,7 +3332,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     * no effect since it is only used to the set the initial value.
 	     * Similar for the "checked" attribute.
 	     */
-	    INPUT: function INPUT(fromEl, toEl) {
+	    INPUT: function(fromEl, toEl) {
 	        fromEl.checked = toEl.checked;
 
 	        if (fromEl.value != toEl.value) {
@@ -3350,7 +3348,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 
-	    TEXTAREA: function TEXTAREA(fromEl, toEl) {
+	    TEXTAREA: function(fromEl, toEl) {
 	        var newValue = toEl.value;
 	        if (fromEl.value != newValue) {
 	            fromEl.value = newValue;
@@ -3380,7 +3378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var attrValue;
 	    var foundAttrs = {};
 
-	    for (i = attrs.length - 1; i >= 0; i--) {
+	    for (i=attrs.length-1; i>=0; i--) {
 	        attr = attrs[i];
 	        if (attr.specified !== false) {
 	            attrName = attr.name;
@@ -3397,7 +3395,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    // found on the target element.
 	    attrs = fromNode.attributes;
 
-	    for (i = attrs.length - 1; i >= 0; i--) {
+	    for (i=attrs.length-1; i>=0; i--) {
 	        attr = attrs[i];
 	        if (attr.specified !== false) {
 	            attrName = attr.name;
@@ -3413,7 +3411,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function moveChildren(fromEl, toEl) {
 	    var curChild = fromEl.firstChild;
-	    while (curChild) {
+	    while(curChild) {
 	        var nextChild = curChild.nextSibling;
 	        toEl.appendChild(curChild);
 	        curChild = nextChild;
@@ -3458,7 +3456,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        if (node.nodeType === 1) {
 	            var curChild = node.firstChild;
-	            while (curChild) {
+	            while(curChild) {
 	                removeNodeHelper(curChild, nestedInSavedEl || id);
 	                curChild = curChild.nextSibling;
 	            }
@@ -3468,7 +3466,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function walkDiscardedChildNodes(node) {
 	        if (node.nodeType === 1) {
 	            var curChild = node.firstChild;
-	            while (curChild) {
+	            while(curChild) {
+
 
 	                if (!getNodeKey(curChild)) {
 	                    // We only want to handle nodes that don't have an ID to avoid double
@@ -3530,11 +3529,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var savedEl;
 	            var unmatchedEl;
 
-	            outer: while (curToNodeChild) {
+	            outer: while(curToNodeChild) {
 	                toNextSibling = curToNodeChild.nextSibling;
 	                curToNodeId = getNodeKey(curToNodeChild);
 
-	                while (curFromNodeChild) {
+	                while(curFromNodeChild) {
 	                    var curFromNodeId = getNodeKey(curFromNodeChild);
 	                    fromNextSibling = curFromNodeChild.nextSibling;
 
@@ -3552,8 +3551,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (curFromNodeType === curToNodeChild.nodeType) {
 	                        var isCompatible = false;
 
-	                        if (curFromNodeType === 1) {
-	                            // Both nodes being compared are Element nodes
+	                        if (curFromNodeType === 1) { // Both nodes being compared are Element nodes
 	                            if (curFromNodeChild.tagName === curToNodeChild.tagName) {
 	                                // We have compatible DOM elements
 	                                if (curFromNodeId || curToNodeId) {
@@ -3573,8 +3571,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                // to match the current target DOM node.
 	                                morphEl(curFromNodeChild, curToNodeChild, alreadyVisited);
 	                            }
-	                        } else if (curFromNodeType === 3) {
-	                            // Both nodes being compared are Text nodes
+	                        } else if (curFromNodeType === 3) { // Both nodes being compared are Text nodes
 	                            isCompatible = true;
 	                            // Simply update nodeValue on the original node to change the text value
 	                            curFromNodeChild.nodeValue = curToNodeChild.nodeValue;
@@ -3594,18 +3591,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                if (curToNodeId) {
-	                    if (savedEl = savedEls[curToNodeId]) {
+	                    if ((savedEl = savedEls[curToNodeId])) {
 	                        morphEl(savedEl, curToNodeChild, true);
 	                        curToNodeChild = savedEl; // We want to append the saved element instead
 	                    } else {
-	                            // The current DOM element in the target tree has an ID
-	                            // but we did not find a match in any of the corresponding
-	                            // siblings. We just put the target element in the old DOM tree
-	                            // but if we later find an element in the old DOM tree that has
-	                            // a matching ID then we will replace the target element
-	                            // with the corresponding old element and morph the old element
-	                            unmatchedEls[curToNodeId] = curToNodeChild;
-	                        }
+	                        // The current DOM element in the target tree has an ID
+	                        // but we did not find a match in any of the corresponding
+	                        // siblings. We just put the target element in the old DOM tree
+	                        // but if we later find an element in the old DOM tree that has
+	                        // a matching ID then we will replace the target element
+	                        // with the corresponding old element and morph the old element
+	                        unmatchedEls[curToNodeId] = curToNodeChild;
+	                    }
 	                }
 
 	                // If we got this far then we did not find a candidate match for our "to node"
@@ -3619,7 +3616,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            // We have processed all of the "to nodes". If curFromNodeChild is non-null then
 	            // we still have some from nodes left over that need to be removed
-	            while (curFromNodeChild) {
+	            while(curFromNodeChild) {
 	                fromNextSibling = curFromNodeChild.nextSibling;
 	                removeNode(curFromNodeChild, fromEl, alreadyVisited);
 	                curFromNodeChild = fromNextSibling;
@@ -3649,8 +3646,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                // Going from an element node to a text node
 	                morphedNode = toNode;
 	            }
-	        } else if (morphedNodeType === 3) {
-	            // Text node
+	        } else if (morphedNodeType === 3) { // Text node
 	            if (toNodeType === 3) {
 	                morphedNode.nodeValue = toNode.nodeValue;
 	                return morphedNode;
@@ -3692,6 +3688,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	module.exports = morphdom;
+
 
 /***/ },
 /* 7 */
@@ -3749,8 +3746,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _require2 = __webpack_require__(5);
 
-	var KEY_VIEW = _require2.KEY_VIEW;
-	var getViewClass = _require2.getClass;
+	var KEY_COMPONENT = _require2.KEY_COMPONENT;
+	var getComponentSubclass = _require2.getSubclass;
 
 	/**
 	 * @typesign (el: HTMLElement): Array<HTMLElement>;
@@ -3759,11 +3756,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	function findBlocks(el) {
 		var blocks = [];
 
-		if (el.hasAttribute('rt-view')) {
+		if (el.hasAttribute('rt-is')) {
 			blocks.push(el);
 		}
 
-		blocks.push.apply(blocks, el.querySelectorAll('[rt-view]'));
+		blocks.push.apply(blocks, el.querySelectorAll('[rt-is]'));
 
 		return blocks;
 	}
@@ -3771,18 +3768,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @typesign (el: HTMLElement);
 	 */
-	function applyViews(el) {
+	function applyComponents(el) {
 		var blocks = findBlocks(el);
 
 		for (var i = blocks.length; i;) {
 			var block = blocks[--i];
 
-			if (!block[KEY_VIEW]) {
-				var viewClass = getViewClass(block.getAttribute('rt-view'));
+			if (!block[KEY_COMPONENT]) {
+				var componentSubclass = getComponentSubclass(block.getAttribute('rt-is'));
 
-				if (viewClass) {
+				if (componentSubclass) {
 					try {
-						new viewClass(block);
+						new componentSubclass(block);
 					} catch (err) {
 						logError(err);
 					}
@@ -3794,21 +3791,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * @typesign (el: HTMLElement);
 	 */
-	function destroyViews(el) {
+	function destroyComponents(el) {
 		var blocks = findBlocks(el);
 
 		for (var i = blocks.length; i;) {
-			var view = blocks[--i][KEY_VIEW];
+			var component = blocks[--i][KEY_COMPONENT];
 
-			if (view) {
-				view.destroy();
+			if (component) {
+				component.destroy();
 			}
 		}
 	}
 
 	module.exports = {
-		applyViews: applyViews,
-		destroyViews: destroyViews
+		applyComponents: applyComponents,
+		destroyComponents: destroyComponents
 	};
 
 /***/ }

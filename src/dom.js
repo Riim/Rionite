@@ -1,5 +1,5 @@
 let { utils: { logError } } = require('cellx');
-let { KEY_VIEW, getClass: getViewClass } = require('./View');
+let { KEY_COMPONENT, getSubclass: getComponentSubclass } = require('./Component');
 
 /**
  * @typesign (el: HTMLElement): Array<HTMLElement>;
@@ -7,11 +7,11 @@ let { KEY_VIEW, getClass: getViewClass } = require('./View');
 function findBlocks(el) {
 	let blocks = [];
 
-	if (el.hasAttribute('rt-view')) {
+	if (el.hasAttribute('rt-is')) {
 		blocks.push(el);
 	}
 
-	blocks.push.apply(blocks, el.querySelectorAll('[rt-view]'));
+	blocks.push.apply(blocks, el.querySelectorAll('[rt-is]'));
 
 	return blocks;
 }
@@ -19,18 +19,18 @@ function findBlocks(el) {
 /**
  * @typesign (el: HTMLElement);
  */
-function applyViews(el) {
+function applyComponents(el) {
 	let blocks = findBlocks(el);
 
 	for (let i = blocks.length; i;) {
 		let block = blocks[--i];
 
-		if (!block[KEY_VIEW]) {
-			let viewClass = getViewClass(block.getAttribute('rt-view'));
+		if (!block[KEY_COMPONENT]) {
+			let componentSubclass = getComponentSubclass(block.getAttribute('rt-is'));
 
-			if (viewClass) {
+			if (componentSubclass) {
 				try {
-					new viewClass(block);
+					new componentSubclass(block);
 				} catch (err) {
 					logError(err);
 				}
@@ -42,19 +42,19 @@ function applyViews(el) {
 /**
  * @typesign (el: HTMLElement);
  */
-function destroyViews(el) {
+function destroyComponents(el) {
 	let blocks = findBlocks(el);
 
 	for (let i = blocks.length; i;) {
-		let view = blocks[--i][KEY_VIEW];
+		let component = blocks[--i][KEY_COMPONENT];
 
-		if (view) {
-			view.destroy();
+		if (component) {
+			component.destroy();
 		}
 	}
 }
 
 module.exports = {
-	applyViews,
-	destroyViews
+	applyComponents,
+	destroyComponents
 };

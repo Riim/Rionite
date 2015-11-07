@@ -14,6 +14,8 @@
 </head>
 <body>
 
+<div rt-is="todoApp"></div>
+
 <script type="text/ecmascript-7">
 
 let d = rista.d;
@@ -44,9 +46,9 @@ let appModel = {
 	}
 };
 
-rista.view('todo', {
+rista.component('todo', {
 	render() {
-		let todo = appModel.todos.get(this.block.dataset.todoId);
+		let todo = appModel.todos.get(this.block.dataset.id);
 
 		return `
 			<input class="todo__cbDone" type="checkbox" rt-change="_onCbDoneChange">
@@ -58,7 +60,7 @@ rista.view('todo', {
 	_onCbDoneChange() {
 		let done = this.$('&cbDone')[0].checked;
 
-		appModel.todos.get(this.block.dataset.todoId).done = done;
+		appModel.todos.get(this.block.dataset.id).done = done;
 
 		if (done) {
 			this.block.classList.add('_done');
@@ -68,16 +70,16 @@ rista.view('todo', {
 	},
 
 	_onBtnRemoveClick() {
-		appModel.todos.delete(this.block.dataset.todoId);
+		appModel.todos.delete(this.block.dataset.id);
 	}
 });
 
-rista.view('todoApp', {
+rista.component('todoApp', {
 	render() {
 		let t = [];
 
 		appModel.todos.forEach((todo, key) => {
-			t.push(`<div rt-view="todo" data-todo-id="${key}"></div>`);
+			t.push(`<div rt-is="todo" data-id="${key}"></div>`);
 		});
 
 		return `
@@ -99,8 +101,6 @@ rista.view('todoApp', {
 });
 
 </script>
-
-<div rt-view="todoApp"></div>
 
 <script src="../rista.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.32/browser.min.js"></script>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<div rt-is="counter"></div>
+
+<script type="text/ecmascript-7">
+
+rista.component('counter', {
+    @rista.d.observable counter: 0,
+
+    render() {
+        return `
+            <div>${this.counter}</div>
+            <button rt-click="_onBtnClick">Click Me!</button>
+        `;
+    },
+
+    _onBtnClick() {
+        this.counter++;
+    }
+});
+
+</script>
+
+<script src="../rista.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.32/browser.min.js"></script>
+<script>
+
+Array.prototype.forEach.call(document.querySelectorAll('script[type="text/ecmascript-7"]'), function(script) {
+	babel.run(script.innerHTML, {
+		optional: ['es7.classProperties', 'es7.decorators', 'es7.functionBind']
+	});
+});
+
+</script>
+
+</body>
+</html>

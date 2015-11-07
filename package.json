@@ -1,6 +1,6 @@
 {
   "name": "rista",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "",
   "main": "rista.js",
   "scripts": {
@@ -27,10 +27,10 @@
     "gulp-jscs": "^3.0.2",
     "gulp-load-plugins": "^1.1.0",
     "require-dir": "^0.3.0",
-    "webpack": "^1.12.2"
+    "webpack": "^1.12.3"
   },
   "dependencies": {
     "cellx": "^1.2.14",
-    "morphdom": "^1.0.2"
+    "morphdom": "^1.0.3"
   }
 }

@@ -1,10 +1,10 @@
 let { EventEmitter, map, list, cellx, d, utils } = require('cellx');
 let settings = require('./settings');
 let observeDOM = require('./observeDOM');
-let View = require('./View');
-let { applyViews, destroyViews } = require('./dom');
+let Component = require('./Component');
+let { applyComponents, destroyComponents } = require('./dom');
 
-let { KEY_VIEW, define: defineView } = View;
+let { KEY_COMPONENT, defineSubclass: defineComponentSubclass } = Component;
 
 let eventTypes = [
 	'click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mousemove', 'mouseout',
@@ -18,18 +18,18 @@ let eventTypes = [
 let inited = false;
 
 /**
- * @typesign (name: string, description: {
+ * @typesign (id: string, description: {
  *     preinit?: (),
  *     render?: (): string,
  *     init?: (),
  *     dispose?: ()
  * });
  */
-function view(name, description) {
-	defineView(name, description);
+function component(id, description) {
+	defineComponentSubclass(id, description);
 
 	if (inited) {
-		applyViews(document.documentElement);
+		applyComponents(document.documentElement);
 	}
 }
 
@@ -49,15 +49,15 @@ function onDocumentEvent(evt) {
 			break;
 		}
 
-		let view = node[KEY_VIEW];
+		let component = node[KEY_COMPONENT];
 
-		if (view) {
+		if (component) {
 			for (let i = 0, l = targets.length; i < l; i++) {
 				let target = targets[i];
-				let handler = view[target.getAttribute(attrName)];
+				let handler = component[target.getAttribute(attrName)];
 
 				if (handler) {
-					handler.call(view, evt, target);
+					handler.call(component, evt, target);
 				}
 			}
 
@@ -77,18 +77,18 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 		observeDOM((removedNodes, addedNodes) => {
 			removedNodes.forEach(node => {
 				if (node.nodeType == 1) {
-					destroyViews(node);
+					destroyComponents(node);
 				}
 			});
 
 			addedNodes.forEach(node => {
 				if (node.nodeType == 1) {
-					applyViews(node);
+					applyComponents(node);
 				}
 			});
 		});
 
-		applyViews(document.documentElement);
+		applyComponents(document.documentElement);
 
 		inited = true;
 	});
@@ -102,7 +102,7 @@ let rista = module.exports = {
 	d,
 	utils,
 	settings,
-	View,
-	view
+	Component,
+	component
 };
 rista.rista = rista; // for destructuring
