@@ -1,4 +1,5 @@
 let settings = {
+	blockNameStyle: 'camelCase', // 'pascalCase', 'hyphen'
 	blockElementDelimiter: '__'
 };
 

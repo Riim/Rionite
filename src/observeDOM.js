@@ -4,8 +4,6 @@ let Set = require('./Set');
 let removedNodes = new Set();
 let addedNodes = new Set();
 
-let releaseIsPlanned = false;
-
 let listeners = [];
 
 function registerRemovedNode(node) {
@@ -13,11 +11,7 @@ function registerRemovedNode(node) {
 		addedNodes.delete(node);
 	} else {
 		removedNodes.add(node);
-
-		if (!releaseIsPlanned) {
-			releaseIsPlanned = true;
-			nextTick(release);
-		}
+		nextTick(release);
 	}
 }
 
@@ -26,17 +20,11 @@ function registerAddedNode(node) {
 		removedNodes.delete(node);
 	} else {
 		addedNodes.add(node);
-
-		if (!releaseIsPlanned) {
-			releaseIsPlanned = true;
-			nextTick(release);
-		}
+		nextTick(release);
 	}
 }
 
 function release() {
-	releaseIsPlanned = false;
-
 	if (removedNodes.size || addedNodes.size) {
 		for (let i = 0, l = listeners.length; i < l; i++) {
 			listeners[i](removedNodes, addedNodes);
@@ -82,8 +70,8 @@ if (MutationObserver) {
 		});
 	});
 } else {
-	docEl.addEventListener('DOMNodeRemoved', () => { registerRemovedNode(evt.target); }, false);
-	docEl.addEventListener('DOMNodeInserted', () => { registerAddedNode(evt.target); }, false);
+	docEl.addEventListener('DOMNodeRemoved', evt => { registerRemovedNode(evt.target); }, false);
+	docEl.addEventListener('DOMNodeInserted', evt => { registerAddedNode(evt.target); }, false);
 }
 
 module.exports = observeDOM;

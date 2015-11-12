@@ -34,9 +34,6 @@
 		"semi-spacing": 0,
 		"space-unary-ops": 0
 	},
-	"globals": {
-		//
-	},
 	"env": {
 		"node": true,
 		"browser": true

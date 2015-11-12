@@ -69,7 +69,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var observeDOM = __webpack_require__(3);
 	var Component = __webpack_require__(5);
 
-	var _require2 = __webpack_require__(9);
+	var _require2 = __webpack_require__(10);
 
 	var applyComponents = _require2.applyComponents;
 	var destroyComponents = _require2.destroyComponents;
@@ -81,15 +81,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	var inited = false;
 
 	/**
-	 * @typesign (id: string, description: {
+	 * @typesign (name: string, description: {
+	 *     styles?: string,
+	 *     blockName?: string,
 	 *     preinit?: (),
 	 *     render?: (): string,
 	 *     init?: (),
 	 *     dispose?: ()
 	 * });
 	 */
-	function component(id, description) {
-		defineComponentSubclass(id, description);
+	function component(name, description) {
+		defineComponentSubclass(name, description);
 
 		if (inited) {
 			applyComponents(document.documentElement);
@@ -100,10 +102,11 @@ return /******/ (function(modules) { // webpackBootstrap
 		var node = evt.target;
 		var attrName = 'rt-' + evt.type;
 		var targets = [];
+		var component = undefined;
 
 		while (true) {
-			if (node.nodeType == 1 && node.hasAttribute(attrName)) {
-				targets.push(node);
+			if (!component && node.nodeType == 1 && node.hasAttribute(attrName)) {
+				targets.unshift(node);
 			}
 
 			node = node.parentNode;
@@ -112,19 +115,22 @@ return /******/ (function(modules) { // webpackBootstrap
 				break;
 			}
 
-			var _component = node[KEY_COMPONENT];
+			if (node[KEY_COMPONENT]) {
+				component = node[KEY_COMPONENT];
 
-			if (_component) {
-				for (var i = 0, l = targets.length; i < l; i++) {
-					var target = targets[i];
-					var handler = _component[target.getAttribute(attrName)];
+				for (var i = targets.length; i;) {
+					var target = targets[--i];
+					var handler = component[target.getAttribute(attrName)];
 
 					if (handler) {
-						handler.call(_component, evt, target);
+						handler.call(component, evt, target);
+						targets.splice(i, 1);
 					}
 				}
 
-				break;
+				if (!targets.length) {
+					break;
+				}
 			}
 		}
 	}
@@ -217,8 +223,11 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 		cellx.cellx = cellx; // for destructuring
 
+		var KEY_UID = '__cellx_uid__';
 		var KEY_CELLS = '__cellx_cells__';
+
 		if (global.Symbol && typeof Symbol.iterator == 'symbol') {
+			KEY_UID = Symbol(KEY_UID);
 			KEY_CELLS = Symbol(KEY_CELLS);
 		}
 
@@ -399,11 +408,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			var Map = global.Map;
 		
 			if (!Map) {
-				var KEY_UID = '__cellx_Map_uid__';
-				if (global.Symbol && typeof Symbol.iterator == 'symbol') {
-					KEY_UID = Symbol(KEY_UID);
-				}
-		
 				var entryStub = {
 					value: undefined
 				};
@@ -2588,6 +2592,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	var settings = {
+		blockNameStyle: 'camelCase', // 'pascalCase', 'hyphen'
 		blockElementDelimiter: '__'
 	};
 
@@ -2608,39 +2613,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	var removedNodes = new Set();
 	var addedNodes = new Set();
 
-	var releaseIsPlanned = false;
-
 	var listeners = [];
 
 	function registerRemovedNode(node) {
 		if (addedNodes.has(node)) {
-			addedNodes.delete(node);
+			addedNodes['delete'](node);
 		} else {
 			removedNodes.add(node);
-
-			if (!releaseIsPlanned) {
-				releaseIsPlanned = true;
-				nextTick(release);
-			}
+			nextTick(release);
 		}
 	}
 
 	function registerAddedNode(node) {
 		if (removedNodes.has(node)) {
-			removedNodes.delete(node);
+			removedNodes['delete'](node);
 		} else {
 			addedNodes.add(node);
-
-			if (!releaseIsPlanned) {
-				releaseIsPlanned = true;
-				nextTick(release);
-			}
+			nextTick(release);
 		}
 	}
 
 	function release() {
-		releaseIsPlanned = false;
-
 		if (removedNodes.size || addedNodes.size) {
 			for (var i = 0, l = listeners.length; i < l; i++) {
 				listeners[i](removedNodes, addedNodes);
@@ -2686,10 +2679,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			});
 		});
 	} else {
-		docEl.addEventListener('DOMNodeRemoved', function () {
+		docEl.addEventListener('DOMNodeRemoved', function (evt) {
 			registerRemovedNode(evt.target);
 		}, false);
-		docEl.addEventListener('DOMNodeInserted', function () {
+		docEl.addEventListener('DOMNodeInserted', function (evt) {
 			registerAddedNode(evt.target);
 		}, false);
 	}
@@ -2715,26 +2708,31 @@ return /******/ (function(modules) { // webpackBootstrap
 				this._entries = new Map();
 				this.size = 0;
 			},
+
 			has: function has(value) {
 				return this._entries.has(value);
 			},
+
 			add: function add(value) {
 				this._entries.set(value, value);
 				this.size = this._entries.size;
 				return this;
 			},
-			delete: function _delete(value) {
-				if (this._entries.delete(value)) {
+
+			'delete': function _delete(value) {
+				if (this._entries['delete'](value)) {
 					this.size--;
 					return true;
 				}
 
 				return false;
 			},
+
 			clear: function clear() {
 				this._entries.clear();
 				this.size = 0;
 			},
+
 			forEach: function forEach(cb, context) {
 				var _this = this;
 
@@ -2757,8 +2755,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
-
 	var _require = __webpack_require__(1);
 
 	var EventEmitter = _require.EventEmitter;
@@ -2772,53 +2768,91 @@ return /******/ (function(modules) { // webpackBootstrap
 	var settings = __webpack_require__(2);
 	var nextUID = __webpack_require__(7);
 	var hasClass = __webpack_require__(8);
+	var addScopedStyles = __webpack_require__(9);
 
-	var KEY_COMPONENT = '__rista_Component_component__';
-	if (window.Symbol && _typeof(Symbol.iterator) == 'symbol') {
+	var KEY_COMPONENT = '__rista_component__';
+	if (window.Symbol && typeof Symbol.iterator == 'symbol') {
 		KEY_COMPONENT = Symbol(KEY_COMPONENT);
+	}
+
+	/**
+	 * @typesign (name: string);
+	 */
+	function checkName(name) {
+		if (!/^[^0-9a-zA-Z]*[a-zA-Z]/.test(name)) {
+			throw new TypeError('Component name "' + name + '" is not valid');
+		}
 	}
 
 	/**
 	 * @typesign (str: string): string;
 	 */
-	function toCamelCase(str) {
-		return str.replace(/[^$0-9a-zA-Z]([$0-9a-zA-Z])/g, function (match, chr) {
+	function hyphenize(str) {
+		return ('!' + str.replace(/([A-Z])/g, '-$1').toLowerCase() + '!0').replace(/[^0-9a-z]+([0-9a-z])/g, '-$1').slice(1, -2);
+	}
+
+	/**
+	 * @typesign (str: string): string;
+	 */
+	function pascalize(str) {
+		return ('!' + str + '!0').replace(/[^0-9a-zA-Z]+([0-9a-zA-Z])/g, function (match, chr) {
 			return chr.toUpperCase();
-		});
+		}).slice(0, -1);
 	}
 
 	var componentSubclasses = Object.create(null);
+	var selector = '[rt-is]';
 
 	/**
-	 * @typesign (id: string): Function|undefined;
+	 * @typesign (name: string): Function|undefined;
 	 */
-	function getComponentSubclass(id) {
-		return componentSubclasses[id];
+	function getComponentSubclass(name) {
+		return componentSubclasses[hyphenize(name)];
 	}
 
-	/**
-	 * @typesign (id: string, componentSubclass: Function): Function;
-	 */
-	function registerComponentSubclass(id, componentSubclass) {
-		if (componentSubclasses[id]) {
-			throw new TypeError('Component "' + id + '" is already registered');
+	function _registerComponentSubclass(name, componentSubclass) {
+		if (componentSubclasses[name]) {
+			throw new TypeError('Component "' + name + '" is already registered');
 		}
 
-		componentSubclasses[id] = componentSubclass;
+		componentSubclasses[name] = componentSubclass;
+		selector += ', ' + name;
 
 		return componentSubclass;
 	}
 
 	/**
-	 * @typesign (id: string, description: {
+	 * @typesign (name: string, componentSubclass: Function): Function;
+	 */
+	function registerComponentSubclass(name, componentSubclass) {
+		checkName(name);
+		return _registerComponentSubclass(hyphenize(name), componentSubclass);
+	}
+
+	/**
+	 * @typesign (name: string, description: {
+	 *     styles?: string,
+	 *     blockName?: string,
 	 *     preinit?: (),
 	 *     render?: (): string,
 	 *     init?: (),
 	 *     dispose?: ()
 	 * }): Function;
 	 */
-	function defineComponentSubclass(id, description) {
-		var constr = Function('Component', 'return function ' + toCamelCase('#' + id) + '(block) { Component.call(this, block); };')(Component);
+	function defineComponentSubclass(name, description) {
+		checkName(name);
+
+		var pName = pascalize(name);
+		var hName = hyphenize(name);
+
+		var styles = description.styles;
+
+		if (styles) {
+			var styleEl = addScopedStyles(Array.isArray(styles) ? styles.join('') : styles, [hName, '[rt-is=' + hName + ']']);
+			styleEl.setAttribute('rt-component', hName);
+		}
+
+		var constr = Function('Component', 'return function ' + pName + '(block) { Component.call(this, block); };')(Component);
 
 		var proto = constr.prototype = Object.create(Component.prototype);
 
@@ -2826,10 +2860,26 @@ return /******/ (function(modules) { // webpackBootstrap
 		proto.constructor = constr;
 
 		if (!proto.blockName) {
-			proto.blockName = toCamelCase(id);
+			switch (settings.blockNameStyle) {
+				case 'camelCase':
+					{
+						proto.blockName = pName[0].toLowerCase() + pName.slice(1);
+						break;
+					}
+				case 'pascalCase':
+					{
+						proto.blockName = pName;
+						break;
+					}
+				case 'hyphen':
+					{
+						proto.blockName = hName;
+						break;
+					}
+			}
 		}
 
-		return registerComponentSubclass(id, constr);
+		return _registerComponentSubclass(hName, constr);
 	}
 
 	/**
@@ -2847,7 +2897,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			getSubclass: getComponentSubclass,
 			registerSubclass: registerComponentSubclass,
 
-			defineSubclass: defineComponentSubclass
+			defineSubclass: defineComponentSubclass,
+
+			getSelector: function getSelector() {
+				return selector;
+			}
 		},
 
 		/**
@@ -2871,8 +2925,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @final
 	  * @type {cellx<string>}
 	  */
-		_content: cellx(function () {
-			return this.render();
+		_componentContent: cellx(function () {
+			var content = this.render();
+			return Array.isArray(content) ? content.join('') : content;
 		}),
 
 		destroyed: false,
@@ -2896,8 +2951,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 
 			if (this.render) {
-				block.innerHTML = this._content();
-				this._content('on', 'change', this._onContentChange);
+				block.innerHTML = this._componentContent();
+				this._componentContent('on', 'change', this._onContentChange);
 			}
 
 			if (this.init) {
@@ -2942,31 +2997,41 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		_onContentChange: function _onContentChange() {
 			var el = document.createElement('div');
-			el.innerHTML = this._content();
+			el.innerHTML = this._componentContent();
 
 			morphdom(this.block, el, {
 				childrenOnly: true,
 
 				getNodeKey: function getNodeKey(node) {
-					if (node.id) {
-						return node.id;
-					}
-
 					if (node.nodeType == 1) {
+						if (node.id) {
+							return node.id;
+						}
+
 						if (node.hasAttribute('key')) {
 							return node.getAttribute('key');
 						}
 
-						if (node.hasAttribute('rt-is')) {
-							return node.getAttribute('rt-is') + JSON.stringify(node.dataset);
+						if (node.hasAttribute('rt-is') || getComponentSubclass(node.tagName.toLowerCase())) {
+							var attrs = node.attributes;
+							var key = [node.getAttribute('rt-is')];
+
+							for (var i = attrs.length; i;) {
+								var attr = attrs[--i];
+								key.push(attr.name, attr.value);
+							}
+
+							return JSON.stringify(key);
 						}
 					}
 				},
+
 				onBeforeMorphEl: function onBeforeMorphEl(fromEl, toEl) {
 					if (fromEl[KEY_COMPONENT]) {
 						return false;
 					}
 				},
+
 				onNodeDiscarded: function onNodeDiscarded(node) {
 					if (node[KEY_COMPONENT]) {
 						node[KEY_COMPONENT].destroy();
@@ -2994,7 +3059,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (): Array<HTMLElement>;
 	  */
 		getDescendants: function getDescendants() {
-			return Array.prototype.map.call(this.block.querySelectorAll('[rt-is]'), function (block) {
+			return Array.prototype.map.call(this.block.querySelectorAll(selector), function (block) {
 				return block[KEY_COMPONENT];
 			}).filter(function (component) {
 				return component;
@@ -3027,6 +3092,24 @@ return /******/ (function(modules) { // webpackBootstrap
 		}),
 
 		/**
+	  * @typesign (name: string): rista.Component;
+	  */
+		$$: function $$(name) {
+			var els = this.block.querySelectorAll('[name=' + name + ']');
+			var components = [];
+
+			for (var i = 0, l = els.length; i < l; i++) {
+				var component = els[i][KEY_COMPONENT];
+
+				if (component) {
+					components.push(component);
+				}
+			}
+
+			return components;
+		},
+
+		/**
 	  * @typesign (method: string, ...args?: Array): Array;
 	  */
 		broadcast: function broadcast(method) {
@@ -3038,6 +3121,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			});
 		},
+
 		listenTo: function listenTo(target, type, listener, context) {
 			var _this = this;
 
@@ -3049,7 +3133,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				for (var i = 0, l = target.length; i < l; i++) {
 					listenings.push(this.listenTo(target[i], type, listener, context));
 				}
-			} else if ((typeof type === 'undefined' ? 'undefined' : _typeof(type)) == 'object') {
+			} else if (typeof type == 'object') {
 				listenings = [];
 
 				if (Array.isArray(type)) {
@@ -3075,13 +3159,13 @@ return /******/ (function(modules) { // webpackBootstrap
 				for (var i = 0, l = listeners.length; i < l; i++) {
 					listenings.push(this.listenTo(target, type, listeners[i], context));
 				}
-			} else if ((typeof listener === 'undefined' ? 'undefined' : _typeof(listener)) == 'object') {
+			} else if (typeof listener == 'object') {
 				listenings = [];
 
 				var listeners = listener;
 
-				for (var name in listeners) {
-					listenings.push(this.listenTo(target[name]('unwrap', 0), type, listeners[name], context));
+				for (var _name in listeners) {
+					listenings.push(this.listenTo(target[_name]('unwrap', 0), type, listeners[_name], context));
 				}
 			} else {
 				return this._listenTo(target, type, listener, context);
@@ -3265,7 +3349,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				return;
 			}
 
-			this._content('dispose', 0);
+			this._componentContent('dispose', 0);
 
 			var disposables = this._disposables;
 
@@ -3711,11 +3795,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 8 */
 /***/ function(module, exports) {
 
-	"use strict";
-
 	/**
 	 * @typesign (el: HTMLElement, name: string): boolean;
 	 */
+	"use strict";
+
 	var hasClass = undefined;
 
 	if (document.documentElement.classList) {
@@ -3736,6 +3820,69 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 9 */
+/***/ function(module, exports) {
+
+	/**
+	 * @typesign (rules: CSSRuleList, sheet: CSSStyleSheet, prefix: string|Array<string>);
+	 */
+	'use strict';
+
+	function scopeRules(rules, sheet, prefix) {
+		if (!Array.isArray(prefix)) {
+			prefix = [prefix];
+		}
+
+		var _loop = function (_i) {
+			var rule = rules[--_i];
+
+			if (rule.type == 1) {
+				var cssText = rule.style.cssText;
+
+				if (cssText) {
+					var selector = prefix.map(function (prefix) {
+						return prefix + (' ' + rule.selectorText.split(',').join(', ' + prefix + ' ')).replace(/\x20+:root/gi, '');
+					}).join(', ');
+
+					sheet.deleteRule(_i);
+					sheet.insertRule(selector + ' { ' + cssText + ' }', _i);
+				}
+			} else if (rule.cssRules) {
+				scopeRules(rule.cssRules, rule, prefix);
+			}
+			i = _i;
+		};
+
+		for (var i = rules.length; i;) {
+			_loop(i);
+		}
+	}
+
+	/**
+	 * @typesign (styleEl: HTMLStyleElement, prefix: string|Array<string>);
+	 */
+	function scopeStyles(styleEl, prefix) {
+		scopeRules(styleEl.sheet.cssRules, styleEl.sheet, prefix);
+	}
+
+	/**
+	 * @typesign (styles: string, prefix: string|Array<string>): HTMLStyleElement;
+	 */
+	function addScopedStyles(styles, prefix) {
+		var styleEl = document.createElement('style');
+		styleEl.setAttribute('type', 'text/css');
+		styleEl.textContent = styles;
+
+		document.head.appendChild(styleEl);
+
+		scopeStyles(styleEl, prefix);
+
+		return styleEl;
+	}
+
+	module.exports = addScopedStyles;
+
+/***/ },
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3748,19 +3895,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var KEY_COMPONENT = _require2.KEY_COMPONENT;
 	var getComponentSubclass = _require2.getSubclass;
+	var getComponentSelector = _require2.getSelector;
 
 	/**
 	 * @typesign (el: HTMLElement): Array<HTMLElement>;
 	 */
-
 	function findBlocks(el) {
 		var blocks = [];
 
-		if (el.hasAttribute('rt-is')) {
+		if (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase())) {
 			blocks.push(el);
 		}
 
-		blocks.push.apply(blocks, el.querySelectorAll('[rt-is]'));
+		blocks.push.apply(blocks, el.querySelectorAll(getComponentSelector()));
 
 		return blocks;
 	}
@@ -3775,7 +3922,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var block = blocks[--i];
 
 			if (!block[KEY_COMPONENT]) {
-				var componentSubclass = getComponentSubclass(block.getAttribute('rt-is'));
+				var componentSubclass = getComponentSubclass(block.getAttribute('rt-is') || block.tagName.toLowerCase());
 
 				if (componentSubclass) {
 					try {

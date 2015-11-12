@@ -3,55 +3,95 @@ let morphdom = require('morphdom');
 let settings = require('./settings');
 let nextUID = require('./nextUID');
 let hasClass = require('./hasClass');
+let addScopedStyles = require('./addScopedStyles');
 
-let KEY_COMPONENT = '__rista_Component_component__';
+let KEY_COMPONENT = '__rista_component__';
 if (window.Symbol && typeof Symbol.iterator == 'symbol') {
 	KEY_COMPONENT = Symbol(KEY_COMPONENT);
 }
 
 /**
+ * @typesign (name: string);
+ */
+function checkName(name) {
+	if (!/^[^0-9a-zA-Z]*[a-zA-Z]/.test(name)) {
+		throw new TypeError(`Component name "${name}" is not valid`);
+	}
+}
+
+/**
  * @typesign (str: string): string;
  */
-function toCamelCase(str) {
-	return str.replace(/[^$0-9a-zA-Z]([$0-9a-zA-Z])/g, function(match, chr) {
+function hyphenize(str) {
+	return `!${str.replace(/([A-Z])/g, '-$1').toLowerCase()}!0`
+		.replace(/[^0-9a-z]+([0-9a-z])/g, '-$1')
+		.slice(1, -2);
+}
+
+/**
+ * @typesign (str: string): string;
+ */
+function pascalize(str) {
+	return `!${str}!0`.replace(/[^0-9a-zA-Z]+([0-9a-zA-Z])/g, function(match, chr) {
 		return chr.toUpperCase();
-	});
+	}).slice(0, -1);
 }
 
 let componentSubclasses = Object.create(null);
+let selector = '[rt-is]';
 
 /**
- * @typesign (id: string): Function|undefined;
+ * @typesign (name: string): Function|undefined;
  */
-function getComponentSubclass(id) {
-	return componentSubclasses[id];
+function getComponentSubclass(name) {
+	return componentSubclasses[hyphenize(name)];
 }
 
-/**
- * @typesign (id: string, componentSubclass: Function): Function;
- */
-function registerComponentSubclass(id, componentSubclass) {
-	if (componentSubclasses[id]) {
-		throw new TypeError('Component "' + id + '" is already registered');
+function _registerComponentSubclass(name, componentSubclass) {
+	if (componentSubclasses[name]) {
+		throw new TypeError(`Component "${name}" is already registered`);
 	}
 
-	componentSubclasses[id] = componentSubclass;
+	componentSubclasses[name] = componentSubclass;
+	selector += ', ' + name;
 
 	return componentSubclass;
 }
 
 /**
- * @typesign (id: string, description: {
+ * @typesign (name: string, componentSubclass: Function): Function;
+ */
+function registerComponentSubclass(name, componentSubclass) {
+	checkName(name);
+	return _registerComponentSubclass(hyphenize(name), componentSubclass);
+}
+
+/**
+ * @typesign (name: string, description: {
+ *     styles?: string,
+ *     blockName?: string,
  *     preinit?: (),
  *     render?: (): string,
  *     init?: (),
  *     dispose?: ()
  * }): Function;
  */
-function defineComponentSubclass(id, description) {
+function defineComponentSubclass(name, description) {
+	checkName(name);
+
+	let pName = pascalize(name);
+	let hName = hyphenize(name);
+
+	let styles = description.styles;
+
+	if (styles) {
+		let styleEl = addScopedStyles(Array.isArray(styles) ? styles.join('') : styles, [hName, `[rt-is=${hName}]`]);
+		styleEl.setAttribute('rt-component', hName);
+	}
+
 	let constr = Function(
 		'Component',
-		`return function ${toCamelCase('#' + id)}(block) { Component.call(this, block); };`
+		`return function ${pName}(block) { Component.call(this, block); };`
 	)(Component);
 
 	let proto = constr.prototype = Object.create(Component.prototype);
@@ -60,10 +100,23 @@ function defineComponentSubclass(id, description) {
 	proto.constructor = constr;
 
 	if (!proto.blockName) {
-		proto.blockName = toCamelCase(id);
+		switch (settings.blockNameStyle) {
+			case 'camelCase': {
+				proto.blockName = pName[0].toLowerCase() + pName.slice(1);
+				break;
+			}
+			case 'pascalCase': {
+				proto.blockName = pName;
+				break;
+			}
+			case 'hyphen': {
+				proto.blockName = hName;
+				break;
+			}
+		}
 	}
 
-	return registerComponentSubclass(id, constr);
+	return _registerComponentSubclass(hName, constr);
 }
 
 /**
@@ -81,7 +134,11 @@ let Component = createClass({
 		getSubclass: getComponentSubclass,
 		registerSubclass: registerComponentSubclass,
 
-		defineSubclass: defineComponentSubclass
+		defineSubclass: defineComponentSubclass,
+
+		getSelector() {
+			return selector;
+		}
 	},
 
 	/**
@@ -105,8 +162,9 @@ let Component = createClass({
 	 * @final
 	 * @type {cellx<string>}
 	 */
-	_content: cellx(function() {
-		return this.render();
+	_componentContent: cellx(function() {
+		let content = this.render();
+		return Array.isArray(content) ? content.join('') : content;
 	}),
 
 	destroyed: false,
@@ -130,8 +188,8 @@ let Component = createClass({
 		}
 
 		if (this.render) {
-			block.innerHTML = this._content();
-			this._content('on', 'change', this._onContentChange);
+			block.innerHTML = this._componentContent();
+			this._componentContent('on', 'change', this._onContentChange);
 		}
 
 		if (this.init) {
@@ -176,23 +234,31 @@ let Component = createClass({
 
 	_onContentChange() {
 		let el = document.createElement('div');
-		el.innerHTML = this._content();
+		el.innerHTML = this._componentContent();
 
 		morphdom(this.block, el, {
 			childrenOnly: true,
 
 			getNodeKey(node) {
-				if (node.id) {
-					return node.id;
-				}
-
 				if (node.nodeType == 1) {
+					if (node.id) {
+						return node.id;
+					}
+
 					if (node.hasAttribute('key')) {
 						return node.getAttribute('key');
 					}
 
-					if (node.hasAttribute('rt-is')) {
-						return node.getAttribute('rt-is') + JSON.stringify(node.dataset);
+					if (node.hasAttribute('rt-is') || getComponentSubclass(node.tagName.toLowerCase())) {
+						let attrs = node.attributes;
+						let key = [node.getAttribute('rt-is')];
+
+						for (let i = attrs.length; i;) {
+							let attr = attrs[--i];
+							key.push(attr.name, attr.value);
+						}
+
+						return JSON.stringify(key);
 					}
 				}
 			},
@@ -230,7 +296,7 @@ let Component = createClass({
 	 * @typesign (): Array<HTMLElement>;
 	 */
 	getDescendants() {
-		return Array.prototype.map.call(this.block.querySelectorAll('[rt-is]'), block => block[KEY_COMPONENT])
+		return Array.prototype.map.call(this.block.querySelectorAll(selector), block => block[KEY_COMPONENT])
 			.filter(component => component);
 	},
 
@@ -249,6 +315,24 @@ let Component = createClass({
 		}
 
 		return this.block.querySelectorAll(selector);
+	},
+
+	/**
+	 * @typesign (name: string): rista.Component;
+	 */
+	$$(name) {
+		let els = this.block.querySelectorAll(`[name=${name}]`);
+		let components = [];
+
+		for (let i = 0, l = els.length; i < l; i++) {
+			let component = els[i][KEY_COMPONENT];
+
+			if (component) {
+				components.push(component);
+			}
+		}
+
+		return components;
 	},
 
 	/**
@@ -460,7 +544,7 @@ let Component = createClass({
 			return;
 		}
 
-		this._content('dispose', 0);
+		this._componentContent('dispose', 0);
 
 		let disposables = this._disposables;
 

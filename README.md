@@ -10,7 +10,7 @@ npm install rista --save
 
 ## TodoApp
 
-Пример намеренно немного усложнён: [jsfiddle](http://jsfiddle.net/mk9ws2qo/).
+[jsfiddle](http://jsfiddle.net/mk9ws2qo/).
 
 ## Принцип работы
 
@@ -19,32 +19,44 @@ npm install rista --save
 ### Пример
 
 ```js
-<div rt-is="helloWorld">Hello, World!</div>
+<div rt-is="hello-world">Hello, World!</div>
 
 <script type="text/ecmascript-7">
-    
-rista.component('helloWorld', {
+
+rista.component('hello-world', {
     init() {
-        // Сработает при появлении элемента с `rt-is="helloWorld"` в документе.
+        // Сработает при появлении элемента с `rt-is="hello-world"` в документе.
         // `this.block` - ссылка на появившийся элемент.
     },
 
     dispose() {
-        // Сработает при удалении элемента с `rt-is="helloWorld"` из документа.
+        // Сработает при удалении элемента с `rt-is="hello-world"` из документа.
     }
 });
 
 </script>
 ```
 
-Если компонент должен задавать собственное содержимое, можно определить метод `render`, который должен вернуть html-строку. Содержимое элемента будет заменено на результат его вызова. Далее `rista`, используя возможности [cellx](https://github.com/Riim/cellx)-а, начинает  отслеживать изменения всех используемых в методе `render` наблюдаемых свойств и при их изменении перерендеривает содержимое применяя изменения с помощью [morphdom](https://github.com/patrick-steele-idem/morphdom)-а.
+Вместо атрибута `rt-is` можно использовать имя тега:
+
+```js
+<hello-world>Hello, World!</hello-world>
+
+<script type="text/ecmascript-7">
+
+rista.component('hello-world', {/* ... */});
+
+</script>
+```
+
+Если компонент должен задавать собственное содержимое, можно определить метод `render`, который должен вернуть html-строку. Содержимое элемента будет заменено на результат его вызова. Далее `rista`, используя возможности [cellx](https://github.com/Riim/cellx)-а, отслеживает изменения всех используемых в методе `render` наблюдаемых свойств и при их изменении перерендеривает содержимое применяя изменения с помощью [morphdom](https://github.com/patrick-steele-idem/morphdom)-а.
 
 ### Пример
 
 [jsfiddle](http://jsfiddle.net/91y8vcym/)
 
 ```js
-<div rt-is="userAge"></div>
+<user-card></user-card>
 
 <script type="text/ecmascript-7">
 
@@ -66,7 +78,7 @@ setInterval(() => {
     appModel.userAge++;
 }, 1000);
 
-rista.component('userAge', {
+rista.component('user-card', {
     // Собственное свойство компонента, вычисляемое из свойства модели.
     @d.computed userAgeTwoYearsLater: function() {
         return appModel.userAgeYearLater + 1;
@@ -85,93 +97,6 @@ rista.component('userAge', {
 </script>
 ```
 
-## preinit
-
-Иногда нужно что бы компонент не только определял собственное содержимое, но и использовал переданное ему:
-
-```js
-<div rt-is="header">Title</div>
-
-<script type="text/ecmascript-7">
-
-rista.component('header', {
-    render() {
-        return `
-            <img src="/logo.png">
-            <div>${this.block.innerHTML}</div>
-        `;
-    }
-});
-
-</script>
-```
-
-Но использование `this.block.innerHTML` прямо в `render`-е будет приводить к постоянному лишнему обёртыванию при перерендеривании:
-
-[jsfiddle](http://jsfiddle.net/z8xtLqts/)
-
-```js
-<div rt-is="header2">Title</div>
-
-<script type="text/ecmascript-7">
-
-rista.component('header2', {
-    @rista.d.observable counter: 0,
-
-    render() {
-        return `
-            <img src="/logo.png">
-            <div>${this.block.innerHTML}</div>
-            <span>${this.counter}</span>
-        `;
-    },
-
-    init() {
-        setInterval(() => {
-            this.counter++;
-        }, 1000);
-    }
-});
-
-</script>
-```
-
-`preinit` срабатывает один раз при инициализации компонента, но в отличии от `init` срабатывает перед `render`. Это позволяет запомнить исходное содержимое перед `render`-ом и использовать его в дальнейшем:
-
-[jsfiddle](http://jsfiddle.net/v72b10or/)
-
-```js
-<div rt-is="header3">Title</div>
-
-<script type="text/ecmascript-7">
-
-rista.component('header3', {
-    @rista.d.observable counter: 0,
-
-    title: undefined,
-
-    preinit() {
-        this.title = this.block.innerHTML;
-    },
-
-    render() {
-        return `
-            <img src="/logo.png">
-            <div>${this.title}</div>
-            <span>${this.counter}</span>
-        `;
-    },
-
-    init() {
-        setInterval(() => {
-            this.counter++;
-        }, 1000);
-    }
-});
-
-</script>
-```
-
 ## Обработка событий элементов
 
 `rista` позволяет добавлять обработчики событий элементов в декларативном стиле:
@@ -179,7 +104,7 @@ rista.component('header3', {
 [jsfiddle](http://jsfiddle.net/ayx3ae4r/)
 
 ```js
-<div rt-is="counter"></div>
+<counter></counter>
 
 <script type="text/ecmascript-7">
 
@@ -203,37 +128,26 @@ rista.component('counter', {
 
 ## Выбор элементов
 
-В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.elementName')` можно сократить до `this.$('.elementName')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на имя блока с разделителем между именем блока и именем элемента. Например, запись `$(this.block).find('.blockName__elementName')` можно сократить до `this.$('&elementName')`. Имя блока соответствует имени компонента, но, при наличии в нём недопустимых символов, они удаляются с приведением в верхнему регистру последующего допустимого символа:
+В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.elementName')` можно сократить до `this.$('.elementName')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на имя блока с разделителем между именем блока и именем элемента. Например, запись `$(this.block).find('.blockName__elementName')` можно сократить до `this.$('&elementName')`:
 
 ```js
-<div rt-is="company.project.component"></div>
+<example></example>
 
 <script type="text/ecmascript-7">
 
-rista.component('company.project.component', {
+rista.component('example', {
+    render() {
+        return `
+            <input class="example__tfSearch" type="text">
+        `;
+    },
+
     init() {
-        console.log(this.blockName); // 'companyProjectComponent'
+        this.$('&tfSearch').focus();
     }
 });
 
 </script>
-```
-
-Можно вручную задать имя блока при определении компонента:
-
-```js
-rista.component('company.project.component', {
-    blockName: 'someBlockName',
-
-    init() {
-        console.log(this.blockName); // 'someBlockName'
-    }
-});
-```
-
-Можно задать разделитель между именем блока и именем элемента:
-```js
-rista.settings.blockElementDelimiter = '--';
 ```
 
 Если недоступен `jQuery/Zepto/...`, то `$` вернёт [NodeList](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
@@ -329,7 +243,7 @@ rista.component('example', {
 ```js
 let BackendProvider = require('../../../Proxy/BackendProvider');
 
-rista.component('userCard', {
+rista.component('user-card', {
     init() {
         BackendProvider.getUser(this.registerCallback((err, user) => {
             //

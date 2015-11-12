@@ -1,5 +1,9 @@
 let { utils: { logError } } = require('cellx');
-let { KEY_COMPONENT, getSubclass: getComponentSubclass } = require('./Component');
+let {
+	KEY_COMPONENT,
+	getSubclass: getComponentSubclass,
+	getSelector: getComponentSelector
+} = require('./Component');
 
 /**
  * @typesign (el: HTMLElement): Array<HTMLElement>;
@@ -7,11 +11,11 @@ let { KEY_COMPONENT, getSubclass: getComponentSubclass } = require('./Component'
 function findBlocks(el) {
 	let blocks = [];
 
-	if (el.hasAttribute('rt-is')) {
+	if (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase())) {
 		blocks.push(el);
 	}
 
-	blocks.push.apply(blocks, el.querySelectorAll('[rt-is]'));
+	blocks.push.apply(blocks, el.querySelectorAll(getComponentSelector()));
 
 	return blocks;
 }
@@ -26,7 +30,7 @@ function applyComponents(el) {
 		let block = blocks[--i];
 
 		if (!block[KEY_COMPONENT]) {
-			let componentSubclass = getComponentSubclass(block.getAttribute('rt-is'));
+			let componentSubclass = getComponentSubclass(block.getAttribute('rt-is') || block.tagName.toLowerCase());
 
 			if (componentSubclass) {
 				try {

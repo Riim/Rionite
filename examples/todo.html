@@ -6,7 +6,11 @@
 
 	<style>
 
-.todo._done .todo__text {
+todo {
+	display: block;
+}
+
+todo._done .todo__text {
 	text-decoration: line-through;
 }
 
@@ -14,7 +18,7 @@
 </head>
 <body>
 
-<div rt-is="todoApp"></div>
+<todo-app></todo-app>
 
 <script type="text/ecmascript-7">
 
@@ -74,12 +78,12 @@ rista.component('todo', {
 	}
 });
 
-rista.component('todoApp', {
+rista.component('todo-app', {
 	render() {
 		let t = [];
 
 		appModel.todos.forEach((todo, key) => {
-			t.push(`<div rt-is="todo" data-id="${key}"></div>`);
+			t.push(`<todo data-id="${key}"></todo>`);
 		});
 
 		return `

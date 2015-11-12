@@ -1,6 +1,6 @@
 {
   "name": "rista",
-  "version": "0.3.2",
+  "version": "0.3.8",
   "description": "",
   "main": "rista.js",
   "scripts": {
@@ -18,19 +18,18 @@
   },
   "homepage": "https://github.com/Riim/rista#readme",
   "devDependencies": {
-    "babel-core": "^6.1.2",
-    "babel-eslint": "^4.1.4",
-    "babel-loader": "^6.0.1",
-    "babel-preset-es2015": "^6.1.2",
+    "babel-core": "^5.8.33",
+    "babel-eslint": "^4.1.5",
+    "babel-loader": "^5.3.3",
     "gulp": "^3.9.0",
-    "gulp-eslint": "^1.0.0",
+    "gulp-eslint": "^1.1.0",
     "gulp-jscs": "^3.0.2",
     "gulp-load-plugins": "^1.1.0",
     "require-dir": "^0.3.0",
-    "webpack": "^1.12.3"
+    "webpack": "^1.12.4"
   },
   "dependencies": {
-    "cellx": "^1.2.14",
+    "cellx": "^1.2.15",
     "morphdom": "^1.0.3"
   }
 }

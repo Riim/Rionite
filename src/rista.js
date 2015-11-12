@@ -18,15 +18,17 @@ let eventTypes = [
 let inited = false;
 
 /**
- * @typesign (id: string, description: {
+ * @typesign (name: string, description: {
+ *     styles?: string,
+ *     blockName?: string,
  *     preinit?: (),
  *     render?: (): string,
  *     init?: (),
  *     dispose?: ()
  * });
  */
-function component(id, description) {
-	defineComponentSubclass(id, description);
+function component(name, description) {
+	defineComponentSubclass(name, description);
 
 	if (inited) {
 		applyComponents(document.documentElement);
@@ -37,10 +39,11 @@ function onDocumentEvent(evt) {
 	let node = evt.target;
 	let attrName = 'rt-' + evt.type;
 	let targets = [];
+	let component;
 
 	while (true) {
-		if (node.nodeType == 1 && node.hasAttribute(attrName)) {
-			targets.push(node);
+		if (!component && node.nodeType == 1 && node.hasAttribute(attrName)) {
+			targets.unshift(node);
 		}
 
 		node = node.parentNode;
@@ -49,19 +52,22 @@ function onDocumentEvent(evt) {
 			break;
 		}
 
-		let component = node[KEY_COMPONENT];
+		if (node[KEY_COMPONENT]) {
+			component = node[KEY_COMPONENT];
 
-		if (component) {
-			for (let i = 0, l = targets.length; i < l; i++) {
-				let target = targets[i];
+			for (let i = targets.length; i;) {
+				let target = targets[--i];
 				let handler = component[target.getAttribute(attrName)];
 
 				if (handler) {
 					handler.call(component, evt, target);
+					targets.splice(i, 1);
 				}
 			}
 
-			break;
+			if (!targets.length) {
+				break;
+			}
 		}
 	}
 }
