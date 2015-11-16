@@ -1,5 +1,6 @@
 let { EventEmitter, map, list, cellx, d, utils } = require('cellx');
 let settings = require('./settings');
+let morphElement = require('./morphElement');
 let observeDOM = require('./observeDOM');
 let Component = require('./Component');
 let { applyComponents, destroyComponents } = require('./dom');
@@ -108,6 +109,7 @@ let rista = module.exports = {
 	d,
 	utils,
 	settings,
+	morphElement,
 	Component,
 	component
 };

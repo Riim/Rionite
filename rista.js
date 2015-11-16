@@ -66,8 +66,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var utils = _require.utils;
 
 	var settings = __webpack_require__(2);
-	var observeDOM = __webpack_require__(3);
-	var Component = __webpack_require__(5);
+	var morphElement = __webpack_require__(3);
+	var observeDOM = __webpack_require__(4);
+	var Component = __webpack_require__(6);
 
 	var _require2 = __webpack_require__(10);
 
@@ -171,6 +172,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		d: d,
 		utils: utils,
 		settings: settings,
+		morphElement: morphElement,
 		Component: Component,
 		component: component
 	};
@@ -2592,7 +2594,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	var settings = {
-		blockNameStyle: 'camelCase', // 'pascalCase', 'hyphen'
+		blockNameCase: 'camel', // 'pascal', 'hyphen'
 		blockElementDelimiter: '__'
 	};
 
@@ -2600,6 +2602,352 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
+/***/ function(module, exports) {
+
+	/**
+	 * Original code: https://github.com/patrick-steele-idem/morphdom
+	 */
+
+	'use strict';
+
+	var PREFIX_ELEMENT = '@';
+	var PREFIX_KEY = ':';
+	var PREFIX_TEXT_NODE = ',';
+	var PREFIX_COMMENT_NODE = '#';
+
+	var specialElementHandlers = {
+		INPUT: function INPUT(target, source) {
+			if (target.value != source.value) {
+				target.value = source.value;
+			}
+
+			target.checked = source.checked;
+		},
+
+		TEXTAREA: function TEXTAREA(target, source) {
+			var value = source.value;
+
+			if (target.value != value) {
+				target.value = value;
+			}
+
+			if (target.firstChild) {
+				target.firstChild.nodeValue = value;
+			}
+		},
+
+		OPTION: function OPTION(target, source) {
+			target.selected = source.selected;
+		}
+	};
+
+	function defaultGetElementKey(el) {
+		return el.getAttribute('key');
+	}
+
+	function morphAttributes(target, source) {
+		var sourceAttributes = source.attributes;
+		var foundAttributes = Object.create(null);
+
+		for (var i = sourceAttributes.length; i;) {
+			var attr = sourceAttributes[--i];
+			var attrName = attr.name;
+			var attrValue = attr.value;
+
+			foundAttributes[attrName] = true;
+
+			if (target.getAttribute(attrName) != attrValue) {
+				target.setAttribute(attrName, attrValue);
+			}
+		}
+
+		var targetAttributes = target.attributes;
+
+		for (var i = targetAttributes.length; i;) {
+			var attr = targetAttributes[--i];
+			var attrName = attr.name;
+
+			if (!foundAttributes[attrName]) {
+				target.removeAttribute(attrName);
+			}
+		}
+	}
+
+	/**
+	 * @typesign (target: HTMLElement, source: HTMLElement, options: {
+	 *     getElementKey?: (el: HTMLElement): string|undefined,
+	 *     contentOnly: boolean = false,
+	 *     onBeforeMorphElement?: (source: HTMLElement, target: HTMLElement): boolean|undefined,
+	 *     onBeforeMorphElementContent?: (source: HTMLElement, target: HTMLElement): boolean|undefined,
+	 *     onBeforeNodeDiscarded?: (node: Node): boolean|undefined,
+	 *     onNodeDiscarded?: (node: Node)
+	 * });
+	 */
+	function morphElement(target, source, options) {
+		if (!options) {
+			options = {};
+		}
+
+		var getElementKey = options.getElementKey || defaultGetElementKey;
+		var contentOnly = options.contentOnly === true;
+		var onBeforeMorphElement = options.onBeforeMorphElement;
+		var onBeforeMorphElementContent = options.onBeforeMorphElementContent;
+		var onBeforeNodeDiscarded = options.onBeforeNodeDiscarded;
+		var onNodeDiscarded = options.onNodeDiscarded;
+
+		var storedElements = {};
+		var unmatchedElements = {};
+
+		function storeContent(el) {
+			var childNodes = el.childNodes;
+
+			for (var _i = 0, _l = childNodes.length; _i < _l; _i++) {
+				var childNode = childNodes[_i];
+
+				if (childNode.nodeType == 1) {
+					var key = getElementKey(childNode);
+
+					if (key) {
+						var stamp = PREFIX_ELEMENT + childNode.tagName + PREFIX_KEY + key;
+						(storedElements[stamp] || (storedElements[stamp] = [])).push(childNode);
+					}
+
+					storeContent(childNode);
+				}
+			}
+		}
+
+		function morphNode(target, source, contentOnly) {
+			if (target.nodeType == 1) {
+				if (!contentOnly) {
+					if (onBeforeMorphElement && onBeforeMorphElement(target, source) === false) {
+						return;
+					}
+
+					morphAttributes(target, source);
+
+					if (onBeforeMorphElementContent && onBeforeMorphElementContent(target, source) === false) {
+						return;
+					}
+				}
+
+				var targetChildNodes = target.childNodes;
+				var storedChildNodes = {};
+
+				for (var _i2 = 0, _l2 = targetChildNodes.length; _i2 < _l2; _i2++) {
+					var childNode = targetChildNodes[_i2];
+					var stamp = undefined;
+
+					switch (childNode.nodeType) {
+						case 1:
+							{
+								var key = getElementKey(childNode);
+
+								if (key) {
+									stamp = PREFIX_ELEMENT + childNode.tagName + PREFIX_KEY + key;
+
+									var els = unmatchedElements[stamp];
+
+									if (els) {
+										var el = els.shift();
+
+										if (!els.length) {
+											delete unmatchedElements[stamp];
+										}
+
+										el.blank.parentNode.replaceChild(childNode, el.blank);
+										morphNode(childNode, el.element, false);
+									} else {
+										(storedElements[stamp] || (storedElements[stamp] = [])).push(childNode);
+									}
+
+									continue;
+								}
+
+								stamp = PREFIX_ELEMENT + childNode.tagName;
+								break;
+							}
+						case 3:
+							{
+								stamp = PREFIX_TEXT_NODE + childNode.nodeValue;
+								break;
+							}
+						case 8:
+							{
+								stamp = PREFIX_COMMENT_NODE + childNode.nodeValue;
+								break;
+							}
+						default:
+							{
+								throw new TypeError('Unsupported node type');
+							}
+					}
+
+					(storedChildNodes[stamp] || (storedChildNodes[stamp] = [])).push(childNode);
+				}
+
+				var sourceChildNodes = source.childNodes;
+
+				for (var _i3 = 0, _l3 = sourceChildNodes.length; _i3 < _l3; _i3++) {
+					var sourceChildNode = sourceChildNodes[_i3];
+					var stamp = undefined;
+					var unique = false;
+
+					switch (sourceChildNode.nodeType) {
+						case 1:
+							{
+								var key = getElementKey(sourceChildNode);
+
+								if (key) {
+									stamp = PREFIX_ELEMENT + sourceChildNode.tagName + PREFIX_KEY + key;
+									unique = true;
+								} else {
+									stamp = PREFIX_ELEMENT + sourceChildNode.tagName;
+								}
+
+								break;
+							}
+						case 3:
+							{
+								stamp = PREFIX_TEXT_NODE + sourceChildNode.nodeValue;
+								break;
+							}
+						case 8:
+							{
+								stamp = PREFIX_COMMENT_NODE + sourceChildNode.nodeValue;
+								break;
+							}
+						default:
+							{
+								throw new TypeError('Unsupported node type');
+							}
+					}
+
+					var storedNodes = unique ? storedElements : storedChildNodes;
+					var nodes = storedNodes[stamp];
+					var beforeElement = targetChildNodes[_i3] || null;
+
+					if (nodes) {
+						var targetChildNode = nodes.shift();
+
+						if (!nodes.length) {
+							delete storedNodes[stamp];
+						}
+
+						if (!beforeElement || targetChildNode != beforeElement) {
+							target.insertBefore(targetChildNode, beforeElement);
+						}
+
+						if (targetChildNode.nodeType == 1) {
+							morphNode(targetChildNode, sourceChildNode, false);
+						}
+					} else {
+						switch (sourceChildNode.nodeType) {
+							case 1:
+								{
+									var el = document.createElement(sourceChildNode.tagName);
+									target.insertBefore(el, beforeElement);
+
+									if (unique) {
+										(unmatchedElements[stamp] || (unmatchedElements[stamp] = [])).push({
+											blank: el,
+											element: sourceChildNode
+										});
+									} else {
+										morphNode(el, sourceChildNode, false);
+									}
+
+									break;
+								}
+							case 3:
+								{
+									target.insertBefore(document.createTextNode(sourceChildNode.nodeValue), beforeElement);
+									break;
+								}
+							case 8:
+								{
+									target.insertBefore(document.createComment(sourceChildNode.nodeValue), beforeElement);
+									break;
+								}
+							default:
+								{
+									throw new TypeError('Unsupported node type');
+								}
+						}
+					}
+				}
+
+				for (var stamp in storedChildNodes) {
+					var childNodes = storedChildNodes[stamp];
+
+					for (var _i4 = 0, _l4 = childNodes.length; _i4 < _l4; _i4++) {
+						var childNode = childNodes[_i4];
+
+						if (!onBeforeNodeDiscarded || onBeforeNodeDiscarded(childNode) !== false) {
+							childNode.parentNode.removeChild(childNode);
+
+							if (childNode.nodeType == 1) {
+								storeContent(childNode);
+							}
+
+							if (onNodeDiscarded) {
+								onNodeDiscarded(childNode);
+							}
+						}
+					}
+				}
+
+				var specialElementHandler = specialElementHandlers[target.tagName];
+
+				if (specialElementHandler) {
+					specialElementHandler(target, source);
+				}
+			} else {
+				target.nodeValue = source.nodeValue;
+			}
+		}
+
+		morphNode(target, source, contentOnly);
+
+		var ch = undefined;
+
+		do {
+			ch = false;
+
+			for (var stamp in unmatchedElements) {
+				ch = true;
+
+				var els = unmatchedElements[stamp];
+				delete unmatchedElements[stamp];
+
+				for (var i = 0, l = els.length; i < l; i++) {
+					var el = els[i];
+					morphNode(el.blank, el.element, false);
+				}
+			}
+		} while (ch);
+
+		for (var stamp in storedElements) {
+			var els = storedElements[stamp];
+
+			for (var _i5 = 0, _l5 = els.length; _i5 < _l5; _i5++) {
+				var el = els[_i5];
+
+				if (!onBeforeNodeDiscarded || onBeforeNodeDiscarded(el) !== false) {
+					el.parentNode.removeChild(el);
+
+					if (onNodeDiscarded) {
+						onNodeDiscarded(el);
+					}
+				}
+			}
+		}
+	}
+
+	module.exports = morphElement;
+
+/***/ },
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2608,7 +2956,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var nextTick = _require.utils.nextTick;
 
-	var Set = __webpack_require__(4);
+	var Set = __webpack_require__(5);
 
 	var removedNodes = new Set();
 	var addedNodes = new Set();
@@ -2690,7 +3038,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = observeDOM;
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2750,7 +3098,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Set;
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2764,16 +3112,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	var mixin = _require$utils.mixin;
 	var createClass = _require$utils.createClass;
 
-	var morphdom = __webpack_require__(6);
 	var settings = __webpack_require__(2);
 	var nextUID = __webpack_require__(7);
 	var hasClass = __webpack_require__(8);
+	var morphElement = __webpack_require__(3);
 	var addScopedStyles = __webpack_require__(9);
 
 	var KEY_COMPONENT = '__rista_component__';
-	if (window.Symbol && typeof Symbol.iterator == 'symbol') {
-		KEY_COMPONENT = Symbol(KEY_COMPONENT);
-	}
+	var KEY_INITIAL_KEY = '__rista_initialKey__';
 
 	/**
 	 * @typesign (name: string);
@@ -2860,13 +3206,13 @@ return /******/ (function(modules) { // webpackBootstrap
 		proto.constructor = constr;
 
 		if (!proto.blockName) {
-			switch (settings.blockNameStyle) {
-				case 'camelCase':
+			switch (settings.blockNameCase) {
+				case 'camel':
 					{
 						proto.blockName = pName[0].toLowerCase() + pName.slice(1);
 						break;
 					}
-				case 'pascalCase':
+				case 'pascal':
 					{
 						proto.blockName = pName;
 						break;
@@ -2880,6 +3226,69 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 
 		return _registerComponentSubclass(hName, constr);
+	}
+
+	/**
+	 * @typesign (block: HTMLElement): string;
+	 */
+	function getBlockKey(block) {
+		var attrs = block.attributes;
+		var key = [];
+
+		for (var i = attrs.length; i;) {
+			var attr = attrs[--i];
+			key.push(attr.name + '=' + attr.value);
+		}
+
+		return JSON.stringify(key.sort());
+	}
+
+	/**
+	 * @typesign (component: rista.Component);
+	 */
+	function morphComponentContent(component) {
+		var el = document.createElement('div');
+		el.innerHTML = component._componentContent();
+
+		morphElement(component.block, el, {
+			contentOnly: true,
+
+			getElementKey: function getElementKey(el) {
+				if (el.hasAttribute('key')) {
+					return el.getAttribute('key');
+				}
+
+				if (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase())) {
+					var key = el[KEY_INITIAL_KEY];
+
+					if (key) {
+						return key;
+					}
+
+					key = el[KEY_INITIAL_KEY] = getBlockKey(el);
+
+					return key;
+				}
+			},
+
+			onBeforeMorphElement: function onBeforeMorphElement(el) {
+				if (el[KEY_COMPONENT]) {
+					return false;
+				}
+			},
+
+			onBeforeMorphElementContent: function onBeforeMorphElementContent(el) {
+				if (!el[KEY_INITIAL_KEY] && (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase()))) {
+					el[KEY_INITIAL_KEY] = getBlockKey(el);
+				}
+			},
+
+			onNodeDiscarded: function onNodeDiscarded(node) {
+				if (node[KEY_COMPONENT]) {
+					node[KEY_COMPONENT].destroy();
+				}
+			}
+		});
 	}
 
 	/**
@@ -2951,7 +3360,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 
 			if (this.render) {
-				block.innerHTML = this._componentContent();
+				morphComponentContent(this);
 				this._componentContent('on', 'change', this._onContentChange);
 			}
 
@@ -2979,65 +3388,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * For override.
 	  */
 		preinit: null,
-
 		/**
 	  * For override.
 	  */
 		render: null,
-
 		/**
 	  * For override.
 	  */
 		init: null,
-
 		/**
 	  * For override.
 	  */
 		dispose: null,
 
 		_onContentChange: function _onContentChange() {
-			var el = document.createElement('div');
-			el.innerHTML = this._componentContent();
-
-			morphdom(this.block, el, {
-				childrenOnly: true,
-
-				getNodeKey: function getNodeKey(node) {
-					if (node.nodeType == 1) {
-						if (node.id) {
-							return node.id;
-						}
-
-						if (node.hasAttribute('key')) {
-							return node.getAttribute('key');
-						}
-
-						if (node.hasAttribute('rt-is') || getComponentSubclass(node.tagName.toLowerCase())) {
-							var attrs = node.attributes;
-							var key = [node.getAttribute('rt-is')];
-
-							for (var i = attrs.length; i;) {
-								var attr = attrs[--i];
-								key.push(attr.name, attr.value);
-							}
-
-							return JSON.stringify(key);
-						}
-					}
-				},
-
-				onBeforeMorphEl: function onBeforeMorphEl(fromEl, toEl) {
-					if (fromEl[KEY_COMPONENT]) {
-						return false;
-					}
-				},
-
-				onNodeDiscarded: function onNodeDiscarded(node) {
-					if (node[KEY_COMPONENT]) {
-						node[KEY_COMPONENT].destroy();
-					}
-				}
-			});
+			morphComponentContent(this);
 		},
 
 		/**
@@ -3374,407 +3739,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Component;
 
 /***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	// Create a range object for efficently rendering strings to elements.
-	var range;
-
-	function toElement(str) {
-	    if (!range) {
-	        range = document.createRange();
-	        range.selectNode(document.body);
-	    }
-
-	    var fragment;
-	    if (range.createContextualFragment) {
-	        fragment = range.createContextualFragment(str);
-	    } else {
-	        fragment = document.createElement('body');
-	        fragment.innerHTML = str;
-	    }
-	    return fragment.childNodes[0];
-	}
-
-	var specialElHandlers = {
-	    /**
-	     * Needed for IE. Apparently IE doesn't think
-	     * that "selected" is an attribute when reading
-	     * over the attributes using selectEl.attributes
-	     */
-	    OPTION: function(fromEl, toEl) {
-	        if ((fromEl.selected = toEl.selected)) {
-	            fromEl.setAttribute('selected', '');
-	        } else {
-	            fromEl.removeAttribute('selected', '');
-	        }
-	    },
-	    /**
-	     * The "value" attribute is special for the <input> element
-	     * since it sets the initial value. Changing the "value"
-	     * attribute without changing the "value" property will have
-	     * no effect since it is only used to the set the initial value.
-	     * Similar for the "checked" attribute.
-	     */
-	    INPUT: function(fromEl, toEl) {
-	        fromEl.checked = toEl.checked;
-
-	        if (fromEl.value != toEl.value) {
-	            fromEl.value = toEl.value;
-	        }
-
-	        if (!toEl.hasAttribute('checked')) {
-	            fromEl.removeAttribute('checked');
-	        }
-
-	        if (!toEl.hasAttribute('value')) {
-	            fromEl.removeAttribute('value');
-	        }
-	    },
-
-	    TEXTAREA: function(fromEl, toEl) {
-	        var newValue = toEl.value;
-	        if (fromEl.value != newValue) {
-	            fromEl.value = newValue;
-	        }
-
-	        if (fromEl.firstChild) {
-	            fromEl.firstChild.nodeValue = newValue;
-	        }
-	    }
-	};
-
-	function noop() {}
-
-	/**
-	 * Loop over all of the attributes on the target node and make sure the
-	 * original DOM node has the same attributes. If an attribute
-	 * found on the original node is not on the new node then remove it from
-	 * the original node
-	 * @param  {HTMLElement} fromNode
-	 * @param  {HTMLElement} toNode
-	 */
-	function morphAttrs(fromNode, toNode) {
-	    var attrs = toNode.attributes;
-	    var i;
-	    var attr;
-	    var attrName;
-	    var attrValue;
-	    var foundAttrs = {};
-
-	    for (i=attrs.length-1; i>=0; i--) {
-	        attr = attrs[i];
-	        if (attr.specified !== false) {
-	            attrName = attr.name;
-	            attrValue = attr.value;
-	            foundAttrs[attrName] = true;
-
-	            if (fromNode.getAttribute(attrName) !== attrValue) {
-	                fromNode.setAttribute(attrName, attrValue);
-	            }
-	        }
-	    }
-
-	    // Delete any extra attributes found on the original DOM element that weren't
-	    // found on the target element.
-	    attrs = fromNode.attributes;
-
-	    for (i=attrs.length-1; i>=0; i--) {
-	        attr = attrs[i];
-	        if (attr.specified !== false) {
-	            attrName = attr.name;
-	            if (!foundAttrs.hasOwnProperty(attrName)) {
-	                fromNode.removeAttribute(attrName);
-	            }
-	        }
-	    }
-	}
-
-	/**
-	 * Copies the children of one DOM element to another DOM element
-	 */
-	function moveChildren(fromEl, toEl) {
-	    var curChild = fromEl.firstChild;
-	    while(curChild) {
-	        var nextChild = curChild.nextSibling;
-	        toEl.appendChild(curChild);
-	        curChild = nextChild;
-	    }
-	    return toEl;
-	}
-
-	function defaultGetNodeKey(node) {
-	    return node.id;
-	}
-
-	function morphdom(fromNode, toNode, options) {
-	    if (!options) {
-	        options = {};
-	    }
-
-	    if (typeof toNode === 'string') {
-	        toNode = toElement(toNode);
-	    }
-
-	    var savedEls = {}; // Used to save off DOM elements with IDs
-	    var unmatchedEls = {};
-	    var getNodeKey = options.getNodeKey || defaultGetNodeKey;
-	    var onNodeDiscarded = options.onNodeDiscarded || noop;
-	    var onBeforeMorphEl = options.onBeforeMorphEl || noop;
-	    var onBeforeMorphElChildren = options.onBeforeMorphElChildren || noop;
-	    var onBeforeNodeDiscarded = options.onBeforeNodeDiscarded || noop;
-	    var childrenOnly = options.childrenOnly === true;
-
-	    function removeNodeHelper(node, nestedInSavedEl) {
-	        var id = getNodeKey(node);
-	        // If the node has an ID then save it off since we will want
-	        // to reuse it in case the target DOM tree has a DOM element
-	        // with the same ID
-	        if (id) {
-	            savedEls[id] = node;
-	        } else if (!nestedInSavedEl) {
-	            // If we are not nested in a saved element then we know that this node has been
-	            // completely discarded and will not exist in the final DOM.
-	            onNodeDiscarded(node);
-	        }
-
-	        if (node.nodeType === 1) {
-	            var curChild = node.firstChild;
-	            while(curChild) {
-	                removeNodeHelper(curChild, nestedInSavedEl || id);
-	                curChild = curChild.nextSibling;
-	            }
-	        }
-	    }
-
-	    function walkDiscardedChildNodes(node) {
-	        if (node.nodeType === 1) {
-	            var curChild = node.firstChild;
-	            while(curChild) {
-
-
-	                if (!getNodeKey(curChild)) {
-	                    // We only want to handle nodes that don't have an ID to avoid double
-	                    // walking the same saved element.
-
-	                    onNodeDiscarded(curChild);
-
-	                    // Walk recursively
-	                    walkDiscardedChildNodes(curChild);
-	                }
-
-	                curChild = curChild.nextSibling;
-	            }
-	        }
-	    }
-
-	    function removeNode(node, parentNode, alreadyVisited) {
-	        if (onBeforeNodeDiscarded(node) === false) {
-	            return;
-	        }
-
-	        parentNode.removeChild(node);
-	        if (alreadyVisited) {
-	            if (!getNodeKey(node)) {
-	                onNodeDiscarded(node);
-	                walkDiscardedChildNodes(node);
-	            }
-	        } else {
-	            removeNodeHelper(node);
-	        }
-	    }
-
-	    function morphEl(fromEl, toEl, alreadyVisited, childrenOnly) {
-	        if (getNodeKey(toEl)) {
-	            // If an element with an ID is being morphed then it is will be in the final
-	            // DOM so clear it out of the saved elements collection
-	            delete savedEls[getNodeKey(toEl)];
-	        }
-
-	        if (!childrenOnly) {
-	            if (onBeforeMorphEl(fromEl, toEl) === false) {
-	                return;
-	            }
-
-	            morphAttrs(fromEl, toEl);
-
-	            if (onBeforeMorphElChildren(fromEl, toEl) === false) {
-	                return;
-	            }
-	        }
-
-	        if (fromEl.tagName != 'TEXTAREA') {
-	            var curToNodeChild = toEl.firstChild;
-	            var curFromNodeChild = fromEl.firstChild;
-	            var curToNodeId;
-
-	            var fromNextSibling;
-	            var toNextSibling;
-	            var savedEl;
-	            var unmatchedEl;
-
-	            outer: while(curToNodeChild) {
-	                toNextSibling = curToNodeChild.nextSibling;
-	                curToNodeId = getNodeKey(curToNodeChild);
-
-	                while(curFromNodeChild) {
-	                    var curFromNodeId = getNodeKey(curFromNodeChild);
-	                    fromNextSibling = curFromNodeChild.nextSibling;
-
-	                    if (!alreadyVisited) {
-	                        if (curFromNodeId && (unmatchedEl = unmatchedEls[curFromNodeId])) {
-	                            unmatchedEl.parentNode.replaceChild(curFromNodeChild, unmatchedEl);
-	                            morphEl(curFromNodeChild, unmatchedEl, alreadyVisited);
-	                            curFromNodeChild = fromNextSibling;
-	                            continue;
-	                        }
-	                    }
-
-	                    var curFromNodeType = curFromNodeChild.nodeType;
-
-	                    if (curFromNodeType === curToNodeChild.nodeType) {
-	                        var isCompatible = false;
-
-	                        if (curFromNodeType === 1) { // Both nodes being compared are Element nodes
-	                            if (curFromNodeChild.tagName === curToNodeChild.tagName) {
-	                                // We have compatible DOM elements
-	                                if (curFromNodeId || curToNodeId) {
-	                                    // If either DOM element has an ID then we handle
-	                                    // those differently since we want to match up
-	                                    // by ID
-	                                    if (curToNodeId === curFromNodeId) {
-	                                        isCompatible = true;
-	                                    }
-	                                } else {
-	                                    isCompatible = true;
-	                                }
-	                            }
-
-	                            if (isCompatible) {
-	                                // We found compatible DOM elements so transform the current "from" node
-	                                // to match the current target DOM node.
-	                                morphEl(curFromNodeChild, curToNodeChild, alreadyVisited);
-	                            }
-	                        } else if (curFromNodeType === 3) { // Both nodes being compared are Text nodes
-	                            isCompatible = true;
-	                            // Simply update nodeValue on the original node to change the text value
-	                            curFromNodeChild.nodeValue = curToNodeChild.nodeValue;
-	                        }
-
-	                        if (isCompatible) {
-	                            curToNodeChild = toNextSibling;
-	                            curFromNodeChild = fromNextSibling;
-	                            continue outer;
-	                        }
-	                    }
-
-	                    // No compatible match so remove the old node from the DOM and continue trying
-	                    // to find a match in the original DOM
-	                    removeNode(curFromNodeChild, fromEl, alreadyVisited);
-	                    curFromNodeChild = fromNextSibling;
-	                }
-
-	                if (curToNodeId) {
-	                    if ((savedEl = savedEls[curToNodeId])) {
-	                        morphEl(savedEl, curToNodeChild, true);
-	                        curToNodeChild = savedEl; // We want to append the saved element instead
-	                    } else {
-	                        // The current DOM element in the target tree has an ID
-	                        // but we did not find a match in any of the corresponding
-	                        // siblings. We just put the target element in the old DOM tree
-	                        // but if we later find an element in the old DOM tree that has
-	                        // a matching ID then we will replace the target element
-	                        // with the corresponding old element and morph the old element
-	                        unmatchedEls[curToNodeId] = curToNodeChild;
-	                    }
-	                }
-
-	                // If we got this far then we did not find a candidate match for our "to node"
-	                // and we exhausted all of the children "from" nodes. Therefore, we will just
-	                // append the current "to node" to the end
-	                fromEl.appendChild(curToNodeChild);
-
-	                curToNodeChild = toNextSibling;
-	                curFromNodeChild = fromNextSibling;
-	            }
-
-	            // We have processed all of the "to nodes". If curFromNodeChild is non-null then
-	            // we still have some from nodes left over that need to be removed
-	            while(curFromNodeChild) {
-	                fromNextSibling = curFromNodeChild.nextSibling;
-	                removeNode(curFromNodeChild, fromEl, alreadyVisited);
-	                curFromNodeChild = fromNextSibling;
-	            }
-	        }
-
-	        var specialElHandler = specialElHandlers[fromEl.tagName];
-	        if (specialElHandler) {
-	            specialElHandler(fromEl, toEl);
-	        }
-	    } // END: morphEl(...)
-
-	    var morphedNode = fromNode;
-	    var morphedNodeType = morphedNode.nodeType;
-	    var toNodeType = toNode.nodeType;
-
-	    if (!childrenOnly) {
-	        // Handle the case where we are given two DOM nodes that are not
-	        // compatible (e.g. <div> --> <span> or <div> --> TEXT)
-	        if (morphedNodeType === 1) {
-	            if (toNodeType === 1) {
-	                if (fromNode.tagName !== toNode.tagName) {
-	                    onNodeDiscarded(fromNode);
-	                    morphedNode = moveChildren(fromNode, document.createElement(toNode.tagName));
-	                }
-	            } else {
-	                // Going from an element node to a text node
-	                morphedNode = toNode;
-	            }
-	        } else if (morphedNodeType === 3) { // Text node
-	            if (toNodeType === 3) {
-	                morphedNode.nodeValue = toNode.nodeValue;
-	                return morphedNode;
-	            } else {
-	                // Text node to something else
-	                morphedNode = toNode;
-	            }
-	        }
-	    }
-
-	    if (morphedNode === toNode) {
-	        // The "to node" was not compatible with the "from node"
-	        // so we had to toss out the "from node" and use the "to node"
-	        onNodeDiscarded(fromNode);
-	    } else {
-	        morphEl(morphedNode, toNode, false, childrenOnly);
-
-	        // Fire the "onNodeDiscarded" event for any saved elements
-	        // that never found a new home in the morphed DOM
-	        for (var savedElId in savedEls) {
-	            if (savedEls.hasOwnProperty(savedElId)) {
-	                var savedEl = savedEls[savedElId];
-	                onNodeDiscarded(savedEl);
-	                walkDiscardedChildNodes(savedEl);
-	            }
-	        }
-	    }
-
-	    if (!childrenOnly && morphedNode !== fromNode && fromNode.parentNode) {
-	        // If we had to swap out the from node with a new node because the old
-	        // node was not compatible with the target node then we need to
-	        // replace the old DOM node in the original DOM tree. This is only
-	        // possible if the original DOM node was part of a DOM tree which
-	        // we know is the case if it has a parent node.
-	        fromNode.parentNode.replaceChild(morphedNode, fromNode);
-	    }
-
-	    return morphedNode;
-	}
-
-	module.exports = morphdom;
-
-
-/***/ },
 /* 7 */
 /***/ function(module, exports) {
 
@@ -3891,7 +3855,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var logError = _require.utils.logError;
 
-	var _require2 = __webpack_require__(5);
+	var _require2 = __webpack_require__(6);
 
 	var KEY_COMPONENT = _require2.KEY_COMPONENT;
 	var getComponentSubclass = _require2.getSubclass;

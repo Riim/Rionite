@@ -1,14 +1,12 @@
 let { EventEmitter, cellx, utils: { logError, mixin, createClass } } = require('cellx');
-let morphdom = require('morphdom');
 let settings = require('./settings');
 let nextUID = require('./nextUID');
 let hasClass = require('./hasClass');
+let morphElement = require('./morphElement');
 let addScopedStyles = require('./addScopedStyles');
 
 let KEY_COMPONENT = '__rista_component__';
-if (window.Symbol && typeof Symbol.iterator == 'symbol') {
-	KEY_COMPONENT = Symbol(KEY_COMPONENT);
-}
+let KEY_INITIAL_KEY = '__rista_initialKey__';
 
 /**
  * @typesign (name: string);
@@ -100,12 +98,12 @@ function defineComponentSubclass(name, description) {
 	proto.constructor = constr;
 
 	if (!proto.blockName) {
-		switch (settings.blockNameStyle) {
-			case 'camelCase': {
+		switch (settings.blockNameCase) {
+			case 'camel': {
 				proto.blockName = pName[0].toLowerCase() + pName.slice(1);
 				break;
 			}
-			case 'pascalCase': {
+			case 'pascal': {
 				proto.blockName = pName;
 				break;
 			}
@@ -117,6 +115,69 @@ function defineComponentSubclass(name, description) {
 	}
 
 	return _registerComponentSubclass(hName, constr);
+}
+
+/**
+ * @typesign (block: HTMLElement): string;
+ */
+function getBlockKey(block) {
+	let attrs = block.attributes;
+	let key = [];
+
+	for (let i = attrs.length; i;) {
+		let attr = attrs[--i];
+		key.push(attr.name + '=' + attr.value);
+	}
+
+	return JSON.stringify(key.sort());
+}
+
+/**
+ * @typesign (component: rista.Component);
+ */
+function morphComponentContent(component) {
+	let el = document.createElement('div');
+	el.innerHTML = component._componentContent();
+
+	morphElement(component.block, el, {
+		contentOnly: true,
+
+		getElementKey(el) {
+			if (el.hasAttribute('key')) {
+				return el.getAttribute('key');
+			}
+
+			if (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase())) {
+				let key = el[KEY_INITIAL_KEY];
+
+				if (key) {
+					return key;
+				}
+
+				key = el[KEY_INITIAL_KEY] = getBlockKey(el);
+
+				return key;
+			}
+		},
+
+		onBeforeMorphElement(el) {
+			if (el[KEY_COMPONENT]) {
+				return false;
+			}
+		},
+
+		onBeforeMorphElementContent(el) {
+			if (!el[KEY_INITIAL_KEY] && (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase()))) {
+				el[KEY_INITIAL_KEY] = getBlockKey(el);
+			}
+		},
+
+		onNodeDiscarded(node) {
+			if (node[KEY_COMPONENT]) {
+				node[KEY_COMPONENT].destroy();
+			}
+		}
+	});
 }
 
 /**
@@ -188,7 +249,7 @@ let Component = createClass({
 		}
 
 		if (this.render) {
-			block.innerHTML = this._componentContent();
+			morphComponentContent(this);
 			this._componentContent('on', 'change', this._onContentChange);
 		}
 
@@ -216,65 +277,21 @@ let Component = createClass({
 	 * For override.
 	 */
 	preinit: null,
-
 	/**
 	 * For override.
 	 */
 	render: null,
-
 	/**
 	 * For override.
 	 */
 	init: null,
-
 	/**
 	 * For override.
 	 */
 	dispose: null,
 
 	_onContentChange() {
-		let el = document.createElement('div');
-		el.innerHTML = this._componentContent();
-
-		morphdom(this.block, el, {
-			childrenOnly: true,
-
-			getNodeKey(node) {
-				if (node.nodeType == 1) {
-					if (node.id) {
-						return node.id;
-					}
-
-					if (node.hasAttribute('key')) {
-						return node.getAttribute('key');
-					}
-
-					if (node.hasAttribute('rt-is') || getComponentSubclass(node.tagName.toLowerCase())) {
-						let attrs = node.attributes;
-						let key = [node.getAttribute('rt-is')];
-
-						for (let i = attrs.length; i;) {
-							let attr = attrs[--i];
-							key.push(attr.name, attr.value);
-						}
-
-						return JSON.stringify(key);
-					}
-				}
-			},
-
-			onBeforeMorphEl(fromEl, toEl) {
-				if (fromEl[KEY_COMPONENT]) {
-					return false;
-				}
-			},
-
-			onNodeDiscarded(node) {
-				if (node[KEY_COMPONENT]) {
-					node[KEY_COMPONENT].destroy();
-				}
-			}
-		});
+		morphComponentContent(this);
 	},
 
 	/**
