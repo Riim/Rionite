@@ -10,7 +10,7 @@ npm install rista --save
 
 ## TodoApp
 
-[jsfiddle](http://jsfiddle.net/mk9ws2qo/).
+[jsfiddle](http://jsfiddle.net/yt18aat7/)
 
 ## Принцип работы
 
@@ -53,7 +53,7 @@ rista.component('hello-world', {/* ... */});
 
 ### Пример
 
-[jsfiddle](http://jsfiddle.net/91y8vcym/)
+[jsfiddle](http://jsfiddle.net/x9n1bqgq/)
 
 ```js
 <user-card></user-card>
@@ -101,7 +101,7 @@ rista.component('user-card', {
 
 `rista` позволяет добавлять обработчики событий элементов в декларативном стиле:
 
-[jsfiddle](http://jsfiddle.net/ayx3ae4r/)
+[jsfiddle](http://jsfiddle.net/wLhj8o7z/)
 
 ```js
 <counter></counter>
@@ -262,7 +262,7 @@ rista.component('user-card', {
 
 #### Пример
 
-[jsfiddle](http://jsfiddle.net/3cymk78L/)
+[jsfiddle](http://jsfiddle.net/hLur9jx3/)
 
 ```js
 <div rt-is="parent"></div>
@@ -307,7 +307,7 @@ rista.component('child', {
 
 #### Пример
 
-[jsfiddle](http://jsfiddle.net/2hsnr0et/)
+[jsfiddle](http://jsfiddle.net/kLrmamq1/)
 
 ```js
 <div rt-is="parent"></div>
@@ -337,3 +337,7 @@ rista.component('child', {
 
 </script>
 ```
+
+## Готовые компоненты
+
+[popup](https://github.com/Riim/rista-popup)
