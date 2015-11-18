@@ -1,6 +1,7 @@
 # rista
 
-Простой фреймворк объединяющий в себе возможности [cellx](https://github.com/Riim/cellx)-а, [morphdom](https://github.com/patrick-steele-idem/morphdom)-а и [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver)-а.
+Простой фреймворк объединяющий в себе возможности [cellx](https://github.com/Riim/cellx)-а, [morphdom](https://github.com/patrick-steele-idem/morphdom)-а и [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver)-а.  
+В целом, по возможностям получается легковесная (minify+gzip ~ 10kB) альтернатива [ReactJS](https://facebook.github.io/react/)-у, более быстрая и не требующая какой-то предварительной обработки кода (jsx).
 
 ## Установка
 
@@ -128,7 +129,7 @@ rista.component('counter', {
 
 ## Выбор элементов
 
-В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.elementName')` можно сократить до `this.$('.elementName')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на имя блока с разделителем между именем блока и именем элемента. Например, запись `$(this.block).find('.blockName__elementName')` можно сократить до `this.$('&elementName')`:
+В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.elementName')` можно сократить до `this.$('.elementName')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на селектор блока. Например, запись `this.$('.blockName__elementName')` можно сократить до `this.$('&__elementName')`:
 
 ```js
 <example></example>
@@ -143,7 +144,7 @@ rista.component('example', {
     },
 
     init() {
-        this.$('&tfSearch').focus();
+        this.$('&__tfSearch').focus();
     }
 });
 
@@ -184,13 +185,9 @@ rista.component('example', {
 Можно передать объект, ключи которого будут типами событий, а значения - обработчиками:
 
 ```js
-rista.component('example', {
-    init() {
-        this.listenTo(document, {
-            mousedown: this._onDocumentMouseDown,
-            mouseup: this._onDocumentMouseUp
-        });
-    }
+this.listenTo(document, {
+    mousedown: this._onDocumentMouseDown,
+    mouseup: this._onDocumentMouseUp
 });
 ```
 

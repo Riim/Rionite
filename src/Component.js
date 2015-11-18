@@ -3,7 +3,6 @@ let settings = require('./settings');
 let nextUID = require('./nextUID');
 let hasClass = require('./hasClass');
 let morphElement = require('./morphElement');
-let addScopedStyles = require('./addScopedStyles');
 
 let KEY_COMPONENT = '__rista_component__';
 let KEY_INITIAL_KEY = '__rista_initialKey__';
@@ -66,7 +65,6 @@ function registerComponentSubclass(name, componentSubclass) {
 
 /**
  * @typesign (name: string, description: {
- *     styles?: string,
  *     blockName?: string,
  *     preinit?: (),
  *     render?: (): string,
@@ -79,13 +77,6 @@ function defineComponentSubclass(name, description) {
 
 	let pName = pascalize(name);
 	let hName = hyphenize(name);
-
-	let styles = description.styles;
-
-	if (styles) {
-		let styleEl = addScopedStyles(Array.isArray(styles) ? styles.join('') : styles, [hName, `[rt-is=${hName}]`]);
-		styleEl.setAttribute('rt-component', hName);
-	}
 
 	let constr = Function(
 		'Component',
@@ -325,7 +316,7 @@ let Component = createClass({
 
 		selector = selector.length == 1 ?
 			selector[0] :
-			selector.join(`.${this.blockName}${settings.blockElementDelimiter}`);
+			selector.join('.' + this.blockName);
 
 		if (typeof $ == 'function' && $.fn) {
 			return $(this.block).find(selector);

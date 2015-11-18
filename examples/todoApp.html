@@ -61,8 +61,8 @@ rista.component('todo', {
 		`;
 	},
 
-	_onCbDoneChange() {
-		let done = this.$('&cbDone')[0].checked;
+	_onCbDoneChange(evt) {
+		let done = evt.target.checked;
 
 		appModel.todos.get(this.block.dataset.id).done = done;
 

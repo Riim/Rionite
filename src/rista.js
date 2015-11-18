@@ -20,7 +20,6 @@ let inited = false;
 
 /**
  * @typesign (name: string, description: {
- *     styles?: string,
  *     blockName?: string,
  *     preinit?: (),
  *     render?: (): string,

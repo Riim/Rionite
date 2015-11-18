@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var observeDOM = __webpack_require__(4);
 	var Component = __webpack_require__(6);
 
-	var _require2 = __webpack_require__(10);
+	var _require2 = __webpack_require__(9);
 
 	var applyComponents = _require2.applyComponents;
 	var destroyComponents = _require2.destroyComponents;
@@ -83,7 +83,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * @typesign (name: string, description: {
-	 *     styles?: string,
 	 *     blockName?: string,
 	 *     preinit?: (),
 	 *     render?: (): string,
@@ -2594,8 +2593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	var settings = {
-		blockNameCase: 'camel', // 'pascal', 'hyphen'
-		blockElementDelimiter: '__'
+		blockNameCase: 'camel' // 'pascal', 'hyphen'
 	};
 
 	module.exports = settings;
@@ -3116,7 +3114,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var nextUID = __webpack_require__(7);
 	var hasClass = __webpack_require__(8);
 	var morphElement = __webpack_require__(3);
-	var addScopedStyles = __webpack_require__(9);
 
 	var KEY_COMPONENT = '__rista_component__';
 	var KEY_INITIAL_KEY = '__rista_initialKey__';
@@ -3177,7 +3174,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * @typesign (name: string, description: {
-	 *     styles?: string,
 	 *     blockName?: string,
 	 *     preinit?: (),
 	 *     render?: (): string,
@@ -3190,13 +3186,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		var pName = pascalize(name);
 		var hName = hyphenize(name);
-
-		var styles = description.styles;
-
-		if (styles) {
-			var styleEl = addScopedStyles(Array.isArray(styles) ? styles.join('') : styles, [hName, '[rt-is=' + hName + ']']);
-			styleEl.setAttribute('rt-component', hName);
-		}
 
 		var constr = Function('Component', 'return function ' + pName + '(block) { Component.call(this, block); };')(Component);
 
@@ -3447,7 +3436,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		})(function (selector) {
 			selector = selector.split('&');
 
-			selector = selector.length == 1 ? selector[0] : selector.join('.' + this.blockName + settings.blockElementDelimiter);
+			selector = selector.length == 1 ? selector[0] : selector.join('.' + this.blockName);
 
 			if (typeof $ == 'function' && $.fn) {
 				return $(this.block).find(selector);
@@ -3784,69 +3773,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 9 */
-/***/ function(module, exports) {
-
-	/**
-	 * @typesign (rules: CSSRuleList, sheet: CSSStyleSheet, prefix: string|Array<string>);
-	 */
-	'use strict';
-
-	function scopeRules(rules, sheet, prefix) {
-		if (!Array.isArray(prefix)) {
-			prefix = [prefix];
-		}
-
-		var _loop = function (_i) {
-			var rule = rules[--_i];
-
-			if (rule.type == 1) {
-				var cssText = rule.style.cssText;
-
-				if (cssText) {
-					var selector = prefix.map(function (prefix) {
-						return prefix + (' ' + rule.selectorText.split(',').join(', ' + prefix + ' ')).replace(/\x20+:root/gi, '');
-					}).join(', ');
-
-					sheet.deleteRule(_i);
-					sheet.insertRule(selector + ' { ' + cssText + ' }', _i);
-				}
-			} else if (rule.cssRules) {
-				scopeRules(rule.cssRules, rule, prefix);
-			}
-			i = _i;
-		};
-
-		for (var i = rules.length; i;) {
-			_loop(i);
-		}
-	}
-
-	/**
-	 * @typesign (styleEl: HTMLStyleElement, prefix: string|Array<string>);
-	 */
-	function scopeStyles(styleEl, prefix) {
-		scopeRules(styleEl.sheet.cssRules, styleEl.sheet, prefix);
-	}
-
-	/**
-	 * @typesign (styles: string, prefix: string|Array<string>): HTMLStyleElement;
-	 */
-	function addScopedStyles(styles, prefix) {
-		var styleEl = document.createElement('style');
-		styleEl.setAttribute('type', 'text/css');
-		styleEl.textContent = styles;
-
-		document.head.appendChild(styleEl);
-
-		scopeStyles(styleEl, prefix);
-
-		return styleEl;
-	}
-
-	module.exports = addScopedStyles;
-
-/***/ },
-/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
