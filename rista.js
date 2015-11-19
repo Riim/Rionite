@@ -198,14 +198,16 @@ return /******/ (function(modules) { // webpackBootstrap
 		 * @typesign (value?, opts?: {
 		 *     get?: (value): *,
 		 *     validate?: (value),
-		 *     computed?: false
+		 *     computed?: false,
+		 *     debugKey?: string
 		 * }): cellx;
 		 *
 		 * @typesign (formula: (): *, opts?: {
 		 *     get?: (value): *,
 		 *     set?: (value),
 		 *     validate?: (value),
-		 *     computed?: true
+		 *     computed?: true,
+		 *     debugKey?: string
 		 * }): cellx;
 		 */
 		function cellx(value, opts) {
@@ -1810,7 +1812,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			 *     validate?: (value),
 			 *     onchange?: (evt: cellx~Event): boolean|undefined,
 			 *     onerror?: (evt: cellx~Event): boolean|undefined,
-			 *     computed?: false
+			 *     computed?: false,
+			 *     debugKey?: string
 			 * }): cellx.Cell;
 			 *
 			 * @typesign new (formula: (): *, opts?: {
@@ -1820,7 +1823,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			 *     validate?: (value),
 			 *     onchange?: (evt: cellx~Event): boolean|undefined,
 			 *     onerror?: (evt: cellx~Event): boolean|undefined,
-			 *     computed?: true
+			 *     computed?: true,
+			 *     debugKey?: string
 			 * }): cellx.Cell;
 			 */
 			var Cell = createClass({
@@ -1913,7 +1917,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @override cellx.EventEmitter#on
+				 * @override
 				 */
 				on: function(type, listener, context) {
 					if (!currentlyRelease) {
@@ -1929,7 +1933,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					return this;
 				},
 				/**
-				 * @override cellx.EventEmitter#off
+				 * @override
 				 */
 				off: function(type, listener, context) {
 					if (!currentlyRelease) {
@@ -1946,13 +1950,13 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @override cellx.EventEmitter#_on
+				 * @override
 				 */
 				_on: function(type, listener, context) {
 					EventEmitter.prototype._on.call(this, type, listener, context || this.owner);
 				},
 				/**
-				 * @override cellx.EventEmitter#_off
+				 * @override
 				 */
 				_off: function(type, listener, context) {
 					EventEmitter.prototype._off.call(this, type, listener, context || this.owner);
@@ -2127,7 +2131,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				 */
 				set: function(value) {
 					if (this.computed && !this._set) {
-						throw new TypeError('Cannot write to read-only cell');
+						throw new TypeError(
+							(this.debugKey ? '[' + this.debugKey + '] ' : '') + 'Cannot write to read-only cell'
+						);
 					}
 		
 					var oldValue = this._value;
@@ -2352,6 +2358,14 @@ return /******/ (function(modules) { // webpackBootstrap
 						type: 'error',
 						error: err
 					});
+				},
+		
+				/**
+				 * @override
+				 * @typesign (err: Error);
+				 */
+				_logError: function(err) {
+					cellx._logError((this.debugKey ? '[' + this.debugKey + '] ' : '') + err.stack);
 				},
 		
 				/**
@@ -3122,25 +3136,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign (name: string);
 	 */
 	function checkName(name) {
-		if (!/^[^0-9a-zA-Z]*[a-zA-Z]/.test(name)) {
+		if (!/^[a-z](?:\-?[0-9a-z])*$/i.test(name)) {
 			throw new TypeError('Component name "' + name + '" is not valid');
 		}
 	}
 
 	/**
-	 * @typesign (str: string): string;
+	 * @typesign (name: string): string;
 	 */
-	function hyphenize(str) {
-		return ('!' + str.replace(/([A-Z])/g, '-$1').toLowerCase() + '!0').replace(/[^0-9a-z]+([0-9a-z])/g, '-$1').slice(1, -2);
+	function hyphenize(name) {
+		return name[0].toLowerCase() + name.slice(1).replace(/([A-Z])/g, '-$1').replace('--', '-').toLowerCase();
 	}
 
 	/**
-	 * @typesign (str: string): string;
+	 * @typesign (name: string): string;
 	 */
-	function pascalize(str) {
-		return ('!' + str + '!0').replace(/[^0-9a-zA-Z]+([0-9a-zA-Z])/g, function (match, chr) {
+	function pascalize(name) {
+		return name[0].toUpperCase() + name.slice(1).replace(/\-([0-9a-z])/gi, function (match, chr) {
 			return chr.toUpperCase();
-		}).slice(0, -1);
+		});
 	}
 
 	var componentSubclasses = Object.create(null);

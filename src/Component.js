@@ -11,27 +11,25 @@ let KEY_INITIAL_KEY = '__rista_initialKey__';
  * @typesign (name: string);
  */
 function checkName(name) {
-	if (!/^[^0-9a-zA-Z]*[a-zA-Z]/.test(name)) {
+	if (!/^[a-z](?:\-?[0-9a-z])*$/i.test(name)) {
 		throw new TypeError(`Component name "${name}" is not valid`);
 	}
 }
 
 /**
- * @typesign (str: string): string;
+ * @typesign (name: string): string;
  */
-function hyphenize(str) {
-	return `!${str.replace(/([A-Z])/g, '-$1').toLowerCase()}!0`
-		.replace(/[^0-9a-z]+([0-9a-z])/g, '-$1')
-		.slice(1, -2);
+function hyphenize(name) {
+	return name[0].toLowerCase() + name.slice(1).replace(/([A-Z])/g, '-$1').replace('--', '-').toLowerCase();
 }
 
 /**
- * @typesign (str: string): string;
+ * @typesign (name: string): string;
  */
-function pascalize(str) {
-	return `!${str}!0`.replace(/[^0-9a-zA-Z]+([0-9a-zA-Z])/g, function(match, chr) {
+function pascalize(name) {
+	return name[0].toUpperCase() + name.slice(1).replace(/\-([0-9a-z])/gi, function(match, chr) {
 		return chr.toUpperCase();
-	}).slice(0, -1);
+	});
 }
 
 let componentSubclasses = Object.create(null);

@@ -20,6 +20,7 @@ todo._done .todo__text {
 
 <todo-app></todo-app>
 
+<script src="../rista.js"></script>
 <script type="text/ecmascript-7">
 
 let d = rista.d;
@@ -95,7 +96,7 @@ rista.component('todo-app', {
 	},
 
 	_onBtnAddClick() {
-		let value = this.$('&tfNewTodo')[0].value;
+		let value = this.$('&__tfNewTodo')[0].value;
 
 		appModel.todos.set(nextId(), {
 			text: value,
@@ -106,7 +107,6 @@ rista.component('todo-app', {
 
 </script>
 
-<script src="../rista.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.32/browser.min.js"></script>
 <script>
 

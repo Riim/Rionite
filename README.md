@@ -11,7 +11,7 @@ npm install rista --save
 
 ## TodoApp
 
-[jsfiddle](http://jsfiddle.net/yt18aat7/)
+[jsfiddle](http://jsfiddle.net/dsstbgf6/)
 
 ## Принцип работы
 
@@ -54,7 +54,7 @@ rista.component('hello-world', {/* ... */});
 
 ### Пример
 
-[jsfiddle](http://jsfiddle.net/x9n1bqgq/)
+[jsfiddle](http://jsfiddle.net/ceavLvk3/)
 
 ```js
 <user-card></user-card>
@@ -102,7 +102,7 @@ rista.component('user-card', {
 
 `rista` позволяет добавлять обработчики событий элементов в декларативном стиле:
 
-[jsfiddle](http://jsfiddle.net/wLhj8o7z/)
+[jsfiddle](http://jsfiddle.net/wa91gjy0/)
 
 ```js
 <counter></counter>
@@ -259,7 +259,7 @@ rista.component('user-card', {
 
 #### Пример
 
-[jsfiddle](http://jsfiddle.net/hLur9jx3/)
+[jsfiddle](http://jsfiddle.net/tvx18x10/)
 
 ```js
 <div rt-is="parent"></div>
@@ -304,7 +304,7 @@ rista.component('child', {
 
 #### Пример
 
-[jsfiddle](http://jsfiddle.net/kLrmamq1/)
+[jsfiddle](http://jsfiddle.net/kb3yuhsx/)
 
 ```js
 <div rt-is="parent"></div>
@@ -337,4 +337,5 @@ rista.component('child', {
 
 ## Готовые компоненты
 
-[popup](https://github.com/Riim/rista-popup)
+- [router](https://github.com/Riim/rista-router)
+- [popup](https://github.com/Riim/rista-popup)
