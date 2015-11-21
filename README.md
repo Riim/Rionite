@@ -1,4 +1,4 @@
-# rista
+# Rista
 
 Простой фреймворк объединяющий в себе возможности [cellx](https://github.com/Riim/cellx)-а, [morphdom](https://github.com/patrick-steele-idem/morphdom)-а и [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver)-а.  
 В целом, по возможностям получается легковесная (minify+gzip ~ 10kB) альтернатива [ReactJS](https://facebook.github.io/react/)-у, более быстрая и не требующая какой-то предварительной обработки кода (jsx).
@@ -11,11 +11,11 @@ npm install rista --save
 
 ## TodoApp
 
-[jsfiddle](http://jsfiddle.net/dsstbgf6/)
+[jsfiddle](http://jsfiddle.net/t85erdug/)
 
 ## Принцип работы
 
-Используя [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `rista` отслеживает появляющиеся в документе элементы с атрибутом `rt-is` и применяет к ним компоненты с заданными в значении атрибута именами.
+Используя [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `Rista` отслеживает появляющиеся в документе элементы с атрибутом `rt-is` и применяет к ним компоненты с заданными в значении атрибута именами.
 
 ### Пример
 
@@ -50,7 +50,7 @@ rista.component('hello-world', {/* ... */});
 </script>
 ```
 
-Если компонент должен задавать собственное содержимое, можно определить метод `render`, который должен вернуть html-строку. Содержимое элемента будет заменено на результат его вызова. Далее `rista`, используя возможности [cellx](https://github.com/Riim/cellx)-а, отслеживает изменения всех используемых в методе `render` наблюдаемых свойств и при их изменении перерендеривает содержимое применяя изменения с помощью [morphdom](https://github.com/patrick-steele-idem/morphdom)-а.
+Если компонент должен задавать собственное содержимое, можно определить метод `render`, который должен вернуть html-строку. Содержимое элемента будет заменено на результат его вызова. Далее `Rista`, используя возможности [cellx](https://github.com/Riim/cellx)-а, отслеживает изменения всех используемых в методе `render` наблюдаемых свойств и при их изменении перерендеривает содержимое применяя изменения с помощью [morphdom](https://github.com/patrick-steele-idem/morphdom)-а.
 
 ### Пример
 
@@ -100,7 +100,7 @@ rista.component('user-card', {
 
 ## Обработка событий элементов
 
-`rista` позволяет добавлять обработчики событий элементов в декларативном стиле:
+`Rista` позволяет добавлять обработчики событий элементов в декларативном стиле:
 
 [jsfiddle](http://jsfiddle.net/wa91gjy0/)
 
@@ -181,7 +181,7 @@ rista.component('example', {
 });
 ```
 
-Целевым объектом может быть [EventTarget](https://developer.mozilla.org/en/docs/Web/API/EventTarget), `jQuery/Zepto/...`-коллекция или `cellx.EventEmitter` (в `rista` доступен как `rista.EventEmitter`).  
+Целевым объектом может быть [EventTarget](https://developer.mozilla.org/en/docs/Web/API/EventTarget), `jQuery/Zepto/...`-коллекция или `cellx.EventEmitter` (в `Rista` доступен как `rista.EventEmitter`).  
 Можно передать объект, ключи которого будут типами событий, а значения - обработчиками:
 
 ```js

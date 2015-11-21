@@ -35,7 +35,7 @@ let appModel = {
 	@d.observable todos: rista.map({
 		[nextId()]: { text: 'Сходить в магаз', @d.observable done: false },
 		[nextId()]: { text: 'Накормить кота', @d.observable done: false },
-		[nextId()]: { text: 'Убить Билла', @d.observable done: false }
+		[nextId()]: { text: 'Убить Билла', @d.observable done: true }
 	}),
 
 	@d.computed doneTodoCount: function() {
@@ -52,15 +52,25 @@ let appModel = {
 };
 
 rista.component('todo', {
+    preinit() {
+        this.model = appModel.todos.get(this.block.dataset.id);
+    },
+
 	render() {
-		let todo = appModel.todos.get(this.block.dataset.id);
+		let model = this.model;
 
 		return `
-			<input class="todo__cbDone" type="checkbox" rt-change="_onCbDoneChange">
-			<span class="todo__text">${todo.text}</span>
+			<input class="todo__cbDone" type="checkbox" rt-change="_onCbDoneChange" ${model.done ? 'checked' : ''}>
+			<span class="todo__text">${model.text}</span>
 			<button rt-click="_onBtnRemoveClick">remove</button>
 		`;
 	},
+
+    init() {
+        if (this.model.done) {
+            this.block.classList.add('_done');
+        }
+    },
 
 	_onCbDoneChange(evt) {
 		let done = evt.target.checked;

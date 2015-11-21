@@ -4,6 +4,8 @@ let Set = require('./Set');
 let removedNodes = new Set();
 let addedNodes = new Set();
 
+let releasePlanned = false;
+
 let listeners = [];
 
 function registerRemovedNode(node) {
@@ -11,7 +13,11 @@ function registerRemovedNode(node) {
 		addedNodes.delete(node);
 	} else {
 		removedNodes.add(node);
-		nextTick(release);
+
+		if (!releasePlanned) {
+			releasePlanned = true;
+			nextTick(release);
+		}
 	}
 }
 
@@ -20,11 +26,17 @@ function registerAddedNode(node) {
 		removedNodes.delete(node);
 	} else {
 		addedNodes.add(node);
-		nextTick(release);
+
+		if (!releasePlanned) {
+			releasePlanned = true;
+			nextTick(release);
+		}
 	}
 }
 
 function release() {
+	releasePlanned = false;
+
 	if (removedNodes.size || addedNodes.size) {
 		for (let i = 0, l = listeners.length; i < l; i++) {
 			listeners[i](removedNodes, addedNodes);

@@ -2973,6 +2973,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var removedNodes = new Set();
 	var addedNodes = new Set();
 
+	var releasePlanned = false;
+
 	var listeners = [];
 
 	function registerRemovedNode(node) {
@@ -2980,7 +2982,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			addedNodes['delete'](node);
 		} else {
 			removedNodes.add(node);
-			nextTick(release);
+
+			if (!releasePlanned) {
+				releasePlanned = true;
+				nextTick(release);
+			}
 		}
 	}
 
@@ -2989,11 +2995,17 @@ return /******/ (function(modules) { // webpackBootstrap
 			removedNodes['delete'](node);
 		} else {
 			addedNodes.add(node);
-			nextTick(release);
+
+			if (!releasePlanned) {
+				releasePlanned = true;
+				nextTick(release);
+			}
 		}
 	}
 
 	function release() {
+		releasePlanned = false;
+
 		if (removedNodes.size || addedNodes.size) {
 			for (var i = 0, l = listeners.length; i < l; i++) {
 				listeners[i](removedNodes, addedNodes);
