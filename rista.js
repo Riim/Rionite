@@ -2622,7 +2622,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var PREFIX_ELEMENT = '@';
 	var PREFIX_KEY = ':';
 	var PREFIX_TEXT_NODE = ',';
 	var PREFIX_COMMENT_NODE = '#';
@@ -2652,6 +2651,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			target.selected = source.selected;
 		}
 	};
+
+	function noop() {}
 
 	function defaultGetElementKey(el) {
 		return el.getAttribute('key');
@@ -2702,13 +2703,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		var getElementKey = options.getElementKey || defaultGetElementKey;
 		var contentOnly = options.contentOnly === true;
-		var onBeforeMorphElement = options.onBeforeMorphElement;
-		var onBeforeMorphElementContent = options.onBeforeMorphElementContent;
-		var onBeforeNodeDiscarded = options.onBeforeNodeDiscarded;
-		var onNodeDiscarded = options.onNodeDiscarded;
+		var onBeforeMorphElement = options.onBeforeMorphElement || noop;
+		var onBeforeMorphElementContent = options.onBeforeMorphElementContent || noop;
+		var onBeforeNodeDiscarded = options.onBeforeNodeDiscarded || noop;
+		var onNodeDiscarded = options.onNodeDiscarded || noop;
 
-		var storedElements = {};
-		var unmatchedElements = {};
+		var storedElements = Object.create(null);
+		var unmatchedElements = Object.create(null);
 
 		function storeContent(el) {
 			var childNodes = el.childNodes;
@@ -2720,7 +2721,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					var key = getElementKey(childNode);
 
 					if (key) {
-						var stamp = PREFIX_ELEMENT + childNode.tagName + PREFIX_KEY + key;
+						var stamp = childNode.tagName + PREFIX_KEY + key;
 						(storedElements[stamp] || (storedElements[stamp] = [])).push(childNode);
 					}
 
@@ -2732,13 +2733,13 @@ return /******/ (function(modules) { // webpackBootstrap
 		function morphNode(target, source, contentOnly) {
 			if (target.nodeType == 1) {
 				if (!contentOnly) {
-					if (onBeforeMorphElement && onBeforeMorphElement(target, source) === false) {
+					if (onBeforeMorphElement(target, source) === false) {
 						return;
 					}
 
 					morphAttributes(target, source);
 
-					if (onBeforeMorphElementContent && onBeforeMorphElementContent(target, source) === false) {
+					if (onBeforeMorphElementContent(target, source) === false) {
 						return;
 					}
 				}
@@ -2756,7 +2757,7 @@ return /******/ (function(modules) { // webpackBootstrap
 								var key = getElementKey(childNode);
 
 								if (key) {
-									stamp = PREFIX_ELEMENT + childNode.tagName + PREFIX_KEY + key;
+									stamp = childNode.tagName + PREFIX_KEY + key;
 
 									var els = unmatchedElements[stamp];
 
@@ -2776,7 +2777,7 @@ return /******/ (function(modules) { // webpackBootstrap
 									continue;
 								}
 
-								stamp = PREFIX_ELEMENT + childNode.tagName;
+								stamp = childNode.tagName;
 								break;
 							}
 						case 3:
@@ -2811,10 +2812,10 @@ return /******/ (function(modules) { // webpackBootstrap
 								var key = getElementKey(sourceChildNode);
 
 								if (key) {
-									stamp = PREFIX_ELEMENT + sourceChildNode.tagName + PREFIX_KEY + key;
+									stamp = sourceChildNode.tagName + PREFIX_KEY + key;
 									unique = true;
 								} else {
-									stamp = PREFIX_ELEMENT + sourceChildNode.tagName;
+									stamp = sourceChildNode.tagName;
 								}
 
 								break;
@@ -2895,16 +2896,14 @@ return /******/ (function(modules) { // webpackBootstrap
 					for (var _i4 = 0, _l4 = childNodes.length; _i4 < _l4; _i4++) {
 						var childNode = childNodes[_i4];
 
-						if (!onBeforeNodeDiscarded || onBeforeNodeDiscarded(childNode) !== false) {
+						if (onBeforeNodeDiscarded(childNode) !== false) {
 							childNode.parentNode.removeChild(childNode);
 
 							if (childNode.nodeType == 1) {
 								storeContent(childNode);
 							}
 
-							if (onNodeDiscarded) {
-								onNodeDiscarded(childNode);
-							}
+							onNodeDiscarded(childNode);
 						}
 					}
 				}
@@ -2945,12 +2944,9 @@ return /******/ (function(modules) { // webpackBootstrap
 			for (var _i5 = 0, _l5 = els.length; _i5 < _l5; _i5++) {
 				var el = els[_i5];
 
-				if (!onBeforeNodeDiscarded || onBeforeNodeDiscarded(el) !== false) {
+				if (onBeforeNodeDiscarded(el) !== false) {
 					el.parentNode.removeChild(el);
-
-					if (onNodeDiscarded) {
-						onNodeDiscarded(el);
-					}
+					onNodeDiscarded(el);
 				}
 			}
 		}
@@ -3329,21 +3325,10 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		/**
-	  * @type {Array<{ dispose: () }>}
-	  */
-		_disposables: null,
-
-		/**
 	  * For override.
 	  * @type {string}
 	  */
 		blockName: undefined,
-
-		/**
-	  * Корневой элемент компонента.
-	  * @type {HTMLElement}
-	  */
-		block: null,
 
 		/**
 	  * @final
@@ -3354,17 +3339,24 @@ return /******/ (function(modules) { // webpackBootstrap
 			return Array.isArray(content) ? content.join('') : content;
 		}),
 
-		destroyed: false,
-
 		constructor: function constructor(block) {
 			if (block[KEY_COMPONENT]) {
 				throw new TypeError('Element is already used as a block of component');
 			}
 
+			/**
+	   * @type {Array<{ dispose: () }>}
+	   */
 			this._disposables = {};
 
+			/**
+	   * Корневой элемент компонента.
+	   * @type {HTMLElement}
+	   */
 			this.block = block;
 			block[KEY_COMPONENT] = this;
+
+			this.destroyed = false;
 
 			if (!hasClass(block, this.blockName)) {
 				block.className = this.blockName + ' ' + block.className;
@@ -3376,7 +3368,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			if (this.render) {
 				morphComponentContent(this);
-				this._componentContent('on', 'change', this._onContentChange);
+				this._componentContent('on', 'change', this._onComponentContentChange);
 			}
 
 			if (this.init) {
@@ -3416,7 +3408,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  */
 		dispose: null,
 
-		_onContentChange: function _onContentChange() {
+		_onComponentContentChange: function _onComponentContentChange() {
 			morphComponentContent(this);
 		},
 
@@ -3503,7 +3495,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		listenTo: function listenTo(target, type, listener, context) {
-			var _this = this;
+			var _this2 = this;
 
 			var listenings = undefined;
 
@@ -3558,7 +3550,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					listenings[--i].stop();
 				}
 
-				delete _this._disposables[id];
+				delete _this2._disposables[id];
 			};
 
 			var listening = this._disposables[id] = {
@@ -3578,7 +3570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * ): { stop: (), dispose: () };
 	  */
 		_listenTo: function _listenTo(target, type, listener, context) {
-			var _this2 = this;
+			var _this3 = this;
 
 			if (!context) {
 				context = this;
@@ -3599,14 +3591,14 @@ return /******/ (function(modules) { // webpackBootstrap
 			var id = nextUID();
 
 			var stopListening = function stopListening() {
-				if (_this2._disposables[id]) {
+				if (_this3._disposables[id]) {
 					if (target instanceof EventEmitter) {
 						target.off(type, listener, context);
 					} else {
 						target.removeEventListener(type, listener);
 					}
 
-					delete _this2._disposables[id];
+					delete _this3._disposables[id];
 				}
 			};
 
@@ -3632,19 +3624,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return setTimeout;
 		})(function (cb, delay) {
-			var _this3 = this;
+			var _this4 = this;
 
 			var id = nextUID();
 
 			var timeoutId = setTimeout(function () {
-				delete _this3._disposables[id];
-				cb.call(_this3);
+				delete _this4._disposables[id];
+				cb.call(_this4);
 			}, delay);
 
 			var _clearTimeout = function _clearTimeout() {
-				if (_this3._disposables[id]) {
+				if (_this4._disposables[id]) {
 					clearTimeout(timeoutId);
-					delete _this3._disposables[id];
+					delete _this4._disposables[id];
 				}
 			};
 
@@ -3670,18 +3662,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return setInterval;
 		})(function (cb, delay) {
-			var _this4 = this;
+			var _this5 = this;
 
 			var id = nextUID();
 
 			var intervalId = setInterval(function () {
-				cb.call(_this4);
+				cb.call(_this5);
 			}, delay);
 
 			var _clearInterval = function _clearInterval() {
-				if (_this4._disposables[id]) {
+				if (_this5._disposables[id]) {
 					clearInterval(intervalId);
-					delete _this4._disposables[id];
+					delete _this5._disposables[id];
 				}
 			};
 
@@ -3697,20 +3689,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (cb: Function): Function{ cancel: (), dispose: () };
 	  */
 		registerCallback: function registerCallback(cb) {
-			var _this5 = this,
-			    _arguments = arguments;
+			var _this6 = this;
 
 			var id = nextUID();
+			var _this = this;
 
 			var callback = function callback() {
-				if (_this5._disposables[id]) {
-					delete _this5._disposables[id];
-					return cb.apply(_this5, _arguments);
+				if (_this._disposables[id]) {
+					delete _this._disposables[id];
+					return cb.apply(_this, arguments);
 				}
 			};
 
 			var cancelCallback = function cancelCallback() {
-				delete _this5._disposables[id];
+				delete _this6._disposables[id];
 			};
 
 			callback.cancel = cancelCallback;

@@ -2,7 +2,6 @@
  * Original code: https://github.com/patrick-steele-idem/morphdom
  */
 
-let PREFIX_ELEMENT = '@';
 let PREFIX_KEY = ':';
 let PREFIX_TEXT_NODE = ',';
 let PREFIX_COMMENT_NODE = '#';
@@ -32,6 +31,8 @@ let specialElementHandlers = {
 		target.selected = source.selected;
 	}
 };
+
+function noop() {}
 
 function defaultGetElementKey(el) {
 	return el.getAttribute('key');
@@ -82,13 +83,13 @@ function morphElement(target, source, options) {
 
 	let getElementKey = options.getElementKey || defaultGetElementKey;
 	let contentOnly = options.contentOnly === true;
-	let onBeforeMorphElement = options.onBeforeMorphElement;
-	let onBeforeMorphElementContent = options.onBeforeMorphElementContent;
-	let onBeforeNodeDiscarded = options.onBeforeNodeDiscarded;
-	let onNodeDiscarded = options.onNodeDiscarded;
+	let onBeforeMorphElement = options.onBeforeMorphElement || noop;
+	let onBeforeMorphElementContent = options.onBeforeMorphElementContent || noop;
+	let onBeforeNodeDiscarded = options.onBeforeNodeDiscarded || noop;
+	let onNodeDiscarded = options.onNodeDiscarded || noop;
 
-	let storedElements = {};
-	let unmatchedElements = {};
+	let storedElements = Object.create(null);
+	let unmatchedElements = Object.create(null);
 
 	function storeContent(el) {
 		let childNodes = el.childNodes;
@@ -100,7 +101,7 @@ function morphElement(target, source, options) {
 				let key = getElementKey(childNode);
 
 				if (key) {
-					let stamp = PREFIX_ELEMENT + childNode.tagName + PREFIX_KEY + key;
+					let stamp = childNode.tagName + PREFIX_KEY + key;
 					(storedElements[stamp] || (storedElements[stamp] = [])).push(childNode);
 				}
 
@@ -112,13 +113,13 @@ function morphElement(target, source, options) {
 	function morphNode(target, source, contentOnly) {
 		if (target.nodeType == 1) {
 			if (!contentOnly) {
-				if (onBeforeMorphElement && onBeforeMorphElement(target, source) === false) {
+				if (onBeforeMorphElement(target, source) === false) {
 					return;
 				}
 
 				morphAttributes(target, source);
 
-				if (onBeforeMorphElementContent && onBeforeMorphElementContent(target, source) === false) {
+				if (onBeforeMorphElementContent(target, source) === false) {
 					return;
 				}
 			}
@@ -135,7 +136,7 @@ function morphElement(target, source, options) {
 						let key = getElementKey(childNode);
 
 						if (key) {
-							stamp = PREFIX_ELEMENT + childNode.tagName + PREFIX_KEY + key;
+							stamp = childNode.tagName + PREFIX_KEY + key;
 
 							let els = unmatchedElements[stamp];
 
@@ -155,7 +156,7 @@ function morphElement(target, source, options) {
 							continue;
 						}
 
-						stamp = PREFIX_ELEMENT + childNode.tagName;
+						stamp = childNode.tagName;
 						break;
 					}
 					case 3: {
@@ -186,10 +187,10 @@ function morphElement(target, source, options) {
 						let key = getElementKey(sourceChildNode);
 
 						if (key) {
-							stamp = PREFIX_ELEMENT + sourceChildNode.tagName + PREFIX_KEY + key;
+							stamp = sourceChildNode.tagName + PREFIX_KEY + key;
 							unique = true;
 						} else {
-							stamp = PREFIX_ELEMENT + sourceChildNode.tagName;
+							stamp = sourceChildNode.tagName;
 						}
 
 						break;
@@ -263,16 +264,14 @@ function morphElement(target, source, options) {
 				for (let i = 0, l = childNodes.length; i < l; i++) {
 					let childNode = childNodes[i];
 
-					if (!onBeforeNodeDiscarded || onBeforeNodeDiscarded(childNode) !== false) {
+					if (onBeforeNodeDiscarded(childNode) !== false) {
 						childNode.parentNode.removeChild(childNode);
 
 						if (childNode.nodeType == 1) {
 							storeContent(childNode);
 						}
 
-						if (onNodeDiscarded) {
-							onNodeDiscarded(childNode);
-						}
+						onNodeDiscarded(childNode);
 					}
 				}
 			}
@@ -313,12 +312,9 @@ function morphElement(target, source, options) {
 		for (let i = 0, l = els.length; i < l; i++) {
 			let el = els[i];
 
-			if (!onBeforeNodeDiscarded || onBeforeNodeDiscarded(el) !== false) {
+			if (onBeforeNodeDiscarded(el) !== false) {
 				el.parentNode.removeChild(el);
-
-				if (onNodeDiscarded) {
-					onNodeDiscarded(el);
-				}
+				onNodeDiscarded(el);
 			}
 		}
 	}

@@ -12,18 +12,18 @@
 <script type="text/ecmascript-7">
 
 rista.component('counter', {
-    @rista.d.observable counter: 0,
+	@rista.d.observable counter: 0,
 
-    render() {
-        return `
-            <div>${this.counter}</div>
-            <button rt-click="_onBtnClick">Click Me!</button>
-        `;
-    },
+	render() {
+		return `
+			<div>${this.counter}</div>
+			<button rt-click="_onBtnClick">Click Me!</button>
+		`;
+	},
 
-    _onBtnClick() {
-        this.counter++;
-    }
+	_onBtnClick() {
+		this.counter++;
+	}
 });
 
 </script>

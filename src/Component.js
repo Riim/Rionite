@@ -192,21 +192,10 @@ let Component = createClass({
 	},
 
 	/**
-	 * @type {Array<{ dispose: () }>}
-	 */
-	_disposables: null,
-
-	/**
 	 * For override.
 	 * @type {string}
 	 */
 	blockName: undefined,
-
-	/**
-	 * Корневой элемент компонента.
-	 * @type {HTMLElement}
-	 */
-	block: null,
 
 	/**
 	 * @final
@@ -217,17 +206,24 @@ let Component = createClass({
 		return Array.isArray(content) ? content.join('') : content;
 	}),
 
-	destroyed: false,
-
 	constructor(block) {
 		if (block[KEY_COMPONENT]) {
 			throw new TypeError('Element is already used as a block of component');
 		}
 
+		/**
+		 * @type {Array<{ dispose: () }>}
+		 */
 		this._disposables = {};
 
+		/**
+		 * Корневой элемент компонента.
+		 * @type {HTMLElement}
+		 */
 		this.block = block;
 		block[KEY_COMPONENT] = this;
+
+		this.destroyed = false;
 
 		if (!hasClass(block, this.blockName)) {
 			block.className = `${this.blockName} ${block.className}`;
@@ -239,7 +235,7 @@ let Component = createClass({
 
 		if (this.render) {
 			morphComponentContent(this);
-			this._componentContent('on', 'change', this._onContentChange);
+			this._componentContent('on', 'change', this._onComponentContentChange);
 		}
 
 		if (this.init) {
@@ -279,7 +275,7 @@ let Component = createClass({
 	 */
 	dispose: null,
 
-	_onContentChange() {
+	_onComponentContentChange() {
 		morphComponentContent(this);
 	},
 
@@ -522,11 +518,12 @@ let Component = createClass({
 	 */
 	registerCallback(cb) {
 		let id = nextUID();
+		let _this = this;
 
-		let callback = () => {
-			if (this._disposables[id]) {
-				delete this._disposables[id];
-				return cb.apply(this, arguments);
+		let callback = function() {
+			if (_this._disposables[id]) {
+				delete _this._disposables[id];
+				return cb.apply(_this, arguments);
 			}
 		};
 
