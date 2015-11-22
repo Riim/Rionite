@@ -87,6 +87,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     preinit?: (),
 	 *     render?: (): string,
 	 *     init?: (),
+	 *     canComponentMorph?: (): boolean,
 	 *     dispose?: ()
 	 * });
 	 */
@@ -3013,7 +3014,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * @typsign (listener: ());
+	 * @typsign (listener: (removedNodes: Set<Node>, addedNodes: Set<Node>));
 	 */
 	function observeDOM(listener) {
 		listeners.push(listener);
@@ -3200,6 +3201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     preinit?: (),
 	 *     render?: (): string,
 	 *     init?: (),
+	 *     canComponentMorph?: (): boolean,
 	 *     dispose?: ()
 	 * }): Function;
 	 */
@@ -3283,7 +3285,13 @@ return /******/ (function(modules) { // webpackBootstrap
 			},
 
 			onBeforeMorphElement: function onBeforeMorphElement(el) {
-				if (el[KEY_COMPONENT]) {
+				var component = el[KEY_COMPONENT];
+
+				if (component) {
+					if (component.canComponentMorph) {
+						return component.canComponentMorph();
+					}
+
 					return false;
 				}
 			},

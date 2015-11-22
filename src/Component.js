@@ -67,6 +67,7 @@ function registerComponentSubclass(name, componentSubclass) {
  *     preinit?: (),
  *     render?: (): string,
  *     init?: (),
+ *     canComponentMorph?: (): boolean,
  *     dispose?: ()
  * }): Function;
  */
@@ -150,7 +151,13 @@ function morphComponentContent(component) {
 		},
 
 		onBeforeMorphElement(el) {
-			if (el[KEY_COMPONENT]) {
+			let component = el[KEY_COMPONENT];
+
+			if (component) {
+				if (component.canComponentMorph) {
+					return component.canComponentMorph();
+				}
+
 				return false;
 			}
 		},

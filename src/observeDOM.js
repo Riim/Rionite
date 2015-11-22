@@ -48,7 +48,7 @@ function release() {
 }
 
 /**
- * @typsign (listener: ());
+ * @typsign (listener: (removedNodes: Set<Node>, addedNodes: Set<Node>));
  */
 function observeDOM(listener) {
 	listeners.push(listener);

@@ -24,6 +24,7 @@ let inited = false;
  *     preinit?: (),
  *     render?: (): string,
  *     init?: (),
+ *     canComponentMorph?: (): boolean,
  *     dispose?: ()
  * });
  */

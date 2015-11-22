@@ -9,6 +9,10 @@
 npm install rista --save
 ```
 
+## Поддержка браузеров
+
+Все актуальные, IE9+.
+
 ## TodoApp
 
 [jsfiddle](http://jsfiddle.net/t85erdug/)
