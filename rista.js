@@ -1606,37 +1606,37 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (cb: (item, index: uint, arr: Array), context: Object = global);
+				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList), context: Object = global);
 				 */
 				forEach: null,
 		
 				/**
-				 * @typesign (cb: (item, index: uint, arr: Array): *, context: Object = global): Array;
+				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList): *, context: Object = global): Array;
 				 */
 				map: null,
 		
 				/**
-				 * @typesign (cb: (item, index: uint, arr: Array): boolean, context: Object = global): Array;
+				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList): boolean, context: Object = global): Array;
 				 */
 				filter: null,
 		
 				/**
-				 * @typesign (cb: (item, index: uint, arr: Array): boolean, context: Object = global): boolean;
+				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList): boolean, context: Object = global): boolean;
 				 */
 				every: null,
 		
 				/**
-				 * @typesign (cb: (item, index: uint, arr: Array): boolean, context: Object = global): boolean;
+				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList): boolean, context: Object = global): boolean;
 				 */
 				some: null,
 		
 				/**
-				 * @typesign (cb: (accumulator: *, item, index: uint, arr: Array): *, initialValue?): *;
+				 * @typesign (cb: (accumulator: *, item, index: uint, arr: cellx.ObservableList): *, initialValue?): *;
 				 */
 				reduce: null,
 		
 				/**
-				 * @typesign (cb: (accumulator: *, item, index: uint, arr: Array): *, initialValue?): *;
+				 * @typesign (cb: (accumulator: *, item, index: uint, arr: cellx.ObservableList): *, initialValue?): *;
 				 */
 				reduceRight: null,
 		
@@ -1668,7 +1668,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		
 			['forEach', 'map', 'filter', 'every', 'some', 'reduce', 'reduceRight'].forEach(function(name) {
 				ObservableList.prototype[name] = function() {
-					return Array.prototype[name].apply(this._items, arguments);
+					return Array.prototype[name].apply(this, arguments);
 				};
 			});
 		
@@ -2556,7 +2556,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		
 				target[_name] = cellx(value, opts);
 		
-				var descr = {
+				var descriptor = {
 					configurable: descr.configurable,
 					enumerable: descr.enumerable,
 		
@@ -2566,12 +2566,12 @@ return /******/ (function(modules) { // webpackBootstrap
 				};
 		
 				if (opts.set) {
-					descr.set = function(value) {
+					descriptor.set = function(value) {
 						this[_name](value);
 					};
 				}
 		
-				return descr;
+				return descriptor;
 			}
 		
 			cellx.d = {
@@ -3464,7 +3464,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}),
 
 		/**
-	  * @typesign (name: string): rista.Component;
+	  * @typesign (name: string): Array<rista.Component>;
 	  */
 		$$: function $$(name) {
 			var els = this.block.querySelectorAll('[name=' + name + ']');
@@ -3482,7 +3482,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		/**
-	  * @typesign (method: string, ...args?: Array): Array;
+	  * @typesign (method: string, ...args: Array): Array;
 	  */
 		broadcast: function broadcast(method) {
 			var args = Array.prototype.slice.call(arguments, 1);

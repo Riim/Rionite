@@ -320,7 +320,7 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (name: string): rista.Component;
+	 * @typesign (name: string): Array<rista.Component>;
 	 */
 	$$(name) {
 		let els = this.block.querySelectorAll(`[name=${name}]`);
@@ -338,7 +338,7 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (method: string, ...args?: Array): Array;
+	 * @typesign (method: string, ...args: Array): Array;
 	 */
 	broadcast(method) {
 		let args = Array.prototype.slice.call(arguments, 1);
