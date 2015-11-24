@@ -3490,14 +3490,14 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		/**
-	  * @typesign (method: string, ...args: Array): Array;
+	  * @typesign (name: string, method: string, ...args: Array): Array;
 	  */
-		broadcast: function broadcast(method) {
-			var args = Array.prototype.slice.call(arguments, 1);
+		broadcast: function broadcast(name, method) {
+			var args = Array.prototype.slice.call(arguments, 2);
 
-			return this.getDescendants().map(function (descendant) {
-				if (!descendant.destroyed && typeof descendant[method] == 'function') {
-					return descendant[method].apply(descendant, args);
+			return this.$$(name).slice().map(function (component) {
+				if (!component.destroyed && typeof component[method] == 'function') {
+					return component[method].apply(component, args);
 				}
 			});
 		},

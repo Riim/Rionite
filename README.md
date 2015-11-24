@@ -1,31 +1,35 @@
+<p align="right">
+    <a href="https://github.com/Riim/rista/blob/master/README.ru.md">Этот документ на русском</a>
+</p>
+
 # Rista
 
 <p>
     <img src="https://raw.githubusercontent.com/Riim/rista/master/docs/images/logo.png" width="160.5" height="146">
 </p>
 
-Простой фреймворк объединяющий в себе возможности [cellx](https://github.com/Riim/cellx)-а, [morphdom](https://github.com/patrick-steele-idem/morphdom)-а и [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver)-а.  
-В целом, по возможностям получается легковесная (minify+gzip ~ 10kB) альтернатива [ReactJS](https://facebook.github.io/react/)-у, более быстрая и не требующая какой-то предварительной обработки кода (jsx).
+A simple framework combining the functionality of [cellx](https://github.com/Riim/cellx), [morphdom](https://github.com/patrick-steele-idem/morphdom) and [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver).  
+In general, we receive a lightweight (minify+gzip ~ 10kB) alternative to [ReactJS](https://facebook.github.io/react/), which is faster and does not require any code pretreatment (jsx).
 
-## Установка
+## Installation
 
 ```
 npm install rista --save
 ```
 
-## Поддержка браузеров
+## Browser support
 
-Все актуальные, IE9+.
+Rista supports IE9 and above and all modern browsers.
 
 ## TodoApp
 
 [jsfiddle](http://jsfiddle.net/t85erdug/)
 
-## Принцип работы
+## Principle of operation
 
-Используя [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `Rista` отслеживает появляющиеся в документе элементы с атрибутом `rt-is` и применяет к ним компоненты с заданными в значении атрибута именами.
+Using [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `Rista` monitors the elements appearing in the document with `rt-is` attribute and applies to them components with names specified in the attribute value.
 
-### Пример
+### Sample
 
 ```js
 <div rt-is="hello-world">Hello, World!</div>
@@ -34,19 +38,19 @@ npm install rista --save
 
 rista.component('hello-world', {
     init() {
-        // Сработает при появлении элемента с `rt-is="hello-world"` в документе.
-        // `this.block` - ссылка на появившийся элемент.
+        // Triggers when the element with `rt-is="hello-world"` appears in the document.
+        // `this.block` - a link to the element which has appeared.
     },
 
     dispose() {
-        // Сработает при удалении элемента с `rt-is="hello-world"` из документа.
+        // Triggers when deleting the element with `rt-is="hello-world"` from the document.
     }
 });
 
 </script>
 ```
 
-Вместо атрибута `rt-is` можно использовать имя тега:
+Instead of `rt-is` attribute, you can use the tag name:
 
 ```js
 <hello-world>Hello, World!</hello-world>
@@ -58,9 +62,9 @@ rista.component('hello-world', {/* ... */});
 </script>
 ```
 
-Если компонент должен задавать собственное содержимое, можно определить метод `render`, который должен вернуть html-строку. Содержимое элемента будет заменено на результат его вызова. Далее `Rista`, используя возможности [cellx](https://github.com/Riim/cellx)-а, отслеживает изменения всех используемых в методе `render` наблюдаемых свойств и при их изменении перерендеривает содержимое применяя изменения с помощью [morphdom](https://github.com/patrick-steele-idem/morphdom)-а.
+If a component needs to set its own content, you can determine the method `render`, which should return the html-string. The element content will be replaced with the result of its call. Then, `Rista`, using functionality of [cellx](https://github.com/Riim/cellx), tracks changes in all the properties used in the method `render` and when they change, it renders the contents applying changes using [morphdom](https://github.com/patrick-steele-idem/morphdom).
 
-### Пример
+### Sample
 
 [jsfiddle](http://jsfiddle.net/ceavLvk3/)
 
@@ -71,30 +75,30 @@ rista.component('hello-world', {/* ... */});
 
 let d = rista.d;
 
-// модель приложения
+// App model
 let appModel = {
-    // Наблюдаемое свойство. Подробности в описании cellx-а.
+    // Observable property. Details in cellx-а description.
     @d.observable userAge: 0,
 
-    // Вычисляемое свойство.
+    // Computed property.
     @d.computed userAgeYearLater: function() {
         return this.userAge + 1;
     }
 };
 
 setInterval(() => {
-    // каждую секунду юзер будет стареть на год
+    // every second the user will age one year
     appModel.userAge++;
 }, 1000);
 
 rista.component('user-card', {
-    // Собственное свойство компонента, вычисляемое из свойства модели.
+    // Own property of the component is computed from properties of the model.
     @d.computed userAgeTwoYearsLater: function() {
         return appModel.userAgeYearLater + 1;
     },
 
     render() {
-        // выводим всё
+        // write everything
         return `
             <div>${appModel.userAge}</div>
             <div>${appModel.userAgeYearLater}</div>
@@ -106,9 +110,9 @@ rista.component('user-card', {
 </script>
 ```
 
-## Обработка событий элементов
+## Element event processing
 
-`Rista` позволяет добавлять обработчики событий элементов в декларативном стиле:
+`Rista` allows you to add element event handlers in the declarative style:
 
 [jsfiddle](http://jsfiddle.net/wa91gjy0/)
 
@@ -135,9 +139,9 @@ rista.component('counter', {
 </script>
 ```
 
-## Выбор элементов
+## Element selection
 
-В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.elementName')` можно сократить до `this.$('.elementName')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на селектор блока. Например, запись `this.$('.blockName__elementName')` можно сократить до `this.$('&__elementName')`:
+In the component methods there is `$` method, allowing to reduce the record when selecting elements. The record `$(this.block).find('.elementName')` can be reduced to `this.$('.elementName')`. Furthermore, when using BEM methodology in layout, you can use a symbol `&` in the selector, which will be replaced by the block selector. For example, here, the record `this.$('.blockName__elementName')` can be reduced to `this.$('&__elementName')`:
 
 ```js
 <example></example>
@@ -159,14 +163,14 @@ rista.component('example', {
 </script>
 ```
 
-Если недоступен `jQuery/Zepto/...`, то `$` вернёт [NodeList](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
+If `jQuery/Zepto/...` unavailable, `$` will return [NodeList](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
 
-## Контроль памяти
+## Memory control
 
 ### Component#listenTo
 
-Добавляет обработчик собития, который будет автоматически снят при очистке (`dispose`) компонента.  
-Следующие два примера равносильны:
+This adds the event handler that will be automatically removed in cleaning (`dispose`) the component.  
+The following two examples are equivalent:
 
 ```js
 rista.component('example', {
@@ -189,8 +193,8 @@ rista.component('example', {
 });
 ```
 
-Целевым объектом может быть [EventTarget](https://developer.mozilla.org/en/docs/Web/API/EventTarget), `jQuery/Zepto/...`-коллекция или `cellx.EventEmitter` (в `Rista` доступен как `rista.EventEmitter`).  
-Можно передать объект, ключи которого будут типами событий, а значения - обработчиками:
+The target can be [EventTarget](https://developer.mozilla.org/en/docs/Web/API/EventTarget), `jQuery/Zepto/...`-collection or `cellx.EventEmitter` (in `Rista` it is available as `rista.EventEmitter`).  
+You can pass an object whose keys will be types of events, and values - handlers:
 
 ```js
 this.listenTo(document, {
@@ -199,12 +203,12 @@ this.listenTo(document, {
 });
 ```
 
-Возвращает объект с методом `stop`, при вызове которого обработчик будет снят (если один `listenTo` добавил сразу несколько обработчиков, то `stop` снимет их все).
+This returns object with method `stop`, when calling which the handler will be removed (if one `listenTo` added several handlers at once, `stop` will remove all of them).
 
 ### Component#setTimeout
 
-Устанавливает таймер, который будет автоматически снят при очистке (`dispose`) компонента (в случае если он ещё не отработал).  
-Следующие два примера равносильны:
+This sets a timer that will be automatically removed in cleaning (`dispose`) the component (if it has not worked out yet).  
+The following two examples are equivalent:
 
 ```js
 rista.component('example', {
@@ -233,17 +237,17 @@ rista.component('example', {
 });
 ```
 
-Возвращает объект с методом `clear`, при вызове которого таймер будет снят.
+This returns the object with method `clear`, when calling which the timer will be cleaned.
 
 ### Component#setInterval
 
-Аналогично с `Component#setTimeout`.
+Similar to `Component#setTimeout`.
 
 ### Component#registerCallback
 
-Аналогично с `Component#listenTo` и `Component#setTimeout` хотелось бы прерывать запрос при очистке компонента создавшего его. Но есть ли смысл прерывать его с помощью [XMLHTTPRequest#abort](https://developer.mozilla.org/ru/docs/Web/API/XMLHttpRequest#abort())? На самом деле нет. `abort` вовсе не "догоняет" уже отправленный запрос в сети и не остановливает его, он просто отменяет его обработку на клиенте, но полная отмена часто скорее вредна, например, вместо голого `XMLHttpRequest` используется умная обёртка, способная один и тот же запрос, отправленный двумя разными компонентами, отправить лишь один раз, или, при поддержке такой возможности сервером, сгрупировать несколько запросов в один (для этого запрос отправляется не мгновенно, а с небольшой задержкой, позволяющей накопить несколько запросов). Если, в таком случае, отменять запрос `abort`-ом, то очищающийся компонент будет отменять запросы отправленные другими компонентами, которые ещё работают. То есть, по сути, отменять нужно не сам запрос, а только лишь его обработчик - callback. Для этого обработчик пропускается через `Component#registerCallback` который запоминает его в замыкании. Возвращённая `registerCallback`-ом функция запустит исходный callback (и вернёт результат его вызова) только в случае, если компонент не будет очищен до ответа.
+Similarly to `Component#listenTo` and `Component#setTimeout` I would like to interrupt the request when cleaning that has created it. But is there any sense to interrupt it using [XMLHTTPRequest#abort](https://developer.mozilla.org/ru/docs/Web/API/XMLHttpRequest#abort())? Actually, no. `abort` does not "catch up" a request already sent in the network and does not stop it, it just cancels its processing on the client, but the complete cancelling is often more harmful, for example, instead of `XMLHttpRequest`, it is used a smart wrapper, which can send the same request, sent by two different components, only one time, or, if the server supports such a function, simply group multiple requests in a single one (to do this, the request is sent not instantaneously, but with a slight delay, allowing to save several requests). If, in this case, you cancel the request using `abort`, the component being cleaned will cancel the requests sent of other components that are still working. That is, in fact, there is no need to cancel the request itself, but only its handler - callback. To do this, the handler is passed through `Component#registerCallback` which saves it in the closure. The function returned by `registerCallback` will trigger the source callback (and will return the result of its call) only if the component is not be cleared until the response.
 
-#### Пример
+#### Sample
 
 ```js
 let BackendProvider = require('../../../Proxy/BackendProvider');
@@ -257,15 +261,15 @@ rista.component('user-card', {
 });
 ```
 
-## Передача сигналов между компонентами
+## Signaling between components
 
-Сложное взаимодействие между несколькими компонентами обычно делается через модель приложения, но простейшее взаимодействие, видящих друг-друга напрямую компонентов, обычно допустимо и удобнее делать без использования модели.
+The complex interaction between several components is usually done through the application model, but the simple interaction of components seeing each other directly is generally acceptable and more convenient to do without the use of the model.
 
 ### Component#emit
 
-Создаёт всплывающее событие на компоненте, что позволяет отправить сигнал от компонента-потомка к компонентам-предкам.
+This creates a pop-up event on the component that allows you to send the signal from the descendant component to ancestor component. 
 
-#### Пример
+#### Sample
 
 [jsfiddle](http://jsfiddle.net/tvx18x10/)
 
@@ -307,12 +311,12 @@ rista.component('child', {
 
 ### Component#broadcast
 
-Позволяет отправить сигнал от компонента-предка к компонентам-потомкам. Первый аргумент - имя вызываемого метода, остальные - передаваемые в метод аргументы. Если компонент-потомок не содержит нужного метода, он пропускается.  
-Возвращает массив результатов.
+This allows you to send the signal from the ancestor component to descendant component. The first argument is the name of the descendant components (specifies attribute `name`), second is the name of the called method, and the rest are arguments passed to the method. If the descendant component does not contain the desired method, it is skipped.  
+It returns an array of results.
 
-#### Пример
+#### Sample
 
-[jsfiddle](http://jsfiddle.net/kb3yuhsx/)
+[jsfiddle](http://jsfiddle.net/c5091vq2/)
 
 ```js
 <div rt-is="parent"></div>
@@ -322,14 +326,14 @@ rista.component('child', {
 rista.component('parent', {
     render() {
         return `
-            <div rt-is="child"></div>
-            <div rt-is="child"></div>
+            <div name="foo" rt-is="child"></div>
+            <div name="foo" rt-is="child"></div>
         `;
     },
 
     init() {
         this.setInterval(() => {
-            this.broadcast('method', Math.random());
+            this.broadcast('foo', 'method', Math.random());
         }, 1000);
     }
 });
@@ -343,7 +347,7 @@ rista.component('child', {
 </script>
 ```
 
-## Готовые компоненты
+## Ready components
 
 - [router](https://github.com/Riim/rista-router)
 - [popup](https://github.com/Riim/rista-popup)

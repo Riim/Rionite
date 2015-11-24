@@ -345,14 +345,14 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (method: string, ...args: Array): Array;
+	 * @typesign (name: string, method: string, ...args: Array): Array;
 	 */
-	broadcast(method) {
-		let args = Array.prototype.slice.call(arguments, 1);
+	broadcast(name, method) {
+		let args = Array.prototype.slice.call(arguments, 2);
 
-		return this.getDescendants().map(descendant => {
-			if (!descendant.destroyed && typeof descendant[method] == 'function') {
-				return descendant[method].apply(descendant, args);
+		return this.$$(name).slice().map(component => {
+			if (!component.destroyed && typeof component[method] == 'function') {
+				return component[method].apply(component, args);
 			}
 		});
 	},
