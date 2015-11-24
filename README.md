@@ -1,5 +1,9 @@
 # Rista
 
+<p>
+    <img src="https://raw.githubusercontent.com/Riim/rista/master/docs/images/logo.png" width="160.5" height="146">
+</p>
+
 Простой фреймворк объединяющий в себе возможности [cellx](https://github.com/Riim/cellx)-а, [morphdom](https://github.com/patrick-steele-idem/morphdom)-а и [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver)-а.  
 В целом, по возможностям получается легковесная (minify+gzip ~ 10kB) альтернатива [ReactJS](https://facebook.github.io/react/)-у, более быстрая и не требующая какой-то предварительной обработки кода (jsx).
 
