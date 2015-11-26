@@ -3507,7 +3507,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			var listenings = undefined;
 
-			if (Array.isArray(target) || target.addClass && target.append) {
+			if (Array.isArray(target) || target instanceof NodeList || target instanceof HTMLCollection || target.addClass && target.append) {
 				listenings = [];
 
 				for (var i = 0, l = target.length; i < l; i++) {

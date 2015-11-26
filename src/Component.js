@@ -360,7 +360,12 @@ let Component = createClass({
 	listenTo(target, type, listener, context) {
 		let listenings;
 
-		if (Array.isArray(target) || (target.addClass && target.append)) {
+		if (
+			Array.isArray(target) ||
+				target instanceof NodeList ||
+				target instanceof HTMLCollection ||
+				(target.addClass && target.append)
+		) {
 			listenings = [];
 
 			for (let i = 0, l = target.length; i < l; i++) {
