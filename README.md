@@ -351,3 +351,4 @@ rista.component('child', {
 
 - [router](https://github.com/Riim/rista-router)
 - [popup](https://github.com/Riim/rista-popup)
+- [switcher](https://github.com/Riim/rista-switcher)
