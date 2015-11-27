@@ -14,7 +14,7 @@
 rista.component('counter', {
 	@rista.d.observable counter: 0,
 
-	render() {
+	renderInner() {
 		return `
 			<div>${this.counter}</div>
 			<button rt-click="_onBtnClick">Click Me!</button>

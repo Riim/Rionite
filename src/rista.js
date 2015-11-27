@@ -22,7 +22,8 @@ let inited = false;
  * @typesign (name: string, description: {
  *     blockName?: string,
  *     preinit?: (),
- *     render?: (): string,
+ *     render?: (): string|Array<string>,
+ *     renderInner?: (): string|Array<string>,
  *     init?: (),
  *     canComponentMorph?: (): boolean,
  *     dispose?: ()

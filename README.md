@@ -23,7 +23,7 @@ Rista supports IE9 and above and all modern browsers.
 
 ## TodoApp
 
-[jsfiddle](http://jsfiddle.net/t85erdug/)
+[jsfiddle](http://jsfiddle.net/9sudert7/)
 
 ## Principle of operation
 
@@ -62,11 +62,11 @@ rista.component('hello-world', {/* ... */});
 </script>
 ```
 
-If a component needs to set its own content, you can determine the method `render`, which should return the html-string. The element content will be replaced with the result of its call. Then, `Rista`, using functionality of [cellx](https://github.com/Riim/cellx), tracks changes in all the properties used in the method `render` and when they change, it renders the contents applying changes using [morphdom](https://github.com/patrick-steele-idem/morphdom).
+If a component needs to set its own content, you can determine the method `renderInner`, which should return the html-string. The element content will be replaced with the result of its call. Then, `Rista`, using functionality of [cellx](https://github.com/Riim/cellx), tracks changes in all the properties used in the method `renderInner` and when they change, it renders the contents applying changes using [morphdom](https://github.com/patrick-steele-idem/morphdom).
 
 ### Sample
 
-[jsfiddle](http://jsfiddle.net/ceavLvk3/)
+[jsfiddle](http://jsfiddle.net/yoLkuxtw/)
 
 ```js
 <user-card></user-card>
@@ -97,7 +97,7 @@ rista.component('user-card', {
         return appModel.userAgeYearLater + 1;
     },
 
-    render() {
+    renderInner() {
         // write everything
         return `
             <div>${appModel.userAge}</div>
@@ -114,7 +114,7 @@ rista.component('user-card', {
 
 `Rista` allows you to add element event handlers in the declarative style:
 
-[jsfiddle](http://jsfiddle.net/wa91gjy0/)
+[jsfiddle](http://jsfiddle.net/utvffa63/)
 
 ```js
 <counter></counter>
@@ -124,7 +124,7 @@ rista.component('user-card', {
 rista.component('counter', {
     @rista.d.observable counter: 0,
 
-    render() {
+    renderInner() {
         return `
             <div>${this.counter}</div>
             <button rt-click="_onBtnClick">Click Me!</button>
@@ -149,7 +149,7 @@ In the component methods there is `$` method, allowing to reduce the record when
 <script type="text/ecmascript-7">
 
 rista.component('example', {
-    render() {
+    renderInner() {
         return `
             <input class="example__tfSearch" type="text">
         `;
@@ -271,7 +271,7 @@ This creates a pop-up event on the component that allows you to send the signal 
 
 #### Sample
 
-[jsfiddle](http://jsfiddle.net/tvx18x10/)
+[jsfiddle](http://jsfiddle.net/esb8cx6x/)
 
 ```js
 <div rt-is="parent"></div>
@@ -279,7 +279,7 @@ This creates a pop-up event on the component that allows you to send the signal 
 <script type="text/ecmascript-7">
 
 rista.component('parent', {
-    render() {
+    renderInner() {
         return `
             <div rt-is="child" data-id="1"></div>
             <div rt-is="child" data-id="2"></div>
@@ -316,7 +316,7 @@ It returns an array of results.
 
 #### Sample
 
-[jsfiddle](http://jsfiddle.net/c5091vq2/)
+[jsfiddle](http://jsfiddle.net/n7fv5k8s/)
 
 ```js
 <div rt-is="parent"></div>
@@ -324,7 +324,7 @@ It returns an array of results.
 <script type="text/ecmascript-7">
 
 rista.component('parent', {
-    render() {
+    renderInner() {
         return `
             <div name="foo" rt-is="child"></div>
             <div name="foo" rt-is="child"></div>

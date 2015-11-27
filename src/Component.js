@@ -65,7 +65,8 @@ function registerComponentSubclass(name, componentSubclass) {
  * @typesign (name: string, description: {
  *     blockName?: string,
  *     preinit?: (),
- *     render?: (): string,
+ *     render?: (): string|Array<string>,
+ *     renderInner?: (): string|Array<string>,
  *     init?: (),
  *     canComponentMorph?: (): boolean,
  *     dispose?: ()
@@ -123,14 +124,14 @@ function getBlockKey(block) {
 }
 
 /**
- * @typesign (component: rista.Component);
+ * @typesign (component: rista.Component, contentOnly: boolean);
  */
-function morphComponentContent(component) {
+function morphComponentBlock(component, contentOnly) {
 	let el = document.createElement('div');
-	el.innerHTML = component._componentContent();
+	el.innerHTML = contentOnly ? component._blockInnerHTML() : component._blockOuterHTML();
 
-	morphElement(component.block, el, {
-		contentOnly: true,
+	morphElement(component.block, contentOnly ? el : el.firstElementChild, {
+		contentOnly: contentOnly,
 
 		getElementKey(el) {
 			if (el.hasAttribute('key')) {
@@ -151,11 +152,15 @@ function morphComponentContent(component) {
 		},
 
 		onBeforeMorphElement(el) {
-			let component = el[KEY_COMPONENT];
+			let cmp = el[KEY_COMPONENT];
 
-			if (component) {
-				if (component.canComponentMorph) {
-					return component.canComponentMorph();
+			if (cmp) {
+				if (cmp == component) {
+					return true;
+				}
+
+				if (cmp.canComponentMorph) {
+					return cmp.canComponentMorph();
 				}
 
 				return false;
@@ -208,9 +213,18 @@ let Component = createClass({
 	 * @final
 	 * @type {cellx<string>}
 	 */
-	_componentContent: cellx(function() {
-		let content = this.render();
-		return Array.isArray(content) ? content.join('') : content;
+	_blockOuterHTML: cellx(function() {
+		let html = this.render();
+		return Array.isArray(html) ? html.join('') : html;
+	}),
+
+	/**
+	 * @final
+	 * @type {cellx<string>}
+	 */
+	_blockInnerHTML: cellx(function() {
+		let html = this.renderInner();
+		return Array.isArray(html) ? html.join('') : html;
 	}),
 
 	constructor(block) {
@@ -241,8 +255,11 @@ let Component = createClass({
 		}
 
 		if (this.render) {
-			morphComponentContent(this);
-			this._componentContent('on', 'change', this._onComponentContentChange);
+			morphComponentBlock(this, false);
+			this._blockOuterHTML('on', 'change', this._onBlockOuterHTMLChange);
+		} else if (this.renderInner) {
+			morphComponentBlock(this, true);
+			this._blockInnerHTML('on', 'change', this._onBlockInnerHTMLChange);
 		}
 
 		if (this.init) {
@@ -276,14 +293,22 @@ let Component = createClass({
 	/**
 	 * For override.
 	 */
+	renderInner: null,
+	/**
+	 * For override.
+	 */
 	init: null,
 	/**
 	 * For override.
 	 */
 	dispose: null,
 
-	_onComponentContentChange() {
-		morphComponentContent(this);
+	_onBlockOuterHTMLChange() {
+		morphComponentBlock(this, false);
+	},
+
+	_onBlockInnerHTMLChange() {
+		morphComponentBlock(this, true);
 	},
 
 	/**
@@ -559,7 +584,8 @@ let Component = createClass({
 			return;
 		}
 
-		this._componentContent('dispose', 0);
+		this._blockOuterHTML('dispose', 0);
+		this._blockInnerHTML('dispose', 0);
 
 		let disposables = this._disposables;
 

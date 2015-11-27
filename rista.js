@@ -85,7 +85,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign (name: string, description: {
 	 *     blockName?: string,
 	 *     preinit?: (),
-	 *     render?: (): string,
+	 *     render?: (): string|Array<string>,
+	 *     renderInner?: (): string|Array<string>,
 	 *     init?: (),
 	 *     canComponentMorph?: (): boolean,
 	 *     dispose?: ()
@@ -3198,7 +3199,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign (name: string, description: {
 	 *     blockName?: string,
 	 *     preinit?: (),
-	 *     render?: (): string,
+	 *     render?: (): string|Array<string>,
+	 *     renderInner?: (): string|Array<string>,
 	 *     init?: (),
 	 *     canComponentMorph?: (): boolean,
 	 *     dispose?: ()
@@ -3256,14 +3258,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * @typesign (component: rista.Component);
+	 * @typesign (component: rista.Component, contentOnly: boolean);
 	 */
-	function morphComponentContent(component) {
+	function morphComponentBlock(component, contentOnly) {
 		var el = document.createElement('div');
-		el.innerHTML = component._componentContent();
+		el.innerHTML = contentOnly ? component._blockInnerHTML() : component._blockOuterHTML();
 
-		morphElement(component.block, el, {
-			contentOnly: true,
+		morphElement(component.block, contentOnly ? el : el.firstElementChild, {
+			contentOnly: contentOnly,
 
 			getElementKey: function getElementKey(el) {
 				if (el.hasAttribute('key')) {
@@ -3284,11 +3286,15 @@ return /******/ (function(modules) { // webpackBootstrap
 			},
 
 			onBeforeMorphElement: function onBeforeMorphElement(el) {
-				var component = el[KEY_COMPONENT];
+				var cmp = el[KEY_COMPONENT];
 
-				if (component) {
-					if (component.canComponentMorph) {
-						return component.canComponentMorph();
+				if (cmp) {
+					if (cmp == component) {
+						return true;
+					}
+
+					if (cmp.canComponentMorph) {
+						return cmp.canComponentMorph();
 					}
 
 					return false;
@@ -3341,9 +3347,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @final
 	  * @type {cellx<string>}
 	  */
-		_componentContent: cellx(function () {
-			var content = this.render();
-			return Array.isArray(content) ? content.join('') : content;
+		_blockOuterHTML: cellx(function () {
+			var html = this.render();
+			return Array.isArray(html) ? html.join('') : html;
+		}),
+
+		/**
+	  * @final
+	  * @type {cellx<string>}
+	  */
+		_blockInnerHTML: cellx(function () {
+			var html = this.renderInner();
+			return Array.isArray(html) ? html.join('') : html;
 		}),
 
 		constructor: function constructor(block) {
@@ -3374,8 +3389,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 
 			if (this.render) {
-				morphComponentContent(this);
-				this._componentContent('on', 'change', this._onComponentContentChange);
+				morphComponentBlock(this, false);
+				this._blockOuterHTML('on', 'change', this._onBlockOuterHTMLChange);
+			} else if (this.renderInner) {
+				morphComponentBlock(this, true);
+				this._blockInnerHTML('on', 'change', this._onBlockInnerHTMLChange);
 			}
 
 			if (this.init) {
@@ -3409,14 +3427,22 @@ return /******/ (function(modules) { // webpackBootstrap
 		/**
 	  * For override.
 	  */
+		renderInner: null,
+		/**
+	  * For override.
+	  */
 		init: null,
 		/**
 	  * For override.
 	  */
 		dispose: null,
 
-		_onComponentContentChange: function _onComponentContentChange() {
-			morphComponentContent(this);
+		_onBlockOuterHTMLChange: function _onBlockOuterHTMLChange() {
+			morphComponentBlock(this, false);
+		},
+
+		_onBlockInnerHTMLChange: function _onBlockInnerHTMLChange() {
+			morphComponentBlock(this, true);
 		},
 
 		/**
@@ -3728,7 +3754,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				return;
 			}
 
-			this._componentContent('dispose', 0);
+			this._blockOuterHTML('dispose', 0);
+			this._blockInnerHTML('dispose', 0);
 
 			var disposables = this._disposables;
 

@@ -19,7 +19,7 @@ npm install rista --save
 
 ## TodoApp
 
-[jsfiddle](http://jsfiddle.net/t85erdug/)
+[jsfiddle](http://jsfiddle.net/9sudert7/)
 
 ## Принцип работы
 
@@ -58,11 +58,11 @@ rista.component('hello-world', {/* ... */});
 </script>
 ```
 
-Если компонент должен задавать собственное содержимое, можно определить метод `render`, который должен вернуть html-строку. Содержимое элемента будет заменено на результат его вызова. Далее `Rista`, используя возможности [cellx](https://github.com/Riim/cellx)-а, отслеживает изменения всех используемых в методе `render` наблюдаемых свойств и при их изменении перерендеривает содержимое применяя изменения с помощью [morphdom](https://github.com/patrick-steele-idem/morphdom)-а.
+Если компонент должен задавать собственное содержимое, можно определить метод `renderInner`, который должен вернуть html-строку. Содержимое элемента будет заменено на результат его вызова. Далее `Rista`, используя возможности [cellx](https://github.com/Riim/cellx)-а, отслеживает изменения всех используемых в методе `renderInner` наблюдаемых свойств и при их изменении перерендеривает содержимое применяя изменения с помощью [morphdom](https://github.com/patrick-steele-idem/morphdom)-а.
 
 ### Пример
 
-[jsfiddle](http://jsfiddle.net/ceavLvk3/)
+[jsfiddle](http://jsfiddle.net/yoLkuxtw/)
 
 ```js
 <user-card></user-card>
@@ -93,7 +93,7 @@ rista.component('user-card', {
         return appModel.userAgeYearLater + 1;
     },
 
-    render() {
+    renderInner() {
         // выводим всё
         return `
             <div>${appModel.userAge}</div>
@@ -110,7 +110,7 @@ rista.component('user-card', {
 
 `Rista` позволяет добавлять обработчики событий элементов в декларативном стиле:
 
-[jsfiddle](http://jsfiddle.net/wa91gjy0/)
+[jsfiddle](http://jsfiddle.net/utvffa63/)
 
 ```js
 <counter></counter>
@@ -120,7 +120,7 @@ rista.component('user-card', {
 rista.component('counter', {
     @rista.d.observable counter: 0,
 
-    render() {
+    renderInner() {
         return `
             <div>${this.counter}</div>
             <button rt-click="_onBtnClick">Click Me!</button>
@@ -145,7 +145,7 @@ rista.component('counter', {
 <script type="text/ecmascript-7">
 
 rista.component('example', {
-    render() {
+    renderInner() {
         return `
             <input class="example__tfSearch" type="text">
         `;
@@ -267,7 +267,7 @@ rista.component('user-card', {
 
 #### Пример
 
-[jsfiddle](http://jsfiddle.net/tvx18x10/)
+[jsfiddle](http://jsfiddle.net/esb8cx6x/)
 
 ```js
 <div rt-is="parent"></div>
@@ -275,7 +275,7 @@ rista.component('user-card', {
 <script type="text/ecmascript-7">
 
 rista.component('parent', {
-    render() {
+    renderInner() {
         return `
             <div rt-is="child" data-id="1"></div>
             <div rt-is="child" data-id="2"></div>
@@ -312,7 +312,7 @@ rista.component('child', {
 
 #### Пример
 
-[jsfiddle](http://jsfiddle.net/c5091vq2/)
+[jsfiddle](http://jsfiddle.net/n7fv5k8s/)
 
 ```js
 <div rt-is="parent"></div>
@@ -320,7 +320,7 @@ rista.component('child', {
 <script type="text/ecmascript-7">
 
 rista.component('parent', {
-    render() {
+    renderInner() {
         return `
             <div name="foo" rt-is="child"></div>
             <div name="foo" rt-is="child"></div>

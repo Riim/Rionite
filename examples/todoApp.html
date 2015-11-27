@@ -56,7 +56,7 @@ rista.component('todo', {
         this.model = appModel.todos.get(this.block.dataset.id);
     },
 
-	render() {
+	renderInner() {
 		let model = this.model;
 
 		return `
@@ -90,7 +90,7 @@ rista.component('todo', {
 });
 
 rista.component('todo-app', {
-	render() {
+	renderInner() {
 		let t = [];
 
 		appModel.todos.forEach((todo, key) => {
