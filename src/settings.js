@@ -1,5 +1,5 @@
 let settings = {
-	blockNameCase: 'camel' // 'pascal', 'hyphen'
+	blockNameCase: 'camel' // 'camel', 'pascal' or 'hyphen'
 };
 
 module.exports = settings;

@@ -63,14 +63,14 @@
 	<path d="M100 240 l60 20 l-30 10 z" stroke="hsl(14, 59%, 42%)" stroke-width=".5" fill="hsl(14, 59%, 42%)"></path>
 	<path d="M160 260 l60 -20 l-30 30 z" stroke="hsl(14, 59%, 42%)" stroke-width=".5" fill="hsl(14, 59%, 42%)"></path>
 
-	<path d="M40 220 l60 40 l-20 20 l-20 -20 z" stroke="hsl(0, 0%, 92%)" stroke-width=".5" fill="hsl(0, 0%, 92%)"></path>
-	<path d="M220 260 l60 -40 l-20 40 l-20 20 z" stroke="hsl(0, 0%, 92%)" stroke-width=".5" fill="hsl(0, 0%, 92%)"></path>
+	<path d="M40 220 l60 40 l-20 10 l-20 -20 z" stroke="hsl(0, 0%, 92%)" stroke-width=".5" fill="hsl(0, 0%, 92%)"></path>
+	<path d="M220 260 l60 -40 l-20 30 l-20 20 z" stroke="hsl(0, 0%, 92%)" stroke-width=".5" fill="hsl(0, 0%, 92%)"></path>
 
-	<path d="M80 280 l20 -20 l10 30 z" stroke="hsl(0, 0%, 87%)" stroke-width=".5" fill="hsl(0, 0%, 87%)"></path>
-	<path d="M210 290 l10 -30 l20 20 z" stroke="hsl(0, 0%, 87%)" stroke-width=".5" fill="hsl(0, 0%, 87%)"></path>
+	<path d="M80 270 l20 -10 l10 30 z" stroke="hsl(0, 0%, 87%)" stroke-width=".5" fill="hsl(0, 0%, 87%)"></path>
+	<path d="M210 290 l10 -30 l20 10 z" stroke="hsl(0, 0%, 87%)" stroke-width=".5" fill="hsl(0, 0%, 87%)"></path>
 
-	<path d="M100 260 l30 10 l-20 20 z" stroke="hsl(0, 0%, 75%)" stroke-width=".5" fill="hsl(0, 0%, 75%)"></path>
-	<path d="M190 270 l30 -10 l-10 30 z" stroke="hsl(0, 0%, 75%)" stroke-width=".5" fill="hsl(0, 0%, 75%)"></path>
+	<path d="M100 260 l30 10 l-20 20 z" stroke="hsl(0, 0%, 75%)" stroke-width=".5" fill="hsl(0, 0%, 80%)"></path>
+	<path d="M190 270 l30 -10 l-10 30 z" stroke="hsl(0, 0%, 75%)" stroke-width=".5" fill="hsl(0, 0%, 80%)"></path>
 
 	<path d="M120 90 h80 l-40 20 z" stroke="hsl(14, 58%, 44%)" stroke-width=".5" fill="hsl(14, 58%, 44%)"></path>
 	<path d="M120 90 l40 20 l40 -20 l-40 70 z" stroke="hsl(12, 61%, 54%)" stroke-width=".5" fill="hsl(12, 61%, 54%)"></path>

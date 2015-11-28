@@ -22,10 +22,10 @@ let inited = false;
  * @typesign (name: string, description: {
  *     blockName?: string,
  *     preinit?: (),
- *     render?: (): string|Array<string>,
- *     renderInner?: (): string|Array<string>,
+ *     render?: () -> string|Array<string>,
+ *     renderInner?: () -> string|Array<string>,
  *     init?: (),
- *     canComponentMorph?: (): boolean,
+ *     canComponentMorph?: () -> boolean,
  *     dispose?: ()
  * });
  */
@@ -37,8 +37,8 @@ function component(name, description) {
 	}
 }
 
-function onDocumentEvent(evt) {
-	let node = evt.target;
+function onEvent(evt) {
+	let node = evt instanceof Event ? evt.target : evt.target.block;
 	let attrName = 'rt-' + evt.type;
 	let targets = [];
 	let component;
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 	utils.nextTick(() => {
 		eventTypes.forEach(type => {
-			document.addEventListener(type, onDocumentEvent);
+			document.addEventListener(type, onEvent);
 		});
 
 		observeDOM((removedNodes, addedNodes) => {
@@ -100,6 +100,13 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 		inited = true;
 	});
+});
+
+component('html', {
+	_handleEvent: function(evt) {
+		Component.prototype._handleEvent.call(this, evt);
+		onEvent.call(this, evt);
+	}
 });
 
 let rista = module.exports = {

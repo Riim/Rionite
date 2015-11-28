@@ -52,9 +52,9 @@ let appModel = {
 };
 
 rista.component('todo', {
-    preinit() {
-        this.model = appModel.todos.get(this.block.dataset.id);
-    },
+	preinit() {
+		this.model = appModel.todos.get(this.block.dataset.id);
+	},
 
 	renderInner() {
 		let model = this.model;
@@ -66,11 +66,11 @@ rista.component('todo', {
 		`;
 	},
 
-    init() {
-        if (this.model.done) {
-            this.block.classList.add('_done');
-        }
-    },
+	init() {
+		if (this.model.done) {
+			this.block.classList.add('_done');
+		}
+	},
 
 	_onCbDoneChange(evt) {
 		let done = evt.target.checked;

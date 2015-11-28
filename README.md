@@ -29,7 +29,7 @@ Rista supports IE9 and above and all modern browsers.
 
 Using [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `Rista` monitors the elements appearing in the document with `rt-is` attribute and applies to them components with names specified in the attribute value.
 
-### Sample
+### Example
 
 ```js
 <div rt-is="hello-world">Hello, World!</div>
@@ -64,7 +64,7 @@ rista.component('hello-world', {/* ... */});
 
 If a component needs to set its own content, you can determine the method `renderInner`, which should return the html-string. The element content will be replaced with the result of its call. Then, `Rista`, using functionality of [cellx](https://github.com/Riim/cellx), tracks changes in all the properties used in the method `renderInner` and when they change, it renders the contents applying changes using [morphdom](https://github.com/patrick-steele-idem/morphdom).
 
-### Sample
+### Example
 
 [jsfiddle](http://jsfiddle.net/yoLkuxtw/)
 
@@ -137,6 +137,28 @@ rista.component('counter', {
 });
 
 </script>
+```
+
+You can add event handlers to pop up events:
+
+```js
+return `
+    <div rt-change="_onInputChange">
+        <input type="checkbox">
+        <input type="checkbox">
+    </div>
+`;
+```
+
+Including the event components:
+
+```js
+return `
+    <div rt-bar="_onFooBar">
+        <foo rt-baz="_onFooBaz"></foo>
+        <foo></foo>
+    </div>
+`;
 ```
 
 ## Element selection
@@ -247,7 +269,7 @@ Similar to `Component#setTimeout`.
 
 Similarly to `Component#listenTo` and `Component#setTimeout` I would like to interrupt the request when cleaning that has created it. But is there any sense to interrupt it using [XMLHTTPRequest#abort](https://developer.mozilla.org/ru/docs/Web/API/XMLHttpRequest#abort())? Actually, no. `abort` does not "catch up" a request already sent in the network and does not stop it, it just cancels its processing on the client, but the complete cancelling is often more harmful, for example, instead of `XMLHttpRequest`, it is used a smart wrapper, which can send the same request, sent by two different components, only one time, or, if the server supports such a function, simply group multiple requests in a single one (to do this, the request is sent not instantaneously, but with a slight delay, allowing to save several requests). If, in this case, you cancel the request using `abort`, the component being cleaned will cancel the requests sent of other components that are still working. That is, in fact, there is no need to cancel the request itself, but only its handler - callback. To do this, the handler is passed through `Component#registerCallback` which saves it in the closure. The function returned by `registerCallback` will trigger the source callback (and will return the result of its call) only if the component is not be cleared until the response.
 
-#### Sample
+#### Example
 
 ```js
 let BackendProvider = require('../../../Proxy/BackendProvider');
@@ -269,7 +291,7 @@ The complex interaction between several components is usually done through the a
 
 This creates a pop-up event on the component that allows you to send the signal from the descendant component to ancestor component. 
 
-#### Sample
+#### Example
 
 [jsfiddle](http://jsfiddle.net/esb8cx6x/)
 
@@ -314,7 +336,7 @@ rista.component('child', {
 This allows you to send the signal from the ancestor component to descendant component. The first argument is the name of the descendant components (specifies attribute `name`), second is the name of the called method, and the rest are arguments passed to the method. If the descendant component does not contain the desired method, it is skipped.  
 It returns an array of results.
 
-#### Sample
+#### Example
 
 [jsfiddle](http://jsfiddle.net/n7fv5k8s/)
 

@@ -1,7 +1,7 @@
 let uidCounter = 0;
 
 /**
- * @typesign (): string;
+ * @typesign () -> string;
  */
 function nextUID() {
 	return String(++uidCounter);

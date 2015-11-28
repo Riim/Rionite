@@ -85,10 +85,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign (name: string, description: {
 	 *     blockName?: string,
 	 *     preinit?: (),
-	 *     render?: (): string|Array<string>,
-	 *     renderInner?: (): string|Array<string>,
+	 *     render?: () -> string|Array<string>,
+	 *     renderInner?: () -> string|Array<string>,
 	 *     init?: (),
-	 *     canComponentMorph?: (): boolean,
+	 *     canComponentMorph?: () -> boolean,
 	 *     dispose?: ()
 	 * });
 	 */
@@ -100,8 +100,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	}
 
-	function onDocumentEvent(evt) {
-		var node = evt.target;
+	function onEvent(evt) {
+		var node = evt instanceof Event ? evt.target : evt.target.block;
 		var attrName = 'rt-' + evt.type;
 		var targets = [];
 		var component = undefined;
@@ -142,7 +142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		utils.nextTick(function () {
 			eventTypes.forEach(function (type) {
-				document.addEventListener(type, onDocumentEvent);
+				document.addEventListener(type, onEvent);
 			});
 
 			observeDOM(function (removedNodes, addedNodes) {
@@ -163,6 +163,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			inited = true;
 		});
+	});
+
+	component('html', {
+		_handleEvent: function _handleEvent(evt) {
+			Component.prototype._handleEvent.call(this, evt);
+			onEvent.call(this, evt);
+		}
 	});
 
 	var rista = module.exports = {
@@ -199,25 +206,25 @@ return /******/ (function(modules) { // webpackBootstrap
 		/**
 		 * @typesign (value?, opts?: {
 		 *     owner?: Object,
-		 *     cloneValue?: (value): *,
-		 *     get?: (value): *,
+		 *     cloneValue?: (value) -> *,
+		 *     get?: (value) -> *,
 		 *     validate?: (value),
-		 *     onchange?: (evt: cellx~Event): boolean|undefined,
-		 *     onerror?: (evt: cellx~Event): boolean|undefined,
+		 *     onchange?: (evt: cellx~Event) -> boolean|undefined,
+		 *     onerror?: (evt: cellx~Event) -> boolean|undefined,
 		 *     computed?: false,
 		 *     debugKey?: string
-		 * }): cellx;
+		 * }) -> cellx;
 		 *
-		 * @typesign (formula: (): *, opts?: {
+		 * @typesign (formula: () -> *, opts?: {
 		 *     owner?: Object,
-		 *     get?: (value): *,
+		 *     get?: (value) -> *,
 		 *     set?: (value),
 		 *     validate?: (value),
-		 *     onchange?: (evt: cellx~Event): boolean|undefined,
-		 *     onerror?: (evt: cellx~Event): boolean|undefined,
+		 *     onchange?: (evt: cellx~Event) -> boolean|undefined,
+		 *     onerror?: (evt: cellx~Event) -> boolean|undefined,
 		 *     computed?: true,
 		 *     debugKey?: string
-		 * }): cellx;
+		 * }) -> cellx;
 		 */
 		function cellx(value, opts) {
 			if (!opts) {
@@ -287,7 +294,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		cellx._logError = logError;
 
 		/**
-		 * @typesign (target: Object, source: Object): Object;
+		 * @typesign (target: Object, source: Object) -> Object;
 		 */
 		function mixin(target, source) {
 			var names = Object.getOwnPropertyNames(source);
@@ -300,7 +307,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 
 		/**
-		 * @typesign (a, b): boolean;
+		 * @typesign (a, b) -> boolean;
 		 */
 		var is = Object.is || function(a, b) {
 			if (a === 0 && b === 0) {
@@ -310,7 +317,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		};
 
 		/**
-		 * @typesign (value): boolean;
+		 * @typesign (value) -> boolean;
 		 */
 		var isArray = Array.isArray || function(value) {
 			return toString.call(value) == '[object Array]';
@@ -322,7 +329,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		 *     Implements?: Array<Function>,
 		 *     Static?: Object,
 		 *     constructor?: Function
-		 * }): Function;
+		 * }) -> Function;
 		 */
 		function createClass(description) {
 			var parent;
@@ -678,7 +685,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			/**
 			 * @class cellx.EventEmitter
 			 * @extends {Object}
-			 * @typesign new (): cellx.EventEmitter;
+			 * @typesign new () -> cellx.EventEmitter;
 			 */
 			var EventEmitter = createClass({
 				Static: {
@@ -687,7 +694,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		
 				constructor: function() {
 					/**
-					 * @type {Object<Array<{ listener: (evt: cellx~Event): boolean|undefined, context: Object }>>}
+					 * @type {Object<Array<{ listener: (evt: cellx~Event) -> boolean|undefined, context: Object }>>}
 					 */
 					this._events = Object.create(null);
 				},
@@ -695,14 +702,14 @@ return /******/ (function(modules) { // webpackBootstrap
 				/**
 				 * @typesign (
 				 *     type: string,
-				 *     listener: (evt: cellx~Event): boolean|undefined,
+				 *     listener: (evt: cellx~Event) -> boolean|undefined,
 				 *     context?: Object
-				 * ): cellx.EventEmitter;
+				 * ) -> cellx.EventEmitter;
 				 *
 				 * @typesign (
-				 *     listeners: Object<(evt: cellx~Event): boolean|undefined>,
+				 *     listeners: Object<(evt: cellx~Event) -> boolean|undefined>,
 				 *     context?: Object
-				 * ): cellx.EventEmitter;
+				 * ) -> cellx.EventEmitter;
 				 */
 				on: function(type, listener, context) {
 					if (typeof type == 'object') {
@@ -722,16 +729,16 @@ return /******/ (function(modules) { // webpackBootstrap
 				/**
 				 * @typesign (
 				 *     type: string,
-				 *     listener: (evt: cellx~Event): boolean|undefined,
+				 *     listener: (evt: cellx~Event) -> boolean|undefined,
 				 *     context?: Object
-				 * ): cellx.EventEmitter;
+				 * ) -> cellx.EventEmitter;
 				 *
 				 * @typesign (
-				 *     listeners: Object<(evt: cellx~Event): boolean|undefined>,
+				 *     listeners: Object<(evt: cellx~Event) -> boolean|undefined>,
 				 *     context?: Object
-				 * ): cellx.EventEmitter;
+				 * ) -> cellx.EventEmitter;
 				 *
-				 * @typesign (): cellx.EventEmitter;
+				 * @typesign () -> cellx.EventEmitter;
 				 */
 				off: function(type, listener, context) {
 					if (type) {
@@ -756,7 +763,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				/**
 				 * @typesign (
 				 *     type: string,
-				 *     listener: (evt: cellx~Event): boolean|undefined,
+				 *     listener: (evt: cellx~Event) -> boolean|undefined,
 				 *     context?: Object
 				 * );
 				 */
@@ -781,7 +788,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				/**
 				 * @typesign (
 				 *     type: string,
-				 *     listener: (evt: cellx~Event): boolean|undefined,
+				 *     listener: (evt: cellx~Event) -> boolean|undefined,
 				 *     context?: Object
 				 * );
 				 */
@@ -819,9 +826,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				/**
 				 * @typesign (
 				 *     type: string,
-				 *     listener: (evt: cellx~Event): boolean|undefined,
+				 *     listener: (evt: cellx~Event) -> boolean|undefined,
 				 *     context?: Object
-				 * ): cellx.EventEmitter;
+				 * ) -> cellx.EventEmitter;
 				 */
 				once: function(type, listener, context) {
 					function wrapper() {
@@ -836,8 +843,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (evt: cellx~Event): cellx~Event;
-				 * @typesign (type: string): cellx~Event;
+				 * @typesign (evt: cellx~Event) -> cellx~Event;
+				 * @typesign (type: string) -> cellx~Event;
 				 */
 				emit: function(evt) {
 					if (typeof evt == 'string') {
@@ -880,7 +887,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				 * };
 				 *
 				 * View.prototype._handleEvent = function(evt) {
-				 *     // call super._handleEvent
 				 *     EventEmitter.prototype._handleEvent.call(this, evt);
 				 *
 				 *     var parent = this.getParent();
@@ -1004,8 +1010,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			 * @implements {ObservableCollection}
 			 *
 			 * @typesign new (entries?: Object|Array<{ 0, 1 }>|cellx.ObservableMap, opts?: {
-			 *     adoptsItemChanges: boolean = true
-			 * }): cellx.ObservableMap;
+			 *     adoptsItemChanges?: boolean
+			 * }) -> cellx.ObservableMap;
 			 */
 			var ObservableMap = createClass({
 				Extends: EventEmitter,
@@ -1051,28 +1057,28 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (key): boolean;
+				 * @typesign (key) -> boolean;
 				 */
 				has: function(key) {
 					return this._entries.has(key);
 				},
 		
 				/**
-				 * @typesign (value): boolean;
+				 * @typesign (value) -> boolean;
 				 */
 				contains: function(value) {
 					return this._valueCounts.has(value);
 				},
 		
 				/**
-				 * @typesign (key): *;
+				 * @typesign (key) -> *;
 				 */
 				get: function(key) {
 					return this._entries.get(key);
 				},
 		
 				/**
-				 * @typesign (key, value): cellx.ObservableMap;
+				 * @typesign (key, value) -> cellx.ObservableMap;
 				 */
 				set: function(key, value) {
 					var entries = this._entries;
@@ -1108,7 +1114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (key): boolean;
+				 * @typesign (key) -> boolean;
 				 */
 				delete: function(key) {
 					var entries = this._entries;
@@ -1136,7 +1142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (): cellx.ObservableMap;
+				 * @typesign () -> cellx.ObservableMap;
 				 */
 				clear: function() {
 					if (!this.size) {
@@ -1169,28 +1175,28 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (): { next: (): { value, done: boolean } };
+				 * @typesign () -> { next: () -> { value, done: boolean } };
 				 */
 				keys: function() {
 					return this._entries.keys();
 				},
 		
 				/**
-				 * @typesign (): { next: (): { value, done: boolean } };
+				 * @typesign () -> { next: () -> { value, done: boolean } };
 				 */
 				values: function() {
 					return this._entries.values();
 				},
 		
 				/**
-				 * @typesign (): { next: (): { value: { 0, 1 }, done: boolean } };
+				 * @typesign () -> { next: () -> { value: { 0, 1 }, done: boolean } };
 				 */
 				entries: function() {
 					return this._entries.entries();
 				},
 		
 				/**
-				 * @typesign (): cellx.ObservableMap;
+				 * @typesign () -> cellx.ObservableMap;
 				 */
 				clone: function() {
 					return new this.constructor(this, {
@@ -1204,13 +1210,13 @@ return /******/ (function(modules) { // webpackBootstrap
 			/**
 			 * @typesign (
 			 *     entries?: Object|Array<{ 0, 1 }>|cellx.ObservableMap,
-			 *     opts?: { adoptsItemChanges: boolean = true }
-			 * ): cellx.ObservableMap;
+			 *     opts?: { adoptsItemChanges?: boolean }
+			 * ) -> cellx.ObservableMap;
 			 *
 			 * @typesign (
 			 *     entries?: Object|Array<{ 0, 1 }>|cellx.ObservableMap,
-			 *     adoptsItemChanges: boolean = true
-			 * ): cellx.ObservableMap;
+			 *     adoptsItemChanges?: boolean
+			 * ) -> cellx.ObservableMap;
 			 */
 			function map(entries, opts) {
 				return new ObservableMap(entries, typeof opts == 'boolean' ? { adoptsItemChanges: opts } : opts);
@@ -1223,7 +1229,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var EventEmitter = cellx.EventEmitter;
 		
 			/**
-			 * @typesign (a, b): -1|1|0;
+			 * @typesign (a, b) -> -1|1|0;
 			 */
 			function defaultComparator(a, b) {
 				if (a < b) { return -1; }
@@ -1275,10 +1281,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			 * @implements {ObservableCollection}
 			 *
 			 * @typesign new (items?: Array|cellx.ObservableList, opts?: {
-			 *     adoptsItemChanges: boolean = true,
-			 *     comparator?: (a, b): int,
+			 *     adoptsItemChanges?: boolean,
+			 *     comparator?: (a, b) -> int,
 			 *     sorted?: boolean
-			 * }): cellx.ObservableList;
+			 * }) -> cellx.ObservableList;
 			 */
 			var ObservableList = createClass({
 				Extends: EventEmitter,
@@ -1302,7 +1308,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					this.adoptsItemChanges = opts.adoptsItemChanges !== false;
 		
 					/**
-					 * @type {?(a, b): int}
+					 * @type {?(a, b) -> int}
 					 */
 					this.comparator = null;
 		
@@ -1319,7 +1325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (index: int, allowEndIndex: boolean = false): uint|undefined;
+				 * @typesign (index: int, allowEndIndex?: boolean) -> uint|undefined;
 				 */
 				_validateIndex: function(index, allowEndIndex) {
 					if (index === undefined) {
@@ -1340,35 +1346,35 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (value): boolean;
+				 * @typesign (value) -> boolean;
 				 */
 				contains: function(value) {
 					return this._valueCounts.has(value);
 				},
 		
 				/**
-				 * @typesign (value, fromIndex: int = 0): int;
+				 * @typesign (value, fromIndex?: int) -> int;
 				 */
 				indexOf: function(value, fromIndex) {
 					return this._items.indexOf(value, this._validateIndex(fromIndex));
 				},
 		
 				/**
-				 * @typesign (value, fromIndex: int = -1): int;
+				 * @typesign (value, fromIndex?: int) -> int;
 				 */
 				lastIndexOf: function(value, fromIndex) {
 					return this._items.lastIndexOf(value, this._validateIndex(fromIndex));
 				},
 		
 				/**
-				 * @typesign (index: int): *;
+				 * @typesign (index: int) -> *;
 				 */
 				get: function(index) {
 					return this._items[this._validateIndex(index)];
 				},
 		
 				/**
-				 * @typesign (index: int = 0, count?: uint): Array;
+				 * @typesign (index?: int, count?: uint) -> Array;
 				 */
 				getRange: function(index, count) {
 					index = this._validateIndex(index || 0, true);
@@ -1387,7 +1393,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (index: int, value): cellx.ObservableList;
+				 * @typesign (index: int, value) -> cellx.ObservableList;
 				 */
 				set: function(index, value) {
 					if (this.sorted) {
@@ -1413,7 +1419,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (index: int, items: Array): cellx.ObservableList;
+				 * @typesign (index: int, items: Array) -> cellx.ObservableList;
 				 */
 				setRange: function(index, items) {
 					if (this.sorted) {
@@ -1456,7 +1462,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (item): cellx.ObservableList;
+				 * @typesign (item) -> cellx.ObservableList;
 				 */
 				add: function(item) {
 					this.addRange([item]);
@@ -1464,7 +1470,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (items: Array): cellx.ObservableList;
+				 * @typesign (items: Array) -> cellx.ObservableList;
 				 */
 				addRange: function(items) {
 					if (!items.length) {
@@ -1478,7 +1484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (index: int, item): cellx.ObservableList;
+				 * @typesign (index: int, item) -> cellx.ObservableList;
 				 */
 				insert: function(index, item) {
 					this.insertRange(index, [item]);
@@ -1486,7 +1492,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (index: int, items: Array): cellx.ObservableList;
+				 * @typesign (index: int, items: Array) -> cellx.ObservableList;
 				 */
 				insertRange: function(index, items) {
 					if (this.sorted) {
@@ -1515,7 +1521,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (item, fromIndex: int = 0): cellx.ObservableList;
+				 * @typesign (item, fromIndex?: int) -> cellx.ObservableList;
 				 */
 				remove: function(item, fromIndex) {
 					var index = this._items.indexOf(item, this._validateIndex(fromIndex));
@@ -1535,7 +1541,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (item, fromIndex: int = 0): cellx.ObservableList;
+				 * @typesign (item, fromIndex?: int) -> cellx.ObservableList;
 				 */
 				removeAll: function(item, fromIndex) {
 					var items = this._items;
@@ -1558,7 +1564,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (index: int): cellx.ObservableList;
+				 * @typesign (index: int) -> cellx.ObservableList;
 				 */
 				removeAt: function(index) {
 					this._unregisterValue(this._items.splice(this._validateIndex(index), 1)[0]);
@@ -1570,7 +1576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (index: int = 0, count?: uint): cellx.ObservableList;
+				 * @typesign (index?: int, count?: uint) -> cellx.ObservableList;
 				 */
 				removeRange: function(index, count) {
 					index = this._validateIndex(index || 0, true);
@@ -1600,7 +1606,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (): cellx.ObservableList;
+				 * @typesign () -> cellx.ObservableList;
 				 */
 				clear: function() {
 					if (this.length) {
@@ -1616,49 +1622,49 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (separator: string = ','): string;
+				 * @typesign (separator?: string) -> string;
 				 */
 				join: function(separator) {
 					return this._items.join(separator);
 				},
 		
 				/**
-				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList), context: Object = global);
+				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList), context?: Object);
 				 */
 				forEach: null,
 		
 				/**
-				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList): *, context: Object = global): Array;
+				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList) -> *, context?: Object) -> Array;
 				 */
 				map: null,
 		
 				/**
-				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList): boolean, context: Object = global): Array;
+				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList) -> boolean, context?: Object) -> Array;
 				 */
 				filter: null,
 		
 				/**
-				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList): boolean, context: Object = global): boolean;
+				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList) -> boolean, context?: Object) -> boolean;
 				 */
 				every: null,
 		
 				/**
-				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList): boolean, context: Object = global): boolean;
+				 * @typesign (cb: (item, index: uint, arr: cellx.ObservableList) -> boolean, context?: Object) -> boolean;
 				 */
 				some: null,
 		
 				/**
-				 * @typesign (cb: (accumulator: *, item, index: uint, arr: cellx.ObservableList): *, initialValue?): *;
+				 * @typesign (cb: (accumulator: *, item, index: uint, arr: cellx.ObservableList) -> *, initialValue?) -> *;
 				 */
 				reduce: null,
 		
 				/**
-				 * @typesign (cb: (accumulator: *, item, index: uint, arr: cellx.ObservableList): *, initialValue?): *;
+				 * @typesign (cb: (accumulator: *, item, index: uint, arr: cellx.ObservableList) -> *, initialValue?) -> *;
 				 */
 				reduceRight: null,
 		
 				/**
-				 * @typesign (): cellx.ObservableList;
+				 * @typesign () -> cellx.ObservableList;
 				 */
 				clone: function() {
 					return new this.constructor(this, {
@@ -1669,14 +1675,14 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (): Array;
+				 * @typesign () -> Array;
 				 */
 				toArray: function() {
 					return this._items.slice();
 				},
 		
 				/**
-				 * @typesign (): string;
+				 * @typesign () -> string;
 				 */
 				toString: function() {
 					return this._items.join();
@@ -1685,7 +1691,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		
 			['forEach', 'map', 'filter', 'every', 'some', 'reduce', 'reduceRight'].forEach(function(name) {
 				ObservableList.prototype[name] = function() {
-					return Array.prototype[name].apply(this, arguments);
+					return Array.prototype[name].apply(this._items, arguments);
 				};
 			});
 		
@@ -1693,12 +1699,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		
 			/**
 			 * @typesign (items?: Array|cellx.ObservableList, opts?: {
-			 *     adoptsItemChanges: boolean = true,
-			 *     comparator?: (a, b): int,
+			 *     adoptsItemChanges?: boolean,
+			 *     comparator?: (a, b) -> int,
 			 *     sorted?: boolean
-			 * }): cellx.ObservableList;
+			 * }) -> cellx.ObservableList;
 			 *
-			 * @typesign (items?: Array|cellx.ObservableList, adoptsItemChanges: boolean = true): cellx.ObservableList;
+			 * @typesign (items?: Array|cellx.ObservableList, adoptsItemChanges?: boolean) -> cellx.ObservableList;
 			 */
 			function list(items, opts) {
 				return new ObservableList(items, typeof opts == 'boolean' ? { adoptsItemChanges: opts } : opts);
@@ -1825,24 +1831,24 @@ return /******/ (function(modules) { // webpackBootstrap
 			 *
 			 * @typesign new (value?, opts?: {
 			 *     owner?: Object,
-			 *     get?: (value): *,
+			 *     get?: (value) -> *,
 			 *     validate?: (value),
-			 *     onchange?: (evt: cellx~Event): boolean|undefined,
-			 *     onerror?: (evt: cellx~Event): boolean|undefined,
+			 *     onchange?: (evt: cellx~Event) -> boolean|undefined,
+			 *     onerror?: (evt: cellx~Event) -> boolean|undefined,
 			 *     computed?: false,
 			 *     debugKey?: string
-			 * }): cellx.Cell;
+			 * }) -> cellx.Cell;
 			 *
-			 * @typesign new (formula: (): *, opts?: {
+			 * @typesign new (formula: () -> *, opts?: {
 			 *     owner?: Object,
-			 *     get?: (value): *,
+			 *     get?: (value) -> *,
 			 *     set?: (value),
 			 *     validate?: (value),
-			 *     onchange?: (evt: cellx~Event): boolean|undefined,
-			 *     onerror?: (evt: cellx~Event): boolean|undefined,
+			 *     onchange?: (evt: cellx~Event) -> boolean|undefined,
+			 *     onerror?: (evt: cellx~Event) -> boolean|undefined,
 			 *     computed?: true,
 			 *     debugKey?: string
-			 * }): cellx.Cell;
+			 * }) -> cellx.Cell;
 			 */
 			var Cell = createClass({
 				Extends: EventEmitter,
@@ -1980,7 +1986,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (listener: (err: Error|null, evt: cellx~Event): boolean|undefined): cellx.Cell;
+				 * @typesign (listener: (err: Error|null, evt: cellx~Event) -> boolean|undefined) -> cellx.Cell;
 				 */
 				subscribe: function(listener) {
 					function wrapper(evt) {
@@ -1995,7 +2001,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					return this;
 				},
 				/**
-				 * @typesign (listener: (err: Error|null, evt: cellx~Event): boolean|undefined): cellx.Cell;
+				 * @typesign (listener: (err: Error|null, evt: cellx~Event) -> boolean|undefined) -> cellx.Cell;
 				 */
 				unsubscribe: function(listener) {
 					this
@@ -2100,7 +2106,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (): *;
+				 * @typesign () -> *;
 				 */
 				get: function() {
 					if (!currentlyRelease) {
@@ -2144,7 +2150,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (value): boolean;
+				 * @typesign (value) -> boolean;
 				 */
 				set: function(value) {
 					if (this.computed && !this._set) {
@@ -2225,14 +2231,14 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (): boolean|undefined;
+				 * @typesign () -> boolean|undefined;
 				 */
 				recalc: function() {
 					return this._recalc(true);
 				},
 		
 				/**
-				 * @typesign (force: boolean = false): boolean|undefined;
+				 * @typesign (force?: boolean) -> boolean|undefined;
 				 */
 				_recalc: function(force) {
 					if (!force) {
@@ -2343,7 +2349,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (): *;
+				 * @typesign () -> *;
 				 */
 				_tryFormula: function() {
 					var prevCalculatedCell = calculatedCell;
@@ -2409,7 +2415,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (): cellx.Cell;
+				 * @typesign () -> cellx.Cell;
 				 */
 				dispose: function() {
 					if (!currentlyRelease) {
@@ -2460,6 +2466,10 @@ return /******/ (function(modules) { // webpackBootstrap
 				var cell = owner[KEY_CELLS].get(wrapper);
 		
 				if (!cell) {
+					if (argCount >= 2 && firstArg === 'dispose') {
+						return;
+					}
+		
 					if (opts.cloneValue) {
 						initialValue = opts.cloneValue(initialValue);
 					}
@@ -2608,7 +2618,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	var settings = {
-		blockNameCase: 'camel' // 'pascal', 'hyphen'
+		blockNameCase: 'camel' // 'camel', 'pascal' or 'hyphen'
 	};
 
 	module.exports = settings;
@@ -2689,11 +2699,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * @typesign (target: HTMLElement, source: HTMLElement, options: {
-	 *     getElementKey?: (el: HTMLElement): string|undefined,
-	 *     contentOnly: boolean = false,
-	 *     onBeforeMorphElement?: (source: HTMLElement, target: HTMLElement): boolean|undefined,
-	 *     onBeforeMorphElementContent?: (source: HTMLElement, target: HTMLElement): boolean|undefined,
-	 *     onBeforeNodeDiscarded?: (node: Node): boolean|undefined,
+	 *     getElementKey?: (el: HTMLElement) -> string|undefined,
+	 *     contentOnly?: boolean,
+	 *     onBeforeMorphElement?: (source: HTMLElement, target: HTMLElement) -> boolean|undefined,
+	 *     onBeforeMorphElementContent?: (source: HTMLElement, target: HTMLElement) -> boolean|undefined,
+	 *     onBeforeNodeDiscarded?: (node: Node) -> boolean|undefined,
 	 *     onNodeDiscarded?: (node: Node)
 	 * });
 	 */
@@ -2974,6 +2984,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var listeners = [];
 
+	function release() {
+		releasePlanned = false;
+
+		if (removedNodes.size || addedNodes.size) {
+			for (var i = 0, l = listeners.length; i < l; i++) {
+				listeners[i](removedNodes, addedNodes);
+			}
+
+			removedNodes.clear();
+			addedNodes.clear();
+		}
+	}
+
 	function registerRemovedNode(node) {
 		if (addedNodes.has(node)) {
 			addedNodes['delete'](node);
@@ -2997,19 +3020,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				releasePlanned = true;
 				nextTick(release);
 			}
-		}
-	}
-
-	function release() {
-		releasePlanned = false;
-
-		if (removedNodes.size || addedNodes.size) {
-			for (var i = 0, l = listeners.length; i < l; i++) {
-				listeners[i](removedNodes, addedNodes);
-			}
-
-			removedNodes.clear();
-			addedNodes.clear();
 		}
 	}
 
@@ -3142,6 +3152,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	var KEY_INITIAL_KEY = '__rista_initialKey__';
 
 	/**
+	 * @class rista.Component
+	 * @extends {cellx.EventEmitter}
+	 *
+	 * @typesign new (block: HTMLElement) -> rista.Component;
+	 */
+	var Component = undefined;
+
+	var componentSubclasses = Object.create(null);
+	var selector = '[rt-is]';
+
+	/**
 	 * @typesign (name: string);
 	 */
 	function checkName(name) {
@@ -3151,14 +3172,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * @typesign (name: string): string;
+	 * @typesign (name: string) -> string;
 	 */
 	function hyphenize(name) {
 		return name[0].toLowerCase() + name.slice(1).replace(/([A-Z])/g, '-$1').replace('--', '-').toLowerCase();
 	}
 
 	/**
-	 * @typesign (name: string): string;
+	 * @typesign (name: string) -> string;
 	 */
 	function pascalize(name) {
 		return name[0].toUpperCase() + name.slice(1).replace(/\-([0-9a-z])/gi, function (match, chr) {
@@ -3166,11 +3187,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		});
 	}
 
-	var componentSubclasses = Object.create(null);
-	var selector = '[rt-is]';
-
 	/**
-	 * @typesign (name: string): Function|undefined;
+	 * @typesign (name: string) -> Function|undefined;
 	 */
 	function getComponentSubclass(name) {
 		return componentSubclasses[hyphenize(name)];
@@ -3188,7 +3206,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * @typesign (name: string, componentSubclass: Function): Function;
+	 * @typesign (name: string, componentSubclass: Function) -> Function;
 	 */
 	function registerComponentSubclass(name, componentSubclass) {
 		checkName(name);
@@ -3199,12 +3217,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign (name: string, description: {
 	 *     blockName?: string,
 	 *     preinit?: (),
-	 *     render?: (): string|Array<string>,
-	 *     renderInner?: (): string|Array<string>,
+	 *     render?: () -> string|Array<string>,
+	 *     renderInner?: () -> string|Array<string>,
 	 *     init?: (),
-	 *     canComponentMorph?: (): boolean,
+	 *     canComponentMorph?: () -> boolean,
 	 *     dispose?: ()
-	 * }): Function;
+	 * }) -> Function;
 	 */
 	function defineComponentSubclass(name, description) {
 		checkName(name);
@@ -3243,7 +3261,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * @typesign (block: HTMLElement): string;
+	 * @typesign (block: HTMLElement) -> string;
 	 */
 	function getBlockKey(block) {
 		var attrs = block.attributes;
@@ -3315,13 +3333,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		});
 	}
 
-	/**
-	 * @class rista.Component
-	 * @extends {cellx.EventEmitter}
-	 *
-	 * @typesign new (block: HTMLElement): rista.Component;
-	 */
-	var Component = createClass({
+	Component = createClass({
 		Extends: EventEmitter,
 
 		Static: {
@@ -3446,7 +3458,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		/**
-	  * @typesign (): HTMLElement|null;
+	  * @typesign () -> HTMLElement|null;
 	  */
 		getParent: function getParent() {
 			var node = this.block;
@@ -3461,7 +3473,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		/**
-	  * @typesign (): Array<HTMLElement>;
+	  * @typesign () -> Array<HTMLElement>;
 	  */
 		getDescendants: function getDescendants() {
 			return Array.prototype.map.call(this.block.querySelectorAll(selector), function (block) {
@@ -3472,7 +3484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		/**
-	  * @typesign (selector: string): $|NodeList;
+	  * @typesign (selector: string) -> $|NodeList;
 	  */
 		$: (function (_$) {
 			function $(_x) {
@@ -3497,7 +3509,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}),
 
 		/**
-	  * @typesign (name: string): Array<rista.Component>;
+	  * @typesign (name: string) -> Array<rista.Component>;
 	  */
 		$$: function $$(name) {
 			var els = this.block.querySelectorAll('[name=' + name + ']');
@@ -3515,7 +3527,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		/**
-	  * @typesign (name: string, method: string, ...args: Array): Array;
+	  * @typesign (name: string, method: string, ...args: Array) -> Array;
 	  */
 		broadcast: function broadcast(name, method) {
 			var args = Array.prototype.slice.call(arguments, 2);
@@ -3598,9 +3610,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (
 	  *     target: cellx.EventEmitter|EventTarget,
 	  *     type: string,
-	  *     listener: (evt: cellx~Event): boolean|undefined,
+	  *     listener: (evt: cellx~Event) -> boolean|undefined,
 	  *     context?: Object
-	  * ): { stop: (), dispose: () };
+	  * ) -> { stop: (), dispose: () };
 	  */
 		_listenTo: function _listenTo(target, type, listener, context) {
 			var _this3 = this;
@@ -3644,7 +3656,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		/**
-	  * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
+	  * @typesign (cb: Function, delay: uint) -> { clear: (), dispose: () };
 	  */
 		setTimeout: (function (_setTimeout) {
 			function setTimeout(_x2, _x3) {
@@ -3682,7 +3694,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}),
 
 		/**
-	  * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
+	  * @typesign (cb: Function, delay: uint) -> { clear: (), dispose: () };
 	  */
 		setInterval: (function (_setInterval) {
 			function setInterval(_x4, _x5) {
@@ -3719,7 +3731,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}),
 
 		/**
-	  * @typesign (cb: Function): Function{ cancel: (), dispose: () };
+	  * @typesign (cb: Function) -> { (), cancel: (), dispose: () };
 	  */
 		registerCallback: function registerCallback(cb) {
 			var _this6 = this;
@@ -3788,7 +3800,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var uidCounter = 0;
 
 	/**
-	 * @typesign (): string;
+	 * @typesign () -> string;
 	 */
 	function nextUID() {
 	  return String(++uidCounter);
@@ -3801,7 +3813,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	/**
-	 * @typesign (el: HTMLElement, name: string): boolean;
+	 * @typesign (el: HTMLElement, name: string) -> boolean;
 	 */
 	"use strict";
 
@@ -3840,7 +3852,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var getComponentSelector = _require2.getSelector;
 
 	/**
-	 * @typesign (el: HTMLElement): Array<HTMLElement>;
+	 * @typesign (el: HTMLElement) -> Array<HTMLElement>;
 	 */
 	function findBlocks(el) {
 		var blocks = [];

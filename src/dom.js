@@ -6,7 +6,7 @@ let {
 } = require('./Component');
 
 /**
- * @typesign (el: HTMLElement): Array<HTMLElement>;
+ * @typesign (el: HTMLElement) -> Array<HTMLElement>;
  */
 function findBlocks(el) {
 	let blocks = [];

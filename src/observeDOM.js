@@ -8,6 +8,19 @@ let releasePlanned = false;
 
 let listeners = [];
 
+function release() {
+	releasePlanned = false;
+
+	if (removedNodes.size || addedNodes.size) {
+		for (let i = 0, l = listeners.length; i < l; i++) {
+			listeners[i](removedNodes, addedNodes);
+		}
+
+		removedNodes.clear();
+		addedNodes.clear();
+	}
+}
+
 function registerRemovedNode(node) {
 	if (addedNodes.has(node)) {
 		addedNodes.delete(node);
@@ -31,19 +44,6 @@ function registerAddedNode(node) {
 			releasePlanned = true;
 			nextTick(release);
 		}
-	}
-}
-
-function release() {
-	releasePlanned = false;
-
-	if (removedNodes.size || addedNodes.size) {
-		for (let i = 0, l = listeners.length; i < l; i++) {
-			listeners[i](removedNodes, addedNodes);
-		}
-
-		removedNodes.clear();
-		addedNodes.clear();
 	}
 }
 

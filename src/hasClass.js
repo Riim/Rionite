@@ -1,5 +1,5 @@
 /**
- * @typesign (el: HTMLElement, name: string): boolean;
+ * @typesign (el: HTMLElement, name: string) -> boolean;
  */
 let hasClass;
 

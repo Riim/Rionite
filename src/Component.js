@@ -8,6 +8,17 @@ let KEY_COMPONENT = '__rista_component__';
 let KEY_INITIAL_KEY = '__rista_initialKey__';
 
 /**
+ * @class rista.Component
+ * @extends {cellx.EventEmitter}
+ *
+ * @typesign new (block: HTMLElement) -> rista.Component;
+ */
+let Component;
+
+let componentSubclasses = Object.create(null);
+let selector = '[rt-is]';
+
+/**
  * @typesign (name: string);
  */
 function checkName(name) {
@@ -17,14 +28,14 @@ function checkName(name) {
 }
 
 /**
- * @typesign (name: string): string;
+ * @typesign (name: string) -> string;
  */
 function hyphenize(name) {
 	return name[0].toLowerCase() + name.slice(1).replace(/([A-Z])/g, '-$1').replace('--', '-').toLowerCase();
 }
 
 /**
- * @typesign (name: string): string;
+ * @typesign (name: string) -> string;
  */
 function pascalize(name) {
 	return name[0].toUpperCase() + name.slice(1).replace(/\-([0-9a-z])/gi, function(match, chr) {
@@ -32,11 +43,8 @@ function pascalize(name) {
 	});
 }
 
-let componentSubclasses = Object.create(null);
-let selector = '[rt-is]';
-
 /**
- * @typesign (name: string): Function|undefined;
+ * @typesign (name: string) -> Function|undefined;
  */
 function getComponentSubclass(name) {
 	return componentSubclasses[hyphenize(name)];
@@ -54,7 +62,7 @@ function _registerComponentSubclass(name, componentSubclass) {
 }
 
 /**
- * @typesign (name: string, componentSubclass: Function): Function;
+ * @typesign (name: string, componentSubclass: Function) -> Function;
  */
 function registerComponentSubclass(name, componentSubclass) {
 	checkName(name);
@@ -65,12 +73,12 @@ function registerComponentSubclass(name, componentSubclass) {
  * @typesign (name: string, description: {
  *     blockName?: string,
  *     preinit?: (),
- *     render?: (): string|Array<string>,
- *     renderInner?: (): string|Array<string>,
+ *     render?: () -> string|Array<string>,
+ *     renderInner?: () -> string|Array<string>,
  *     init?: (),
- *     canComponentMorph?: (): boolean,
+ *     canComponentMorph?: () -> boolean,
  *     dispose?: ()
- * }): Function;
+ * }) -> Function;
  */
 function defineComponentSubclass(name, description) {
 	checkName(name);
@@ -109,7 +117,7 @@ function defineComponentSubclass(name, description) {
 }
 
 /**
- * @typesign (block: HTMLElement): string;
+ * @typesign (block: HTMLElement) -> string;
  */
 function getBlockKey(block) {
 	let attrs = block.attributes;
@@ -181,13 +189,7 @@ function morphComponentBlock(component, contentOnly) {
 	});
 }
 
-/**
- * @class rista.Component
- * @extends {cellx.EventEmitter}
- *
- * @typesign new (block: HTMLElement): rista.Component;
- */
-let Component = createClass({
+Component = createClass({
 	Extends: EventEmitter,
 
 	Static: {
@@ -312,7 +314,7 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (): HTMLElement|null;
+	 * @typesign () -> HTMLElement|null;
 	 */
 	getParent() {
 		let node = this.block;
@@ -327,7 +329,7 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (): Array<HTMLElement>;
+	 * @typesign () -> Array<HTMLElement>;
 	 */
 	getDescendants() {
 		return Array.prototype.map.call(this.block.querySelectorAll(selector), block => block[KEY_COMPONENT])
@@ -335,7 +337,7 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (selector: string): $|NodeList;
+	 * @typesign (selector: string) -> $|NodeList;
 	 */
 	$(selector) {
 		selector = selector.split('&');
@@ -352,7 +354,7 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (name: string): Array<rista.Component>;
+	 * @typesign (name: string) -> Array<rista.Component>;
 	 */
 	$$(name) {
 		let els = this.block.querySelectorAll(`[name=${name}]`);
@@ -370,7 +372,7 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (name: string, method: string, ...args: Array): Array;
+	 * @typesign (name: string, method: string, ...args: Array) -> Array;
 	 */
 	broadcast(name, method) {
 		let args = Array.prototype.slice.call(arguments, 2);
@@ -456,9 +458,9 @@ let Component = createClass({
 	 * @typesign (
 	 *     target: cellx.EventEmitter|EventTarget,
 	 *     type: string,
-	 *     listener: (evt: cellx~Event): boolean|undefined,
+	 *     listener: (evt: cellx~Event) -> boolean|undefined,
 	 *     context?: Object
-	 * ): { stop: (), dispose: () };
+	 * ) -> { stop: (), dispose: () };
 	 */
 	_listenTo(target, type, listener, context) {
 		if (!context) {
@@ -500,7 +502,7 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
+	 * @typesign (cb: Function, delay: uint) -> { clear: (), dispose: () };
 	 */
 	setTimeout(cb, delay) {
 		let id = nextUID();
@@ -526,7 +528,7 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (cb: Function, delay: uint): { clear: (), dispose: () };
+	 * @typesign (cb: Function, delay: uint) -> { clear: (), dispose: () };
 	 */
 	setInterval(cb, delay) {
 		let id = nextUID();
@@ -551,7 +553,7 @@ let Component = createClass({
 	},
 
 	/**
-	 * @typesign (cb: Function): Function{ cancel: (), dispose: () };
+	 * @typesign (cb: Function) -> { (), cancel: (), dispose: () };
 	 */
 	registerCallback(cb) {
 		let id = nextUID();

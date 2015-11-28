@@ -135,6 +135,28 @@ rista.component('counter', {
 </script>
 ```
 
+Можно добавлять обработчики на всплывающие события:
+
+```js
+return `
+    <div rt-change="_onInputChange">
+        <input type="checkbox">
+        <input type="checkbox">
+    </div>
+`;
+```
+
+В том числе на события компонентов:
+
+```js
+return `
+    <div rt-bar="_onFooBar">
+        <foo rt-baz="_onFooBaz"></foo>
+        <foo></foo>
+    </div>
+`;
+```
+
 ## Выбор элементов
 
 В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.elementName')` можно сократить до `this.$('.elementName')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на селектор блока. Например, запись `this.$('.blockName__elementName')` можно сократить до `this.$('&__elementName')`:
