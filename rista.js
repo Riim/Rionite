@@ -239,11 +239,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			cell.constructor = cellx;
 
 			if (opts.onchange || opts.onerror) {
-				if (!opts.owner) {
-					throw new TypeError('Owner is required');
-				}
-
-				cell.call(opts.owner);
+				cell.call(opts.owner || global);
 			}
 
 			return cell;
@@ -325,7 +321,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		/**
 		 * @typesign (description: {
-		 *     Extends: Function,
+		 *     Extends?: Function,
 		 *     Implements?: Array<Function>,
 		 *     Static?: Object,
 		 *     constructor?: Function
@@ -414,7 +410,7 @@ return /******/ (function(modules) { // webpackBootstrap
 							}
 						}
 					}
-				}, false);
+				});
 		
 				return function(cb) {
 					if (queue) {
@@ -1986,27 +1982,33 @@ return /******/ (function(modules) { // webpackBootstrap
 				},
 		
 				/**
-				 * @typesign (listener: (err: Error|null, evt: cellx~Event) -> boolean|undefined) -> cellx.Cell;
+				 * @typesign (
+				 *     listener: (err: Error|null, evt: cellx~Event) -> boolean|undefined,
+				 *     context?: Object
+				 * ) -> cellx.Cell;
 				 */
-				subscribe: function(listener) {
+				subscribe: function(listener, context) {
 					function wrapper(evt) {
 						return listener.call(this, evt.error || null, evt);
 					}
 					wrapper[KEY_INNER] = listener;
 		
 					this
-						.on('change', wrapper)
-						.on('error', wrapper);
+						.on('change', wrapper, context)
+						.on('error', wrapper, context);
 		
 					return this;
 				},
 				/**
-				 * @typesign (listener: (err: Error|null, evt: cellx~Event) -> boolean|undefined) -> cellx.Cell;
+				 * @typesign (
+				 *     listener: (err: Error|null, evt: cellx~Event) -> boolean|undefined,
+				 *     context?: Object
+				 * ) -> cellx.Cell;
 				 */
-				unsubscribe: function(listener) {
+				unsubscribe: function(listener, context) {
 					this
-						.off('change', listener)
-						.off('error', listener);
+						.off('change', listener, context)
+						.off('error', listener, context);
 		
 					return this;
 				},
@@ -2591,13 +2593,13 @@ return /******/ (function(modules) { // webpackBootstrap
 			};
 		})();
 		
-
 		cellx.utils = {
 			logError: logError,
 			mixin: mixin,
 			createClass: createClass,
 			nextTick: nextTick
 		};
+		
 
 		if (true) {
 			if (true) {
@@ -2698,7 +2700,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * @typesign (target: HTMLElement, source: HTMLElement, options: {
+	 * @typesign (target: HTMLElement, source: HTMLElement, options?: {
 	 *     getElementKey?: (el: HTMLElement) -> string|undefined,
 	 *     contentOnly?: boolean,
 	 *     onBeforeMorphElement?: (source: HTMLElement, target: HTMLElement) -> boolean|undefined,
@@ -3149,7 +3151,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var morphElement = __webpack_require__(3);
 
 	var KEY_COMPONENT = '__rista_component__';
-	var KEY_INITIAL_KEY = '__rista_initialKey__';
+	var KEY_INITIAL_OUTER_HTML = '__rista_initialOuterHTML__';
 
 	/**
 	 * @class rista.Component
@@ -3261,21 +3263,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * @typesign (block: HTMLElement) -> string;
-	 */
-	function getBlockKey(block) {
-		var attrs = block.attributes;
-		var key = [];
-
-		for (var i = attrs.length; i;) {
-			var attr = attrs[--i];
-			key.push(attr.name + '=' + attr.value);
-		}
-
-		return JSON.stringify(key.sort());
-	}
-
-	/**
 	 * @typesign (component: rista.Component, contentOnly: boolean);
 	 */
 	function morphComponentBlock(component, contentOnly) {
@@ -3286,42 +3273,35 @@ return /******/ (function(modules) { // webpackBootstrap
 			contentOnly: contentOnly,
 
 			getElementKey: function getElementKey(el) {
-				if (el.hasAttribute('key')) {
-					return el.getAttribute('key');
+				var key = el[KEY_INITIAL_OUTER_HTML];
+
+				if (key) {
+					return key;
 				}
 
-				if (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase())) {
-					var key = el[KEY_INITIAL_KEY];
-
-					if (key) {
-						return key;
-					}
-
-					key = el[KEY_INITIAL_KEY] = getBlockKey(el);
-
-					return key;
+				if (getComponentSubclass(el.hasAttribute('rt-is') || el.tagName.toLowerCase())) {
+					return el[KEY_INITIAL_OUTER_HTML] = el.outerHTML;
 				}
 			},
 
-			onBeforeMorphElement: function onBeforeMorphElement(el) {
-				var cmp = el[KEY_COMPONENT];
+			onBeforeMorphElement: function onBeforeMorphElement(target, source) {
+				// для ситуации, когда morphElement сам создаёт блок компонента
+				if (!target[KEY_INITIAL_OUTER_HTML] && getComponentSubclass(target.hasAttribute('rt-is') || target.tagName.toLowerCase())) {
+					target[KEY_INITIAL_OUTER_HTML] = source.outerHTML;
+				}
 
-				if (cmp) {
-					if (cmp == component) {
+				var cmpn = target[KEY_COMPONENT];
+
+				if (cmpn) {
+					if (cmpn == component) {
 						return true;
 					}
 
-					if (cmp.canComponentMorph) {
-						return cmp.canComponentMorph();
+					if (cmpn.canComponentMorph) {
+						return cmpn.canComponentMorph();
 					}
 
 					return false;
-				}
-			},
-
-			onBeforeMorphElementContent: function onBeforeMorphElementContent(el) {
-				if (!el[KEY_INITIAL_KEY] && (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase()))) {
-					el[KEY_INITIAL_KEY] = getBlockKey(el);
 				}
 			},
 
@@ -3391,6 +3371,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			block[KEY_COMPONENT] = this;
 
 			this.destroyed = false;
+
+			if (!block[KEY_INITIAL_OUTER_HTML]) {
+				block[KEY_INITIAL_OUTER_HTML] = block.outerHTML;
+			}
 
 			if (!hasClass(block, this.blockName)) {
 				block.className = this.blockName + ' ' + block.className;

@@ -5,7 +5,7 @@ let hasClass = require('./hasClass');
 let morphElement = require('./morphElement');
 
 let KEY_COMPONENT = '__rista_component__';
-let KEY_INITIAL_KEY = '__rista_initialKey__';
+let KEY_INITIAL_OUTER_HTML = '__rista_initialOuterHTML__';
 
 /**
  * @class rista.Component
@@ -117,21 +117,6 @@ function defineComponentSubclass(name, description) {
 }
 
 /**
- * @typesign (block: HTMLElement) -> string;
- */
-function getBlockKey(block) {
-	let attrs = block.attributes;
-	let key = [];
-
-	for (let i = attrs.length; i;) {
-		let attr = attrs[--i];
-		key.push(attr.name + '=' + attr.value);
-	}
-
-	return JSON.stringify(key.sort());
-}
-
-/**
  * @typesign (component: rista.Component, contentOnly: boolean);
  */
 function morphComponentBlock(component, contentOnly) {
@@ -142,42 +127,38 @@ function morphComponentBlock(component, contentOnly) {
 		contentOnly: contentOnly,
 
 		getElementKey(el) {
-			if (el.hasAttribute('key')) {
-				return el.getAttribute('key');
+			let key = el[KEY_INITIAL_OUTER_HTML];
+
+			if (key) {
+				return key;
 			}
 
-			if (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase())) {
-				let key = el[KEY_INITIAL_KEY];
-
-				if (key) {
-					return key;
-				}
-
-				key = el[KEY_INITIAL_KEY] = getBlockKey(el);
-
-				return key;
+			if (getComponentSubclass(el.hasAttribute('rt-is') || el.tagName.toLowerCase())) {
+				return el[KEY_INITIAL_OUTER_HTML] = el.outerHTML;
 			}
 		},
 
-		onBeforeMorphElement(el) {
-			let cmp = el[KEY_COMPONENT];
+		onBeforeMorphElement(target, source) {
+			// для ситуации, когда morphElement сам создаёт блок компонента
+			if (
+				!target[KEY_INITIAL_OUTER_HTML] &&
+					getComponentSubclass(target.hasAttribute('rt-is') || target.tagName.toLowerCase())
+			) {
+				target[KEY_INITIAL_OUTER_HTML] = source.outerHTML;
+			}
 
-			if (cmp) {
-				if (cmp == component) {
+			let cmpn = target[KEY_COMPONENT];
+
+			if (cmpn) {
+				if (cmpn == component) {
 					return true;
 				}
 
-				if (cmp.canComponentMorph) {
-					return cmp.canComponentMorph();
+				if (cmpn.canComponentMorph) {
+					return cmpn.canComponentMorph();
 				}
 
 				return false;
-			}
-		},
-
-		onBeforeMorphElementContent(el) {
-			if (!el[KEY_INITIAL_KEY] && (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase()))) {
-				el[KEY_INITIAL_KEY] = getBlockKey(el);
 			}
 		},
 
@@ -247,6 +228,10 @@ Component = createClass({
 		block[KEY_COMPONENT] = this;
 
 		this.destroyed = false;
+
+		if (!block[KEY_INITIAL_OUTER_HTML]) {
+			block[KEY_INITIAL_OUTER_HTML] = block.outerHTML;
+		}
 
 		if (!hasClass(block, this.blockName)) {
 			block.className = `${this.blockName} ${block.className}`;

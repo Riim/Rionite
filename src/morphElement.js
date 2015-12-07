@@ -67,7 +67,7 @@ function morphAttributes(target, source) {
 }
 
 /**
- * @typesign (target: HTMLElement, source: HTMLElement, options: {
+ * @typesign (target: HTMLElement, source: HTMLElement, options?: {
  *     getElementKey?: (el: HTMLElement) -> string|undefined,
  *     contentOnly?: boolean,
  *     onBeforeMorphElement?: (source: HTMLElement, target: HTMLElement) -> boolean|undefined,
