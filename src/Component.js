@@ -254,6 +254,10 @@ Component = createClass({
 		if (this.init) {
 			this.init();
 		}
+
+		if (!block[KEY_COMPONENT_KEY]) {
+			block[KEY_COMPONENT_KEY] = block.getAttribute('key') || block.outerHTML;
+		}
 	},
 
 	/**
