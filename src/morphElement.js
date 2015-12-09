@@ -2,10 +2,6 @@
  * Original code: https://github.com/patrick-steele-idem/morphdom
  */
 
-let PREFIX_KEY = ':';
-let PREFIX_TEXT_NODE = ',';
-let PREFIX_COMMENT_NODE = '#';
-
 let specialElementHandlers = {
 	INPUT(target, source) {
 		if (target.value != source.value) {
@@ -40,14 +36,14 @@ function defaultGetElementKey(el) {
 
 function morphAttributes(target, source) {
 	let sourceAttributes = source.attributes;
-	let foundAttributes = Object.create(null);
+	let foundAttributes = {};
 
 	for (let i = sourceAttributes.length; i;) {
 		let attr = sourceAttributes[--i];
 		let attrName = attr.name;
 		let attrValue = attr.value;
 
-		foundAttributes[attrName] = true;
+		foundAttributes[attrName] = foundAttributes;
 
 		if (target.getAttribute(attrName) != attrValue) {
 			target.setAttribute(attrName, attrValue);
@@ -60,7 +56,7 @@ function morphAttributes(target, source) {
 		let attr = targetAttributes[--i];
 		let attrName = attr.name;
 
-		if (!foundAttributes[attrName]) {
+		if (foundAttributes[attrName] != foundAttributes) {
 			target.removeAttribute(attrName);
 		}
 	}
@@ -68,12 +64,11 @@ function morphAttributes(target, source) {
 
 /**
  * @typesign (target: HTMLElement, source: HTMLElement, options?: {
- *     getElementKey?: (el: HTMLElement) -> string|undefined,
  *     contentOnly?: boolean,
+ *     getElementKey?: (el: HTMLElement) -> string|undefined,
  *     onBeforeMorphElement?: (source: HTMLElement, target: HTMLElement) -> boolean|undefined,
  *     onBeforeMorphElementContent?: (source: HTMLElement, target: HTMLElement) -> boolean|undefined,
- *     onBeforeNodeDiscarded?: (node: Node) -> boolean|undefined,
- *     onNodeDiscarded?: (node: Node)
+ *     onKeyedElementRemoved?: (el: HTMLElement)
  * });
  */
 function morphElement(target, source, options) {
@@ -81,28 +76,22 @@ function morphElement(target, source, options) {
 		options = {};
 	}
 
-	let getElementKey = options.getElementKey || defaultGetElementKey;
 	let contentOnly = options.contentOnly === true;
+	let getElementKey = options.getElementKey || defaultGetElementKey;
 	let onBeforeMorphElement = options.onBeforeMorphElement || noop;
 	let onBeforeMorphElementContent = options.onBeforeMorphElementContent || noop;
-	let onBeforeNodeDiscarded = options.onBeforeNodeDiscarded || noop;
-	let onNodeDiscarded = options.onNodeDiscarded || noop;
+	let onKeyedElementRemoved = options.onKeyedElementRemoved || noop;
 
 	let storedElements = Object.create(null);
 	let unmatchedElements = Object.create(null);
 
 	function storeContent(el) {
-		let childNodes = el.childNodes;
-
-		for (let i = 0, l = childNodes.length; i < l; i++) {
-			let childNode = childNodes[i];
-
+		for (let childNode = el.firstChild; childNode; childNode = childNode.nextSibling) {
 			if (childNode.nodeType == 1) {
 				let key = getElementKey(childNode);
 
 				if (key) {
-					let stamp = childNode.tagName + PREFIX_KEY + key;
-					(storedElements[stamp] || (storedElements[stamp] = [])).push(childNode);
+					storedElements[key] = childNode;
 				}
 
 				storeContent(childNode);
@@ -110,213 +99,156 @@ function morphElement(target, source, options) {
 		}
 	}
 
-	function morphNode(target, source, contentOnly) {
-		if (target.nodeType == 1) {
-			if (!contentOnly) {
-				if (onBeforeMorphElement(target, source) === false) {
-					return;
-				}
-
-				morphAttributes(target, source);
-
-				if (onBeforeMorphElementContent(target, source) === false) {
-					return;
-				}
+	function _morphElement(target, source, contentOnly) {
+		if (!contentOnly) {
+			if (onBeforeMorphElement(target, source) === false) {
+				return;
 			}
 
-			let targetChildNodes = target.childNodes;
-			let storedChildNodes = {};
+			morphAttributes(target, source);
 
-			for (let i = 0, l = targetChildNodes.length; i < l; i++) {
-				let childNode = targetChildNodes[i];
-				let stamp;
+			if (onBeforeMorphElementContent(target, source) === false) {
+				return;
+			}
+		}
 
-				switch (childNode.nodeType) {
-					case 1: {
-						let key = getElementKey(childNode);
+		let targetTagName = target.tagName;
 
-						if (key) {
-							stamp = childNode.tagName + PREFIX_KEY + key;
+		if (targetTagName != 'TEXTAREA') {
+			let targetChildNode = target.firstChild;
+			let sourceChildNode = source.firstChild;
 
-							let els = unmatchedElements[stamp];
+			outer: while (sourceChildNode) {
+				let sourceChildNodeType = sourceChildNode.nodeType;
+				let sourceChildNodeKey;
 
-							if (els) {
-								let el = els.shift();
+				if (sourceChildNodeType == 1) {
+					sourceChildNodeKey = getElementKey(sourceChildNode);
 
-								if (!els.length) {
-									delete unmatchedElements[stamp];
-								}
+					if (storedElements[sourceChildNodeKey]) {
+						target.insertBefore(storedElements[sourceChildNodeKey], targetChildNode || null);
+						delete storedElements[sourceChildNodeKey];
 
-								el.blank.parentNode.replaceChild(childNode, el.blank);
-								morphNode(childNode, el.element, false);
-							} else {
-								(storedElements[stamp] || (storedElements[stamp] = [])).push(childNode);
+						sourceChildNode = sourceChildNode.nextSibling;
+
+						continue;
+					}
+				}
+
+				while (targetChildNode) {
+					let targetChildNodeType = targetChildNode.nodeType;
+					let targetChildNodeKey;
+
+					if (targetChildNodeType == 1) {
+						targetChildNodeKey = getElementKey(targetChildNode);
+					}
+
+					if (targetChildNodeType == sourceChildNodeType) {
+						if (targetChildNodeType == 1) {
+							if (
+								targetChildNodeKey === sourceChildNodeKey &&
+									targetChildNode.tagName == sourceChildNode.tagName
+							) {
+								_morphElement(targetChildNode, sourceChildNode, false);
+
+								targetChildNode = targetChildNode.nextSibling;
+								sourceChildNode = sourceChildNode.nextSibling;
+
+								continue outer;
 							}
+						} else if (targetChildNodeType == 3 || targetChildNodeType == 8) {
+							targetChildNode.nodeValue = sourceChildNode.nodeValue;
 
-							continue;
-						}
+							targetChildNode = targetChildNode.nextSibling;
+							sourceChildNode = sourceChildNode.nextSibling;
 
-						stamp = childNode.tagName;
-						break;
-					}
-					case 3: {
-						stamp = PREFIX_TEXT_NODE + childNode.nodeValue;
-						break;
-					}
-					case 8: {
-						stamp = PREFIX_COMMENT_NODE + childNode.nodeValue;
-						break;
-					}
-					default: {
-						throw new TypeError('Unsupported node type');
-					}
-				}
-
-				(storedChildNodes[stamp] || (storedChildNodes[stamp] = [])).push(childNode);
-			}
-
-			let sourceChildNodes = source.childNodes;
-
-			for (let i = 0, l = sourceChildNodes.length; i < l; i++) {
-				let sourceChildNode = sourceChildNodes[i];
-				let stamp;
-				let unique = false;
-
-				switch (sourceChildNode.nodeType) {
-					case 1: {
-						let key = getElementKey(sourceChildNode);
-
-						if (key) {
-							stamp = sourceChildNode.tagName + PREFIX_KEY + key;
-							unique = true;
+							continue outer;
 						} else {
-							stamp = sourceChildNode.tagName;
-						}
-
-						break;
-					}
-					case 3: {
-						stamp = PREFIX_TEXT_NODE + sourceChildNode.nodeValue;
-						break;
-					}
-					case 8: {
-						stamp = PREFIX_COMMENT_NODE + sourceChildNode.nodeValue;
-						break;
-					}
-					default: {
-						throw new TypeError('Unsupported node type');
-					}
-				}
-
-				let storedNodes = unique ? storedElements : storedChildNodes;
-				let nodes = storedNodes[stamp];
-				let beforeElement = targetChildNodes[i] || null;
-
-				if (nodes) {
-					let targetChildNode = nodes.shift();
-
-					if (!nodes.length) {
-						delete storedNodes[stamp];
-					}
-
-					if (!beforeElement || targetChildNode != beforeElement) {
-						target.insertBefore(targetChildNode, beforeElement);
-					}
-
-					if (targetChildNode.nodeType == 1) {
-						morphNode(targetChildNode, sourceChildNode, false);
-					}
-				} else {
-					switch (sourceChildNode.nodeType) {
-						case 1: {
-							let el = document.createElement(sourceChildNode.tagName);
-							target.insertBefore(el, beforeElement);
-
-							if (unique) {
-								(unmatchedElements[stamp] || (unmatchedElements[stamp] = [])).push({
-									blank: el,
-									element: sourceChildNode
-								});
-							} else {
-								morphNode(el, sourceChildNode, false);
-							}
-
-							break;
-						}
-						case 3: {
-							target.insertBefore(document.createTextNode(sourceChildNode.nodeValue), beforeElement);
-							break;
-						}
-						case 8: {
-							target.insertBefore(document.createComment(sourceChildNode.nodeValue), beforeElement);
-							break;
-						}
-						default: {
 							throw new TypeError('Unsupported node type');
 						}
 					}
-				}
-			}
 
-			for (let stamp in storedChildNodes) {
-				let childNodes = storedChildNodes[stamp];
+					let node = targetChildNode;
+					targetChildNode = targetChildNode.nextSibling;
 
-				for (let i = 0, l = childNodes.length; i < l; i++) {
-					let childNode = childNodes[i];
+					if (targetChildNodeKey) {
+						let el = unmatchedElements[targetChildNodeKey];
 
-					if (onBeforeNodeDiscarded(childNode) !== false) {
-						childNode.parentNode.removeChild(childNode);
+						if (el) {
+							delete unmatchedElements[targetChildNodeKey];
 
-						if (childNode.nodeType == 1) {
-							storeContent(childNode);
+							el.blank.parentNode.replaceChild(node, el.blank);
+							_morphElement(node, el.source, false);
+						} else {
+							target.removeChild(node);
+							storedElements[targetChildNodeKey] = node;
 						}
+					} else {
+						target.removeChild(node);
 
-						onNodeDiscarded(childNode);
+						if (targetChildNodeType == 1) {
+							storeContent(node);
+						}
 					}
 				}
-			}
 
-			let specialElementHandler = specialElementHandlers[target.tagName];
+				switch (sourceChildNode.nodeType) {
+					case 1: {
+						let el = document.createElement(sourceChildNode.tagName);
+						target.appendChild(el);
 
-			if (specialElementHandler) {
-				specialElementHandler(target, source);
+						if (sourceChildNodeKey) {
+							unmatchedElements[sourceChildNodeKey] = {
+								blank: el,
+								source: sourceChildNode
+							};
+						} else {
+							_morphElement(el, sourceChildNode, false);
+						}
+
+						break;
+					}
+					case 3: {
+						target.appendChild(document.createTextNode(sourceChildNode.nodeValue));
+						break;
+					}
+					case 8: {
+						target.appendChild(document.createComment(sourceChildNode.nodeValue));
+						break;
+					}
+					default: {
+						throw new TypeError('Unsupported node type');
+					}
+				}
+
+				sourceChildNode = sourceChildNode.nextSibling;
 			}
-		} else {
-			target.nodeValue = source.nodeValue;
+		}
+
+		let specialElementHandler = specialElementHandlers[targetTagName];
+
+		if (specialElementHandler) {
+			specialElementHandler(target, source);
 		}
 	}
 
-	morphNode(target, source, contentOnly);
+	_morphElement(target, source, contentOnly);
 
 	let ch;
 
 	do {
 		ch = false;
 
-		for (let stamp in unmatchedElements) {
+		for (let key in unmatchedElements) {
+			let el = unmatchedElements[key];
+			delete unmatchedElements[key];
+			_morphElement(el.blank, el.source, false);
 			ch = true;
-
-			let els = unmatchedElements[stamp];
-			delete unmatchedElements[stamp];
-
-			for (var i = 0, l = els.length; i < l; i++) {
-				let el = els[i];
-				morphNode(el.blank, el.element, false);
-			}
 		}
 	} while (ch);
 
-	for (let stamp in storedElements) {
-		let els = storedElements[stamp];
-
-		for (let i = 0, l = els.length; i < l; i++) {
-			let el = els[i];
-
-			if (onBeforeNodeDiscarded(el) !== false) {
-				el.parentNode.removeChild(el);
-				onNodeDiscarded(el);
-			}
-		}
+	for (let key in storedElements) {
+		onKeyedElementRemoved(storedElements[key]);
 	}
 }
 

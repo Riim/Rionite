@@ -65,9 +65,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var d = _require.d;
 	var utils = _require.utils;
 
-	var settings = __webpack_require__(2);
-	var morphElement = __webpack_require__(3);
-	var observeDOM = __webpack_require__(4);
+	var morphElement = __webpack_require__(2);
+	var observeDOM = __webpack_require__(3);
+	var settings = __webpack_require__(5);
 	var Component = __webpack_require__(6);
 
 	var _require2 = __webpack_require__(9);
@@ -2617,27 +2617,11 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports) {
 
-	'use strict';
-
-	var settings = {
-		blockNameCase: 'camel' // 'camel', 'pascal' or 'hyphen'
-	};
-
-	module.exports = settings;
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
 	/**
 	 * Original code: https://github.com/patrick-steele-idem/morphdom
 	 */
 
 	'use strict';
-
-	var PREFIX_KEY = ':';
-	var PREFIX_TEXT_NODE = ',';
-	var PREFIX_COMMENT_NODE = '#';
 
 	var specialElementHandlers = {
 		INPUT: function INPUT(target, source) {
@@ -2673,14 +2657,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function morphAttributes(target, source) {
 		var sourceAttributes = source.attributes;
-		var foundAttributes = Object.create(null);
+		var foundAttributes = {};
 
 		for (var i = sourceAttributes.length; i;) {
 			var attr = sourceAttributes[--i];
 			var attrName = attr.name;
 			var attrValue = attr.value;
 
-			foundAttributes[attrName] = true;
+			foundAttributes[attrName] = foundAttributes;
 
 			if (target.getAttribute(attrName) != attrValue) {
 				target.setAttribute(attrName, attrValue);
@@ -2693,7 +2677,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var attr = targetAttributes[--i];
 			var attrName = attr.name;
 
-			if (!foundAttributes[attrName]) {
+			if (foundAttributes[attrName] != foundAttributes) {
 				target.removeAttribute(attrName);
 			}
 		}
@@ -2701,12 +2685,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/**
 	 * @typesign (target: HTMLElement, source: HTMLElement, options?: {
-	 *     getElementKey?: (el: HTMLElement) -> string|undefined,
 	 *     contentOnly?: boolean,
+	 *     getElementKey?: (el: HTMLElement) -> string|undefined,
 	 *     onBeforeMorphElement?: (source: HTMLElement, target: HTMLElement) -> boolean|undefined,
 	 *     onBeforeMorphElementContent?: (source: HTMLElement, target: HTMLElement) -> boolean|undefined,
-	 *     onBeforeNodeDiscarded?: (node: Node) -> boolean|undefined,
-	 *     onNodeDiscarded?: (node: Node)
+	 *     onKeyedElementRemoved?: (el: HTMLElement)
 	 * });
 	 */
 	function morphElement(target, source, options) {
@@ -2714,28 +2697,22 @@ return /******/ (function(modules) { // webpackBootstrap
 			options = {};
 		}
 
-		var getElementKey = options.getElementKey || defaultGetElementKey;
 		var contentOnly = options.contentOnly === true;
+		var getElementKey = options.getElementKey || defaultGetElementKey;
 		var onBeforeMorphElement = options.onBeforeMorphElement || noop;
 		var onBeforeMorphElementContent = options.onBeforeMorphElementContent || noop;
-		var onBeforeNodeDiscarded = options.onBeforeNodeDiscarded || noop;
-		var onNodeDiscarded = options.onNodeDiscarded || noop;
+		var onKeyedElementRemoved = options.onKeyedElementRemoved || noop;
 
 		var storedElements = Object.create(null);
 		var unmatchedElements = Object.create(null);
 
 		function storeContent(el) {
-			var childNodes = el.childNodes;
-
-			for (var _i = 0, _l = childNodes.length; _i < _l; _i++) {
-				var childNode = childNodes[_i];
-
+			for (var childNode = el.firstChild; childNode; childNode = childNode.nextSibling) {
 				if (childNode.nodeType == 1) {
 					var key = getElementKey(childNode);
 
 					if (key) {
-						var stamp = childNode.tagName + PREFIX_KEY + key;
-						(storedElements[stamp] || (storedElements[stamp] = [])).push(childNode);
+						storedElements[key] = childNode;
 					}
 
 					storeContent(childNode);
@@ -2743,104 +2720,121 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		}
 
-		function morphNode(target, source, contentOnly) {
-			if (target.nodeType == 1) {
-				if (!contentOnly) {
-					if (onBeforeMorphElement(target, source) === false) {
-						return;
-					}
-
-					morphAttributes(target, source);
-
-					if (onBeforeMorphElementContent(target, source) === false) {
-						return;
-					}
+		function _morphElement(target, source, contentOnly) {
+			if (!contentOnly) {
+				if (onBeforeMorphElement(target, source) === false) {
+					return;
 				}
 
-				var targetChildNodes = target.childNodes;
-				var storedChildNodes = {};
+				morphAttributes(target, source);
 
-				for (var _i2 = 0, _l2 = targetChildNodes.length; _i2 < _l2; _i2++) {
-					var childNode = targetChildNodes[_i2];
-					var stamp = undefined;
+				if (onBeforeMorphElementContent(target, source) === false) {
+					return;
+				}
+			}
 
-					switch (childNode.nodeType) {
-						case 1:
-							{
-								var key = getElementKey(childNode);
+			var targetTagName = target.tagName;
 
-								if (key) {
-									stamp = childNode.tagName + PREFIX_KEY + key;
+			if (targetTagName != 'TEXTAREA') {
+				var targetChildNode = target.firstChild;
+				var sourceChildNode = source.firstChild;
 
-									var els = unmatchedElements[stamp];
+				outer: while (sourceChildNode) {
+					var sourceChildNodeType = sourceChildNode.nodeType;
+					var sourceChildNodeKey = undefined;
 
-									if (els) {
-										var el = els.shift();
+					if (sourceChildNodeType == 1) {
+						sourceChildNodeKey = getElementKey(sourceChildNode);
 
-										if (!els.length) {
-											delete unmatchedElements[stamp];
-										}
+						if (storedElements[sourceChildNodeKey]) {
+							target.insertBefore(storedElements[sourceChildNodeKey], targetChildNode || null);
+							delete storedElements[sourceChildNodeKey];
 
-										el.blank.parentNode.replaceChild(childNode, el.blank);
-										morphNode(childNode, el.element, false);
-									} else {
-										(storedElements[stamp] || (storedElements[stamp] = [])).push(childNode);
-									}
+							sourceChildNode = sourceChildNode.nextSibling;
 
-									continue;
+							continue;
+						}
+					}
+
+					while (targetChildNode) {
+						var targetChildNodeType = targetChildNode.nodeType;
+						var targetChildNodeKey = undefined;
+
+						if (targetChildNodeType == 1) {
+							targetChildNodeKey = getElementKey(targetChildNode);
+						}
+
+						if (targetChildNodeType == sourceChildNodeType) {
+							if (targetChildNodeType == 1) {
+								if (targetChildNodeKey === sourceChildNodeKey && targetChildNode.tagName == sourceChildNode.tagName) {
+									_morphElement(targetChildNode, sourceChildNode, false);
+
+									targetChildNode = targetChildNode.nextSibling;
+									sourceChildNode = sourceChildNode.nextSibling;
+
+									continue outer;
 								}
+							} else if (targetChildNodeType == 3 || targetChildNodeType == 8) {
+								targetChildNode.nodeValue = sourceChildNode.nodeValue;
 
-								stamp = childNode.tagName;
-								break;
-							}
-						case 3:
-							{
-								stamp = PREFIX_TEXT_NODE + childNode.nodeValue;
-								break;
-							}
-						case 8:
-							{
-								stamp = PREFIX_COMMENT_NODE + childNode.nodeValue;
-								break;
-							}
-						default:
-							{
+								targetChildNode = targetChildNode.nextSibling;
+								sourceChildNode = sourceChildNode.nextSibling;
+
+								continue outer;
+							} else {
 								throw new TypeError('Unsupported node type');
 							}
+						}
+
+						var node = targetChildNode;
+						targetChildNode = targetChildNode.nextSibling;
+
+						if (targetChildNodeKey) {
+							var el = unmatchedElements[targetChildNodeKey];
+
+							if (el) {
+								delete unmatchedElements[targetChildNodeKey];
+
+								el.blank.parentNode.replaceChild(node, el.blank);
+								_morphElement(node, el.source, false);
+							} else {
+								target.removeChild(node);
+								storedElements[targetChildNodeKey] = node;
+							}
+						} else {
+							target.removeChild(node);
+
+							if (targetChildNodeType == 1) {
+								storeContent(node);
+							}
+						}
 					}
-
-					(storedChildNodes[stamp] || (storedChildNodes[stamp] = [])).push(childNode);
-				}
-
-				var sourceChildNodes = source.childNodes;
-
-				for (var _i3 = 0, _l3 = sourceChildNodes.length; _i3 < _l3; _i3++) {
-					var sourceChildNode = sourceChildNodes[_i3];
-					var stamp = undefined;
-					var unique = false;
 
 					switch (sourceChildNode.nodeType) {
 						case 1:
 							{
-								var key = getElementKey(sourceChildNode);
+								var el = document.createElement(sourceChildNode.tagName);
+								target.appendChild(el);
 
-								if (key) {
-									stamp = sourceChildNode.tagName + PREFIX_KEY + key;
-									unique = true;
+								if (sourceChildNodeKey) {
+									unmatchedElements[sourceChildNodeKey] = {
+										blank: el,
+										source: sourceChildNode
+									};
 								} else {
-									stamp = sourceChildNode.tagName;
+									_morphElement(el, sourceChildNode, false);
 								}
 
 								break;
 							}
 						case 3:
 							{
-								stamp = PREFIX_TEXT_NODE + sourceChildNode.nodeValue;
+								target.appendChild(document.createTextNode(sourceChildNode.nodeValue));
 								break;
 							}
 						case 8:
 							{
-								stamp = PREFIX_COMMENT_NODE + sourceChildNode.nodeValue;
+								target.appendChild(document.createComment(sourceChildNode.nodeValue));
 								break;
 							}
 						default:
@@ -2849,126 +2843,41 @@ return /******/ (function(modules) { // webpackBootstrap
 							}
 					}
 
-					var storedNodes = unique ? storedElements : storedChildNodes;
-					var nodes = storedNodes[stamp];
-					var beforeElement = targetChildNodes[_i3] || null;
-
-					if (nodes) {
-						var targetChildNode = nodes.shift();
-
-						if (!nodes.length) {
-							delete storedNodes[stamp];
-						}
-
-						if (!beforeElement || targetChildNode != beforeElement) {
-							target.insertBefore(targetChildNode, beforeElement);
-						}
-
-						if (targetChildNode.nodeType == 1) {
-							morphNode(targetChildNode, sourceChildNode, false);
-						}
-					} else {
-						switch (sourceChildNode.nodeType) {
-							case 1:
-								{
-									var el = document.createElement(sourceChildNode.tagName);
-									target.insertBefore(el, beforeElement);
-
-									if (unique) {
-										(unmatchedElements[stamp] || (unmatchedElements[stamp] = [])).push({
-											blank: el,
-											element: sourceChildNode
-										});
-									} else {
-										morphNode(el, sourceChildNode, false);
-									}
-
-									break;
-								}
-							case 3:
-								{
-									target.insertBefore(document.createTextNode(sourceChildNode.nodeValue), beforeElement);
-									break;
-								}
-							case 8:
-								{
-									target.insertBefore(document.createComment(sourceChildNode.nodeValue), beforeElement);
-									break;
-								}
-							default:
-								{
-									throw new TypeError('Unsupported node type');
-								}
-						}
-					}
+					sourceChildNode = sourceChildNode.nextSibling;
 				}
+			}
 
-				for (var stamp in storedChildNodes) {
-					var childNodes = storedChildNodes[stamp];
+			var specialElementHandler = specialElementHandlers[targetTagName];
 
-					for (var _i4 = 0, _l4 = childNodes.length; _i4 < _l4; _i4++) {
-						var childNode = childNodes[_i4];
-
-						if (onBeforeNodeDiscarded(childNode) !== false) {
-							childNode.parentNode.removeChild(childNode);
-
-							if (childNode.nodeType == 1) {
-								storeContent(childNode);
-							}
-
-							onNodeDiscarded(childNode);
-						}
-					}
-				}
-
-				var specialElementHandler = specialElementHandlers[target.tagName];
-
-				if (specialElementHandler) {
-					specialElementHandler(target, source);
-				}
-			} else {
-				target.nodeValue = source.nodeValue;
+			if (specialElementHandler) {
+				specialElementHandler(target, source);
 			}
 		}
 
-		morphNode(target, source, contentOnly);
+		_morphElement(target, source, contentOnly);
 
 		var ch = undefined;
 
 		do {
 			ch = false;
 
-			for (var stamp in unmatchedElements) {
+			for (var key in unmatchedElements) {
+				var el = unmatchedElements[key];
+				delete unmatchedElements[key];
+				_morphElement(el.blank, el.source, false);
 				ch = true;
-
-				var els = unmatchedElements[stamp];
-				delete unmatchedElements[stamp];
-
-				for (var i = 0, l = els.length; i < l; i++) {
-					var el = els[i];
-					morphNode(el.blank, el.element, false);
-				}
 			}
 		} while (ch);
 
-		for (var stamp in storedElements) {
-			var els = storedElements[stamp];
-
-			for (var _i5 = 0, _l5 = els.length; _i5 < _l5; _i5++) {
-				var el = els[_i5];
-
-				if (onBeforeNodeDiscarded(el) !== false) {
-					el.parentNode.removeChild(el);
-					onNodeDiscarded(el);
-				}
-			}
+		for (var key in storedElements) {
+			onKeyedElementRemoved(storedElements[key]);
 		}
 	}
 
 	module.exports = morphElement;
 
 /***/ },
-/* 4 */
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2977,7 +2886,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var nextTick = _require.utils.nextTick;
 
-	var Set = __webpack_require__(5);
+	var Set = __webpack_require__(4);
 
 	var removedNodes = new Set();
 	var addedNodes = new Set();
@@ -3071,7 +2980,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = observeDOM;
 
 /***/ },
-/* 5 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3131,6 +3040,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Set;
 
 /***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var settings = {
+		blockNameCase: 'camel' // 'camel', 'pascal' or 'hyphen'
+	};
+
+	module.exports = settings;
+
+/***/ },
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -3145,13 +3066,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var mixin = _require$utils.mixin;
 	var createClass = _require$utils.createClass;
 
-	var settings = __webpack_require__(2);
 	var nextUID = __webpack_require__(7);
 	var hasClass = __webpack_require__(8);
-	var morphElement = __webpack_require__(3);
+	var morphElement = __webpack_require__(2);
+	var settings = __webpack_require__(5);
 
 	var KEY_COMPONENT = '__rista_component__';
-	var KEY_INITIAL_OUTER_HTML = '__rista_initialOuterHTML__';
+	var KEY_COMPONENT_KEY = '__rista_componentKey__';
 
 	/**
 	 * @class rista.Component
@@ -3168,7 +3089,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign (name: string);
 	 */
 	function checkName(name) {
-		if (!/^[a-z](?:\-?[0-9a-z])*$/i.test(name)) {
+		if (!/^[a-z](?:\-?[0-9a-z]+)*$/i.test(name)) {
 			throw new TypeError('Component name "' + name + '" is not valid');
 		}
 	}
@@ -3193,7 +3114,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign (name: string) -> Function|undefined;
 	 */
 	function getComponentSubclass(name) {
-		return componentSubclasses[hyphenize(name)];
+		return componentSubclasses[name];
 	}
 
 	function _registerComponentSubclass(name, componentSubclass) {
@@ -3202,6 +3123,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 
 		componentSubclasses[name] = componentSubclass;
+		componentSubclasses[name.toUpperCase()] = componentSubclass;
+
 		selector += ', ' + name;
 
 		return componentSubclass;
@@ -3273,21 +3196,28 @@ return /******/ (function(modules) { // webpackBootstrap
 			contentOnly: contentOnly,
 
 			getElementKey: function getElementKey(el) {
-				var key = el[KEY_INITIAL_OUTER_HTML];
+				var key = el[KEY_COMPONENT_KEY];
 
 				if (key) {
 					return key;
 				}
 
-				if (getComponentSubclass(el.hasAttribute('rt-is') || el.tagName.toLowerCase())) {
-					return el[KEY_INITIAL_OUTER_HTML] = el.outerHTML;
+				key = el.getAttribute('key');
+
+				if (key) {
+					el[KEY_COMPONENT_KEY] = key;
+					return key;
+				}
+
+				if (getComponentSubclass(el.getAttribute('rt-is') || el.tagName)) {
+					key = el[KEY_COMPONENT_KEY] = el.outerHTML;
+					return key;
 				}
 			},
 
 			onBeforeMorphElement: function onBeforeMorphElement(target, source) {
-				// для ситуации, когда morphElement сам создаёт блок компонента
-				if (!target[KEY_INITIAL_OUTER_HTML] && getComponentSubclass(target.hasAttribute('rt-is') || target.tagName.toLowerCase())) {
-					target[KEY_INITIAL_OUTER_HTML] = source.outerHTML;
+				if (!target[KEY_COMPONENT_KEY] && getComponentSubclass(target.getAttribute('rt-is') || target.tagName)) {
+					target[KEY_COMPONENT_KEY] = source.outerHTML;
 				}
 
 				var cmpn = target[KEY_COMPONENT];
@@ -3305,9 +3235,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			},
 
-			onNodeDiscarded: function onNodeDiscarded(node) {
-				if (node[KEY_COMPONENT]) {
-					node[KEY_COMPONENT].destroy();
+			onKeyedElementRemoved: function onKeyedElementRemoved(el) {
+				if (el[KEY_COMPONENT]) {
+					el[KEY_COMPONENT].destroy();
 				}
 			}
 		});
@@ -3371,10 +3301,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			block[KEY_COMPONENT] = this;
 
 			this.destroyed = false;
-
-			if (!block[KEY_INITIAL_OUTER_HTML]) {
-				block[KEY_INITIAL_OUTER_HTML] = block.outerHTML;
-			}
 
 			if (!hasClass(block, this.blockName)) {
 				block.className = this.blockName + ' ' + block.className;
@@ -3841,7 +3767,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function findBlocks(el) {
 		var blocks = [];
 
-		if (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase())) {
+		if (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName)) {
 			blocks.push(el);
 		}
 
@@ -3860,7 +3786,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var block = blocks[--i];
 
 			if (!block[KEY_COMPONENT]) {
-				var componentSubclass = getComponentSubclass(block.getAttribute('rt-is') || block.tagName.toLowerCase());
+				var componentSubclass = getComponentSubclass(block.getAttribute('rt-is') || block.tagName);
 
 				if (componentSubclass) {
 					try {

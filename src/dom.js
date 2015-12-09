@@ -11,7 +11,7 @@ let {
 function findBlocks(el) {
 	let blocks = [];
 
-	if (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName.toLowerCase())) {
+	if (el.hasAttribute('rt-is') || getComponentSubclass(el.tagName)) {
 		blocks.push(el);
 	}
 
@@ -30,7 +30,7 @@ function applyComponents(el) {
 		let block = blocks[--i];
 
 		if (!block[KEY_COMPONENT]) {
-			let componentSubclass = getComponentSubclass(block.getAttribute('rt-is') || block.tagName.toLowerCase());
+			let componentSubclass = getComponentSubclass(block.getAttribute('rt-is') || block.tagName);
 
 			if (componentSubclass) {
 				try {

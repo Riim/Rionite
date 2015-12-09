@@ -1,7 +1,7 @@
 let { EventEmitter, map, list, cellx, d, utils } = require('cellx');
-let settings = require('./settings');
 let morphElement = require('./morphElement');
 let observeDOM = require('./observeDOM');
+let settings = require('./settings');
 let Component = require('./Component');
 let { applyComponents, destroyComponents } = require('./dom');
 
