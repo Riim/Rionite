@@ -70,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var settings = __webpack_require__(5);
 	var Component = __webpack_require__(6);
 
-	var _require2 = __webpack_require__(9);
+	var _require2 = __webpack_require__(10);
 
 	var applyComponents = _require2.applyComponents;
 	var destroyComponents = _require2.destroyComponents;
@@ -427,8 +427,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			};
 		})();
 		
+		var Map;
+		
 		(function() {
-			var Map = global.Map;
+			Map = global.Map;
 		
 			if (!Map) {
 				var entryStub = {
@@ -671,6 +673,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		 * }} cellx~Event
 		 */
 		
+		var EventEmitter;
+		
 		(function() {
 			var KEY_INNER = '__cellx_EventEmitter_inner__';
 		
@@ -683,7 +687,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			 * @extends {Object}
 			 * @typesign new () -> cellx.EventEmitter;
 			 */
-			var EventEmitter = createClass({
+			EventEmitter = createClass({
 				Static: {
 					KEY_INNER: KEY_INNER
 				},
@@ -924,9 +928,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		var ObservableCollection;
 		
 		(function() {
-			var Map = cellx.Map;
-			var EventEmitter = cellx.EventEmitter;
-		
 			ObservableCollection = createClass({
 				Extends: EventEmitter,
 		
@@ -996,10 +997,9 @@ return /******/ (function(modules) { // webpackBootstrap
 			});
 		})();
 		
-		(function() {
-			var Map = cellx.Map;
-			var EventEmitter = cellx.EventEmitter;
+		var ObservableMap;
 		
+		(function() {
 			/**
 			 * @class cellx.ObservableMap
 			 * @extends {cellx.EventEmitter}
@@ -1009,7 +1009,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			 *     adoptsItemChanges?: boolean
 			 * }) -> cellx.ObservableMap;
 			 */
-			var ObservableMap = createClass({
+			ObservableMap = createClass({
 				Extends: EventEmitter,
 				Implements: [ObservableCollection],
 		
@@ -1221,9 +1221,9 @@ return /******/ (function(modules) { // webpackBootstrap
 			cellx.map = map;
 		})();
 		
-		(function() {
-			var EventEmitter = cellx.EventEmitter;
+		var ObservableList;
 		
+		(function() {
 			/**
 			 * @typesign (a, b) -> -1|1|0;
 			 */
@@ -1282,7 +1282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			 *     sorted?: boolean
 			 * }) -> cellx.ObservableList;
 			 */
-			var ObservableList = createClass({
+			ObservableList = createClass({
 				Extends: EventEmitter,
 				Implements: [ObservableCollection],
 		
@@ -1709,9 +1709,9 @@ return /******/ (function(modules) { // webpackBootstrap
 			cellx.list = list;
 		})();
 		
-		(function() {
-			var EventEmitter = cellx.EventEmitter;
+		var Cell;
 		
+		(function() {
 			var KEY_INNER = EventEmitter.KEY_INNER;
 		
 			var error = {
@@ -1846,7 +1846,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			 *     debugKey?: string
 			 * }) -> cellx.Cell;
 			 */
-			var Cell = createClass({
+			Cell = createClass({
 				Extends: EventEmitter,
 		
 				constructor: function(value, opts) {
@@ -1979,6 +1979,48 @@ return /******/ (function(modules) { // webpackBootstrap
 				 */
 				_off: function(type, listener, context) {
 					EventEmitter.prototype._off.call(this, type, listener, context || this.owner);
+				},
+		
+				/**
+				 * @typesign (
+				 *     listener: (evt: cellx~Event) -> boolean|undefined,
+				 *     context?: Object
+				 * ) -> cellx.Cell;
+				 */
+				addChangeListener: function(listener, context) {
+					this.on('success', listener, context);
+					return this;
+				},
+				/**
+				 * @typesign (
+				 *     listener: (evt: cellx~Event) -> boolean|undefined,
+				 *     context?: Object
+				 * ) -> cellx.Cell;
+				 */
+				removeChangeListener: function(listener, context) {
+					this.off('success', listener, context);
+					return this;
+				},
+		
+				/**
+				 * @typesign (
+				 *     listener: (evt: cellx~Event) -> boolean|undefined,
+				 *     context?: Object
+				 * ) -> cellx.Cell;
+				 */
+				addErrorListener: function(listener, context) {
+					this.on('error', listener, context);
+					return this;
+				},
+				/**
+				 * @typesign (
+				 *     listener: (evt: cellx~Event) -> boolean|undefined,
+				 *     context?: Object
+				 * ) -> cellx.Cell;
+				 */
+				removeErrorListener: function(listener, context) {
+					this.off('error', listener, context);
+					return this;
 				},
 		
 				/**
@@ -2651,8 +2693,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function noop() {}
 
+	function isEmpty(obj) {
+		for (var _name in obj) {
+			return false;
+		}
+		return true;
+	}
+
 	function defaultGetElementKey(el) {
-		return el.getAttribute('key');
+		return el.getAttribute('key') || undefined;
 	}
 
 	function morphAttributes(target, source) {
@@ -2703,19 +2752,28 @@ return /******/ (function(modules) { // webpackBootstrap
 		var onBeforeMorphElementContent = options.onBeforeMorphElementContent || noop;
 		var onKeyedElementRemoved = options.onKeyedElementRemoved || noop;
 
+		var activeElement = document.activeElement;
+		var scrollLeft = undefined;
+		var scrollTop = undefined;
+
+		if ('selectionStart' in activeElement) {
+			scrollLeft = activeElement.scrollLeft;
+			scrollTop = activeElement.scrollTop;
+		}
+
 		var storedElements = Object.create(null);
 		var unmatchedElements = Object.create(null);
 
 		function storeContent(el) {
-			for (var childNode = el.firstChild; childNode; childNode = childNode.nextSibling) {
-				if (childNode.nodeType == 1) {
-					var key = getElementKey(childNode);
+			for (var child = el.firstChild; child; child = child.nextSibling) {
+				if (child.nodeType == 1) {
+					var key = getElementKey(child);
 
 					if (key) {
-						storedElements[key] = childNode;
+						storedElements[key] = child;
 					}
 
-					storeContent(childNode);
+					storeContent(child);
 				}
 			}
 		}
@@ -2736,114 +2794,117 @@ return /******/ (function(modules) { // webpackBootstrap
 			var targetTagName = target.tagName;
 
 			if (targetTagName != 'TEXTAREA') {
-				var targetChildNode = target.firstChild;
-				var sourceChildNode = source.firstChild;
+				var targetChild = target.firstChild;
+				var fromChild = targetChild;
 
-				outer: while (sourceChildNode) {
-					var sourceChildNodeType = sourceChildNode.nodeType;
-					var sourceChildNodeKey = undefined;
+				for (var sourceChild = source.firstChild; sourceChild; sourceChild = sourceChild.nextSibling) {
+					var sourceChildType = sourceChild.nodeType;
+					var sourceChildTagName = sourceChild.tagName;
+					var sourceChildKey = undefined;
 
-					if (sourceChildNodeType == 1) {
-						sourceChildNodeKey = getElementKey(sourceChildNode);
+					if (sourceChildType == 1) {
+						sourceChildKey = getElementKey(sourceChild);
 
-						if (storedElements[sourceChildNodeKey]) {
-							target.insertBefore(storedElements[sourceChildNodeKey], targetChildNode || null);
-							delete storedElements[sourceChildNodeKey];
-
-							sourceChildNode = sourceChildNode.nextSibling;
-
+						if (storedElements[sourceChildKey]) {
+							target.insertBefore(storedElements[sourceChildKey], targetChild || null);
+							delete storedElements[sourceChildKey];
 							continue;
 						}
 					}
 
-					while (targetChildNode) {
-						var targetChildNodeType = targetChildNode.nodeType;
-						var targetChildNodeKey = undefined;
+					var found = false;
 
-						if (targetChildNodeType == 1) {
-							targetChildNodeKey = getElementKey(targetChildNode);
-						}
-
-						if (targetChildNodeType == sourceChildNodeType) {
-							if (targetChildNodeType == 1) {
-								if (targetChildNodeKey === sourceChildNodeKey && targetChildNode.tagName == sourceChildNode.tagName) {
-									_morphElement(targetChildNode, sourceChildNode, false);
-
-									targetChildNode = targetChildNode.nextSibling;
-									sourceChildNode = sourceChildNode.nextSibling;
-
-									continue outer;
+					while (targetChild) {
+						if (targetChild.nodeType == sourceChildType) {
+							if (targetChild.nodeType == 1) {
+								if (targetChild.tagName == sourceChildTagName && getElementKey(targetChild) === sourceChildKey) {
+									found = true;
+									_morphElement(targetChild, sourceChild, false);
 								}
-							} else if (targetChildNodeType == 3 || targetChildNodeType == 8) {
-								targetChildNode.nodeValue = sourceChildNode.nodeValue;
-
-								targetChildNode = targetChildNode.nextSibling;
-								sourceChildNode = sourceChildNode.nextSibling;
-
-								continue outer;
 							} else {
-								throw new TypeError('Unsupported node type');
+								found = true;
+								targetChild.nodeValue = sourceChild.nodeValue;
 							}
 						}
 
-						var node = targetChildNode;
-						targetChildNode = targetChildNode.nextSibling;
-
-						if (targetChildNodeKey) {
-							var el = unmatchedElements[targetChildNodeKey];
-
-							if (el) {
-								delete unmatchedElements[targetChildNodeKey];
-
-								el.blank.parentNode.replaceChild(node, el.blank);
-								_morphElement(node, el.source, false);
+						if (found) {
+							if (targetChild == fromChild) {
+								targetChild = fromChild = fromChild.nextSibling;
 							} else {
-								target.removeChild(node);
-								storedElements[targetChildNodeKey] = node;
+								target.insertBefore(targetChild, fromChild);
+								targetChild = fromChild;
 							}
+
+							break;
+						}
+
+						targetChild = targetChild.nextSibling;
+					}
+
+					if (!found) {
+						switch (sourceChild.nodeType) {
+							case 1:
+								{
+									var el = document.createElement(sourceChildTagName);
+									target.insertBefore(el, fromChild || null);
+
+									if (sourceChildKey) {
+										unmatchedElements[sourceChildKey] = {
+											blank: el,
+											source: sourceChild
+										};
+									} else {
+										_morphElement(el, sourceChild, false);
+									}
+
+									break;
+								}
+							case 3:
+								{
+									target.insertBefore(document.createTextNode(sourceChild.nodeValue), fromChild || null);
+									break;
+								}
+							case 8:
+								{
+									target.insertBefore(document.createComment(sourceChild.nodeValue), fromChild || null);
+									break;
+								}
+							default:
+								{
+									throw new TypeError('Unsupported node type');
+								}
+						}
+
+						targetChild = fromChild;
+					}
+				}
+
+				while (fromChild) {
+					var child = fromChild;
+					fromChild = fromChild.nextSibling;
+
+					if (child.nodeType == 1) {
+						var childKey = getElementKey(child);
+
+						if (childKey) {
+							var unmatchedElement = unmatchedElements[childKey];
+
+							if (unmatchedElement) {
+								delete unmatchedElements[childKey];
+
+								unmatchedElement.blank.parentNode.replaceChild(child, unmatchedElement.blank);
+								_morphElement(child, unmatchedElement.source, false);
+
+								continue;
+							}
+
+							storedElements[childKey] = child;
 						} else {
-							target.removeChild(node);
-
-							if (targetChildNodeType == 1) {
-								storeContent(node);
-							}
+							storeContent(child);
 						}
 					}
 
-					switch (sourceChildNode.nodeType) {
-						case 1:
-							{
-								var el = document.createElement(sourceChildNode.tagName);
-								target.appendChild(el);
-
-								if (sourceChildNodeKey) {
-									unmatchedElements[sourceChildNodeKey] = {
-										blank: el,
-										source: sourceChildNode
-									};
-								} else {
-									_morphElement(el, sourceChildNode, false);
-								}
-
-								break;
-							}
-						case 3:
-							{
-								target.appendChild(document.createTextNode(sourceChildNode.nodeValue));
-								break;
-							}
-						case 8:
-							{
-								target.appendChild(document.createComment(sourceChildNode.nodeValue));
-								break;
-							}
-						default:
-							{
-								throw new TypeError('Unsupported node type');
-							}
-					}
-
-					sourceChildNode = sourceChildNode.nextSibling;
+					target.removeChild(child);
 				}
 			}
 
@@ -2856,21 +2917,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		_morphElement(target, source, contentOnly);
 
-		var ch = undefined;
-
-		do {
-			ch = false;
-
+		while (!isEmpty(unmatchedElements)) {
 			for (var key in unmatchedElements) {
 				var el = unmatchedElements[key];
 				delete unmatchedElements[key];
 				_morphElement(el.blank, el.source, false);
-				ch = true;
 			}
-		} while (ch);
+		}
 
 		for (var key in storedElements) {
 			onKeyedElementRemoved(storedElements[key]);
+		}
+
+		if (activeElement != document.activeElement) {
+			if (scrollLeft !== undefined) {
+				activeElement.scrollLeft = scrollLeft;
+				activeElement.scrollTop = scrollTop;
+			}
+
+			activeElement.focus();
 		}
 	}
 
@@ -3067,7 +3132,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var createClass = _require$utils.createClass;
 
 	var nextUID = __webpack_require__(7);
-	var hasClass = __webpack_require__(8);
+	var raf = __webpack_require__(8);
+	var hasClass = __webpack_require__(9);
 	var morphElement = __webpack_require__(2);
 	var settings = __webpack_require__(5);
 
@@ -3321,10 +3387,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (this.init) {
 				this.init();
 			}
-
-			if (!block[KEY_COMPONENT_KEY]) {
-				block[KEY_COMPONENT_KEY] = block.getAttribute('key') || block.outerHTML;
-			}
 		},
 
 		/**
@@ -3364,11 +3426,19 @@ return /******/ (function(modules) { // webpackBootstrap
 		dispose: null,
 
 		_onBlockOuterHTMLChange: function _onBlockOuterHTMLChange() {
-			morphComponentBlock(this, false);
+			var _this2 = this;
+
+			raf(function () {
+				morphComponentBlock(_this2, false);
+			});
 		},
 
 		_onBlockInnerHTMLChange: function _onBlockInnerHTMLChange() {
-			morphComponentBlock(this, true);
+			var _this3 = this;
+
+			raf(function () {
+				morphComponentBlock(_this3, true);
+			});
 		},
 
 		/**
@@ -3454,7 +3524,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		listenTo: function listenTo(target, type, listener, context) {
-			var _this2 = this;
+			var _this4 = this;
 
 			var listenings = undefined;
 
@@ -3509,7 +3579,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					listenings[--i].stop();
 				}
 
-				delete _this2._disposables[id];
+				delete _this4._disposables[id];
 			};
 
 			var listening = this._disposables[id] = {
@@ -3529,7 +3599,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * ) -> { stop: (), dispose: () };
 	  */
 		_listenTo: function _listenTo(target, type, listener, context) {
-			var _this3 = this;
+			var _this5 = this;
 
 			if (!context) {
 				context = this;
@@ -3550,14 +3620,14 @@ return /******/ (function(modules) { // webpackBootstrap
 			var id = nextUID();
 
 			var stopListening = function stopListening() {
-				if (_this3._disposables[id]) {
+				if (_this5._disposables[id]) {
 					if (target instanceof EventEmitter) {
 						target.off(type, listener, context);
 					} else {
 						target.removeEventListener(type, listener);
 					}
 
-					delete _this3._disposables[id];
+					delete _this5._disposables[id];
 				}
 			};
 
@@ -3583,19 +3653,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return setTimeout;
 		})(function (cb, delay) {
-			var _this4 = this;
+			var _this6 = this;
 
 			var id = nextUID();
 
 			var timeoutId = setTimeout(function () {
-				delete _this4._disposables[id];
-				cb.call(_this4);
+				delete _this6._disposables[id];
+				cb.call(_this6);
 			}, delay);
 
 			var _clearTimeout = function _clearTimeout() {
-				if (_this4._disposables[id]) {
+				if (_this6._disposables[id]) {
 					clearTimeout(timeoutId);
-					delete _this4._disposables[id];
+					delete _this6._disposables[id];
 				}
 			};
 
@@ -3621,18 +3691,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return setInterval;
 		})(function (cb, delay) {
-			var _this5 = this;
+			var _this7 = this;
 
 			var id = nextUID();
 
 			var intervalId = setInterval(function () {
-				cb.call(_this5);
+				cb.call(_this7);
 			}, delay);
 
 			var _clearInterval = function _clearInterval() {
-				if (_this5._disposables[id]) {
+				if (_this7._disposables[id]) {
 					clearInterval(intervalId);
-					delete _this5._disposables[id];
+					delete _this7._disposables[id];
 				}
 			};
 
@@ -3648,7 +3718,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (cb: Function) -> { (), cancel: (), dispose: () };
 	  */
 		registerCallback: function registerCallback(cb) {
-			var _this6 = this;
+			var _this8 = this;
 
 			var id = nextUID();
 			var _this = this;
@@ -3661,7 +3731,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			};
 
 			var cancelCallback = function cancelCallback() {
-				delete _this6._disposables[id];
+				delete _this8._disposables[id];
 			};
 
 			callback.cancel = cancelCallback;
@@ -3726,6 +3796,45 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 8 */
 /***/ function(module, exports) {
 
+	'use strict';
+
+	var raf = window.requestAnimationFrame;
+
+	if (!raf) {
+		var vendors = ['webkit', 'moz', 'ms', 'o'];
+
+		for (var i = 0, l = vendors.length; i < l; i++) {
+			raf = window[vendors[i] + 'RequestAnimationFrame'];
+
+			if (raf) {
+				break;
+			}
+		}
+
+		if (!raf) {
+			(function () {
+				var targetTime = 0;
+
+				raf = function (cb) {
+					var currentTime = Date.now();
+					var timeToCall = Math.max(1, 16 - (currentTime - targetTime));
+
+					setTimeout(function () {
+						cb(currentTime + timeToCall);
+					}, timeToCall);
+
+					targetTime = currentTime + timeToCall;
+				};
+			})();
+		}
+	}
+
+	module.exports = raf;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports) {
+
 	/**
 	 * @typesign (el: HTMLElement, name: string) -> boolean;
 	 */
@@ -3750,7 +3859,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = hasClass;
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';

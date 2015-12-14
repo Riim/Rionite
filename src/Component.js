@@ -1,5 +1,6 @@
 let { EventEmitter, cellx, utils: { logError, mixin, createClass } } = require('cellx');
 let nextUID = require('./nextUID');
+let raf = require('./raf');
 let hasClass = require('./hasClass');
 let morphElement = require('./morphElement');
 let settings = require('./settings');
@@ -254,10 +255,6 @@ Component = createClass({
 		if (this.init) {
 			this.init();
 		}
-
-		if (!block[KEY_COMPONENT_KEY]) {
-			block[KEY_COMPONENT_KEY] = block.getAttribute('key') || block.outerHTML;
-		}
 	},
 
 	/**
@@ -297,11 +294,15 @@ Component = createClass({
 	dispose: null,
 
 	_onBlockOuterHTMLChange() {
-		morphComponentBlock(this, false);
+		raf(() => {
+			morphComponentBlock(this, false);
+		});
 	},
 
 	_onBlockInnerHTMLChange() {
-		morphComponentBlock(this, true);
+		raf(() => {
+			morphComponentBlock(this, true);
+		});
 	},
 
 	/**

@@ -30,8 +30,15 @@ let specialElementHandlers = {
 
 function noop() {}
 
+function isEmpty(obj) {
+	for (let name in obj) {
+		return false;
+	}
+	return true;
+}
+
 function defaultGetElementKey(el) {
-	return el.getAttribute('key');
+	return el.getAttribute('key') || undefined;
 }
 
 function morphAttributes(target, source) {
@@ -82,19 +89,28 @@ function morphElement(target, source, options) {
 	let onBeforeMorphElementContent = options.onBeforeMorphElementContent || noop;
 	let onKeyedElementRemoved = options.onKeyedElementRemoved || noop;
 
+	let activeElement = document.activeElement;
+	let scrollLeft;
+	let scrollTop;
+
+	if ('selectionStart' in activeElement) {
+		scrollLeft = activeElement.scrollLeft;
+		scrollTop = activeElement.scrollTop;
+	}
+
 	let storedElements = Object.create(null);
 	let unmatchedElements = Object.create(null);
 
 	function storeContent(el) {
-		for (let childNode = el.firstChild; childNode; childNode = childNode.nextSibling) {
-			if (childNode.nodeType == 1) {
-				let key = getElementKey(childNode);
+		for (let child = el.firstChild; child; child = child.nextSibling) {
+			if (child.nodeType == 1) {
+				let key = getElementKey(child);
 
 				if (key) {
-					storedElements[key] = childNode;
+					storedElements[key] = child;
 				}
 
-				storeContent(childNode);
+				storeContent(child);
 			}
 		}
 	}
@@ -115,113 +131,116 @@ function morphElement(target, source, options) {
 		let targetTagName = target.tagName;
 
 		if (targetTagName != 'TEXTAREA') {
-			let targetChildNode = target.firstChild;
-			let sourceChildNode = source.firstChild;
+			let targetChild = target.firstChild;
+			let fromChild = targetChild;
 
-			outer: while (sourceChildNode) {
-				let sourceChildNodeType = sourceChildNode.nodeType;
-				let sourceChildNodeKey;
+			for (let sourceChild = source.firstChild; sourceChild; sourceChild = sourceChild.nextSibling) {
+				let sourceChildType = sourceChild.nodeType;
+				let sourceChildTagName = sourceChild.tagName;
+				let sourceChildKey;
 
-				if (sourceChildNodeType == 1) {
-					sourceChildNodeKey = getElementKey(sourceChildNode);
+				if (sourceChildType == 1) {
+					sourceChildKey = getElementKey(sourceChild);
 
-					if (storedElements[sourceChildNodeKey]) {
-						target.insertBefore(storedElements[sourceChildNodeKey], targetChildNode || null);
-						delete storedElements[sourceChildNodeKey];
-
-						sourceChildNode = sourceChildNode.nextSibling;
-
+					if (storedElements[sourceChildKey]) {
+						target.insertBefore(storedElements[sourceChildKey], targetChild || null);
+						delete storedElements[sourceChildKey];
 						continue;
 					}
 				}
 
-				while (targetChildNode) {
-					let targetChildNodeType = targetChildNode.nodeType;
-					let targetChildNodeKey;
+				let found = false;
 
-					if (targetChildNodeType == 1) {
-						targetChildNodeKey = getElementKey(targetChildNode);
+				while (targetChild) {
+					if (targetChild.nodeType == sourceChildType) {
+						if (targetChild.nodeType == 1) {
+							if (
+								targetChild.tagName == sourceChildTagName &&
+									getElementKey(targetChild) === sourceChildKey
+							) {
+								found = true;
+								_morphElement(targetChild, sourceChild, false);
+							}
+						} else {
+							found = true;
+							targetChild.nodeValue = sourceChild.nodeValue;
+						}
 					}
 
-					if (targetChildNodeType == sourceChildNodeType) {
-						if (targetChildNodeType == 1) {
-							if (
-								targetChildNodeKey === sourceChildNodeKey &&
-									targetChildNode.tagName == sourceChildNode.tagName
-							) {
-								_morphElement(targetChildNode, sourceChildNode, false);
-
-								targetChildNode = targetChildNode.nextSibling;
-								sourceChildNode = sourceChildNode.nextSibling;
-
-								continue outer;
-							}
-						} else if (targetChildNodeType == 3 || targetChildNodeType == 8) {
-							targetChildNode.nodeValue = sourceChildNode.nodeValue;
-
-							targetChildNode = targetChildNode.nextSibling;
-							sourceChildNode = sourceChildNode.nextSibling;
-
-							continue outer;
+					if (found) {
+						if (targetChild == fromChild) {
+							targetChild = fromChild = fromChild.nextSibling;
 						} else {
+							target.insertBefore(targetChild, fromChild);
+							targetChild = fromChild;
+						}
+
+						break;
+					}
+
+					targetChild = targetChild.nextSibling;
+				}
+
+				if (!found) {
+					switch (sourceChild.nodeType) {
+						case 1: {
+							let el = document.createElement(sourceChildTagName);
+							target.insertBefore(el, fromChild || null);
+
+							if (sourceChildKey) {
+								unmatchedElements[sourceChildKey] = {
+									blank: el,
+									source: sourceChild
+								};
+							} else {
+								_morphElement(el, sourceChild, false);
+							}
+
+							break;
+						}
+						case 3: {
+							target.insertBefore(document.createTextNode(sourceChild.nodeValue), fromChild || null);
+							break;
+						}
+						case 8: {
+							target.insertBefore(document.createComment(sourceChild.nodeValue), fromChild || null);
+							break;
+						}
+						default: {
 							throw new TypeError('Unsupported node type');
 						}
 					}
 
-					let node = targetChildNode;
-					targetChildNode = targetChildNode.nextSibling;
+					targetChild = fromChild;
+				}
+			}
 
-					if (targetChildNodeKey) {
-						let el = unmatchedElements[targetChildNodeKey];
+			while (fromChild) {
+				let child = fromChild;
+				fromChild = fromChild.nextSibling;
 
-						if (el) {
-							delete unmatchedElements[targetChildNodeKey];
+				if (child.nodeType == 1) {
+					let childKey = getElementKey(child);
 
-							el.blank.parentNode.replaceChild(node, el.blank);
-							_morphElement(node, el.source, false);
-						} else {
-							target.removeChild(node);
-							storedElements[targetChildNodeKey] = node;
+					if (childKey) {
+						let unmatchedElement = unmatchedElements[childKey];
+
+						if (unmatchedElement) {
+							delete unmatchedElements[childKey];
+
+							unmatchedElement.blank.parentNode.replaceChild(child, unmatchedElement.blank);
+							_morphElement(child, unmatchedElement.source, false);
+
+							continue;
 						}
+
+						storedElements[childKey] = child;
 					} else {
-						target.removeChild(node);
-
-						if (targetChildNodeType == 1) {
-							storeContent(node);
-						}
+						storeContent(child);
 					}
 				}
 
-				switch (sourceChildNode.nodeType) {
-					case 1: {
-						let el = document.createElement(sourceChildNode.tagName);
-						target.appendChild(el);
-
-						if (sourceChildNodeKey) {
-							unmatchedElements[sourceChildNodeKey] = {
-								blank: el,
-								source: sourceChildNode
-							};
-						} else {
-							_morphElement(el, sourceChildNode, false);
-						}
-
-						break;
-					}
-					case 3: {
-						target.appendChild(document.createTextNode(sourceChildNode.nodeValue));
-						break;
-					}
-					case 8: {
-						target.appendChild(document.createComment(sourceChildNode.nodeValue));
-						break;
-					}
-					default: {
-						throw new TypeError('Unsupported node type');
-					}
-				}
-
-				sourceChildNode = sourceChildNode.nextSibling;
+				target.removeChild(child);
 			}
 		}
 
@@ -234,21 +253,25 @@ function morphElement(target, source, options) {
 
 	_morphElement(target, source, contentOnly);
 
-	let ch;
-
-	do {
-		ch = false;
-
+	while (!isEmpty(unmatchedElements)) {
 		for (let key in unmatchedElements) {
 			let el = unmatchedElements[key];
 			delete unmatchedElements[key];
 			_morphElement(el.blank, el.source, false);
-			ch = true;
 		}
-	} while (ch);
+	}
 
 	for (let key in storedElements) {
 		onKeyedElementRemoved(storedElements[key]);
+	}
+
+	if (activeElement != document.activeElement) {
+		if (scrollLeft !== undefined) {
+			activeElement.scrollLeft = scrollLeft;
+			activeElement.scrollTop = scrollTop;
+		}
+
+		activeElement.focus();
 	}
 }
 

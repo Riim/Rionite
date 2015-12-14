@@ -39,7 +39,7 @@ Using [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationO
 rista.component('hello-world', {
     init() {
         // Triggers when the element with `rt-is="hello-world"` appears in the document.
-        // `this.block` - a link to the element which has appeared.
+        // `this.block` — a link to the element which has appeared.
     },
 
     dispose() {
@@ -216,7 +216,7 @@ rista.component('example', {
 ```
 
 The target can be [EventTarget](https://developer.mozilla.org/en/docs/Web/API/EventTarget), `jQuery/Zepto/...`-collection or `cellx.EventEmitter` (in `Rista` it is available as `rista.EventEmitter`).  
-You can pass an object whose keys will be types of events, and values - handlers:
+You can pass an object whose keys will be types of events, and values — handlers:
 
 ```js
 this.listenTo(document, {
@@ -267,7 +267,7 @@ Similar to `Component#setTimeout`.
 
 ### Component#registerCallback
 
-Similarly to `Component#listenTo` and `Component#setTimeout` I would like to interrupt the request when cleaning that has created it. But is there any sense to interrupt it using [XMLHTTPRequest#abort](https://developer.mozilla.org/ru/docs/Web/API/XMLHttpRequest#abort())? Actually, no. `abort` does not "catch up" a request already sent in the network and does not stop it, it just cancels its processing on the client, but the complete cancelling is often more harmful, for example, instead of `XMLHttpRequest`, it is used a smart wrapper, which can send the same request, sent by two different components, only one time, or, if the server supports such a function, simply group multiple requests in a single one (to do this, the request is sent not instantaneously, but with a slight delay, allowing to save several requests). If, in this case, you cancel the request using `abort`, the component being cleaned will cancel the requests sent of other components that are still working. That is, in fact, there is no need to cancel the request itself, but only its handler - callback. To do this, the handler is passed through `Component#registerCallback` which saves it in the closure. The function returned by `registerCallback` will trigger the source callback (and will return the result of its call) only if the component is not be cleared until the response.
+Similarly to `Component#listenTo` and `Component#setTimeout` I would like to interrupt the request when cleaning that has created it. But is there any sense to interrupt it using [XMLHTTPRequest#abort](https://developer.mozilla.org/ru/docs/Web/API/XMLHttpRequest#abort())? Actually, no. `abort` does not "catch up" a request already sent in the network and does not stop it, it just cancels its processing on the client, but the complete cancelling is often more harmful, for example, instead of `XMLHttpRequest`, it is used a smart wrapper, which can send the same request, sent by two different components, only one time, or, if the server supports such a function, simply group multiple requests in a single one (to do this, the request is sent not instantaneously, but with a slight delay, allowing to save several requests). If, in this case, you cancel the request using `abort`, the component being cleaned will cancel the requests sent of other components that are still working. That is, in fact, there is no need to cancel the request itself, but only its handler — callback. To do this, the handler is passed through `Component#registerCallback` which saves it in the closure. The function returned by `registerCallback` will trigger the source callback (and will return the result of its call) only if the component is not be cleared until the response.
 
 #### Example
 
