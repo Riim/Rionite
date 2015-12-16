@@ -77,7 +77,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var KEY_COMPONENT = Component.KEY_COMPONENT;
 	var defineComponentSubclass = Component.defineSubclass;
 
-	var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mousemove', 'mouseout', 'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend', 'keydown', 'keypress', 'keyup', 'abort', 'error', 'resize', 'select', 'change', 'submit', 'reset', 'focusin', 'focusout'];
+	var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mousemove', 'mouseout', 'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend', 'keydown', 'keypress', 'keyup', 'abort', 'error', 'resize', 'select', 'change', 'submit', 'reset', 'input', 'focusin', 'focusout'];
 
 	var inited = false;
 
@@ -1988,7 +1988,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				 * ) -> cellx.Cell;
 				 */
 				addChangeListener: function(listener, context) {
-					this.on('success', listener, context);
+					this.on('change', listener, context);
 					return this;
 				},
 				/**
@@ -1998,7 +1998,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				 * ) -> cellx.Cell;
 				 */
 				removeChangeListener: function(listener, context) {
-					this.off('success', listener, context);
+					this.off('change', listener, context);
 					return this;
 				},
 		
