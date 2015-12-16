@@ -77,7 +77,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var KEY_COMPONENT = Component.KEY_COMPONENT;
 	var defineComponentSubclass = Component.defineSubclass;
 
-	var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mousemove', 'mouseout', 'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend', 'keydown', 'keypress', 'keyup', 'abort', 'error', 'resize', 'select', 'change', 'submit', 'reset', 'input', 'focusin', 'focusout'];
+	var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mousemove', 'mouseout', 'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend', 'keydown', 'keypress', 'keyup', 'abort', 'error', 'resize', 'select', 'input', 'change', 'submit', 'reset', 'focusin', 'focusout'];
 
 	var inited = false;
 
@@ -206,7 +206,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		/**
 		 * @typesign (value?, opts?: {
 		 *     owner?: Object,
-		 *     cloneValue?: (value) -> *,
 		 *     get?: (value) -> *,
 		 *     validate?: (value),
 		 *     onchange?: (evt: cellx~Event) -> boolean|undefined,
@@ -2514,10 +2513,6 @@ return /******/ (function(modules) { // webpackBootstrap
 						return;
 					}
 		
-					if (opts.cloneValue) {
-						initialValue = opts.cloneValue(initialValue);
-					}
-		
 					opts = Object.create(opts);
 					opts.owner = owner;
 		
@@ -3395,13 +3390,29 @@ return /******/ (function(modules) { // webpackBootstrap
 		_handleEvent: function _handleEvent(evt) {
 			EventEmitter.prototype._handleEvent.call(this, evt);
 
-			var parent = this.getParent();
+			if (evt.bubbles !== false && !evt.isPropagationStopped) {
+				var _parent = this.getParent();
 
-			if (parent && evt.bubbles !== false && !evt.isPropagationStopped) {
-				if (!parent.destroyed) {
-					parent._handleEvent(evt);
+				if (_parent && !_parent.destroyed) {
+					_parent._handleEvent(evt);
 				}
 			}
+		},
+
+		_onBlockOuterHTMLChange: function _onBlockOuterHTMLChange() {
+			var _this = this;
+
+			raf(function () {
+				morphComponentBlock(_this, false);
+			});
+		},
+
+		_onBlockInnerHTMLChange: function _onBlockInnerHTMLChange() {
+			var _this2 = this;
+
+			raf(function () {
+				morphComponentBlock(_this2, true);
+			});
 		},
 
 		/**
@@ -3424,22 +3435,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * For override.
 	  */
 		dispose: null,
-
-		_onBlockOuterHTMLChange: function _onBlockOuterHTMLChange() {
-			var _this2 = this;
-
-			raf(function () {
-				morphComponentBlock(_this2, false);
-			});
-		},
-
-		_onBlockInnerHTMLChange: function _onBlockInnerHTMLChange() {
-			var _this3 = this;
-
-			raf(function () {
-				morphComponentBlock(_this3, true);
-			});
-		},
 
 		/**
 	  * @typesign () -> HTMLElement|null;
@@ -3482,13 +3477,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			return $;
 		})(function (selector) {
 			selector = selector.split('&');
-
 			selector = selector.length == 1 ? selector[0] : selector.join('.' + this.blockName);
 
 			if (typeof $ == 'function' && $.fn) {
 				return $(this.block).find(selector);
 			}
-
 			return this.block.querySelectorAll(selector);
 		}),
 
@@ -3524,7 +3517,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		listenTo: function listenTo(target, type, listener, context) {
-			var _this4 = this;
+			var _this3 = this;
 
 			var listenings = undefined;
 
@@ -3579,7 +3572,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					listenings[--i].stop();
 				}
 
-				delete _this4._disposables[id];
+				delete _this3._disposables[id];
 			};
 
 			var listening = this._disposables[id] = {
@@ -3599,7 +3592,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * ) -> { stop: (), dispose: () };
 	  */
 		_listenTo: function _listenTo(target, type, listener, context) {
-			var _this5 = this;
+			var _this4 = this;
 
 			if (!context) {
 				context = this;
@@ -3620,14 +3613,14 @@ return /******/ (function(modules) { // webpackBootstrap
 			var id = nextUID();
 
 			var stopListening = function stopListening() {
-				if (_this5._disposables[id]) {
+				if (_this4._disposables[id]) {
 					if (target instanceof EventEmitter) {
 						target.off(type, listener, context);
 					} else {
 						target.removeEventListener(type, listener);
 					}
 
-					delete _this5._disposables[id];
+					delete _this4._disposables[id];
 				}
 			};
 
@@ -3653,19 +3646,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return setTimeout;
 		})(function (cb, delay) {
-			var _this6 = this;
+			var _this5 = this;
 
 			var id = nextUID();
 
 			var timeoutId = setTimeout(function () {
-				delete _this6._disposables[id];
-				cb.call(_this6);
+				delete _this5._disposables[id];
+				cb.call(_this5);
 			}, delay);
 
 			var _clearTimeout = function _clearTimeout() {
-				if (_this6._disposables[id]) {
+				if (_this5._disposables[id]) {
 					clearTimeout(timeoutId);
-					delete _this6._disposables[id];
+					delete _this5._disposables[id];
 				}
 			};
 
@@ -3691,18 +3684,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return setInterval;
 		})(function (cb, delay) {
-			var _this7 = this;
+			var _this6 = this;
 
 			var id = nextUID();
 
 			var intervalId = setInterval(function () {
-				cb.call(_this7);
+				cb.call(_this6);
 			}, delay);
 
 			var _clearInterval = function _clearInterval() {
-				if (_this7._disposables[id]) {
+				if (_this6._disposables[id]) {
 					clearInterval(intervalId);
-					delete _this7._disposables[id];
+					delete _this6._disposables[id];
 				}
 			};
 
@@ -3718,20 +3711,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (cb: Function) -> { (), cancel: (), dispose: () };
 	  */
 		registerCallback: function registerCallback(cb) {
-			var _this8 = this;
+			var _this7 = this;
 
 			var id = nextUID();
-			var _this = this;
+			var component = this;
 
 			var callback = function callback() {
-				if (_this._disposables[id]) {
-					delete _this._disposables[id];
-					return cb.apply(_this, arguments);
+				if (component._disposables[id]) {
+					delete component._disposables[id];
+					return cb.apply(component, arguments);
 				}
 			};
 
 			var cancelCallback = function cancelCallback() {
-				delete _this8._disposables[id];
+				delete _this7._disposables[id];
 			};
 
 			callback.cancel = cancelCallback;

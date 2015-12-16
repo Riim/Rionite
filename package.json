@@ -1,6 +1,6 @@
 {
   "name": "rista",
-  "version": "0.7.11",
+  "version": "0.7.12",
   "description": "",
   "main": "rista.js",
   "scripts": {
@@ -28,6 +28,6 @@
     "webpack": "^1.12.9"
   },
   "dependencies": {
-    "cellx": "^1.4.15"
+    "cellx": "^1.4.16"
   }
 }

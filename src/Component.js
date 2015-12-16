@@ -263,13 +263,25 @@ Component = createClass({
 	_handleEvent(evt) {
 		EventEmitter.prototype._handleEvent.call(this, evt);
 
-		let parent = this.getParent();
+		if (evt.bubbles !== false && !evt.isPropagationStopped) {
+			let parent = this.getParent();
 
-		if (parent && evt.bubbles !== false && !evt.isPropagationStopped) {
-			if (!parent.destroyed) {
+			if (parent && !parent.destroyed) {
 				parent._handleEvent(evt);
 			}
 		}
+	},
+
+	_onBlockOuterHTMLChange() {
+		raf(() => {
+			morphComponentBlock(this, false);
+		});
+	},
+
+	_onBlockInnerHTMLChange() {
+		raf(() => {
+			morphComponentBlock(this, true);
+		});
 	},
 
 	/**
@@ -292,18 +304,6 @@ Component = createClass({
 	 * For override.
 	 */
 	dispose: null,
-
-	_onBlockOuterHTMLChange() {
-		raf(() => {
-			morphComponentBlock(this, false);
-		});
-	},
-
-	_onBlockInnerHTMLChange() {
-		raf(() => {
-			morphComponentBlock(this, true);
-		});
-	},
 
 	/**
 	 * @typesign () -> HTMLElement|null;
@@ -333,15 +333,11 @@ Component = createClass({
 	 */
 	$(selector) {
 		selector = selector.split('&');
-
-		selector = selector.length == 1 ?
-			selector[0] :
-			selector.join('.' + this.blockName);
+		selector = selector.length == 1 ? selector[0] : selector.join('.' + this.blockName);
 
 		if (typeof $ == 'function' && $.fn) {
 			return $(this.block).find(selector);
 		}
-
 		return this.block.querySelectorAll(selector);
 	},
 
@@ -549,12 +545,12 @@ Component = createClass({
 	 */
 	registerCallback(cb) {
 		let id = nextUID();
-		let _this = this;
+		let component = this;
 
 		let callback = function() {
-			if (_this._disposables[id]) {
-				delete _this._disposables[id];
-				return cb.apply(_this, arguments);
+			if (component._disposables[id]) {
+				delete component._disposables[id];
+				return cb.apply(component, arguments);
 			}
 		};
 

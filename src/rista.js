@@ -12,7 +12,7 @@ let eventTypes = [
 	'dragstart', 'drag', 'dragenter', 'dragleave', 'dragover', 'drop', 'dragend',
 	'keydown', 'keypress', 'keyup',
 	'abort', 'error', 'resize',
-	'select', 'change', 'submit', 'reset', 'input',
+	'select', 'input', 'change', 'submit', 'reset',
 	'focusin', 'focusout'
 ];
 
