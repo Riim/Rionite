@@ -159,7 +159,7 @@ return `
 
 ## Выбор элементов
 
-В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.elementName')` можно сократить до `this.$('.elementName')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на селектор блока. Например, запись `this.$('.blockName__elementName')` можно сократить до `this.$('&__elementName')`:
+В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.element-name')` можно сократить до `this.$('.element-name')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на селектор блока. Например, запись `this.$('.block-name__element-name')` можно сократить до `this.$('&__element-name')`:
 
 ```js
 <example></example>
@@ -169,12 +169,12 @@ return `
 rista.component('example', {
     renderInner() {
         return `
-            <input class="example__tfSearch" type="text">
+            <input class="example__tf-search" type="text">
         `;
     },
 
     init() {
-        this.$('&__tfSearch').focus();
+        this.$('&__tf-search').focus();
     }
 });
 

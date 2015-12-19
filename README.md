@@ -163,7 +163,7 @@ return `
 
 ## Element selection
 
-In the component methods there is `$` method, allowing to reduce the record when selecting elements. The record `$(this.block).find('.elementName')` can be reduced to `this.$('.elementName')`. Furthermore, when using BEM methodology in layout, you can use a symbol `&` in the selector, which will be replaced by the block selector. For example, here, the record `this.$('.blockName__elementName')` can be reduced to `this.$('&__elementName')`:
+In the component methods there is `$` method, allowing to reduce the record when selecting elements. The record `$(this.block).find('.element-name')` can be reduced to `this.$('.element-name')`. Furthermore, when using BEM methodology in layout, you can use a symbol `&` in the selector, which will be replaced by the block selector. For example, here, the record `this.$('.block-name__element-name')` can be reduced to `this.$('&__element-name')`:
 
 ```js
 <example></example>
@@ -173,12 +173,12 @@ In the component methods there is `$` method, allowing to reduce the record when
 rista.component('example', {
     renderInner() {
         return `
-            <input class="example__tfSearch" type="text">
+            <input class="example__tf-search" type="text">
         `;
     },
 
     init() {
-        this.$('&__tfSearch').focus();
+        this.$('&__tf-search').focus();
     }
 });
 

@@ -1,4 +1,4 @@
-let { EventEmitter, cellx, utils: { logError, mixin, createClass } } = require('cellx');
+let { EventEmitter, Cell, utils: { logError, mixin, createClass } } = require('cellx');
 let nextUID = require('./nextUID');
 let raf = require('./raf');
 let hasClass = require('./hasClass');
@@ -124,7 +124,7 @@ function defineComponentSubclass(name, description) {
  */
 function morphComponentBlock(component, contentOnly) {
 	let el = document.createElement('div');
-	el.innerHTML = contentOnly ? component._blockInnerHTML() : component._blockOuterHTML();
+	el.innerHTML = contentOnly ? component._blockInnerHTML.get() : component._blockOuterHTML.get();
 
 	morphElement(component.block, contentOnly ? el : el.firstElementChild, {
 		contentOnly,
@@ -200,22 +200,13 @@ Component = createClass({
 	blockName: undefined,
 
 	/**
-	 * @final
-	 * @type {cellx<string>}
+	 * @type {cellx.Cell<string>|null}
 	 */
-	_blockOuterHTML: cellx(function() {
-		let html = this.render();
-		return Array.isArray(html) ? html.join('') : html;
-	}),
-
+	_blockOuterHTML: null,
 	/**
-	 * @final
-	 * @type {cellx<string>}
+	 * @type {cellx.Cell<string>|null}
 	 */
-	_blockInnerHTML: cellx(function() {
-		let html = this.renderInner();
-		return Array.isArray(html) ? html.join('') : html;
-	}),
+	_blockInnerHTML: null,
 
 	constructor(block) {
 		if (block[KEY_COMPONENT]) {
@@ -245,11 +236,25 @@ Component = createClass({
 		}
 
 		if (this.render) {
+			this._blockOuterHTML = new Cell(function() {
+				let html = this.render();
+				return Array.isArray(html) ? html.join('') : html;
+			}, {
+				owner: this,
+				onChange: this._onBlockOuterHTMLChange
+			});
+			
 			morphComponentBlock(this, false);
-			this._blockOuterHTML('on', 'change', this._onBlockOuterHTMLChange);
 		} else if (this.renderInner) {
+			this._blockInnerHTML = new Cell(function() {
+				let html = this.renderInner();
+				return Array.isArray(html) ? html.join('') : html;
+			}, {
+				owner: this,
+				onChange: this._onBlockInnerHTMLChange
+			});
+			
 			morphComponentBlock(this, true);
-			this._blockInnerHTML('on', 'change', this._onBlockInnerHTMLChange);
 		}
 
 		if (this.init) {
@@ -277,7 +282,6 @@ Component = createClass({
 			morphComponentBlock(this, false);
 		});
 	},
-
 	_onBlockInnerHTMLChange() {
 		raf(() => {
 			morphComponentBlock(this, true);
@@ -574,8 +578,11 @@ Component = createClass({
 			return;
 		}
 
-		this._blockOuterHTML('dispose', 0);
-		this._blockInnerHTML('dispose', 0);
+		if (this.render) {
+			this._blockOuterHTML.dispose();
+		} else if (this.renderInner) {
+			this._blockInnerHTML.dispose();
+		}
 
 		let disposables = this._disposables;
 

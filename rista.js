@@ -208,8 +208,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		 *     owner?: Object,
 		 *     get?: (value) -> *,
 		 *     validate?: (value),
-		 *     onchange?: (evt: cellx~Event) -> boolean|undefined,
-		 *     onerror?: (evt: cellx~Event) -> boolean|undefined,
+		 *     onChange?: (evt: cellx~Event) -> boolean|undefined,
+		 *     onError?: (evt: cellx~Event) -> boolean|undefined,
 		 *     computed?: false,
 		 *     debugKey?: string
 		 * }) -> cellx;
@@ -219,8 +219,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		 *     get?: (value) -> *,
 		 *     set?: (value),
 		 *     validate?: (value),
-		 *     onchange?: (evt: cellx~Event) -> boolean|undefined,
-		 *     onerror?: (evt: cellx~Event) -> boolean|undefined,
+		 *     onChange?: (evt: cellx~Event) -> boolean|undefined,
+		 *     onError?: (evt: cellx~Event) -> boolean|undefined,
 		 *     computed?: true,
 		 *     debugKey?: string
 		 * }) -> cellx;
@@ -237,7 +237,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 			cell.constructor = cellx;
 
-			if (opts.onchange || opts.onerror) {
+			if (opts.onChange || opts.onError) {
 				cell.call(opts.owner || global);
 			}
 
@@ -1828,8 +1828,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			 *     owner?: Object,
 			 *     get?: (value) -> *,
 			 *     validate?: (value),
-			 *     onchange?: (evt: cellx~Event) -> boolean|undefined,
-			 *     onerror?: (evt: cellx~Event) -> boolean|undefined,
+			 *     onChange?: (evt: cellx~Event) -> boolean|undefined,
+			 *     onError?: (evt: cellx~Event) -> boolean|undefined,
 			 *     computed?: false,
 			 *     debugKey?: string
 			 * }) -> cellx.Cell;
@@ -1839,8 +1839,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			 *     get?: (value) -> *,
 			 *     set?: (value),
 			 *     validate?: (value),
-			 *     onchange?: (evt: cellx~Event) -> boolean|undefined,
-			 *     onerror?: (evt: cellx~Event) -> boolean|undefined,
+			 *     onChange?: (evt: cellx~Event) -> boolean|undefined,
+			 *     onError?: (evt: cellx~Event) -> boolean|undefined,
 			 *     computed?: true,
 			 *     debugKey?: string
 			 * }) -> cellx.Cell;
@@ -1915,11 +1915,11 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					}
 		
-					if (opts.onchange) {
-						this.on('change', opts.onchange);
+					if (opts.onChange) {
+						this.on('change', opts.onChange);
 					}
-					if (opts.onerror) {
-						this.on('error', opts.onerror);
+					if (opts.onError) {
+						this.on('error', opts.onError);
 					}
 				},
 		
@@ -3106,7 +3106,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	var settings = {
-		blockNameCase: 'camel' // 'camel', 'pascal' or 'hyphen'
+		blockNameCase: 'hyphen' // hyphen, camel or pascal
 	};
 
 	module.exports = settings;
@@ -3120,7 +3120,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _require = __webpack_require__(1);
 
 	var EventEmitter = _require.EventEmitter;
-	var cellx = _require.cellx;
+	var Cell = _require.Cell;
 	var _require$utils = _require.utils;
 	var logError = _require$utils.logError;
 	var mixin = _require$utils.mixin;
@@ -3251,7 +3251,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function morphComponentBlock(component, contentOnly) {
 		var el = document.createElement('div');
-		el.innerHTML = contentOnly ? component._blockInnerHTML() : component._blockOuterHTML();
+		el.innerHTML = contentOnly ? component._blockInnerHTML.get() : component._blockOuterHTML.get();
 
 		morphElement(component.block, contentOnly ? el : el.firstElementChild, {
 			contentOnly: contentOnly,
@@ -3327,22 +3327,13 @@ return /******/ (function(modules) { // webpackBootstrap
 		blockName: undefined,
 
 		/**
-	  * @final
-	  * @type {cellx<string>}
+	  * @type {cellx.Cell<string>|null}
 	  */
-		_blockOuterHTML: cellx(function () {
-			var html = this.render();
-			return Array.isArray(html) ? html.join('') : html;
-		}),
-
+		_blockOuterHTML: null,
 		/**
-	  * @final
-	  * @type {cellx<string>}
+	  * @type {cellx.Cell<string>|null}
 	  */
-		_blockInnerHTML: cellx(function () {
-			var html = this.renderInner();
-			return Array.isArray(html) ? html.join('') : html;
-		}),
+		_blockInnerHTML: null,
 
 		constructor: function constructor(block) {
 			if (block[KEY_COMPONENT]) {
@@ -3372,11 +3363,25 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 
 			if (this.render) {
+				this._blockOuterHTML = new Cell(function () {
+					var html = this.render();
+					return Array.isArray(html) ? html.join('') : html;
+				}, {
+					owner: this,
+					onChange: this._onBlockOuterHTMLChange
+				});
+
 				morphComponentBlock(this, false);
-				this._blockOuterHTML('on', 'change', this._onBlockOuterHTMLChange);
 			} else if (this.renderInner) {
+				this._blockInnerHTML = new Cell(function () {
+					var html = this.renderInner();
+					return Array.isArray(html) ? html.join('') : html;
+				}, {
+					owner: this,
+					onChange: this._onBlockInnerHTMLChange
+				});
+
 				morphComponentBlock(this, true);
-				this._blockInnerHTML('on', 'change', this._onBlockInnerHTMLChange);
 			}
 
 			if (this.init) {
@@ -3406,7 +3411,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				morphComponentBlock(_this, false);
 			});
 		},
-
 		_onBlockInnerHTMLChange: function _onBlockInnerHTMLChange() {
 			var _this2 = this;
 
@@ -3743,8 +3747,11 @@ return /******/ (function(modules) { // webpackBootstrap
 				return;
 			}
 
-			this._blockOuterHTML('dispose', 0);
-			this._blockInnerHTML('dispose', 0);
+			if (this.render) {
+				this._blockOuterHTML.dispose();
+			} else if (this.renderInner) {
+				this._blockInnerHTML.dispose();
+			}
 
 			var disposables = this._disposables;
 

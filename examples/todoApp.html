@@ -60,7 +60,7 @@ rista.component('todo', {
 		let model = this.model;
 
 		return `
-			<input class="todo__cbDone" type="checkbox" rt-change="_onCbDoneChange" ${model.done ? 'checked' : ''}>
+			<input class="todo__cb-done" type="checkbox" rt-change="_onCbDoneChange" ${model.done ? 'checked' : ''}>
 			<span class="todo__text">${model.text}</span>
 			<button rt-click="_onBtnRemoveClick">remove</button>
 		`;
@@ -99,14 +99,14 @@ rista.component('todo-app', {
 
 		return `
 			${t.join('')}
-			<input class="todoApp__tfNewTodo" type="text">
+			<input class="todo-app__tf-new-todo" type="text">
 			<button rt-click="_onBtnAddClick">Add #${appModel.todos.size + 1}</button>
 			<div>all: ${appModel.todos.size} done: ${appModel.doneTodoCount}</div>
 		`;
 	},
 
 	_onBtnAddClick() {
-		let value = this.$('&__tfNewTodo')[0].value;
+		let value = this.$('&__tf-new-todo')[0].value;
 
 		appModel.todos.set(nextId(), {
 			text: value,
