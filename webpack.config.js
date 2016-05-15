@@ -2,13 +2,28 @@ var webpack = require('webpack');
 
 module.exports = {
 	output: {
-		library: 'rista',
+		library: 'Rista',
 		libraryTarget: 'umd'
 	},
 
 	module: {
+		preLoaders: [
+			{
+				test: /\.js$/,
+				loader: 'eslint'
+			}
+		],
+
 		loaders: [
-			{ test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' }
+			{
+				test: /\.js$/,
+				exclude: /node_modules/,
+				loader: 'babel',
+				query: {
+					presets: ['es2015'],
+					plugins: ['transform-object-rest-spread']
+				}
+			}
 		]
 	},
 

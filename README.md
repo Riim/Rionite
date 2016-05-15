@@ -8,8 +8,10 @@
     <img src="https://raw.githubusercontent.com/Riim/rista/master/docs/images/logo.png" width="160.5" height="146">
 </p>
 
-A simple framework combining the functionality of [cellx](https://github.com/Riim/cellx), [morphdom](https://github.com/patrick-steele-idem/morphdom) and [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver).  
+A simple framework combining the functionality of [cellx](https://github.com/Riim/cellx), [morphdom](https://github.com/patrick-steele-idem/morphdom) and [Custom Elements](https://www.w3.org/TR/custom-elements/).  
 In general, we receive a lightweight (minify+gzip ~ 10kB) alternative to [ReactJS](https://facebook.github.io/react/), which is faster and does not require any code pretreatment (jsx).
+
+## Description partially outdated.
 
 ## Installation
 
@@ -27,37 +29,25 @@ Rista supports IE9 and above and all modern browsers.
 
 ## Principle of operation
 
-Using [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `Rista` monitors the elements appearing in the document with `rt-is` attribute and applies to them components with names specified in the attribute value.
+Using [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `Rista` monitors the custom elements appearing in the document and applies to them components with names specified in the attribute value.
 
 ### Example
 
 ```js
-<div rt-is="hello-world">Hello, World!</div>
+<hello-world>Hello, World!</hello-world>
 
-<script type="text/ecmascript-7">
+<script>
 
-rista.component('hello-world', {
-    init() {
+Rista.Component.extend('hello-world', {
+    onElementAttached: function() {
         // Triggers when the element with `rt-is="hello-world"` appears in the document.
-        // `this.block` — a link to the element which has appeared.
+        // `this.element` — a link to the element which has appeared.
     },
 
-    dispose() {
+    onElementDetached: function() {
         // Triggers when deleting the element with `rt-is="hello-world"` from the document.
     }
 });
-
-</script>
-```
-
-Instead of `rt-is` attribute, you can use the tag name:
-
-```js
-<hello-world>Hello, World!</hello-world>
-
-<script type="text/ecmascript-7">
-
-rista.component('hello-world', {/* ... */});
 
 </script>
 ```
@@ -71,38 +61,44 @@ If a component needs to set its own content, you can determine the method `rende
 ```js
 <user-card></user-card>
 
-<script type="text/ecmascript-7">
+<script>
 
-let d = rista.d;
+var cellx = Rista.cellx;
 
-// App model
-let appModel = {
+// модель приложения
+var appModel = cellx.define({}, {
     // Observable property. Details in cellx-а description.
-    @d.observable userAge: 0,
+    userAge: 0,
 
     // Computed property.
-    @d.computed userAgeYearLater: function() {
+    userAgeYearLater: function() {
         return this.userAge + 1;
     }
-};
+});
 
-setInterval(() => {
+setInterval(function() {
     // every second the user will age one year
     appModel.userAge++;
 }, 1000);
 
-rista.component('user-card', {
-    // Own property of the component is computed from properties of the model.
-    @d.computed userAgeTwoYearsLater: function() {
-        return appModel.userAgeYearLater + 1;
+Rista.Component.extend('user-card', {
+    constructor: function() {
+        Rista.Component.call(this);
+        
+        cellx.define(this, {
+            // Own property of the component is computed from properties of the model.
+            userAgeTwoYearsLater: function() {
+                return appModel.userAgeYearLater + 1;
+            }
+        });
     },
 
-    renderInner() {
+    renderInner: function() {
         // write everything
         return `
-            <div>${appModel.userAge}</div>
-            <div>${appModel.userAgeYearLater}</div>
-            <div>${this.userAgeTwoYearsLater}</div>
+            <div>${ appModel.userAge }</div>
+            <div>${ appModel.userAgeYearLater }</div>
+            <div>${ this.userAgeTwoYearsLater }</div>
         `;
     }
 });
@@ -117,23 +113,26 @@ rista.component('user-card', {
 [jsfiddle](http://jsfiddle.net/utvffa63/)
 
 ```js
-<counter></counter>
+<simple-counter></simple-counter>
 
-<script type="text/ecmascript-7">
+<script>
 
-rista.component('counter', {
-    @rista.d.observable counter: 0,
+Rista.Component.extend('simple-counter', {
+	constructor: function() {
+		Rista.Component.call(this);
+		Rista.cellx.define(this, 'counter', 0);
+	},
+	
+	renderInner: function() {
+		return `
+			<div>${ this.counter }</div>
+			<button rt-click="onBtnClick">Click Me!</button>
+		`;
+	},
 
-    renderInner() {
-        return `
-            <div>${this.counter}</div>
-            <button rt-click="_onBtnClick">Click Me!</button>
-        `;
-    },
-
-    _onBtnClick() {
-        this.counter++;
-    }
+	onBtnClick: function() {
+		this.counter++;
+	}
 });
 
 </script>
@@ -154,38 +153,12 @@ Including the event components:
 
 ```js
 return `
-    <div rt-bar="_onFooBar">
-        <foo rt-baz="_onFooBaz"></foo>
-        <foo></foo>
+    <div rt-bar="onFooBar">
+        <x-foo rt-baz="onFooBaz"></x-foo>
+        <x-foo></x-foo>
     </div>
 `;
 ```
-
-## Element selection
-
-In the component methods there is `$` method, allowing to reduce the record when selecting elements. The record `$(this.block).find('.element-name')` can be reduced to `this.$('.element-name')`. Furthermore, when using BEM methodology in layout, you can use a symbol `&` in the selector, which will be replaced by the block selector. For example, here, the record `this.$('.block-name__element-name')` can be reduced to `this.$('&__element-name')`:
-
-```js
-<example></example>
-
-<script type="text/ecmascript-7">
-
-rista.component('example', {
-    renderInner() {
-        return `
-            <input class="example__tf-search" type="text">
-        `;
-    },
-
-    init() {
-        this.$('&__tf-search').focus();
-    }
-});
-
-</script>
-```
-
-If `jQuery/Zepto/...` unavailable, `$` will return [NodeList](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
 
 ## Memory control
 
@@ -195,22 +168,22 @@ This adds the event handler that will be automatically removed in cleaning (`dis
 The following two examples are equivalent:
 
 ```js
-rista.component('example', {
-    init() {
-        this._onDocumentScroll = this._onDocumentScroll.bind(this);
-        document.addEventListener('scroll', this._onDocumentScroll);
+Rista.Component.extend('my-example', {
+    onElementAttached: function() {
+        this.onDocumentScroll = this.onDocumentScroll.bind(this);
+        document.addEventListener('scroll', this.onDocumentScroll);
     },
 
-    dispose() {
-        document.removeEventListener('scroll', this._onDocumentScroll);
+    onElementDetached: function() {
+        document.removeEventListener('scroll', this.onDocumentScroll);
     }
 });
 ```
 
 ```js
-rista.component('example', {
-    init() {
-        this.listenTo(document, 'scroll', this._onDocumentScroll);
+Rista.Component.extend('my-example', {
+    onElementAttached: function() {
+        this.listenTo(document, 'scroll', this.onDocumentScroll);
     }
 });
 ```
@@ -220,8 +193,8 @@ You can pass an object whose keys will be types of events, and values — handle
 
 ```js
 this.listenTo(document, {
-    mousedown: this._onDocumentMouseDown,
-    mouseup: this._onDocumentMouseUp
+    mousedown: this.onDocumentMouseDown,
+    mouseup: this.onDocumentMouseUp
 });
 ```
 
@@ -233,17 +206,17 @@ This sets a timer that will be automatically removed in cleaning (`dispose`) the
 The following two examples are equivalent:
 
 ```js
-rista.component('example', {
-    _timerId: undefined,
+Rista.Component.extend('my-example', {
+    _timerId: void 0,
 
-    init() {
+    onElementAttached: function() {
         this._timerId = setTimeout(() => {
-            this._timerId = undefined;
-            this._onTimer();
+            this._timerId = void 0;
+            this.onTimer();
         }, 10000);
     },
 
-    dispose() {
+    onElementDetached: function() {
         if (this._timerId) {
             clearTimeout(this._timerId);
         }
@@ -252,9 +225,9 @@ rista.component('example', {
 ```
 
 ```js
-rista.component('example', {
-    init() {
-        this.setTimeout(this._onTimer, 10000);
+Rista.Component.extend('my-example', {
+    onElementAttached: function() {
+        this.setTimeout(this.onTimer, 10000);
     }
 });
 ```
@@ -272,11 +245,11 @@ Similarly to `Component#listenTo` and `Component#setTimeout` I would like to int
 #### Example
 
 ```js
-let BackendProvider = require('../../../Proxy/BackendProvider');
+var BackendProvider = require('../../../Proxy/BackendProvider');
 
-rista.component('user-card', {
-    init() {
-        BackendProvider.getUser(this.registerCallback((err, user) => {
+Rista.Component.extend('user-card', {
+    onElementAttached: function() {
+        BackendProvider.getUser(this.registerCallback(function(err, user) {
             //
         }));
     }
@@ -296,33 +269,33 @@ This creates a pop-up event on the component that allows you to send the signal 
 [jsfiddle](http://jsfiddle.net/esb8cx6x/)
 
 ```js
-<div rt-is="parent"></div>
+<x-parent></x-parent>
 
-<script type="text/ecmascript-7">
+<script>
 
-rista.component('parent', {
-    renderInner() {
+Rista.Component.extend('x-parent', {
+    renderInner: function() {
         return `
-            <div rt-is="child" data-id="1"></div>
-            <div rt-is="child" data-id="2"></div>
+            <x-child data-id="1"></x-child>
+            <x-child data-id="2"></x-child>
         `;
     },
 
-    init() {
-        this.listenTo(this, 'foo', this._onFoo);
+    onElementAttached: function() {
+        this.listenTo(this, 'foo', this.onFoo);
     },
 
-    _onFoo(evt) {
+    onFoo: function(evt) {
         console.log(evt.childId);
     }
 });
 
-rista.component('child', {
-    init() {
-        this.setInterval(() => {
+Rista.Component.extend('x-child', {
+    onElementAttached: function() {
+        this.setInterval(function() {
             this.emit({
                 type: 'foo',
-                childId: this.block.dataset.id
+                childId: this.element.dataset.id
             });
         }, 1000);
     }
@@ -330,47 +303,3 @@ rista.component('child', {
 
 </script>
 ```
-
-### Component#broadcast
-
-This allows you to send the signal from the ancestor component to descendant component. The first argument is the name of the descendant components (specifies attribute `name`), second is the name of the called method, and the rest are arguments passed to the method. If the descendant component does not contain the desired method, it is skipped.  
-It returns an array of results.
-
-#### Example
-
-[jsfiddle](http://jsfiddle.net/n7fv5k8s/)
-
-```js
-<div rt-is="parent"></div>
-
-<script type="text/ecmascript-7">
-
-rista.component('parent', {
-    renderInner() {
-        return `
-            <div name="foo" rt-is="child"></div>
-            <div name="foo" rt-is="child"></div>
-        `;
-    },
-
-    init() {
-        this.setInterval(() => {
-            this.broadcast('foo', 'method', Math.random());
-        }, 1000);
-    }
-});
-
-rista.component('child', {
-    method(num) {
-        console.log(num);
-    }
-});
-
-</script>
-```
-
-## Ready components
-
-- [router](https://github.com/Riim/rista-router)
-- [popup](https://github.com/Riim/rista-popup)
-- [switcher](https://github.com/Riim/rista-switcher)

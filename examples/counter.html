@@ -6,35 +6,27 @@
 </head>
 <body>
 
-<counter></counter>
+<simple-counter></simple-counter>
 
-<script src="../rista.js"></script>
-<script type="text/ecmascript-7">
+<script src="../dist/Rista.js"></script>
+<script>
 
-rista.component('counter', {
-	@rista.d.observable counter: 0,
-
-	renderInner() {
+Rista.Component.extend('simple-counter', {
+	constructor: function() {
+		Rista.Component.call(this);
+		Rista.cellx.define(this, 'counter', 0);
+	},
+	
+	renderInner: function() {
 		return `
-			<div>${this.counter}</div>
-			<button rt-click="_onBtnClick">Click Me!</button>
+			<div>${ this.counter }</div>
+			<button rt-click="onBtnClick">Click Me!</button>
 		`;
 	},
 
-	_onBtnClick() {
+	onBtnClick: function() {
 		this.counter++;
 	}
-});
-
-</script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.32/browser.min.js"></script>
-<script>
-
-Array.prototype.forEach.call(document.querySelectorAll('script[type="text/ecmascript-7"]'), function(script) {
-	babel.run(script.innerHTML, {
-		optional: ['es7.classProperties', 'es7.decorators', 'es7.functionBind']
-	});
 });
 
 </script>

@@ -4,8 +4,10 @@
     <img src="https://raw.githubusercontent.com/Riim/rista/master/docs/images/logo.png" width="160.5" height="146">
 </p>
 
-Простой фреймворк объединяющий в себе возможности [cellx](https://github.com/Riim/cellx)-а, [morphdom](https://github.com/patrick-steele-idem/morphdom)-а и [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver)-а.  
+Простой фреймворк объединяющий в себе возможности [cellx](https://github.com/Riim/cellx)-а, [morphdom](https://github.com/patrick-steele-idem/morphdom)-а и [Custom Elements](https://www.w3.org/TR/custom-elements/).  
 В целом, по возможностям получается легковесная (minify+gzip ~ 10kB) альтернатива [ReactJS](https://facebook.github.io/react/)-у, более быстрая и не требующая какой-то предварительной обработки кода (jsx).
+
+## Описание частично устарело.
 
 ## Установка
 
@@ -23,37 +25,25 @@ npm install rista --save
 
 ## Принцип работы
 
-Используя [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `Rista` отслеживает появляющиеся в документе элементы с атрибутом `rt-is` и применяет к ним компоненты с заданными в значении атрибута именами.
+Используя [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `Rista` отслеживает появляющиеся в документе кастомные элементы и применяет к ним компоненты с заданными в значении атрибута именами.
 
 ### Пример
 
 ```js
-<div rt-is="hello-world">Hello, World!</div>
+<hello-world>Hello, World!</hello-world>
 
-<script type="text/ecmascript-7">
+<script>
 
-rista.component('hello-world', {
-    init() {
+Rista.Component.extend('hello-world', {
+    onElementAttached: function() {
         // Сработает при появлении элемента с `rt-is="hello-world"` в документе.
-        // `this.block` — ссылка на появившийся элемент.
+        // `this.element` — ссылка на появившийся элемент.
     },
 
-    dispose() {
+    onElementDetached: function() {
         // Сработает при удалении элемента с `rt-is="hello-world"` из документа.
     }
 });
-
-</script>
-```
-
-Вместо атрибута `rt-is` можно использовать имя тега:
-
-```js
-<hello-world>Hello, World!</hello-world>
-
-<script type="text/ecmascript-7">
-
-rista.component('hello-world', {/* ... */});
 
 </script>
 ```
@@ -67,38 +57,44 @@ rista.component('hello-world', {/* ... */});
 ```js
 <user-card></user-card>
 
-<script type="text/ecmascript-7">
+<script>
 
-let d = rista.d;
+var cellx = Rista.cellx;
 
 // модель приложения
-let appModel = {
+var appModel = cellx.define({}, {
     // Наблюдаемое свойство. Подробности в описании cellx-а.
-    @d.observable userAge: 0,
+    userAge: 0,
 
     // Вычисляемое свойство.
-    @d.computed userAgeYearLater: function() {
+    userAgeYearLater: function() {
         return this.userAge + 1;
     }
-};
+});
 
-setInterval(() => {
+setInterval(function() {
     // каждую секунду юзер будет стареть на год
     appModel.userAge++;
 }, 1000);
 
-rista.component('user-card', {
-    // Собственное свойство компонента, вычисляемое из свойства модели.
-    @d.computed userAgeTwoYearsLater: function() {
-        return appModel.userAgeYearLater + 1;
+Rista.Component.extend('user-card', {
+    constructor: function() {
+        Rista.Component.call(this);
+        
+        cellx.define(this, {
+            // Собственное свойство компонента, вычисляемое из свойства модели.
+            userAgeTwoYearsLater: function() {
+                return appModel.userAgeYearLater + 1;
+            }
+        });
     },
 
-    renderInner() {
+    renderInner: function() {
         // выводим всё
         return `
-            <div>${appModel.userAge}</div>
-            <div>${appModel.userAgeYearLater}</div>
-            <div>${this.userAgeTwoYearsLater}</div>
+            <div>${ appModel.userAge }</div>
+            <div>${ appModel.userAgeYearLater }</div>
+            <div>${ this.userAgeTwoYearsLater }</div>
         `;
     }
 });
@@ -113,23 +109,26 @@ rista.component('user-card', {
 [jsfiddle](http://jsfiddle.net/utvffa63/)
 
 ```js
-<counter></counter>
+<simple-counter></simple-counter>
 
-<script type="text/ecmascript-7">
+<script>
 
-rista.component('counter', {
-    @rista.d.observable counter: 0,
+Rista.Component.extend('simple-counter', {
+	constructor: function() {
+		Rista.Component.call(this);
+		Rista.cellx.define(this, 'counter', 0);
+	},
+	
+	renderInner: function() {
+		return `
+			<div>${ this.counter }</div>
+			<button rt-click="onBtnClick">Click Me!</button>
+		`;
+	},
 
-    renderInner() {
-        return `
-            <div>${this.counter}</div>
-            <button rt-click="_onBtnClick">Click Me!</button>
-        `;
-    },
-
-    _onBtnClick() {
-        this.counter++;
-    }
+	onBtnClick: function() {
+		this.counter++;
+	}
 });
 
 </script>
@@ -139,7 +138,7 @@ rista.component('counter', {
 
 ```js
 return `
-    <div rt-change="_onInputChange">
+    <div rt-change="onInputChange">
         <input type="checkbox">
         <input type="checkbox">
     </div>
@@ -150,38 +149,12 @@ return `
 
 ```js
 return `
-    <div rt-bar="_onFooBar">
-        <foo rt-baz="_onFooBaz"></foo>
-        <foo></foo>
+    <div rt-bar="onFooBar">
+        <x-foo rt-baz="onFooBaz"></x-foo>
+        <x-foo></x-foo>
     </div>
 `;
 ```
-
-## Выбор элементов
-
-В методах компонента доступен метод `$` позволяющий сократить запись при выборе элементов. Запись `$(this.block).find('.element-name')` можно сократить до `this.$('.element-name')`. Кроме того, при использовании в вёрстке методологии БЭМ, вы можете использовать в селекторе символ `&`, который будет заменён на селектор блока. Например, запись `this.$('.block-name__element-name')` можно сократить до `this.$('&__element-name')`:
-
-```js
-<example></example>
-
-<script type="text/ecmascript-7">
-
-rista.component('example', {
-    renderInner() {
-        return `
-            <input class="example__tf-search" type="text">
-        `;
-    },
-
-    init() {
-        this.$('&__tf-search').focus();
-    }
-});
-
-</script>
-```
-
-Если недоступен `jQuery/Zepto/...`, то `$` вернёт [NodeList](https://developer.mozilla.org/en-US/docs/Web/API/NodeList).
 
 ## Контроль памяти
 
@@ -191,22 +164,22 @@ rista.component('example', {
 Следующие два примера равносильны:
 
 ```js
-rista.component('example', {
-    init() {
-        this._onDocumentScroll = this._onDocumentScroll.bind(this);
-        document.addEventListener('scroll', this._onDocumentScroll);
+Rista.Component.extend('my-example', {
+    onElementAttached: function() {
+        this.onDocumentScroll = this.onDocumentScroll.bind(this);
+        document.addEventListener('scroll', this.onDocumentScroll);
     },
 
-    dispose() {
-        document.removeEventListener('scroll', this._onDocumentScroll);
+    onElementDetached: function() {
+        document.removeEventListener('scroll', this.onDocumentScroll);
     }
 });
 ```
 
 ```js
-rista.component('example', {
-    init() {
-        this.listenTo(document, 'scroll', this._onDocumentScroll);
+Rista.Component.extend('my-example', {
+    onElementAttached: function() {
+        this.listenTo(document, 'scroll', this.onDocumentScroll);
     }
 });
 ```
@@ -216,8 +189,8 @@ rista.component('example', {
 
 ```js
 this.listenTo(document, {
-    mousedown: this._onDocumentMouseDown,
-    mouseup: this._onDocumentMouseUp
+    mousedown: this.onDocumentMouseDown,
+    mouseup: this.onDocumentMouseUp
 });
 ```
 
@@ -229,17 +202,17 @@ this.listenTo(document, {
 Следующие два примера равносильны:
 
 ```js
-rista.component('example', {
-    _timerId: undefined,
+Rista.Component.extend('my-example', {
+    _timerId: void 0,
 
-    init() {
+    onElementAttached: function() {
         this._timerId = setTimeout(() => {
-            this._timerId = undefined;
-            this._onTimer();
+            this._timerId = void 0;
+            this.onTimer();
         }, 10000);
     },
 
-    dispose() {
+    onElementDetached: function() {
         if (this._timerId) {
             clearTimeout(this._timerId);
         }
@@ -248,9 +221,9 @@ rista.component('example', {
 ```
 
 ```js
-rista.component('example', {
-    init() {
-        this.setTimeout(this._onTimer, 10000);
+Rista.Component.extend('my-example', {
+    onElementAttached: function() {
+        this.setTimeout(this.onTimer, 10000);
     }
 });
 ```
@@ -268,11 +241,11 @@ rista.component('example', {
 #### Пример
 
 ```js
-let BackendProvider = require('../../../Proxy/BackendProvider');
+var BackendProvider = require('../../../Proxy/BackendProvider');
 
-rista.component('user-card', {
-    init() {
-        BackendProvider.getUser(this.registerCallback((err, user) => {
+Rista.Component.extend('user-card', {
+    onElementAttached: function() {
+        BackendProvider.getUser(this.registerCallback(function(err, user) {
             //
         }));
     }
@@ -292,33 +265,33 @@ rista.component('user-card', {
 [jsfiddle](http://jsfiddle.net/esb8cx6x/)
 
 ```js
-<div rt-is="parent"></div>
+<x-parent></x-parent>
 
-<script type="text/ecmascript-7">
+<script>
 
-rista.component('parent', {
-    renderInner() {
+Rista.Component.extend('x-parent', {
+    renderInner: function() {
         return `
-            <div rt-is="child" data-id="1"></div>
-            <div rt-is="child" data-id="2"></div>
+            <x-child data-id="1"></x-child>
+            <x-child data-id="2"></x-child>
         `;
     },
 
-    init() {
-        this.listenTo(this, 'foo', this._onFoo);
+    onElementAttached: function() {
+        this.listenTo(this, 'foo', this.onFoo);
     },
 
-    _onFoo(evt) {
+    onFoo: function(evt) {
         console.log(evt.childId);
     }
 });
 
-rista.component('child', {
-    init() {
-        this.setInterval(() => {
+Rista.Component.extend('x-child', {
+    onElementAttached: function() {
+        this.setInterval(function() {
             this.emit({
                 type: 'foo',
-                childId: this.block.dataset.id
+                childId: this.element.dataset.id
             });
         }, 1000);
     }
@@ -326,47 +299,3 @@ rista.component('child', {
 
 </script>
 ```
-
-### Component#broadcast
-
-Позволяет отправить сигнал от компонента-предка к компонентам-потомкам. Первый аргумент — имя компонентов-потомков (задаётся атрибутом `name` элементов), второй — имя вызываемого метода, остальные — передаваемые в метод аргументы. Если компонент-потомок не содержит нужного метода, он пропускается.  
-Возвращает массив результатов.
-
-#### Пример
-
-[jsfiddle](http://jsfiddle.net/n7fv5k8s/)
-
-```js
-<div rt-is="parent"></div>
-
-<script type="text/ecmascript-7">
-
-rista.component('parent', {
-    renderInner() {
-        return `
-            <div name="foo" rt-is="child"></div>
-            <div name="foo" rt-is="child"></div>
-        `;
-    },
-
-    init() {
-        this.setInterval(() => {
-            this.broadcast('foo', 'method', Math.random());
-        }, 1000);
-    }
-});
-
-rista.component('child', {
-    method(num) {
-        console.log(num);
-    }
-});
-
-</script>
-```
-
-## Готовые компоненты
-
-- [router](https://github.com/Riim/rista-router)
-- [popup](https://github.com/Riim/rista-popup)
-- [switcher](https://github.com/Riim/rista-switcher)

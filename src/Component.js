@@ -1,264 +1,219 @@
-let { EventEmitter, Cell, utils: { logError, mixin, createClass } } = require('cellx');
-let nextUID = require('./nextUID');
-let raf = require('./raf');
-let hasClass = require('./hasClass');
-let morphElement = require('./morphElement');
-let settings = require('./settings');
+let { EventEmitter, Cell, js: { Symbol }, utils: { mixin, createClass } } = require('cellx');
+let morphElement = require('morph-element');
+let camelize = require('./utils/camelize');
+let Disposable = require('./Disposable');
+let Attributes = require('./Attributes');
+let Properties = require('./Properties');
+// let eventTypes = require('./eventTypes');
 
-let KEY_COMPONENT = '__rista_component__';
-let KEY_COMPONENT_KEY = '__rista_componentKey__';
+let hasOwn = Object.prototype.hasOwnProperty;
+let isArray = Array.isArray;
 
-/**
- * @class rista.Component
- * @extends {cellx.EventEmitter}
- *
- * @typesign new (block: HTMLElement) -> rista.Component;
- */
-let Component;
-
-let componentSubclasses = Object.create(null);
-let selector = '[rt-is]';
+let lastAppliedAttributes = Symbol('lastAppliedAttributes');
 
 /**
- * @typesign (name: string);
+ * @typesign (evt: Event|cellx~Event);
  */
-function checkName(name) {
-	if (!/^[a-z](?:\-?[0-9a-z]+)*$/i.test(name)) {
-		throw new TypeError(`Component name "${name}" is not valid`);
-	}
-}
+function onEvent(evt) {
+	let node = evt instanceof Event ? evt.target : evt.target.element;
+	let attrName = 'rt-' + evt.type;
+	let targets = [];
 
-/**
- * @typesign (name: string) -> string;
- */
-function hyphenize(name) {
-	return name[0].toLowerCase() + name.slice(1).replace(/([A-Z])/g, '-$1').replace('--', '-').toLowerCase();
-}
+	for (;;) {
+		if (node.nodeType == 1 && node.hasAttribute(attrName)) {
+			targets.unshift(node);
+		}
 
-/**
- * @typesign (name: string) -> string;
- */
-function pascalize(name) {
-	return name[0].toUpperCase() + name.slice(1).replace(/\-([0-9a-z])/gi, function(match, chr) {
-		return chr.toUpperCase();
-	});
-}
+		node = node.parentNode;
 
-/**
- * @typesign (name: string) -> Function|undefined;
- */
-function getComponentSubclass(name) {
-	return componentSubclasses[name];
-}
+		if (!node) {
+			break;
+		}
 
-function _registerComponentSubclass(name, componentSubclass) {
-	if (componentSubclasses[name]) {
-		throw new TypeError(`Component "${name}" is already registered`);
-	}
+		let component = node.ristaComponent;
 
-	componentSubclasses[name] = componentSubclass;
-	componentSubclasses[name.toUpperCase()] = componentSubclass;
+		if (!component) {
+			continue;
+		}
 
-	selector += ', ' + name;
+		for (let i = targets.length; i;) {
+			let target = targets[--i];
+			let handler = component[target.getAttribute(attrName)];
 
-	return componentSubclass;
-}
-
-/**
- * @typesign (name: string, componentSubclass: Function) -> Function;
- */
-function registerComponentSubclass(name, componentSubclass) {
-	checkName(name);
-	return _registerComponentSubclass(hyphenize(name), componentSubclass);
-}
-
-/**
- * @typesign (name: string, description: {
- *     blockName?: string,
- *     preinit?: (),
- *     render?: () -> string|Array<string>,
- *     renderInner?: () -> string|Array<string>,
- *     init?: (),
- *     canComponentMorph?: () -> boolean,
- *     dispose?: ()
- * }) -> Function;
- */
-function defineComponentSubclass(name, description) {
-	checkName(name);
-
-	let pName = pascalize(name);
-	let hName = hyphenize(name);
-
-	let constr = Function(
-		'Component',
-		`return function ${pName}(block) { Component.call(this, block); };`
-	)(Component);
-
-	let proto = constr.prototype = Object.create(Component.prototype);
-
-	mixin(proto, description);
-	proto.constructor = constr;
-
-	if (!proto.blockName) {
-		switch (settings.blockNameCase) {
-			case 'camel': {
-				proto.blockName = pName[0].toLowerCase() + pName.slice(1);
-				break;
-			}
-			case 'pascal': {
-				proto.blockName = pName;
-				break;
-			}
-			case 'hyphen': {
-				proto.blockName = hName;
-				break;
+			if (typeof handler == 'function') {
+				handler.call(component, evt, target);
+				targets.splice(i, 1);
 			}
 		}
 	}
-
-	return _registerComponentSubclass(hName, constr);
 }
 
-/**
- * @typesign (component: rista.Component, contentOnly: boolean);
- */
-function morphComponentBlock(component, contentOnly) {
-	let el = document.createElement('div');
-	el.innerHTML = contentOnly ? component._blockInnerHTML.get() : component._blockOuterHTML.get();
+let currentElement = null;
+let currentComponent = null;
 
-	morphElement(component.block, contentOnly ? el : el.firstElementChild, {
-		contentOnly,
+let elementProtoMixin = {
+	ristaComponent: null,
 
-		getElementKey(el) {
-			let key = el[KEY_COMPONENT_KEY];
-
-			if (key) {
-				return key;
-			}
-
-			key = el.getAttribute('key');
-
-			if (key) {
-				el[KEY_COMPONENT_KEY] = key;
-				return key;
-			}
-
-			if (getComponentSubclass(el.getAttribute('rt-is') || el.tagName)) {
-				key = el[KEY_COMPONENT_KEY] = el.outerHTML;
-				return key;
-			}
-		},
-
-		onBeforeMorphElement(target, source) {
-			if (!target[KEY_COMPONENT_KEY] && getComponentSubclass(target.getAttribute('rt-is') || target.tagName)) {
-				target[KEY_COMPONENT_KEY] = source.outerHTML;
-			}
-
-			let cmpn = target[KEY_COMPONENT];
-
-			if (cmpn) {
-				if (cmpn == component) {
-					return true;
-				}
-
-				if (cmpn.canComponentMorph) {
-					return cmpn.canComponentMorph();
-				}
-
-				return false;
-			}
-		},
-
-		onKeyedElementRemoved(el) {
-			if (el[KEY_COMPONENT]) {
-				el[KEY_COMPONENT].destroy();
-			}
-		}
-	});
-}
-
-Component = createClass({
-	Extends: EventEmitter,
-
-	Static: {
-		KEY_COMPONENT,
-
-		getSubclass: getComponentSubclass,
-		registerSubclass: registerComponentSubclass,
-
-		defineSubclass: defineComponentSubclass,
-
-		getSelector() {
-			return selector;
+	createdCallback() {
+		if (currentComponent) {
+			this.ristaComponent = currentComponent;
+		} else {
+			currentElement = this;
+			this.ristaComponent = new this._ristaComponentConstr();
+			currentElement = null;
 		}
 	},
 
-	/**
-	 * For override.
-	 * @type {string}
-	 */
-	blockName: undefined,
+	attachedCallback() {
+		this.ristaComponent._elementAttached.set(true);
+	},
 
-	/**
-	 * @type {cellx.Cell<string>|null}
-	 */
-	_blockOuterHTML: null,
-	/**
-	 * @type {cellx.Cell<string>|null}
-	 */
-	_blockInnerHTML: null,
+	detachedCallback() {
+		this.ristaComponent._elementAttached.set(false);
+	},
 
-	constructor(block) {
-		if (block[KEY_COMPONENT]) {
-			throw new TypeError('Element is already used as a block of component');
+	attributeChangedCallback(name, oldValue, value) {
+		let component = this.ristaComponent;
+		let attrs = component.elementAttributes;
+		let privateName = '_' + name;
+
+		if (hasOwn.call(attrs, privateName)) {
+			let attrValue = attrs[privateName];
+			let handledOldValue = attrValue.get();
+
+			attrValue.set(value);
+
+			if (component.ready) {
+				let handledValue = attrValue.get();
+
+				component.emit({
+					type: `element-attribute-${ name }-change`,
+					oldValue: handledOldValue,
+					value: handledValue
+				});
+				component.emit({
+					type: 'element-attribute-change',
+					name: name,
+					oldValue: handledOldValue,
+					value: handledValue
+				});
+
+				if (component.onElementAttributeChanged) {
+					component.onElementAttributeChanged(name, handledOldValue, handledValue);
+				}
+			}
 		}
+	}
+};
 
+/**
+ * @typesign () -> string;
+ */
+function renderInner() {
+	let template = this.template;
+
+	if (template) {
+		return template.render ? template.render(this) : template.call(this, this);
+	}
+
+	return '';
+}
+
+let Component = EventEmitter.extend({
+	Implements: [Disposable],
+
+	Static: {
 		/**
-		 * @type {Array<{ dispose: () }>}
+		 * @this {Function}
+		 *
+		 * @typesign (elementTagName: string, description: {
+		 *     Implements?: Array<Object|Function>,
+		 *     Static?: {
+		 *         elementAttributes?: Object,
+		 *         [key: string]
+		 *     },
+		 *     constructor?: Function,
+		 *     [key: string]
+		 * }) -> Function;
 		 */
-		this._disposables = {};
+		extend(elementTagName, description) {
+			description.Extends = this;
+			description.elementTagName = elementTagName;
 
-		/**
-		 * Корневой элемент компонента.
-		 * @type {HTMLElement}
-		 */
-		this.block = block;
-		block[KEY_COMPONENT] = this;
+			let cl = createClass(description);
+			let elementProto = Object.create(HTMLElement.prototype);
 
-		this.destroyed = false;
+			mixin(elementProto, elementProtoMixin);
+			elementProto._ristaComponentConstr = cl;
 
-		if (!hasClass(block, this.blockName)) {
-			block.className = `${this.blockName} ${block.className}`;
+			document.registerElement(elementTagName, { prototype: elementProto });
+
+			return cl;
+		},
+
+		elementAttributes: {}
+	},
+
+	element: null,
+
+	elementTagName: void 0,
+
+	_elementAttributes: null,
+
+	get elementAttributes() {
+		return this._elementAttributes || (this._elementAttributes = new Attributes(this));
+	},
+
+	_props: null,
+
+	get props() {
+		return this._props || (this._props = new Properties(this));
+	},
+
+	_elementInnerHTML: null,
+	_lastAppliedElementInnerHTML: void 0,
+
+	_elementAttached: null,
+
+	ready: false,
+
+	template: null,
+
+	constructor: function Component(props) {
+		Disposable.call(this);
+
+		if (currentElement) {
+			this.element = currentElement;
+		} else {
+			currentComponent = this;
+			this.element = document.createElement(this.elementTagName);
+			currentComponent = null;
 		}
 
-		if (this.preinit) {
-			this.preinit();
-		}
-
-		if (this.render) {
-			this._blockOuterHTML = new Cell(function() {
-				let html = this.render();
-				return Array.isArray(html) ? html.join('') : html;
-			}, {
-				owner: this,
-				onChange: this._onBlockOuterHTMLChange
-			});
-			
-			morphComponentBlock(this, false);
-		} else if (this.renderInner) {
-			this._blockInnerHTML = new Cell(function() {
+		if (this.template || this.renderInner !== renderInner) {
+			this._elementInnerHTML = new Cell(function() {
 				let html = this.renderInner();
-				return Array.isArray(html) ? html.join('') : html;
+				return isArray(html) ? html.join('') : html;
 			}, {
-				owner: this,
-				onChange: this._onBlockInnerHTMLChange
+				owner: this
 			});
-			
-			morphComponentBlock(this, true);
 		}
 
-		if (this.init) {
-			this.init();
+		this._elementAttached = new Cell(false, {
+			owner: this,
+			onChange: this._onElementAttachedChange
+		});
+
+		if (props) {
+			let attrs = this.elementAttributes;
+
+			for (let name in props) {
+				attrs[camelize(name)] = props[name];
+			}
+		}
+
+		if (this.onCreated) {
+			this.onCreated();
 		}
 	},
 
@@ -271,337 +226,139 @@ Component = createClass({
 		if (evt.bubbles !== false && !evt.isPropagationStopped) {
 			let parent = this.getParent();
 
-			if (parent && !parent.destroyed) {
+			if (parent) {
 				parent._handleEvent(evt);
+			} else {
+				onEvent(evt);
 			}
 		}
 	},
 
-	_onBlockOuterHTMLChange() {
-		raf(() => {
-			morphComponentBlock(this, false);
-		});
-	},
-	_onBlockInnerHTMLChange() {
-		raf(() => {
-			morphComponentBlock(this, true);
-		});
-	},
-
 	/**
-	 * For override.
-	 */
-	preinit: null,
-	/**
-	 * For override.
-	 */
-	render: null,
-	/**
-	 * For override.
-	 */
-	renderInner: null,
-	/**
-	 * For override.
-	 */
-	init: null,
-	/**
-	 * For override.
-	 */
-	dispose: null,
-
-	/**
-	 * @typesign () -> HTMLElement|null;
+	 * @typesign () -> ?Rista.Component;
 	 */
 	getParent() {
-		let node = this.block;
-
-		while (node = node.parentNode) {
-			if (node[KEY_COMPONENT]) {
-				return node[KEY_COMPONENT];
+		for (let node; node = (node || this.element).parentNode;) {
+			if (node.ristaComponent) {
+				return node.ristaComponent;
 			}
 		}
 
 		return null;
 	},
 
+	_onElementInnerHTMLChange() {
+		this.update();
+	},
+
+	_onElementAttachedChange({ value: attached }) {
+		if (this._elementInnerHTML) {
+			this._elementInnerHTML[attached ? 'on' : 'off']('change', this._onElementInnerHTMLChange);
+		}
+
+		if (attached) {
+			this.update();
+
+			if (!this.ready) {
+				this.ready = true;
+
+				let attributesSchema = this.constructor.elementAttributes;
+				let attrs = this.elementAttributes;
+
+				for (let name in attributesSchema) {
+					if (typeof attributesSchema[name] != 'function') {
+						let camelizedName = camelize(name);
+						attrs[camelizedName] = attrs[camelizedName];
+					}
+				}
+
+				if (this.onReady) {
+					this.onReady();
+				}
+			}
+
+			if (this.onElementAttached) {
+				this.onElementAttached();
+			}
+		} else {
+			this.dispose();
+
+			if (this.onElementDetached) {
+				this.onElementDetached();
+			}
+		}
+	},
+
 	/**
-	 * @typesign () -> Array<HTMLElement>;
+	 * @typesign () -> string;
 	 */
-	getDescendants() {
-		return Array.prototype.map.call(this.block.querySelectorAll(selector), block => block[KEY_COMPONENT])
-			.filter(component => component);
+	renderInner,
+
+	/**
+	 * @typesign () -> Rista.Component;
+	 */
+	update() {
+		if (!this._elementInnerHTML) {
+			return this;
+		}
+
+		let html = this._elementInnerHTML.get();
+
+		if (html == (this._lastAppliedElementInnerHTML || '')) {
+			return this;
+		}
+
+		let el = document.createElement('div');
+		el.innerHTML = html;
+
+		morphElement(this.element, el, {
+			contentOnly: true,
+
+			getElementAttributes(el) {
+				return el[lastAppliedAttributes] || el.attributes;
+			},
+
+			getElementKey(el) {
+				return el.getAttribute('key');
+			},
+
+			onBeforeMorphElementContent(el, toEl) {
+				let component = el.ristaComponent;
+
+				if (component) {
+					el[lastAppliedAttributes] = toEl.attributes;
+
+					if (component.template || component.renderInner !== renderInner) {
+						component.props.contentSourceElement = toEl;
+						return false;
+					}
+				}
+			}
+		});
+
+		this._lastAppliedElementInnerHTML = html;
+
+		return this;
 	},
 
 	/**
 	 * @typesign (selector: string) -> $|NodeList;
 	 */
 	$(selector) {
-		selector = selector.split('&');
-		selector = selector.length == 1 ? selector[0] : selector.join('.' + this.blockName);
+		selector = selector.split('&').join('.' + this.elementTagName);
 
-		if (typeof $ == 'function' && $.fn) {
-			return $(this.block).find(selector);
-		}
-		return this.block.querySelectorAll(selector);
-	},
-
-	/**
-	 * @typesign (name: string) -> Array<rista.Component>;
-	 */
-	$$(name) {
-		let els = this.block.querySelectorAll(`[name=${name}]`);
-		let components = [];
-
-		for (let i = 0, l = els.length; i < l; i++) {
-			let component = els[i][KEY_COMPONENT];
-
-			if (component) {
-				components.push(component);
-			}
-		}
-
-		return components;
-	},
-
-	/**
-	 * @typesign (name: string, method: string, ...args: Array) -> Array;
-	 */
-	broadcast(name, method) {
-		let args = Array.prototype.slice.call(arguments, 2);
-
-		return this.$$(name).slice().map(component => {
-			if (!component.destroyed && typeof component[method] == 'function') {
-				return component[method].apply(component, args);
-			}
-		});
-	},
-
-	listenTo(target, type, listener, context) {
-		let listenings;
-
-		if (
-			Array.isArray(target) ||
-				target instanceof NodeList ||
-				target instanceof HTMLCollection ||
-				(target.addClass && target.append)
-		) {
-			listenings = [];
-
-			for (let i = 0, l = target.length; i < l; i++) {
-				listenings.push(this.listenTo(target[i], type, listener, context));
-			}
-		} else if (typeof type == 'object') {
-			listenings = [];
-
-			if (Array.isArray(type)) {
-				let types = type;
-
-				for (let i = 0, l = types.length; i < l; i++) {
-					listenings.push(this.listenTo(target, types[i], listener, context));
-				}
-			} else {
-				let listeners = type;
-
-				context = listener;
-
-				for (let type in listeners) {
-					listenings.push(this.listenTo(target, type, listeners[type], context));
-				}
-			}
-		} else if (Array.isArray(listener)) {
-			listenings = [];
-
-			let listeners = listener;
-
-			for (let i = 0, l = listeners.length; i < l; i++) {
-				listenings.push(this.listenTo(target, type, listeners[i], context));
-			}
-		} else if (typeof listener == 'object') {
-			listenings = [];
-
-			let listeners = listener;
-
-			for (let name in listeners) {
-				listenings.push(this.listenTo(target[name]('unwrap', 0), type, listeners[name], context));
-			}
-		} else {
-			return this._listenTo(target, type, listener, context);
-		}
-
-		let id = nextUID();
-
-		let stopListening = () => {
-			for (let i = listenings.length; i;) {
-				listenings[--i].stop();
-			}
-
-			delete this._disposables[id];
-		};
-
-		let listening = this._disposables[id] = {
-			stop: stopListening,
-			dispose: stopListening
-		};
-
-		return listening;
-	},
-
-	/**
-	 * @typesign (
-	 *     target: cellx.EventEmitter|EventTarget,
-	 *     type: string,
-	 *     listener: (evt: cellx~Event) -> boolean|undefined,
-	 *     context?: Object
-	 * ) -> { stop: (), dispose: () };
-	 */
-	_listenTo(target, type, listener, context) {
-		if (!context) {
-			context = this;
-		}
-
-		if (target instanceof EventEmitter) {
-			target.on(type, listener, context);
-		} else if (typeof target.addEventListener == 'function') {
-			if (target != context) {
-				listener = listener.bind(context);
-			}
-
-			target.addEventListener(type, listener);
-		} else {
-			throw new TypeError('Unable to add a listener');
-		}
-
-		let id = nextUID();
-
-		let stopListening = () => {
-			if (this._disposables[id]) {
-				if (target instanceof EventEmitter) {
-					target.off(type, listener, context);
-				} else {
-					target.removeEventListener(type, listener);
-				}
-
-				delete this._disposables[id];
-			}
-		};
-
-		let listening = this._disposables[id] = {
-			stop: stopListening,
-			dispose: stopListening
-		};
-
-		return listening;
-	},
-
-	/**
-	 * @typesign (cb: Function, delay: uint) -> { clear: (), dispose: () };
-	 */
-	setTimeout(cb, delay) {
-		let id = nextUID();
-
-		let timeoutId = setTimeout(() => {
-			delete this._disposables[id];
-			cb.call(this);
-		}, delay);
-
-		let _clearTimeout = () => {
-			if (this._disposables[id]) {
-				clearTimeout(timeoutId);
-				delete this._disposables[id];
-			}
-		};
-
-		let timeout = this._disposables[id] = {
-			clear: _clearTimeout,
-			dispose: _clearTimeout
-		};
-
-		return timeout;
-	},
-
-	/**
-	 * @typesign (cb: Function, delay: uint) -> { clear: (), dispose: () };
-	 */
-	setInterval(cb, delay) {
-		let id = nextUID();
-
-		let intervalId = setInterval(() => {
-			cb.call(this);
-		}, delay);
-
-		let _clearInterval = () => {
-			if (this._disposables[id]) {
-				clearInterval(intervalId);
-				delete this._disposables[id];
-			}
-		};
-
-		let interval = this._disposables[id] = {
-			clear: _clearInterval,
-			dispose: _clearInterval
-		};
-
-		return interval;
-	},
-
-	/**
-	 * @typesign (cb: Function) -> { (), cancel: (), dispose: () };
-	 */
-	registerCallback(cb) {
-		let id = nextUID();
-		let component = this;
-
-		let callback = function() {
-			if (component._disposables[id]) {
-				delete component._disposables[id];
-				return cb.apply(component, arguments);
-			}
-		};
-
-		let cancelCallback = () => {
-			delete this._disposables[id];
-		};
-
-		callback.cancel = cancelCallback;
-		callback.dispose = cancelCallback;
-
-		this._disposables[id] = callback;
-
-		return callback;
-	},
-
-	/**
-	 * @typesign ();
-	 */
-	destroy() {
-		if (this.destroyed) {
-			return;
-		}
-
-		if (this.render) {
-			this._blockOuterHTML.dispose();
-		} else if (this.renderInner) {
-			this._blockInnerHTML.dispose();
-		}
-
-		let disposables = this._disposables;
-
-		for (let id in disposables) {
-			disposables[id].dispose();
-		}
-
-		if (this.dispose) {
-			try {
-				this.dispose();
-			} catch (err) {
-				logError(err);
-			}
-		}
-
-		this.block[KEY_COMPONENT] = null;
-
-		this.destroyed = true;
+		return typeof $ == 'function' && $.fn ?
+			$(this.element).find(selector) :
+			this.element.querySelectorAll(selector);
 	}
 });
 
 module.exports = Component;
+
+// document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
+// 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
+
+// 	eventTypes.forEach(type => {
+// 		document.addEventListener(type, onEvent);
+// 	});
+// });
