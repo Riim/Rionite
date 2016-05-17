@@ -3158,6 +3158,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		_elementAttached: null,
 
+		initialized: false,
 		isReady: false,
 
 		template: null,
@@ -3235,6 +3236,14 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 		_onElementAttachedChange: function _onElementAttachedChange(_ref) {
 			var attached = _ref.value;
+
+			if (attached && !this.initialized) {
+				this.initialized = true;
+
+				if (this.initialize) {
+					this.initialize();
+				}
+			}
 
 			if (this._elementInnerHTML) {
 				this._elementInnerHTML[attached ? 'on' : 'off']('change', this._onElementInnerHTMLChange);

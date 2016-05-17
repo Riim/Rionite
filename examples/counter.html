@@ -19,7 +19,7 @@ Rista.Component.extend('simple-counter', {
 		`;
 	},
 
-	created: function() {
+	initialize: function() {
 		Rista.cellx.define(this, 'counter', 0);
 	},
 

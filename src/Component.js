@@ -175,6 +175,7 @@ let Component = EventEmitter.extend({
 
 	_elementAttached: null,
 
+	initialized: false,
 	isReady: false,
 
 	template: null,
@@ -252,6 +253,14 @@ let Component = EventEmitter.extend({
 	},
 
 	_onElementAttachedChange({ value: attached }) {
+		if (attached && !this.initialized) {
+			this.initialized = true;
+
+			if (this.initialize) {
+				this.initialize();
+			}
+		}
+
 		if (this._elementInnerHTML) {
 			this._elementInnerHTML[attached ? 'on' : 'off']('change', this._onElementInnerHTMLChange);
 		}
