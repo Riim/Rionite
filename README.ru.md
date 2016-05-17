@@ -35,12 +35,12 @@ npm install rista --save
 <script>
 
 Rista.Component.extend('hello-world', {
-    onElementAttached: function() {
+    elementAttached: function() {
         // Сработает при появлении элемента с `rt-is="hello-world"` в документе.
         // `this.element` — ссылка на появившийся элемент.
     },
 
-    onElementDetached: function() {
+    elementDetached: function() {
         // Сработает при удалении элемента с `rt-is="hello-world"` из документа.
     }
 });
@@ -118,7 +118,7 @@ Rista.Component.extend('simple-counter', {
 		Rista.Component.call(this);
 		Rista.cellx.define(this, 'counter', 0);
 	},
-	
+
 	renderInner: function() {
 		return `
 			<div>${ this.counter }</div>
@@ -165,12 +165,12 @@ return `
 
 ```js
 Rista.Component.extend('my-example', {
-    onElementAttached: function() {
+    elementAttached: function() {
         this.onDocumentScroll = this.onDocumentScroll.bind(this);
         document.addEventListener('scroll', this.onDocumentScroll);
     },
 
-    onElementDetached: function() {
+    elementDetached: function() {
         document.removeEventListener('scroll', this.onDocumentScroll);
     }
 });
@@ -178,7 +178,7 @@ Rista.Component.extend('my-example', {
 
 ```js
 Rista.Component.extend('my-example', {
-    onElementAttached: function() {
+    elementAttached: function() {
         this.listenTo(document, 'scroll', this.onDocumentScroll);
     }
 });
@@ -205,14 +205,14 @@ this.listenTo(document, {
 Rista.Component.extend('my-example', {
     _timerId: void 0,
 
-    onElementAttached: function() {
+    elementAttached: function() {
         this._timerId = setTimeout(() => {
             this._timerId = void 0;
             this.onTimer();
         }, 10000);
     },
 
-    onElementDetached: function() {
+    elementDetached: function() {
         if (this._timerId) {
             clearTimeout(this._timerId);
         }
@@ -222,7 +222,7 @@ Rista.Component.extend('my-example', {
 
 ```js
 Rista.Component.extend('my-example', {
-    onElementAttached: function() {
+    elementAttached: function() {
         this.setTimeout(this.onTimer, 10000);
     }
 });
@@ -244,7 +244,7 @@ Rista.Component.extend('my-example', {
 var BackendProvider = require('../../../Proxy/BackendProvider');
 
 Rista.Component.extend('user-card', {
-    onElementAttached: function() {
+    elementAttached: function() {
         BackendProvider.getUser(this.registerCallback(function(err, user) {
             //
         }));
@@ -277,7 +277,7 @@ Rista.Component.extend('x-parent', {
         `;
     },
 
-    onElementAttached: function() {
+    elementAttached: function() {
         this.listenTo(this, 'foo', this.onFoo);
     },
 
@@ -287,7 +287,7 @@ Rista.Component.extend('x-parent', {
 });
 
 Rista.Component.extend('x-child', {
-    onElementAttached: function() {
+    elementAttached: function() {
         this.setInterval(function() {
             this.emit({
                 type: 'foo',

@@ -83,7 +83,7 @@ let elementProtoMixin = {
 
 			attrValue.set(value);
 
-			if (component.ready) {
+			if (component.isReady) {
 				let handledValue = attrValue.get();
 
 				component.emit({
@@ -98,8 +98,8 @@ let elementProtoMixin = {
 					value: handledValue
 				});
 
-				if (component.onElementAttributeChanged) {
-					component.onElementAttributeChanged(name, handledOldValue, handledValue);
+				if (component.elementAttributeChanged) {
+					component.elementAttributeChanged(name, handledOldValue, handledValue);
 				}
 			}
 		}
@@ -175,7 +175,7 @@ let Component = EventEmitter.extend({
 
 	_elementAttached: null,
 
-	ready: false,
+	isReady: false,
 
 	template: null,
 
@@ -212,8 +212,8 @@ let Component = EventEmitter.extend({
 			}
 		}
 
-		if (this.onCreated) {
-			this.onCreated();
+		if (this.created) {
+			this.created();
 		}
 	},
 
@@ -259,8 +259,8 @@ let Component = EventEmitter.extend({
 		if (attached) {
 			this.update();
 
-			if (!this.ready) {
-				this.ready = true;
+			if (!this.isReady) {
+				this.isReady = true;
 
 				let attributesSchema = this.constructor.elementAttributes;
 				let attrs = this.elementAttributes;
@@ -272,19 +272,19 @@ let Component = EventEmitter.extend({
 					}
 				}
 
-				if (this.onReady) {
-					this.onReady();
+				if (this.ready) {
+					this.ready();
 				}
 			}
 
-			if (this.onElementAttached) {
-				this.onElementAttached();
+			if (this.elementAttached) {
+				this.elementAttached();
 			}
 		} else {
 			this.dispose();
 
-			if (this.onElementDetached) {
-				this.onElementDetached();
+			if (this.elementDetached) {
+				this.elementDetached();
 			}
 		}
 	},

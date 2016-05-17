@@ -3064,7 +3064,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				attrValue.set(value);
 
-				if (component.ready) {
+				if (component.isReady) {
 					var handledValue = attrValue.get();
 
 					component.emit({
@@ -3079,8 +3079,8 @@ return /******/ (function(modules) { // webpackBootstrap
 						value: handledValue
 					});
 
-					if (component.onElementAttributeChanged) {
-						component.onElementAttributeChanged(name, handledOldValue, handledValue);
+					if (component.elementAttributeChanged) {
+						component.elementAttributeChanged(name, handledOldValue, handledValue);
 					}
 				}
 			}
@@ -3158,7 +3158,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		_elementAttached: null,
 
-		ready: false,
+		isReady: false,
 
 		template: null,
 
@@ -3195,8 +3195,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 
-			if (this.onCreated) {
-				this.onCreated();
+			if (this.created) {
+				this.created();
 			}
 		},
 
@@ -3243,8 +3243,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (attached) {
 				this.update();
 
-				if (!this.ready) {
-					this.ready = true;
+				if (!this.isReady) {
+					this.isReady = true;
 
 					var attributesSchema = this.constructor.elementAttributes;
 					var attrs = this.elementAttributes;
@@ -3256,19 +3256,19 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					}
 
-					if (this.onReady) {
-						this.onReady();
+					if (this.ready) {
+						this.ready();
 					}
 				}
 
-				if (this.onElementAttached) {
-					this.onElementAttached();
+				if (this.elementAttached) {
+					this.elementAttached();
 				}
 			} else {
 				this.dispose();
 
-				if (this.onElementDetached) {
-					this.onElementDetached();
+				if (this.elementDetached) {
+					this.elementDetached();
 				}
 			}
 		},

@@ -12,19 +12,22 @@
 <script>
 
 Rista.Component.extend('simple-counter', {
-	constructor: function() {
-		Rista.Component.call(this);
-		Rista.cellx.define(this, 'counter', 0);
-	},
-	
 	renderInner: function() {
 		return `
 			<div>${ this.counter }</div>
-			<button rt-click="onBtnClick">Click Me!</button>
+			<button class="simple-counter__button">Click Me!</button>
 		`;
 	},
 
-	onBtnClick: function() {
+	created: function() {
+		Rista.cellx.define(this, 'counter', 0);
+	},
+
+	elementAttached: function() {
+		this.listenTo(this.$('&__button'), 'click', this._onBtnClick);
+	},
+
+	_onBtnClick: function() {
 		this.counter++;
 	}
 });

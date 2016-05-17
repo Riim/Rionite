@@ -39,12 +39,12 @@ Using [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationO
 <script>
 
 Rista.Component.extend('hello-world', {
-    onElementAttached: function() {
+    elementAttached: function() {
         // Triggers when the element with `rt-is="hello-world"` appears in the document.
         // `this.element` — a link to the element which has appeared.
     },
 
-    onElementDetached: function() {
+    elementDetached: function() {
         // Triggers when deleting the element with `rt-is="hello-world"` from the document.
     }
 });
@@ -122,7 +122,7 @@ Rista.Component.extend('simple-counter', {
 		Rista.Component.call(this);
 		Rista.cellx.define(this, 'counter', 0);
 	},
-	
+
 	renderInner: function() {
 		return `
 			<div>${ this.counter }</div>
@@ -169,12 +169,12 @@ The following two examples are equivalent:
 
 ```js
 Rista.Component.extend('my-example', {
-    onElementAttached: function() {
+    elementAttached: function() {
         this.onDocumentScroll = this.onDocumentScroll.bind(this);
         document.addEventListener('scroll', this.onDocumentScroll);
     },
 
-    onElementDetached: function() {
+    elementDetached: function() {
         document.removeEventListener('scroll', this.onDocumentScroll);
     }
 });
@@ -182,7 +182,7 @@ Rista.Component.extend('my-example', {
 
 ```js
 Rista.Component.extend('my-example', {
-    onElementAttached: function() {
+    elementAttached: function() {
         this.listenTo(document, 'scroll', this.onDocumentScroll);
     }
 });
@@ -209,14 +209,14 @@ The following two examples are equivalent:
 Rista.Component.extend('my-example', {
     _timerId: void 0,
 
-    onElementAttached: function() {
+    elementAttached: function() {
         this._timerId = setTimeout(() => {
             this._timerId = void 0;
             this.onTimer();
         }, 10000);
     },
 
-    onElementDetached: function() {
+    elementDetached: function() {
         if (this._timerId) {
             clearTimeout(this._timerId);
         }
@@ -226,7 +226,7 @@ Rista.Component.extend('my-example', {
 
 ```js
 Rista.Component.extend('my-example', {
-    onElementAttached: function() {
+    elementAttached: function() {
         this.setTimeout(this.onTimer, 10000);
     }
 });
@@ -248,7 +248,7 @@ Similarly to `Component#listenTo` and `Component#setTimeout` I would like to int
 var BackendProvider = require('../../../Proxy/BackendProvider');
 
 Rista.Component.extend('user-card', {
-    onElementAttached: function() {
+    elementAttached: function() {
         BackendProvider.getUser(this.registerCallback(function(err, user) {
             //
         }));
@@ -281,7 +281,7 @@ Rista.Component.extend('x-parent', {
         `;
     },
 
-    onElementAttached: function() {
+    elementAttached: function() {
         this.listenTo(this, 'foo', this.onFoo);
     },
 
@@ -291,7 +291,7 @@ Rista.Component.extend('x-parent', {
 });
 
 Rista.Component.extend('x-child', {
-    onElementAttached: function() {
+    elementAttached: function() {
         this.setInterval(function() {
             this.emit({
                 type: 'foo',
