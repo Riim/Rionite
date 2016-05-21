@@ -6,6 +6,7 @@ let Attributes = require('./Attributes');
 let Properties = require('./Properties');
 // let eventTypes = require('./eventTypes');
 
+let getPrototypeOf = Object.getPrototypeOf;
 let hasOwn = Object.prototype.hasOwnProperty;
 let isArray = Array.isArray;
 
@@ -183,11 +184,20 @@ let Component = EventEmitter.extend({
 	constructor: function Component(props) {
 		Disposable.call(this);
 
+		let componentProto = Component.prototype;
+		let proto = this.constructor.prototype;
+
+		if (proto == componentProto) {
+			throw new TypeError('Component is abstract class');
+		}
+
+		let el;
+
 		if (currentElement) {
-			this.element = currentElement;
+			el = this.element = currentElement;
 		} else {
 			currentComponent = this;
-			this.element = document.createElement(this.elementTagName);
+			el = this.element = document.createElement(this.elementTagName);
 			currentComponent = null;
 		}
 
@@ -204,6 +214,15 @@ let Component = EventEmitter.extend({
 			owner: this,
 			onChange: this._onElementAttachedChange
 		});
+
+		for (let p = proto; ;) {
+			el.className += ' ' + p.elementTagName;
+			p = getPrototypeOf(p);
+
+			if (p == componentProto) {
+				break;
+			}
+		}
 
 		if (props) {
 			let attrs = this.elementAttributes;

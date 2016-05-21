@@ -2990,6 +2990,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Properties = __webpack_require__(27);
 	// let eventTypes = require('./eventTypes');
 
+	var getPrototypeOf = Object.getPrototypeOf;
 	var hasOwn = Object.prototype.hasOwnProperty;
 	var isArray = Array.isArray;
 
@@ -3166,11 +3167,20 @@ return /******/ (function(modules) { // webpackBootstrap
 		constructor: function Component(props) {
 			Disposable.call(this);
 
+			var componentProto = Component.prototype;
+			var proto = this.constructor.prototype;
+
+			if (proto == componentProto) {
+				throw new TypeError('Component is abstract class');
+			}
+
+			var el = void 0;
+
 			if (currentElement) {
-				this.element = currentElement;
+				el = this.element = currentElement;
 			} else {
 				currentComponent = this;
-				this.element = document.createElement(this.elementTagName);
+				el = this.element = document.createElement(this.elementTagName);
 				currentComponent = null;
 			}
 
@@ -3187,6 +3197,15 @@ return /******/ (function(modules) { // webpackBootstrap
 				owner: this,
 				onChange: this._onElementAttachedChange
 			});
+
+			for (var p = proto;;) {
+				el.className += ' ' + p.elementTagName;
+				p = getPrototypeOf(p);
+
+				if (p == componentProto) {
+					break;
+				}
+			}
 
 			if (props) {
 				var attrs = this.elementAttributes;
