@@ -1,6 +1,6 @@
 {
   "name": "rista",
-  "version": "0.9.10",
+  "version": "0.9.11",
   "description": "",
   "main": "dist/Rista.js",
   "scripts": {
@@ -28,6 +28,6 @@
   },
   "dependencies": {
     "cellx": "^1.6.6",
-    "morph-element": "^0.2.2"
+    "morph-element": "^0.2.3"
   }
 }

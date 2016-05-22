@@ -3482,7 +3482,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return el.attributes;
 	}
 	function defaultGetElementKey(el) {
-	    return el.getAttribute('key') || void 0;
+	    return el.getAttribute('key');
 	}
 	function defaultIsCompatibleElements(el1, el2) {
 	    return el1.tagName == el2.tagName;
@@ -3606,7 +3606,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                for (var nextElChild = elChild; nextElChild; nextElChild = nextElChild.nextSibling) {
 	                    if (nextElChild.nodeType == toElChildType) {
 	                        if (toElChildType == 1) {
-	                            if (getElementKey(nextElChild) === toElChildKey && (toElChildKey !== void 0 ||
+	                            if (getElementKey(nextElChild) === toElChildKey && (toElChildKey ||
 	                                isCompatibleElements(nextElChild, toElChild))) {
 	                                found = true;
 	                                _morphElement(nextElChild, toElChild, false);
