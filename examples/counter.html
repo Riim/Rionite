@@ -12,15 +12,17 @@
 <script>
 
 Rista.Component.extend('simple-counter', {
+	initialize: function() {
+		Rista.cellx.define(this, {
+			counter: 0
+		});
+	},
+
 	renderInner: function() {
 		return `
 			<div>${ this.counter }</div>
 			<button class="simple-counter__button">Click Me!</button>
 		`;
-	},
-
-	initialize: function() {
-		Rista.cellx.define(this, 'counter', 0);
 	},
 
 	elementAttached: function() {

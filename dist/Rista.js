@@ -63,14 +63,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	var list = _require.list;
 	var cellx = _require.cellx;
 
-	var Component = __webpack_require__(17);
+	var camelize = __webpack_require__(17);
+	var hyphenize = __webpack_require__(18);
+	var escapeHTML = __webpack_require__(19);
+	var unescapeHTML = __webpack_require__(20);
+	var Component = __webpack_require__(21);
 
 	var Rista = module.exports = {
 		EventEmitter: EventEmitter,
 		map: map,
 		list: list,
 		cellx: cellx,
-		Component: Component
+		Component: Component,
+
+		utils: {
+			camelize: camelize,
+			hyphenize: hyphenize,
+			escapeHTML: escapeHTML,
+			unescapeHTML: unescapeHTML
+		}
 	};
 	Rista.Rista = Rista; // for destructuring
 
@@ -2970,6 +2981,82 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 17 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	/**
+	 * @typesign (str: string) -> string;
+	 */
+	function camelize(str) {
+		return str.replace(/[\-_]+([a-z]|$)/g, function (match, chr) {
+			return chr.toUpperCase();
+		});
+	}
+
+	module.exports = camelize;
+
+/***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	/**
+	 * @typesign (str: string) -> string;
+	 */
+	function hyphenize(str) {
+		return str.replace(/([A-Z])([^A-Z])/g, function (match, chr1, chr2) {
+			return '-' + chr1.toLowerCase() + chr2;
+		}).replace(/([A-Z]+)/g, function (match, chars) {
+			return '-' + chars.toLowerCase();
+		}).replace('--', '-').replace(/^-/, '');
+	}
+
+	module.exports = hyphenize;
+
+/***/ },
+/* 19 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var reAmpersand = /&/g;
+	var reLessThan = /</g;
+	var reGreaterThan = />/g;
+	var reQuote = /"/g;
+
+	/**
+	 * @typesign (str: string) -> string;
+	 */
+	function escapeHTML(str) {
+		return str.replace(reAmpersand, '&amp;').replace(reLessThan, '&lt;').replace(reGreaterThan, '&gt;').replace(reQuote, '&quot;');
+	}
+
+	module.exports = escapeHTML;
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var reLessThan = /&lt;/g;
+	var reGreaterThan = /&gt;/g;
+	var reQuote = /&quot;/g;
+	var reAmpersand = /&amp;/g;
+
+	/**
+	 * @typesign (str: string) -> string;
+	 */
+	function unescapeHTML(str) {
+		return str.replace(reLessThan, '<').replace(reGreaterThan, '>').replace(reQuote, '"').replace(reAmpersand, '&');
+	}
+
+	module.exports = unescapeHTML;
+
+/***/ },
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2983,10 +3070,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var mixin = _require$utils.mixin;
 	var createClass = _require$utils.createClass;
 
-	var morphElement = __webpack_require__(18);
-	var camelize = __webpack_require__(21);
-	var Disposable = __webpack_require__(22);
-	var Attributes = __webpack_require__(23);
+	var morphElement = __webpack_require__(22);
+	var camelize = __webpack_require__(17);
+	var Disposable = __webpack_require__(25);
+	var Attributes = __webpack_require__(26);
 	var Properties = __webpack_require__(27);
 	// let eventTypes = require('./eventTypes');
 
@@ -3385,12 +3472,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	// });
 
 /***/ },
-/* 18 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var specialElementHandlers = __webpack_require__(19);
-	var morphElementAttributes = __webpack_require__(20);
+	var specialElementHandlers = __webpack_require__(23);
+	var morphElementAttributes = __webpack_require__(24);
 	function defaultGetElementAttributes(el) {
 	    return el.attributes;
 	}
@@ -3621,7 +3708,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 19 */
+/* 23 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3649,7 +3736,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 20 */
+/* 24 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3673,24 +3760,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 21 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	/**
-	 * @typesign (str: string) -> string;
-	 */
-	function camelize(str) {
-		return str.replace(/[\-_]+([a-z]|$)/g, function (match, chr) {
-			return chr.toUpperCase();
-		});
-	}
-
-	module.exports = camelize;
-
-/***/ },
-/* 22 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3967,7 +4037,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Disposable;
 
 /***/ },
-/* 23 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3980,10 +4050,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Cell = _require.Cell;
 	var Map = _require.js.Map;
 
-	var camelize = __webpack_require__(21);
-	var hyphenize = __webpack_require__(24);
-	var escapeHTML = __webpack_require__(25);
-	var unescapeHTML = __webpack_require__(26);
+	var camelize = __webpack_require__(17);
+	var hyphenize = __webpack_require__(18);
+	var escapeHTML = __webpack_require__(19);
+	var unescapeHTML = __webpack_require__(20);
 
 	var typeHandlers = new Map([[Boolean, [function (value) {
 		return value != null ? value != 'no' : false;
@@ -4080,65 +4150,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 	module.exports = Attributes;
-
-/***/ },
-/* 24 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	/**
-	 * @typesign (str: string) -> string;
-	 */
-	function hyphenize(str) {
-		return str.replace(/([A-Z])([^A-Z])/g, function (match, chr1, chr2) {
-			return '-' + chr1.toLowerCase() + chr2;
-		}).replace(/([A-Z]+)/g, function (match, chars) {
-			return '-' + chars.toLowerCase();
-		}).replace('--', '-').replace(/^-/, '');
-	}
-
-	module.exports = hyphenize;
-
-/***/ },
-/* 25 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var reAmpersand = /&/g;
-	var reLessThan = /</g;
-	var reGreaterThan = />/g;
-	var reQuote = /"/g;
-
-	/**
-	 * @typesign (str: string) -> string;
-	 */
-	function escapeHTML(str) {
-		return str.replace(reAmpersand, '&amp;').replace(reLessThan, '&lt;').replace(reGreaterThan, '&gt;').replace(reQuote, '&quot;');
-	}
-
-	module.exports = escapeHTML;
-
-/***/ },
-/* 26 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var reLessThan = /&lt;/g;
-	var reGreaterThan = /&gt;/g;
-	var reQuote = /&quot;/g;
-	var reAmpersand = /&amp;/g;
-
-	/**
-	 * @typesign (str: string) -> string;
-	 */
-	function unescapeHTML(str) {
-		return str.replace(reLessThan, '<').replace(reGreaterThan, '>').replace(reQuote, '"').replace(reAmpersand, '&');
-	}
-
-	module.exports = unescapeHTML;
 
 /***/ },
 /* 27 */
