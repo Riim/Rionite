@@ -10,6 +10,7 @@ let getPrototypeOf = Object.getPrototypeOf;
 let hasOwn = Object.prototype.hasOwnProperty;
 let isArray = Array.isArray;
 
+let reClosedCustomElementTag = /<(\w+(?:\-\w+)+)([^>]*)\/>/g;
 let lastAppliedAttributes = Symbol('lastAppliedAttributes');
 
 /**
@@ -204,7 +205,7 @@ let Component = EventEmitter.extend({
 		if (this.template || this.renderInner !== renderInner) {
 			this._elementInnerHTML = new Cell(function() {
 				let html = this.renderInner();
-				return isArray(html) ? html.join('') : html;
+				return (isArray(html) ? html.join('') : html).replace(reClosedCustomElementTag, '<$1$2></$1>');
 			}, {
 				owner: this
 			});

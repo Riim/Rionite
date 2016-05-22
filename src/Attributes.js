@@ -78,7 +78,7 @@ let Attributes = EventEmitter.extend({
 
 			let attrValue = this[privateName] = new Cell(el.getAttribute(hyphenizedName), {
 				merge(value) {
-					return handlers[0](value, defaultValue);
+					return handlers[0].call(component, value, defaultValue);
 				}
 			});
 			let descriptor = {

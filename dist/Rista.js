@@ -2994,6 +2994,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var hasOwn = Object.prototype.hasOwnProperty;
 	var isArray = Array.isArray;
 
+	var reClosedCustomElementTag = /<(\w+(?:\-\w+)+)([^>]*)\/>/g;
 	var lastAppliedAttributes = _Symbol('lastAppliedAttributes');
 
 	/**
@@ -3187,7 +3188,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (this.template || this.renderInner !== renderInner) {
 				this._elementInnerHTML = new Cell(function () {
 					var html = this.renderInner();
-					return isArray(html) ? html.join('') : html;
+					return (isArray(html) ? html.join('') : html).replace(reClosedCustomElementTag, '<$1$2></$1>');
 				}, {
 					owner: this
 				});
@@ -3654,8 +3655,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	function morphElementAttributes(el, toEl, elAttributes) {
 	    var toElAttributes = toEl.attributes;
-	    for (var i = toElAttributes.length; i;) {
-	        var toElAttr = toElAttributes.item(--i);
+	    for (var i = 0, l = toElAttributes.length; i < l; i++) {
+	        var toElAttr = toElAttributes.item(i);
 	        var elAttr = elAttributes.getNamedItem(toElAttr.name);
 	        if (!elAttr || elAttr.value != toElAttr.value) {
 	            el.setAttribute(toElAttr.name, toElAttr.value);
@@ -4044,7 +4045,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				var attrValue = _this[privateName] = new Cell(el.getAttribute(hyphenizedName), {
 					merge: function merge(value) {
-						return handlers[0](value, defaultValue);
+						return handlers[0].call(component, value, defaultValue);
 					}
 				});
 				var descriptor = {
