@@ -2989,13 +2989,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 
+	var cache = Object.create(null);
+
 	/**
 	 * @typesign (str: string) -> string;
 	 */
 	function camelize(str) {
-		return str.replace(/[\-_]+([a-z]|$)/g, function (match, chr) {
+		return cache[str] || (cache[str] = str.replace(/[\-_]+([a-z]|$)/g, function (match, chr) {
 			return chr.toUpperCase();
-		});
+		}));
 	}
 
 	module.exports = camelize;
@@ -3006,15 +3008,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var cache = Object.create(null);
+
 	/**
 	 * @typesign (str: string) -> string;
 	 */
 	function hyphenize(str) {
-		return str.replace(/([A-Z])([^A-Z])/g, function (match, chr1, chr2) {
+		return cache[str] || (cache[str] = str.replace(/([A-Z])([^A-Z])/g, function (match, chr1, chr2) {
 			return '-' + chr1.toLowerCase() + chr2;
 		}).replace(/([A-Z]+)/g, function (match, chars) {
 			return '-' + chars.toLowerCase();
-		}).replace('--', '-').replace(/^-/, '');
+		}).replace('--', '-').replace(/^-/, ''));
 	}
 
 	module.exports = hyphenize;
@@ -3482,6 +3486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var specialElementHandlers = __webpack_require__(23);
 	var morphElementAttributes = __webpack_require__(24);
+	var defaultNamespaceURI = document.documentElement.namespaceURI;
 	function defaultGetElementAttributes(el) {
 	    return el.attributes;
 	}
@@ -3610,8 +3615,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                for (var nextElChild = elChild; nextElChild; nextElChild = nextElChild.nextSibling) {
 	                    if (nextElChild.nodeType == toElChildType) {
 	                        if (toElChildType == 1) {
-	                            if (getElementKey(nextElChild) === toElChildKey && (toElChildKey ||
-	                                isCompatibleElements(nextElChild, toElChild))) {
+	                            if (getElementKey(nextElChild) === toElChildKey &&
+	                                (toElChildKey || isCompatibleElements(nextElChild, toElChild))) {
 	                                found = true;
 	                                _morphElement(nextElChild, toElChild, false);
 	                            }
@@ -3634,7 +3639,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!found) {
 	                    switch (toElChildType) {
 	                        case 1: {
-	                            var unmatchedEl = document.createElement(toElChild.tagName);
+	                            var unmatchedEl = toElChild.namespaceURI == defaultNamespaceURI ?
+	                                document.createElement(toElChild.tagName) :
+	                                document.createElementNS(toElChild.namespaceURI, toElChild.tagName);
 	                            el.insertBefore(unmatchedEl, elChild || null);
 	                            if (toElChildKey) {
 	                                unmatchedElements[toElChildKey] = {
@@ -3748,15 +3755,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var toElAttributes = toEl.attributes;
 	    for (var i = 0, l = toElAttributes.length; i < l; i++) {
 	        var toElAttr = toElAttributes.item(i);
-	        var elAttr = elAttributes.getNamedItem(toElAttr.name);
+	        var toElAttrNamespaceURI = toElAttr.namespaceURI;
+	        var elAttr = toElAttrNamespaceURI ?
+	            elAttributes.getNamedItemNS(toElAttrNamespaceURI, toElAttr.name) :
+	            elAttributes.getNamedItem(toElAttr.name);
 	        if (!elAttr || elAttr.value != toElAttr.value) {
-	            el.setAttribute(toElAttr.name, toElAttr.value);
+	            if (toElAttrNamespaceURI) {
+	                el.setAttributeNS(toElAttrNamespaceURI, toElAttr.name, toElAttr.value);
+	            }
+	            else {
+	                el.setAttribute(toElAttr.name, toElAttr.value);
+	            }
 	        }
 	    }
 	    for (var i = elAttributes.length; i;) {
 	        var elAttr = elAttributes.item(--i);
-	        if (!toElAttributes.getNamedItem(elAttr.name)) {
-	            el.removeAttribute(elAttr.name);
+	        var elAttrNamespaceURI = elAttr.namespaceURI;
+	        if (elAttrNamespaceURI) {
+	            if (!toElAttributes.getNamedItemNS(elAttrNamespaceURI, elAttr.name)) {
+	                el.removeAttributeNS(elAttrNamespaceURI, elAttr.name);
+	            }
+	        }
+	        else {
+	            if (!toElAttributes.getNamedItem(elAttr.name)) {
+	                el.removeAttribute(elAttr.name);
+	            }
 	        }
 	    }
 	}
@@ -4114,7 +4137,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 
 				var camelizedName = camelize(name);
-				var hyphenizedName = hyphenize(camelizedName);
+				var hyphenizedName = hyphenize(name);
 				var privateName = '_' + hyphenizedName;
 
 				var attrValue = _this[privateName] = new Cell(el.getAttribute(hyphenizedName), {

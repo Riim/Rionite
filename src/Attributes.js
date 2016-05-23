@@ -73,7 +73,7 @@ let Attributes = EventEmitter.extend({
 			}
 
 			let camelizedName = camelize(name);
-			let hyphenizedName = hyphenize(camelizedName);
+			let hyphenizedName = hyphenize(name);
 			let privateName = '_' + hyphenizedName;
 
 			let attrValue = this[privateName] = new Cell(el.getAttribute(hyphenizedName), {
