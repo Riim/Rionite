@@ -4,6 +4,8 @@ let hyphenize = require('./utils/hyphenize');
 let escapeHTML = require('./utils/escapeHTML');
 let unescapeHTML = require('./utils/unescapeHTML');
 
+let defineProperty = Object.defineProperty;
+
 let typeHandlers = new Map([
 	[Boolean, [function(value) {
 		return value != null ? value != 'no' : false;
@@ -100,10 +102,10 @@ let Attributes = EventEmitter.extend({
 				}
 			};
 
-			Object.defineProperty(this, camelizedName, descriptor);
+			defineProperty(this, camelizedName, descriptor);
 
 			if (hyphenizedName != camelizedName) {
-				Object.defineProperty(this, hyphenizedName, descriptor);
+				defineProperty(this, hyphenizedName, descriptor);
 			}
 		}
 	}

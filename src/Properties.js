@@ -1,5 +1,7 @@
 let { Cell, utils: { createClass } } = require('cellx');
 
+let createObject = Object.create;
+
 let Properties = createClass({
 	constructor: function Properties(component) {
 		let contentSourceElement = new Cell(component.element.childNodes, {
@@ -17,7 +19,7 @@ let Properties = createClass({
 			}
 		});
 
-		return Object.create(component.elementAttributes, {
+		return createObject(component.elementAttributes, {
 			contentSourceElement: {
 				configurable: true,
 				enumerable: true,

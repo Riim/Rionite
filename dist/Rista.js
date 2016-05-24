@@ -3083,8 +3083,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Disposable = __webpack_require__(25);
 	var Attributes = __webpack_require__(26);
 	var Properties = __webpack_require__(27);
-	// let eventTypes = require('./eventTypes');
 
+	var createObject = Object.create;
+	var defineProperty = Object.defineProperty;
 	var getPrototypeOf = Object.getPrototypeOf;
 	var hasOwn = Object.prototype.hasOwnProperty;
 	var isArray = Array.isArray;
@@ -3130,20 +3131,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var currentElement = null;
-	var currentComponent = null;
 
 	var elementProtoMixin = {
-		ristaComponent: null,
-
-		createdCallback: function createdCallback() {
-			if (currentComponent) {
-				this.ristaComponent = currentComponent;
-			} else {
-				currentElement = this;
-				this.ristaComponent = new this._ristaComponentConstr();
-				currentElement = null;
-			}
+		get ristaComponent() {
+			currentElement = this;
+			var component = new this._ristaComponentConstr();
+			currentElement = null;
+			return component;
 		},
+
 		attachedCallback: function attachedCallback() {
 			this.ristaComponent._elementAttached.set(true);
 		},
@@ -3220,7 +3216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				description.elementTagName = elementTagName;
 
 				var cl = createClass(description);
-				var elementProto = Object.create(HTMLElement.prototype);
+				var elementProto = createObject(HTMLElement.prototype);
 
 				mixin(elementProto, elementProtoMixin);
 				elementProto._ristaComponentConstr = cl;
@@ -3263,22 +3259,15 @@ return /******/ (function(modules) { // webpackBootstrap
 		constructor: function Component(props) {
 			Disposable.call(this);
 
-			var componentProto = Component.prototype;
-			var proto = this.constructor.prototype;
-
-			if (proto == componentProto) {
+			if (this.constructor.prototype == Component.prototype) {
 				throw new TypeError('Component is abstract class');
 			}
 
-			var el = void 0;
+			var el = this.element = currentElement || document.createElement(this.elementTagName);
 
-			if (currentElement) {
-				el = this.element = currentElement;
-			} else {
-				currentComponent = this;
-				el = this.element = document.createElement(this.elementTagName);
-				currentComponent = null;
-			}
+			defineProperty(el, 'ristaComponent', {
+				value: this
+			});
 
 			if (this.template || this.renderInner !== renderInner) {
 				this._elementInnerHTML = new Cell(function () {
@@ -3293,15 +3282,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				owner: this,
 				onChange: this._onElementAttachedChange
 			});
-
-			for (var p = proto;;) {
-				el.className += ' ' + p.elementTagName;
-				p = getPrototypeOf(p);
-
-				if (p == componentProto) {
-					break;
-				}
-			}
 
 			if (props) {
 				var attrs = this.elementAttributes;
@@ -3370,6 +3350,15 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (!this.isReady) {
 					this.isReady = true;
 
+					for (var proto = this.constructor.prototype;;) {
+						this.element.className += ' ' + proto.elementTagName;
+						proto = getPrototypeOf(proto);
+
+						if (proto == Component.prototype) {
+							break;
+						}
+					}
+
 					var attributesSchema = this.constructor.elementAttributes;
 					var attrs = this.elementAttributes;
 
@@ -3426,9 +3415,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				getElementAttributes: function getElementAttributes(el) {
 					return el[lastAppliedAttributes] || el.attributes;
 				},
-				getElementKey: function getElementKey(el) {
-					return el.getAttribute('key');
-				},
 				onBeforeMorphElementContent: function onBeforeMorphElementContent(el, toEl) {
 					var component = el.ristaComponent;
 
@@ -3470,14 +3456,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 	module.exports = Component;
-
-	// document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
-	// 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
-
-	// 	eventTypes.forEach(type => {
-	// 		document.addEventListener(type, onEvent);
-	// 	});
-	// });
 
 /***/ },
 /* 22 */
@@ -4082,6 +4060,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var escapeHTML = __webpack_require__(19);
 	var unescapeHTML = __webpack_require__(20);
 
+	var defineProperty = Object.defineProperty;
+
 	var typeHandlers = new Map([[Boolean, [function (value) {
 		return value != null ? value != 'no' : false;
 	}, function (value) {
@@ -4163,10 +4143,10 @@ return /******/ (function(modules) { // webpackBootstrap
 					}
 				};
 
-				Object.defineProperty(_this, camelizedName, descriptor);
+				defineProperty(_this, camelizedName, descriptor);
 
 				if (hyphenizedName != camelizedName) {
-					Object.defineProperty(_this, hyphenizedName, descriptor);
+					defineProperty(_this, hyphenizedName, descriptor);
 				}
 			};
 
@@ -4190,6 +4170,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var createClass = _require.utils.createClass;
 
 
+	var createObject = Object.create;
+
 	var Properties = createClass({
 		constructor: function Properties(component) {
 			var contentSourceElement = new Cell(component.element.childNodes, {
@@ -4207,7 +4189,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			});
 
-			return Object.create(component.elementAttributes, {
+			return createObject(component.elementAttributes, {
 				contentSourceElement: {
 					configurable: true,
 					enumerable: true,

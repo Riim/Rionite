@@ -4,8 +4,9 @@ let camelize = require('./utils/camelize');
 let Disposable = require('./Disposable');
 let Attributes = require('./Attributes');
 let Properties = require('./Properties');
-// let eventTypes = require('./eventTypes');
 
+let createObject = Object.create;
+let defineProperty = Object.defineProperty;
 let getPrototypeOf = Object.getPrototypeOf;
 let hasOwn = Object.prototype.hasOwnProperty;
 let isArray = Array.isArray;
@@ -51,19 +52,13 @@ function onEvent(evt) {
 }
 
 let currentElement = null;
-let currentComponent = null;
 
 let elementProtoMixin = {
-	ristaComponent: null,
-
-	createdCallback() {
-		if (currentComponent) {
-			this.ristaComponent = currentComponent;
-		} else {
-			currentElement = this;
-			this.ristaComponent = new this._ristaComponentConstr();
-			currentElement = null;
-		}
+	get ristaComponent() {
+		currentElement = this;
+		let component = new this._ristaComponentConstr();
+		currentElement = null;
+		return component;
 	},
 
 	attachedCallback() {
@@ -143,7 +138,7 @@ let Component = EventEmitter.extend({
 			description.elementTagName = elementTagName;
 
 			let cl = createClass(description);
-			let elementProto = Object.create(HTMLElement.prototype);
+			let elementProto = createObject(HTMLElement.prototype);
 
 			mixin(elementProto, elementProtoMixin);
 			elementProto._ristaComponentConstr = cl;
@@ -185,22 +180,15 @@ let Component = EventEmitter.extend({
 	constructor: function Component(props) {
 		Disposable.call(this);
 
-		let componentProto = Component.prototype;
-		let proto = this.constructor.prototype;
-
-		if (proto == componentProto) {
+		if (this.constructor.prototype == Component.prototype) {
 			throw new TypeError('Component is abstract class');
 		}
 
-		let el;
+		let el = this.element = currentElement || document.createElement(this.elementTagName);
 
-		if (currentElement) {
-			el = this.element = currentElement;
-		} else {
-			currentComponent = this;
-			el = this.element = document.createElement(this.elementTagName);
-			currentComponent = null;
-		}
+		defineProperty(el, 'ristaComponent', {
+			value: this
+		});
 
 		if (this.template || this.renderInner !== renderInner) {
 			this._elementInnerHTML = new Cell(function() {
@@ -215,15 +203,6 @@ let Component = EventEmitter.extend({
 			owner: this,
 			onChange: this._onElementAttachedChange
 		});
-
-		for (let p = proto; ;) {
-			el.className += ' ' + p.elementTagName;
-			p = getPrototypeOf(p);
-
-			if (p == componentProto) {
-				break;
-			}
-		}
 
 		if (props) {
 			let attrs = this.elementAttributes;
@@ -291,6 +270,15 @@ let Component = EventEmitter.extend({
 			if (!this.isReady) {
 				this.isReady = true;
 
+				for (let proto = this.constructor.prototype; ;) {
+					this.element.className += ' ' + proto.elementTagName;
+					proto = getPrototypeOf(proto);
+
+					if (proto == Component.prototype) {
+						break;
+					}
+				}
+
 				let attributesSchema = this.constructor.elementAttributes;
 				let attrs = this.elementAttributes;
 
@@ -347,10 +335,6 @@ let Component = EventEmitter.extend({
 				return el[lastAppliedAttributes] || el.attributes;
 			},
 
-			getElementKey(el) {
-				return el.getAttribute('key');
-			},
-
 			onBeforeMorphElementContent(el, toEl) {
 				let component = el.ristaComponent;
 
@@ -383,11 +367,3 @@ let Component = EventEmitter.extend({
 });
 
 module.exports = Component;
-
-// document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
-// 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
-
-// 	eventTypes.forEach(type => {
-// 		document.addEventListener(type, onEvent);
-// 	});
-// });
