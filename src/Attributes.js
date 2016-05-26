@@ -76,13 +76,15 @@ let Attributes = EventEmitter.extend({
 
 			let camelizedName = camelize(name);
 			let hyphenizedName = hyphenize(name);
-			let privateName = '_' + hyphenizedName;
 
-			let attrValue = this[privateName] = new Cell(el.getAttribute(hyphenizedName), {
-				merge(value) {
-					return handlers[0].call(component, value, defaultValue);
+			let attrValue = this['_' + camelizedName] = this['_' + hyphenizedName] = new Cell(
+				el.getAttribute(hyphenizedName),
+				{
+					merge(value) {
+						return handlers[0].call(component, value, defaultValue);
+					}
 				}
-			});
+			);
 			let descriptor = {
 				configurable: true,
 				enumerable: true,

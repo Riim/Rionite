@@ -4,6 +4,7 @@ let camelize = require('./utils/camelize');
 let Disposable = require('./Disposable');
 let Attributes = require('./Attributes');
 let Properties = require('./Properties');
+let eventTypes = require('./eventTypes');
 
 let createObject = Object.create;
 let defineProperty = Object.defineProperty;
@@ -18,9 +19,17 @@ let lastAppliedAttributes = Symbol('lastAppliedAttributes');
  * @typesign (evt: Event|cellx~Event);
  */
 function onEvent(evt) {
-	let node = evt instanceof Event ? evt.target : evt.target.element;
-	let attrName = 'rt-' + evt.type;
+	let node;
+	let attrName;
 	let targets = [];
+
+	if (evt instanceof Event) {
+		node = evt.target;
+		attrName = 'rt-' + evt.type;
+	} else {
+		node = evt.target.element;
+		attrName = 'rt-component-' + evt.type;
+	}
 
 	for (;;) {
 		if (node.nodeType == 1 && node.hasAttribute(attrName)) {
@@ -63,6 +72,7 @@ let elementProtoMixin = {
 
 	attachedCallback() {
 		this.ristaComponent._elementAttached.set(true);
+		Cell.forceRelease();
 	},
 
 	detachedCallback() {
@@ -367,3 +377,11 @@ let Component = EventEmitter.extend({
 });
 
 module.exports = Component;
+
+document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
+	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
+
+	eventTypes.forEach(type => {
+		document.addEventListener(type, onEvent);
+	});
+});

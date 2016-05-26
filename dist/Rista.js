@@ -2242,6 +2242,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * }) -> cellx.Cell;
 	 */
 	var Cell = EventEmitter.extend({
+		Static: {
+			forceRelease: function() {
+				if (releasePlanned) {
+					release();
+				}
+			}
+		},
+
 		constructor: function Cell(value, opts) {
 			EventEmitter.call(this);
 
@@ -3083,6 +3091,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Disposable = __webpack_require__(25);
 	var Attributes = __webpack_require__(26);
 	var Properties = __webpack_require__(27);
+	var eventTypes = __webpack_require__(28);
 
 	var createObject = Object.create;
 	var defineProperty = Object.defineProperty;
@@ -3097,9 +3106,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign (evt: Event|cellx~Event);
 	 */
 	function onEvent(evt) {
-		var node = evt instanceof Event ? evt.target : evt.target.element;
-		var attrName = 'rt-' + evt.type;
+		var node = void 0;
+		var attrName = void 0;
 		var targets = [];
+
+		if (evt instanceof Event) {
+			node = evt.target;
+			attrName = 'rt-' + evt.type;
+		} else {
+			node = evt.target.element;
+			attrName = 'rt-component-' + evt.type;
+		}
 
 		for (;;) {
 			if (node.nodeType == 1 && node.hasAttribute(attrName)) {
@@ -3142,6 +3159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		attachedCallback: function attachedCallback() {
 			this.ristaComponent._elementAttached.set(true);
+			Cell.forceRelease();
 		},
 		detachedCallback: function detachedCallback() {
 			this.ristaComponent._elementAttached.set(false);
@@ -3456,6 +3474,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 	module.exports = Component;
+
+	document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
+		document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
+
+		eventTypes.forEach(function (type) {
+			document.addEventListener(type, onEvent);
+		});
+	});
 
 /***/ },
 /* 22 */
@@ -4118,9 +4144,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				var camelizedName = camelize(name);
 				var hyphenizedName = hyphenize(name);
-				var privateName = '_' + hyphenizedName;
 
-				var attrValue = _this[privateName] = new Cell(el.getAttribute(hyphenizedName), {
+				var attrValue = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new Cell(el.getAttribute(hyphenizedName), {
 					merge: function merge(value) {
 						return handlers[0].call(component, value, defaultValue);
 					}
@@ -4190,6 +4215,13 @@ return /******/ (function(modules) { // webpackBootstrap
 			});
 
 			return createObject(component.elementAttributes, {
+				_contentSourceElement: {
+					configurable: true,
+					enumerable: true,
+					writable: true,
+					value: contentSourceElement
+				},
+
 				contentSourceElement: {
 					configurable: true,
 					enumerable: true,
@@ -4206,6 +4238,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 	module.exports = Properties;
+
+/***/ },
+/* 28 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	module.exports = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /***/ }
 /******/ ])

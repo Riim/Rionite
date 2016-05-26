@@ -20,6 +20,13 @@ let Properties = createClass({
 		});
 
 		return createObject(component.elementAttributes, {
+			_contentSourceElement: {
+				configurable: true,
+				enumerable: true,
+				writable: true,
+				value: contentSourceElement
+			},
+
 			contentSourceElement: {
 				configurable: true,
 				enumerable: true,
