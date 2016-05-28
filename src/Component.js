@@ -1,14 +1,14 @@
-let { EventEmitter, Cell, js: { Symbol }, utils: { mixin, createClass } } = require('cellx');
+let { EventEmitter, Cell, js: { is, Symbol }, utils: { mixin, createClass } } = require('cellx');
 let morphElement = require('morph-element');
 let camelize = require('./utils/camelize');
-let Disposable = require('./Disposable');
+let DisposableMixin = require('./DisposableMixin');
 let Attributes = require('./Attributes');
 let Properties = require('./Properties');
 let eventTypes = require('./eventTypes');
 
 let createObject = Object.create;
-let defineProperty = Object.defineProperty;
 let getPrototypeOf = Object.getPrototypeOf;
+let defineProperty = Object.defineProperty;
 let hasOwn = Object.prototype.hasOwnProperty;
 let isArray = Array.isArray;
 
@@ -93,20 +93,22 @@ let elementProtoMixin = {
 			if (component.isReady) {
 				let handledValue = attrValue.get();
 
-				component.emit({
-					type: `element-attribute-${ name }-change`,
-					oldValue: handledOldValue,
-					value: handledValue
-				});
-				component.emit({
-					type: 'element-attribute-change',
-					name: name,
-					oldValue: handledOldValue,
-					value: handledValue
-				});
+				if (!is(handledValue, handledOldValue)) {
+					component.emit({
+						type: `element-attribute-${ name }-change`,
+						oldValue: handledOldValue,
+						value: handledValue
+					});
+					component.emit({
+						type: 'element-attribute-change',
+						name: name,
+						oldValue: handledOldValue,
+						value: handledValue
+					});
 
-				if (component.elementAttributeChanged) {
-					component.elementAttributeChanged(name, handledOldValue, handledValue);
+					if (component.elementAttributeChanged) {
+						component.elementAttributeChanged(name, handledOldValue, handledValue);
+					}
 				}
 			}
 		}
@@ -127,7 +129,7 @@ function renderInner() {
 }
 
 let Component = EventEmitter.extend({
-	Implements: [Disposable],
+	Implements: [DisposableMixin],
 
 	Static: {
 		/**
@@ -188,7 +190,8 @@ let Component = EventEmitter.extend({
 	template: null,
 
 	constructor: function Component(props) {
-		Disposable.call(this);
+		EventEmitter.call(this);
+		DisposableMixin.call(this);
 
 		if (this.constructor.prototype == Component.prototype) {
 			throw new TypeError('Component is abstract class');

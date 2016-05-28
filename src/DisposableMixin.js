@@ -2,10 +2,8 @@ let { EventEmitter, utils: { nextUID } } = require('cellx');
 
 let isArray = Array.isArray;
 
-let Disposable = EventEmitter.extend({
-	constructor: function Disposable() {
-		EventEmitter.call(this);
-
+let DisposableMixin = EventEmitter.extend({
+	constructor: function DisposableMixin() {
 		/**
 		 * @type {Array<{ dispose: () }>}
 		 */
@@ -216,7 +214,7 @@ let Disposable = EventEmitter.extend({
 	},
 
 	/**
-	 * @typesign () -> Rista.Disposable;
+	 * @typesign () -> Rista.DisposableMixin;
 	 */
 	dispose() {
 		let disposables = this._disposables;
@@ -229,4 +227,4 @@ let Disposable = EventEmitter.extend({
 	}
 });
 
-module.exports = Disposable;
+module.exports = DisposableMixin;

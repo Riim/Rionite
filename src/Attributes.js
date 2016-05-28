@@ -56,6 +56,9 @@ let typeHandlers = new Map([
 	}]]
 ]);
 
+/**
+ * @typesign new Attributes(component: Rista.Component) -> Rista.Attributes;
+ */
 let Attributes = EventEmitter.extend({
 	Static: {
 		typeHandlers
@@ -85,6 +88,7 @@ let Attributes = EventEmitter.extend({
 					}
 				}
 			);
+
 			let descriptor = {
 				configurable: true,
 				enumerable: true,

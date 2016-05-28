@@ -67,7 +67,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var hyphenize = __webpack_require__(18);
 	var escapeHTML = __webpack_require__(19);
 	var unescapeHTML = __webpack_require__(20);
-	var Component = __webpack_require__(21);
+	var Attributes = __webpack_require__(21);
+	var Properties = __webpack_require__(22);
+	var Component = __webpack_require__(23);
 
 	var Rista = module.exports = {
 		EventEmitter: EventEmitter,
@@ -75,6 +77,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		list: list,
 		cellx: cellx,
 		Component: Component,
+		Attributes: Attributes,
+		Properties: Properties,
 
 		utils: {
 			camelize: camelize,
@@ -89,17 +93,18 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Map = __webpack_require__(2);
+	var is = __webpack_require__(2);
 	var Symbol = __webpack_require__(3);
-	var logError = __webpack_require__(8);
+	var Map = __webpack_require__(5);
+	var logError = __webpack_require__(9);
 	var nextUID = __webpack_require__(4);
-	var mixin = __webpack_require__(6);
-	var createClass = __webpack_require__(5);
-	var nextTick = __webpack_require__(9);
-	var keys = __webpack_require__(7);
-	var ErrorLogger = __webpack_require__(10);
-	var EventEmitter = __webpack_require__(11);
-	var ObservableMap = __webpack_require__(12);
+	var mixin = __webpack_require__(7);
+	var createClass = __webpack_require__(6);
+	var nextTick = __webpack_require__(10);
+	var keys = __webpack_require__(8);
+	var ErrorLogger = __webpack_require__(11);
+	var EventEmitter = __webpack_require__(12);
+	var ObservableMap = __webpack_require__(13);
 	var ObservableList = __webpack_require__(15);
 	var Cell = __webpack_require__(16);
 
@@ -246,20 +251,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign (obj: cellx.EventEmitter, name: string, value) -> cellx.EventEmitter;
 	 */
 	function defineObservableProperty(obj, name, value) {
-		var _name = '_' + name;
+		var privateName = '_' + name;
 
-		obj[_name] = typeof value == 'function' && value.constructor == cellx ? value : cellx(value);
+		obj[privateName] = value instanceof Cell ? value : new Cell(value, { owner: obj });
 
 		Object.defineProperty(obj, name, {
 			configurable: true,
 			enumerable: true,
 
 			get: function() {
-				return this[_name]();
+				return this[privateName].get();
 			},
 
 			set: function(value) {
-				this[_name](value);
+				this[privateName].set(value);
 			}
 		});
 
@@ -294,6 +299,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	cellx.define = define;
 
 	cellx.js = {
+		is: is,
 		Symbol: Symbol,
 		Map: Map
 	};
@@ -315,12 +321,64 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	/**
+	 * @typesign (a, b) -> boolean;
+	 */
+	var is = Object.is || function is(a, b) {
+		if (a === 0 && b === 0) {
+			return 1 / a == 1 / b;
+		}
+		return a === b || (a != a && b != b);
+	};
+
+	module.exports = is;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var nextUID = __webpack_require__(4);
+
+	var Symbol = Function('return this;')().Symbol;
+
+	if (!Symbol) {
+		Symbol = function Symbol(key) {
+			return '__' + key + '_' + Math.floor(Math.random() * 1e9) + '_' + nextUID() + '__';
+		};
+
+		Symbol.iterator = Symbol('iterator');
+	}
+
+	module.exports = Symbol;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	var uidCounter = 0;
+
+	/**
+	 * @typesign () -> string;
+	 */
+	function nextUID() {
+		return String(++uidCounter);
+	}
+
+	module.exports = nextUID;
+
+
+/***/ },
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Symbol = __webpack_require__(3);
 	var nextUID = __webpack_require__(4);
-	var createClass = __webpack_require__(5);
-	var keys = __webpack_require__(7);
+	var createClass = __webpack_require__(6);
+	var keys = __webpack_require__(8);
 
 	var KEY_UID = keys.UID;
 
@@ -564,45 +622,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 3 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var nextUID = __webpack_require__(4);
-
-	var Symbol = Function('return this;')().Symbol;
-
-	if (!Symbol) {
-		Symbol = function Symbol(key) {
-			return '__' + key + '_' + Math.floor(Math.random() * 1e9) + '_' + nextUID() + '__';
-		};
-
-		Symbol.iterator = Symbol('iterator');
-	}
-
-	module.exports = Symbol;
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	var uidCounter = 0;
-
-	/**
-	 * @typesign () -> string;
-	 */
-	function nextUID() {
-		return String(++uidCounter);
-	}
-
-	module.exports = nextUID;
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var mixin = __webpack_require__(6);
+	var mixin = __webpack_require__(7);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 
@@ -701,7 +724,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	/**
@@ -722,7 +745,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Symbol = __webpack_require__(3);
@@ -736,7 +759,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	function noop() {}
@@ -759,10 +782,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var ErrorLogger = __webpack_require__(10);
+	var ErrorLogger = __webpack_require__(11);
 
 	var global = Function('return this;')();
 
@@ -818,7 +841,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports) {
 
 	var ErrorLogger = {
@@ -843,12 +866,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Symbol = __webpack_require__(3);
-	var createClass = __webpack_require__(5);
-	var ErrorLogger = __webpack_require__(10);
+	var createClass = __webpack_require__(6);
+	var ErrorLogger = __webpack_require__(11);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 
@@ -961,7 +984,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var index = type.indexOf(':');
 
 			if (index != -1) {
-				this['_' + type.slice(index + 1)]('on', type.slice(0, index), listener, context);
+				this['_' + type.slice(index + 1)].on(type.slice(0, index), listener, context);
 			} else {
 				var events = (this._events || (this._events = Object.create(null)))[type];
 
@@ -986,7 +1009,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var index = type.indexOf(':');
 
 			if (index != -1) {
-				this['_' + type.slice(index + 1)]('off', type.slice(0, index), listener, context);
+				this['_' + type.slice(index + 1)].off(type.slice(0, index), listener, context);
 			} else {
 				var events = this._events && this._events[type];
 
@@ -1120,13 +1143,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Map = __webpack_require__(2);
+	var is = __webpack_require__(2);
 	var Symbol = __webpack_require__(3);
-	var is = __webpack_require__(13);
-	var EventEmitter = __webpack_require__(11);
+	var Map = __webpack_require__(5);
+	var EventEmitter = __webpack_require__(12);
 	var ObservableCollectionMixin = __webpack_require__(14);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
@@ -1350,28 +1373,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	/**
-	 * @typesign (a, b) -> boolean;
-	 */
-	var is = Object.is || function is(a, b) {
-		if (a === 0 && b === 0) {
-			return 1 / a == 1 / b;
-		}
-		return a === b || (a != a && b != b);
-	};
-
-	module.exports = is;
-
-
-/***/ },
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Map = __webpack_require__(2);
-	var EventEmitter = __webpack_require__(11);
+	var Map = __webpack_require__(5);
+	var EventEmitter = __webpack_require__(12);
 
 	var ObservableCollectionMixin = EventEmitter.extend({
 		constructor: function ObservableCollectionMixin() {
@@ -1432,9 +1438,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var is = __webpack_require__(2);
 	var Symbol = __webpack_require__(3);
-	var is = __webpack_require__(13);
-	var EventEmitter = __webpack_require__(11);
+	var EventEmitter = __webpack_require__(12);
 	var ObservableCollectionMixin = __webpack_require__(14);
 
 	var push = Array.prototype.push;
@@ -2049,9 +2055,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var is = __webpack_require__(13);
-	var nextTick = __webpack_require__(9);
-	var EventEmitter = __webpack_require__(11);
+	var is = __webpack_require__(2);
+	var nextTick = __webpack_require__(10);
+	var EventEmitter = __webpack_require__(12);
 
 	var slice = Array.prototype.slice;
 
@@ -3077,25 +3083,173 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
 	var _require = __webpack_require__(1);
 
 	var EventEmitter = _require.EventEmitter;
 	var Cell = _require.Cell;
-	var _Symbol = _require.js.Symbol;
+	var Map = _require.js.Map;
+
+	var camelize = __webpack_require__(17);
+	var hyphenize = __webpack_require__(18);
+	var escapeHTML = __webpack_require__(19);
+	var unescapeHTML = __webpack_require__(20);
+
+	var defineProperty = Object.defineProperty;
+
+	var typeHandlers = new Map([[Boolean, [function (value) {
+		return value != null ? value != 'no' : false;
+	}, function (value) {
+		return value ? '' : void 0;
+	}]], ['boolean', [function (value, defaultValue) {
+		return value != null ? value != 'no' : defaultValue;
+	}, function (value, defaultValue) {
+		return value ? '' : defaultValue ? 'no' : void 0;
+	}]], [Number, [function (value) {
+		return value != null ? +value : void 0;
+	}, function (value) {
+		return value !== void 0 ? String(+value) : void 0;
+	}]], ['number', [function (value, defaultValue) {
+		return value != null ? +value : defaultValue;
+	}, function (value) {
+		return value !== void 0 ? String(+value) : void 0;
+	}]], [String, [function (value) {
+		return value != null ? value : void 0;
+	}, function (value) {
+		return value !== void 0 ? String(value) : void 0;
+	}]], ['string', [function (value, defaultValue) {
+		return value != null ? value : defaultValue;
+	}, function (value) {
+		return value !== void 0 ? String(value) : void 0;
+	}]], [Object, [function (value) {
+		return value != null ? Object(Function('return ' + unescapeHTML(value) + ';')()) : null;
+	}, function (value) {
+		return value != null ? escapeHTML(JSON.stringify(value)) : void 0;
+	}]], ['object', [function (value, defaultValue) {
+		return value != null ? Object(Function('return ' + unescapeHTML(value) + ';')()) : defaultValue;
+	}, function (value) {
+		return value != null ? escapeHTML(JSON.stringify(value)) : void 0;
+	}]]]);
+
+	/**
+	 * @typesign new Attributes(component: Rista.Component) -> Rista.Attributes;
+	 */
+	var Attributes = EventEmitter.extend({
+		Static: {
+			typeHandlers: typeHandlers
+		},
+
+		constructor: function Attributes(component) {
+			var _this = this;
+
+			var el = component.element;
+			var schema = component.constructor.elementAttributes;
+
+			var _loop = function _loop(name) {
+				var defaultValue = schema[name];
+				var type = typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue);
+				var handlers = typeHandlers.get(type == 'function' ? defaultValue : type);
+
+				if (!handlers) {
+					throw new TypeError('Unsupported attribute type');
+				}
+
+				var camelizedName = camelize(name);
+				var hyphenizedName = hyphenize(name);
+
+				var attrValue = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new Cell(el.getAttribute(hyphenizedName), {
+					merge: function merge(value) {
+						return handlers[0].call(component, value, defaultValue);
+					}
+				});
+
+				var descriptor = {
+					configurable: true,
+					enumerable: true,
+
+					get: function get() {
+						return attrValue.get();
+					},
+					set: function set(value) {
+						value = handlers[1](value, defaultValue);
+
+						if (value === void 0) {
+							el.removeAttribute(hyphenizedName);
+						} else {
+							el.setAttribute(hyphenizedName, value);
+						}
+					}
+				};
+
+				defineProperty(_this, camelizedName, descriptor);
+
+				if (hyphenizedName != camelizedName) {
+					defineProperty(_this, hyphenizedName, descriptor);
+				}
+			};
+
+			for (var name in schema) {
+				_loop(name);
+			}
+		}
+	});
+
+	module.exports = Attributes;
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _require = __webpack_require__(1);
+
+	var _require$utils = _require.utils;
+	var createClass = _require$utils.createClass;
+	var defineObservableProperty = _require$utils.defineObservableProperty;
+
+
+	var createObject = Object.create;
+
+	/**
+	 * @typesign new Properties(component: Rista.Component) -> Rista.Properties;
+	 */
+	var Properties = createClass({
+		constructor: function Properties(component) {
+			return defineObservableProperty(createObject(component.elementAttributes), 'contentSourceElement', component.element.childNodes);
+		}
+	});
+
+	module.exports = Properties;
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _require = __webpack_require__(1);
+
+	var EventEmitter = _require.EventEmitter;
+	var Cell = _require.Cell;
+	var _require$js = _require.js;
+	var is = _require$js.is;
+	var _Symbol = _require$js.Symbol;
 	var _require$utils = _require.utils;
 	var mixin = _require$utils.mixin;
 	var createClass = _require$utils.createClass;
 
-	var morphElement = __webpack_require__(22);
+	var morphElement = __webpack_require__(24);
 	var camelize = __webpack_require__(17);
-	var Disposable = __webpack_require__(25);
-	var Attributes = __webpack_require__(26);
-	var Properties = __webpack_require__(27);
+	var DisposableMixin = __webpack_require__(27);
+	var Attributes = __webpack_require__(21);
+	var Properties = __webpack_require__(22);
 	var eventTypes = __webpack_require__(28);
 
 	var createObject = Object.create;
-	var defineProperty = Object.defineProperty;
 	var getPrototypeOf = Object.getPrototypeOf;
+	var defineProperty = Object.defineProperty;
 	var hasOwn = Object.prototype.hasOwnProperty;
 	var isArray = Array.isArray;
 
@@ -3178,20 +3332,22 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (component.isReady) {
 					var handledValue = attrValue.get();
 
-					component.emit({
-						type: 'element-attribute-' + name + '-change',
-						oldValue: handledOldValue,
-						value: handledValue
-					});
-					component.emit({
-						type: 'element-attribute-change',
-						name: name,
-						oldValue: handledOldValue,
-						value: handledValue
-					});
+					if (!is(handledValue, handledOldValue)) {
+						component.emit({
+							type: 'element-attribute-' + name + '-change',
+							oldValue: handledOldValue,
+							value: handledValue
+						});
+						component.emit({
+							type: 'element-attribute-change',
+							name: name,
+							oldValue: handledOldValue,
+							value: handledValue
+						});
 
-					if (component.elementAttributeChanged) {
-						component.elementAttributeChanged(name, handledOldValue, handledValue);
+						if (component.elementAttributeChanged) {
+							component.elementAttributeChanged(name, handledOldValue, handledValue);
+						}
 					}
 				}
 			}
@@ -3212,7 +3368,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	var Component = EventEmitter.extend({
-		Implements: [Disposable],
+		Implements: [DisposableMixin],
 
 		Static: {
 			/**
@@ -3275,7 +3431,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		template: null,
 
 		constructor: function Component(props) {
-			Disposable.call(this);
+			EventEmitter.call(this);
+			DisposableMixin.call(this);
 
 			if (this.constructor.prototype == Component.prototype) {
 				throw new TypeError('Component is abstract class');
@@ -3484,12 +3641,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var specialElementHandlers = __webpack_require__(23);
-	var morphElementAttributes = __webpack_require__(24);
+	var specialElementHandlers = __webpack_require__(25);
+	var morphElementAttributes = __webpack_require__(26);
 	var defaultNamespaceURI = document.documentElement.namespaceURI;
 	function defaultGetElementAttributes(el) {
 	    return el.attributes;
@@ -3723,7 +3880,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3751,7 +3908,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3791,7 +3948,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3806,10 +3963,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var isArray = Array.isArray;
 
-	var Disposable = EventEmitter.extend({
-		constructor: function Disposable() {
-			EventEmitter.call(this);
-
+	var DisposableMixin = EventEmitter.extend({
+		constructor: function DisposableMixin() {
 			/**
 	   * @type {Array<{ dispose: () }>}
 	   */
@@ -4052,7 +4207,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 		/**
-	  * @typesign () -> Rista.Disposable;
+	  * @typesign () -> Rista.DisposableMixin;
 	  */
 		dispose: function dispose() {
 			var disposables = this._disposables;
@@ -4065,179 +4220,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	});
 
-	module.exports = Disposable;
-
-/***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-	var _require = __webpack_require__(1);
-
-	var EventEmitter = _require.EventEmitter;
-	var Cell = _require.Cell;
-	var Map = _require.js.Map;
-
-	var camelize = __webpack_require__(17);
-	var hyphenize = __webpack_require__(18);
-	var escapeHTML = __webpack_require__(19);
-	var unescapeHTML = __webpack_require__(20);
-
-	var defineProperty = Object.defineProperty;
-
-	var typeHandlers = new Map([[Boolean, [function (value) {
-		return value != null ? value != 'no' : false;
-	}, function (value) {
-		return value ? '' : void 0;
-	}]], ['boolean', [function (value, defaultValue) {
-		return value != null ? value != 'no' : defaultValue;
-	}, function (value, defaultValue) {
-		return value ? '' : defaultValue ? 'no' : void 0;
-	}]], [Number, [function (value) {
-		return value != null ? +value : void 0;
-	}, function (value) {
-		return value !== void 0 ? String(+value) : void 0;
-	}]], ['number', [function (value, defaultValue) {
-		return value != null ? +value : defaultValue;
-	}, function (value) {
-		return value !== void 0 ? String(+value) : void 0;
-	}]], [String, [function (value) {
-		return value != null ? value : void 0;
-	}, function (value) {
-		return value !== void 0 ? String(value) : void 0;
-	}]], ['string', [function (value, defaultValue) {
-		return value != null ? value : defaultValue;
-	}, function (value) {
-		return value !== void 0 ? String(value) : void 0;
-	}]], [Object, [function (value) {
-		return value != null ? Object(Function('return ' + unescapeHTML(value) + ';')()) : null;
-	}, function (value) {
-		return value != null ? escapeHTML(JSON.stringify(value)) : void 0;
-	}]], ['object', [function (value, defaultValue) {
-		return value != null ? Object(Function('return ' + unescapeHTML(value) + ';')()) : defaultValue;
-	}, function (value) {
-		return value != null ? escapeHTML(JSON.stringify(value)) : void 0;
-	}]]]);
-
-	var Attributes = EventEmitter.extend({
-		Static: {
-			typeHandlers: typeHandlers
-		},
-
-		constructor: function Attributes(component) {
-			var _this = this;
-
-			var el = component.element;
-			var schema = component.constructor.elementAttributes;
-
-			var _loop = function _loop(name) {
-				var defaultValue = schema[name];
-				var type = typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue);
-				var handlers = typeHandlers.get(type == 'function' ? defaultValue : type);
-
-				if (!handlers) {
-					throw new TypeError('Unsupported attribute type');
-				}
-
-				var camelizedName = camelize(name);
-				var hyphenizedName = hyphenize(name);
-
-				var attrValue = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new Cell(el.getAttribute(hyphenizedName), {
-					merge: function merge(value) {
-						return handlers[0].call(component, value, defaultValue);
-					}
-				});
-				var descriptor = {
-					configurable: true,
-					enumerable: true,
-
-					get: function get() {
-						return attrValue.get();
-					},
-					set: function set(value) {
-						value = handlers[1](value, defaultValue);
-
-						if (value === void 0) {
-							el.removeAttribute(hyphenizedName);
-						} else {
-							el.setAttribute(hyphenizedName, value);
-						}
-					}
-				};
-
-				defineProperty(_this, camelizedName, descriptor);
-
-				if (hyphenizedName != camelizedName) {
-					defineProperty(_this, hyphenizedName, descriptor);
-				}
-			};
-
-			for (var name in schema) {
-				_loop(name);
-			}
-		}
-	});
-
-	module.exports = Attributes;
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var _require = __webpack_require__(1);
-
-	var Cell = _require.Cell;
-	var createClass = _require.utils.createClass;
-
-
-	var createObject = Object.create;
-
-	var Properties = createClass({
-		constructor: function Properties(component) {
-			var contentSourceElement = new Cell(component.element.childNodes, {
-				merge: function merge(el) {
-					if (typeof el == 'string') {
-						var html = el;
-
-						el = document.createElement('div');
-						el.innerHTML = html;
-
-						return el;
-					}
-
-					return el;
-				}
-			});
-
-			return createObject(component.elementAttributes, {
-				_contentSourceElement: {
-					configurable: true,
-					enumerable: true,
-					writable: true,
-					value: contentSourceElement
-				},
-
-				contentSourceElement: {
-					configurable: true,
-					enumerable: true,
-
-					get: function get() {
-						return contentSourceElement.get();
-					},
-					set: function set(el) {
-						contentSourceElement.set(el);
-					}
-				}
-			});
-		}
-	});
-
-	module.exports = Properties;
+	module.exports = DisposableMixin;
 
 /***/ },
 /* 28 */

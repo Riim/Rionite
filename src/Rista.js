@@ -3,6 +3,8 @@ let camelize = require('./utils/camelize');
 let hyphenize = require('./utils/hyphenize');
 let escapeHTML = require('./utils/escapeHTML');
 let unescapeHTML = require('./utils/unescapeHTML');
+let Attributes = require('./Attributes');
+let Properties = require('./Properties');
 let Component = require('./Component');
 
 let Rista = module.exports = {
@@ -11,6 +13,8 @@ let Rista = module.exports = {
 	list,
 	cellx,
 	Component,
+	Attributes,
+	Properties,
 
 	utils: {
 		camelize,

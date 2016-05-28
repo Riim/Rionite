@@ -1,45 +1,17 @@
-let { Cell, utils: { createClass } } = require('cellx');
+let { utils: { createClass, defineObservableProperty } } = require('cellx');
 
 let createObject = Object.create;
 
+/**
+ * @typesign new Properties(component: Rista.Component) -> Rista.Properties;
+ */
 let Properties = createClass({
 	constructor: function Properties(component) {
-		let contentSourceElement = new Cell(component.element.childNodes, {
-			merge(el) {
-				if (typeof el == 'string') {
-					let html = el;
-
-					el = document.createElement('div');
-					el.innerHTML = html;
-
-					return el;
-				}
-
-				return el;
-			}
-		});
-
-		return createObject(component.elementAttributes, {
-			_contentSourceElement: {
-				configurable: true,
-				enumerable: true,
-				writable: true,
-				value: contentSourceElement
-			},
-
-			contentSourceElement: {
-				configurable: true,
-				enumerable: true,
-
-				get() {
-					return contentSourceElement.get();
-				},
-
-				set(el) {
-					contentSourceElement.set(el);
-				}
-			}
-		});
+		return defineObservableProperty(
+			createObject(component.elementAttributes),
+			'contentSourceElement',
+			component.element.childNodes
+		);
 	}
 });
 

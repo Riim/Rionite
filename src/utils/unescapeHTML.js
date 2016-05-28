@@ -1,4 +1,3 @@
-
 let reLessThan = /&lt;/g;
 let reGreaterThan = /&gt;/g;
 let reQuote = /&quot;/g;
