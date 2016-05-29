@@ -63,22 +63,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	var list = _require.list;
 	var cellx = _require.cellx;
 
-	var camelize = __webpack_require__(17);
-	var hyphenize = __webpack_require__(18);
-	var escapeHTML = __webpack_require__(19);
-	var unescapeHTML = __webpack_require__(20);
-	var Attributes = __webpack_require__(21);
+	var Attributes = __webpack_require__(17);
 	var Properties = __webpack_require__(22);
 	var Component = __webpack_require__(23);
+	var XContent = __webpack_require__(31);
+	var camelize = __webpack_require__(18);
+	var hyphenize = __webpack_require__(19);
+	var escapeHTML = __webpack_require__(20);
+	var unescapeHTML = __webpack_require__(21);
 
 	var Rista = module.exports = {
 		EventEmitter: EventEmitter,
 		map: map,
 		list: list,
 		cellx: cellx,
-		Component: Component,
 		Attributes: Attributes,
 		Properties: Properties,
+		Component: Component,
+
+		components: {
+			XContent: XContent
+		},
 
 		utils: {
 			camelize: camelize,
@@ -93,20 +98,20 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var is = __webpack_require__(2);
-	var Symbol = __webpack_require__(3);
-	var Map = __webpack_require__(5);
-	var logError = __webpack_require__(9);
-	var nextUID = __webpack_require__(4);
+	var ErrorLogger = __webpack_require__(2);
+	var EventEmitter = __webpack_require__(3);
+	var ObservableMap = __webpack_require__(8);
+	var ObservableList = __webpack_require__(13);
+	var Cell = __webpack_require__(14);
+	var keys = __webpack_require__(11);
+	var is = __webpack_require__(12);
+	var Symbol = __webpack_require__(4);
+	var Map = __webpack_require__(10);
+	var logError = __webpack_require__(16);
+	var nextUID = __webpack_require__(5);
 	var mixin = __webpack_require__(7);
 	var createClass = __webpack_require__(6);
-	var nextTick = __webpack_require__(10);
-	var keys = __webpack_require__(8);
-	var ErrorLogger = __webpack_require__(11);
-	var EventEmitter = __webpack_require__(12);
-	var ObservableMap = __webpack_require__(13);
-	var ObservableList = __webpack_require__(15);
-	var Cell = __webpack_require__(16);
+	var nextTick = __webpack_require__(15);
 
 	var KEY_UID = keys.UID;
 	var KEY_CELLS = keys.CELLS;
@@ -323,527 +328,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 2 */
 /***/ function(module, exports) {
 
-	/**
-	 * @typesign (a, b) -> boolean;
-	 */
-	var is = Object.is || function is(a, b) {
-		if (a === 0 && b === 0) {
-			return 1 / a == 1 / b;
-		}
-		return a === b || (a != a && b != b);
-	};
-
-	module.exports = is;
-
-
-/***/ },
-/* 3 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var nextUID = __webpack_require__(4);
-
-	var Symbol = Function('return this;')().Symbol;
-
-	if (!Symbol) {
-		Symbol = function Symbol(key) {
-			return '__' + key + '_' + Math.floor(Math.random() * 1e9) + '_' + nextUID() + '__';
-		};
-
-		Symbol.iterator = Symbol('iterator');
-	}
-
-	module.exports = Symbol;
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	var uidCounter = 0;
-
-	/**
-	 * @typesign () -> string;
-	 */
-	function nextUID() {
-		return String(++uidCounter);
-	}
-
-	module.exports = nextUID;
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Symbol = __webpack_require__(3);
-	var nextUID = __webpack_require__(4);
-	var createClass = __webpack_require__(6);
-	var keys = __webpack_require__(8);
-
-	var KEY_UID = keys.UID;
-
-	var hasOwn = Object.prototype.hasOwnProperty;
-	var global = Function('return this;')();
-
-	var Map = global.Map;
-
-	if (!Map) {
-		var entryStub = {
-			value: void 0
-		};
-
-		Map = createClass({
-			constructor: function Map(entries) {
-				this._entries = Object.create(null);
-				this._objectStamps = {};
-
-				this._first = null;
-				this._last = null;
-
-				this.size = 0;
-
-				if (entries) {
-					for (var i = 0, l = entries.length; i < l; i++) {
-						this.set(entries[i][0], entries[i][1]);
-					}
-				}
-			},
-
-			has: function has(key) {
-				return !!this._entries[this._getValueStamp(key)];
-			},
-
-			get: function get(key) {
-				return (this._entries[this._getValueStamp(key)] || entryStub).value;
-			},
-
-			set: function set(key, value) {
-				var entries = this._entries;
-				var keyStamp = this._getValueStamp(key);
-
-				if (entries[keyStamp]) {
-					entries[keyStamp].value = value;
-				} else {
-					var entry = entries[keyStamp] = {
-						key: key,
-						keyStamp: keyStamp,
-						value: value,
-						prev: this._last,
-						next: null
-					};
-
-					if (this.size++) {
-						this._last.next = entry;
-					} else {
-						this._first = entry;
-					}
-
-					this._last = entry;
-				}
-
-				return this;
-			},
-
-			delete: function _delete(key) {
-				var keyStamp = this._getValueStamp(key);
-				var entry = this._entries[keyStamp];
-
-				if (!entry) {
-					return false;
-				}
-
-				if (--this.size) {
-					var prev = entry.prev;
-					var next = entry.next;
-
-					if (prev) {
-						prev.next = next;
-					} else {
-						this._first = next;
-					}
-
-					if (next) {
-						next.prev = prev;
-					} else {
-						this._last = prev;
-					}
-				} else {
-					this._first = null;
-					this._last = null;
-				}
-
-				delete this._entries[keyStamp];
-				delete this._objectStamps[keyStamp];
-
-				return true;
-			},
-
-			clear: function clear() {
-				var entries = this._entries;
-
-				for (var stamp in entries) {
-					delete entries[stamp];
-				}
-
-				this._objectStamps = {};
-
-				this._first = null;
-				this._last = null;
-
-				this.size = 0;
-			},
-
-			_getValueStamp: function _getValueStamp(value) {
-				switch (typeof value) {
-					case 'undefined': {
-						return 'undefined';
-					}
-					case 'object': {
-						if (value === null) {
-							return 'null';
-						}
-
-						break;
-					}
-					case 'boolean': {
-						return '?' + value;
-					}
-					case 'number': {
-						return '+' + value;
-					}
-					case 'string': {
-						return ',' + value;
-					}
-				}
-
-				return this._getObjectStamp(value);
-			},
-
-			_getObjectStamp: function _getObjectStamp(obj) {
-				if (!hasOwn.call(obj, KEY_UID)) {
-					if (!Object.isExtensible(obj)) {
-						var stamps = this._objectStamps;
-						var stamp;
-
-						for (stamp in stamps) {
-							if (hasOwn.call(stamps, stamp) && stamps[stamp] == obj) {
-								return stamp;
-							}
-						}
-
-						stamp = nextUID();
-						stamps[stamp] = obj;
-
-						return stamp;
-					}
-
-					Object.defineProperty(obj, KEY_UID, {
-						value: nextUID()
-					});
-				}
-
-				return obj[KEY_UID];
-			},
-
-			forEach: function forEach(cb, context) {
-				context = arguments.length >= 2 ? context : global;
-
-				var entry = this._first;
-
-				while (entry) {
-					cb.call(context, entry.value, entry.key, this);
-
-					do {
-						entry = entry.next;
-					} while (entry && !this._entries[entry.keyStamp]);
-				}
-			},
-
-			toString: function toString() {
-				return '[object Map]';
-			}
-		});
-
-		[
-			['keys', function keys(entry) {
-				return entry.key;
-			}],
-			['values', function values(entry) {
-				return entry.value;
-			}],
-			['entries', function entries(entry) {
-				return [entry.key, entry.value];
-			}]
-		].forEach(function(settings) {
-			var getStepValue = settings[1];
-
-			Map.prototype[settings[0]] = function() {
-				var entries = this._entries;
-				var entry;
-				var done = false;
-				var map = this;
-
-				return {
-					next: function() {
-						if (!done) {
-							if (entry) {
-								do {
-									entry = entry.next;
-								} while (entry && !entries[entry.keyStamp]);
-							} else {
-								entry = map._first;
-							}
-
-							if (entry) {
-								return {
-									value: getStepValue(entry),
-									done: false
-								};
-							}
-
-							done = true;
-						}
-
-						return {
-							value: void 0,
-							done: true
-						};
-					}
-				};
-			};
-		});
-	}
-
-	if (!Map.prototype[Symbol.iterator]) {
-		Map.prototype[Symbol.iterator] = Map.prototype.entries;
-	}
-
-	module.exports = Map;
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var mixin = __webpack_require__(7);
-
-	var hasOwn = Object.prototype.hasOwnProperty;
-
-	var extend;
-
-	/**
-	 * @typesign (description: {
-	 *     Extends?: Function,
-	 *     Implements?: Array<Object|Function>,
-	 *     Static?: Object,
-	 *     constructor?: Function,
-	 *     [key: string]
-	 * }) -> Function;
-	 */
-	function createClass(description) {
-		var parent;
-
-		if (description.Extends) {
-			parent = description.Extends;
-			delete description.Extends;
-		} else {
-			parent = Object;
-		}
-
-		var constr;
-
-		if (hasOwn.call(description, 'constructor')) {
-			constr = description.constructor;
-			delete description.constructor;
-		} else {
-			constr = parent == Object ?
-				function() {} :
-				function() {
-					return parent.apply(this, arguments);
-				};
-		}
-
-		var proto = constr.prototype = Object.create(parent.prototype);
-
-		if (description.Implements) {
-			description.Implements.forEach(function(implementation) {
-				if (typeof implementation == 'function') {
-					Object.keys(implementation).forEach(function(name) {
-						Object.defineProperty(constr, name, Object.getOwnPropertyDescriptor(implementation, name));
-					});
-
-					mixin(proto, implementation.prototype);
-				} else {
-					mixin(proto, implementation);
-				}
-			});
-
-			delete description.Implements;
-		}
-
-		Object.keys(parent).forEach(function(name) {
-			Object.defineProperty(constr, name, Object.getOwnPropertyDescriptor(parent, name));
-		});
-
-		if (description.Static) {
-			mixin(constr, description.Static);
-			delete description.Static;
-		}
-
-		if (constr.extend === void 0) {
-			constr.extend = extend;
-		}
-
-		mixin(proto, description);
-
-		Object.defineProperty(proto, 'constructor', {
-			configurable: true,
-			writable: true,
-			value: constr
-		});
-
-		return constr;
-	}
-
-	/**
-	 * @this {Function}
-	 *
-	 * @typesign (description: {
-	 *     Implements?: Array<Object|Function>,
-	 *     Static?: Object,
-	 *     constructor?: Function,
-	 *     [key: string]
-	 * }) -> Function;
-	 */
-	extend = function extend(description) {
-		description.Extends = this;
-		return createClass(description);
-	};
-
-	module.exports = createClass;
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports) {
-
-	/**
-	 * @typesign (target: Object, source: Object) -> Object;
-	 */
-	function mixin(target, source) {
-		var names = Object.getOwnPropertyNames(source);
-
-		for (var i = 0, l = names.length; i < l; i++) {
-			var name = names[i];
-			Object.defineProperty(target, name, Object.getOwnPropertyDescriptor(source, name));
-		}
-
-		return target;
-	}
-
-	module.exports = mixin;
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Symbol = __webpack_require__(3);
-
-	var keys = {
-		UID: Symbol('uid'),
-		CELLS: Symbol('cells')
-	};
-
-	module.exports = keys;
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports) {
-
-	function noop() {}
-
-	var map = Array.prototype.map;
-	var global = Function('return this;')();
-
-	/**
-	 * @typesign (...msg);
-	 */
-	function logError() {
-		var console = global.console;
-
-		(console && console.error || noop).call(console || global, map.call(arguments, function(part) {
-			return part === Object(part) && part.stack || part;
-		}).join(' '));
-	}
-
-	module.exports = logError;
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var ErrorLogger = __webpack_require__(11);
-
-	var global = Function('return this;')();
-
-	/**
-	 * @typesign (cb: ());
-	 */
-	var nextTick;
-
-	if (global.process && process.toString() == '[object process]' && process.nextTick) {
-		nextTick = process.nextTick;
-	} else if (global.setImmediate) {
-		nextTick = function nextTick(cb) {
-			setImmediate(cb);
-		};
-	} else if (global.Promise && Promise.toString().indexOf('[native code]') != -1) {
-		var prm = Promise.resolve();
-
-		nextTick = function nextTick(cb) {
-			prm.then(function() {
-				cb();
-			});
-		};
-	} else {
-		var queue;
-
-		global.addEventListener('message', function() {
-			if (queue) {
-				var track = queue;
-
-				queue = null;
-
-				for (var i = 0, l = track.length; i < l; i++) {
-					try {
-						track[i]();
-					} catch (err) {
-						ErrorLogger.log(err);
-					}
-				}
-			}
-		});
-
-		nextTick = function nextTick(cb) {
-			if (queue) {
-				queue.push(cb);
-			} else {
-				queue = [cb];
-				postMessage('__tic__', '*');
-			}
-		};
-	}
-
-	module.exports = nextTick;
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
 	var ErrorLogger = {
 		_handler: null,
 
@@ -866,12 +350,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Symbol = __webpack_require__(3);
+	var ErrorLogger = __webpack_require__(2);
+	var Symbol = __webpack_require__(4);
 	var createClass = __webpack_require__(6);
-	var ErrorLogger = __webpack_require__(11);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 
@@ -1143,14 +627,172 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var is = __webpack_require__(2);
-	var Symbol = __webpack_require__(3);
-	var Map = __webpack_require__(5);
-	var EventEmitter = __webpack_require__(12);
-	var ObservableCollectionMixin = __webpack_require__(14);
+	var nextUID = __webpack_require__(5);
+
+	var Symbol = Function('return this;')().Symbol;
+
+	if (!Symbol) {
+		Symbol = function Symbol(key) {
+			return '__' + key + '_' + Math.floor(Math.random() * 1e9) + '_' + nextUID() + '__';
+		};
+
+		Symbol.iterator = Symbol('iterator');
+	}
+
+	module.exports = Symbol;
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	var uidCounter = 0;
+
+	/**
+	 * @typesign () -> string;
+	 */
+	function nextUID() {
+		return String(++uidCounter);
+	}
+
+	module.exports = nextUID;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var mixin = __webpack_require__(7);
+
+	var hasOwn = Object.prototype.hasOwnProperty;
+
+	var extend;
+
+	/**
+	 * @typesign (description: {
+	 *     Extends?: Function,
+	 *     Implements?: Array<Object|Function>,
+	 *     Static?: Object,
+	 *     constructor?: Function,
+	 *     [key: string]
+	 * }) -> Function;
+	 */
+	function createClass(description) {
+		var parent;
+
+		if (description.Extends) {
+			parent = description.Extends;
+			delete description.Extends;
+		} else {
+			parent = Object;
+		}
+
+		var constr;
+
+		if (hasOwn.call(description, 'constructor')) {
+			constr = description.constructor;
+			delete description.constructor;
+		} else {
+			constr = parent == Object ?
+				function() {} :
+				function() {
+					return parent.apply(this, arguments);
+				};
+		}
+
+		var proto = constr.prototype = Object.create(parent.prototype);
+
+		if (description.Implements) {
+			description.Implements.forEach(function(implementation) {
+				if (typeof implementation == 'function') {
+					Object.keys(implementation).forEach(function(name) {
+						Object.defineProperty(constr, name, Object.getOwnPropertyDescriptor(implementation, name));
+					});
+
+					mixin(proto, implementation.prototype);
+				} else {
+					mixin(proto, implementation);
+				}
+			});
+
+			delete description.Implements;
+		}
+
+		Object.keys(parent).forEach(function(name) {
+			Object.defineProperty(constr, name, Object.getOwnPropertyDescriptor(parent, name));
+		});
+
+		if (description.Static) {
+			mixin(constr, description.Static);
+			delete description.Static;
+		}
+
+		if (constr.extend === void 0) {
+			constr.extend = extend;
+		}
+
+		mixin(proto, description);
+
+		Object.defineProperty(proto, 'constructor', {
+			configurable: true,
+			writable: true,
+			value: constr
+		});
+
+		return constr;
+	}
+
+	/**
+	 * @this {Function}
+	 *
+	 * @typesign (description: {
+	 *     Implements?: Array<Object|Function>,
+	 *     Static?: Object,
+	 *     constructor?: Function,
+	 *     [key: string]
+	 * }) -> Function;
+	 */
+	extend = function extend(description) {
+		description.Extends = this;
+		return createClass(description);
+	};
+
+	module.exports = createClass;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	/**
+	 * @typesign (target: Object, source: Object) -> Object;
+	 */
+	function mixin(target, source) {
+		var names = Object.getOwnPropertyNames(source);
+
+		for (var i = 0, l = names.length; i < l; i++) {
+			var name = names[i];
+			Object.defineProperty(target, name, Object.getOwnPropertyDescriptor(source, name));
+		}
+
+		return target;
+	}
+
+	module.exports = mixin;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var EventEmitter = __webpack_require__(3);
+	var ObservableCollectionMixin = __webpack_require__(9);
+	var is = __webpack_require__(12);
+	var Symbol = __webpack_require__(4);
+	var Map = __webpack_require__(10);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 	var isArray = Array.isArray;
@@ -1373,11 +1015,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Map = __webpack_require__(5);
-	var EventEmitter = __webpack_require__(12);
+	var EventEmitter = __webpack_require__(3);
+	var Map = __webpack_require__(10);
 
 	var ObservableCollectionMixin = EventEmitter.extend({
 		constructor: function ObservableCollectionMixin() {
@@ -1435,13 +1077,292 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var is = __webpack_require__(2);
-	var Symbol = __webpack_require__(3);
-	var EventEmitter = __webpack_require__(12);
-	var ObservableCollectionMixin = __webpack_require__(14);
+	var keys = __webpack_require__(11);
+	var Symbol = __webpack_require__(4);
+	var nextUID = __webpack_require__(5);
+	var createClass = __webpack_require__(6);
+
+	var KEY_UID = keys.UID;
+
+	var hasOwn = Object.prototype.hasOwnProperty;
+	var global = Function('return this;')();
+
+	var Map = global.Map;
+
+	if (!Map) {
+		var entryStub = {
+			value: void 0
+		};
+
+		Map = createClass({
+			constructor: function Map(entries) {
+				this._entries = Object.create(null);
+				this._objectStamps = {};
+
+				this._first = null;
+				this._last = null;
+
+				this.size = 0;
+
+				if (entries) {
+					for (var i = 0, l = entries.length; i < l; i++) {
+						this.set(entries[i][0], entries[i][1]);
+					}
+				}
+			},
+
+			has: function has(key) {
+				return !!this._entries[this._getValueStamp(key)];
+			},
+
+			get: function get(key) {
+				return (this._entries[this._getValueStamp(key)] || entryStub).value;
+			},
+
+			set: function set(key, value) {
+				var entries = this._entries;
+				var keyStamp = this._getValueStamp(key);
+
+				if (entries[keyStamp]) {
+					entries[keyStamp].value = value;
+				} else {
+					var entry = entries[keyStamp] = {
+						key: key,
+						keyStamp: keyStamp,
+						value: value,
+						prev: this._last,
+						next: null
+					};
+
+					if (this.size++) {
+						this._last.next = entry;
+					} else {
+						this._first = entry;
+					}
+
+					this._last = entry;
+				}
+
+				return this;
+			},
+
+			delete: function _delete(key) {
+				var keyStamp = this._getValueStamp(key);
+				var entry = this._entries[keyStamp];
+
+				if (!entry) {
+					return false;
+				}
+
+				if (--this.size) {
+					var prev = entry.prev;
+					var next = entry.next;
+
+					if (prev) {
+						prev.next = next;
+					} else {
+						this._first = next;
+					}
+
+					if (next) {
+						next.prev = prev;
+					} else {
+						this._last = prev;
+					}
+				} else {
+					this._first = null;
+					this._last = null;
+				}
+
+				delete this._entries[keyStamp];
+				delete this._objectStamps[keyStamp];
+
+				return true;
+			},
+
+			clear: function clear() {
+				var entries = this._entries;
+
+				for (var stamp in entries) {
+					delete entries[stamp];
+				}
+
+				this._objectStamps = {};
+
+				this._first = null;
+				this._last = null;
+
+				this.size = 0;
+			},
+
+			_getValueStamp: function _getValueStamp(value) {
+				switch (typeof value) {
+					case 'undefined': {
+						return 'undefined';
+					}
+					case 'object': {
+						if (value === null) {
+							return 'null';
+						}
+
+						break;
+					}
+					case 'boolean': {
+						return '?' + value;
+					}
+					case 'number': {
+						return '+' + value;
+					}
+					case 'string': {
+						return ',' + value;
+					}
+				}
+
+				return this._getObjectStamp(value);
+			},
+
+			_getObjectStamp: function _getObjectStamp(obj) {
+				if (!hasOwn.call(obj, KEY_UID)) {
+					if (!Object.isExtensible(obj)) {
+						var stamps = this._objectStamps;
+						var stamp;
+
+						for (stamp in stamps) {
+							if (hasOwn.call(stamps, stamp) && stamps[stamp] == obj) {
+								return stamp;
+							}
+						}
+
+						stamp = nextUID();
+						stamps[stamp] = obj;
+
+						return stamp;
+					}
+
+					Object.defineProperty(obj, KEY_UID, {
+						value: nextUID()
+					});
+				}
+
+				return obj[KEY_UID];
+			},
+
+			forEach: function forEach(cb, context) {
+				context = arguments.length >= 2 ? context : global;
+
+				var entry = this._first;
+
+				while (entry) {
+					cb.call(context, entry.value, entry.key, this);
+
+					do {
+						entry = entry.next;
+					} while (entry && !this._entries[entry.keyStamp]);
+				}
+			},
+
+			toString: function toString() {
+				return '[object Map]';
+			}
+		});
+
+		[
+			['keys', function keys(entry) {
+				return entry.key;
+			}],
+			['values', function values(entry) {
+				return entry.value;
+			}],
+			['entries', function entries(entry) {
+				return [entry.key, entry.value];
+			}]
+		].forEach(function(settings) {
+			var getStepValue = settings[1];
+
+			Map.prototype[settings[0]] = function() {
+				var entries = this._entries;
+				var entry;
+				var done = false;
+				var map = this;
+
+				return {
+					next: function() {
+						if (!done) {
+							if (entry) {
+								do {
+									entry = entry.next;
+								} while (entry && !entries[entry.keyStamp]);
+							} else {
+								entry = map._first;
+							}
+
+							if (entry) {
+								return {
+									value: getStepValue(entry),
+									done: false
+								};
+							}
+
+							done = true;
+						}
+
+						return {
+							value: void 0,
+							done: true
+						};
+					}
+				};
+			};
+		});
+	}
+
+	if (!Map.prototype[Symbol.iterator]) {
+		Map.prototype[Symbol.iterator] = Map.prototype.entries;
+	}
+
+	module.exports = Map;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Symbol = __webpack_require__(4);
+
+	module.exports = {
+		UID: Symbol('uid'),
+		CELLS: Symbol('cells')
+	};
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	/**
+	 * @typesign (a, b) -> boolean;
+	 */
+	var is = Object.is || function is(a, b) {
+		if (a === 0 && b === 0) {
+			return 1 / a == 1 / b;
+		}
+		return a === b || (a != a && b != b);
+	};
+
+	module.exports = is;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var EventEmitter = __webpack_require__(3);
+	var ObservableCollectionMixin = __webpack_require__(9);
+	var is = __webpack_require__(12);
+	var Symbol = __webpack_require__(4);
 
 	var push = Array.prototype.push;
 	var splice = Array.prototype.splice;
@@ -1915,9 +1836,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var items = this._items;
 
 			for (var i = 0, l = items.length; i < l; i++) {
-				var item = items[i];
-
-				if (cb.call(context, item, i, this)) {
+				if (cb.call(context, items[i], i, this)) {
 					return i;
 				}
 			}
@@ -2052,12 +1971,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var is = __webpack_require__(2);
-	var nextTick = __webpack_require__(10);
-	var EventEmitter = __webpack_require__(12);
+	var EventEmitter = __webpack_require__(3);
+	var is = __webpack_require__(12);
+	var nextTick = __webpack_require__(15);
 
 	var slice = Array.prototype.slice;
 
@@ -2998,87 +2917,89 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var ErrorLogger = __webpack_require__(2);
+
+	var global = Function('return this;')();
+
+	/**
+	 * @typesign (cb: ());
+	 */
+	var nextTick;
+
+	if (global.process && process.toString() == '[object process]' && process.nextTick) {
+		nextTick = process.nextTick;
+	} else if (global.setImmediate) {
+		nextTick = function nextTick(cb) {
+			setImmediate(cb);
+		};
+	} else if (global.Promise && Promise.toString().indexOf('[native code]') != -1) {
+		var prm = Promise.resolve();
+
+		nextTick = function nextTick(cb) {
+			prm.then(function() {
+				cb();
+			});
+		};
+	} else {
+		var queue;
+
+		global.addEventListener('message', function() {
+			if (queue) {
+				var track = queue;
+
+				queue = null;
+
+				for (var i = 0, l = track.length; i < l; i++) {
+					try {
+						track[i]();
+					} catch (err) {
+						ErrorLogger.log(err);
+					}
+				}
+			}
+		});
+
+		nextTick = function nextTick(cb) {
+			if (queue) {
+				queue.push(cb);
+			} else {
+				queue = [cb];
+				postMessage('__tic__', '*');
+			}
+		};
+	}
+
+	module.exports = nextTick;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	function noop() {}
+
+	var map = Array.prototype.map;
+	var global = Function('return this;')();
+
+	/**
+	 * @typesign (...msg);
+	 */
+	function logError() {
+		var console = global.console;
+
+		(console && console.error || noop).call(console || global, map.call(arguments, function(part) {
+			return part === Object(part) && part.stack || part;
+		}).join(' '));
+	}
+
+	module.exports = logError;
+
+
+/***/ },
 /* 17 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	var cache = Object.create(null);
-
-	/**
-	 * @typesign (str: string) -> string;
-	 */
-	function camelize(str) {
-		return cache[str] || (cache[str] = str.replace(/[\-_]+([a-z]|$)/g, function (match, chr) {
-			return chr.toUpperCase();
-		}));
-	}
-
-	module.exports = camelize;
-
-/***/ },
-/* 18 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var cache = Object.create(null);
-
-	/**
-	 * @typesign (str: string) -> string;
-	 */
-	function hyphenize(str) {
-		return cache[str] || (cache[str] = str.replace(/([A-Z])([^A-Z])/g, function (match, chr1, chr2) {
-			return '-' + chr1.toLowerCase() + chr2;
-		}).replace(/([A-Z]+)/g, function (match, chars) {
-			return '-' + chars.toLowerCase();
-		}).replace('--', '-').replace(/^-/, ''));
-	}
-
-	module.exports = hyphenize;
-
-/***/ },
-/* 19 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var reAmpersand = /&/g;
-	var reLessThan = /</g;
-	var reGreaterThan = />/g;
-	var reQuote = /"/g;
-
-	/**
-	 * @typesign (str: string) -> string;
-	 */
-	function escapeHTML(str) {
-		return str.replace(reAmpersand, '&amp;').replace(reLessThan, '&lt;').replace(reGreaterThan, '&gt;').replace(reQuote, '&quot;');
-	}
-
-	module.exports = escapeHTML;
-
-/***/ },
-/* 20 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var reLessThan = /&lt;/g;
-	var reGreaterThan = /&gt;/g;
-	var reQuote = /&quot;/g;
-	var reAmpersand = /&amp;/g;
-
-	/**
-	 * @typesign (str: string) -> string;
-	 */
-	function unescapeHTML(str) {
-		return str.replace(reLessThan, '<').replace(reGreaterThan, '>').replace(reQuote, '"').replace(reAmpersand, '&');
-	}
-
-	module.exports = unescapeHTML;
-
-/***/ },
-/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3091,10 +3012,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Cell = _require.Cell;
 	var Map = _require.js.Map;
 
-	var camelize = __webpack_require__(17);
-	var hyphenize = __webpack_require__(18);
-	var escapeHTML = __webpack_require__(19);
-	var unescapeHTML = __webpack_require__(20);
+	var camelize = __webpack_require__(18);
+	var hyphenize = __webpack_require__(19);
+	var escapeHTML = __webpack_require__(20);
+	var unescapeHTML = __webpack_require__(21);
 
 	var defineProperty = Object.defineProperty;
 
@@ -3198,6 +3119,86 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Attributes;
 
 /***/ },
+/* 18 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	var cache = Object.create(null);
+
+	/**
+	 * @typesign (str: string) -> string;
+	 */
+	function camelize(str) {
+		return cache[str] || (cache[str] = str.replace(/[\-_]+([a-z]|$)/g, function (match, chr) {
+			return chr.toUpperCase();
+		}));
+	}
+
+	module.exports = camelize;
+
+/***/ },
+/* 19 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var cache = Object.create(null);
+
+	/**
+	 * @typesign (str: string) -> string;
+	 */
+	function hyphenize(str) {
+		return cache[str] || (cache[str] = str.replace(/([A-Z])([^A-Z])/g, function (match, chr1, chr2) {
+			return '-' + chr1.toLowerCase() + chr2;
+		}).replace(/([A-Z]+)/g, function (match, chars) {
+			return '-' + chars.toLowerCase();
+		}).replace('--', '-').replace(/^-/, ''));
+	}
+
+	module.exports = hyphenize;
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var reAmpersand = /&/g;
+	var reLessThan = /</g;
+	var reGreaterThan = />/g;
+	var reQuote = /"/g;
+
+	/**
+	 * @typesign (str: string) -> string;
+	 */
+	function escapeHTML(str) {
+		return str.replace(reAmpersand, '&amp;').replace(reLessThan, '&lt;').replace(reGreaterThan, '&gt;').replace(reQuote, '&quot;');
+	}
+
+	module.exports = escapeHTML;
+
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var reLessThan = /&lt;/g;
+	var reGreaterThan = /&gt;/g;
+	var reQuote = /&quot;/g;
+	var reAmpersand = /&amp;/g;
+
+	/**
+	 * @typesign (str: string) -> string;
+	 */
+	function unescapeHTML(str) {
+		return str.replace(reLessThan, '<').replace(reGreaterThan, '>').replace(reQuote, '"').replace(reAmpersand, '&');
+	}
+
+	module.exports = unescapeHTML;
+
+/***/ },
 /* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -3233,19 +3234,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var EventEmitter = _require.EventEmitter;
 	var Cell = _require.Cell;
-	var _require$js = _require.js;
-	var is = _require$js.is;
-	var _Symbol = _require$js.Symbol;
+	var is = _require.js.is;
 	var _require$utils = _require.utils;
 	var mixin = _require$utils.mixin;
 	var createClass = _require$utils.createClass;
 
-	var morphElement = __webpack_require__(24);
-	var camelize = __webpack_require__(17);
-	var DisposableMixin = __webpack_require__(27);
-	var Attributes = __webpack_require__(21);
+	var DisposableMixin = __webpack_require__(24);
+	var Attributes = __webpack_require__(17);
 	var Properties = __webpack_require__(22);
-	var eventTypes = __webpack_require__(28);
+	var renderInner = __webpack_require__(25);
+	var morphComponentElement = __webpack_require__(26);
+	var eventTypes = __webpack_require__(30);
+	var camelize = __webpack_require__(18);
 
 	var createObject = Object.create;
 	var getPrototypeOf = Object.getPrototypeOf;
@@ -3254,7 +3254,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var isArray = Array.isArray;
 
 	var reClosedCustomElementTag = /<(\w+(?:\-\w+)+)([^>]*)\/>/g;
-	var lastAppliedAttributes = _Symbol('lastAppliedAttributes');
 
 	/**
 	 * @typesign (evt: Event|cellx~Event);
@@ -3354,19 +3353,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	};
 
-	/**
-	 * @typesign () -> string;
-	 */
-	function renderInner() {
-		var template = this.template;
-
-		if (template) {
-			return template.render ? template.render(this) : template.call(this, this);
-		}
-
-		return '';
-	}
-
 	var Component = EventEmitter.extend({
 		Implements: [DisposableMixin],
 
@@ -3401,21 +3387,35 @@ return /******/ (function(modules) { // webpackBootstrap
 			},
 
 
-			elementAttributes: {}
+			elementAttributes: {},
+
+			morphComponentElement: morphComponentElement
 		},
 
+		/**
+	  * @type {HTMLElement}
+	  */
 		element: null,
 
+		/**
+	  * @type {string}
+	  */
 		elementTagName: void 0,
 
 		_elementAttributes: null,
 
+		/**
+	  * @type {Rista.Attributes}
+	  */
 		get elementAttributes() {
 			return this._elementAttributes || (this._elementAttributes = new Attributes(this));
 		},
 
 		_props: null,
 
+		/**
+	  * @type {Rista.Properties}
+	  */
 		get props() {
 			return this._props || (this._props = new Properties(this));
 		},
@@ -3459,10 +3459,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			});
 
 			if (props) {
-				var attrs = this.elementAttributes;
+				var properties = this.props;
 
 				for (var name in props) {
-					attrs[camelize(name)] = props[name];
+					properties[camelize(name)] = props[name];
 				}
 			}
 
@@ -3563,7 +3563,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 		/**
-	  * @typesign () -> string;
+	  * @typesign () -> string|Array<string>;
 	  */
 		renderInner: renderInner,
 
@@ -3581,28 +3581,10 @@ return /******/ (function(modules) { // webpackBootstrap
 				return this;
 			}
 
-			var el = document.createElement('div');
-			el.innerHTML = html;
+			var toEl = document.createElement('div');
+			toEl.innerHTML = html;
 
-			morphElement(this.element, el, {
-				contentOnly: true,
-
-				getElementAttributes: function getElementAttributes(el) {
-					return el[lastAppliedAttributes] || el.attributes;
-				},
-				onBeforeMorphElementContent: function onBeforeMorphElementContent(el, toEl) {
-					var component = el.ristaComponent;
-
-					if (component) {
-						el[lastAppliedAttributes] = toEl.attributes;
-
-						if (component.template || component.renderInner !== renderInner) {
-							component.props.contentSourceElement = toEl;
-							return false;
-						}
-					}
-				}
-			});
+			morphComponentElement(this, toEl);
 
 			this._lastAppliedElementInnerHTML = html;
 
@@ -3642,313 +3624,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var specialElementHandlers = __webpack_require__(25);
-	var morphElementAttributes = __webpack_require__(26);
-	var defaultNamespaceURI = document.documentElement.namespaceURI;
-	function defaultGetElementAttributes(el) {
-	    return el.attributes;
-	}
-	function defaultGetElementKey(el) {
-	    return el.getAttribute('key');
-	}
-	function defaultIsCompatibleElements(el1, el2) {
-	    return el1.tagName == el2.tagName;
-	}
-	function morphElement(el, toEl, options) {
-	    if (!options) {
-	        options = {};
-	    }
-	    var contentOnly = !!options.contentOnly;
-	    var getElementAttributes = options.getElementAttributes || defaultGetElementAttributes;
-	    var getElementKey = options.getElementKey || defaultGetElementKey;
-	    var isCompatibleElements = options.isCompatibleElements || defaultIsCompatibleElements;
-	    var onBeforeMorphElement = options.onBeforeMorphElement;
-	    var onBeforeMorphElementContent = options.onBeforeMorphElementContent;
-	    var onElementRemoved = options.onElementRemoved;
-	    var activeElement = document.activeElement;
-	    var scrollLeft;
-	    var scrollTop;
-	    if (activeElement.selectionStart !== void 0) {
-	        scrollLeft = activeElement.scrollLeft;
-	        scrollTop = activeElement.scrollTop;
-	    }
-	    var storedElements = Object.create(null);
-	    var someStoredElements = Object.create(null);
-	    var unmatchedElements = Object.create(null);
-	    var haveNewStoredElements = false;
-	    var haveNewUnmatchedElements = false;
-	    function storeElement(el, remove) {
-	        var key = getElementKey(el);
-	        if (key) {
-	            var unmatchedEl = unmatchedElements[key];
-	            if (unmatchedEl) {
-	                delete unmatchedElements[key];
-	                unmatchedEl.el.parentNode.replaceChild(el, unmatchedEl.el);
-	                _morphElement(el, unmatchedEl.toEl, false);
-	            }
-	            else {
-	                storedElements[key] = someStoredElements[key] = el;
-	                haveNewStoredElements = true;
-	                if (remove) {
-	                    el.parentNode.removeChild(el);
-	                }
-	            }
-	        }
-	        else {
-	            if (remove) {
-	                el.parentNode.removeChild(el);
-	            }
-	            for (var child = el.firstElementChild; child; child = child.nextElementSibling) {
-	                storeElement(child, false);
-	            }
-	            if (onElementRemoved) {
-	                onElementRemoved(el);
-	            }
-	        }
-	    }
-	    function restoreElement(el) {
-	        for (var child = el.firstElementChild, nextChild = void 0; child; child = nextChild) {
-	            nextChild = child.nextElementSibling;
-	            var key = getElementKey(child);
-	            if (key) {
-	                var unmatchedEl = unmatchedElements[key];
-	                if (unmatchedEl) {
-	                    delete unmatchedElements[key];
-	                    unmatchedEl.el.parentNode.replaceChild(child, unmatchedEl.el);
-	                    _morphElement(child, unmatchedEl.toEl, false);
-	                }
-	                else {
-	                    storedElements[key] = someStoredElements[key] = child;
-	                    haveNewStoredElements = true;
-	                }
-	            }
-	            else {
-	                restoreElement(child);
-	            }
-	        }
-	    }
-	    function handleRemovedElement(el) {
-	        for (var child = el.firstElementChild; child; child = child.nextElementSibling) {
-	            handleRemovedElement(child);
-	        }
-	        if (onElementRemoved) {
-	            onElementRemoved(el);
-	        }
-	    }
-	    function _morphElement(el, toEl, contentOnly) {
-	        if (!contentOnly) {
-	            if (onBeforeMorphElement && onBeforeMorphElement(el, toEl) === false) {
-	                return;
-	            }
-	            morphElementAttributes(el, toEl, getElementAttributes(el));
-	            if (onBeforeMorphElementContent && onBeforeMorphElementContent(el, toEl) === false) {
-	                return;
-	            }
-	        }
-	        var elTagName = el.tagName;
-	        if (elTagName != 'TEXTAREA') {
-	            var elChild = el.firstChild;
-	            for (var toElChild = toEl.firstChild; toElChild; toElChild = toElChild.nextSibling) {
-	                var toElChildType = toElChild.nodeType;
-	                var toElChildKey = void 0;
-	                if (toElChildType == 1) {
-	                    toElChildKey = getElementKey(toElChild);
-	                    if (toElChildKey) {
-	                        var storedEl = storedElements[toElChildKey];
-	                        if (storedEl) {
-	                            delete storedElements[toElChildKey];
-	                            delete someStoredElements[toElChildKey];
-	                            if (elChild === storedEl) {
-	                                elChild = elChild.nextSibling;
-	                            }
-	                            else {
-	                                el.insertBefore(storedEl, elChild || null);
-	                            }
-	                            _morphElement(storedEl, toElChild, false);
-	                            continue;
-	                        }
-	                    }
-	                }
-	                var found = false;
-	                for (var nextElChild = elChild; nextElChild; nextElChild = nextElChild.nextSibling) {
-	                    if (nextElChild.nodeType == toElChildType) {
-	                        if (toElChildType == 1) {
-	                            if (getElementKey(nextElChild) === toElChildKey &&
-	                                (toElChildKey || isCompatibleElements(nextElChild, toElChild))) {
-	                                found = true;
-	                                _morphElement(nextElChild, toElChild, false);
-	                            }
-	                        }
-	                        else {
-	                            found = true;
-	                            nextElChild.nodeValue = toElChild.nodeValue;
-	                        }
-	                    }
-	                    if (found) {
-	                        if (elChild == nextElChild) {
-	                            elChild = elChild.nextSibling;
-	                        }
-	                        else {
-	                            el.insertBefore(nextElChild, elChild);
-	                        }
-	                        break;
-	                    }
-	                }
-	                if (!found) {
-	                    switch (toElChildType) {
-	                        case 1: {
-	                            var unmatchedEl = toElChild.namespaceURI == defaultNamespaceURI ?
-	                                document.createElement(toElChild.tagName) :
-	                                document.createElementNS(toElChild.namespaceURI, toElChild.tagName);
-	                            el.insertBefore(unmatchedEl, elChild || null);
-	                            if (toElChildKey) {
-	                                unmatchedElements[toElChildKey] = {
-	                                    el: unmatchedEl,
-	                                    toEl: toElChild
-	                                };
-	                                haveNewUnmatchedElements = true;
-	                            }
-	                            else {
-	                                _morphElement(unmatchedEl, toElChild, false);
-	                            }
-	                            break;
-	                        }
-	                        case 3: {
-	                            el.insertBefore(document.createTextNode(toElChild.nodeValue), elChild || null);
-	                            break;
-	                        }
-	                        case 8: {
-	                            el.insertBefore(document.createComment(toElChild.nodeValue), elChild || null);
-	                            break;
-	                        }
-	                        default: {
-	                            throw new TypeError('Unsupported node type');
-	                        }
-	                    }
-	                }
-	            }
-	            for (var nextElChild = void 0; elChild; elChild = nextElChild) {
-	                nextElChild = elChild.nextSibling;
-	                if (elChild.nodeType == 1) {
-	                    storeElement(elChild, true);
-	                }
-	                else {
-	                    el.removeChild(elChild);
-	                }
-	            }
-	        }
-	        var specialElementHandler = specialElementHandlers[elTagName];
-	        if (specialElementHandler) {
-	            specialElementHandler(el, toEl);
-	        }
-	    }
-	    _morphElement(el, toEl, contentOnly);
-	    while (haveNewUnmatchedElements) {
-	        while (haveNewStoredElements) {
-	            haveNewStoredElements = false;
-	            for (var key in someStoredElements) {
-	                var storedEl = someStoredElements[key];
-	                delete someStoredElements[key];
-	                restoreElement(storedEl);
-	            }
-	        }
-	        haveNewUnmatchedElements = false;
-	        for (var key in unmatchedElements) {
-	            var unmatchedEl = unmatchedElements[key];
-	            delete unmatchedElements[key];
-	            _morphElement(unmatchedEl.el, unmatchedEl.toEl, false);
-	            if (haveNewUnmatchedElements) {
-	                break;
-	            }
-	        }
-	    }
-	    for (var key in storedElements) {
-	        handleRemovedElement(storedElements[key]);
-	    }
-	    if (activeElement != document.activeElement) {
-	        if (scrollLeft !== void 0) {
-	            activeElement.scrollLeft = scrollLeft;
-	            activeElement.scrollTop = scrollTop;
-	        }
-	        activeElement.focus();
-	    }
-	}
-	module.exports = morphElement;
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var specialElementHandlers = {
-	    INPUT: function (el, toEl) {
-	        if (el.value != toEl.value) {
-	            el.value = toEl.value;
-	        }
-	        el.checked = toEl.checked;
-	    },
-	    TEXTAREA: function (el, toEl) {
-	        var value = toEl.value;
-	        if (el.value != value) {
-	            el.value = value;
-	        }
-	        if (el.firstChild) {
-	            el.firstChild.nodeValue = value;
-	        }
-	    },
-	    OPTION: function (el, toEl) {
-	        el.selected = toEl.selected;
-	    }
-	};
-	module.exports = specialElementHandlers;
-
-
-/***/ },
-/* 26 */
-/***/ function(module, exports) {
-
-	"use strict";
-	function morphElementAttributes(el, toEl, elAttributes) {
-	    var toElAttributes = toEl.attributes;
-	    for (var i = 0, l = toElAttributes.length; i < l; i++) {
-	        var toElAttr = toElAttributes.item(i);
-	        var toElAttrNamespaceURI = toElAttr.namespaceURI;
-	        var elAttr = toElAttrNamespaceURI ?
-	            elAttributes.getNamedItemNS(toElAttrNamespaceURI, toElAttr.name) :
-	            elAttributes.getNamedItem(toElAttr.name);
-	        if (!elAttr || elAttr.value != toElAttr.value) {
-	            if (toElAttrNamespaceURI) {
-	                el.setAttributeNS(toElAttrNamespaceURI, toElAttr.name, toElAttr.value);
-	            }
-	            else {
-	                el.setAttribute(toElAttr.name, toElAttr.value);
-	            }
-	        }
-	    }
-	    for (var i = elAttributes.length; i;) {
-	        var elAttr = elAttributes.item(--i);
-	        var elAttrNamespaceURI = elAttr.namespaceURI;
-	        if (elAttrNamespaceURI) {
-	            if (!toElAttributes.getNamedItemNS(elAttrNamespaceURI, elAttr.name)) {
-	                el.removeAttributeNS(elAttrNamespaceURI, elAttr.name);
-	            }
-	        }
-	        else {
-	            if (!toElAttributes.getNamedItem(elAttr.name)) {
-	                el.removeAttribute(elAttr.name);
-	            }
-	        }
-	    }
-	}
-	module.exports = morphElementAttributes;
-
-
-/***/ },
-/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4223,12 +3898,437 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = DisposableMixin;
 
 /***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	/**
+	 * @typesign () -> string;
+	 */
+	function renderInner() {
+		var template = this.template;
+
+		if (template) {
+			return template.render ? template.render(this) : template.call(this, this);
+		}
+
+		return '';
+	}
+
+	module.exports = renderInner;
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _require = __webpack_require__(1);
+
+	var _Symbol = _require.js.Symbol;
+
+	var morphElement = __webpack_require__(27);
+	var renderInner = __webpack_require__(25);
+
+	var KEY_LAST_APPLIED_ATTRIBUTES = _Symbol('lastAppliedAttributes');
+
+	function morphComponentElement(component, toEl) {
+		morphElement(component.element, toEl, {
+			contentOnly: true,
+
+			getElementAttributes: function getElementAttributes(el) {
+				return el[KEY_LAST_APPLIED_ATTRIBUTES] || el.attributes;
+			},
+			onBeforeMorphElementContent: function onBeforeMorphElementContent(el, toEl) {
+				var component = el.ristaComponent;
+
+				if (component) {
+					el[KEY_LAST_APPLIED_ATTRIBUTES] = toEl.attributes;
+
+					if (component.template || component.renderInner !== renderInner) {
+						component.props.contentSourceElement = toEl;
+						return false;
+					}
+				}
+			}
+		});
+	}
+
+	module.exports = morphComponentElement;
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var specialElementHandlers = __webpack_require__(28);
+	var morphElementAttributes = __webpack_require__(29);
+	var defaultNamespaceURI = document.documentElement.namespaceURI;
+	function defaultGetElementAttributes(el) {
+	    return el.attributes;
+	}
+	function defaultGetElementKey(el) {
+	    return el.getAttribute('key');
+	}
+	function defaultIsCompatibleElements(el1, el2) {
+	    return el1.tagName == el2.tagName;
+	}
+	function morphElement(el, toEl, options) {
+	    if (!options) {
+	        options = {};
+	    }
+	    var contentOnly = !!options.contentOnly;
+	    var getElementAttributes = options.getElementAttributes || defaultGetElementAttributes;
+	    var getElementKey = options.getElementKey || defaultGetElementKey;
+	    var isCompatibleElements = options.isCompatibleElements || defaultIsCompatibleElements;
+	    var onBeforeMorphElement = options.onBeforeMorphElement;
+	    var onBeforeMorphElementContent = options.onBeforeMorphElementContent;
+	    var onElementRemoved = options.onElementRemoved;
+	    var activeElement = document.activeElement;
+	    var scrollLeft;
+	    var scrollTop;
+	    if (activeElement.selectionStart !== void 0) {
+	        scrollLeft = activeElement.scrollLeft;
+	        scrollTop = activeElement.scrollTop;
+	    }
+	    var storedElements = Object.create(null);
+	    var someStoredElements = Object.create(null);
+	    var unmatchedElements = Object.create(null);
+	    var haveNewStoredElements = false;
+	    var haveNewUnmatchedElements = false;
+	    function storeElement(el, remove) {
+	        var key = getElementKey(el);
+	        if (key) {
+	            var unmatchedEl = unmatchedElements[key];
+	            if (unmatchedEl) {
+	                delete unmatchedElements[key];
+	                unmatchedEl.el.parentNode.replaceChild(el, unmatchedEl.el);
+	                _morphElement(el, unmatchedEl.toEl, false);
+	            }
+	            else {
+	                storedElements[key] = someStoredElements[key] = el;
+	                haveNewStoredElements = true;
+	                if (remove) {
+	                    el.parentNode.removeChild(el);
+	                }
+	            }
+	        }
+	        else {
+	            if (remove) {
+	                el.parentNode.removeChild(el);
+	            }
+	            for (var child = el.firstElementChild; child; child = child.nextElementSibling) {
+	                storeElement(child, false);
+	            }
+	            if (onElementRemoved) {
+	                onElementRemoved(el);
+	            }
+	        }
+	    }
+	    function restoreElement(el) {
+	        for (var child = el.firstElementChild, nextChild = void 0; child; child = nextChild) {
+	            nextChild = child.nextElementSibling;
+	            var key = getElementKey(child);
+	            if (key) {
+	                var unmatchedEl = unmatchedElements[key];
+	                if (unmatchedEl) {
+	                    delete unmatchedElements[key];
+	                    unmatchedEl.el.parentNode.replaceChild(child, unmatchedEl.el);
+	                    _morphElement(child, unmatchedEl.toEl, false);
+	                }
+	                else {
+	                    storedElements[key] = someStoredElements[key] = child;
+	                    haveNewStoredElements = true;
+	                }
+	            }
+	            else {
+	                restoreElement(child);
+	            }
+	        }
+	    }
+	    function handleRemovedElement(el) {
+	        for (var child = el.firstElementChild; child; child = child.nextElementSibling) {
+	            handleRemovedElement(child);
+	        }
+	        if (onElementRemoved) {
+	            onElementRemoved(el);
+	        }
+	    }
+	    function _morphElement(el, toEl, contentOnly) {
+	        if (!contentOnly) {
+	            if (onBeforeMorphElement && onBeforeMorphElement(el, toEl) === false) {
+	                return;
+	            }
+	            morphElementAttributes(el, toEl, getElementAttributes(el));
+	            if (onBeforeMorphElementContent && onBeforeMorphElementContent(el, toEl) === false) {
+	                return;
+	            }
+	        }
+	        var elTagName = el.tagName;
+	        if (elTagName != 'TEXTAREA') {
+	            var elChild = el.firstChild;
+	            for (var toElChild = toEl.firstChild; toElChild; toElChild = toElChild.nextSibling) {
+	                var toElChildType = toElChild.nodeType;
+	                var toElChildKey = void 0;
+	                if (toElChildType == 1) {
+	                    toElChildKey = getElementKey(toElChild);
+	                    if (toElChildKey) {
+	                        var storedEl = storedElements[toElChildKey];
+	                        if (storedEl) {
+	                            delete storedElements[toElChildKey];
+	                            delete someStoredElements[toElChildKey];
+	                            if (elChild === storedEl) {
+	                                elChild = elChild.nextSibling;
+	                            }
+	                            else {
+	                                el.insertBefore(storedEl, elChild || null);
+	                            }
+	                            _morphElement(storedEl, toElChild, false);
+	                            continue;
+	                        }
+	                    }
+	                }
+	                var found = false;
+	                for (var nextElChild = elChild; nextElChild; nextElChild = nextElChild.nextSibling) {
+	                    if (nextElChild.nodeType == toElChildType) {
+	                        if (toElChildType == 1) {
+	                            if (getElementKey(nextElChild) === toElChildKey &&
+	                                (toElChildKey || isCompatibleElements(nextElChild, toElChild))) {
+	                                found = true;
+	                                _morphElement(nextElChild, toElChild, false);
+	                            }
+	                        }
+	                        else {
+	                            found = true;
+	                            nextElChild.nodeValue = toElChild.nodeValue;
+	                        }
+	                    }
+	                    if (found) {
+	                        if (elChild == nextElChild) {
+	                            elChild = elChild.nextSibling;
+	                        }
+	                        else {
+	                            el.insertBefore(nextElChild, elChild);
+	                        }
+	                        break;
+	                    }
+	                }
+	                if (!found) {
+	                    switch (toElChildType) {
+	                        case 1: {
+	                            var unmatchedEl = toElChild.namespaceURI == defaultNamespaceURI ?
+	                                document.createElement(toElChild.tagName) :
+	                                document.createElementNS(toElChild.namespaceURI, toElChild.tagName);
+	                            el.insertBefore(unmatchedEl, elChild || null);
+	                            if (toElChildKey) {
+	                                unmatchedElements[toElChildKey] = {
+	                                    el: unmatchedEl,
+	                                    toEl: toElChild
+	                                };
+	                                haveNewUnmatchedElements = true;
+	                            }
+	                            else {
+	                                _morphElement(unmatchedEl, toElChild, false);
+	                            }
+	                            break;
+	                        }
+	                        case 3: {
+	                            el.insertBefore(document.createTextNode(toElChild.nodeValue), elChild || null);
+	                            break;
+	                        }
+	                        case 8: {
+	                            el.insertBefore(document.createComment(toElChild.nodeValue), elChild || null);
+	                            break;
+	                        }
+	                        default: {
+	                            throw new TypeError('Unsupported node type');
+	                        }
+	                    }
+	                }
+	            }
+	            for (var nextElChild = void 0; elChild; elChild = nextElChild) {
+	                nextElChild = elChild.nextSibling;
+	                if (elChild.nodeType == 1) {
+	                    storeElement(elChild, true);
+	                }
+	                else {
+	                    el.removeChild(elChild);
+	                }
+	            }
+	        }
+	        var specialElementHandler = specialElementHandlers[elTagName];
+	        if (specialElementHandler) {
+	            specialElementHandler(el, toEl);
+	        }
+	    }
+	    _morphElement(el, toEl, contentOnly);
+	    while (haveNewUnmatchedElements) {
+	        while (haveNewStoredElements) {
+	            haveNewStoredElements = false;
+	            for (var key in someStoredElements) {
+	                var storedEl = someStoredElements[key];
+	                delete someStoredElements[key];
+	                restoreElement(storedEl);
+	            }
+	        }
+	        haveNewUnmatchedElements = false;
+	        for (var key in unmatchedElements) {
+	            var unmatchedEl = unmatchedElements[key];
+	            delete unmatchedElements[key];
+	            _morphElement(unmatchedEl.el, unmatchedEl.toEl, false);
+	            if (haveNewUnmatchedElements) {
+	                break;
+	            }
+	        }
+	    }
+	    for (var key in storedElements) {
+	        handleRemovedElement(storedElements[key]);
+	    }
+	    if (activeElement != document.activeElement) {
+	        if (scrollLeft !== void 0) {
+	            activeElement.scrollLeft = scrollLeft;
+	            activeElement.scrollTop = scrollTop;
+	        }
+	        activeElement.focus();
+	    }
+	}
+	module.exports = morphElement;
+
+
+/***/ },
 /* 28 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var specialElementHandlers = {
+	    INPUT: function (el, toEl) {
+	        if (el.value != toEl.value) {
+	            el.value = toEl.value;
+	        }
+	        el.checked = toEl.checked;
+	    },
+	    TEXTAREA: function (el, toEl) {
+	        var value = toEl.value;
+	        if (el.value != value) {
+	            el.value = value;
+	        }
+	        if (el.firstChild) {
+	            el.firstChild.nodeValue = value;
+	        }
+	    },
+	    OPTION: function (el, toEl) {
+	        el.selected = toEl.selected;
+	    }
+	};
+	module.exports = specialElementHandlers;
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports) {
+
+	"use strict";
+	function morphElementAttributes(el, toEl, elAttributes) {
+	    var toElAttributes = toEl.attributes;
+	    for (var i = 0, l = toElAttributes.length; i < l; i++) {
+	        var toElAttr = toElAttributes.item(i);
+	        var toElAttrNamespaceURI = toElAttr.namespaceURI;
+	        var elAttr = toElAttrNamespaceURI ?
+	            elAttributes.getNamedItemNS(toElAttrNamespaceURI, toElAttr.name) :
+	            elAttributes.getNamedItem(toElAttr.name);
+	        if (!elAttr || elAttr.value != toElAttr.value) {
+	            if (toElAttrNamespaceURI) {
+	                el.setAttributeNS(toElAttrNamespaceURI, toElAttr.name, toElAttr.value);
+	            }
+	            else {
+	                el.setAttribute(toElAttr.name, toElAttr.value);
+	            }
+	        }
+	    }
+	    for (var i = elAttributes.length; i;) {
+	        var elAttr = elAttributes.item(--i);
+	        var elAttrNamespaceURI = elAttr.namespaceURI;
+	        if (elAttrNamespaceURI) {
+	            if (!toElAttributes.getNamedItemNS(elAttrNamespaceURI, elAttr.name)) {
+	                el.removeAttributeNS(elAttrNamespaceURI, elAttr.name);
+	            }
+	        }
+	        else {
+	            if (!toElAttributes.getNamedItem(elAttr.name)) {
+	                el.removeAttribute(elAttr.name);
+	            }
+	        }
+	    }
+	}
+	module.exports = morphElementAttributes;
+
+
+/***/ },
+/* 30 */
 /***/ function(module, exports) {
 
 	'use strict';
 
 	module.exports = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
+
+/***/ },
+/* 31 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _require = __webpack_require__(1);
+
+	var Cell = _require.Cell;
+
+	var Component = __webpack_require__(23);
+	var morphComponentElement = __webpack_require__(26);
+
+	module.exports = Component.extend('x-content', {
+		Static: {
+			elementAttributes: {
+				select: String
+			}
+		},
+
+		initialize: function initialize() {
+			var parentContentSourceElement = this.getParent().props.contentSourceElement;
+
+			this._contentSourceElement = new Cell(function () {
+				var selector = this.elementAttributes.select;
+				var el = document.createElement('div');
+
+				if (selector) {
+					var selectedEls = parentContentSourceElement.querySelectorAll(selector);
+
+					for (var i = 0, l = selectedEls.length; i < l; i++) {
+						el.appendChild(selectedEls[i]);
+					}
+				} else {
+					for (var child; child = parentContentSourceElement.firstChild;) {
+						el.appendChild(child);
+					}
+				}
+
+				return el;
+			}, {
+				owner: this
+			});
+		},
+		elementAttached: function elementAttached() {
+			this.listenTo(this._contentSourceElement, 'change', this.update);
+			this.update();
+		},
+
+
+		/**
+	  * @override
+	  */
+		update: function update() {
+			morphComponentElement(this, this._contentSourceElement.get());
+		}
+	});
 
 /***/ }
 /******/ ])

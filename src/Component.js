@@ -1,10 +1,11 @@
-let { EventEmitter, Cell, js: { is, Symbol }, utils: { mixin, createClass } } = require('cellx');
-let morphElement = require('morph-element');
-let camelize = require('./utils/camelize');
+let { EventEmitter, Cell, js: { is }, utils: { mixin, createClass } } = require('cellx');
 let DisposableMixin = require('./DisposableMixin');
 let Attributes = require('./Attributes');
 let Properties = require('./Properties');
+let renderInner = require('./renderInner');
+let morphComponentElement = require('./morphComponentElement');
 let eventTypes = require('./eventTypes');
+let camelize = require('./utils/camelize');
 
 let createObject = Object.create;
 let getPrototypeOf = Object.getPrototypeOf;
@@ -13,7 +14,6 @@ let hasOwn = Object.prototype.hasOwnProperty;
 let isArray = Array.isArray;
 
 let reClosedCustomElementTag = /<(\w+(?:\-\w+)+)([^>]*)\/>/g;
-let lastAppliedAttributes = Symbol('lastAppliedAttributes');
 
 /**
  * @typesign (evt: Event|cellx~Event);
@@ -115,19 +115,6 @@ let elementProtoMixin = {
 	}
 };
 
-/**
- * @typesign () -> string;
- */
-function renderInner() {
-	let template = this.template;
-
-	if (template) {
-		return template.render ? template.render(this) : template.call(this, this);
-	}
-
-	return '';
-}
-
 let Component = EventEmitter.extend({
 	Implements: [DisposableMixin],
 
@@ -160,21 +147,35 @@ let Component = EventEmitter.extend({
 			return cl;
 		},
 
-		elementAttributes: {}
+		elementAttributes: {},
+
+		morphComponentElement
 	},
 
+	/**
+	 * @type {HTMLElement}
+	 */
 	element: null,
 
+	/**
+	 * @type {string}
+	 */
 	elementTagName: void 0,
 
 	_elementAttributes: null,
 
+	/**
+	 * @type {Rista.Attributes}
+	 */
 	get elementAttributes() {
 		return this._elementAttributes || (this._elementAttributes = new Attributes(this));
 	},
 
 	_props: null,
 
+	/**
+	 * @type {Rista.Properties}
+	 */
 	get props() {
 		return this._props || (this._props = new Properties(this));
 	},
@@ -218,10 +219,10 @@ let Component = EventEmitter.extend({
 		});
 
 		if (props) {
-			let attrs = this.elementAttributes;
+			let properties = this.props;
 
 			for (let name in props) {
-				attrs[camelize(name)] = props[name];
+				properties[camelize(name)] = props[name];
 			}
 		}
 
@@ -320,7 +321,7 @@ let Component = EventEmitter.extend({
 	},
 
 	/**
-	 * @typesign () -> string;
+	 * @typesign () -> string|Array<string>;
 	 */
 	renderInner,
 
@@ -338,29 +339,10 @@ let Component = EventEmitter.extend({
 			return this;
 		}
 
-		let el = document.createElement('div');
-		el.innerHTML = html;
+		let toEl = document.createElement('div');
+		toEl.innerHTML = html;
 
-		morphElement(this.element, el, {
-			contentOnly: true,
-
-			getElementAttributes(el) {
-				return el[lastAppliedAttributes] || el.attributes;
-			},
-
-			onBeforeMorphElementContent(el, toEl) {
-				let component = el.ristaComponent;
-
-				if (component) {
-					el[lastAppliedAttributes] = toEl.attributes;
-
-					if (component.template || component.renderInner !== renderInner) {
-						component.props.contentSourceElement = toEl;
-						return false;
-					}
-				}
-			}
-		});
+		morphComponentElement(this, toEl);
 
 		this._lastAppliedElementInnerHTML = html;
 
