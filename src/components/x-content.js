@@ -9,21 +9,26 @@ module.exports = Component.extend('x-content', {
 		}
 	},
 
+	renderInner() {
+		return '';
+	},
+
 	initialize() {
 		let parentContentSourceElement = this.getParent().props.contentSourceElement;
 
 		this._contentSourceElement = new Cell(function() {
+			let parentContentSourceElementCopy = parentContentSourceElement.cloneNode(true);
 			let selector = this.elementAttributes.select;
 			let el = document.createElement('div');
 
 			if (selector) {
-				let selectedEls = parentContentSourceElement.querySelectorAll(selector);
+				let selectedEls = parentContentSourceElementCopy.querySelectorAll(selector);
 
 				for (let i = 0, l = selectedEls.length; i < l; i++) {
 					el.appendChild(selectedEls[i]);
 				}
 			} else {
-				for (let child; child = parentContentSourceElement.firstChild;) {
+				for (let child; child = parentContentSourceElementCopy.firstChild;) {
 					el.appendChild(child);
 				}
 			}

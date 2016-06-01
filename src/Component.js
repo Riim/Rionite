@@ -353,7 +353,25 @@ let Component = EventEmitter.extend({
 	 * @typesign (selector: string) -> $|NodeList;
 	 */
 	$(selector) {
-		selector = selector.split('&').join('.' + this.elementTagName);
+		selector = selector.split('&');
+
+		if (selector.length == 1) {
+			selector = selector[0];
+		} else {
+			for (let proto = this.constructor.prototype; ;) {
+				if (hasOwn.call(proto, 'template') || hasOwn.call(proto, 'renderInner')) {
+					selector = selector.join('.' + proto.elementTagName);
+					break;
+				}
+
+				proto = getPrototypeOf(proto);
+
+				if (proto == Component.prototype) {
+					selector = selector.join('.' + this.elementTagName);
+					break;
+				}
+			}
+		}
 
 		return typeof $ == 'function' && $.fn ?
 			$(this.element).find(selector) :

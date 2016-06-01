@@ -3606,7 +3606,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			return $;
 		}(function (selector) {
-			selector = selector.split('&').join('.' + this.elementTagName);
+			selector = selector.split('&');
+
+			if (selector.length == 1) {
+				selector = selector[0];
+			} else {
+				for (var proto = this.constructor.prototype;;) {
+					if (hasOwn.call(proto, 'template') || hasOwn.call(proto, 'renderInner')) {
+						selector = selector.join('.' + proto.elementTagName);
+						break;
+					}
+
+					proto = getPrototypeOf(proto);
+
+					if (proto == Component.prototype) {
+						selector = selector.join('.' + this.elementTagName);
+						break;
+					}
+				}
+			}
 
 			return typeof $ == 'function' && $.fn ? $(this.element).find(selector) : this.element.querySelectorAll(selector);
 		})
@@ -4292,21 +4310,25 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		},
 
+		renderInner: function renderInner() {
+			return '';
+		},
 		initialize: function initialize() {
 			var parentContentSourceElement = this.getParent().props.contentSourceElement;
 
 			this._contentSourceElement = new Cell(function () {
+				var parentContentSourceElementCopy = parentContentSourceElement.cloneNode(true);
 				var selector = this.elementAttributes.select;
 				var el = document.createElement('div');
 
 				if (selector) {
-					var selectedEls = parentContentSourceElement.querySelectorAll(selector);
+					var selectedEls = parentContentSourceElementCopy.querySelectorAll(selector);
 
 					for (var i = 0, l = selectedEls.length; i < l; i++) {
 						el.appendChild(selectedEls[i]);
 					}
 				} else {
-					for (var child; child = parentContentSourceElement.firstChild;) {
+					for (var child; child = parentContentSourceElementCopy.firstChild;) {
 						el.appendChild(child);
 					}
 				}
