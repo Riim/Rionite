@@ -3010,7 +3010,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var EventEmitter = _require.EventEmitter;
 	var Cell = _require.Cell;
-	var Map = _require.js.Map;
+	var _require$js = _require.js;
+	var is = _require$js.is;
+	var Map = _require$js.Map;
 
 	var camelize = __webpack_require__(18);
 	var hyphenize = __webpack_require__(19);
@@ -3093,12 +3095,42 @@ return /******/ (function(modules) { // webpackBootstrap
 						return attrValue.get();
 					},
 					set: function set(value) {
+						var oldValue = attrValue.get();
+
+						if (is(value, oldValue)) {
+							return;
+						}
+
 						value = handlers[1](value, defaultValue);
+
+						attrValue.set(value);
 
 						if (value === void 0) {
 							el.removeAttribute(hyphenizedName);
 						} else {
 							el.setAttribute(hyphenizedName, value);
+						}
+
+						if (component.isReady) {
+							value = attrValue.get();
+
+							if (!is(value, oldValue)) {
+								component.emit({
+									type: 'element-attribute-' + hyphenizedName + '-change',
+									oldValue: oldValue,
+									value: value
+								});
+								component.emit({
+									type: 'element-attribute-change',
+									name: hyphenizedName,
+									oldValue: oldValue,
+									value: value
+								});
+
+								if (component.elementAttributeChanged) {
+									component.elementAttributeChanged(hyphenizedName, oldValue, value);
+								}
+							}
 						}
 					}
 				};
@@ -3234,7 +3266,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var EventEmitter = _require.EventEmitter;
 	var Cell = _require.Cell;
-	var is = _require.js.is;
 	var _require$utils = _require.utils;
 	var mixin = _require$utils.mixin;
 	var createClass = _require$utils.createClass;
@@ -3318,37 +3349,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.ristaComponent._elementAttached.set(false);
 		},
 		attributeChangedCallback: function attributeChangedCallback(name, oldValue, value) {
-			var component = this.ristaComponent;
-			var attrs = component.elementAttributes;
+			var attrs = this.ristaComponent.elementAttributes;
 			var privateName = '_' + name;
 
 			if (hasOwn.call(attrs, privateName)) {
-				var attrValue = attrs[privateName];
-				var handledOldValue = attrValue.get();
-
-				attrValue.set(value);
-
-				if (component.isReady) {
-					var handledValue = attrValue.get();
-
-					if (!is(handledValue, handledOldValue)) {
-						component.emit({
-							type: 'element-attribute-' + name + '-change',
-							oldValue: handledOldValue,
-							value: handledValue
-						});
-						component.emit({
-							type: 'element-attribute-change',
-							name: name,
-							oldValue: handledOldValue,
-							value: handledValue
-						});
-
-						if (component.elementAttributeChanged) {
-							component.elementAttributeChanged(name, handledOldValue, handledValue);
-						}
-					}
-				}
+				attrs[privateName].set(value);
 			}
 		}
 	};

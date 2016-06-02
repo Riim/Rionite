@@ -1,4 +1,4 @@
-let { EventEmitter, Cell, js: { is }, utils: { mixin, createClass } } = require('cellx');
+let { EventEmitter, Cell, utils: { mixin, createClass } } = require('cellx');
 let DisposableMixin = require('./DisposableMixin');
 let Attributes = require('./Attributes');
 let Properties = require('./Properties');
@@ -80,37 +80,11 @@ let elementProtoMixin = {
 	},
 
 	attributeChangedCallback(name, oldValue, value) {
-		let component = this.ristaComponent;
-		let attrs = component.elementAttributes;
+		let attrs = this.ristaComponent.elementAttributes;
 		let privateName = '_' + name;
 
 		if (hasOwn.call(attrs, privateName)) {
-			let attrValue = attrs[privateName];
-			let handledOldValue = attrValue.get();
-
-			attrValue.set(value);
-
-			if (component.isReady) {
-				let handledValue = attrValue.get();
-
-				if (!is(handledValue, handledOldValue)) {
-					component.emit({
-						type: `element-attribute-${ name }-change`,
-						oldValue: handledOldValue,
-						value: handledValue
-					});
-					component.emit({
-						type: 'element-attribute-change',
-						name: name,
-						oldValue: handledOldValue,
-						value: handledValue
-					});
-
-					if (component.elementAttributeChanged) {
-						component.elementAttributeChanged(name, handledOldValue, handledValue);
-					}
-				}
-			}
+			attrs[privateName].set(value);
 		}
 	}
 };

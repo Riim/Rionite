@@ -1,4 +1,4 @@
-let { EventEmitter, Cell, js: { Map } } = require('cellx');
+let { EventEmitter, Cell, js: { is, Map } } = require('cellx');
 let camelize = require('./utils/camelize');
 let hyphenize = require('./utils/hyphenize');
 let escapeHTML = require('./utils/escapeHTML');
@@ -98,12 +98,42 @@ let Attributes = EventEmitter.extend({
 				},
 
 				set(value) {
+					let oldValue = attrValue.get();
+
+					if (is(value, oldValue)) {
+						return;
+					}
+
 					value = handlers[1](value, defaultValue);
+
+					attrValue.set(value);
 
 					if (value === void 0) {
 						el.removeAttribute(hyphenizedName);
 					} else {
 						el.setAttribute(hyphenizedName, value);
+					}
+
+					if (component.isReady) {
+						value = attrValue.get();
+
+						if (!is(value, oldValue)) {
+							component.emit({
+								type: `element-attribute-${ hyphenizedName }-change`,
+								oldValue: oldValue,
+								value: value
+							});
+							component.emit({
+								type: 'element-attribute-change',
+								name: hyphenizedName,
+								oldValue: oldValue,
+								value: value
+							});
+
+							if (component.elementAttributeChanged) {
+								component.elementAttributeChanged(hyphenizedName, oldValue, value);
+							}
+						}
 					}
 				}
 			};
