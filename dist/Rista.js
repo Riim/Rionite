@@ -3022,37 +3022,37 @@ return /******/ (function(modules) { // webpackBootstrap
 	var defineProperty = Object.defineProperty;
 
 	var typeHandlers = new Map([[Boolean, [function (value) {
-		return value != null ? value != 'no' : false;
+		return value !== null ? value != 'no' : false;
 	}, function (value) {
-		return value ? '' : void 0;
+		return value ? '' : null;
 	}]], ['boolean', [function (value, defaultValue) {
-		return value != null ? value != 'no' : defaultValue;
+		return value !== null ? value != 'no' : defaultValue;
 	}, function (value, defaultValue) {
-		return value ? '' : defaultValue ? 'no' : void 0;
+		return value ? '' : defaultValue ? 'no' : null;
 	}]], [Number, [function (value) {
-		return value != null ? +value : void 0;
+		return value !== null ? +value : void 0;
 	}, function (value) {
-		return value !== void 0 ? String(+value) : void 0;
+		return value !== void 0 ? String(+value) : null;
 	}]], ['number', [function (value, defaultValue) {
-		return value != null ? +value : defaultValue;
+		return value !== null ? +value : defaultValue;
 	}, function (value) {
-		return value !== void 0 ? String(+value) : void 0;
+		return value !== void 0 ? String(+value) : null;
 	}]], [String, [function (value) {
-		return value != null ? value : void 0;
+		return value !== null ? value : void 0;
 	}, function (value) {
-		return value !== void 0 ? String(value) : void 0;
+		return value !== void 0 ? String(value) : null;
 	}]], ['string', [function (value, defaultValue) {
-		return value != null ? value : defaultValue;
+		return value !== null ? value : defaultValue;
 	}, function (value) {
-		return value !== void 0 ? String(value) : void 0;
-	}]], [Object, [function (value) {
-		return value != null ? Object(Function('return ' + unescapeHTML(value) + ';')()) : null;
+		return value !== void 0 ? String(value) : null;
+	}]], [Object, [function (value, defaultValue, component) {
+		return value !== null ? Object(Function('return ' + unescapeHTML(value) + ';').call(component)) : null;
 	}, function (value) {
-		return value != null ? escapeHTML(JSON.stringify(value)) : void 0;
-	}]], ['object', [function (value, defaultValue) {
-		return value != null ? Object(Function('return ' + unescapeHTML(value) + ';')()) : defaultValue;
+		return value != null ? escapeHTML(JSON.stringify(value)) : null;
+	}]], ['object', [function (value, defaultValue, component) {
+		return value !== null ? Object(Function('return ' + unescapeHTML(value) + ';').call(component)) : defaultValue;
 	}, function (value) {
-		return value != null ? escapeHTML(JSON.stringify(value)) : void 0;
+		return value != null ? escapeHTML(JSON.stringify(value)) : null;
 	}]]]);
 
 	/**
@@ -3082,8 +3082,12 @@ return /******/ (function(modules) { // webpackBootstrap
 				var hyphenizedName = hyphenize(name);
 
 				var attrValue = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new Cell(el.getAttribute(hyphenizedName), {
-					merge: function merge(value) {
-						return handlers[0].call(component, value, defaultValue);
+					merge: function merge(value, oldValue) {
+						if (value === void 0) {
+							value = null;
+						}
+
+						return oldValue && value === oldValue[0] ? oldValue : [value, handlers[0](value, defaultValue, component)];
 					}
 				});
 
@@ -3092,27 +3096,23 @@ return /******/ (function(modules) { // webpackBootstrap
 					enumerable: true,
 
 					get: function get() {
-						return attrValue.get();
+						return attrValue.get()[1];
 					},
 					set: function set(value) {
-						var oldValue = attrValue.get();
-
-						if (is(value, oldValue)) {
-							return;
-						}
-
 						value = handlers[1](value, defaultValue);
+
+						var oldValue = attrValue.get()[1];
 
 						attrValue.set(value);
 
-						if (value === void 0) {
+						if (value === null) {
 							el.removeAttribute(hyphenizedName);
 						} else {
 							el.setAttribute(hyphenizedName, value);
 						}
 
 						if (component.isReady) {
-							value = attrValue.get();
+							value = attrValue.get()[1];
 
 							if (!is(value, oldValue)) {
 								component.emit({
