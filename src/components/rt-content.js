@@ -2,7 +2,7 @@ let { Cell } = require('cellx');
 let Component = require('../Component');
 let morphComponentElement = require('../morphComponentElement');
 
-module.exports = Component.extend('x-content', {
+module.exports = Component.extend('rt-content', {
 	Static: {
 		elementAttributes: {
 			select: String

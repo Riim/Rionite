@@ -66,7 +66,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Attributes = __webpack_require__(17);
 	var Properties = __webpack_require__(22);
 	var Component = __webpack_require__(23);
-	var XContent = __webpack_require__(31);
+	var RtContent = __webpack_require__(31);
 	var camelize = __webpack_require__(18);
 	var hyphenize = __webpack_require__(19);
 	var escapeHTML = __webpack_require__(20);
@@ -82,7 +82,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		Component: Component,
 
 		components: {
-			XContent: XContent
+			RtContent: RtContent
 		},
 
 		utils: {
@@ -4308,7 +4308,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Component = __webpack_require__(23);
 	var morphComponentElement = __webpack_require__(26);
 
-	module.exports = Component.extend('x-content', {
+	module.exports = Component.extend('rt-content', {
 		Static: {
 			elementAttributes: {
 				select: String
