@@ -10,7 +10,7 @@ let Properties = createClass({
 		return defineObservableProperty(
 			createObject(component.elementAttributes),
 			'contentSourceElement',
-			component.element.childNodes
+			component.element
 		);
 	}
 });

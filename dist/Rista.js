@@ -3250,7 +3250,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var Properties = createClass({
 		constructor: function Properties(component) {
-			return defineObservableProperty(createObject(component.elementAttributes), 'contentSourceElement', component.element.childNodes);
+			return defineObservableProperty(createObject(component.elementAttributes), 'contentSourceElement', component.element);
 		}
 	});
 
