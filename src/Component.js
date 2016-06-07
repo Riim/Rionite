@@ -324,9 +324,23 @@ let Component = EventEmitter.extend({
 	},
 
 	/**
-	 * @typesign (selector: string) -> $|NodeList;
+	 * @typesign (selector: string) -> HTMLElement;
 	 */
 	$(selector) {
+		return this.element.querySelector(this._prepareSelector(selector));
+	},
+
+	/**
+	 * @typesign (selector: string) -> NodeList;
+	 */
+	$$(selector) {
+		return this.element.querySelectorAll(this._prepareSelector(selector));
+	},
+
+	/**
+	 * @typesign (selector: string) -> string;
+	 */
+	_prepareSelector(selector) {
 		selector = selector.split('&');
 
 		if (selector.length == 1) {
@@ -346,10 +360,8 @@ let Component = EventEmitter.extend({
 				}
 			}
 		}
-
-		return typeof $ == 'function' && $.fn ?
-			$(this.element).find(selector) :
-			this.element.querySelectorAll(selector);
+		
+		return selector;
 	}
 });
 

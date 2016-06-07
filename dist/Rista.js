@@ -3598,19 +3598,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 		/**
-	  * @typesign (selector: string) -> $|NodeList;
+	  * @typesign (selector: string) -> HTMLElement;
 	  */
-		$: function (_$) {
-			function $(_x) {
-				return _$.apply(this, arguments);
-			}
+		$: function $(selector) {
+			return this.element.querySelector(this._prepareSelector(selector));
+		},
 
-			$.toString = function () {
-				return _$.toString();
-			};
 
-			return $;
-		}(function (selector) {
+		/**
+	  * @typesign (selector: string) -> NodeList;
+	  */
+		$$: function $$(selector) {
+			return this.element.querySelectorAll(this._prepareSelector(selector));
+		},
+
+
+		/**
+	  * @typesign (selector: string) -> string;
+	  */
+		_prepareSelector: function _prepareSelector(selector) {
 			selector = selector.split('&');
 
 			if (selector.length == 1) {
@@ -3631,8 +3637,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 
-			return typeof $ == 'function' && $.fn ? $(this.element).find(selector) : this.element.querySelectorAll(selector);
-		})
+			return selector;
+		}
 	});
 
 	module.exports = Component;
