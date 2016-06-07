@@ -3020,6 +3020,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var unescapeHTML = __webpack_require__(21);
 
 	var defineProperty = Object.defineProperty;
+	var toString = Object.prototype.toString;
+
+	function isRegExp(value) {
+		return toString.call(value) == '[object RegExp]';
+	}
 
 	var typeHandlers = new Map([[Boolean, [function (value) {
 		return value !== null ? value != 'no' : false;
@@ -3048,11 +3053,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	}]], [Object, [function (value, defaultValue, component) {
 		return value !== null ? Object(Function('return ' + unescapeHTML(value) + ';').call(component)) : null;
 	}, function (value) {
-		return value != null ? escapeHTML(JSON.stringify(value)) : null;
+		return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
 	}]], ['object', [function (value, defaultValue, component) {
 		return value !== null ? Object(Function('return ' + unescapeHTML(value) + ';').call(component)) : defaultValue;
 	}, function (value) {
-		return value != null ? escapeHTML(JSON.stringify(value)) : null;
+		return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
 	}]]]);
 
 	/**

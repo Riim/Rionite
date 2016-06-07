@@ -5,6 +5,11 @@ let escapeHTML = require('./utils/escapeHTML');
 let unescapeHTML = require('./utils/unescapeHTML');
 
 let defineProperty = Object.defineProperty;
+let toString = Object.prototype.toString;
+
+function isRegExp(value) {
+	return toString.call(value) == '[object RegExp]';
+}
 
 let typeHandlers = new Map([
 	[Boolean, [function(value) {
@@ -46,13 +51,13 @@ let typeHandlers = new Map([
 	[Object, [function(value, defaultValue, component) {
 		return value !== null ? Object(Function(`return ${ unescapeHTML(value) };`).call(component)) : null;
 	}, function(value) {
-		return value != null ? escapeHTML(JSON.stringify(value)) : null;
+		return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
 	}]],
 
 	['object', [function(value, defaultValue, component) {
 		return value !== null ? Object(Function(`return ${ unescapeHTML(value) };`).call(component)) : defaultValue;
 	}, function(value) {
-		return value != null ? escapeHTML(JSON.stringify(value)) : null;
+		return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
 	}]]
 ]);
 
