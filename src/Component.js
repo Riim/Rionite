@@ -12,6 +12,7 @@ let getPrototypeOf = Object.getPrototypeOf;
 let defineProperty = Object.defineProperty;
 let hasOwn = Object.prototype.hasOwnProperty;
 let isArray = Array.isArray;
+let slice = Array.prototype.slice;
 
 let reClosedCustomElementTag = /<(\w+(?:\-\w+)+)([^>]*)\/>/g;
 
@@ -334,7 +335,7 @@ let Component = EventEmitter.extend({
 	 * @typesign (selector: string) -> NodeList;
 	 */
 	$$(selector) {
-		return this.element.querySelectorAll(this._prepareSelector(selector));
+		return slice.call(this.element.querySelectorAll(this._prepareSelector(selector)));
 	},
 
 	/**

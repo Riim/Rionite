@@ -3283,6 +3283,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var defineProperty = Object.defineProperty;
 	var hasOwn = Object.prototype.hasOwnProperty;
 	var isArray = Array.isArray;
+	var slice = Array.prototype.slice;
 
 	var reClosedCustomElementTag = /<(\w+(?:\-\w+)+)([^>]*)\/>/g;
 
@@ -3609,7 +3610,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (selector: string) -> NodeList;
 	  */
 		$$: function $$(selector) {
-			return this.element.querySelectorAll(this._prepareSelector(selector));
+			return slice.call(this.element.querySelectorAll(this._prepareSelector(selector)));
 		},
 
 
