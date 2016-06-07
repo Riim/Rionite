@@ -71,6 +71,10 @@ let elementProtoMixin = {
 		return component;
 	},
 
+	get $c() {
+		return this.ristaComponent;
+	},
+
 	attachedCallback() {
 		this.ristaComponent._elementAttached.set(true);
 		Cell.forceRelease();

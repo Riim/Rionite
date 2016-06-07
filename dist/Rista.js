@@ -3347,6 +3347,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			return component;
 		},
 
+		get $c() {
+			return this.ristaComponent;
+		},
+
 		attachedCallback: function attachedCallback() {
 			this.ristaComponent._elementAttached.set(true);
 			Cell.forceRelease();
