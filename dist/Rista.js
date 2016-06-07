@@ -4315,7 +4315,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Component = __webpack_require__(23);
 	var morphComponentElement = __webpack_require__(26);
 
-	module.exports = Component.extend('rt-content', {
+	var RtContent = module.exports = Component.extend('rt-content', {
 		Static: {
 			elementAttributes: {
 				select: String
@@ -4326,7 +4326,18 @@ return /******/ (function(modules) { // webpackBootstrap
 			return '';
 		},
 		initialize: function initialize() {
-			var parentContentSourceElement = this.getParent().props.contentSourceElement;
+			var component = this;
+
+			for (var contentComponentCounter = 1;;) {
+				component = component.getParent();
+				contentComponentCounter += component instanceof RtContent ? 1 : -1;
+
+				if (!contentComponentCounter) {
+					break;
+				}
+			}
+
+			var parentContentSourceElement = component.props.contentSourceElement;
 
 			this._contentSourceElement = new Cell(function () {
 				var parentContentSourceElementCopy = parentContentSourceElement.cloneNode(true);

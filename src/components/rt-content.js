@@ -2,7 +2,7 @@ let { Cell } = require('cellx');
 let Component = require('../Component');
 let morphComponentElement = require('../morphComponentElement');
 
-module.exports = Component.extend('rt-content', {
+let RtContent = module.exports = Component.extend('rt-content', {
 	Static: {
 		elementAttributes: {
 			select: String
@@ -14,7 +14,18 @@ module.exports = Component.extend('rt-content', {
 	},
 
 	initialize() {
-		let parentContentSourceElement = this.getParent().props.contentSourceElement;
+		let component = this;
+
+		for (let contentComponentCounter = 1; ;) {
+			component = component.getParent();
+			contentComponentCounter += component instanceof RtContent ? 1 : -1;
+
+			if (!contentComponentCounter) {
+				break;
+			}
+		}
+
+		let parentContentSourceElement = component.props.contentSourceElement;
 
 		this._contentSourceElement = new Cell(function() {
 			let parentContentSourceElementCopy = parentContentSourceElement.cloneNode(true);
