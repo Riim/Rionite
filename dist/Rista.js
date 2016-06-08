@@ -3274,6 +3274,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _require$utils = _require.utils;
 	var mixin = _require$utils.mixin;
 	var createClass = _require$utils.createClass;
+	var nextTick = _require$utils.nextTick;
 
 	var DisposableMixin = __webpack_require__(24);
 	var Attributes = __webpack_require__(17);
@@ -3285,7 +3286,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var createObject = Object.create;
 	var getPrototypeOf = Object.getPrototypeOf;
-	var defineProperty = Object.defineProperty;
+	var defineProperties = Object.defineProperties;
 	var hasOwn = Object.prototype.hasOwnProperty;
 	var isArray = Array.isArray;
 	var slice = Array.prototype.slice;
@@ -3352,10 +3353,20 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		attachedCallback: function attachedCallback() {
-			this.ristaComponent._elementAttached.set(true);
-			Cell.forceRelease();
+			var component = this.ristaComponent;
+
+			component._parent = void 0;
+
+			if (component.parent) {
+				component._elementAttached.set(true);
+			} else {
+				nextTick(function () {
+					component._elementAttached.set(true);
+				});
+			}
 		},
 		detachedCallback: function detachedCallback() {
+			this.ristaComponent._parent = void 0;
 			this.ristaComponent._elementAttached.set(false);
 		},
 		attributeChangedCallback: function attributeChangedCallback(name, oldValue, value) {
@@ -3407,6 +3418,25 @@ return /******/ (function(modules) { // webpackBootstrap
 			morphComponentElement: morphComponentElement
 		},
 
+		_parent: null,
+
+		/**
+	  * @type {?Rista.Component}
+	  */
+		get parent() {
+			if (this._parent !== void 0) {
+				return this._parent;
+			}
+
+			for (var node; node = (node || this.element).parentNode;) {
+				if (node.ristaComponent) {
+					return this._parent = node.ristaComponent;
+				}
+			}
+
+			return this._parent = null;
+		},
+
 		/**
 	  * @type {HTMLElement}
 	  */
@@ -3455,8 +3485,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			var el = this.element = currentElement || document.createElement(this.elementTagName);
 
-			defineProperty(el, 'ristaComponent', {
-				value: this
+			defineProperties(el, {
+				ristaComponent: { value: this },
+				$c: { value: this }
 			});
 
 			if (this.template || this.renderInner !== renderInner) {
@@ -3493,7 +3524,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			EventEmitter.prototype._handleEvent.call(this, evt);
 
 			if (evt.bubbles !== false && !evt.isPropagationStopped) {
-				var parent = this.getParent();
+				var parent = this.parent;
 
 				if (parent) {
 					parent._handleEvent(evt);
@@ -3501,20 +3532,6 @@ return /******/ (function(modules) { // webpackBootstrap
 					onEvent(evt);
 				}
 			}
-		},
-
-
-		/**
-	  * @typesign () -> ?Rista.Component;
-	  */
-		getParent: function getParent() {
-			for (var node; node = (node || this.element).parentNode;) {
-				if (node.ristaComponent) {
-					return node.ristaComponent;
-				}
-			}
-
-			return null;
 		},
 		_onElementInnerHTMLChange: function _onElementInnerHTMLChange() {
 			this.update();
@@ -4338,7 +4355,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var component = this;
 
 			for (var contentComponentCounter = 1;;) {
-				component = component.getParent();
+				component = component.parent;
 				contentComponentCounter += component instanceof RtContent ? 1 : -1;
 
 				if (!contentComponentCounter) {

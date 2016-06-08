@@ -1,4 +1,4 @@
-let { EventEmitter, Cell, utils: { mixin, createClass } } = require('cellx');
+let { EventEmitter, Cell, utils: { mixin, createClass, nextTick } } = require('cellx');
 let DisposableMixin = require('./DisposableMixin');
 let Attributes = require('./Attributes');
 let Properties = require('./Properties');
@@ -9,7 +9,7 @@ let camelize = require('./utils/camelize');
 
 let createObject = Object.create;
 let getPrototypeOf = Object.getPrototypeOf;
-let defineProperty = Object.defineProperty;
+let defineProperties = Object.defineProperties;
 let hasOwn = Object.prototype.hasOwnProperty;
 let isArray = Array.isArray;
 let slice = Array.prototype.slice;
@@ -76,11 +76,21 @@ let elementProtoMixin = {
 	},
 
 	attachedCallback() {
-		this.ristaComponent._elementAttached.set(true);
-		Cell.forceRelease();
+		let component = this.ristaComponent;
+
+		component._parent = void 0;
+
+		if (component.parent) {
+			component._elementAttached.set(true);
+		} else {
+			nextTick(() => {
+				component._elementAttached.set(true);
+			});
+		}
 	},
 
 	detachedCallback() {
+		this.ristaComponent._parent = void 0;
 		this.ristaComponent._elementAttached.set(false);
 	},
 
@@ -131,6 +141,25 @@ let Component = EventEmitter.extend({
 		morphComponentElement
 	},
 
+	_parent: null,
+
+	/**
+	 * @type {?Rista.Component}
+	 */
+	get parent() {
+		if (this._parent !== void 0) {
+			return this._parent;
+		}
+
+		for (let node; node = (node || this.element).parentNode;) {
+			if (node.ristaComponent) {
+				return (this._parent = node.ristaComponent);
+			}
+		}
+
+		return (this._parent = null);
+	},
+
 	/**
 	 * @type {HTMLElement}
 	 */
@@ -179,8 +208,9 @@ let Component = EventEmitter.extend({
 
 		let el = this.element = currentElement || document.createElement(this.elementTagName);
 
-		defineProperty(el, 'ristaComponent', {
-			value: this
+		defineProperties(el, {
+			ristaComponent: { value: this },
+			$c: { value: this }
 		});
 
 		if (this.template || this.renderInner !== renderInner) {
@@ -217,7 +247,7 @@ let Component = EventEmitter.extend({
 		EventEmitter.prototype._handleEvent.call(this, evt);
 
 		if (evt.bubbles !== false && !evt.isPropagationStopped) {
-			let parent = this.getParent();
+			let parent = this.parent;
 
 			if (parent) {
 				parent._handleEvent(evt);
@@ -225,19 +255,6 @@ let Component = EventEmitter.extend({
 				onEvent(evt);
 			}
 		}
-	},
-
-	/**
-	 * @typesign () -> ?Rista.Component;
-	 */
-	getParent() {
-		for (let node; node = (node || this.element).parentNode;) {
-			if (node.ristaComponent) {
-				return node.ristaComponent;
-			}
-		}
-
-		return null;
 	},
 
 	_onElementInnerHTMLChange() {
@@ -365,7 +382,7 @@ let Component = EventEmitter.extend({
 				}
 			}
 		}
-		
+
 		return selector;
 	}
 });

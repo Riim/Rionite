@@ -17,7 +17,7 @@ let RtContent = module.exports = Component.extend('rt-content', {
 		let component = this;
 
 		for (let contentComponentCounter = 1; ;) {
-			component = component.getParent();
+			component = component.parent;
 			contentComponentCounter += component instanceof RtContent ? 1 : -1;
 
 			if (!contentComponentCounter) {
