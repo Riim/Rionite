@@ -1,6 +1,5 @@
 let { js: { Symbol } } = require('cellx');
 let morphElement = require('morph-element');
-let renderInner = require('./renderInner');
 
 let KEY_LAST_APPLIED_ATTRIBUTES = Symbol('lastAppliedAttributes');
 
@@ -18,7 +17,7 @@ function morphComponentElement(component, toEl) {
 			if (component) {
 				el[KEY_LAST_APPLIED_ATTRIBUTES] = toEl.attributes;
 
-				if (component.template || component.renderInner !== renderInner) {
+				if (component.shouldElementUpdate()) {
 					component.props.contentSourceElement = toEl;
 					return false;
 				}

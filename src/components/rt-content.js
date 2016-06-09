@@ -9,8 +9,8 @@ let RtContent = module.exports = Component.extend('rt-content', {
 		}
 	},
 
-	renderInner() {
-		return '';
+	shouldElementUpdate() {
+		return true;
 	},
 
 	initialize() {
@@ -25,10 +25,10 @@ let RtContent = module.exports = Component.extend('rt-content', {
 			}
 		}
 
-		let parentContentSourceElement = component.props.contentSourceElement;
+		let parentProps = component.props;
 
 		this._contentSourceElement = new Cell(function() {
-			let parentContentSourceElementCopy = parentContentSourceElement.cloneNode(true);
+			let parentContentSourceElementCopy = parentProps.contentSourceElement.cloneNode(true);
 			let selector = this.elementAttributes.select;
 			let el = document.createElement('div');
 
@@ -52,7 +52,6 @@ let RtContent = module.exports = Component.extend('rt-content', {
 
 	elementAttached() {
 		this.listenTo(this._contentSourceElement, 'change', this.update);
-		this.update();
 	},
 
 	/**

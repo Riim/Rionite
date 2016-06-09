@@ -2,7 +2,6 @@ let { EventEmitter, Cell, utils: { mixin, createClass, nextTick } } = require('c
 let DisposableMixin = require('./DisposableMixin');
 let Attributes = require('./Attributes');
 let Properties = require('./Properties');
-let renderInner = require('./renderInner');
 let morphComponentElement = require('./morphComponentElement');
 let eventTypes = require('./eventTypes');
 let camelize = require('./utils/camelize');
@@ -103,6 +102,19 @@ let elementProtoMixin = {
 		}
 	}
 };
+
+/**
+ * @typesign () -> string;
+ */
+function renderInner() {
+	let template = this.template;
+
+	if (template) {
+		return template.render ? template.render(this) : template.call(this, this);
+	}
+
+	return '';
+}
 
 let Component = EventEmitter.extend({
 	Implements: [DisposableMixin],
@@ -314,6 +326,13 @@ let Component = EventEmitter.extend({
 				this.elementDetached();
 			}
 		}
+	},
+
+	/**
+	 * @typesign () -> boolean;
+	 */
+	shouldElementUpdate() {
+		return !!this._elementInnerHTML;
 	},
 
 	/**

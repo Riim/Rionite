@@ -66,7 +66,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Attributes = __webpack_require__(17);
 	var Properties = __webpack_require__(22);
 	var Component = __webpack_require__(23);
-	var RtContent = __webpack_require__(31);
+	var RtContent = __webpack_require__(30);
 	var camelize = __webpack_require__(18);
 	var hyphenize = __webpack_require__(19);
 	var escapeHTML = __webpack_require__(20);
@@ -3279,9 +3279,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var DisposableMixin = __webpack_require__(24);
 	var Attributes = __webpack_require__(17);
 	var Properties = __webpack_require__(22);
-	var renderInner = __webpack_require__(25);
-	var morphComponentElement = __webpack_require__(26);
-	var eventTypes = __webpack_require__(30);
+	var morphComponentElement = __webpack_require__(25);
+	var eventTypes = __webpack_require__(29);
 	var camelize = __webpack_require__(18);
 
 	var createObject = Object.create;
@@ -3378,6 +3377,19 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		}
 	};
+
+	/**
+	 * @typesign () -> string;
+	 */
+	function renderInner() {
+		var template = this.template;
+
+		if (template) {
+			return template.render ? template.render(this) : template.call(this, this);
+		}
+
+		return '';
+	}
 
 	var Component = EventEmitter.extend({
 		Implements: [DisposableMixin],
@@ -3591,6 +3603,14 @@ return /******/ (function(modules) { // webpackBootstrap
 					this.elementDetached();
 				}
 			}
+		},
+
+
+		/**
+	  * @typesign () -> boolean;
+	  */
+		shouldElementUpdate: function shouldElementUpdate() {
+			return !!this._elementInnerHTML;
 		},
 
 
@@ -3955,27 +3975,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 25 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	/**
-	 * @typesign () -> string;
-	 */
-	function renderInner() {
-		var template = this.template;
-
-		if (template) {
-			return template.render ? template.render(this) : template.call(this, this);
-		}
-
-		return '';
-	}
-
-	module.exports = renderInner;
-
-/***/ },
-/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3984,8 +3983,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _Symbol = _require.js.Symbol;
 
-	var morphElement = __webpack_require__(27);
-	var renderInner = __webpack_require__(25);
+	var morphElement = __webpack_require__(26);
 
 	var KEY_LAST_APPLIED_ATTRIBUTES = _Symbol('lastAppliedAttributes');
 
@@ -4002,7 +4000,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (component) {
 					el[KEY_LAST_APPLIED_ATTRIBUTES] = toEl.attributes;
 
-					if (component.template || component.renderInner !== renderInner) {
+					if (component.shouldElementUpdate()) {
 						component.props.contentSourceElement = toEl;
 						return false;
 					}
@@ -4014,12 +4012,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = morphComponentElement;
 
 /***/ },
-/* 27 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var specialElementHandlers = __webpack_require__(28);
-	var morphElementAttributes = __webpack_require__(29);
+	var specialElementHandlers = __webpack_require__(27);
+	var morphElementAttributes = __webpack_require__(28);
 	var defaultNamespaceURI = document.documentElement.namespaceURI;
 	function defaultGetElementAttributes(el) {
 	    return el.attributes;
@@ -4253,7 +4251,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
+/* 27 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -4281,7 +4279,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 29 */
+/* 28 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -4321,7 +4319,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 29 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -4329,7 +4327,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /***/ },
-/* 31 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4339,7 +4337,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Cell = _require.Cell;
 
 	var Component = __webpack_require__(23);
-	var morphComponentElement = __webpack_require__(26);
+	var morphComponentElement = __webpack_require__(25);
 
 	var RtContent = module.exports = Component.extend('rt-content', {
 		Static: {
@@ -4348,8 +4346,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		},
 
-		renderInner: function renderInner() {
-			return '';
+		shouldElementUpdate: function shouldElementUpdate() {
+			return true;
 		},
 		initialize: function initialize() {
 			var component = this;
@@ -4363,10 +4361,10 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 
-			var parentContentSourceElement = component.props.contentSourceElement;
+			var parentProps = component.props;
 
 			this._contentSourceElement = new Cell(function () {
-				var parentContentSourceElementCopy = parentContentSourceElement.cloneNode(true);
+				var parentContentSourceElementCopy = parentProps.contentSourceElement.cloneNode(true);
 				var selector = this.elementAttributes.select;
 				var el = document.createElement('div');
 
@@ -4389,7 +4387,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 		elementAttached: function elementAttached() {
 			this.listenTo(this._contentSourceElement, 'change', this.update);
-			this.update();
 		},
 
 
