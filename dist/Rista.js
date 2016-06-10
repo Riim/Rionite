@@ -3255,7 +3255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var Properties = createClass({
 		constructor: function Properties(component) {
-			return defineObservableProperty(createObject(component.elementAttributes), 'contentSourceElement', component.element);
+			return defineObservableProperty(createObject(component.elementAttributes), 'contentSourceElement', null);
 		}
 	});
 
@@ -3549,6 +3549,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.update();
 		},
 		_onElementAttachedChange: function _onElementAttachedChange(_ref) {
+			var _this = this;
+
 			var attached = _ref.value;
 
 			if (attached && !this.initialized) {
@@ -3567,8 +3569,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				this.update();
 
 				if (!this.isReady) {
-					this.isReady = true;
-
 					for (var proto = this.constructor.prototype;;) {
 						this.element.className += ' ' + proto.elementTagName;
 						proto = getPrototypeOf(proto);
@@ -3587,14 +3587,22 @@ return /******/ (function(modules) { // webpackBootstrap
 							attrs[camelizedName] = attrs[camelizedName];
 						}
 					}
-
-					if (this.ready) {
-						this.ready();
-					}
 				}
 
-				if (this.elementAttached) {
-					this.elementAttached();
+				if (!this.isReady || this.elementAttached) {
+					nextTick(function () {
+						if (!_this.isReady) {
+							_this.isReady = true;
+
+							if (_this.ready) {
+								_this.ready();
+							}
+						}
+
+						if (_this.elementAttached) {
+							_this.elementAttached();
+						}
+					});
 				}
 			} else {
 				this.dispose();

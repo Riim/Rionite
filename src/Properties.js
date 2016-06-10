@@ -7,11 +7,7 @@ let createObject = Object.create;
  */
 let Properties = createClass({
 	constructor: function Properties(component) {
-		return defineObservableProperty(
-			createObject(component.elementAttributes),
-			'contentSourceElement',
-			component.element
-		);
+		return defineObservableProperty(createObject(component.elementAttributes), 'contentSourceElement', null);
 	}
 });
 

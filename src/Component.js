@@ -290,8 +290,6 @@ let Component = EventEmitter.extend({
 			this.update();
 
 			if (!this.isReady) {
-				this.isReady = true;
-
 				for (let proto = this.constructor.prototype; ;) {
 					this.element.className += ' ' + proto.elementTagName;
 					proto = getPrototypeOf(proto);
@@ -310,14 +308,22 @@ let Component = EventEmitter.extend({
 						attrs[camelizedName] = attrs[camelizedName];
 					}
 				}
-
-				if (this.ready) {
-					this.ready();
-				}
 			}
 
-			if (this.elementAttached) {
-				this.elementAttached();
+			if (!this.isReady || this.elementAttached) {
+				nextTick(() => {
+					if (!this.isReady) {
+						this.isReady = true;
+
+						if (this.ready) {
+							this.ready();
+						}
+					}
+
+					if (this.elementAttached) {
+						this.elementAttached();
+					}
+				});
 			}
 		} else {
 			this.dispose();
