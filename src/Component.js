@@ -290,8 +290,10 @@ let Component = EventEmitter.extend({
 			this.update();
 
 			if (!this.isReady) {
+				let el = this.element;
+
 				for (let proto = this.constructor.prototype; ;) {
-					this.element.className += ' ' + proto.elementTagName;
+					el.className += ' ' + proto.elementTagName;
 					proto = getPrototypeOf(proto);
 
 					if (proto == Component.prototype) {
@@ -308,6 +310,8 @@ let Component = EventEmitter.extend({
 						attrs[camelizedName] = attrs[camelizedName];
 					}
 				}
+
+				el.className += ' _component_ready';
 			}
 
 			if (!this.isReady || this.elementAttached) {

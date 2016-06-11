@@ -3569,8 +3569,10 @@ return /******/ (function(modules) { // webpackBootstrap
 				this.update();
 
 				if (!this.isReady) {
+					var el = this.element;
+
 					for (var proto = this.constructor.prototype;;) {
-						this.element.className += ' ' + proto.elementTagName;
+						el.className += ' ' + proto.elementTagName;
 						proto = getPrototypeOf(proto);
 
 						if (proto == Component.prototype) {
@@ -3587,6 +3589,8 @@ return /******/ (function(modules) { // webpackBootstrap
 							attrs[camelizedName] = attrs[camelizedName];
 						}
 					}
+
+					el.className += ' _component_ready';
 				}
 
 				if (!this.isReady || this.elementAttached) {
