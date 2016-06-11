@@ -311,7 +311,7 @@ let Component = EventEmitter.extend({
 					}
 				}
 
-				el.className += ' _component_ready';
+				el.className += ' _component-ready';
 			}
 
 			if (!this.isReady || this.elementAttached) {

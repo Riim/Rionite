@@ -63,20 +63,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	var list = _require.list;
 	var cellx = _require.cellx;
 
-	var Attributes = __webpack_require__(17);
-	var Properties = __webpack_require__(22);
-	var Component = __webpack_require__(23);
-	var RtContent = __webpack_require__(30);
-	var camelize = __webpack_require__(18);
-	var hyphenize = __webpack_require__(19);
-	var escapeHTML = __webpack_require__(20);
-	var unescapeHTML = __webpack_require__(21);
+	var KeyedList = __webpack_require__(17);
+	var Attributes = __webpack_require__(18);
+	var Properties = __webpack_require__(23);
+	var Component = __webpack_require__(24);
+	var RtContent = __webpack_require__(31);
+	var camelize = __webpack_require__(19);
+	var hyphenize = __webpack_require__(20);
+	var escapeHTML = __webpack_require__(21);
+	var unescapeHTML = __webpack_require__(22);
 
 	var Rista = module.exports = {
 		EventEmitter: EventEmitter,
 		map: map,
 		list: list,
 		cellx: cellx,
+		KeyedList: KeyedList,
 		Attributes: Attributes,
 		Properties: Properties,
 		Component: Component,
@@ -3008,16 +3010,94 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _require = __webpack_require__(1);
 
+	var ObservableList = _require.ObservableList;
+
+
+	var registerValue = ObservableList.prototype._registerValue;
+	var unregisterValue = ObservableList.prototype._unregisterValue;
+	var _get = ObservableList.prototype.get;
+
+	/**
+	 * @class Rista.KeyedList
+	 * @extends {cellx.ObservableList}
+	 *
+	 * @typesign new KeyedList(items?: Array|cellx.ObservableList, opts?: {
+	 *     adoptsItemChanges?: boolean,
+	 *     comparator?: (a, b) -> int,
+	 *     sorted?: boolean,
+	 *     keyName?: string
+	 * }) -> Rista.KeyedList;
+	 */
+	var KeyedList = ObservableList.extend({
+		constructor: function KeyedList(items, opts) {
+			this._itemsByKey = Object.create(null);
+			this._keyName = opts && opts.keyName || 'id';
+
+			ObservableList.call(this, items, opts);
+		},
+
+		/**
+	  * @override
+	  * @typesign (value: Object);
+	  */
+		_registerValue: function _registerValue(value) {
+			if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) != 'object') {
+				throw new TypeError('Value must be an object');
+			}
+
+			var itemsByKey = this._itemsByKey;
+			var key = value[this._keyName];
+
+			if (itemsByKey[key]) {
+				throw new TypeError('Key of each value must be unique');
+			}
+
+			itemsByKey[key] = value;
+			registerValue.call(this, value);
+		},
+
+
+		/**
+	  * @override
+	  * @typesign (value: Object);
+	  */
+		_unregisterValue: function _unregisterValue(value) {
+			delete this._itemsByKey[value[this._keyName]];
+			unregisterValue.call(this, value);
+		},
+
+
+		/**
+	  * @override
+	  * @typesign (key: int|string) -> *;
+	  */
+		get: function get(key) {
+			return typeof key == 'string' ? this._itemsByKey[key] : _get.call(this, key);
+		}
+	});
+
+	module.exports = KeyedList;
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+	var _require = __webpack_require__(1);
+
 	var EventEmitter = _require.EventEmitter;
 	var Cell = _require.Cell;
 	var _require$js = _require.js;
 	var is = _require$js.is;
 	var Map = _require$js.Map;
 
-	var camelize = __webpack_require__(18);
-	var hyphenize = __webpack_require__(19);
-	var escapeHTML = __webpack_require__(20);
-	var unescapeHTML = __webpack_require__(21);
+	var camelize = __webpack_require__(19);
+	var hyphenize = __webpack_require__(20);
+	var escapeHTML = __webpack_require__(21);
+	var unescapeHTML = __webpack_require__(22);
 
 	var defineProperty = Object.defineProperty;
 	var toString = Object.prototype.toString;
@@ -3156,7 +3236,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Attributes;
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3175,7 +3255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = camelize;
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -3196,7 +3276,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = hyphenize;
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -3216,7 +3296,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = escapeHTML;
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -3236,7 +3316,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = unescapeHTML;
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3262,7 +3342,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Properties;
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3276,12 +3356,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var createClass = _require$utils.createClass;
 	var nextTick = _require$utils.nextTick;
 
-	var DisposableMixin = __webpack_require__(24);
-	var Attributes = __webpack_require__(17);
-	var Properties = __webpack_require__(22);
-	var morphComponentElement = __webpack_require__(25);
-	var eventTypes = __webpack_require__(29);
-	var camelize = __webpack_require__(18);
+	var DisposableMixin = __webpack_require__(25);
+	var Attributes = __webpack_require__(18);
+	var Properties = __webpack_require__(23);
+	var morphComponentElement = __webpack_require__(26);
+	var eventTypes = __webpack_require__(30);
+	var camelize = __webpack_require__(19);
 
 	var createObject = Object.create;
 	var getPrototypeOf = Object.getPrototypeOf;
@@ -3590,7 +3670,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					}
 
-					el.className += ' _component_ready';
+					el.className += ' _component-ready';
 				}
 
 				if (!this.isReady || this.elementAttached) {
@@ -3711,7 +3791,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3986,7 +4066,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = DisposableMixin;
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3995,7 +4075,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _Symbol = _require.js.Symbol;
 
-	var morphElement = __webpack_require__(26);
+	var morphElement = __webpack_require__(27);
 
 	var KEY_LAST_APPLIED_ATTRIBUTES = _Symbol('lastAppliedAttributes');
 
@@ -4024,12 +4104,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = morphComponentElement;
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var specialElementHandlers = __webpack_require__(27);
-	var morphElementAttributes = __webpack_require__(28);
+	var specialElementHandlers = __webpack_require__(28);
+	var morphElementAttributes = __webpack_require__(29);
 	var defaultNamespaceURI = document.documentElement.namespaceURI;
 	function defaultGetElementAttributes(el) {
 	    return el.attributes;
@@ -4263,7 +4343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -4291,7 +4371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -4331,7 +4411,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -4339,7 +4419,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -4348,8 +4428,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Cell = _require.Cell;
 
-	var Component = __webpack_require__(23);
-	var morphComponentElement = __webpack_require__(25);
+	var Component = __webpack_require__(24);
+	var morphComponentElement = __webpack_require__(26);
 
 	var RtContent = module.exports = Component.extend('rt-content', {
 		Static: {

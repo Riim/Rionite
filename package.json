@@ -1,6 +1,6 @@
 {
   "name": "rista",
-  "version": "0.9.33",
+  "version": "0.9.35",
   "description": "",
   "main": "dist/Rista.js",
   "scripts": {
