@@ -36,12 +36,12 @@ npm install rista --save
 
 Rista.Component.extend('hello-world', {
     elementAttached: function() {
-        // Сработает при появлении элемента с `rt-is="hello-world"` в документе.
+        // Сработает при появлении элемента `hello-world` в документе.
         // `this.element` — ссылка на появившийся элемент.
     },
 
     elementDetached: function() {
-        // Сработает при удалении элемента с `rt-is="hello-world"` из документа.
+        // Сработает при удалении элемента `hello-world` из документа.
     }
 });
 
@@ -78,9 +78,7 @@ setInterval(function() {
 }, 1000);
 
 Rista.Component.extend('user-card', {
-    constructor: function() {
-        Rista.Component.call(this);
-        
+    initialize: function() {
         cellx.define(this, {
             // Собственное свойство компонента, вычисляемое из свойства модели.
             userAgeTwoYearsLater: function() {
@@ -114,8 +112,7 @@ Rista.Component.extend('user-card', {
 <script>
 
 Rista.Component.extend('simple-counter', {
-	constructor: function() {
-		Rista.Component.call(this);
+	initialize: function() {
 		Rista.cellx.define(this, 'counter', 0);
 	},
 
@@ -149,8 +146,8 @@ return `
 
 ```js
 return `
-    <div rt-bar="onFooBar">
-        <x-foo rt-baz="onFooBaz"></x-foo>
+    <div rt-component-bar="onFooBar">
+        <x-foo rt-component-baz="onFooBaz"></x-foo>
         <x-foo></x-foo>
     </div>
 `;

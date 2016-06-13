@@ -1,8 +1,13 @@
 let { ObservableList } = require('cellx');
 
-let registerValue = ObservableList.prototype._registerValue;
-let unregisterValue = ObservableList.prototype._unregisterValue;
-let get = ObservableList.prototype.get;
+let olProto = ObservableList.prototype;
+let _registerValue = olProto._registerValue;
+let _unregisterValue = olProto._unregisterValue;
+let get = olProto.get;
+let set = olProto.set;
+let setRange = olProto.setRange;
+let _addRange = olProto._addRange;
+let insertRange = olProto.insertRange;
 
 /**
  * @class Rista.KeyedList
@@ -28,19 +33,8 @@ let KeyedList = ObservableList.extend({
 	 * @typesign (value: Object);
 	 */
 	_registerValue(value) {
-		if (typeof value != 'object') {
-			throw new TypeError('Value must be an object');
-		}
-
-		let itemsByKey = this._itemsByKey;
-		let key = value[this._keyName];
-
-		if (itemsByKey[key]) {
-			throw new TypeError('Key of each value must be unique');
-		}
-
-		itemsByKey[key] = value;
-		registerValue.call(this, value);
+		this._itemsByKey[value[this._keyName]] = value;
+		_registerValue.call(this, value);
 	},
 
 	/**
@@ -49,7 +43,24 @@ let KeyedList = ObservableList.extend({
 	 */
 	_unregisterValue(value) {
 		delete this._itemsByKey[value[this._keyName]];
-		unregisterValue.call(this, value);
+		_unregisterValue.call(this, value);
+	},
+
+	/**
+	 * @typesign (values: Array);
+	 */
+	_validateValues(values) {
+		for (let i = 0, l = values.length; i < l; i++) {
+			let value = values[i];
+
+			if (value !== Object(value)) {
+				throw new TypeError('Value must be an object');
+			}
+
+			if (this._itemsByKey[value[this._keyName]]) {		
+				throw new TypeError('Key of value must be unique');		
+			}
+		}
 	},
 
 	/**
@@ -58,6 +69,38 @@ let KeyedList = ObservableList.extend({
 	 */
 	get(key) {
 		return typeof key == 'string' ? this._itemsByKey[key] : get.call(this, key);
+	},
+
+	/**
+	 * @override
+	 */
+	set(index, value) {
+		this._validateValues([value]);
+		return set.call(this, index, value);
+	},
+
+	/**
+	 * @override
+	 */
+	setRange(index, items) {
+		this._validateValues(items);
+		return setRange.call(this, index, items);
+	},
+
+	/**
+	 * @override
+	 */
+	_addRange(items) {
+		this._validateValues(items);
+		_addRange.call(this, items);
+	},
+
+	/**
+	 * @override
+	 */
+	insertRange(index, items) {
+		this._validateValues(items);
+		return insertRange.call(this, index, items);
 	}
 });
 

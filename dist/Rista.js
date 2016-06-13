@@ -1380,44 +1380,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	/**
-	 * @typesign (list: cellx.ObservableList, items: Array);
-	 */
-	function addRange(list, items) {
-		var listItems = list._items;
-
-		if (list.sorted) {
-			var comparator = list.comparator;
-
-			for (var i = 0, l = items.length; i < l; i++) {
-				var item = items[i];
-				var low = 0;
-				var high = listItems.length;
-
-				while (low != high) {
-					var mid = (low + high) >> 1;
-
-					if (comparator(item, listItems[mid]) < 0) {
-						high = mid;
-					} else {
-						low = mid + 1;
-					}
-				}
-
-				listItems.splice(low, 0, item);
-				list._registerValue(item);
-			}
-		} else {
-			push.apply(listItems, items);
-
-			for (var j = items.length; j;) {
-				list._registerValue(items[--j]);
-			}
-		}
-
-		list.length = listItems.length;
-	}
-
-	/**
 	 * @class cellx.ObservableList
 	 * @extends {cellx.EventEmitter}
 	 * @implements {ObservableCollectionMixin}
@@ -1461,7 +1423,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 
 			if (items) {
-				addRange(this, items instanceof ObservableList ? items._items : items);
+				this._addRange(items instanceof ObservableList ? items._items : items);
 			}
 		},
 
@@ -1613,15 +1575,53 @@ return /******/ (function(modules) { // webpackBootstrap
 		/**
 		 * @typesign (items: Array) -> cellx.ObservableList;
 		 */
-		addRange: function _addRange(items) {
+		addRange: function addRange_(items) {
 			if (!items.length) {
 				return this;
 			}
 
-			addRange(this, items);
+			this._addRange(items);
 			this.emit('change');
 
 			return this;
+		},
+
+		/**
+		 * @typesign (items: Array);
+		 */
+		_addRange: function _addRange(items) {
+			var listItems = this._items;
+
+			if (this.sorted) {
+				var comparator = this.comparator;
+
+				for (var i = 0, l = items.length; i < l; i++) {
+					var item = items[i];
+					var low = 0;
+					var high = listItems.length;
+
+					while (low != high) {
+						var mid = (low + high) >> 1;
+
+						if (comparator(item, listItems[mid]) < 0) {
+							high = mid;
+						} else {
+							low = mid + 1;
+						}
+					}
+
+					listItems.splice(low, 0, item);
+					this._registerValue(item);
+				}
+			} else {
+				push.apply(listItems, items);
+
+				for (var j = items.length; j;) {
+					this._registerValue(items[--j]);
+				}
+			}
+
+			this.length = listItems.length;
 		},
 
 		/**
@@ -3006,16 +3006,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 	var _require = __webpack_require__(1);
 
 	var ObservableList = _require.ObservableList;
 
 
-	var registerValue = ObservableList.prototype._registerValue;
-	var unregisterValue = ObservableList.prototype._unregisterValue;
-	var _get = ObservableList.prototype.get;
+	var olProto = ObservableList.prototype;
+	var _registerValue2 = olProto._registerValue;
+	var _unregisterValue2 = olProto._unregisterValue;
+	var _get = olProto.get;
+	var _set = olProto.set;
+	var _setRange = olProto.setRange;
+	var _addRange2 = olProto._addRange;
+	var _insertRange = olProto.insertRange;
 
 	/**
 	 * @class Rista.KeyedList
@@ -3041,19 +3044,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (value: Object);
 	  */
 		_registerValue: function _registerValue(value) {
-			if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) != 'object') {
-				throw new TypeError('Value must be an object');
-			}
-
-			var itemsByKey = this._itemsByKey;
-			var key = value[this._keyName];
-
-			if (itemsByKey[key]) {
-				throw new TypeError('Key of each value must be unique');
-			}
-
-			itemsByKey[key] = value;
-			registerValue.call(this, value);
+			this._itemsByKey[value[this._keyName]] = value;
+			_registerValue2.call(this, value);
 		},
 
 
@@ -3063,7 +3055,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	  */
 		_unregisterValue: function _unregisterValue(value) {
 			delete this._itemsByKey[value[this._keyName]];
-			unregisterValue.call(this, value);
+			_unregisterValue2.call(this, value);
+		},
+
+
+		/**
+	  * @typesign (values: Array);
+	  */
+		_validateValues: function _validateValues(values) {
+			for (var i = 0, l = values.length; i < l; i++) {
+				var value = values[i];
+
+				if (value !== Object(value)) {
+					throw new TypeError('Value must be an object');
+				}
+
+				if (this._itemsByKey[value[this._keyName]]) {
+					throw new TypeError('Key of value must be unique');
+				}
+			}
 		},
 
 
@@ -3073,6 +3083,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	  */
 		get: function get(key) {
 			return typeof key == 'string' ? this._itemsByKey[key] : _get.call(this, key);
+		},
+
+
+		/**
+	  * @override
+	  */
+		set: function set(index, value) {
+			this._validateValues([value]);
+			return _set.call(this, index, value);
+		},
+
+
+		/**
+	  * @override
+	  */
+		setRange: function setRange(index, items) {
+			this._validateValues(items);
+			return _setRange.call(this, index, items);
+		},
+
+
+		/**
+	  * @override
+	  */
+		_addRange: function _addRange(items) {
+			this._validateValues(items);
+			_addRange2.call(this, items);
+		},
+
+
+		/**
+	  * @override
+	  */
+		insertRange: function insertRange(index, items) {
+			this._validateValues(items);
+			return _insertRange.call(this, index, items);
 		}
 	});
 

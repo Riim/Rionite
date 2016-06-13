@@ -40,12 +40,12 @@ Using [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationO
 
 Rista.Component.extend('hello-world', {
     elementAttached: function() {
-        // Triggers when the element with `rt-is="hello-world"` appears in the document.
+        // Triggers when the element `hello-world` appears in the document.
         // `this.element` — a link to the element which has appeared.
     },
 
     elementDetached: function() {
-        // Triggers when deleting the element with `rt-is="hello-world"` from the document.
+        // Triggers when deleting the element `hello-world` from the document.
     }
 });
 
@@ -82,9 +82,7 @@ setInterval(function() {
 }, 1000);
 
 Rista.Component.extend('user-card', {
-    constructor: function() {
-        Rista.Component.call(this);
-        
+    initialize: function() {
         cellx.define(this, {
             // Own property of the component is computed from properties of the model.
             userAgeTwoYearsLater: function() {
@@ -118,8 +116,7 @@ Rista.Component.extend('user-card', {
 <script>
 
 Rista.Component.extend('simple-counter', {
-	constructor: function() {
-		Rista.Component.call(this);
+	initialize: function() {
 		Rista.cellx.define(this, 'counter', 0);
 	},
 
@@ -153,8 +150,8 @@ Including the event components:
 
 ```js
 return `
-    <div rt-bar="onFooBar">
-        <x-foo rt-baz="onFooBaz"></x-foo>
+    <div rt-component-bar="onFooBar">
+        <x-foo rt-component-baz="onFooBaz"></x-foo>
         <x-foo></x-foo>
     </div>
 `;
