@@ -2488,6 +2488,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		 * @typesign (evt: cellx~Event);
 		 */
 		_onValueChange: function _onValueChange(evt) {
+			this._pushingIndex = ++pushingIndexCounter;
+
 			if (this._changeEvent) {
 				evt.prev = this._changeEvent;
 				this._changeEvent = evt;
