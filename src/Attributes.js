@@ -1,4 +1,4 @@
-let { EventEmitter, Cell, js: { is, Map } } = require('cellx');
+let { EventEmitter, Cell, js: { Map } } = require('cellx');
 let camelize = require('./utils/camelize');
 let hyphenize = require('./utils/hyphenize');
 let escapeHTML = require('./utils/escapeHTML');
@@ -89,13 +89,29 @@ let Attributes = EventEmitter.extend({
 				el.getAttribute(hyphenizedName),
 				{
 					merge(value, oldValue) {
-						if (value === void 0) {
-							value = null;
-						}
-
 						return oldValue && value === oldValue[0] ?
 							oldValue :
 							[value, handlers[0](value, defaultValue, component)];
+					},
+
+					onChange({ oldValue: { 1: oldValue }, value: { 1: value } }) {
+						if (component.isReady) {
+							component.emit({
+								type: `element-attribute-${ hyphenizedName }-change`,
+								oldValue,
+								value
+							});
+							component.emit({
+								type: 'element-attribute-change',
+								name: hyphenizedName,
+								oldValue,
+								value
+							});
+
+							if (component.elementAttributeChanged) {
+								component.elementAttributeChanged(hyphenizedName, oldValue, value);
+							}
+						}
 					}
 				}
 			);
@@ -111,37 +127,13 @@ let Attributes = EventEmitter.extend({
 				set(value) {
 					value = handlers[1](value, defaultValue);
 
-					let oldValue = attrValue.get()[1];
-
-					attrValue.set(value);
-
 					if (value === null) {
 						el.removeAttribute(hyphenizedName);
 					} else {
 						el.setAttribute(hyphenizedName, value);
 					}
 
-					if (component.isReady) {
-						value = attrValue.get()[1];
-
-						if (!is(value, oldValue)) {
-							component.emit({
-								type: `element-attribute-${ hyphenizedName }-change`,
-								oldValue: oldValue,
-								value: value
-							});
-							component.emit({
-								type: 'element-attribute-change',
-								name: hyphenizedName,
-								oldValue: oldValue,
-								value: value
-							});
-
-							if (component.elementAttributeChanged) {
-								component.elementAttributeChanged(hyphenizedName, oldValue, value);
-							}
-						}
-					}
+					attrValue.set(value);
 				}
 			};
 

@@ -3138,9 +3138,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var EventEmitter = _require.EventEmitter;
 	var Cell = _require.Cell;
-	var _require$js = _require.js;
-	var is = _require$js.is;
-	var Map = _require$js.Map;
+	var Map = _require.js.Map;
 
 	var camelize = __webpack_require__(19);
 	var hyphenize = __webpack_require__(20);
@@ -3216,11 +3214,29 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				var attrValue = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new Cell(el.getAttribute(hyphenizedName), {
 					merge: function merge(value, oldValue) {
-						if (value === void 0) {
-							value = null;
-						}
-
 						return oldValue && value === oldValue[0] ? oldValue : [value, handlers[0](value, defaultValue, component)];
+					},
+					onChange: function onChange(_ref) {
+						var oldValue = _ref.oldValue[1];
+						var value = _ref.value[1];
+
+						if (component.isReady) {
+							component.emit({
+								type: 'element-attribute-' + hyphenizedName + '-change',
+								oldValue: oldValue,
+								value: value
+							});
+							component.emit({
+								type: 'element-attribute-change',
+								name: hyphenizedName,
+								oldValue: oldValue,
+								value: value
+							});
+
+							if (component.elementAttributeChanged) {
+								component.elementAttributeChanged(hyphenizedName, oldValue, value);
+							}
+						}
 					}
 				});
 
@@ -3234,37 +3250,13 @@ return /******/ (function(modules) { // webpackBootstrap
 					set: function set(value) {
 						value = handlers[1](value, defaultValue);
 
-						var oldValue = attrValue.get()[1];
-
-						attrValue.set(value);
-
 						if (value === null) {
 							el.removeAttribute(hyphenizedName);
 						} else {
 							el.setAttribute(hyphenizedName, value);
 						}
 
-						if (component.isReady) {
-							value = attrValue.get()[1];
-
-							if (!is(value, oldValue)) {
-								component.emit({
-									type: 'element-attribute-' + hyphenizedName + '-change',
-									oldValue: oldValue,
-									value: value
-								});
-								component.emit({
-									type: 'element-attribute-change',
-									name: hyphenizedName,
-									oldValue: oldValue,
-									value: value
-								});
-
-								if (component.elementAttributeChanged) {
-									component.elementAttributeChanged(hyphenizedName, oldValue, value);
-								}
-							}
-						}
+						attrValue.set(value);
 					}
 				};
 
