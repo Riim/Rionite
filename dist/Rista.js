@@ -1685,8 +1685,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		 * @typesign (item, fromIndex?: int) -> boolean;
 		 */
 		removeAll: function removeAll(item, fromIndex) {
-			var items = this._items;
 			var index = this._validateIndex(fromIndex);
+			var items = this._items;
 			var changed = false;
 
 			while ((index = items.indexOf(item, index)) != -1) {
@@ -1916,8 +1916,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	['reduce', 'reduceRight'].forEach(function(name) {
 		ObservableList.prototype[name] = function(cb, initialValue) {
-			var list = this;
 			var items = this._items;
+			var list = this;
 
 			function wrapper(accumulator, item, index) {
 				return cb(accumulator, item, index, list);
@@ -3502,10 +3502,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign () -> string;
 	 */
 	function renderInner() {
-		var template = this.template;
+		var tmpl = this.template;
 
-		if (template) {
-			return template.render ? template.render(this) : template.call(this, this);
+		if (tmpl) {
+			return tmpl.render ? tmpl.render(this) : tmpl.call(this, this);
 		}
 
 		return '';
@@ -3666,7 +3666,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		},
 		_onElementInnerHTMLChange: function _onElementInnerHTMLChange() {
-			this.update();
+			this.updateElement();
 		},
 		_onElementAttachedChange: function _onElementAttachedChange(_ref) {
 			var _this = this;
@@ -3686,7 +3686,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 
 			if (attached) {
-				this.update();
+				this.updateElement();
 
 				if (!this.isReady) {
 					var el = this.element;
@@ -3700,8 +3700,8 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					}
 
-					var attributesSchema = this.constructor.elementAttributes;
 					var attrs = this.elementAttributes;
+					var attributesSchema = this.constructor.elementAttributes;
 
 					for (var name in attributesSchema) {
 						if (typeof attributesSchema[name] != 'function') {
@@ -3754,7 +3754,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		/**
 	  * @typesign () -> Rista.Component;
 	  */
-		update: function update() {
+		updateElement: function updateElement() {
+			var _this2 = this;
+
 			if (!this._elementInnerHTML) {
 				return this;
 			}
@@ -3771,6 +3773,12 @@ return /******/ (function(modules) { // webpackBootstrap
 			morphComponentElement(this, toEl);
 
 			this._lastAppliedElementInnerHTML = html;
+
+			if (this.elementUpdated && this.isReady) {
+				nextTick(function () {
+					_this2.elementUpdated();
+				});
+			}
 
 			return this;
 		},
@@ -4467,9 +4475,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _require = __webpack_require__(1);
 
 	var Cell = _require.Cell;
+	var _Symbol = _require.js.Symbol;
 
 	var Component = __webpack_require__(24);
 	var morphComponentElement = __webpack_require__(26);
+
+	var KEY_CONTENT_SOURCE_ELEMENT = _Symbol('contentSourceElement');
 
 	var RtContent = module.exports = Component.extend('rt-content', {
 		Static: {
@@ -4482,34 +4493,48 @@ return /******/ (function(modules) { // webpackBootstrap
 			return true;
 		},
 		initialize: function initialize() {
-			var component = this;
+			var parent = this.parent;
 
-			for (var contentComponentCounter = 1;;) {
-				component = component.parent;
-				contentComponentCounter += component instanceof RtContent ? 1 : -1;
+			for (var counter = 1;; parent = parent.parent) {
+				counter += parent instanceof RtContent ? 1 : -1;
 
-				if (!contentComponentCounter) {
+				if (!counter) {
 					break;
 				}
 			}
 
-			var parentProps = component.props;
+			var parentContentSourceElement = parent[KEY_CONTENT_SOURCE_ELEMENT] || (parent[KEY_CONTENT_SOURCE_ELEMENT] = new Cell(function () {
+				return parent.props.contentSourceElement.cloneNode(true);
+			}));
 
 			this._contentSourceElement = new Cell(function () {
-				var parentContentSourceElementCopy = parentProps.contentSourceElement.cloneNode(true);
+				var sourceElement = parentContentSourceElement.get();
 				var selector = this.elementAttributes.select;
-				var el = document.createElement('div');
 
 				if (selector) {
-					var selectedEls = parentContentSourceElementCopy.querySelectorAll(selector);
+					var selectedElements = sourceElement.querySelectorAll(selector);
 
-					for (var i = 0, l = selectedEls.length; i < l; i++) {
-						el.appendChild(selectedEls[i]);
+					if (!selectedElements.length) {
+						return this.props.contentSourceElement;
 					}
-				} else {
-					for (var child; child = parentContentSourceElementCopy.firstChild;) {
-						el.appendChild(child);
+
+					var _el = document.createElement('div');
+
+					for (var i = 0, l = selectedElements.length; i < l; i++) {
+						_el.appendChild(selectedElements[i]);
 					}
+
+					return _el;
+				}
+
+				if (!sourceElement.firstChild) {
+					return this.props.contentSourceElement;
+				}
+
+				var el = document.createElement('div');
+
+				for (var child; child = sourceElement.firstChild;) {
+					el.appendChild(child);
 				}
 
 				return el;
@@ -4518,14 +4543,14 @@ return /******/ (function(modules) { // webpackBootstrap
 			});
 		},
 		elementAttached: function elementAttached() {
-			this.listenTo(this._contentSourceElement, 'change', this.update);
+			this.listenTo(this._contentSourceElement, 'change', this.updateElement);
 		},
 
 
 		/**
 	  * @override
 	  */
-		update: function update() {
+		updateElement: function updateElement() {
 			morphComponentElement(this, this._contentSourceElement.get());
 		}
 	});

@@ -1,6 +1,8 @@
-let { Cell } = require('cellx');
+let { Cell, js: { Symbol } } = require('cellx');
 let Component = require('../Component');
 let morphComponentElement = require('../morphComponentElement');
+
+let KEY_CONTENT_SOURCE_ELEMENT = Symbol('contentSourceElement');
 
 let RtContent = module.exports = Component.extend('rt-content', {
 	Static: {
@@ -14,34 +16,49 @@ let RtContent = module.exports = Component.extend('rt-content', {
 	},
 
 	initialize() {
-		let component = this;
+		let parent = this.parent;
 
-		for (let contentComponentCounter = 1; ;) {
-			component = component.parent;
-			contentComponentCounter += component instanceof RtContent ? 1 : -1;
+		for (let counter = 1; ; parent = parent.parent) {
+			counter += parent instanceof RtContent ? 1 : -1;
 
-			if (!contentComponentCounter) {
+			if (!counter) {
 				break;
 			}
 		}
 
-		let parentProps = component.props;
+		let parentContentSourceElement = parent[KEY_CONTENT_SOURCE_ELEMENT] ||
+			(parent[KEY_CONTENT_SOURCE_ELEMENT] = new Cell(function() {
+				return parent.props.contentSourceElement.cloneNode(true);
+			}));
 
 		this._contentSourceElement = new Cell(function() {
-			let parentContentSourceElementCopy = parentProps.contentSourceElement.cloneNode(true);
+			let sourceElement = parentContentSourceElement.get();
 			let selector = this.elementAttributes.select;
-			let el = document.createElement('div');
 
 			if (selector) {
-				let selectedEls = parentContentSourceElementCopy.querySelectorAll(selector);
+				let selectedElements = sourceElement.querySelectorAll(selector);
 
-				for (let i = 0, l = selectedEls.length; i < l; i++) {
-					el.appendChild(selectedEls[i]);
+				if (!selectedElements.length) {
+					return this.props.contentSourceElement;
 				}
-			} else {
-				for (let child; child = parentContentSourceElementCopy.firstChild;) {
-					el.appendChild(child);
+
+				let el = document.createElement('div');
+
+				for (let i = 0, l = selectedElements.length; i < l; i++) {
+					el.appendChild(selectedElements[i]);
 				}
+
+				return el;
+			}
+
+			if (!sourceElement.firstChild) {
+				return this.props.contentSourceElement;
+			}
+
+			let el = document.createElement('div');
+
+			for (let child; child = sourceElement.firstChild;) {
+				el.appendChild(child);
 			}
 
 			return el;
@@ -51,13 +68,13 @@ let RtContent = module.exports = Component.extend('rt-content', {
 	},
 
 	elementAttached() {
-		this.listenTo(this._contentSourceElement, 'change', this.update);
+		this.listenTo(this._contentSourceElement, 'change', this.updateElement);
 	},
 
 	/**
 	 * @override
 	 */
-	update() {
+	updateElement() {
 		morphComponentElement(this, this._contentSourceElement.get());
 	}
 });

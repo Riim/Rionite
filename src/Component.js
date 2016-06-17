@@ -107,10 +107,10 @@ let elementProtoMixin = {
  * @typesign () -> string;
  */
 function renderInner() {
-	let template = this.template;
+	let tmpl = this.template;
 
-	if (template) {
-		return template.render ? template.render(this) : template.call(this, this);
+	if (tmpl) {
+		return tmpl.render ? tmpl.render(this) : tmpl.call(this, this);
 	}
 
 	return '';
@@ -270,7 +270,7 @@ let Component = EventEmitter.extend({
 	},
 
 	_onElementInnerHTMLChange() {
-		this.update();
+		this.updateElement();
 	},
 
 	_onElementAttachedChange({ value: attached }) {
@@ -287,7 +287,7 @@ let Component = EventEmitter.extend({
 		}
 
 		if (attached) {
-			this.update();
+			this.updateElement();
 
 			if (!this.isReady) {
 				let el = this.element;
@@ -301,8 +301,8 @@ let Component = EventEmitter.extend({
 					}
 				}
 
-				let attributesSchema = this.constructor.elementAttributes;
 				let attrs = this.elementAttributes;
+				let attributesSchema = this.constructor.elementAttributes;
 
 				for (let name in attributesSchema) {
 					if (typeof attributesSchema[name] != 'function') {
@@ -353,7 +353,7 @@ let Component = EventEmitter.extend({
 	/**
 	 * @typesign () -> Rista.Component;
 	 */
-	update() {
+	updateElement() {
 		if (!this._elementInnerHTML) {
 			return this;
 		}
@@ -370,6 +370,12 @@ let Component = EventEmitter.extend({
 		morphComponentElement(this, toEl);
 
 		this._lastAppliedElementInnerHTML = html;
+
+		if (this.elementUpdated && this.isReady) {
+			nextTick(() => {
+				this.elementUpdated();
+			});
+		}
 
 		return this;
 	},
