@@ -374,6 +374,7 @@ let Component = EventEmitter.extend({
 		if (this.elementUpdated && this.isReady) {
 			nextTick(() => {
 				this.elementUpdated();
+				this.emit('element-update');
 			});
 		}
 

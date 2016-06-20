@@ -1,6 +1,6 @@
 {
   "name": "rista",
-  "version": "0.9.41",
+  "version": "0.9.42",
   "description": "",
   "main": "dist/Rista-with-polyfills.js",
   "scripts": {
@@ -21,7 +21,7 @@
     "babel-core": "^6.9.0",
     "babel-loader": "^6.2.4",
     "babel-preset-es2015": "^6.9.0",
-    "eslint": "^2.12.0",
+    "eslint": "^2.13.0",
     "eslint-loader": "^1.3.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
@@ -32,7 +32,7 @@
     "webpack": "^1.13.1"
   },
   "dependencies": {
-    "cellx": "^1.6.18",
+    "cellx": "^1.6.19",
     "document-register-element": "^0.5.4",
     "morph-element": "^0.2.4"
   }
