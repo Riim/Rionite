@@ -203,12 +203,12 @@ let Component = EventEmitter.extend({
 	_elementInnerHTML: null,
 	_lastAppliedElementInnerHTML: void 0,
 
+	template: null,
+
 	_elementAttached: null,
 
 	initialized: false,
 	isReady: false,
-
-	template: null,
 
 	constructor: function Component(props) {
 		EventEmitter.call(this);
@@ -371,9 +371,12 @@ let Component = EventEmitter.extend({
 
 		this._lastAppliedElementInnerHTML = html;
 
-		if (this.elementUpdated && this.isReady) {
+		if (this.isReady) {
 			nextTick(() => {
-				this.elementUpdated();
+				if (this.elementUpdated) {
+					this.elementUpdated();
+				}
+
 				this.emit('element-update');
 			});
 		}
@@ -402,24 +405,20 @@ let Component = EventEmitter.extend({
 		selector = selector.split('&');
 
 		if (selector.length == 1) {
-			selector = selector[0];
-		} else {
-			for (let proto = this.constructor.prototype; ;) {
-				if (hasOwn.call(proto, 'template') || hasOwn.call(proto, 'renderInner')) {
-					selector = selector.join('.' + proto.elementTagName);
-					break;
-				}
-
-				proto = getPrototypeOf(proto);
-
-				if (proto == Component.prototype) {
-					selector = selector.join('.' + this.elementTagName);
-					break;
-				}
-			}
+			return selector[0];
 		}
 
-		return selector;
+		for (let proto = this.constructor.prototype; ;) {
+			if (hasOwn.call(proto, 'template') || hasOwn.call(proto, 'renderInner')) {
+				return selector.join('.' + proto.elementTagName);
+			}
+
+			proto = getPrototypeOf(proto);
+
+			if (proto == Component.prototype) {
+				return selector.join('.' + this.elementTagName);
+			}
+		}
 	}
 });
 

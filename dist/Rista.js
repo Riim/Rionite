@@ -3600,12 +3600,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		_elementInnerHTML: null,
 		_lastAppliedElementInnerHTML: void 0,
 
+		template: null,
+
 		_elementAttached: null,
 
 		initialized: false,
 		isReady: false,
-
-		template: null,
 
 		constructor: function Component(props) {
 			EventEmitter.call(this);
@@ -3774,9 +3774,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			this._lastAppliedElementInnerHTML = html;
 
-			if (this.elementUpdated && this.isReady) {
+			if (this.isReady) {
 				nextTick(function () {
-					_this2.elementUpdated();
+					if (_this2.elementUpdated) {
+						_this2.elementUpdated();
+					}
+
 					_this2.emit('element-update');
 				});
 			}
@@ -3808,24 +3811,20 @@ return /******/ (function(modules) { // webpackBootstrap
 			selector = selector.split('&');
 
 			if (selector.length == 1) {
-				selector = selector[0];
-			} else {
-				for (var proto = this.constructor.prototype;;) {
-					if (hasOwn.call(proto, 'template') || hasOwn.call(proto, 'renderInner')) {
-						selector = selector.join('.' + proto.elementTagName);
-						break;
-					}
-
-					proto = getPrototypeOf(proto);
-
-					if (proto == Component.prototype) {
-						selector = selector.join('.' + this.elementTagName);
-						break;
-					}
-				}
+				return selector[0];
 			}
 
-			return selector;
+			for (var proto = this.constructor.prototype;;) {
+				if (hasOwn.call(proto, 'template') || hasOwn.call(proto, 'renderInner')) {
+					return selector.join('.' + proto.elementTagName);
+				}
+
+				proto = getPrototypeOf(proto);
+
+				if (proto == Component.prototype) {
+					return selector.join('.' + this.elementTagName);
+				}
+			}
 		}
 	});
 
@@ -4477,6 +4476,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Cell = _require.Cell;
 	var _Symbol = _require.js.Symbol;
+	var nextTick = _require.utils.nextTick;
 
 	var Component = __webpack_require__(24);
 	var morphComponentElement = __webpack_require__(26);
@@ -4492,6 +4492,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		shouldElementUpdate: function shouldElementUpdate() {
 			return true;
+		},
+
+
+		/**
+	  * @override
+	  */
+		updateElement: function updateElement() {
+			var _this = this;
+
+			morphComponentElement(this, this._contentSourceElement.get());
+
+			if (this.isReady) {
+				nextTick(function () {
+					_this.emit('element-update');
+				});
+			}
+
+			return this;
 		},
 		initialize: function initialize() {
 			var parent = this.parent;
@@ -4540,19 +4558,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				return el;
 			}, {
-				owner: this
+				owner: this,
+				onChange: this._onContentSourceElementChange
 			});
+
+			this._contentSourceElementListening = true;
 		},
 		elementAttached: function elementAttached() {
-			this.listenTo(this._contentSourceElement, 'change', this.updateElement);
+			if (!this._contentSourceElementListening) {
+				this._contentSourceElement.on('change', this._onContentSourceElementChange);
+			}
 		},
-
-
-		/**
-	  * @override
-	  */
-		updateElement: function updateElement() {
-			morphComponentElement(this, this._contentSourceElement.get());
+		elementDetached: function elementDetached() {
+			this._contentSourceElement.off('change', this._onContentSourceElementChange);
+			this._contentSourceElementListening = false;
+		},
+		_onContentSourceElementChange: function _onContentSourceElementChange() {
+			this.updateElement();
 		}
 	});
 

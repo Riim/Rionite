@@ -1,4 +1,4 @@
-let { Cell, js: { Symbol } } = require('cellx');
+let { Cell, js: { Symbol }, utils: { nextTick } } = require('cellx');
 let Component = require('../Component');
 let morphComponentElement = require('../morphComponentElement');
 
@@ -15,6 +15,21 @@ let RtContent = module.exports = Component.extend('rt-content', {
 		return true;
 	},
 
+	/**
+	 * @override
+	 */
+	updateElement() {
+		morphComponentElement(this, this._contentSourceElement.get());
+
+		if (this.isReady) {
+			nextTick(() => {
+				this.emit('element-update');
+			});
+		}
+
+		return this;
+	},
+
 	initialize() {
 		let parent = this.parent;
 
@@ -26,10 +41,11 @@ let RtContent = module.exports = Component.extend('rt-content', {
 			}
 		}
 
-		let parentContentSourceElement = parent[KEY_CONTENT_SOURCE_ELEMENT] ||
-			(parent[KEY_CONTENT_SOURCE_ELEMENT] = new Cell(function() {
+		let parentContentSourceElement = parent[KEY_CONTENT_SOURCE_ELEMENT] || (
+			parent[KEY_CONTENT_SOURCE_ELEMENT] = new Cell(function() {
 				return parent.props.contentSourceElement.cloneNode(true);
-			}));
+			})
+		);
 
 		this._contentSourceElement = new Cell(function() {
 			let sourceElement = parentContentSourceElement.get();
@@ -63,18 +79,25 @@ let RtContent = module.exports = Component.extend('rt-content', {
 
 			return el;
 		}, {
-			owner: this
+			owner: this,
+			onChange: this._onContentSourceElementChange
 		});
+
+		this._contentSourceElementListening = true;
 	},
 
 	elementAttached() {
-		this.listenTo(this._contentSourceElement, 'change', this.updateElement);
+		if (!this._contentSourceElementListening) {
+			this._contentSourceElement.on('change', this._onContentSourceElementChange);
+		}
 	},
 
-	/**
-	 * @override
-	 */
-	updateElement() {
-		morphComponentElement(this, this._contentSourceElement.get());
+	elementDetached() {
+		this._contentSourceElement.off('change', this._onContentSourceElementChange);
+		this._contentSourceElementListening = false;
+	},
+
+	_onContentSourceElementChange() {
+		this.updateElement();
 	}
 });
