@@ -3474,9 +3474,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		attachedCallback: function attachedCallback() {
 			var component = this.ristaComponent;
 
-			component._parent = void 0;
+			component._parentComponent = void 0;
 
-			if (component.parent) {
+			if (component.parentComponent) {
 				component._elementAttached.set(true);
 			} else {
 				nextTick(function () {
@@ -3485,8 +3485,9 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		},
 		detachedCallback: function detachedCallback() {
-			this.ristaComponent._parent = void 0;
-			this.ristaComponent._elementAttached.set(false);
+			var component = this.ristaComponent;
+			component._parentComponent = null;
+			component._elementAttached.set(false);
 		},
 		attributeChangedCallback: function attributeChangedCallback(name, oldValue, value) {
 			var attrs = this.ristaComponent.elementAttributes;
@@ -3550,24 +3551,26 @@ return /******/ (function(modules) { // webpackBootstrap
 			morphComponentElement: morphComponentElement
 		},
 
-		_parent: null,
+		_parentComponent: null,
 
 		/**
 	  * @type {?Rista.Component}
 	  */
-		get parent() {
-			if (this._parent !== void 0) {
-				return this._parent;
+		get parentComponent() {
+			if (this._parentComponent !== void 0) {
+				return this._parentComponent;
 			}
 
 			for (var node; node = (node || this.element).parentNode;) {
 				if (node.ristaComponent) {
-					return this._parent = node.ristaComponent;
+					return this._parentComponent = node.ristaComponent;
 				}
 			}
 
-			return this._parent = null;
+			return this._parentComponent = null;
 		},
+
+		ownerComponent: null,
 
 		/**
 	  * @type {HTMLElement}
@@ -3598,7 +3601,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 		_elementInnerHTML: null,
-		_lastAppliedElementInnerHTML: void 0,
+		_prevAppliedElementInnerHTML: void 0,
 
 		template: null,
 
@@ -3656,10 +3659,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			EventEmitter.prototype._handleEvent.call(this, evt);
 
 			if (evt.bubbles !== false && !evt.isPropagationStopped) {
-				var parent = this.parent;
+				var parentComponent = this.parentComponent;
 
-				if (parent) {
-					parent._handleEvent(evt);
+				if (parentComponent) {
+					parentComponent._handleEvent(evt);
 				} else {
 					onEvent(evt);
 				}
@@ -3763,7 +3766,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			var html = this._elementInnerHTML.get();
 
-			if (html == (this._lastAppliedElementInnerHTML || '')) {
+			if (html == (this._prevAppliedElementInnerHTML || '')) {
 				return this;
 			}
 
@@ -3772,7 +3775,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			morphComponentElement(this, toEl);
 
-			this._lastAppliedElementInnerHTML = html;
+			this._prevAppliedElementInnerHTML = html;
 
 			if (this.isReady) {
 				nextTick(function () {
@@ -4125,20 +4128,26 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var morphElement = __webpack_require__(27);
 
-	var KEY_LAST_APPLIED_ATTRIBUTES = _Symbol('lastAppliedAttributes');
+	var KEY_PREV_APPLIED_ATTRIBUTES = _Symbol('prevAppliedAttributes');
 
-	function morphComponentElement(component, toEl) {
+	function morphComponentElement(component, toEl, ownerComponent) {
+		if (!ownerComponent) {
+			ownerComponent = component;
+		}
+
 		morphElement(component.element, toEl, {
 			contentOnly: true,
 
 			getElementAttributes: function getElementAttributes(el) {
-				return el[KEY_LAST_APPLIED_ATTRIBUTES] || el.attributes;
+				return el[KEY_PREV_APPLIED_ATTRIBUTES] || el.attributes;
 			},
 			onBeforeMorphElementContent: function onBeforeMorphElementContent(el, toEl) {
 				var component = el.ristaComponent;
 
 				if (component) {
-					el[KEY_LAST_APPLIED_ATTRIBUTES] = toEl.attributes;
+					el[KEY_PREV_APPLIED_ATTRIBUTES] = toEl.attributes;
+
+					component.ownerComponent = ownerComponent;
 
 					if (component.shouldElementUpdate()) {
 						component.props.contentSourceElement = toEl;
@@ -4483,13 +4492,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var KEY_CONTENT_SOURCE_ELEMENT = _Symbol('contentSourceElement');
 
-	var RtContent = module.exports = Component.extend('rt-content', {
-		Static: {
-			elementAttributes: {
-				select: String
-			}
-		},
-
+	module.exports = Component.extend('rt-content', {
 		shouldElementUpdate: function shouldElementUpdate() {
 			return true;
 		},
@@ -4501,7 +4504,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		updateElement: function updateElement() {
 			var _this = this;
 
-			morphComponentElement(this, this._contentSourceElement.get());
+			var contentSourceElement = this._contentSourceElement.get();
+
+			morphComponentElement(this, contentSourceElement, contentSourceElement == this.props.contentSourceElement ? this.ownerComponent : this.ownerComponent.ownerComponent);
 
 			if (this.isReady) {
 				nextTick(function () {
@@ -4512,47 +4517,38 @@ return /******/ (function(modules) { // webpackBootstrap
 			return this;
 		},
 		initialize: function initialize() {
-			var parent = this.parent;
+			var ownerComponent = this.ownerComponent;
+			var ownerComponentProperties = ownerComponent.props;
+			var selector = this.element.getAttribute('select');
 
-			for (var counter = 1;; parent = parent.parent) {
-				counter += parent instanceof RtContent ? 1 : -1;
-
-				if (!counter) {
-					break;
-				}
-			}
-
-			var parentContentSourceElement = parent[KEY_CONTENT_SOURCE_ELEMENT] || (parent[KEY_CONTENT_SOURCE_ELEMENT] = new Cell(function () {
-				return parent.props.contentSourceElement.cloneNode(true);
+			var ownerComponentContentSourceElement = ownerComponent[KEY_CONTENT_SOURCE_ELEMENT] || (ownerComponent[KEY_CONTENT_SOURCE_ELEMENT] = new Cell(function () {
+				return ownerComponentProperties.contentSourceElement.cloneNode(true);
 			}));
 
-			this._contentSourceElement = new Cell(function () {
-				var sourceElement = parentContentSourceElement.get();
-				var selector = this.elementAttributes.select;
+			this._contentSourceElement = new Cell(selector ? function () {
+				var selectedElements = ownerComponentContentSourceElement.get().querySelectorAll(selector);
 
-				if (selector) {
-					var selectedElements = sourceElement.querySelectorAll(selector);
-
-					if (!selectedElements.length) {
-						return this.props.contentSourceElement;
-					}
-
-					var _el = document.createElement('div');
-
-					for (var i = 0, l = selectedElements.length; i < l; i++) {
-						_el.appendChild(selectedElements[i]);
-					}
-
-					return _el;
-				}
-
-				if (!sourceElement.firstChild) {
+				if (!selectedElements.length) {
 					return this.props.contentSourceElement;
 				}
 
 				var el = document.createElement('div');
 
-				for (var child; child = sourceElement.firstChild;) {
+				for (var i = 0, l = selectedElements.length; i < l; i++) {
+					el.appendChild(selectedElements[i]);
+				}
+
+				return el;
+			} : function () {
+				var contentSourceElement = ownerComponentContentSourceElement.get();
+
+				if (!contentSourceElement.firstChild) {
+					return this.props.contentSourceElement;
+				}
+
+				var el = document.createElement('div');
+
+				for (var child; child = contentSourceElement.firstChild;) {
 					el.appendChild(child);
 				}
 

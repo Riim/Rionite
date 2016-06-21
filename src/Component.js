@@ -77,9 +77,9 @@ let elementProtoMixin = {
 	attachedCallback() {
 		let component = this.ristaComponent;
 
-		component._parent = void 0;
+		component._parentComponent = void 0;
 
-		if (component.parent) {
+		if (component.parentComponent) {
 			component._elementAttached.set(true);
 		} else {
 			nextTick(() => {
@@ -89,8 +89,9 @@ let elementProtoMixin = {
 	},
 
 	detachedCallback() {
-		this.ristaComponent._parent = void 0;
-		this.ristaComponent._elementAttached.set(false);
+		let component = this.ristaComponent;
+		component._parentComponent = null;
+		component._elementAttached.set(false);
 	},
 
 	attributeChangedCallback(name, oldValue, value) {
@@ -153,24 +154,26 @@ let Component = EventEmitter.extend({
 		morphComponentElement
 	},
 
-	_parent: null,
+	_parentComponent: null,
 
 	/**
 	 * @type {?Rista.Component}
 	 */
-	get parent() {
-		if (this._parent !== void 0) {
-			return this._parent;
+	get parentComponent() {
+		if (this._parentComponent !== void 0) {
+			return this._parentComponent;
 		}
 
 		for (let node; node = (node || this.element).parentNode;) {
 			if (node.ristaComponent) {
-				return (this._parent = node.ristaComponent);
+				return (this._parentComponent = node.ristaComponent);
 			}
 		}
 
-		return (this._parent = null);
+		return (this._parentComponent = null);
 	},
+
+	ownerComponent: null,
 
 	/**
 	 * @type {HTMLElement}
@@ -201,7 +204,7 @@ let Component = EventEmitter.extend({
 	},
 
 	_elementInnerHTML: null,
-	_lastAppliedElementInnerHTML: void 0,
+	_prevAppliedElementInnerHTML: void 0,
 
 	template: null,
 
@@ -259,10 +262,10 @@ let Component = EventEmitter.extend({
 		EventEmitter.prototype._handleEvent.call(this, evt);
 
 		if (evt.bubbles !== false && !evt.isPropagationStopped) {
-			let parent = this.parent;
+			let parentComponent = this.parentComponent;
 
-			if (parent) {
-				parent._handleEvent(evt);
+			if (parentComponent) {
+				parentComponent._handleEvent(evt);
 			} else {
 				onEvent(evt);
 			}
@@ -360,7 +363,7 @@ let Component = EventEmitter.extend({
 
 		let html = this._elementInnerHTML.get();
 
-		if (html == (this._lastAppliedElementInnerHTML || '')) {
+		if (html == (this._prevAppliedElementInnerHTML || '')) {
 			return this;
 		}
 
@@ -369,7 +372,7 @@ let Component = EventEmitter.extend({
 
 		morphComponentElement(this, toEl);
 
-		this._lastAppliedElementInnerHTML = html;
+		this._prevAppliedElementInnerHTML = html;
 
 		if (this.isReady) {
 			nextTick(() => {

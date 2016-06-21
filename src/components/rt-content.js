@@ -4,13 +4,7 @@ let morphComponentElement = require('../morphComponentElement');
 
 let KEY_CONTENT_SOURCE_ELEMENT = Symbol('contentSourceElement');
 
-let RtContent = module.exports = Component.extend('rt-content', {
-	Static: {
-		elementAttributes: {
-			select: String
-		}
-	},
-
+module.exports = Component.extend('rt-content', {
 	shouldElementUpdate() {
 		return true;
 	},
@@ -19,7 +13,16 @@ let RtContent = module.exports = Component.extend('rt-content', {
 	 * @override
 	 */
 	updateElement() {
-		morphComponentElement(this, this._contentSourceElement.get());
+		let contentSourceElement = this._contentSourceElement.get();
+
+		morphComponentElement(
+			this,
+			contentSourceElement,
+
+			contentSourceElement == this.props.contentSourceElement ?
+				this.ownerComponent :
+				this.ownerComponent.ownerComponent
+		);
 
 		if (this.isReady) {
 			nextTick(() => {
@@ -31,57 +34,53 @@ let RtContent = module.exports = Component.extend('rt-content', {
 	},
 
 	initialize() {
-		let parent = this.parent;
+		let ownerComponent = this.ownerComponent;
+		let ownerComponentProperties = ownerComponent.props;
+		let selector = this.element.getAttribute('select');
 
-		for (let counter = 1; ; parent = parent.parent) {
-			counter += parent instanceof RtContent ? 1 : -1;
-
-			if (!counter) {
-				break;
-			}
-		}
-
-		let parentContentSourceElement = parent[KEY_CONTENT_SOURCE_ELEMENT] || (
-			parent[KEY_CONTENT_SOURCE_ELEMENT] = new Cell(function() {
-				return parent.props.contentSourceElement.cloneNode(true);
+		let ownerComponentContentSourceElement = ownerComponent[KEY_CONTENT_SOURCE_ELEMENT] || (
+			ownerComponent[KEY_CONTENT_SOURCE_ELEMENT] = new Cell(function() {
+				return ownerComponentProperties.contentSourceElement.cloneNode(true);
 			})
 		);
 
-		this._contentSourceElement = new Cell(function() {
-			let sourceElement = parentContentSourceElement.get();
-			let selector = this.elementAttributes.select;
+		this._contentSourceElement = new Cell(
+			selector ?
+				function() {
+					let selectedElements = ownerComponentContentSourceElement.get().querySelectorAll(selector);
 
-			if (selector) {
-				let selectedElements = sourceElement.querySelectorAll(selector);
+					if (!selectedElements.length) {
+						return this.props.contentSourceElement;
+					}
 
-				if (!selectedElements.length) {
-					return this.props.contentSourceElement;
-				}
+					let el = document.createElement('div');
 
-				let el = document.createElement('div');
+					for (let i = 0, l = selectedElements.length; i < l; i++) {
+						el.appendChild(selectedElements[i]);
+					}
 
-				for (let i = 0, l = selectedElements.length; i < l; i++) {
-					el.appendChild(selectedElements[i]);
-				}
+					return el;
+				} :
+				function() {
+					let contentSourceElement = ownerComponentContentSourceElement.get();
 
-				return el;
+					if (!contentSourceElement.firstChild) {
+						return this.props.contentSourceElement;
+					}
+
+					let el = document.createElement('div');
+
+					for (let child; child = contentSourceElement.firstChild;) {
+						el.appendChild(child);
+					}
+
+					return el;
+				},
+			{
+				owner: this,
+				onChange: this._onContentSourceElementChange
 			}
-
-			if (!sourceElement.firstChild) {
-				return this.props.contentSourceElement;
-			}
-
-			let el = document.createElement('div');
-
-			for (let child; child = sourceElement.firstChild;) {
-				el.appendChild(child);
-			}
-
-			return el;
-		}, {
-			owner: this,
-			onChange: this._onContentSourceElementChange
-		});
+		);
 
 		this._contentSourceElementListening = true;
 	},
