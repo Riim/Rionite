@@ -762,7 +762,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Attributes = __webpack_require__(18);
 	var Properties = __webpack_require__(23);
 	var Component = __webpack_require__(24);
-	var RtContent = __webpack_require__(31);
+	var registerComponent = __webpack_require__(26);
+	var morphComponentElement = __webpack_require__(28);
+	var RtContent = __webpack_require__(33);
 	var camelize = __webpack_require__(19);
 	var hyphenize = __webpack_require__(20);
 	var escapeHTML = __webpack_require__(21);
@@ -777,6 +779,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		Attributes: Attributes,
 		Properties: Properties,
 		Component: Component,
+		registerComponent: registerComponent,
+		morphComponentElement: morphComponentElement,
 
 		components: {
 			RtContent: RtContent
@@ -4087,18 +4091,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	var EventEmitter = _require.EventEmitter;
 	var Cell = _require.Cell;
 	var _require$utils = _require.utils;
-	var mixin = _require$utils.mixin;
 	var createClass = _require$utils.createClass;
 	var nextTick = _require$utils.nextTick;
 
 	var DisposableMixin = __webpack_require__(25);
+	var registerComponent = __webpack_require__(26);
 	var Attributes = __webpack_require__(18);
 	var Properties = __webpack_require__(23);
-	var morphComponentElement = __webpack_require__(26);
-	var eventTypes = __webpack_require__(30);
+	var morphComponentElement = __webpack_require__(28);
+	var eventTypes = __webpack_require__(32);
 	var camelize = __webpack_require__(19);
 
-	var createObject = Object.create;
 	var getPrototypeOf = Object.getPrototypeOf;
 	var defineProperties = Object.defineProperties;
 	var hasOwn = Object.prototype.hasOwnProperty;
@@ -4152,56 +4155,14 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	}
 
-	var currentElement = null;
-
-	var elementProtoMixin = {
-		get ristaComponent() {
-			currentElement = this;
-			var component = new this._ristaComponentConstr();
-			currentElement = null;
-			return component;
-		},
-
-		get $c() {
-			return this.ristaComponent;
-		},
-
-		attachedCallback: function attachedCallback() {
-			var component = this.ristaComponent;
-
-			component._parentComponent = void 0;
-
-			if (component.parentComponent) {
-				component._elementAttached.set(true);
-			} else {
-				nextTick(function () {
-					component._elementAttached.set(true);
-				});
-			}
-		},
-		detachedCallback: function detachedCallback() {
-			var component = this.ristaComponent;
-			component._parentComponent = null;
-			component._elementAttached.set(false);
-		},
-		attributeChangedCallback: function attributeChangedCallback(name, oldValue, value) {
-			var attrs = this.ristaComponent.elementAttributes;
-			var privateName = '_' + name;
-
-			if (hasOwn.call(attrs, privateName)) {
-				attrs[privateName].set(value);
-			}
-		}
-	};
-
 	/**
 	 * @typesign () -> string;
 	 */
 	function renderInner() {
-		var tmpl = this.template;
+		var template = this.constructor.template;
 
-		if (tmpl) {
-			return tmpl.render ? tmpl.render(this) : tmpl.call(this, this);
+		if (template) {
+			return template.render ? template.render(this) : template.call(this, this);
 		}
 
 		return '';
@@ -4227,23 +4188,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			extend: function extend(elementTagName, description) {
 				description.Extends = this;
-				description.elementTagName = elementTagName;
-
-				var cl = createClass(description);
-				var elementProto = createObject(HTMLElement.prototype);
-
-				mixin(elementProto, elementProtoMixin);
-				elementProto._ristaComponentConstr = cl;
-
-				document.registerElement(elementTagName, { prototype: elementProto });
-
-				return cl;
+				(description.Static || (description.Static = {})).elementTagName = elementTagName;
+				return registerComponent(createClass(description));
 			},
 
 
+			elementTagName: void 0,
 			elementAttributes: {},
 
-			morphComponentElement: morphComponentElement
+			template: null
 		},
 
 		_parentComponent: null,
@@ -4272,11 +4225,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	  */
 		element: null,
 
-		/**
-	  * @type {string}
-	  */
-		elementTagName: void 0,
-
 		_elementAttributes: null,
 
 		/**
@@ -4298,29 +4246,33 @@ return /******/ (function(modules) { // webpackBootstrap
 		_elementInnerHTML: null,
 		_prevAppliedElementInnerHTML: void 0,
 
-		template: null,
-
 		_elementAttached: null,
 
 		initialized: false,
 		isReady: false,
 
-		constructor: function Component(props) {
+		constructor: function Component(el, props) {
 			EventEmitter.call(this);
 			DisposableMixin.call(this);
 
-			if (this.constructor.prototype == Component.prototype) {
+			var constr = this.constructor;
+
+			if (constr.prototype == Component.prototype) {
 				throw new TypeError('Component is abstract class');
 			}
 
-			var el = this.element = currentElement || document.createElement(this.elementTagName);
+			if (!el) {
+				el = document.createElement(constr.elementTagName);
+			}
+
+			this.element = el;
 
 			defineProperties(el, {
 				ristaComponent: { value: this },
 				$c: { value: this }
 			});
 
-			if (this.template || this.renderInner !== renderInner) {
+			if (constr.template || this.renderInner !== renderInner) {
 				this._elementInnerHTML = new Cell(function () {
 					var html = this.renderInner();
 					return (isArray(html) ? html.join('') : html).replace(reClosedCustomElementTag, '<$1$2></$1>');
@@ -4389,8 +4341,17 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (!this.isReady) {
 					var el = this.element;
 
+					for (var constr = this.constructor;;) {
+						el.className += ' ' + constr.elementTagName;
+						constr = getPrototypeOf(constr.prototype).constructor;
+
+						if (constr == Component) {
+							break;
+						}
+					}
+
 					for (var proto = this.constructor.prototype;;) {
-						el.className += ' ' + proto.elementTagName;
+						el.className += ' ' + proto.constructor.elementTagName;
 						proto = getPrototypeOf(proto);
 
 						if (proto == Component.prototype) {
@@ -4512,17 +4473,30 @@ return /******/ (function(modules) { // webpackBootstrap
 				return selector[0];
 			}
 
-			for (var proto = this.constructor.prototype;;) {
-				if (hasOwn.call(proto, 'template') || hasOwn.call(proto, 'renderInner')) {
-					return selector.join('.' + proto.elementTagName);
+			var elementTagName = void 0;
+
+			for (var constr = this.constructor;;) {
+				if (hasOwn.call(constr.prototype, 'renderInner')) {
+					elementTagName = constr.elementTagName;
+					break;
 				}
 
-				proto = getPrototypeOf(proto);
+				var parentConstr = getPrototypeOf(constr.prototype).constructor;
 
-				if (proto == Component.prototype) {
-					return selector.join('.' + this.elementTagName);
+				if (constr.template && constr.template !== parentConstr.template) {
+					elementTagName = constr.elementTagName;
+					break;
 				}
+
+				if (parentConstr == Component) {
+					elementTagName = this.constructor.elementTagName;
+					break;
+				}
+
+				constr = parentConstr;
 			}
+
+			return selector.join('.' + elementTagName);
 		}
 	});
 
@@ -4555,7 +4529,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var DisposableMixin = EventEmitter.extend({
 		constructor: function DisposableMixin() {
 			/**
-	   * @type {Array<{ dispose: () }>}
+	   * @type {Object<{ dispose: () }>}
 	   */
 			this._disposables = {};
 		},
@@ -4819,9 +4793,108 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _require = __webpack_require__(1);
 
+	var mixin = _require.utils.mixin;
+
+	var ElementProtoMixin = __webpack_require__(27);
+
+	var createObject = Object.create;
+	var getPrototypeOf = Object.getPrototypeOf;
+	var hasOwn = Object.prototype.hasOwnProperty;
+
+	var inheritedStaticProperties = ['elementAttributes', 'template'];
+
+	function registerComponent(componentClass) {
+		var elementTagName = componentClass.elementTagName;
+
+		if (!elementTagName) {
+			throw new TypeError('"elementTagName" is required');
+		}
+
+		var parent = void 0;
+
+		// Babel, в отличии от typescript-а и Component.extend-а, не копирует статические свойства при наследовании,
+		// а так как парочка нам очень нужны, копируем их сами.
+		inheritedStaticProperties.forEach(function (name) {
+			if (!hasOwn.call(componentClass, name) && hasOwn.call(parent || (parent = getPrototypeOf(componentClass.prototype).constructor), name)) {
+				componentClass[name] = parent[name];
+			}
+		});
+
+		var elementProto = createObject(HTMLElement.prototype);
+
+		mixin(elementProto, ElementProtoMixin);
+		elementProto._ristaComponentConstr = componentClass;
+
+		document.registerElement(elementTagName, { prototype: elementProto });
+
+		return componentClass;
+	}
+
+	module.exports = registerComponent;
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _require = __webpack_require__(1);
+
+	var nextTick = _require.utils.nextTick;
+
+
+	var hasOwn = Object.prototype.hasOwnProperty;
+
+	var ElementProtoMixin = {
+		get ristaComponent() {
+			return new this._ristaComponentConstr(this);
+		},
+
+		get $c() {
+			return this.ristaComponent;
+		},
+
+		attachedCallback: function attachedCallback() {
+			var component = this.ristaComponent;
+
+			component._parentComponent = void 0;
+
+			if (component.parentComponent) {
+				component._elementAttached.set(true);
+			} else {
+				nextTick(function () {
+					component._elementAttached.set(true);
+				});
+			}
+		},
+		detachedCallback: function detachedCallback() {
+			var component = this.ristaComponent;
+			component._parentComponent = null;
+			component._elementAttached.set(false);
+		},
+		attributeChangedCallback: function attributeChangedCallback(name, oldValue, value) {
+			var attrs = this.ristaComponent.elementAttributes;
+			var privateName = '_' + name;
+
+			if (hasOwn.call(attrs, privateName)) {
+				attrs[privateName].set(value);
+			}
+		}
+	};
+
+	module.exports = ElementProtoMixin;
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _require = __webpack_require__(1);
+
 	var _Symbol = _require.js.Symbol;
 
-	var morphElement = __webpack_require__(27);
+	var morphElement = __webpack_require__(29);
 
 	var KEY_PREV_APPLIED_ATTRIBUTES = _Symbol('prevAppliedAttributes');
 
@@ -4856,12 +4929,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = morphComponentElement;
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var specialElementHandlers = __webpack_require__(28);
-	var morphElementAttributes = __webpack_require__(29);
+	var specialElementHandlers = __webpack_require__(30);
+	var morphElementAttributes = __webpack_require__(31);
 	var defaultNamespaceURI = document.documentElement.namespaceURI;
 	function defaultGetElementAttributes(el) {
 	    return el.attributes;
@@ -5095,7 +5168,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -5123,7 +5196,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -5163,7 +5236,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -5171,7 +5244,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -5183,7 +5256,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var nextTick = _require.utils.nextTick;
 
 	var Component = __webpack_require__(24);
-	var morphComponentElement = __webpack_require__(26);
+	var morphComponentElement = __webpack_require__(28);
 
 	var KEY_CONTENT_SOURCE_ELEMENT = _Symbol('contentSourceElement');
 

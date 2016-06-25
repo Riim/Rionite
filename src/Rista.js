@@ -3,6 +3,8 @@ let KeyedList = require('./KeyedList');
 let Attributes = require('./Attributes');
 let Properties = require('./Properties');
 let Component = require('./Component');
+let registerComponent = require('./registerComponent');
+let morphComponentElement = require('./morphComponentElement');
 let RtContent = require('./components/rt-content');
 let camelize = require('./utils/camelize');
 let hyphenize = require('./utils/hyphenize');
@@ -18,6 +20,8 @@ let Rista = module.exports = {
 	Attributes,
 	Properties,
 	Component,
+	registerComponent,
+	morphComponentElement,
 
 	components: {
 		RtContent

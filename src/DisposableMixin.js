@@ -5,7 +5,7 @@ let isArray = Array.isArray;
 let DisposableMixin = EventEmitter.extend({
 	constructor: function DisposableMixin() {
 		/**
-		 * @type {Array<{ dispose: () }>}
+		 * @type {Object<{ dispose: () }>}
 		 */
 		this._disposables = {};
 	},

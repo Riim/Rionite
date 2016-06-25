@@ -1,12 +1,12 @@
-let { EventEmitter, Cell, utils: { mixin, createClass, nextTick } } = require('cellx');
+let { EventEmitter, Cell, utils: { createClass, nextTick } } = require('cellx');
 let DisposableMixin = require('./DisposableMixin');
+let registerComponent = require('./registerComponent');
 let Attributes = require('./Attributes');
 let Properties = require('./Properties');
 let morphComponentElement = require('./morphComponentElement');
 let eventTypes = require('./eventTypes');
 let camelize = require('./utils/camelize');
 
-let createObject = Object.create;
 let getPrototypeOf = Object.getPrototypeOf;
 let defineProperties = Object.defineProperties;
 let hasOwn = Object.prototype.hasOwnProperty;
@@ -60,58 +60,14 @@ function onEvent(evt) {
 	}
 }
 
-let currentElement = null;
-
-let elementProtoMixin = {
-	get ristaComponent() {
-		currentElement = this;
-		let component = new this._ristaComponentConstr();
-		currentElement = null;
-		return component;
-	},
-
-	get $c() {
-		return this.ristaComponent;
-	},
-
-	attachedCallback() {
-		let component = this.ristaComponent;
-
-		component._parentComponent = void 0;
-
-		if (component.parentComponent) {
-			component._elementAttached.set(true);
-		} else {
-			nextTick(() => {
-				component._elementAttached.set(true);
-			});
-		}
-	},
-
-	detachedCallback() {
-		let component = this.ristaComponent;
-		component._parentComponent = null;
-		component._elementAttached.set(false);
-	},
-
-	attributeChangedCallback(name, oldValue, value) {
-		let attrs = this.ristaComponent.elementAttributes;
-		let privateName = '_' + name;
-
-		if (hasOwn.call(attrs, privateName)) {
-			attrs[privateName].set(value);
-		}
-	}
-};
-
 /**
  * @typesign () -> string;
  */
 function renderInner() {
-	let tmpl = this.template;
+	let template = this.constructor.template;
 
-	if (tmpl) {
-		return tmpl.render ? tmpl.render(this) : tmpl.call(this, this);
+	if (template) {
+		return template.render ? template.render(this) : template.call(this, this);
 	}
 
 	return '';
@@ -136,22 +92,14 @@ let Component = EventEmitter.extend({
 		 */
 		extend(elementTagName, description) {
 			description.Extends = this;
-			description.elementTagName = elementTagName;
-
-			let cl = createClass(description);
-			let elementProto = createObject(HTMLElement.prototype);
-
-			mixin(elementProto, elementProtoMixin);
-			elementProto._ristaComponentConstr = cl;
-
-			document.registerElement(elementTagName, { prototype: elementProto });
-
-			return cl;
+			(description.Static || (description.Static = {})).elementTagName = elementTagName;
+			return registerComponent(createClass(description));
 		},
 
+		elementTagName: void 0,
 		elementAttributes: {},
 
-		morphComponentElement
+		template: null
 	},
 
 	_parentComponent: null,
@@ -180,11 +128,6 @@ let Component = EventEmitter.extend({
 	 */
 	element: null,
 
-	/**
-	 * @type {string}
-	 */
-	elementTagName: void 0,
-
 	_elementAttributes: null,
 
 	/**
@@ -206,29 +149,33 @@ let Component = EventEmitter.extend({
 	_elementInnerHTML: null,
 	_prevAppliedElementInnerHTML: void 0,
 
-	template: null,
-
 	_elementAttached: null,
 
 	initialized: false,
 	isReady: false,
 
-	constructor: function Component(props) {
+	constructor: function Component(el, props) {
 		EventEmitter.call(this);
 		DisposableMixin.call(this);
 
-		if (this.constructor.prototype == Component.prototype) {
+		let constr = this.constructor;
+
+		if (constr.prototype == Component.prototype) {
 			throw new TypeError('Component is abstract class');
 		}
 
-		let el = this.element = currentElement || document.createElement(this.elementTagName);
+		if (!el) {
+			el = document.createElement(constr.elementTagName);
+		}
+
+		this.element = el;
 
 		defineProperties(el, {
 			ristaComponent: { value: this },
 			$c: { value: this }
 		});
 
-		if (this.template || this.renderInner !== renderInner) {
+		if (constr.template || this.renderInner !== renderInner) {
 			this._elementInnerHTML = new Cell(function() {
 				let html = this.renderInner();
 				return (isArray(html) ? html.join('') : html).replace(reClosedCustomElementTag, '<$1$2></$1>');
@@ -295,8 +242,17 @@ let Component = EventEmitter.extend({
 			if (!this.isReady) {
 				let el = this.element;
 
+				for (let constr = this.constructor; ;) {
+					el.className += ' ' + constr.elementTagName;
+					constr = getPrototypeOf(constr.prototype).constructor;
+
+					if (constr == Component) {
+						break;
+					}
+				}
+
 				for (let proto = this.constructor.prototype; ;) {
-					el.className += ' ' + proto.elementTagName;
+					el.className += ' ' + proto.constructor.elementTagName;
 					proto = getPrototypeOf(proto);
 
 					if (proto == Component.prototype) {
@@ -411,17 +367,30 @@ let Component = EventEmitter.extend({
 			return selector[0];
 		}
 
-		for (let proto = this.constructor.prototype; ;) {
-			if (hasOwn.call(proto, 'template') || hasOwn.call(proto, 'renderInner')) {
-				return selector.join('.' + proto.elementTagName);
+		let elementTagName;
+
+		for (let constr = this.constructor; ;) {
+			if (hasOwn.call(constr.prototype, 'renderInner')) {
+				elementTagName = constr.elementTagName;
+				break;
 			}
 
-			proto = getPrototypeOf(proto);
+			let parentConstr = getPrototypeOf(constr.prototype).constructor;
 
-			if (proto == Component.prototype) {
-				return selector.join('.' + this.elementTagName);
+			if (constr.template && constr.template !== parentConstr.template) {
+				elementTagName = constr.elementTagName;
+				break;
 			}
+
+			if (parentConstr == Component) {
+				elementTagName = this.constructor.elementTagName;
+				break;
+			}
+
+			constr = parentConstr;
 		}
+
+		return selector.join('.' + elementTagName);
 	}
 });
 
