@@ -154,6 +154,8 @@ let Component = EventEmitter.extend({
 	initialized: false,
 	isReady: false,
 
+	_blockNameInMarkup: void 0,
+
 	constructor: function Component(el, props) {
 		EventEmitter.call(this);
 		DisposableMixin.call(this);
@@ -367,30 +369,34 @@ let Component = EventEmitter.extend({
 			return selector[0];
 		}
 
-		let elementTagName;
+		let blockName = this._blockNameInMarkup;
 
-		for (let constr = this.constructor; ;) {
-			if (hasOwn.call(constr.prototype, 'renderInner')) {
-				elementTagName = constr.elementTagName;
-				break;
+		if (!blockName) {
+			for (let constr = this.constructor; ;) {
+				if (hasOwn.call(constr.prototype, 'renderInner')) {
+					blockName = constr.elementTagName;
+					break;
+				}
+
+				let parentConstr = getPrototypeOf(constr.prototype).constructor;
+
+				if (constr.template && constr.template !== parentConstr.template) {
+					blockName = constr.elementTagName;
+					break;
+				}
+
+				if (parentConstr == Component) {
+					blockName = this.constructor.elementTagName;
+					break;
+				}
+
+				constr = parentConstr;
 			}
 
-			let parentConstr = getPrototypeOf(constr.prototype).constructor;
-
-			if (constr.template && constr.template !== parentConstr.template) {
-				elementTagName = constr.elementTagName;
-				break;
-			}
-
-			if (parentConstr == Component) {
-				elementTagName = this.constructor.elementTagName;
-				break;
-			}
-
-			constr = parentConstr;
+			this._blockNameInMarkup = blockName;
 		}
 
-		return selector.join('.' + elementTagName);
+		return selector.join('.' + blockName);
 	}
 });
 

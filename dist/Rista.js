@@ -3556,6 +3556,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		initialized: false,
 		isReady: false,
 
+		_blockNameInMarkup: void 0,
+
 		constructor: function Component(el, props) {
 			EventEmitter.call(this);
 			DisposableMixin.call(this);
@@ -3778,30 +3780,34 @@ return /******/ (function(modules) { // webpackBootstrap
 				return selector[0];
 			}
 
-			var elementTagName = void 0;
+			var blockName = this._blockNameInMarkup;
 
-			for (var constr = this.constructor;;) {
-				if (hasOwn.call(constr.prototype, 'renderInner')) {
-					elementTagName = constr.elementTagName;
-					break;
+			if (!blockName) {
+				for (var constr = this.constructor;;) {
+					if (hasOwn.call(constr.prototype, 'renderInner')) {
+						blockName = constr.elementTagName;
+						break;
+					}
+
+					var parentConstr = getPrototypeOf(constr.prototype).constructor;
+
+					if (constr.template && constr.template !== parentConstr.template) {
+						blockName = constr.elementTagName;
+						break;
+					}
+
+					if (parentConstr == Component) {
+						blockName = this.constructor.elementTagName;
+						break;
+					}
+
+					constr = parentConstr;
 				}
 
-				var parentConstr = getPrototypeOf(constr.prototype).constructor;
-
-				if (constr.template && constr.template !== parentConstr.template) {
-					elementTagName = constr.elementTagName;
-					break;
-				}
-
-				if (parentConstr == Component) {
-					elementTagName = this.constructor.elementTagName;
-					break;
-				}
-
-				constr = parentConstr;
+				this._blockNameInMarkup = blockName;
 			}
 
-			return selector.join('.' + elementTagName);
+			return selector.join('.' + blockName);
 		}
 	});
 
