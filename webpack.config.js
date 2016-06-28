@@ -6,6 +6,8 @@ module.exports = {
 		libraryTarget: 'umd'
 	},
 
+	externals: ['cellx'],
+
 	module: {
 		preLoaders: [
 			{

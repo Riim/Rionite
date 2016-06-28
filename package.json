@@ -1,6 +1,6 @@
 {
   "name": "rista",
-  "version": "0.9.52",
+  "version": "0.9.53",
   "description": "",
   "main": "dist/Rista-with-polyfills.js",
   "scripts": {
@@ -32,8 +32,10 @@
     "webpack": "^1.13.1"
   },
   "dependencies": {
-    "cellx": "^1.6.20",
     "document-register-element": "^0.5.4",
     "morph-element": "^0.2.4"
+  },
+  "peerDependencies": {
+    "cellx": "^1.6.20"
   }
 }
