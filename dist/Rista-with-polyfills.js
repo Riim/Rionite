@@ -817,6 +817,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var KEY_UID = keys.UID;
 	var KEY_CELLS = keys.CELLS;
 
+	var createObject = Object.create;
 	var hasOwn = Object.prototype.hasOwnProperty;
 	var slice = Array.prototype.slice;
 	var global = Function('return this;')();
@@ -869,7 +870,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					return;
 				}
 
-				opts = Object.create(opts);
+				opts = createObject(opts);
 				opts.owner = owner;
 
 				cell = new Cell(initialValue, opts);
@@ -1058,6 +1059,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Symbol = __webpack_require__(4);
 	var createClass = __webpack_require__(6);
 
+	var createObject = Object.create;
 	var hasOwn = Object.prototype.hasOwnProperty;
 
 	var KEY_INNER = Symbol('inner');
@@ -1088,7 +1090,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			 *     context
 			 * }>>}
 			 */
-			this._events = Object.create(null);
+			this._events = createObject(null);
 		},
 
 		/**
@@ -1152,7 +1154,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					this._off(type, listener, argCount >= 3 ? context : this);
 				}
 			} else if (this._events) {
-				this._events = Object.create(null);
+				this._events = createObject(null);
 			}
 
 			return this;
@@ -1171,7 +1173,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (index != -1) {
 				this['_' + type.slice(index + 1)].on(type.slice(0, index), listener, context);
 			} else {
-				var events = (this._events || (this._events = Object.create(null)))[type];
+				var events = (this._events || (this._events = createObject(null)))[type];
 
 				if (!events) {
 					events = this._events[type] = [];
@@ -1368,6 +1370,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var mixin = __webpack_require__(7);
 
+	var createObject = Object.create;
 	var hasOwn = Object.prototype.hasOwnProperty;
 
 	var extend;
@@ -1404,7 +1407,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				};
 		}
 
-		var proto = constr.prototype = Object.create(parent.prototype);
+		var proto = constr.prototype = createObject(parent.prototype);
 
 		if (description.Implements) {
 			description.Implements.forEach(function(implementation) {
@@ -1584,7 +1587,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (hasKey) {
 				oldValue = entries.get(key);
 
-				if (is(oldValue, value)) {
+				if (is(value, oldValue)) {
 					return this;
 				}
 
@@ -1788,6 +1791,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var KEY_UID = keys.UID;
 
+	var createObject = Object.create;
 	var hasOwn = Object.prototype.hasOwnProperty;
 	var global = Function('return this;')();
 
@@ -1800,7 +1804,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		Map = createClass({
 			constructor: function Map(entries) {
-				this._entries = Object.create(null);
+				this._entries = createObject(null);
 				this._objectStamps = {};
 
 				this._first = null;
@@ -2206,7 +2210,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			var items = this._items;
 
-			if (is(items[index], value)) {
+			if (is(value, items[index])) {
 				return this;
 			}
 
@@ -2246,7 +2250,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			for (var i = index + itemCount; i > index;) {
 				var item = items[--i - index];
 
-				if (!is(listItems[i], item)) {
+				if (!is(item, listItems[i])) {
 					this._unregisterValue(listItems[i]);
 
 					listItems[i] = item;
@@ -3721,6 +3725,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _addRange2 = olProto._addRange;
 	var _insertRange = olProto.insertRange;
 
+	var createObject = Object.create;
+
 	/**
 	 * @class Rista.KeyedList
 	 * @extends {cellx.ObservableList}
@@ -3734,7 +3740,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	var KeyedList = ObservableList.extend({
 		constructor: function KeyedList(items, opts) {
-			this._itemsByKey = Object.create(null);
+			this._itemsByKey = createObject(null);
 			this._keyName = opts && opts.keyName || 'id';
 
 			ObservableList.call(this, items, opts);

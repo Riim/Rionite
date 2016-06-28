@@ -9,6 +9,8 @@ let setRange = olProto.setRange;
 let _addRange = olProto._addRange;
 let insertRange = olProto.insertRange;
 
+let createObject = Object.create;
+
 /**
  * @class Rista.KeyedList
  * @extends {cellx.ObservableList}
@@ -22,7 +24,7 @@ let insertRange = olProto.insertRange;
  */
 let KeyedList = ObservableList.extend({
 	constructor: function KeyedList(items, opts) {
-		this._itemsByKey = Object.create(null);
+		this._itemsByKey = createObject(null);
 		this._keyName = opts && opts.keyName || 'id';
 
 		ObservableList.call(this, items, opts);
