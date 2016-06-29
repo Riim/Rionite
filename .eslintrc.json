@@ -1,4 +1,5 @@
 {
+	"parser": "babel-eslint",
 	"rules": {
 		"camelcase": 2,
 		"comma-dangle": [2, "never"],

@@ -1,17 +1,17 @@
-let { EventEmitter, Cell, utils: { createClass, nextTick } } = require('cellx');
+let { EventEmitter, Cell, utils: { createClass, nextTick, defineObservableProperty } } = require('cellx');
 let DisposableMixin = require('./DisposableMixin');
 let registerComponent = require('./registerComponent');
 let Attributes = require('./Attributes');
-let Properties = require('./Properties');
 let morphComponentElement = require('./morphComponentElement');
 let eventTypes = require('./eventTypes');
 let camelize = require('./utils/camelize');
 
+let createObject = Object.create;
 let getPrototypeOf = Object.getPrototypeOf;
 let defineProperties = Object.defineProperties;
 let hasOwn = Object.prototype.hasOwnProperty;
 let isArray = Array.isArray;
-let slice = Array.prototype.slice;
+let map = Array.prototype.map;
 
 let reClosedCustomElementTag = /<(\w+(?:\-\w+)+)([^>]*)\/>/g;
 
@@ -143,7 +143,9 @@ let Component = EventEmitter.extend({
 	 * @type {Rista.Properties}
 	 */
 	get props() {
-		return this._props || (this._props = new Properties(this));
+		return this._props || (
+			this._props = defineObservableProperty(createObject(this.elementAttributes), 'contentSourceElement', null)
+		);
 	},
 
 	_elementInnerHTML: null,
@@ -346,17 +348,18 @@ let Component = EventEmitter.extend({
 	},
 
 	/**
-	 * @typesign (selector: string) -> HTMLElement;
+	 * @typesign (selector: string) -> Rista.Component|HTMLElement;
 	 */
 	$(selector) {
-		return this.element.querySelector(this._prepareSelector(selector));
+		let el = this.element.querySelector(this._prepareSelector(selector));
+		return el.$c || el;
 	},
 
 	/**
-	 * @typesign (selector: string) -> NodeList;
+	 * @typesign (selector: string) -> Array<Rista.Component|HTMLElement>;
 	 */
 	$$(selector) {
-		return slice.call(this.element.querySelectorAll(this._prepareSelector(selector)));
+		return map.call(this.element.querySelectorAll(this._prepareSelector(selector)), el => el.$c || el);
 	},
 
 	/**
