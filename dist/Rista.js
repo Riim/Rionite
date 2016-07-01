@@ -604,15 +604,6 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					}
 
-					for (var proto = this.constructor.prototype;;) {
-						el.className += ' ' + proto.constructor.elementTagName;
-						proto = getPrototypeOf(proto);
-
-						if (proto == Component.prototype) {
-							break;
-						}
-					}
-
 					var attrs = this.elementAttributes;
 					var attributesSchema = this.constructor.elementAttributes;
 

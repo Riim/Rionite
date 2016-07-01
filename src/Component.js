@@ -255,15 +255,6 @@ let Component = EventEmitter.extend({
 					}
 				}
 
-				for (let proto = this.constructor.prototype; ;) {
-					el.className += ' ' + proto.constructor.elementTagName;
-					proto = getPrototypeOf(proto);
-
-					if (proto == Component.prototype) {
-						break;
-					}
-				}
-
 				let attrs = this.elementAttributes;
 				let attributesSchema = this.constructor.elementAttributes;
 
