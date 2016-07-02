@@ -1150,12 +1150,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var KEY_PREV_APPLIED_ATTRIBUTES = _Symbol('prevAppliedAttributes');
 
-	function morphComponentElement(component, toEl, ownerComponent) {
+	/**
+	 * @typesign (component: Rista.Component, contentSource: HTMLElement|NodeList, ownerComponent?: Rista.Component);
+	 */
+	function morphComponentElement(component, contentSource, ownerComponent) {
 		if (!ownerComponent) {
 			ownerComponent = component;
 		}
 
-		morphElement(component.element, toEl, {
+		morphElement(component.element, contentSource, {
 			contentOnly: true,
 
 			getElementAttributes: function getElementAttributes(el) {
@@ -1279,7 +1282,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	    function _morphElement(el, toEl, contentOnly) {
-	        if (!contentOnly) {
+	        var isToElNodeList = toEl instanceof NodeList;
+	        if (!contentOnly && !isToElNodeList) {
 	            if (onBeforeMorphElement && onBeforeMorphElement(el, toEl) === false) {
 	                return;
 	            }
@@ -1291,7 +1295,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var elTagName = el.tagName;
 	        if (elTagName != 'TEXTAREA') {
 	            var elChild = el.firstChild;
-	            for (var toElChild = toEl.firstChild; toElChild; toElChild = toElChild.nextSibling) {
+	            var toElChildren = isToElNodeList ? toEl : toEl.childNodes;
+	            for (var i = 0, l = toElChildren.length; i < l; i++) {
+	                var toElChild = toElChildren[i];
 	                var toElChildType = toElChild.nodeType;
 	                var toElChildKey = void 0;
 	                if (toElChildType == 1) {
@@ -1380,9 +1386,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	        }
-	        var specialElementHandler = specialElementHandlers[elTagName];
-	        if (specialElementHandler) {
-	            specialElementHandler(el, toEl);
+	        if (!isToElNodeList) {
+	            var specialElementHandler = specialElementHandlers[elTagName];
+	            if (specialElementHandler) {
+	                specialElementHandler(el, toEl);
+	            }
 	        }
 	    }
 	    _morphElement(el, toEl, contentOnly);
@@ -1504,15 +1512,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _require = __webpack_require__(1);
 
 	var Cell = _require.Cell;
-	var _Symbol = _require.js.Symbol;
 	var nextTick = _require.utils.nextTick;
 
 	var Component = __webpack_require__(7);
 	var morphComponentElement = __webpack_require__(11);
 
-	var KEY_CONTENT_SOURCE_ELEMENT = _Symbol('contentSourceElement');
-
 	module.exports = Component.extend('rt-content', {
+		Static: {
+			elementAttributes: {
+				select: String
+			}
+		},
+
 		shouldElementUpdate: function shouldElementUpdate() {
 			return true;
 		},
@@ -1524,9 +1535,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		updateElement: function updateElement() {
 			var _this = this;
 
-			var contentSourceElement = this._contentSourceElement.get();
+			var contentSource = this._contentSource.get();
 
-			morphComponentElement(this, contentSourceElement, contentSourceElement == this.props.contentSourceElement ? this.ownerComponent : this.ownerComponent.ownerComponent);
+			morphComponentElement(this, contentSource, contentSource == this.props.contentSourceElement ? this.ownerComponent : this.ownerComponent.ownerComponent);
 
 			if (this.isReady) {
 				nextTick(function () {
@@ -1537,59 +1548,36 @@ return /******/ (function(modules) { // webpackBootstrap
 			return this;
 		},
 		initialize: function initialize() {
-			var ownerComponent = this.ownerComponent;
-			var ownerComponentProperties = ownerComponent.props;
-			var selector = this.element.getAttribute('select');
+			var ownerComponentProperties = this.ownerComponent.props;
+			var elementAttributes = this.elementAttributes;
 
-			var ownerComponentContentSourceElement = ownerComponent[KEY_CONTENT_SOURCE_ELEMENT] || (ownerComponent[KEY_CONTENT_SOURCE_ELEMENT] = new Cell(function () {
-				return ownerComponentProperties.contentSourceElement.cloneNode(true);
-			}));
+			this._contentSource = new Cell(function () {
+				var ownerComponentContentSourceElement = ownerComponentProperties.contentSourceElement;
+				var selector = elementAttributes.select;
 
-			this._contentSourceElement = new Cell(selector ? function () {
-				var selectedElements = ownerComponentContentSourceElement.get().querySelectorAll(selector);
-
-				if (!selectedElements.length) {
-					return this.props.contentSourceElement;
+				if (selector) {
+					var selectedElements = ownerComponentContentSourceElement.querySelectorAll(selector);
+					return selectedElements.length ? selectedElements : this.props.contentSourceElement;
 				}
 
-				var el = document.createElement('div');
-
-				for (var i = 0, l = selectedElements.length; i < l; i++) {
-					el.appendChild(selectedElements[i]);
-				}
-
-				return el;
-			} : function () {
-				var contentSourceElement = ownerComponentContentSourceElement.get();
-
-				if (!contentSourceElement.firstChild) {
-					return this.props.contentSourceElement;
-				}
-
-				var el = document.createElement('div');
-
-				for (var child; child = contentSourceElement.firstChild;) {
-					el.appendChild(child);
-				}
-
-				return el;
+				return ownerComponentContentSourceElement.firstChild ? ownerComponentContentSourceElement : this.props.contentSourceElement;
 			}, {
 				owner: this,
-				onChange: this._onContentSourceElementChange
+				onChange: this._onContentSourceChange
 			});
 
-			this._contentSourceElementListening = true;
+			this._contentSourceListening = true;
 		},
 		elementAttached: function elementAttached() {
-			if (!this._contentSourceElementListening) {
-				this._contentSourceElement.on('change', this._onContentSourceElementChange);
+			if (!this._contentSourceListening) {
+				this._contentSource.on('change', this._onContentSourceChange);
 			}
 		},
 		elementDetached: function elementDetached() {
-			this._contentSourceElement.off('change', this._onContentSourceElementChange);
-			this._contentSourceElementListening = false;
+			this._contentSource.off('change', this._onContentSourceChange);
+			this._contentSourceListening = false;
 		},
-		_onContentSourceElementChange: function _onContentSourceElementChange() {
+		_onContentSourceChange: function _onContentSourceChange() {
 			this.updateElement();
 		}
 	});

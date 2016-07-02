@@ -3,12 +3,15 @@ let morphElement = require('morph-element');
 
 let KEY_PREV_APPLIED_ATTRIBUTES = Symbol('prevAppliedAttributes');
 
-function morphComponentElement(component, toEl, ownerComponent) {
+/**
+ * @typesign (component: Rista.Component, contentSource: HTMLElement|NodeList, ownerComponent?: Rista.Component);
+ */
+function morphComponentElement(component, contentSource, ownerComponent) {
 	if (!ownerComponent) {
 		ownerComponent = component;
 	}
 
-	morphElement(component.element, toEl, {
+	morphElement(component.element, contentSource, {
 		contentOnly: true,
 
 		getElementAttributes(el) {
