@@ -1,6 +1,6 @@
 {
   "name": "rista",
-  "version": "0.9.56",
+  "version": "0.10.1",
   "description": "",
   "main": "dist/Rista-with-polyfills.js",
   "scripts": {

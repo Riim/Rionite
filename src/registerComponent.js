@@ -5,7 +5,7 @@ let createObject = Object.create;
 let getPrototypeOf = Object.getPrototypeOf;
 let hasOwn = Object.prototype.hasOwnProperty;
 
-let inheritedStaticProperties = ['elementAttributes', 'template'];
+let inheritedStaticProperties = ['template', 'elementAttributes', 'assets'];
 
 function registerComponent(componentClass) {
 	let elementTagName = componentClass.elementTagName;

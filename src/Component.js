@@ -1,8 +1,10 @@
 let { EventEmitter, Cell, utils: { createClass, nextTick, defineObservableProperty } } = require('cellx');
 let DisposableMixin = require('./DisposableMixin');
-let registerComponent = require('./registerComponent');
 let Attributes = require('./Attributes');
+let registerComponent = require('./registerComponent');
 let morphComponentElement = require('./morphComponentElement');
+let defineAssets = require('./defineAssets');
+let listenAssets = require('./listenAssets');
 let eventTypes = require('./eventTypes');
 let camelize = require('./utils/camelize');
 
@@ -270,12 +272,22 @@ let Component = EventEmitter.extend({
 
 			if (!this.isReady || this.elementAttached) {
 				nextTick(() => {
+					let assets = this.constructor.assets;
+
 					if (!this.isReady) {
 						this.isReady = true;
+
+						if (assets) {
+							defineAssets(this, assets);
+						}
 
 						if (this.ready) {
 							this.ready();
 						}
+					}
+
+					if (assets) {
+						listenAssets(this, assets);
 					}
 
 					if (this.elementAttached) {

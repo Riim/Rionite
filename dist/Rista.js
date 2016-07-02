@@ -67,7 +67,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Component = __webpack_require__(7);
 	var registerComponent = __webpack_require__(9);
 	var morphComponentElement = __webpack_require__(11);
-	var RtContent = __webpack_require__(16);
+	var RtContent = __webpack_require__(18);
 	var camelize = __webpack_require__(3);
 	var hyphenize = __webpack_require__(4);
 	var escapeHTML = __webpack_require__(5);
@@ -282,11 +282,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @typesign (str: string) -> string;
 	 */
 	function hyphenize(str) {
-		return cache[str] || (cache[str] = str.replace(/([A-Z])([^A-Z])/g, function (match, chr1, chr2) {
+		return cache[str] || (cache[str] = str.replace(/\-?([A-Z])([^A-Z])/g, function (match, chr1, chr2) {
 			return '-' + chr1.toLowerCase() + chr2;
-		}).replace(/([A-Z]+)/g, function (match, chars) {
+		}).replace(/\-?([A-Z]+)/g, function (match, chars) {
 			return '-' + chars.toLowerCase();
-		}).replace('--', '-').replace(/^-/, ''));
+		}).replace(/^-/, ''));
 	}
 
 	module.exports = hyphenize;
@@ -347,10 +347,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var defineObservableProperty = _require$utils.defineObservableProperty;
 
 	var DisposableMixin = __webpack_require__(8);
-	var registerComponent = __webpack_require__(9);
 	var Attributes = __webpack_require__(2);
+	var registerComponent = __webpack_require__(9);
 	var morphComponentElement = __webpack_require__(11);
-	var eventTypes = __webpack_require__(15);
+	var defineAssets = __webpack_require__(15);
+	var listenAssets = __webpack_require__(16);
+	var eventTypes = __webpack_require__(17);
 	var camelize = __webpack_require__(3);
 
 	var createObject = Object.create;
@@ -619,12 +621,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				if (!this.isReady || this.elementAttached) {
 					nextTick(function () {
+						var assets = _this.constructor.assets;
+
 						if (!_this.isReady) {
 							_this.isReady = true;
+
+							if (assets) {
+								defineAssets(_this, assets);
+							}
 
 							if (_this.ready) {
 								_this.ready();
 							}
+						}
+
+						if (assets) {
+							listenAssets(_this, assets);
 						}
 
 						if (_this.elementAttached) {
@@ -1053,7 +1065,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var getPrototypeOf = Object.getPrototypeOf;
 	var hasOwn = Object.prototype.hasOwnProperty;
 
-	var inheritedStaticProperties = ['elementAttributes', 'template'];
+	var inheritedStaticProperties = ['template', 'elementAttributes', 'assets'];
 
 	function registerComponent(componentClass) {
 		var elementTagName = componentClass.elementTagName;
@@ -1497,6 +1509,51 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var hyphenize = __webpack_require__(4);
+
+	var hasOwn = Object.prototype.hasOwnProperty;
+
+	function defineAssets(component, assets) {
+		for (var name in assets) {
+			if (hasOwn.call(assets, name) && name.charAt(0) != ':') {
+				component[name] = component.$(assets[name].selector || '&__' + hyphenize(name));
+			}
+		}
+	}
+
+	module.exports = defineAssets;
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var hasOwn = Object.prototype.hasOwnProperty;
+
+	function listenAssets(component, assets) {
+		for (var name in assets) {
+			if (hasOwn.call(assets, name)) {
+				var asset = name == ':host' ? component : name == ':element' ? component.element : component[name];
+				var config = assets[name];
+
+				for (var key in config) {
+					if (hasOwn.call(config, key) && key.length > 3 && key.slice(0, 3) == 'on-') {
+						component.listenTo(asset, key.slice(3), config[key]);
+					}
+				}
+			}
+		}
+	}
+
+	module.exports = listenAssets;
+
+/***/ },
+/* 17 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1504,7 +1561,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
