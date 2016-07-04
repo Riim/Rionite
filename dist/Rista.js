@@ -67,11 +67,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Component = __webpack_require__(7);
 	var registerComponent = __webpack_require__(9);
 	var morphComponentElement = __webpack_require__(11);
-	var RtContent = __webpack_require__(18);
+	var RtContent = __webpack_require__(19);
 	var camelize = __webpack_require__(3);
 	var hyphenize = __webpack_require__(4);
 	var escapeHTML = __webpack_require__(5);
 	var unescapeHTML = __webpack_require__(6);
+	var defer = __webpack_require__(18);
 
 	var Rista = module.exports = {
 		EventEmitter: EventEmitter,
@@ -91,7 +92,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			camelize: camelize,
 			hyphenize: hyphenize,
 			escapeHTML: escapeHTML,
-			unescapeHTML: unescapeHTML
+			unescapeHTML: unescapeHTML,
+			defer: defer
 		}
 	};
 	Rista.Rista = Rista; // for destructuring
@@ -343,7 +345,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Cell = _require.Cell;
 	var _require$utils = _require.utils;
 	var createClass = _require$utils.createClass;
-	var nextTick = _require$utils.nextTick;
 	var defineObservableProperty = _require$utils.defineObservableProperty;
 
 	var DisposableMixin = __webpack_require__(8);
@@ -354,6 +355,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var listenAssets = __webpack_require__(16);
 	var eventTypes = __webpack_require__(17);
 	var camelize = __webpack_require__(3);
+	var defer = __webpack_require__(18);
 
 	var createObject = Object.create;
 	var getPrototypeOf = Object.getPrototypeOf;
@@ -592,6 +594,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 
 			if (attached) {
+				if (!this.ownerComponent && !this.props.contentSourceElement) {
+					this.props.contentSourceElement = this.element.cloneNode(true);
+				}
+
 				this.updateElement();
 
 				if (!this.isReady) {
@@ -620,7 +626,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 
 				if (!this.isReady || this.elementAttached) {
-					nextTick(function () {
+					defer(function () {
 						var assets = _this.constructor.assets;
 
 						if (!_this.isReady) {
@@ -691,7 +697,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			this._prevAppliedElementInnerHTML = html;
 
 			if (this.isReady) {
-				nextTick(function () {
+				defer(function () {
 					if (_this2.elementUpdated) {
 						_this2.elementUpdated();
 					}
@@ -1562,6 +1568,47 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _require = __webpack_require__(1);
+
+	var ErrorLogger = _require.ErrorLogger;
+
+
+	var queue = void 0;
+
+	function run() {
+		var track = queue;
+
+		queue = null;
+
+		for (var i = 0, l = track.length; i < l; i++) {
+			try {
+				track[i]();
+			} catch (err) {
+				ErrorLogger.log(err);
+			}
+		}
+	}
+
+	/**
+	 * @typesign (cb: Function);
+	 */
+	function defer(cb) {
+		if (queue) {
+			queue.push(cb);
+		} else {
+			queue = [cb];
+			setTimeout(run, 1);
+		}
+	}
+
+	module.exports = defer;
+
+/***/ },
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';

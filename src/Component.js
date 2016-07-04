@@ -1,4 +1,4 @@
-let { EventEmitter, Cell, utils: { createClass, nextTick, defineObservableProperty } } = require('cellx');
+let { EventEmitter, Cell, utils: { createClass, defineObservableProperty } } = require('cellx');
 let DisposableMixin = require('./DisposableMixin');
 let Attributes = require('./Attributes');
 let registerComponent = require('./registerComponent');
@@ -7,6 +7,7 @@ let defineAssets = require('./defineAssets');
 let listenAssets = require('./listenAssets');
 let eventTypes = require('./eventTypes');
 let camelize = require('./utils/camelize');
+let defer = require('./utils/defer');
 
 let createObject = Object.create;
 let getPrototypeOf = Object.getPrototypeOf;
@@ -243,6 +244,10 @@ let Component = EventEmitter.extend({
 		}
 
 		if (attached) {
+			if (!this.ownerComponent && !this.props.contentSourceElement) {
+				this.props.contentSourceElement = this.element.cloneNode(true);
+			}
+
 			this.updateElement();
 
 			if (!this.isReady) {
@@ -271,7 +276,7 @@ let Component = EventEmitter.extend({
 			}
 
 			if (!this.isReady || this.elementAttached) {
-				nextTick(() => {
+				defer(() => {
 					let assets = this.constructor.assets;
 
 					if (!this.isReady) {
@@ -338,7 +343,7 @@ let Component = EventEmitter.extend({
 		this._prevAppliedElementInnerHTML = html;
 
 		if (this.isReady) {
-			nextTick(() => {
+			defer(() => {
 				if (this.elementUpdated) {
 					this.elementUpdated();
 				}

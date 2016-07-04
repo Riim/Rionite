@@ -8,6 +8,7 @@ let camelize = require('./utils/camelize');
 let hyphenize = require('./utils/hyphenize');
 let escapeHTML = require('./utils/escapeHTML');
 let unescapeHTML = require('./utils/unescapeHTML');
+let defer = require('./utils/defer');
 
 let Rista = module.exports = {
 	EventEmitter,
@@ -27,7 +28,8 @@ let Rista = module.exports = {
 		camelize,
 		hyphenize,
 		escapeHTML,
-		unescapeHTML
+		unescapeHTML,
+		defer
 	}
 };
 Rista.Rista = Rista; // for destructuring
