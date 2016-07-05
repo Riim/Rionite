@@ -1,9 +1,6 @@
 let cache = Object.create(null);
 
-/**
- * @typesign (str: string) -> string;
- */
-function hyphenize(str) {
+function hyphenize(str: string): string {
 	return cache[str] || (cache[str] = str.replace(/\-?([A-Z])([^A-Z])/g, (match, chr1, chr2) => {
 		return '-' + chr1.toLowerCase() + chr2;
 	}).replace(/\-?([A-Z]+)/g, (match, chars) => {

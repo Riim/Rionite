@@ -3,10 +3,7 @@ let reLessThan = /</g;
 let reGreaterThan = />/g;
 let reQuote = /"/g;
 
-/**
- * @typesign (str: string) -> string;
- */
-function escapeHTML(str) {
+function escapeHTML(str: string): string {
 	return str
 		.replace(reAmpersand, '&amp;')
 		.replace(reLessThan, '&lt;')

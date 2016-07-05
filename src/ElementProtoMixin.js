@@ -32,11 +32,15 @@ let ElementProtoMixin = {
 	},
 
 	attributeChangedCallback(name, oldValue, value) {
-		let attrs = this.ristaComponent.elementAttributes;
-		let privateName = '_' + name;
+		var component = this.ristaComponent;
 
-		if (hasOwn.call(attrs, privateName)) {
-			attrs[privateName].set(value);
+		if (component.isReady) {
+			let attrs = component.elementAttributes;
+			let privateName = '_' + name;
+
+			if (hasOwn.call(attrs, privateName)) {
+				attrs[privateName].set(value);
+			}
 		}
 	}
 };

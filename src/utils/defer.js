@@ -2,7 +2,7 @@ let { ErrorLogger } = require('cellx');
 
 let queue;
 
-function run() {
+function run(): void {
 	let track = queue;
 
 	queue = null;
@@ -16,10 +16,7 @@ function run() {
 	}
 }
 
-/**
- * @typesign (cb: Function);
- */
-function defer(cb) {
+function defer(cb: Function): void {
 	if (queue) {
 		queue.push(cb);
 	} else {

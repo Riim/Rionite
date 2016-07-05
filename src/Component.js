@@ -2,6 +2,7 @@ let { EventEmitter, Cell, utils: { createClass, defineObservableProperty } } = r
 let DisposableMixin = require('./DisposableMixin');
 let Attributes = require('./Attributes');
 let registerComponent = require('./registerComponent');
+let renderInner = require('./renderInner');
 let morphComponentElement = require('./morphComponentElement');
 let defineAssets = require('./defineAssets');
 let listenAssets = require('./listenAssets');
@@ -61,19 +62,6 @@ function onEvent(evt) {
 			}
 		}
 	}
-}
-
-/**
- * @typesign () -> string;
- */
-function renderInner() {
-	let template = this.constructor.template;
-
-	if (template) {
-		return template.render ? template.render(this) : template.call(this, this);
-	}
-
-	return '';
 }
 
 let Component = EventEmitter.extend({
@@ -161,7 +149,7 @@ let Component = EventEmitter.extend({
 
 	_blockNameInMarkup: void 0,
 
-	constructor: function Component(el, props) {
+	constructor: function Component(el) {
 		EventEmitter.call(this);
 		DisposableMixin.call(this);
 
@@ -171,8 +159,23 @@ let Component = EventEmitter.extend({
 			throw new TypeError('Component is abstract class');
 		}
 
-		if (!el) {
+		if (el == null) {
 			el = document.createElement(constr.elementTagName);
+		} else if (typeof el == 'string') {
+			let elementTagName = constr.elementTagName;
+			let html = el;
+
+			el = document.createElement(elementTagName);
+			el.innerHTML = html;
+
+			let firstChild = el.firstChild;
+
+			if (
+				firstChild == el.lastChild && firstChild.nodeType == 1 &&
+					firstChild.tagName.toLowerCase() == elementTagName
+			) {
+				el = firstChild;
+			}
 		}
 
 		this.element = el;
@@ -195,14 +198,6 @@ let Component = EventEmitter.extend({
 			owner: this,
 			onChange: this._onElementAttachedChange
 		});
-
-		if (props) {
-			let properties = this.props;
-
-			for (let name in props) {
-				properties[camelize(name)] = props[name];
-			}
-		}
 
 		if (this.created) {
 			this.created();

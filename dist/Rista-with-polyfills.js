@@ -761,13 +761,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Attributes = __webpack_require__(2);
 	var Component = __webpack_require__(7);
 	var registerComponent = __webpack_require__(9);
-	var morphComponentElement = __webpack_require__(11);
-	var RtContent = __webpack_require__(19);
+	var morphComponentElement = __webpack_require__(12);
+	var RtContent = __webpack_require__(20);
 	var camelize = __webpack_require__(3);
 	var hyphenize = __webpack_require__(4);
 	var escapeHTML = __webpack_require__(5);
 	var unescapeHTML = __webpack_require__(6);
-	var defer = __webpack_require__(18);
+	var defer = __webpack_require__(19);
 
 	var Rista = module.exports = {
 		EventEmitter: EventEmitter,
@@ -956,9 +956,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var cache = Object.create(null);
 
-	/**
-	 * @typesign (str: string) -> string;
-	 */
 	function camelize(str) {
 		return cache[str] || (cache[str] = str.replace(/[\-_]+([a-z]|$)/g, function (match, chr) {
 			return chr.toUpperCase();
@@ -975,9 +972,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var cache = Object.create(null);
 
-	/**
-	 * @typesign (str: string) -> string;
-	 */
 	function hyphenize(str) {
 		return cache[str] || (cache[str] = str.replace(/\-?([A-Z])([^A-Z])/g, function (match, chr1, chr2) {
 			return '-' + chr1.toLowerCase() + chr2;
@@ -999,9 +993,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var reGreaterThan = />/g;
 	var reQuote = /"/g;
 
-	/**
-	 * @typesign (str: string) -> string;
-	 */
 	function escapeHTML(str) {
 		return str.replace(reAmpersand, '&amp;').replace(reLessThan, '&lt;').replace(reGreaterThan, '&gt;').replace(reQuote, '&quot;');
 	}
@@ -1019,9 +1010,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var reQuote = /&quot;/g;
 	var reAmpersand = /&amp;/g;
 
-	/**
-	 * @typesign (str: string) -> string;
-	 */
 	function unescapeHTML(str) {
 		return str.replace(reLessThan, '<').replace(reGreaterThan, '>').replace(reQuote, '"').replace(reAmpersand, '&');
 	}
@@ -1045,12 +1033,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var DisposableMixin = __webpack_require__(8);
 	var Attributes = __webpack_require__(2);
 	var registerComponent = __webpack_require__(9);
-	var morphComponentElement = __webpack_require__(11);
-	var defineAssets = __webpack_require__(15);
-	var listenAssets = __webpack_require__(16);
-	var eventTypes = __webpack_require__(17);
+	var renderInner = __webpack_require__(11);
+	var morphComponentElement = __webpack_require__(12);
+	var defineAssets = __webpack_require__(16);
+	var listenAssets = __webpack_require__(17);
+	var eventTypes = __webpack_require__(18);
 	var camelize = __webpack_require__(3);
-	var defer = __webpack_require__(18);
+	var defer = __webpack_require__(19);
 
 	var createObject = Object.create;
 	var getPrototypeOf = Object.getPrototypeOf;
@@ -1104,19 +1093,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 		}
-	}
-
-	/**
-	 * @typesign () -> string;
-	 */
-	function renderInner() {
-		var template = this.constructor.template;
-
-		if (template) {
-			return template.render ? template.render(this) : template.call(this, this);
-		}
-
-		return '';
 	}
 
 	var Component = EventEmitter.extend({
@@ -1204,7 +1180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		_blockNameInMarkup: void 0,
 
-		constructor: function Component(el, props) {
+		constructor: function Component(el) {
 			EventEmitter.call(this);
 			DisposableMixin.call(this);
 
@@ -1214,8 +1190,20 @@ return /******/ (function(modules) { // webpackBootstrap
 				throw new TypeError('Component is abstract class');
 			}
 
-			if (!el) {
+			if (el == null) {
 				el = document.createElement(constr.elementTagName);
+			} else if (typeof el == 'string') {
+				var elementTagName = constr.elementTagName;
+				var html = el;
+
+				el = document.createElement(elementTagName);
+				el.innerHTML = html;
+
+				var firstChild = el.firstChild;
+
+				if (firstChild == el.lastChild && firstChild.nodeType == 1 && firstChild.tagName.toLowerCase() == elementTagName) {
+					el = firstChild;
+				}
 			}
 
 			this.element = el;
@@ -1238,14 +1226,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				owner: this,
 				onChange: this._onElementAttachedChange
 			});
-
-			if (props) {
-				var properties = this.props;
-
-				for (var name in props) {
-					properties[camelize(name)] = props[name];
-				}
-			}
 
 			if (this.created) {
 				this.created();
@@ -1838,11 +1818,15 @@ return /******/ (function(modules) { // webpackBootstrap
 			component._elementAttached.set(false);
 		},
 		attributeChangedCallback: function attributeChangedCallback(name, oldValue, value) {
-			var attrs = this.ristaComponent.elementAttributes;
-			var privateName = '_' + name;
+			var component = this.ristaComponent;
 
-			if (hasOwn.call(attrs, privateName)) {
-				attrs[privateName].set(value);
+			if (component.isReady) {
+				var attrs = component.elementAttributes;
+				var privateName = '_' + name;
+
+				if (hasOwn.call(attrs, privateName)) {
+					attrs[privateName].set(value);
+				}
 			}
 		}
 	};
@@ -1851,6 +1835,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 11 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	function renderInner() {
+		var template = this.constructor.template;
+
+		if (template) {
+			return template.render ? template.render(this) : template.call(this, this);
+		}
+
+		return '';
+	}
+
+	module.exports = renderInner;
+
+/***/ },
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1859,7 +1861,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _Symbol = _require.js.Symbol;
 
-	var morphElement = __webpack_require__(12);
+	var morphElement = __webpack_require__(13);
 
 	var KEY_PREV_APPLIED_ATTRIBUTES = _Symbol('prevAppliedAttributes');
 
@@ -1897,12 +1899,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = morphComponentElement;
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var specialElementHandlers = __webpack_require__(13);
-	var morphElementAttributes = __webpack_require__(14);
+	var specialElementHandlers = __webpack_require__(14);
+	var morphElementAttributes = __webpack_require__(15);
 	var defaultNamespaceURI = document.documentElement.namespaceURI;
 	function defaultGetElementAttributes(el) {
 	    return el.attributes;
@@ -2141,7 +2143,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2169,7 +2171,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2209,7 +2211,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2229,7 +2231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = defineAssets;
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2254,7 +2256,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = listenAssets;
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2262,7 +2264,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2288,9 +2290,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 	}
 
-	/**
-	 * @typesign (cb: Function);
-	 */
 	function defer(cb) {
 		if (queue) {
 			queue.push(cb);
@@ -2303,7 +2302,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = defer;
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2314,7 +2313,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var nextTick = _require.utils.nextTick;
 
 	var Component = __webpack_require__(7);
-	var morphComponentElement = __webpack_require__(11);
+	var morphComponentElement = __webpack_require__(12);
 
 	module.exports = Component.extend('rt-content', {
 		Static: {
