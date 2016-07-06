@@ -691,11 +691,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 		/**
-	  * @typesign (selector: string) -> Rista.Component|HTMLElement;
+	  * @typesign (selector: string) -> ?Rista.Component|HTMLElement;
 	  */
 		$: function $(selector) {
 			var el = this.element.querySelector(this._prepareSelector(selector));
-			return el.$c || el;
+			return el && (el.$c || el);
 		},
 
 

@@ -351,11 +351,11 @@ let Component = EventEmitter.extend({
 	},
 
 	/**
-	 * @typesign (selector: string) -> Rista.Component|HTMLElement;
+	 * @typesign (selector: string) -> ?Rista.Component|HTMLElement;
 	 */
 	$(selector) {
 		let el = this.element.querySelector(this._prepareSelector(selector));
-		return el.$c || el;
+		return el && (el.$c || el);
 	},
 
 	/**
