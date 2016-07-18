@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<script src="../node_modules/lodash/lodash.js"></script>
+<script src="../node_modules/platform/platform.js"></script>
+<script src="../node_modules/benchmark/benchmark.js"></script>
+<script>
+
+var html1 = ' <span></span> ';
+var html2 = ' <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> ';
+
+function htmlToFragment1(html) {
+	let el = document.createElement('div');
+	let df = document.createDocumentFragment();
+
+	el.innerHTML = html;
+
+	for (let child; (child = el.firstChild);) {
+		df.appendChild(child);
+	}
+
+	return df;
+}
+
+let range;
+
+function htmlToFragment2(html) {
+    if (!range) {
+        range = document.createRange();
+        range.selectNode(document.body);
+    }
+
+    return range.createContextualFragment(html);
+}
+
+var suite = new Benchmark.Suite();
+
+suite
+	.add('1.1', function() {
+		htmlToFragment1(html1);
+	})
+	.add('1.2', function() {
+		htmlToFragment1(html2);
+	})
+	.add('2.1', function() {
+		htmlToFragment2(html1);
+	})
+	.add('2.2', function() {
+		htmlToFragment2(html2);
+	})
+	.on('cycle', function(evt) {
+		document.body.innerHTML += '<br>' + String(evt.target);
+	})
+	.run({ 'async': true });
+
+// 1.1 x 72,321 ops/sec ±2.74% (53 runs sampled)
+// 1.2 x 6,744 ops/sec ±3.04% (37 runs sampled)
+
+// 2.1 x 129,664 ops/sec ±4.49% (51 runs sampled)
+// 2.2 x 13,243 ops/sec ±10.31% (49 runs sampled)
+
+</script>
+
+</body>
+</html>

@@ -2,7 +2,7 @@ var webpack = require('webpack');
 
 module.exports = {
 	output: {
-		library: 'Rista',
+		library: 'Rionite',
 		libraryTarget: 'umd'
 	},
 

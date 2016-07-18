@@ -1,14 +1,15 @@
-let reAmpersand = /&/g;
-let reLessThan = /</g;
-let reGreaterThan = />/g;
-let reQuote = /"/g;
+let reEscapableChars = /[&<>"]/g;
+let charToEntityMap = Object.create(null);
+
+charToEntityMap['&'] = '&amp;';
+charToEntityMap['<'] = '&lt;';
+charToEntityMap['>'] = '&gt;';
+charToEntityMap['"'] = '&quot;';
 
 function escapeHTML(str: string): string {
-	return str
-		.replace(reAmpersand, '&amp;')
-		.replace(reLessThan, '&lt;')
-		.replace(reGreaterThan, '&gt;')
-		.replace(reQuote, '&quot;');
+	return reEscapableChars.test(str) ? str.replace(reEscapableChars, chr => {
+		return charToEntityMap[chr];
+	}) : str;
 }
 
 module.exports = escapeHTML;

@@ -148,7 +148,7 @@ let DisposableMixin = EventEmitter.extend({
 			cb.call(this);
 		}, delay);
 
-		let _clearTimeout = () => {
+		let clearTimeout_ = () => {
 			if (this._disposables[id]) {
 				clearTimeout(timeoutId);
 				delete this._disposables[id];
@@ -156,8 +156,8 @@ let DisposableMixin = EventEmitter.extend({
 		};
 
 		let timeout = this._disposables[id] = {
-			clear: _clearTimeout,
-			dispose: _clearTimeout
+			clear: clearTimeout_,
+			dispose: clearTimeout_
 		};
 
 		return timeout;
@@ -173,7 +173,7 @@ let DisposableMixin = EventEmitter.extend({
 			cb.call(this);
 		}, delay);
 
-		let _clearInterval = () => {
+		let clearInterval_ = () => {
 			if (this._disposables[id]) {
 				clearInterval(intervalId);
 				delete this._disposables[id];
@@ -181,8 +181,8 @@ let DisposableMixin = EventEmitter.extend({
 		};
 
 		let interval = this._disposables[id] = {
-			clear: _clearInterval,
-			dispose: _clearInterval
+			clear: clearInterval_,
+			dispose: clearInterval_
 		};
 
 		return interval;
@@ -214,7 +214,7 @@ let DisposableMixin = EventEmitter.extend({
 	},
 
 	/**
-	 * @typesign () -> Rista.DisposableMixin;
+	 * @typesign () -> Rionite.DisposableMixin;
 	 */
 	dispose() {
 		let disposables = this._disposables;

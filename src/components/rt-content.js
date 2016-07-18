@@ -1,6 +1,5 @@
-let { Cell, utils: { nextTick } } = require('cellx');
+let bind = require('../bind');
 let Component = require('../Component');
-let morphComponentElement = require('../morphComponentElement');
 
 module.exports = Component.extend('rt-content', {
 	Static: {
@@ -9,70 +8,65 @@ module.exports = Component.extend('rt-content', {
 		}
 	},
 
-	shouldElementUpdate() {
-		return true;
-	},
+	_rawContent: void 0,
 
-	/**
-	 * @override
-	 */
-	updateElement() {
-		let contentSource = this._contentSource.get();
+	_onElementAttachedChange({ value: attached }) {
+		if (attached) {
+			let ownerComponent = this.ownerComponent;
+			let el = this.element;
+			let props = this.props;
 
-		morphComponentElement(
-			this,
-			contentSource,
+			if (this.isReady) {
+				for (let child; (child = el.firstChild);) {
+					el.removeChild(child);
+				}
+			} else {
+				let inputContent = props.content = document.createDocumentFragment();
 
-			contentSource == this.props.contentSourceElement ?
-				this.ownerComponent :
-				this.ownerComponent.ownerComponent
-		);
+				for (let child; (child = el.firstChild);) {
+					inputContent.appendChild(child);
+				}
 
-		if (this.isReady) {
-			nextTick(() => {
-				this.emit('element-update');
-			});
-		}
+				let ownerComponentContent = ownerComponent.props.content;
+				let selectors = this.elementAttributes.select;
 
-		return this;
-	},
+				if (selectors) {
+					selectors = selectors.split('|');
 
-	initialize() {
-		let ownerComponentProperties = this.ownerComponent.props;
-		let elementAttributes = this.elementAttributes;
+					for (var i = 0, l = selectors.length; i < l; i++) {
+						let selectedElements = ownerComponentContent.querySelectorAll(selectors[i]);
+						let selectedElementCount = selectedElements.length;
 
-		this._contentSource = new Cell(function() {
-			let ownerComponentContentSourceElement = ownerComponentProperties.contentSourceElement;
-			let selector = elementAttributes.select;
+						if (selectedElementCount) {
+							let rawContent = this._rawContent = document.createDocumentFragment();
 
-			if (selector) {
-				let selectedElements = ownerComponentContentSourceElement.querySelectorAll(selector);
-				return selectedElements.length ? selectedElements : this.props.contentSourceElement;
+							for (let i = 0; i < selectedElementCount; i++) {
+								rawContent.appendChild(selectedElements[i].cloneNode(true));
+							}
+
+							break;
+						}
+					}
+
+					if (!this._rawContent) {
+						this._rawContent = inputContent;
+					}
+				} else {
+					this._rawContent = ownerComponentContent.firstChild ? ownerComponentContent : inputContent;
+				}
+
+				this.isReady = true;
 			}
 
-			return ownerComponentContentSourceElement.firstChild ?
-				ownerComponentContentSourceElement :
-				this.props.contentSourceElement;
-		}, {
-			owner: this,
-			onChange: this._onContentSourceChange
-		});
+			let content = this._rawContent.cloneNode(true);
 
-		this._contentSourceListening = true;
-	},
+			this._bindings = this._rawContent == props.content ?
+				bind(content, ownerComponent, props.context) :
+				bind(content, ownerComponent.ownerComponent, ownerComponent.props.context);
 
-	elementAttached() {
-		if (!this._contentSourceListening) {
-			this._contentSource.on('change', this._onContentSourceChange);
+			el.appendChild(content);
+		} else {
+			this._destroyBindings();
 		}
-	},
-
-	elementDetached() {
-		this._contentSource.off('change', this._onContentSourceChange);
-		this._contentSourceListening = false;
-	},
-
-	_onContentSourceChange() {
-		this.updateElement();
 	}
 });

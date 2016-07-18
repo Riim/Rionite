@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<script src="../node_modules/lodash/lodash.js"></script>
+<script src="../node_modules/platform/platform.js"></script>
+<script src="../node_modules/benchmark/benchmark.js"></script>
+<script>
+
+var node1 = document.createElement('div');
+var node2 = document.createElement('div');
+var node1_ = document.createElement('div');
+var node2_ = document.createElement('div');
+
+node1.innerHTML = ' <span></span> ';
+node2.innerHTML = ' <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> ';
+
+function moveChildNodes1(from, to) {
+	while (from.firstChild) {
+		to.appendChild(from.firstChild);
+	}
+}
+
+function moveChildNodes2(from, to) {
+	for (var child; (child = from.firstChild);) {
+		to.appendChild(child);
+	}
+}
+
+function moveChildNodes3(from, to) {
+	var childNodes = from.childNodes;
+
+	while (childNodes[0]) {
+		to.appendChild(childNodes[0]);
+	}
+}
+
+var suite = new Benchmark.Suite();
+
+suite
+	.add('1.1', function() {
+		if (node1.firstChild) {
+			moveChildNodes1(node1, node1_);
+		} else {
+			moveChildNodes1(node1_, node1);
+		}
+	})
+	.add('1.2', function() {
+		if (node2.firstChild) {
+			moveChildNodes1(node2, node2_);
+		} else {
+			moveChildNodes1(node2_, node2);
+		}
+	})
+	.add('2.1', function() {
+		if (node1.firstChild) {
+			moveChildNodes2(node1, node1_);
+		} else {
+			moveChildNodes2(node1_, node1);
+		}
+	})
+	.add('2.2', function() {
+		if (node2.firstChild) {
+			moveChildNodes2(node2, node2_);
+		} else {
+			moveChildNodes2(node2_, node2);
+		}
+	})
+	.add('3.1', function() {
+		if (node1.firstChild) {
+			moveChildNodes3(node1, node1_);
+		} else {
+			moveChildNodes3(node1_, node1);
+		}
+	})
+	.add('3.2', function() {
+		if (node2.firstChild) {
+			moveChildNodes3(node2, node2_);
+		} else {
+			moveChildNodes3(node2_, node2);
+		}
+	})
+	.on('cycle', function(evt) {
+		document.body.innerHTML += '<br>' + String(evt.target);
+	})
+	.run({ 'async': true });
+
+// 1.1 x 852,835 ops/sec ±0.97% (59 runs sampled)
+// 1.2 x 26,288 ops/sec ±1.05% (59 runs sampled)
+
+// 2.1 x 886,635 ops/sec ±0.94% (59 runs sampled)
+// 2.2 x 31,103 ops/sec ±1.08% (60 runs sampled)
+
+// 3.1 x 636,904 ops/sec ±1.11% (59 runs sampled)
+// 3.2 x 21,417 ops/sec ±1.18% (58 runs sampled)
+
+</script>
+
+</body>
+</html>

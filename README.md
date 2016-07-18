@@ -1,173 +1,385 @@
-<p align="right">
-    <a href="https://github.com/Riim/rista/blob/master/README.ru.md">Этот документ на русском</a>
-</p>
+# Rionite
 
-# Rista
+Реактивная обёртка над [custom-elements](https://www.w3.org/TR/custom-elements/).
 
-<p>
-    <img src="https://raw.githubusercontent.com/Riim/rista/master/docs/images/logo.png" width="160.5" height="146">
-</p>
-
-A simple framework combining the functionality of [cellx](https://github.com/Riim/cellx), [morphdom](https://github.com/patrick-steele-idem/morphdom) and [Custom Elements](https://www.w3.org/TR/custom-elements/).  
-In general, we receive a lightweight (minify+gzip ~ 10kB) alternative to [ReactJS](https://facebook.github.io/react/), which is faster and does not require any code pretreatment (jsx).
-
-## Description partially outdated.
-
-## Installation
+## Установка
 
 ```
-npm install rista --save
+npm install cellx rionite --save
 ```
 
-## Browser support
+### Пример
 
-Rista supports IE9 and above and all modern browsers.
+```html
+<hello-user name="Matroskin"></hello-user>
 
-## TodoApp
-
-[jsfiddle](http://jsfiddle.net/9sudert7/)
-
-## Principle of operation
-
-Using [MutationObserver](https://developer.mozilla.org/ru/docs/Web/API/MutationObserver) `Rista` monitors the custom elements appearing in the document and applies to them components with names specified in the attribute value.
-
-### Example
-
-```js
-<hello-world>Hello, World!</hello-world>
-
+<script src="./node_modules/cellx/dist/cellx.js"></script>
+<script src="./node_modules/rionite/dist/Rionite-with-polyfills.js"></script>
 <script>
 
-Rista.Component.extend('hello-world', {
+Rionite.Component.extend('hello-user', {
+	Static: {
+		template: 'Hello, {props.name}!',
+
+		elementAttributes: {
+			name: String
+		}
+	},
+
     elementAttached: function() {
-        // Triggers when the element `hello-world` appears in the document.
-        // `this.element` — a link to the element which has appeared.
+        // Сработает при появлении элемента `<hello-world>` в документе.
+        // `this.element` — ссылка на появившийся элемент.
+        // Отличное место для добавления обработчиков событий.
     },
 
     elementDetached: function() {
-        // Triggers when deleting the element `hello-world` from the document.
+        // Сработает при удалении элемента `<hello-world>` из документа.
+        // Не забыть снять добавленные обработчики событий.
     }
 });
 
 </script>
 ```
 
-If a component needs to set its own content, you can determine the method `renderInner`, which should return the html-string. The element content will be replaced with the result of its call. Then, `Rista`, using functionality of [cellx](https://github.com/Riim/cellx), tracks changes in all the properties used in the method `renderInner` and when they change, it renders the contents applying changes using [morphdom](https://github.com/patrick-steele-idem/morphdom).
-
-### Example
-
-[jsfiddle](http://jsfiddle.net/yoLkuxtw/)
+Можно использовать ES.Next синтаксис:
 
 ```js
-<user-card></user-card>
+import { Component, registerComponent } from 'rionite';
+
+export default class HelloUser extends Component {
+	static template = 'Hello, {props.name}!';
+
+    static elementIs = 'hello-user';
+	static elementAttributes = {
+        name: String
+    };
+
+    elementAttached() {}
+    elementDetached() {}
+}
+
+// Не забыть зарегистрировать компонент.
+registerComponent(HelloUser);
+```
+
+Элемент в приведённом примере отрендерится в следующий вид:
+```html
+<hello-user name="Matroskin" class="hello-user">Hello, Matroskin!</hello-user>
+```
+
+Имя тега продублировалось в css-классе элемента, это необходимо для наследования стилей: имя тега элемента у наследуемого компонента будет другим, но оба имени добавятся в css-класс элемента:
+```html
+<hello-super-user name="Matroskin" class="hello-user hello-super-user">Hello, Matroskin!</hello-super-user>
+```
+Таким образом стили элемента родительского компонента применятся и к элементу наследуемого компонента. В дальнейшем можно доопределить их:
+```css
+.hello-super-user {
+    & {
+        color: red;
+    }
+
+    & .hello-user__some-inner-element {
+        font-width: bold;
+    }
+}
+```
+
+Стили элемента лучше назначать на css-класс элемента. На тег элемента обычно назначаются стили которые должны применяться к нему пока он не отрендерился, например, для скрытия передаваемого содержимого:
+```html
+<style>
+super-select {
+    display: none;
+}
+
+.super-select {
+    display: inline-block;
+}
+</style>
+
+<super-select>
+    <super-select-option>1</super-select-option>
+    <super-select-option>2</super-select-option>
+    <super-select-option>3</super-select-option>
+</super-select>
+```
+
+В статическом свойстве `elementAttributes` задаётся объект-описание возможных атрибутов элемента. В качестве значений объекта можно указать тип из следующих возможных: `Boolean`, `Number`, `String` и `Object`. Также можно указать значение по-умолчанию, тип будет вычислен из него:
+```html
+<hello-user></hello-user>
 
 <script>
 
-var cellx = Rista.cellx;
+Rionite.Component.extend('hello-user', {
+	Static: {
+		template: 'Hello, {props.name}!',
 
-// модель приложения
-var appModel = cellx.define({}, {
-    // Observable property. Details in cellx-а description.
-    userAge: 0,
-
-    // Computed property.
-    userAgeYearLater: function() {
-        return this.userAge + 1;
-    }
-});
-
-setInterval(function() {
-    // every second the user will age one year
-    appModel.userAge++;
-}, 1000);
-
-Rista.Component.extend('user-card', {
-    initialize: function() {
-        cellx.define(this, {
-            // Own property of the component is computed from properties of the model.
-            userAgeTwoYearsLater: function() {
-                return appModel.userAgeYearLater + 1;
-            }
-        });
-    },
-
-    renderInner: function() {
-        // write everything
-        return `
-            <div>${ appModel.userAge }</div>
-            <div>${ appModel.userAgeYearLater }</div>
-            <div>${ this.userAgeTwoYearsLater }</div>
-        `;
-    }
+		elementAttributes: {
+			name: 'Anonymous'
+		}
+	}
 });
 
 </script>
 ```
+Элемент в примере отрендерится в следующий вид:
+```html
+<hello-user class="hello-user">Hello, Anonymous!</hello-user>
+```
 
-## Element event processing
-
-`Rista` allows you to add element event handlers in the declarative style:
-
-[jsfiddle](http://jsfiddle.net/utvffa63/)
-
+Экземпляр компонента тоже будет иметь свойство `elementAttributes`, в нём будет объект со значениями переданных атрибутов, приведёнными к указанному типу.  
+Экземпляр так-же будет иметь свойство `props`, которое является теми же атрибутами, но с дополнительным свойством `content`:
 ```js
-<simple-counter></simple-counter>
+this.props = Object.create(this.elementAttributes, {
+    content: {
+        value: document.createDocumentFragment()
+    }
+});
+```
+
+Свойство `props.content` является фрагментом документа, в который переносится изначально переданное элементу содержимое. В дальнейшем оно чаще всего используются элементом `<rt-content>`:
+```js
+<super-button>123</super-button>
 
 <script>
 
-Rista.Component.extend('simple-counter', {
-	initialize: function() {
-		Rista.cellx.define(this, 'counter', 0);
-	},
+Rionite.Component.extend('super-button', {
+	Static: {
+		template: '<button><rt-content/></button>'
+	}
+});
 
-	renderInner: function() {
-		return `
-			<div>${ this.counter }</div>
-			<button rt-click="onBtnClick">Click Me!</button>
-		`;
-	},
+</script>
+```
+Элемент в примере отрендерится в следующий вид:
+```html
+<super-button class="super-button"><button><rt-content>123</rt-content></button></super-button>
+```
 
-	onBtnClick: function() {
-		this.counter++;
+Элементу `<rt-content>` можно указать селектор по которому он отберёт содержимое для вывода. Если по селектору никаких элементов нет, то `<rt-content>` отрендерит собственное содержимое:
+```js
+<super-select>
+    <super-select-option>1</super-select-option>
+    <super-select-option>2</super-select-option>
+    <super-select-option>3</super-select-option>
+</super-select>
+
+<script>
+
+Rionite.Component.extend('super-select', {
+	Static: {
+		template: `
+            <rt-content select="super-button">
+                <super-button>{selectedValues}</super-button>
+            </rt-content>
+
+            <rt-content select="super-dropdown, super-popover">
+                <super-dropdown>
+                    <rt-content select="super-select-option"/>
+                </super-dropdown>
+            </rt-content>
+        `
 	}
 });
 
 </script>
 ```
 
-You can add event handlers to pop up events:
+Конструкции вида `{propertyName}` — это привязки данных — биндинги. Они будут автоматически обновляться в разметке при изменении соответствующих свойств. Сами свойства для этого должно быть реактивным и создаваться с помощью [cellx]()-а:
+```html
+<simple-counter></simple-counter>
+
+<script>
+
+Rionite.Component.extend('simple-counter', {
+	Static: {
+		template: `
+            <div>{counter}</div>
+            <button rt-click="onButtonClick">counter++</button>
+        `
+	},
+
+    initialize() {
+        cellx.define(this, {
+            counter: 0
+        });
+    },
+
+    onButtonClick() {
+        this.counter++;
+    }
+});
+
+</script>
+```
+
+Свойства в `elementAttributes` (`props`) тоже реактивные, при изменении значения атрибута разметка будет обновляться в местах где они использованы. При записи в них будет обновляться и разметка и значение атрибута.
+
+Реактивные свойства могут вычислятся из других реактивных свойств и будут автоматически обновляться при изменении исходных:
+```js
+var User = cellx.EventEmitter.extend({
+    constructor: function(name, birthdate) {
+        cellx.define(this, {
+            name: name,
+            birthdate: birthdate,
+
+            // Вычисляемое свойство, при записи в `someUser.birthdate` обновится автоматически.
+            age: function() {
+                return birthdateToAge(this.birthdate);
+            }
+        });
+    }
+});
+
+var someUser = new User('Matroskin', '05/03/1986');
+
+Rionite.Component.extend('user-card', {
+    Static: {
+        // Наблюдаемое и вычисляемое свойства используются в шаблоне.
+        template: `
+            <x-modal shown="{ageLess18}">
+                Привет, {user.name}! Кажется вам ещё нет 18 лет.
+            </x-modal>
+        `
+    },
+
+    initialize: function() {
+        cellx.define(this, {
+            user: someUser,
+
+            // Ещё одно вычисляемое свойство.
+            ageLess18: function() {
+                return this.user.age < 18;
+            }
+        });
+    }
+});
+
+// Вычисляет возраст по дате рождения.
+function birthdateToAge(birthdate) {
+    birthdate = new Date(birthdate);
+    var now = new Date();
+    var age = now.getFullYear() - birthdate.getFullYear();
+    return now.setFullYear(1972) < birthdate.setFullYear(1972) ? age - 1 : age;
+}
+```
+
+Тоже самое в ES.Next синтаксисе с использованием модуля [cellx-decorators]():
+```js
+import { EventEmitter } from 'cellx';
+import { observable, computed } from 'cellx-decorators';
+import { Component, registerComponent } from 'rionite';
+
+class User extends EventEmitter {
+    @observable name = void 0;
+    @observable birthdate = void 0;
+
+    @computed age = function() {
+        return birthdateToAge(this.birthdate);
+    };
+
+    constructor(name, birthdate) {
+        this.name = name;
+        this.birthdate = birthdate;
+    }
+}
+
+let someUser = new User('Matroskin', '05/03/1986');
+
+class UserCard extends Component {
+	static template = `
+        <x-modal shown="{ageLess18}">
+            Привет, {user.name}! Кажется вам ещё нет 18 лет.
+        </x-modal>
+    `;
+
+    static elementIs = 'user-card';
+
+    @observable user = null;
+
+    @computed ageLess18 = function() {
+        return this.user.age < 18;
+    };,
+
+    initialize() {
+        this.user = someUser;
+    }
+}
+
+registerComponent(UserCard);
+```
+
+Выражение биндинга может содержать символ `?` для проверки существования свойства:
+```js
+static template = `{user?.friends?.length}`;
+```
+
+При необходимости более сложных проверок можно создать вычисляемое свойство, как в примере с проверкой возраста выше.
+
+Для управления потоком вычисления в шаблоне используются компоненты `rt-if-then`, `rt-if-else` и `rt-repeat`.
+
+TODO:
+- больше про `rt-if-then`, `rt-if-else` и `rt-repeat` (strip)
+- `|` в селекторе
+- `assets`
+- callbacks и `movedElement`
+- удаление атрибута биндингом
+- component vs element
+
+## Обработка событий элементов
+
+`Rionite` позволяет добавлять обработчики событий элементов в декларативном стиле:
+
+```js
+Rionite.Component.extend('simple-counter', {
+	Static: {
+		template: `
+            <div>{counter}</div>
+            <button rt-click="onButtonClick">counter++</button>
+        `
+	},
+
+    onButtonClick() {
+        this.counter++;
+    }
+});
+```
+
+Можно добавлять обработчики на всплывающие события:
 
 ```js
 return `
-    <div rt-change="_onInputChange">
-        <input type="checkbox">
-        <input type="checkbox">
+    <div>
+        <input type="text">
+        <input type="text">
     </div>
 `;
 ```
 
-Including the event components:
+В том числе на события компонентов:
 
 ```js
 return `
-    <div rt-component-bar="onFooBar">
-        <x-foo rt-component-baz="onFooBaz"></x-foo>
+    <div>
         <x-foo></x-foo>
+        <x-foo rt-component-baz="onFooBaz"></x-foo>
     </div>
 `;
 ```
 
-## Memory control
+## Контроль памяти
 
 ### Component#listenTo
 
-This adds the event handler that will be automatically removed in cleaning (`dispose`) the component.  
-The following two examples are equivalent:
+Добавляет обработчик собития, который будет автоматически снят при очистке (`dispose`) компонента.  
+Следующие два примера равносильны:
 
 ```js
-Rista.Component.extend('my-example', {
+Rionite.Component.extend('x-example', {
+	ready: function() {
+    	this.onDocumentScroll = this.onDocumentScroll.bind(this);
+    },
+
     elementAttached: function() {
-        this.onDocumentScroll = this.onDocumentScroll.bind(this);
         document.addEventListener('scroll', this.onDocumentScroll);
     },
 
@@ -178,15 +390,14 @@ Rista.Component.extend('my-example', {
 ```
 
 ```js
-Rista.Component.extend('my-example', {
+Rionite.Component.extend('x-example', {
     elementAttached: function() {
         this.listenTo(document, 'scroll', this.onDocumentScroll);
     }
 });
 ```
-
-The target can be [EventTarget](https://developer.mozilla.org/en/docs/Web/API/EventTarget), `jQuery/Zepto/...`-collection or `cellx.EventEmitter` (in `Rista` it is available as `rista.EventEmitter`).  
-You can pass an object whose keys will be types of events, and values — handlers:
+ 
+Можно передать объект, ключи которого будут типами событий, а значения — обработчиками:
 
 ```js
 this.listenTo(document, {
@@ -195,20 +406,20 @@ this.listenTo(document, {
 });
 ```
 
-This returns object with method `stop`, when calling which the handler will be removed (if one `listenTo` added several handlers at once, `stop` will remove all of them).
+Возвращает объект с методом `stop`, при вызове которого обработчик будет снят (если один `listenTo` добавил сразу несколько обработчиков, то `stop` снимет их все).
 
 ### Component#setTimeout
 
-This sets a timer that will be automatically removed in cleaning (`dispose`) the component (if it has not worked out yet).  
-The following two examples are equivalent:
+Устанавливает таймер, который будет автоматически снят при очистке (`dispose`) компонента (в случае если он ещё не отработал).  
+Следующие два примера равносильны:
 
 ```js
-Rista.Component.extend('my-example', {
-    _timerId: void 0,
+Rionite.Component.extend('x-example', {
+    _timerId: null,
 
     elementAttached: function() {
         this._timerId = setTimeout(() => {
-            this._timerId = void 0;
+            this._timerId = null;
             this.onTimer();
         }, 10000);
     },
@@ -222,77 +433,63 @@ Rista.Component.extend('my-example', {
 ```
 
 ```js
-Rista.Component.extend('my-example', {
+Rionite.Component.extend('x-example', {
     elementAttached: function() {
         this.setTimeout(this.onTimer, 10000);
     }
 });
 ```
 
-This returns the object with method `clear`, when calling which the timer will be cleaned.
+Возвращает объект с методом `clear`, при вызове которого таймер будет снят.
 
 ### Component#setInterval
 
-Similar to `Component#setTimeout`.
+Аналогично с `Component#setTimeout`.
 
-### Component#registerCallback
+## Передача сигналов между компонентами
 
-Similarly to `Component#listenTo` and `Component#setTimeout` I would like to interrupt the request when cleaning that has created it. But is there any sense to interrupt it using [XMLHTTPRequest#abort](https://developer.mozilla.org/ru/docs/Web/API/XMLHttpRequest#abort())? Actually, no. `abort` does not "catch up" a request already sent in the network and does not stop it, it just cancels its processing on the client, but the complete cancelling is often more harmful, for example, instead of `XMLHttpRequest`, it is used a smart wrapper, which can send the same request, sent by two different components, only one time, or, if the server supports such a function, simply group multiple requests in a single one (to do this, the request is sent not instantaneously, but with a slight delay, allowing to save several requests). If, in this case, you cancel the request using `abort`, the component being cleaned will cancel the requests sent of other components that are still working. That is, in fact, there is no need to cancel the request itself, but only its handler — callback. To do this, the handler is passed through `Component#registerCallback` which saves it in the closure. The function returned by `registerCallback` will trigger the source callback (and will return the result of its call) only if the component is not be cleared until the response.
-
-#### Example
-
-```js
-var BackendProvider = require('../../../Proxy/BackendProvider');
-
-Rista.Component.extend('user-card', {
-    elementAttached: function() {
-        BackendProvider.getUser(this.registerCallback(function(err, user) {
-            //
-        }));
-    }
-});
-```
-
-## Signaling between components
-
-The complex interaction between several components is usually done through the application model, but the simple interaction of components seeing each other directly is generally acceptable and more convenient to do without the use of the model.
+Сложное взаимодействие между несколькими компонентами обычно делается через модель приложения, но простейшее взаимодействие, видящих друг-друга напрямую компонентов, обычно допустимо и удобнее делать без использования модели.
 
 ### Component#emit
 
-This creates a pop-up event on the component that allows you to send the signal from the descendant component to ancestor component. 
+Создаёт всплывающее событие на компоненте, что позволяет отправить сигнал от компонента-потомка к компонентам-предкам.
 
-#### Example
-
-[jsfiddle](http://jsfiddle.net/esb8cx6x/)
+#### Пример
 
 ```js
 <x-parent></x-parent>
 
 <script>
 
-Rista.Component.extend('x-parent', {
+Rionite.Component.extend('x-parent', {
     renderInner: function() {
         return `
-            <x-child data-id="1"></x-child>
-            <x-child data-id="2"></x-child>
+            <x-child child-id="1"></x-child>
+            <x-child child-id="2"></x-child>
         `;
     },
 
     elementAttached: function() {
-        this.listenTo(this, 'foo', this.onFoo);
+        this.listenTo(this, 'foo', this.onChildFoo);
     },
 
-    onFoo: function(evt) {
+    onChildFoo: function(evt) {
         console.log(evt.childId);
     }
 });
 
-Rista.Component.extend('x-child', {
+Rionite.Component.extend('x-child', {
+	Static: {
+    	elementAttributes: {
+        	childId: String
+        }
+    },
+
     elementAttached: function() {
         this.setInterval(function() {
             this.emit({
                 type: 'foo',
-                childId: this.element.dataset.id
+                childId: this.props.childId
             });
         }, 1000);
     }

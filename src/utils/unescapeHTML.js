@@ -1,14 +1,15 @@
-let reLessThan = /&lt;/g;
-let reGreaterThan = /&gt;/g;
-let reQuote = /&quot;/g;
-let reAmpersand = /&amp;/g;
+let reEscapableEntities = /&(?:amp|lt|gt|quot);/g;
+let entityToCharMap = Object.create(null);
+
+entityToCharMap['&amp;'] = '&';
+entityToCharMap['&lt;'] = '<';
+entityToCharMap['&gt;'] = '>';
+entityToCharMap['&quot;'] = '"';
 
 function unescapeHTML(str: string): string {
-	return str
-		.replace(reLessThan, '<')
-		.replace(reGreaterThan, '>')
-		.replace(reQuote, '"')
-		.replace(reAmpersand, '&');
+	return reEscapableEntities.test(str) ? str.replace(reEscapableEntities, entity => {
+		return entityToCharMap[entity];
+	}) : str;
 }
 
 module.exports = unescapeHTML;

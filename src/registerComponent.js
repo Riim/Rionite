@@ -1,40 +1,46 @@
 let { utils: { mixin } } = require('cellx');
+let elementConstructorMap = require('./elementConstructorMap');
 let ElementProtoMixin = require('./ElementProtoMixin');
 
 let createObject = Object.create;
 let getPrototypeOf = Object.getPrototypeOf;
 let hasOwn = Object.prototype.hasOwnProperty;
 
-let inheritedStaticProperties = ['template', 'elementAttributes', 'assets'];
+let inheritedStaticProperties = ['template', 'elementExtends', 'elementAttributes', 'assets'];
 
-function registerComponent(componentClass) {
-	let elementTagName = componentClass.elementTagName;
+function registerComponent(componentConstr) {
+	let elementIs = componentConstr.elementIs;
 
-	if (!elementTagName) {
-		throw new TypeError('"elementTagName" is required');
+	if (!elementIs) {
+		throw new TypeError('Static property "elementIs" is required');
 	}
 
-	let parent;
+	let parentComponentConstr;
 
-	// Babel, в отличии от typescript-а и Component.extend-а, не копирует статические свойства при наследовании,
-	// а так как парочка нам очень нужны, копируем их сами.
 	inheritedStaticProperties.forEach(name => {
-		if (
-			!hasOwn.call(componentClass, name) &&
-				hasOwn.call(parent || (parent = getPrototypeOf(componentClass.prototype).constructor), name)
-		) {
-			componentClass[name] = parent[name];
+		if (!hasOwn.call(componentConstr, name)) {
+			componentConstr[name] = (
+				parentComponentConstr || (parentComponentConstr = getPrototypeOf(componentConstr.prototype).constructor)
+			)[name];
 		}
 	});
 
-	let elementProto = createObject(HTMLElement.prototype);
+	let elementExtends = componentConstr.elementExtends;
+	let parentElementConstr = elementExtends ?
+		elementConstructorMap[elementExtends] ||
+			window[`HTML${ elementExtends.charAt(0).toUpperCase() + elementExtends.slice(1) }Element`] :
+		HTMLElement;
+	let elementProto = createObject(parentElementConstr.prototype);
 
 	mixin(elementProto, ElementProtoMixin);
-	elementProto._ristaComponentConstr = componentClass;
+	elementProto._rioniteComponentConstructor = componentConstr;
 
-	document.registerElement(elementTagName, { prototype: elementProto });
+	elementConstructorMap[elementIs] = document.registerElement(
+		elementIs,
+		elementExtends ? { extends: elementExtends, prototype: elementProto } : { prototype: elementProto }
+	);
 
-	return componentClass;
+	return componentConstr;
 }
 
 module.exports = registerComponent;

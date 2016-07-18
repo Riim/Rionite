@@ -1,41 +1,61 @@
 let { utils: { nextTick } } = require('cellx');
+let defer = require('./utils/defer');
 
 let hasOwn = Object.prototype.hasOwnProperty;
 
 let ElementProtoMixin = {
-	get ristaComponent() {
-		return new this._ristaComponentConstr(this);
+	get rioniteComponent() {
+		return this.$c;
 	},
 
 	get $c() {
-		return this.ristaComponent;
+		return new this._rioniteComponentConstructor(this);
 	},
 
 	attachedCallback() {
-		let component = this.ristaComponent;
+		let component = this.$c;
 
-		component._parentComponent = void 0;
-
-		if (component.parentComponent) {
-			component._elementAttached.set(true);
+		if (component._elementAttached.get()) {
+			if (component._parentComponent === null) {
+				component._parentComponent = void 0;
+				component.elementMoved();
+			} else {
+				component._parentComponent = void 0;
+			}
 		} else {
-			nextTick(() => {
-				component._elementAttached.set(true);
-			});
+			component._parentComponent = void 0;
+
+			if (component.parentComponent) {
+				if (component.ownerComponent) {
+					component._elementAttached.set(true);
+				}
+			} else {
+				nextTick(() => {
+					component._parentComponent = void 0;
+
+					if (!component.parentComponent) {
+						component._elementAttached.set(true);
+					}
+				});
+			}
 		}
 	},
 
 	detachedCallback() {
-		let component = this.ristaComponent;
+		let component = this.$c;
+
 		component._parentComponent = null;
-		component._elementAttached.set(false);
+
+		defer(() => {
+			if (component._parentComponent === null) {
+				component._elementAttached.set(false);
+			}
+		});
 	},
 
 	attributeChangedCallback(name, oldValue, value) {
-		var component = this.ristaComponent;
-
-		if (component.isReady) {
-			let attrs = component.elementAttributes;
+		if (this.$c.isReady) {
+			let attrs = this.$c.elementAttributes;
 			let privateName = '_' + name;
 
 			if (hasOwn.call(attrs, privateName)) {

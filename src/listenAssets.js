@@ -1,16 +1,27 @@
 let hasOwn = Object.prototype.hasOwnProperty;
 
-function listenAssets(component, assets) {
-	for (let name in assets) {
-		if (hasOwn.call(assets, name)) {
-			let asset = name == ':host' ?
-				component :
-				(name == ':element' ? component.element : component[name]);
-			let config = assets[name];
+function listenAssets(component, assetsConfig) {
+	for (let name in assetsConfig) {
+		if (hasOwn.call(assetsConfig, name)) {
+			let asset;
 
-			for (let key in config) {
-				if (hasOwn.call(config, key) && key.length > 3 && key.slice(0, 3) == 'on-') {
-					component.listenTo(asset, key.slice(3), config[key]);
+			if (name == ':component') {
+				asset = component;
+			} else if (name == ':element') {
+				asset = component.element;
+			} else {
+				asset = component[name];
+
+				if (!asset) {
+					throw new TypeError(`Asset "${ name }" is not defined`);
+				}
+			}
+
+			let assetConfig = assetsConfig[name];
+
+			for (let key in assetConfig) {
+				if (hasOwn.call(assetConfig, key) && key.length > 3 && key.slice(0, 3) == 'on-') {
+					component.listenTo(asset, key.slice(3), assetConfig[key]);
 				}
 			}
 		}
