@@ -26,9 +26,11 @@ module.exports = Component.extend('rt-if-then', {
 	_onElementAttachedChange(evt) {
 		if (evt.value) {
 			if (!this.initialized) {
-				this.props.content = document.importNode(this.element.content, true);
+				let props = this.props;
 
-				if (!rePath.test(this.props.if)) {
+				props.content = document.importNode(this.element.content, true);
+
+				if (!rePath.test(props.if)) {
 					throw new SyntaxError('Invalid value of attribute "if"');
 				}
 
@@ -38,7 +40,7 @@ module.exports = Component.extend('rt-if-then', {
 					this._elseMode ?
 						function() { return !getState.call(this); } :
 						function() { return !!getState.call(this); },
-					{ owner: this.ownerComponent }
+					{ owner: props.context }
 				);
 
 				this.initialized = true;

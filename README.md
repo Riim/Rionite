@@ -67,7 +67,7 @@ registerComponent(HelloUser);
 <hello-user name="Matroskin" class="hello-user">Hello, Matroskin!</hello-user>
 ```
 
-Имя тега продублировалось в css-классе элемента, это необходимо для наследования стилей: имя тега элемента у наследуемого компонента будет другим, но оба имени добавятся в css-класс элемента:
+Имя тега продублировалось в css-классе элемента, это необходимо для наследования стилей — имя тега элемента у наследуемого компонента будет другим, но оба имени добавятся в css-класс элемента:
 ```html
 <hello-super-user name="Matroskin" class="hello-user hello-super-user">Hello, Matroskin!</hello-super-user>
 ```
@@ -126,7 +126,7 @@ Rionite.Component.extend('hello-user', {
 <hello-user class="hello-user">Hello, Anonymous!</hello-user>
 ```
 
-Экземпляр компонента тоже будет иметь свойство `elementAttributes`, в нём будет объект со значениями переданных атрибутов, приведёнными к указанному типу.  
+Экземпляр компонента тоже имеет свойство `elementAttributes`, в нём будет объект со значениями переданных атрибутов, приведёнными к указанному типу.  
 Экземпляр так-же будет иметь свойство `props`, которое является теми же атрибутами, но с дополнительным свойством `content`:
 ```js
 this.props = Object.create(this.elementAttributes, {
@@ -193,19 +193,19 @@ Rionite.Component.extend('super-select', {
 Rionite.Component.extend('simple-counter', {
 	Static: {
 		template: `
-            <div>{counter}</div>
-            <button rt-click="onButtonClick">counter++</button>
+            <div>{value}</div>
+            <button rt-click="onButtonClick">value++</button>
         `
 	},
 
     initialize() {
         cellx.define(this, {
-            counter: 0
+            value: 0
         });
     },
 
     onButtonClick() {
-        this.counter++;
+        this.value++;
     }
 });
 
@@ -313,7 +313,7 @@ registerComponent(UserCard);
 static template = `{user?.friends?.length}`;
 ```
 
-При необходимости более сложных проверок можно создать вычисляемое свойство, как в примере с проверкой возраста выше.
+При необходимости более сложной проверки можно создать вычисляемое свойство, как в примере с проверкой возраста выше.
 
 Для управления потоком вычисления в шаблоне используются компоненты `rt-if-then`, `rt-if-else` и `rt-repeat`.
 
@@ -333,13 +333,13 @@ TODO:
 Rionite.Component.extend('simple-counter', {
 	Static: {
 		template: `
-            <div>{counter}</div>
-            <button rt-click="onButtonClick">counter++</button>
+            <div>{value}</div>
+            <button rt-click="onButtonClick">value++</button>
         `
 	},
 
     onButtonClick() {
-        this.counter++;
+        this.value++;
     }
 });
 ```

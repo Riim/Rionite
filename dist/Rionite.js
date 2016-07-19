@@ -1678,9 +1678,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (evt.value) {
 				if (!this.initialized) {
 					(function () {
-						_this.props.content = document.importNode(_this.element.content, true);
+						var props = _this.props;
 
-						if (!rePath.test(_this.props.if)) {
+						props.content = document.importNode(_this.element.content, true);
+
+						if (!rePath.test(props.if)) {
 							throw new SyntaxError('Invalid value of attribute "if"');
 						}
 
@@ -1690,7 +1692,7 @@ return /******/ (function(modules) { // webpackBootstrap
 							return !getState.call(this);
 						} : function () {
 							return !!getState.call(this);
-						}, { owner: _this.ownerComponent });
+						}, { owner: props.context });
 
 						_this.initialized = true;
 					})();
@@ -1993,8 +1995,10 @@ return /******/ (function(modules) { // webpackBootstrap
 				var item = items[--i];
 				var bindings = item.bindings;
 
-				for (var _i = bindings.length; _i;) {
-					bindings[--_i].off();
+				if (bindings) {
+					for (var _i = bindings.length; _i;) {
+						bindings[--_i].off();
+					}
 				}
 
 				var nodes = item.nodes;

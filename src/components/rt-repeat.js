@@ -219,8 +219,10 @@ module.exports = Component.extend('rt-repeat', {
 			let item = items[--i];
 			let bindings = item.bindings;
 
-			for (let i = bindings.length; i;) {
-				bindings[--i].off();
+			if (bindings) {
+				for (let i = bindings.length; i;) {
+					bindings[--i].off();
+				}
 			}
 
 			let nodes = item.nodes;
