@@ -13,7 +13,7 @@ let unescapeHTML = require('./utils/unescapeHTML');
 let isRegExp = require('./utils/isRegExp');
 let pathToJSExpression = require('./utils/pathToJSExpression');
 let compilePath = require('./utils/compilePath');
-let compileContent = require('./utils/compileContent');
+let compileString = require('./utils/compileString');
 let defer = require('./utils/defer');
 let htmlToFragment = require('./utils/htmlToFragment');
 
@@ -38,7 +38,7 @@ let Rionite = module.exports = {
 		isRegExp,
 		pathToJSExpression,
 		compilePath,
-		compileContent,
+		compileString,
 		defer,
 		htmlToFragment
 	}

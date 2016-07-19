@@ -40,11 +40,11 @@ module.exports = Component.extend('rt-repeat', {
 		if (evt.value) {
 			if (!this.initialized) {
 				let props = this.props;
-				let content = props.content = document.importNode(this.element.content, true);
+				let rawContent = props.content = document.importNode(this.element.content, true);
 
 				if (props.strip) {
-					let firstChild = content.firstChild;
-					let lastChild = content.lastChild;
+					let firstChild = rawContent.firstChild;
+					let lastChild = rawContent.lastChild;
 
 					if (firstChild == lastChild) {
 						if (firstChild.nodeType == 3) {
@@ -53,12 +53,12 @@ module.exports = Component.extend('rt-repeat', {
 					} else {
 						if (firstChild.nodeType == 3) {
 							if (!(firstChild.textContent = firstChild.textContent.replace(/^\s+/, ''))) {
-								content.removeChild(firstChild);
+								rawContent.removeChild(firstChild);
 							}
 						}
 						if (lastChild.nodeType == 3) {
 							if (!(lastChild.textContent = lastChild.textContent.replace(/\s+$/, ''))) {
-								content.removeChild(lastChild);
+								rawContent.removeChild(lastChild);
 							}
 						}
 					}
@@ -78,7 +78,7 @@ module.exports = Component.extend('rt-repeat', {
 
 				this._trackBy = props.trackBy;
 
-				this._rawContent = content;
+				this._rawContent = rawContent;
 
 				this._context = props.context;
 

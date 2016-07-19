@@ -38,7 +38,7 @@ let Component = EventEmitter.extend({
 			return registerComponent(createClass(description));
 		},
 
-		template: void 0,
+		template: null,
 
 		elementIs: void 0,
 		elementExtends: void 0,
@@ -188,17 +188,15 @@ let Component = EventEmitter.extend({
 				this.initialized = true;
 			}
 
+			let constr = this.constructor;
+			let rawContent = constr[KEY_RAW_CONTENT];
 			let el = this.element;
 
 			if (this.isReady) {
 				for (let child; (child = el.firstChild);) {
 					el.removeChild(child);
 				}
-
-				this._renderElement();
 			} else {
-				let constr = this.constructor;
-
 				for (let c = constr; ;) {
 					el.classList.add(c.elementIs);
 					c = getPrototypeOf(c.prototype).constructor;
@@ -218,13 +216,32 @@ let Component = EventEmitter.extend({
 					}
 				}
 
-				let content = this.props.content = document.createDocumentFragment();
+				if (constr.template != null) {
+					if (!rawContent) {
+						let template = constr.template;
 
-				for (let child; (child = el.firstChild);) {
-					content.appendChild(child);
+						if (typeof template != 'string') {
+							template = template.render ? template.render(this) : template.call(this, this);
+						}
+
+						rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(
+							template.replace(reClosedCustomElementTag, '<$1$2></$1>')
+						);
+					}
+
+					let inputContent = this.props.content = document.createDocumentFragment();
+
+					for (let child; (child = el.firstChild);) {
+						inputContent.appendChild(child);
+					}
 				}
+			}
 
-				this._renderElement();
+			let content = rawContent && rawContent.cloneNode(true);
+
+			if (content) {
+				this._bindings = bind(content, this);
+				this.element.appendChild(content);
 			}
 
 			if (!this.isReady || this.elementAttached !== elementAttached) {
@@ -253,28 +270,6 @@ let Component = EventEmitter.extend({
 			this._destroyBindings();
 			this.elementDetached();
 		}
-	},
-
-	_renderElement() {
-		let constr = this.constructor;
-		let rawContent = constr[KEY_RAW_CONTENT];
-
-		if (!rawContent) {
-			let template = constr.template || '';
-
-			if (typeof template != 'string') {
-				template = template.render ? template.render(this) : template.call(this, this);
-			}
-
-			rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(
-				template.replace(reClosedCustomElementTag, '<$1$2></$1>')
-			);
-		}
-
-		let content = rawContent.cloneNode(true);
-
-		this._bindings = bind(content, this);
-		this.element.appendChild(content);
 	},
 
 	_destroyBindings() {

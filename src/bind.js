@@ -1,10 +1,10 @@
 let { Cell } = require('cellx');
 let pathPattern = require('./pathPattern');
-let compileContent = require('./utils/compileContent');
+let compileString = require('./utils/compileString');
 
 let reBinding = RegExp(`\\{\\s*(${ pathPattern })\\s*\\}`, 'g');
 
-function bind(content, component, context) {
+function bind(node, component, context) {
 	if (!context) {
 		context = component;
 	}
@@ -15,16 +15,16 @@ function bind(content, component, context) {
 		for (let child = node.firstChild; child; child = child.nextSibling) {
 			switch (child.nodeType) {
 				case 1: {
-					let attributes = child.attributes;
+					let attrs = child.attributes;
 
-					for (let i = attributes.length; i;) {
-						let attr = attributes.item(--i);
+					for (let i = attrs.length; i;) {
+						let attr = attrs.item(--i);
 						let value = attr.value;
 						let splitValue = value.split(reBinding);
 
 						if (splitValue.length > 1) {
 							let name = attr.name;
-							let cell = new Cell(compileContent(splitValue, value), {
+							let cell = new Cell(compileString(splitValue, value), {
 								owner: context,
 								onChange({ value }) {
 									if (value === false || value == null) {
@@ -54,7 +54,9 @@ function bind(content, component, context) {
 						childComponent._parentComponent = void 0;
 						childComponent.props.context = context;
 						childComponent._elementAttached.set(true);
-					} else {
+					}
+
+					if (child.firstChild && (!childComponent || childComponent.constructor.template == null)) {
 						bind_(child);
 					}
 
@@ -65,7 +67,7 @@ function bind(content, component, context) {
 					let splitContent = content.split(reBinding);
 
 					if (splitContent.length > 1) {
-						let cell = new Cell(compileContent(splitContent, content), {
+						let cell = new Cell(compileString(splitContent, content), {
 							owner: context,
 							onChange(evt) {
 								child.textContent = evt.value;
@@ -83,7 +85,7 @@ function bind(content, component, context) {
 		}
 	}
 
-	bind_(content);
+	bind_(node);
 
 	return bindings.length ? bindings : null;
 }

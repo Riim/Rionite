@@ -3,6 +3,8 @@ let Component = require('../Component');
 
 module.exports = Component.extend('rt-content', {
 	Static: {
+		template: '',
+
 		elementAttributes: {
 			select: String
 		}
@@ -10,8 +12,8 @@ module.exports = Component.extend('rt-content', {
 
 	_rawContent: void 0,
 
-	_onElementAttachedChange({ value: attached }) {
-		if (attached) {
+	_onElementAttachedChange(evt) {
+		if (evt.value) {
 			let ownerComponent = this.ownerComponent;
 			let el = this.element;
 			let props = this.props;
@@ -27,14 +29,14 @@ module.exports = Component.extend('rt-content', {
 					inputContent.appendChild(child);
 				}
 
-				let ownerComponentContent = ownerComponent.props.content;
+				let ownerComponentInputContent = ownerComponent.props.content;
 				let selectors = this.elementAttributes.select;
 
 				if (selectors) {
 					selectors = selectors.split('|');
 
 					for (var i = 0, l = selectors.length; i < l; i++) {
-						let selectedElements = ownerComponentContent.querySelectorAll(selectors[i]);
+						let selectedElements = ownerComponentInputContent.querySelectorAll(selectors[i]);
 						let selectedElementCount = selectedElements.length;
 
 						if (selectedElementCount) {
@@ -52,7 +54,9 @@ module.exports = Component.extend('rt-content', {
 						this._rawContent = inputContent;
 					}
 				} else {
-					this._rawContent = ownerComponentContent.firstChild ? ownerComponentContent : inputContent;
+					this._rawContent = ownerComponentInputContent.firstChild ?
+						ownerComponentInputContent :
+						inputContent;
 				}
 
 				this.isReady = true;

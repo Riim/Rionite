@@ -71,7 +71,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var isRegExp = __webpack_require__(7);
 	var pathToJSExpression = __webpack_require__(18);
 	var compilePath = __webpack_require__(19);
-	var compileContent = __webpack_require__(17);
+	var compileString = __webpack_require__(17);
 	var defer = __webpack_require__(14);
 	var htmlToFragment = __webpack_require__(24);
 
@@ -96,7 +96,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			isRegExp: isRegExp,
 			pathToJSExpression: pathToJSExpression,
 			compilePath: compilePath,
-			compileContent: compileContent,
+			compileString: compileString,
 			defer: defer,
 			htmlToFragment: htmlToFragment
 		}
@@ -670,7 +670,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			},
 
 
-			template: void 0,
+			template: null,
 
 			elementIs: void 0,
 			elementExtends: void 0,
@@ -818,17 +818,15 @@ return /******/ (function(modules) { // webpackBootstrap
 					this.initialized = true;
 				}
 
+				var constr = this.constructor;
+				var rawContent = constr[KEY_RAW_CONTENT];
 				var el = this.element;
 
 				if (this.isReady) {
 					for (var child; child = el.firstChild;) {
 						el.removeChild(child);
 					}
-
-					this._renderElement();
 				} else {
-					var constr = this.constructor;
-
 					for (var c = constr;;) {
 						el.classList.add(c.elementIs);
 						c = getPrototypeOf(c.prototype).constructor;
@@ -848,13 +846,30 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					}
 
-					var content = this.props.content = document.createDocumentFragment();
+					if (constr.template != null) {
+						if (!rawContent) {
+							var template = constr.template;
 
-					for (var _child; _child = el.firstChild;) {
-						content.appendChild(_child);
+							if (typeof template != 'string') {
+								template = template.render ? template.render(this) : template.call(this, this);
+							}
+
+							rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(template.replace(reClosedCustomElementTag, '<$1$2></$1>'));
+						}
+
+						var inputContent = this.props.content = document.createDocumentFragment();
+
+						for (var _child; _child = el.firstChild;) {
+							inputContent.appendChild(_child);
+						}
 					}
+				}
 
-					this._renderElement();
+				var content = rawContent && rawContent.cloneNode(true);
+
+				if (content) {
+					this._bindings = bind(content, this);
+					this.element.appendChild(content);
 				}
 
 				if (!this.isReady || this.elementAttached !== elementAttached) {
@@ -883,25 +898,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				this._destroyBindings();
 				this.elementDetached();
 			}
-		},
-		_renderElement: function _renderElement() {
-			var constr = this.constructor;
-			var rawContent = constr[KEY_RAW_CONTENT];
-
-			if (!rawContent) {
-				var template = constr.template || '';
-
-				if (typeof template != 'string') {
-					template = template.render ? template.render(this) : template.call(this, this);
-				}
-
-				rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(template.replace(reClosedCustomElementTag, '<$1$2></$1>'));
-			}
-
-			var content = rawContent.cloneNode(true);
-
-			this._bindings = bind(content, this);
-			this.element.appendChild(content);
 		},
 		_destroyBindings: function _destroyBindings() {
 			var bindings = this._bindings;
@@ -1192,11 +1188,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Cell = _require.Cell;
 
 	var pathPattern = __webpack_require__(16);
-	var compileContent = __webpack_require__(17);
+	var compileString = __webpack_require__(17);
 
 	var reBinding = RegExp('\\{\\s*(' + pathPattern + ')\\s*\\}', 'g');
 
-	function bind(content, component, context) {
+	function bind(node, component, context) {
 		if (!context) {
 			context = component;
 		}
@@ -1208,17 +1204,17 @@ return /******/ (function(modules) { // webpackBootstrap
 				switch (child.nodeType) {
 					case 1:
 						{
-							var attributes = child.attributes;
+							var attrs = child.attributes;
 
-							for (var i = attributes.length; i;) {
-								var attr = attributes.item(--i);
+							for (var i = attrs.length; i;) {
+								var attr = attrs.item(--i);
 								var value = attr.value;
 								var splitValue = value.split(reBinding);
 
 								if (splitValue.length > 1) {
 									(function () {
 										var name = attr.name;
-										var cell = new Cell(compileContent(splitValue, value), {
+										var cell = new Cell(compileString(splitValue, value), {
 											owner: context,
 											onChange: function onChange(_ref) {
 												var value = _ref.value;
@@ -1251,7 +1247,9 @@ return /******/ (function(modules) { // webpackBootstrap
 								childComponent._parentComponent = void 0;
 								childComponent.props.context = context;
 								childComponent._elementAttached.set(true);
-							} else {
+							}
+
+							if (child.firstChild && (!childComponent || childComponent.constructor.template == null)) {
 								bind_(child);
 							}
 
@@ -1259,11 +1257,11 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					case 3:
 						{
-							var _content = child.textContent;
-							var splitContent = _content.split(reBinding);
+							var content = child.textContent;
+							var splitContent = content.split(reBinding);
 
 							if (splitContent.length > 1) {
-								var _cell = new Cell(compileContent(splitContent, _content), {
+								var _cell = new Cell(compileString(splitContent, content), {
 									owner: context,
 									onChange: function onChange(evt) {
 										child.textContent = evt.value;
@@ -1285,7 +1283,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		}
 
-		bind_(content);
+		bind_(node);
 
 		return bindings.length ? bindings : null;
 	}
@@ -1318,21 +1316,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var cache = Object.create(null);
 
-	function compileContent(splitContent, content) {
-		if (cache[content]) {
-			return cache[content];
+	function compileString(splitString, str) {
+		if (cache[str]) {
+			return cache[str];
 		}
 
-		if (splitContent.length == 3 && splitContent[0] == '' && splitContent[2] == '') {
-			return cache[content] = compilePath(splitContent[1]);
+		if (splitString.length == 3 && splitString[0] == '' && splitString[2] == '') {
+			return cache[str] = compilePath(splitString[1]);
 		}
 
 		var tempVar = false;
-		var jsExpr = Array(splitContent.length);
+		var jsExpr = Array(splitString.length);
 
-		for (var i = 0, l = splitContent.length; i < l; i++) {
+		for (var i = 0, l = splitString.length; i < l; i++) {
 			if (i % 2) {
-				var pathJSExpr = pathToJSExpression(splitContent[i]);
+				var pathJSExpr = pathToJSExpression(splitString[i]);
 
 				if (pathJSExpr[1]) {
 					tempVar = true;
@@ -1340,16 +1338,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				jsExpr[i] = '\', ' + pathJSExpr[0] + ', \'';
 			} else {
-				jsExpr[i] = reEscapableChars.test(splitContent[i]) ? splitContent[i].replace(reEscapableChars, function (chr) {
+				jsExpr[i] = reEscapableChars.test(splitString[i]) ? splitString[i].replace(reEscapableChars, function (chr) {
 					return charToRegExpMap[chr];
-				}) : splitContent[i];
+				}) : splitString[i];
 			}
 		}
 
-		return cache[content] = Function((tempVar ? 'var temp; ' : '') + 'return [\'' + jsExpr.join('') + '\'].join(\'\');');
+		return cache[str] = Function((tempVar ? 'var temp; ' : '') + 'return [\'' + jsExpr.join('') + '\'].join(\'\');');
 	}
 
-	module.exports = compileContent;
+	module.exports = compileString;
 
 /***/ },
 /* 18 */
@@ -1572,6 +1570,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = Component.extend('rt-content', {
 		Static: {
+			template: '',
+
 			elementAttributes: {
 				select: String
 			}
@@ -1579,10 +1579,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		_rawContent: void 0,
 
-		_onElementAttachedChange: function _onElementAttachedChange(_ref) {
-			var attached = _ref.value;
-
-			if (attached) {
+		_onElementAttachedChange: function _onElementAttachedChange(evt) {
+			if (evt.value) {
 				var ownerComponent = this.ownerComponent;
 				var el = this.element;
 				var props = this.props;
@@ -1598,14 +1596,14 @@ return /******/ (function(modules) { // webpackBootstrap
 						inputContent.appendChild(_child);
 					}
 
-					var ownerComponentContent = ownerComponent.props.content;
+					var ownerComponentInputContent = ownerComponent.props.content;
 					var selectors = this.elementAttributes.select;
 
 					if (selectors) {
 						selectors = selectors.split('|');
 
 						for (var i = 0, l = selectors.length; i < l; i++) {
-							var selectedElements = ownerComponentContent.querySelectorAll(selectors[i]);
+							var selectedElements = ownerComponentInputContent.querySelectorAll(selectors[i]);
 							var selectedElementCount = selectedElements.length;
 
 							if (selectedElementCount) {
@@ -1623,7 +1621,7 @@ return /******/ (function(modules) { // webpackBootstrap
 							this._rawContent = inputContent;
 						}
 					} else {
-						this._rawContent = ownerComponentContent.firstChild ? ownerComponentContent : inputContent;
+						this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
 					}
 
 					this.isReady = true;
@@ -1819,11 +1817,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (evt.value) {
 				if (!this.initialized) {
 					var props = this.props;
-					var content = props.content = document.importNode(this.element.content, true);
+					var rawContent = props.content = document.importNode(this.element.content, true);
 
 					if (props.strip) {
-						var firstChild = content.firstChild;
-						var lastChild = content.lastChild;
+						var firstChild = rawContent.firstChild;
+						var lastChild = rawContent.lastChild;
 
 						if (firstChild == lastChild) {
 							if (firstChild.nodeType == 3) {
@@ -1832,12 +1830,12 @@ return /******/ (function(modules) { // webpackBootstrap
 						} else {
 							if (firstChild.nodeType == 3) {
 								if (!(firstChild.textContent = firstChild.textContent.replace(/^\s+/, ''))) {
-									content.removeChild(firstChild);
+									rawContent.removeChild(firstChild);
 								}
 							}
 							if (lastChild.nodeType == 3) {
 								if (!(lastChild.textContent = lastChild.textContent.replace(/\s+$/, ''))) {
-									content.removeChild(lastChild);
+									rawContent.removeChild(lastChild);
 								}
 							}
 						}
@@ -1857,7 +1855,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 					this._trackBy = props.trackBy;
 
-					this._rawContent = content;
+					this._rawContent = rawContent;
 
 					this._context = props.context;
 
