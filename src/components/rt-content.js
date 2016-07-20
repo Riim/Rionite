@@ -1,5 +1,9 @@
+let { js: { Symbol } } = require('cellx');
 let bind = require('../bind');
 let Component = require('../Component');
+let templateTagSupported = require('../templateTagSupported').templateTagSupported;
+
+let KEY_TEMPLATES_FIXED = Symbol('templatesFixed');
 
 module.exports = Component.extend('rt-content', {
 	Static: {
@@ -30,27 +34,29 @@ module.exports = Component.extend('rt-content', {
 				}
 
 				let ownerComponentInputContent = ownerComponent.props.content;
-				let selectors = this.elementAttributes.select;
+				let selector = this.elementAttributes.select;
 
-				if (selectors) {
-					selectors = selectors.split('|');
+				if (selector) {
+					if (!templateTagSupported && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
+						let templates = ownerComponentInputContent.querySelectorAll('template');
 
-					for (var i = 0, l = selectors.length; i < l; i++) {
-						let selectedElements = ownerComponentInputContent.querySelectorAll(selectors[i]);
-						let selectedElementCount = selectedElements.length;
-
-						if (selectedElementCount) {
-							let rawContent = this._rawContent = document.createDocumentFragment();
-
-							for (let i = 0; i < selectedElementCount; i++) {
-								rawContent.appendChild(selectedElements[i].cloneNode(true));
-							}
-
-							break;
+						for (let i = templates.length; i;) {
+							templates[--i].content;
 						}
+
+						ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
 					}
 
-					if (!this._rawContent) {
+					let selectedElements = ownerComponentInputContent.querySelectorAll(selector);
+					let selectedElementCount = selectedElements.length;
+
+					if (selectedElementCount) {
+						let rawContent = this._rawContent = document.createDocumentFragment();
+
+						for (let i = 0; i < selectedElementCount; i++) {
+							rawContent.appendChild(selectedElements[i].cloneNode(true));
+						}
+					} else {
 						this._rawContent = inputContent;
 					}
 				} else {

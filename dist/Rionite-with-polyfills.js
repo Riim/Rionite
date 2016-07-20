@@ -794,9 +794,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Component = __webpack_require__(10);
 	var registerComponent = __webpack_require__(11);
 	var RtContent = __webpack_require__(25);
-	var RtIfThen = __webpack_require__(26);
-	var RtIfElse = __webpack_require__(27);
-	var RtRepeat = __webpack_require__(28);
+	var RtIfThen = __webpack_require__(27);
+	var RtIfElse = __webpack_require__(28);
+	var RtRepeat = __webpack_require__(29);
 	var camelize = __webpack_require__(8);
 	var hyphenize = __webpack_require__(9);
 	var escapeHTML = __webpack_require__(5);
@@ -1130,7 +1130,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var EventEmitter = _require.EventEmitter;
 	var Cell = _require.Cell;
 
-	var typeHandlers = __webpack_require__(4);
+	var attributeTypeHandlers = __webpack_require__(4);
 	var camelize = __webpack_require__(8);
 	var hyphenize = __webpack_require__(9);
 
@@ -1149,7 +1149,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var _loop = function _loop(name) {
 				var defaultValue = attributesConfig[name];
 				var type = typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue);
-				var handlers = typeHandlers.get(type == 'function' ? defaultValue : type);
+				var handlers = attributeTypeHandlers.get(type == 'function' ? defaultValue : type);
 
 				if (!handlers) {
 					throw new TypeError('Unsupported attribute type');
@@ -1160,7 +1160,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				var attrValue = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new Cell(el.getAttribute(hyphenizedName), {
 					merge: function merge(value, oldValue) {
-						return oldValue && value === oldValue[0] ? oldValue : [value, handlers[0](value, defaultValue, component)];
+						return oldValue && value === oldValue[0] ? oldValue : [value, handlers[0](value, defaultValue)];
 					},
 					onChange: function onChange(evt) {
 						if (component.isReady) {
@@ -1242,12 +1242,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		return value !== null ? value : defaultValue;
 	}, function (value) {
 		return value !== void 0 ? String(value) : null;
-	}]], [Object, [function (value, defaultValue, component) {
-		return value !== null ? Object(Function('return ' + unescapeHTML(value) + ';').call(component)) : void 0;
+	}]], [Object, [function (value) {
+		return value !== null ? Object(Function('return ' + unescapeHTML(value) + ';')()) : void 0;
 	}, function (value) {
 		return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
-	}]], ['object', [function (value, defaultValue, component) {
-		return value !== null ? Object(Function('return ' + unescapeHTML(value) + ';').call(component)) : defaultValue;
+	}]], ['object', [function (value, defaultValue) {
+		return value !== null ? Object(Function('return ' + unescapeHTML(value) + ';')()) : defaultValue;
 	}, function (value) {
 		return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
 	}]]]);
@@ -2298,8 +2298,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var _require = __webpack_require__(2);
+
+	var _Symbol = _require.js.Symbol;
+
 	var bind = __webpack_require__(15);
 	var Component = __webpack_require__(10);
+	var templateTagSupported = __webpack_require__(26).templateTagSupported;
+
+	var KEY_TEMPLATES_FIXED = _Symbol('templatesFixed');
 
 	module.exports = Component.extend('rt-content', {
 		Static: {
@@ -2330,27 +2337,29 @@ return /******/ (function(modules) { // webpackBootstrap
 					}
 
 					var ownerComponentInputContent = ownerComponent.props.content;
-					var selectors = this.elementAttributes.select;
+					var selector = this.elementAttributes.select;
 
-					if (selectors) {
-						selectors = selectors.split('|');
+					if (selector) {
+						if (!templateTagSupported && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
+							var templates = ownerComponentInputContent.querySelectorAll('template');
 
-						for (var i = 0, l = selectors.length; i < l; i++) {
-							var selectedElements = ownerComponentInputContent.querySelectorAll(selectors[i]);
-							var selectedElementCount = selectedElements.length;
-
-							if (selectedElementCount) {
-								var rawContent = this._rawContent = document.createDocumentFragment();
-
-								for (var _i = 0; _i < selectedElementCount; _i++) {
-									rawContent.appendChild(selectedElements[_i].cloneNode(true));
-								}
-
-								break;
+							for (var i = templates.length; i;) {
+								templates[--i].content;
 							}
+
+							ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
 						}
 
-						if (!this._rawContent) {
+						var selectedElements = ownerComponentInputContent.querySelectorAll(selector);
+						var selectedElementCount = selectedElements.length;
+
+						if (selectedElementCount) {
+							var rawContent = this._rawContent = document.createDocumentFragment();
+
+							for (var _i = 0; _i < selectedElementCount; _i++) {
+								rawContent.appendChild(selectedElements[_i].cloneNode(true));
+							}
+						} else {
 							this._rawContent = inputContent;
 						}
 					} else {
@@ -2373,6 +2382,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 26 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var div = document.createElement('div');
+	div.innerHTML = '<template>1</template>';
+
+	var template = div.firstChild;
+
+	exports.templateTagSupported = !template.firstChild;
+
+/***/ },
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2483,12 +2505,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var RtIfThen = __webpack_require__(26);
+	var RtIfThen = __webpack_require__(27);
 
 	module.exports = RtIfThen.extend('rt-if-else', {
 		Static: {
@@ -2499,7 +2521,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2513,7 +2535,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var bind = __webpack_require__(15);
 	var Component = __webpack_require__(10);
-	var namePattern = __webpack_require__(29);
+	var namePattern = __webpack_require__(30);
 	var pathPattern = __webpack_require__(16);
 	var compilePath = __webpack_require__(19);
 
@@ -2749,7 +2771,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	'use strict';

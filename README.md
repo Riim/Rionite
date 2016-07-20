@@ -319,11 +319,10 @@ static template = `{user?.friends?.length}`;
 
 TODO:
 - больше про `rt-if-then`, `rt-if-else` и `rt-repeat` (strip)
-- `|` в селекторе
-- `assets`
 - callbacks и `movedElement`
 - удаление атрибута биндингом
 - component vs element
+- `assets`
 
 ## Обработка событий элементов
 

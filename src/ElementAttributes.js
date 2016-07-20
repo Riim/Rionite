@@ -1,5 +1,5 @@
 let { EventEmitter, Cell } = require('cellx');
-let typeHandlers = require('./typeHandlers');
+let attributeTypeHandlers = require('./attributeTypeHandlers');
 let camelize = require('./utils/camelize');
 let hyphenize = require('./utils/hyphenize');
 
@@ -16,7 +16,7 @@ let ElementAttributes = EventEmitter.extend({
 		for (let name in attributesConfig) {
 			let defaultValue = attributesConfig[name];
 			let type = typeof defaultValue;
-			let handlers = typeHandlers.get(type == 'function' ? defaultValue : type);
+			let handlers = attributeTypeHandlers.get(type == 'function' ? defaultValue : type);
 
 			if (!handlers) {
 				throw new TypeError('Unsupported attribute type');
@@ -29,9 +29,7 @@ let ElementAttributes = EventEmitter.extend({
 				el.getAttribute(hyphenizedName),
 				{
 					merge(value, oldValue) {
-						return oldValue && value === oldValue[0] ?
-							oldValue :
-							[value, handlers[0](value, defaultValue, component)];
+						return oldValue && value === oldValue[0] ? oldValue : [value, handlers[0](value, defaultValue)];
 					},
 
 					onChange(evt) {
