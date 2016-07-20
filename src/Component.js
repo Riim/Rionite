@@ -34,7 +34,29 @@ let Component = EventEmitter.extend({
 	Static: {
 		extend(elementIs, description) {
 			description.Extends = this;
-			(description.Static || (description.Static = {})).elementIs = elementIs;
+
+			let Static = description.Static || (description.Static = {});
+
+			Static.elementIs = elementIs;
+
+			let elementAttributes = Static.elementAttributes;
+			let props = Static.props;
+
+			if (props) {
+				if (props.content) {
+					throw new TypeError('It is not necessary to declare property "content"');
+				}
+				if (props.context) {
+					throw new TypeError('It is not necessary to declare property "context"');
+				}
+
+				if (!elementAttributes) {
+					Static.elementAttributes = props;
+				}
+			} else if (elementAttributes) {
+				Static.props = elementAttributes;
+			}
+
 			return registerComponent(createClass(description));
 		},
 
@@ -44,6 +66,7 @@ let Component = EventEmitter.extend({
 		elementExtends: void 0,
 
 		elementAttributes: null,
+		props: null,
 
 		assets: null
 	},

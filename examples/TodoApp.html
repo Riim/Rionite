@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<style>
+
+todo-view {
+	display: block;
+}
+
+.todo-view__cb-done:checked + .todo-view__text {
+	text-decoration: line-through;
+}
+
+	</style>
+</head>
+<body>
+
+<todo-app></todo-app>
+
+<script src="../node_modules/cellx/dist/cellx.js"></script>
+<script src="../dist/Rionite-with-polyfills.js"></script>
+<script>
+
+var Todo = cellx.EventEmitter.extend({
+	constructor: function Todo(text, done) {
+		cellx.define(this, {
+			text: text,
+			done: !!done
+		});
+	}
+});
+
+var todos = new Rionite.KeyedList([
+	new Todo('Primum', true),
+	new Todo('Secundo'),
+	new Todo('Tertium')
+]);
+
+Rionite.Component.extend('todo-view', {
+	Static: {
+		template: `
+			<input class="todo-view__cb-done" type="checkbox" checked="{todo.done}" rt-change="onCbDoneChange">
+			<span class="todo-view__text">{todo.text}</span>
+			<button rt-click="onBtnRemoveClick">remove</button>
+		`,
+
+		props: {
+			todoId: String
+		}
+	},
+
+	initialize: function() {
+		this.todo = todos.get(this.props.todoId);
+	},
+
+	onCbDoneChange: function(evt) {
+		this.todo.done = evt.target.checked;
+	},
+
+	onBtnRemoveClick: function() {
+		todos.remove(this.todo);
+	}
+});
+
+Rionite.Component.extend('todo-app', {
+	Static: {
+		template: function() {
+			return `
+				<input class="todo-app__tf-new-todo">
+				<button rt-click="onBtnAddClick">Add #{nextNumber}</button>
+				<div>all: {todos.length} done: {doneTodos.length}</div>
+				<template is="rt-repeat" for="todo of todos">
+					<todo-view todo-id="{todo.id}"/>
+				</template>
+			`;
+		},
+
+		assets: {
+			tfNewTodo: {}
+		}
+	},
+
+	initialize() {
+		cellx.define(this, {
+			todos: todos,
+
+			doneTodos: function() {
+				return this.todos.filter(function(todo) {
+					return todo.done;
+				});
+			},
+
+			nextNumber: function() {
+				return this.todos.length + 1;
+			}
+		});
+	},
+
+	onBtnAddClick() {
+		var tfNewTodo = this.tfNewTodo;
+		todos.add(new Todo(tfNewTodo.value));
+		tfNewTodo.value = '';
+	}
+});
+
+</script>
+
+</body>
+</html>

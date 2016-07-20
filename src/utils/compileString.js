@@ -10,35 +10,37 @@ charToRegExpMap['\n'] = '\\n';
 
 let cache = Object.create(null);
 
-function compileString(splitString: Array<string>, str: string): Function {
+function compileString(substrings: Array<string>, str: string): Function {
 	if (cache[str]) {
 		return cache[str];
 	}
 
-	if (splitString.length == 3 && splitString[0] == '' && splitString[2] == '') {
-		return (cache[str] = compilePath(splitString[1]));
+	if (substrings.length == 3 && substrings[0] == '' && substrings[2] == '') {
+		return (cache[str] = compilePath(substrings[1]));
 	}
 
 	let tempVar = false;
-	let jsExpr = Array(splitString.length);
+	let jsExpr = [];
 
-	for (let i = 0, l = splitString.length; i < l; i++) {
+	for (let i = 0, l = substrings.length; i < l; i++) {
+		let substr = substrings[i];
+
 		if (i % 2) {
-			let pathJSExpr = pathToJSExpression(splitString[i]);
+			let pathJSExpr = pathToJSExpression(substr);
 
 			if (pathJSExpr[1]) {
 				tempVar = true;
 			}
 
-			jsExpr[i] = `', ${ pathJSExpr[0] }, '`;
-		} else {
-			jsExpr[i] = reEscapableChars.test(splitString[i]) ? splitString[i].replace(reEscapableChars, chr => {
-				return charToRegExpMap[chr];
-			}) : splitString[i];
+			jsExpr.push(pathJSExpr[0]);
+		} else if (substr) {
+			jsExpr.push(`'${
+				reEscapableChars.test(substr) ? substr.replace(reEscapableChars, chr => charToRegExpMap[chr]) : substr
+			}'`);
 		}
 	}
 
-	return (cache[str] = Function(`${ tempVar ? 'var temp; ' : '' }return ['${ jsExpr.join('') }'].join('');`));
+	return (cache[str] = Function(`${ tempVar ? 'var temp; ' : '' }return [${ jsExpr.join(', ') }].join('');`));
 }
 
 module.exports = compileString;

@@ -60,10 +60,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ElementAttributes = __webpack_require__(3);
 	var Component = __webpack_require__(10);
 	var registerComponent = __webpack_require__(11);
-	var RtContent = __webpack_require__(25);
-	var RtIfThen = __webpack_require__(27);
-	var RtIfElse = __webpack_require__(28);
-	var RtRepeat = __webpack_require__(29);
+	var KeyedList = __webpack_require__(25);
+	var RtContent = __webpack_require__(26);
+	var RtIfThen = __webpack_require__(28);
+	var RtIfElse = __webpack_require__(29);
+	var RtRepeat = __webpack_require__(30);
 	var camelize = __webpack_require__(8);
 	var hyphenize = __webpack_require__(9);
 	var escapeHTML = __webpack_require__(5);
@@ -80,6 +81,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		ElementAttributes: ElementAttributes,
 		Component: Component,
 		registerComponent: registerComponent,
+		KeyedList: KeyedList,
 
 		components: {
 			RtContent: RtContent,
@@ -665,7 +667,29 @@ return /******/ (function(modules) { // webpackBootstrap
 		Static: {
 			extend: function extend(elementIs, description) {
 				description.Extends = this;
-				(description.Static || (description.Static = {})).elementIs = elementIs;
+
+				var Static = description.Static || (description.Static = {});
+
+				Static.elementIs = elementIs;
+
+				var elementAttributes = Static.elementAttributes;
+				var props = Static.props;
+
+				if (props) {
+					if (props.content) {
+						throw new TypeError('It is not necessary to declare property "content"');
+					}
+					if (props.context) {
+						throw new TypeError('It is not necessary to declare property "context"');
+					}
+
+					if (!elementAttributes) {
+						Static.elementAttributes = props;
+					}
+				} else if (elementAttributes) {
+					Static.props = elementAttributes;
+				}
+
 				return registerComponent(createClass(description));
 			},
 
@@ -676,6 +700,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			elementExtends: void 0,
 
 			elementAttributes: null,
+			props: null,
 
 			assets: null
 		},
@@ -1316,35 +1341,37 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var cache = Object.create(null);
 
-	function compileString(splitString, str) {
+	function compileString(substrings, str) {
 		if (cache[str]) {
 			return cache[str];
 		}
 
-		if (splitString.length == 3 && splitString[0] == '' && splitString[2] == '') {
-			return cache[str] = compilePath(splitString[1]);
+		if (substrings.length == 3 && substrings[0] == '' && substrings[2] == '') {
+			return cache[str] = compilePath(substrings[1]);
 		}
 
 		var tempVar = false;
-		var jsExpr = Array(splitString.length);
+		var jsExpr = [];
 
-		for (var i = 0, l = splitString.length; i < l; i++) {
+		for (var i = 0, l = substrings.length; i < l; i++) {
+			var substr = substrings[i];
+
 			if (i % 2) {
-				var pathJSExpr = pathToJSExpression(splitString[i]);
+				var pathJSExpr = pathToJSExpression(substr);
 
 				if (pathJSExpr[1]) {
 					tempVar = true;
 				}
 
-				jsExpr[i] = '\', ' + pathJSExpr[0] + ', \'';
-			} else {
-				jsExpr[i] = reEscapableChars.test(splitString[i]) ? splitString[i].replace(reEscapableChars, function (chr) {
+				jsExpr.push(pathJSExpr[0]);
+			} else if (substr) {
+				jsExpr.push('\'' + (reEscapableChars.test(substr) ? substr.replace(reEscapableChars, function (chr) {
 					return charToRegExpMap[chr];
-				}) : splitString[i];
+				}) : substr) + '\'');
 			}
 		}
 
-		return cache[str] = Function((tempVar ? 'var temp; ' : '') + 'return [\'' + jsExpr.join('') + '\'].join(\'\');');
+		return cache[str] = Function((tempVar ? 'var temp; ' : '') + 'return [' + jsExpr.join(', ') + '].join(\'\');');
 	}
 
 	module.exports = compileString;
@@ -1567,11 +1594,177 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _require = __webpack_require__(2);
 
+	var ObservableList = _require.ObservableList;
+	var nextUID = _require.utils.nextUID;
+	var _ObservableList$proto = ObservableList.prototype;
+	var _registerValue2 = _ObservableList$proto._registerValue;
+	var _unregisterValue2 = _ObservableList$proto._unregisterValue;
+	var _get = _ObservableList$proto.get;
+	var _set = _ObservableList$proto.set;
+	var _setRange = _ObservableList$proto.setRange;
+	var _add = _ObservableList$proto.add;
+	var _addRange2 = _ObservableList$proto._addRange;
+	var _insert = _ObservableList$proto.insert;
+	var _insertRange = _ObservableList$proto.insertRange;
+
+
+	var createObject = Object.create;
+	var defineProperty = Object.defineProperty;
+
+	/**
+	 * @class Rionite.KeyedList
+	 * @extends {cellx.ObservableList}
+	 *
+	 * @typesign new KeyedList(items?: Array|cellx.ObservableList, opts?: {
+	 *     adoptsItemChanges?: boolean,
+	 *     comparator?: (a, b) -> int,
+	 *     sorted?: boolean,
+	 *     keyName?: string
+	 * }) -> Rionite.KeyedList;
+	 */
+	var KeyedList = ObservableList.extend({
+		constructor: function KeyedList(items, opts) {
+			this._itemsByKey = createObject(null);
+			this._keyName = opts && opts.keyName || 'id';
+
+			ObservableList.call(this, items, opts);
+		},
+
+		/**
+	  * @override
+	  * @typesign (value: Object);
+	  */
+		_registerValue: function _registerValue(value) {
+			this._itemsByKey[value[this._keyName]] = value;
+			_registerValue2.call(this, value);
+		},
+
+
+		/**
+	  * @override
+	  * @typesign (value: Object);
+	  */
+		_unregisterValue: function _unregisterValue(value) {
+			delete this._itemsByKey[value[this._keyName]];
+			_unregisterValue2.call(this, value);
+		},
+
+
+		/**
+	  * @typesign (values: Array);
+	  */
+		_checkValues: function _checkValues(values) {
+			for (var i = 0, l = values.length; i < l; i++) {
+				this._checkValue(values[i]);
+			}
+		},
+
+
+		/**
+	  * @typesign (value);
+	  */
+		_checkValue: function _checkValue(value) {
+			if (value !== Object(value)) {
+				throw new TypeError('Value must be an object');
+			}
+
+			var key = value[this._keyName];
+
+			if (key == null) {
+				do {
+					key = nextUID();
+				} while (this._itemsByKey[key]);
+
+				defineProperty(value, this._keyName, {
+					configurable: false,
+					enumerable: false,
+					writable: false,
+					value: key
+				});
+			} else if (this._itemsByKey[key]) {
+				throw new TypeError('Key of value must be unique');
+			}
+		},
+
+
+		/**
+	  * @override
+	  * @typesign (key: int|string) -> *;
+	  */
+		get: function get(key) {
+			return typeof key == 'string' ? this._itemsByKey[key] : _get.call(this, key);
+		},
+
+
+		/**
+	  * @override
+	  */
+		set: function set(index, value) {
+			this._checkValue(value);
+			return _set.call(this, index, value);
+		},
+
+
+		/**
+	  * @override
+	  */
+		setRange: function setRange(index, values) {
+			this._checkValues(values);
+			return _setRange.call(this, index, values);
+		},
+
+
+		/**
+	  * @override
+	  */
+		add: function add(item) {
+			this._checkValue(item);
+			return _add.call(this, item);
+		},
+
+
+		/**
+	  * @override
+	  */
+		_addRange: function _addRange(items) {
+			this._checkValues(items);
+			_addRange2.call(this, items);
+		},
+
+
+		/**
+	  * @override
+	  */
+		insert: function insert(index, item) {
+			this._checkValue(item);
+			return _insert.call(this, index, item);
+		},
+
+
+		/**
+	  * @override
+	  */
+		insertRange: function insertRange(index, items) {
+			this._checkValues(items);
+			return _insertRange.call(this, index, items);
+		}
+	});
+
+	module.exports = KeyedList;
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _require = __webpack_require__(2);
+
 	var _Symbol = _require.js.Symbol;
 
 	var bind = __webpack_require__(15);
 	var Component = __webpack_require__(10);
-	var templateTagSupported = __webpack_require__(26).templateTagSupported;
+	var templateTagSupported = __webpack_require__(27).templateTagSupported;
 
 	var KEY_TEMPLATES_FIXED = _Symbol('templatesFixed');
 
@@ -1648,7 +1841,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1661,7 +1854,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.templateTagSupported = !template.firstChild;
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1772,12 +1965,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var RtIfThen = __webpack_require__(27);
+	var RtIfThen = __webpack_require__(28);
 
 	module.exports = RtIfThen.extend('rt-if-else', {
 		Static: {
@@ -1788,7 +1981,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1802,7 +1995,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var bind = __webpack_require__(15);
 	var Component = __webpack_require__(10);
-	var namePattern = __webpack_require__(30);
+	var namePattern = __webpack_require__(31);
 	var pathPattern = __webpack_require__(16);
 	var compilePath = __webpack_require__(19);
 
@@ -2038,7 +2231,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports) {
 
 	'use strict';

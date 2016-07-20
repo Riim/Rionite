@@ -2,6 +2,7 @@ let DisposableMixin = require('./DisposableMixin');
 let ElementAttributes = require('./ElementAttributes');
 let Component = require('./Component');
 let registerComponent = require('./registerComponent');
+let KeyedList = require('./KeyedList');
 let RtContent = require('./components/rt-content');
 let RtIfThen = require('./components/rt-if-then');
 let RtIfElse = require('./components/rt-if-else');
@@ -22,6 +23,7 @@ let Rionite = module.exports = {
 	ElementAttributes,
 	Component,
 	registerComponent,
+	KeyedList,
 
 	components: {
 		RtContent,
