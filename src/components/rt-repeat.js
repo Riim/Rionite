@@ -30,17 +30,31 @@ module.exports = Component.extend('rt-repeat', {
 
 	_trackBy: void 0,
 
+	_lastNode: null,
+
 	_rawContent: null,
 
 	_context: null,
-
-	_lastNode: null,
 
 	_onElementAttachedChange(evt) {
 		if (evt.value) {
 			if (!this.initialized) {
 				let props = this.props;
-				let rawContent = props.content = document.importNode(this.element.content, true);
+				let forAttrValue = props.for.match(reForAttributeValue);
+
+				if (!forAttrValue) {
+					throw new SyntaxError('Invalid value of attribute "for"');
+				}
+
+				this._itemName = forAttrValue[1];
+
+				this._list = new Cell(compilePath(forAttrValue[2]), { owner: props.context });
+
+				this._itemMap = new Map();
+
+				this._trackBy = props.trackBy;
+
+				let rawContent = this._rawContent = document.importNode(this.element.content, true);
 
 				if (props.strip) {
 					let firstChild = rawContent.firstChild;
@@ -64,28 +78,12 @@ module.exports = Component.extend('rt-repeat', {
 					}
 				}
 
-				let forAttrValue = props.for.match(reForAttributeValue);
-
-				if (!forAttrValue) {
-					throw new SyntaxError('Invalid value of attribute "for"');
-				}
-
-				this._itemName = forAttrValue[1];
-
-				this._list = new Cell(compilePath(forAttrValue[2]), { owner: props.context });
-
-				this._itemMap = new Map();
-
-				this._trackBy = props.trackBy;
-
-				this._rawContent = rawContent;
-
 				this._context = props.context;
 
 				this.initialized = true;
 			}
 
-			this._renderElement();
+			this._render();
 
 			this._list.on('change', this._onListChange, this);
 		} else {
@@ -95,10 +93,10 @@ module.exports = Component.extend('rt-repeat', {
 	},
 
 	_onListChange() {
-		this._renderElement();
+		this._render();
 	},
 
-	_renderElement() {
+	_render() {
 		let oldItemMap = this._oldItemMap = this._itemMap;
 		this._itemMap = new Map();
 
@@ -149,7 +147,7 @@ module.exports = Component.extend('rt-repeat', {
 				this._lastNode = nodes[nodes.length - 1];
 				return false;
 			}
-			
+
 			prevItem.index.set(index);
 
 			if (nodes.length == 1) {

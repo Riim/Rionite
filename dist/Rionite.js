@@ -1770,7 +1770,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			template: '',
 
 			elementAttributes: {
-				select: String
+				select: String,
+				context: String
 			}
 		},
 
@@ -1827,8 +1828,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 
 				var content = this._rawContent.cloneNode(true);
+				var contextPropertyName = props.context;
 
-				this._bindings = this._rawContent == props.content ? bind(content, ownerComponent, props.context) : bind(content, ownerComponent.ownerComponent, ownerComponent.props.context);
+				this._bindings = this._rawContent == props.content ? bind(content, ownerComponent, contextPropertyName ? this[contextPropertyName] : props.context) : bind(content, ownerComponent.ownerComponent, contextPropertyName ? ownerComponent[contextPropertyName] : ownerComponent.props.context);
 
 				el.appendChild(content);
 			} else {
@@ -1910,7 +1912,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					})();
 				}
 
-				this._renderElement();
+				this._render();
 
 				this._if.on('change', this._onIfChange, this);
 			} else {
@@ -1932,9 +1934,9 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		},
 		_onIfChange: function _onIfChange() {
-			this._renderElement();
+			this._render();
 		},
-		_renderElement: function _renderElement() {
+		_render: function _render() {
 			if (this._if.get()) {
 				var content = this.props.content.cloneNode(true);
 
@@ -2021,17 +2023,31 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		_trackBy: void 0,
 
+		_lastNode: null,
+
 		_rawContent: null,
 
 		_context: null,
-
-		_lastNode: null,
 
 		_onElementAttachedChange: function _onElementAttachedChange(evt) {
 			if (evt.value) {
 				if (!this.initialized) {
 					var props = this.props;
-					var rawContent = props.content = document.importNode(this.element.content, true);
+					var forAttrValue = props.for.match(reForAttributeValue);
+
+					if (!forAttrValue) {
+						throw new SyntaxError('Invalid value of attribute "for"');
+					}
+
+					this._itemName = forAttrValue[1];
+
+					this._list = new Cell(compilePath(forAttrValue[2]), { owner: props.context });
+
+					this._itemMap = new Map();
+
+					this._trackBy = props.trackBy;
+
+					var rawContent = this._rawContent = document.importNode(this.element.content, true);
 
 					if (props.strip) {
 						var firstChild = rawContent.firstChild;
@@ -2055,28 +2071,12 @@ return /******/ (function(modules) { // webpackBootstrap
 						}
 					}
 
-					var forAttrValue = props.for.match(reForAttributeValue);
-
-					if (!forAttrValue) {
-						throw new SyntaxError('Invalid value of attribute "for"');
-					}
-
-					this._itemName = forAttrValue[1];
-
-					this._list = new Cell(compilePath(forAttrValue[2]), { owner: props.context });
-
-					this._itemMap = new Map();
-
-					this._trackBy = props.trackBy;
-
-					this._rawContent = rawContent;
-
 					this._context = props.context;
 
 					this.initialized = true;
 				}
 
-				this._renderElement();
+				this._render();
 
 				this._list.on('change', this._onListChange, this);
 			} else {
@@ -2085,9 +2085,9 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 		},
 		_onListChange: function _onListChange() {
-			this._renderElement();
+			this._render();
 		},
-		_renderElement: function _renderElement() {
+		_render: function _render() {
 			var _this = this;
 
 			var oldItemMap = this._oldItemMap = this._itemMap;

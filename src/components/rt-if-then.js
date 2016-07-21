@@ -46,7 +46,7 @@ module.exports = Component.extend('rt-if-then', {
 				this.initialized = true;
 			}
 
-			this._renderElement();
+			this._render();
 
 			this._if.on('change', this._onIfChange, this);
 		} else {
@@ -69,10 +69,10 @@ module.exports = Component.extend('rt-if-then', {
 	},
 
 	_onIfChange() {
-		this._renderElement();
+		this._render();
 	},
 
-	_renderElement() {
+	_render() {
 		if (this._if.get()) {
 			let content = this.props.content.cloneNode(true);
 

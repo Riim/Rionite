@@ -82,8 +82,8 @@ let KeyedList = ObservableList.extend({
 				writable: false,
 				value: key
 			});
-		} else if (this._itemsByKey[key]) {		
-			throw new TypeError('Key of value must be unique');		
+		} else if (this._itemsByKey[key]) {
+			throw new TypeError('Key of value must be unique');
 		}
 	},
 

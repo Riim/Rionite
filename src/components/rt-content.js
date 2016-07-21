@@ -10,7 +10,8 @@ module.exports = Component.extend('rt-content', {
 		template: '',
 
 		elementAttributes: {
-			select: String
+			select: String,
+			context: String
 		}
 	},
 
@@ -69,10 +70,15 @@ module.exports = Component.extend('rt-content', {
 			}
 
 			let content = this._rawContent.cloneNode(true);
+			let contextPropertyName = props.context;
 
 			this._bindings = this._rawContent == props.content ?
-				bind(content, ownerComponent, props.context) :
-				bind(content, ownerComponent.ownerComponent, ownerComponent.props.context);
+				bind(content, ownerComponent, contextPropertyName ? this[contextPropertyName] : props.context) :
+				bind(
+					content,
+					ownerComponent.ownerComponent,
+					contextPropertyName ? ownerComponent[contextPropertyName] : ownerComponent.props.context
+				);
 
 			el.appendChild(content);
 		} else {
