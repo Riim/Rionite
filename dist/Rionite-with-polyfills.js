@@ -1405,7 +1405,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				Static.elementIs = elementIs;
 
-				var elementAttributes = Static.elementAttributes;
 				var props = Static.props;
 
 				if (props) {
@@ -1416,11 +1415,9 @@ return /******/ (function(modules) { // webpackBootstrap
 						throw new TypeError('It is not necessary to declare property "context"');
 					}
 
-					if (!elementAttributes) {
-						Static.elementAttributes = props;
-					}
-				} else if (elementAttributes) {
-					Static.props = elementAttributes;
+					Static.elementAttributes = props;
+				} else if (Static.elementAttributes) {
+					Static.props = Static.elementAttributes;
 				}
 
 				return registerComponent(createClass(description));

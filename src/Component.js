@@ -39,7 +39,6 @@ let Component = EventEmitter.extend({
 
 			Static.elementIs = elementIs;
 
-			let elementAttributes = Static.elementAttributes;
 			let props = Static.props;
 
 			if (props) {
@@ -50,11 +49,9 @@ let Component = EventEmitter.extend({
 					throw new TypeError('It is not necessary to declare property "context"');
 				}
 
-				if (!elementAttributes) {
-					Static.elementAttributes = props;
-				}
-			} else if (elementAttributes) {
-				Static.props = elementAttributes;
+				Static.elementAttributes = props;
+			} else if (Static.elementAttributes) {
+				Static.props = Static.elementAttributes;
 			}
 
 			return registerComponent(createClass(description));

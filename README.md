@@ -21,7 +21,7 @@ Rionite.Component.extend('hello-user', {
 	Static: {
 		template: 'Hello, {props.name}!',
 
-		elementAttributes: {
+		props: {
 			name: String
 		}
 	},
@@ -50,7 +50,7 @@ export default class HelloUser extends Component {
 	static template = 'Hello, {props.name}!';
 
     static elementIs = 'hello-user';
-	static elementAttributes = {
+	static props = {
         name: String
     };
 
@@ -103,7 +103,7 @@ super-select {
 </super-select>
 ```
 
-В статическом свойстве `elementAttributes` задаётся объект-описание возможных атрибутов элемента. В качестве значений объекта можно указать тип из следующих возможных: `Boolean`, `Number`, `String` и `Object`. Также можно указать значение по-умолчанию, тип будет вычислен из него:
+В статическом свойстве `props` задаётся объект-объявление возможных атрибутов элемента. В качестве значений объекта можно указать тип из следующих возможных: `Boolean`, `Number`, `String` и `Object`. Также можно указать значение по-умолчанию, тип будет вычислен из него:
 ```html
 <hello-user></hello-user>
 
@@ -113,7 +113,7 @@ Rionite.Component.extend('hello-user', {
 	Static: {
 		template: 'Hello, {props.name}!',
 
-		elementAttributes: {
+		props: {
 			name: 'Anonymous'
 		}
 	}
@@ -126,17 +126,8 @@ Rionite.Component.extend('hello-user', {
 <hello-user class="hello-user">Hello, Anonymous!</hello-user>
 ```
 
-Экземпляр компонента тоже имеет свойство `elementAttributes`, в нём будет объект со значениями переданных атрибутов, приведёнными к указанному типу.  
-Экземпляр так-же будет иметь свойство `props`, которое является теми же атрибутами, но с дополнительным свойством `content`:
-```js
-this.props = Object.create(this.elementAttributes, {
-    content: {
-        value: document.createDocumentFragment()
-    }
-});
-```
-
-Свойство `props.content` является фрагментом документа, в который переносится изначально переданное элементу содержимое. В дальнейшем оно чаще всего используются элементом `<rt-content>`:
+Статическое свойство `props` отражается на одноимённое свойство экземпляра компонента, в нём будет объект со значениями объявленных атрибутов, приведёнными к указанному типу.  
+Свойство `props.content` будет фрагментом документа, в который перенесётся изначально переданное элементу содержимое. В дальнейшем оно чаще всего используются элементом `<rt-content>`:
 ```js
 <super-button>123</super-button>
 
@@ -212,7 +203,7 @@ Rionite.Component.extend('simple-counter', {
 </script>
 ```
 
-Свойства в `elementAttributes` (`props`) тоже реактивные, при изменении значения атрибута разметка будет обновляться в местах где они использованы. При записи в них будет обновляться и разметка и значение атрибута.
+Свойства в `props` тоже реактивные, при изменении значения атрибута разметка будет обновляться в местах где они использованы. При записи в них будет обновляться и разметка и значение атрибута.
 
 Реактивные свойства могут вычислятся из других реактивных свойств и будут автоматически обновляться при изменении исходных:
 ```js
@@ -479,7 +470,7 @@ Rionite.Component.extend('x-parent', {
 
 Rionite.Component.extend('x-child', {
 	Static: {
-    	elementAttributes: {
+    	props: {
         	childId: String
         }
     },
