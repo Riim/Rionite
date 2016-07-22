@@ -11,7 +11,7 @@ module.exports = Component.extend('rt-content', {
 
 		elementAttributes: {
 			select: String,
-			context: String
+			getContext: String
 		}
 	},
 
@@ -70,14 +70,20 @@ module.exports = Component.extend('rt-content', {
 			}
 
 			let content = this._rawContent.cloneNode(true);
-			let contextPropertyName = props.context;
+			let getContext = props.getContext;
 
 			this._bindings = this._rawContent == props.content ?
-				bind(content, ownerComponent, contextPropertyName ? this[contextPropertyName] : props.context) :
+				bind(
+					content,
+					ownerComponent,
+					getContext ? ownerComponent[getContext](this, props.context) : props.context
+				) :
 				bind(
 					content,
 					ownerComponent.ownerComponent,
-					contextPropertyName ? ownerComponent[contextPropertyName] : ownerComponent.props.context
+					getContext ?
+						ownerComponent[getContext](this, ownerComponent.props.context) :
+						ownerComponent.props.context
 				);
 
 			el.appendChild(content);

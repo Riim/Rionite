@@ -2504,7 +2504,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			elementAttributes: {
 				select: String,
-				context: String
+				getContext: String
 			}
 		},
 
@@ -2561,9 +2561,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 
 				var content = this._rawContent.cloneNode(true);
-				var contextPropertyName = props.context;
+				var getContext = props.getContext;
 
-				this._bindings = this._rawContent == props.content ? bind(content, ownerComponent, contextPropertyName ? this[contextPropertyName] : props.context) : bind(content, ownerComponent.ownerComponent, contextPropertyName ? ownerComponent[contextPropertyName] : ownerComponent.props.context);
+				this._bindings = this._rawContent == props.content ? bind(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) : bind(content, ownerComponent.ownerComponent, getContext ? ownerComponent[getContext](this, ownerComponent.props.context) : ownerComponent.props.context);
 
 				el.appendChild(content);
 			} else {
