@@ -1,7 +1,5 @@
 let { EventEmitter, utils: { nextUID } } = require('cellx');
 
-let isArray = Array.isArray;
-
 let DisposableMixin = EventEmitter.extend({
 	constructor: function DisposableMixin() {
 		/**
@@ -14,10 +12,10 @@ let DisposableMixin = EventEmitter.extend({
 		let listenings;
 
 		if (
-			isArray(target) || target instanceof NodeList || target instanceof HTMLCollection ||
+			Array.isArray(target) || target instanceof NodeList || target instanceof HTMLCollection ||
 				(target.addClass && target.each)
 		) {
-			if (typeof type == 'object' && !isArray(type)) {
+			if (typeof type == 'object' && !Array.isArray(type)) {
 				if (arguments.length < 3) {
 					listener = this;
 				}
@@ -33,7 +31,7 @@ let DisposableMixin = EventEmitter.extend({
 		} else if (typeof type == 'object') {
 			listenings = [];
 
-			if (isArray(type)) {
+			if (Array.isArray(type)) {
 				if (arguments.length < 4) {
 					context = this;
 				}
@@ -62,7 +60,7 @@ let DisposableMixin = EventEmitter.extend({
 
 				listenings = [];
 
-				if (isArray(listeners)) {
+				if (Array.isArray(listeners)) {
 					for (let i = 0, l = listeners.length; i < l; i++) {
 						listenings.push(this.listenTo(target, type, listeners[i], context));
 					}

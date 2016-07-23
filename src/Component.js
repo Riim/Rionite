@@ -11,9 +11,6 @@ let camelize = require('./utils/camelize');
 let defer = require('./utils/defer');
 let htmlToFragment = require('./utils/htmlToFragment');
 
-let createObject = Object.create;
-let getPrototypeOf = Object.getPrototypeOf;
-let defineProperty = Object.defineProperty;
 let map = Array.prototype.map;
 
 let KEY_RAW_CONTENT = Symbol('rawContent');
@@ -103,7 +100,7 @@ let Component = EventEmitter.extend({
 	get elementAttributes() {
 		let attrs = new ElementAttributes(this.element);
 
-		defineProperty(this, 'elementAttributes', {
+		Object.defineProperty(this, 'elementAttributes', {
 			configurable: true,
 			enumerable: true,
 			writable: true,
@@ -117,12 +114,12 @@ let Component = EventEmitter.extend({
 	 * @type {Rionite.Properties}
 	 */
 	get props() {
-		let props = createObject(this.elementAttributes);
+		let props = Object.create(this.elementAttributes);
 
 		props.content = null;
 		props.context = null;
 
-		defineProperty(this, 'props', {
+		Object.defineProperty(this, 'props', {
 			configurable: true,
 			enumerable: true,
 			writable: true,
@@ -166,7 +163,7 @@ let Component = EventEmitter.extend({
 
 		this.element = el;
 
-		defineProperty(el, '$c', { value: this });
+		Object.defineProperty(el, '$c', { value: this });
 
 		if (props) {
 			let properties = this.props;
@@ -219,7 +216,7 @@ let Component = EventEmitter.extend({
 			} else {
 				for (let c = constr; ;) {
 					el.classList.add(c.elementIs);
-					c = getPrototypeOf(c.prototype).constructor;
+					c = Object.getPrototypeOf(c.prototype).constructor;
 
 					if (c == Component) {
 						break;
@@ -338,7 +335,7 @@ let Component = EventEmitter.extend({
 
 		if (!blockName) {
 			for (let constr = this.constructor; ;) {
-				let parentConstr = getPrototypeOf(constr.prototype).constructor;
+				let parentConstr = Object.getPrototypeOf(constr.prototype).constructor;
 
 				if (constr.template !== parentConstr.template) {
 					blockName = constr.elementIs;

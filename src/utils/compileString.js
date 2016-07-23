@@ -1,12 +1,6 @@
 let pathToJSExpression = require('./pathToJSExpression');
+let escapeString = require('./escapeString');
 let compilePath = require('./compilePath');
-
-let reEscapableChars = /['\r\n]/g;
-let charToRegExpMap = Object.create(null);
-
-charToRegExpMap['\''] = '\\\'';
-charToRegExpMap['\r'] = '\\r';
-charToRegExpMap['\n'] = '\\n';
 
 let cache = Object.create(null);
 
@@ -34,9 +28,7 @@ function compileString(substrings: Array<string>, str: string): Function {
 
 			jsExpr.push(pathJSExpr[0]);
 		} else if (substr) {
-			jsExpr.push(`'${
-				reEscapableChars.test(substr) ? substr.replace(reEscapableChars, chr => charToRegExpMap[chr]) : substr
-			}'`);
+			jsExpr.push(`'${ escapeString(substr) }'`);
 		}
 	}
 

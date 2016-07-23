@@ -12,9 +12,6 @@ let {
 	insertRange
 } = ObservableList.prototype;
 
-let createObject = Object.create;
-let defineProperty = Object.defineProperty;
-
 /**
  * @class Rionite.KeyedList
  * @extends {cellx.ObservableList}
@@ -28,7 +25,7 @@ let defineProperty = Object.defineProperty;
  */
 let KeyedList = ObservableList.extend({
 	constructor: function KeyedList(items, opts) {
-		this._itemsByKey = createObject(null);
+		this._itemsByKey = Object.create(null);
 		this._keyName = opts && opts.keyName || 'id';
 
 		ObservableList.call(this, items, opts);
@@ -76,7 +73,7 @@ let KeyedList = ObservableList.extend({
 				key = nextUID();
 			} while (this._itemsByKey[key]);
 
-			defineProperty(value, this._keyName, {
+			Object.defineProperty(value, this._keyName, {
 				configurable: false,
 				enumerable: false,
 				writable: false,

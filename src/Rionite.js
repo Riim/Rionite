@@ -1,4 +1,5 @@
 let DisposableMixin = require('./DisposableMixin');
+let Template = require('./Template');
 let ElementAttributes = require('./ElementAttributes');
 let Component = require('./Component');
 let registerComponent = require('./registerComponent');
@@ -9,6 +10,7 @@ let RtIfElse = require('./components/rt-if-else');
 let RtRepeat = require('./components/rt-repeat');
 let camelize = require('./utils/camelize');
 let hyphenize = require('./utils/hyphenize');
+let escapeString = require('./utils/escapeString');
 let escapeHTML = require('./utils/escapeHTML');
 let unescapeHTML = require('./utils/unescapeHTML');
 let isRegExp = require('./utils/isRegExp');
@@ -20,10 +22,15 @@ let htmlToFragment = require('./utils/htmlToFragment');
 
 let Rionite = module.exports = {
 	DisposableMixin,
+	Template,
 	ElementAttributes,
 	Component,
 	registerComponent,
 	KeyedList,
+
+	t(tmpl) {
+		return new Template(tmpl);
+	},
 
 	components: {
 		RtContent,
@@ -35,6 +42,7 @@ let Rionite = module.exports = {
 	utils: {
 		camelize,
 		hyphenize,
+		escapeString,
 		escapeHTML,
 		unescapeHTML,
 		isRegExp,

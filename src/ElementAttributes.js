@@ -3,8 +3,6 @@ let attributeTypeHandlers = require('./attributeTypeHandlers');
 let camelize = require('./utils/camelize');
 let hyphenize = require('./utils/hyphenize');
 
-let defineProperty = Object.defineProperty;
-
 /**
  * @typesign new ElementAttributes(el: HTMLElement) -> Rionite.ElementAttributes;
  */
@@ -61,10 +59,10 @@ let ElementAttributes = EventEmitter.extend({
 				}
 			};
 
-			defineProperty(this, camelizedName, descriptor);
+			Object.defineProperty(this, camelizedName, descriptor);
 
 			if (hyphenizedName != camelizedName) {
-				defineProperty(this, hyphenizedName, descriptor);
+				Object.defineProperty(this, hyphenizedName, descriptor);
 			}
 		}
 	}

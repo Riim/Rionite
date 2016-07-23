@@ -57,31 +57,39 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 
 	var DisposableMixin = __webpack_require__(1);
-	var ElementAttributes = __webpack_require__(3);
-	var Component = __webpack_require__(10);
-	var registerComponent = __webpack_require__(11);
-	var KeyedList = __webpack_require__(25);
-	var RtContent = __webpack_require__(26);
-	var RtIfThen = __webpack_require__(28);
-	var RtIfElse = __webpack_require__(29);
-	var RtRepeat = __webpack_require__(30);
-	var camelize = __webpack_require__(8);
-	var hyphenize = __webpack_require__(9);
-	var escapeHTML = __webpack_require__(5);
-	var unescapeHTML = __webpack_require__(6);
-	var isRegExp = __webpack_require__(7);
-	var pathToJSExpression = __webpack_require__(18);
-	var compilePath = __webpack_require__(19);
-	var compileString = __webpack_require__(17);
-	var defer = __webpack_require__(14);
-	var htmlToFragment = __webpack_require__(24);
+	var Template = __webpack_require__(3);
+	var ElementAttributes = __webpack_require__(5);
+	var Component = __webpack_require__(12);
+	var registerComponent = __webpack_require__(13);
+	var KeyedList = __webpack_require__(27);
+	var RtContent = __webpack_require__(28);
+	var RtIfThen = __webpack_require__(30);
+	var RtIfElse = __webpack_require__(31);
+	var RtRepeat = __webpack_require__(32);
+	var camelize = __webpack_require__(10);
+	var hyphenize = __webpack_require__(11);
+	var escapeString = __webpack_require__(4);
+	var escapeHTML = __webpack_require__(7);
+	var unescapeHTML = __webpack_require__(8);
+	var isRegExp = __webpack_require__(9);
+	var pathToJSExpression = __webpack_require__(20);
+	var compilePath = __webpack_require__(21);
+	var compileString = __webpack_require__(19);
+	var defer = __webpack_require__(16);
+	var htmlToFragment = __webpack_require__(26);
 
 	var Rionite = module.exports = {
 		DisposableMixin: DisposableMixin,
+		Template: Template,
 		ElementAttributes: ElementAttributes,
 		Component: Component,
 		registerComponent: registerComponent,
 		KeyedList: KeyedList,
+
+		t: function t(tmpl) {
+			return new Template(tmpl);
+		},
+
 
 		components: {
 			RtContent: RtContent,
@@ -93,6 +101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		utils: {
 			camelize: camelize,
 			hyphenize: hyphenize,
+			escapeString: escapeString,
 			escapeHTML: escapeHTML,
 			unescapeHTML: unescapeHTML,
 			isRegExp: isRegExp,
@@ -119,8 +128,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var nextUID = _require.utils.nextUID;
 
 
-	var isArray = Array.isArray;
-
 	var DisposableMixin = EventEmitter.extend({
 		constructor: function DisposableMixin() {
 			/**
@@ -134,8 +141,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			var listenings = void 0;
 
-			if (isArray(target) || target instanceof NodeList || target instanceof HTMLCollection || target.addClass && target.each) {
-				if ((typeof type === 'undefined' ? 'undefined' : _typeof(type)) == 'object' && !isArray(type)) {
+			if (Array.isArray(target) || target instanceof NodeList || target instanceof HTMLCollection || target.addClass && target.each) {
+				if ((typeof type === 'undefined' ? 'undefined' : _typeof(type)) == 'object' && !Array.isArray(type)) {
 					if (arguments.length < 3) {
 						listener = this;
 					}
@@ -151,7 +158,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			} else if ((typeof type === 'undefined' ? 'undefined' : _typeof(type)) == 'object') {
 				listenings = [];
 
-				if (isArray(type)) {
+				if (Array.isArray(type)) {
 					if (arguments.length < 4) {
 						context = this;
 					}
@@ -180,7 +187,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 					listenings = [];
 
-					if (isArray(_listeners)) {
+					if (Array.isArray(_listeners)) {
 						for (var _i2 = 0, _l2 = _listeners.length; _i2 < _l2; _i2++) {
 							listenings.push(this.listenTo(target, type, _listeners[_i2], context));
 						}
@@ -392,6 +399,100 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var escapeString = __webpack_require__(4);
+
+	var re = /{{\s*(?:block\s+([$_a-zA-Z][$\w]*)|(\/)block|(s)uper)\s*}}/;
+
+	function Template(tmpl, parent) {
+		var _this = this;
+
+		var currentBlock = { js: [] };
+		var blocks = [currentBlock];
+		var blockMap = this._blocks = Object.create(parent ? parent._blocks : null);
+
+		this.parent = parent;
+
+		tmpl = tmpl.split(re);
+
+		for (var i = 0, l = tmpl.length; i < l;) {
+			if (i % 4) {
+				var name = tmpl[i];
+
+				if (name) {
+					currentBlock.js.push('this.' + name + '()');
+					currentBlock = { name: name, js: [] };
+					blocks.push(currentBlock);
+					blockMap[name] = currentBlock;
+				} else if (tmpl[i + 1]) {
+					if (blocks.length > 1) {
+						blocks.pop();
+						currentBlock = blocks[blocks.length - 1];
+					}
+				} else if (parent) {
+					if (blocks.length == 1) {
+						currentBlock.js.push('parent.render()');
+					} else if (parent._blocks[currentBlock.name]) {
+						currentBlock.js.push('_super()');
+					}
+				}
+
+				i += 3;
+			} else {
+				currentBlock.js.push('\'' + escapeString(tmpl[i]) + '\'');
+				i++;
+			}
+		}
+
+		Object.keys(blockMap).forEach(function (name) {
+			var _super = parent && parent._blocks[name];
+			var fn = Function('_super', 'return ' + blockMap[name].js.join(' + ') + ';');
+
+			blockMap[name] = function () {
+				return fn.call(_this._blocks, _super);
+			};
+		});
+
+		this._fn = Function('parent', 'return ' + blocks[0].js.join(' + ') + ';');
+	}
+
+	Template.prototype.extend = function (tmpl) {
+		return new Template(tmpl, this);
+	};
+
+	Template.prototype.render = function () {
+		return this._fn.call(this._blocks, this.parent);
+	};
+
+	module.exports = Template;
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var reEscapableChars = /[\\'\r\n]/g;
+	var charToSpecialMap = Object.create(null);
+
+	charToSpecialMap['\\'] = '\\\\';
+	charToSpecialMap['\''] = '\\\'';
+	charToSpecialMap['\r'] = '\\r';
+	charToSpecialMap['\n'] = '\\n';
+
+	function escapeString(str) {
+		return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) {
+			return charToSpecialMap[chr];
+		}) : str;
+	}
+
+	module.exports = escapeString;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 	var _require = __webpack_require__(2);
@@ -399,11 +500,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var EventEmitter = _require.EventEmitter;
 	var Cell = _require.Cell;
 
-	var attributeTypeHandlers = __webpack_require__(4);
-	var camelize = __webpack_require__(8);
-	var hyphenize = __webpack_require__(9);
-
-	var defineProperty = Object.defineProperty;
+	var attributeTypeHandlers = __webpack_require__(6);
+	var camelize = __webpack_require__(10);
+	var hyphenize = __webpack_require__(11);
 
 	/**
 	 * @typesign new ElementAttributes(el: HTMLElement) -> Rionite.ElementAttributes;
@@ -458,10 +557,10 @@ return /******/ (function(modules) { // webpackBootstrap
 					}
 				};
 
-				defineProperty(_this, camelizedName, descriptor);
+				Object.defineProperty(_this, camelizedName, descriptor);
 
 				if (hyphenizedName != camelizedName) {
-					defineProperty(_this, hyphenizedName, descriptor);
+					Object.defineProperty(_this, hyphenizedName, descriptor);
 				}
 			};
 
@@ -474,7 +573,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ElementAttributes;
 
 /***/ },
-/* 4 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -483,9 +582,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Map = _require.js.Map;
 
-	var escapeHTML = __webpack_require__(5);
-	var unescapeHTML = __webpack_require__(6);
-	var isRegExp = __webpack_require__(7);
+	var escapeHTML = __webpack_require__(7);
+	var unescapeHTML = __webpack_require__(8);
+	var isRegExp = __webpack_require__(9);
 
 	module.exports = new Map([[Boolean, [function (value) {
 		return value !== null ? value != 'no' : false;
@@ -522,7 +621,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}]]]);
 
 /***/ },
-/* 5 */
+/* 7 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -544,7 +643,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = escapeHTML;
 
 /***/ },
-/* 6 */
+/* 8 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -566,7 +665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = unescapeHTML;
 
 /***/ },
-/* 7 */
+/* 9 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -580,7 +679,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = isRegExp;
 
 /***/ },
-/* 8 */
+/* 10 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -598,7 +697,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = camelize;
 
 /***/ },
-/* 9 */
+/* 11 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -620,7 +719,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = hyphenize;
 
 /***/ },
-/* 10 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -633,20 +732,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	var createClass = _require.utils.createClass;
 
 	var DisposableMixin = __webpack_require__(1);
-	var ElementAttributes = __webpack_require__(3);
-	var registerComponent = __webpack_require__(11);
-	var bind = __webpack_require__(15);
-	var defineAssets = __webpack_require__(20);
-	var listenAssets = __webpack_require__(21);
-	var eventTypes = __webpack_require__(22);
-	var onEvent = __webpack_require__(23);
-	var camelize = __webpack_require__(8);
-	var defer = __webpack_require__(14);
-	var htmlToFragment = __webpack_require__(24);
+	var ElementAttributes = __webpack_require__(5);
+	var registerComponent = __webpack_require__(13);
+	var bind = __webpack_require__(17);
+	var defineAssets = __webpack_require__(22);
+	var listenAssets = __webpack_require__(23);
+	var eventTypes = __webpack_require__(24);
+	var onEvent = __webpack_require__(25);
+	var camelize = __webpack_require__(10);
+	var defer = __webpack_require__(16);
+	var htmlToFragment = __webpack_require__(26);
 
-	var createObject = Object.create;
-	var getPrototypeOf = Object.getPrototypeOf;
-	var defineProperty = Object.defineProperty;
 	var map = Array.prototype.map;
 
 	var KEY_RAW_CONTENT = _Symbol('rawContent');
@@ -737,7 +833,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		get elementAttributes() {
 			var attrs = new ElementAttributes(this.element);
 
-			defineProperty(this, 'elementAttributes', {
+			Object.defineProperty(this, 'elementAttributes', {
 				configurable: true,
 				enumerable: true,
 				writable: true,
@@ -751,12 +847,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @type {Rionite.Properties}
 	  */
 		get props() {
-			var props = createObject(this.elementAttributes);
+			var props = Object.create(this.elementAttributes);
 
 			props.content = null;
 			props.context = null;
 
-			defineProperty(this, 'props', {
+			Object.defineProperty(this, 'props', {
 				configurable: true,
 				enumerable: true,
 				writable: true,
@@ -797,7 +893,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			this.element = el;
 
-			defineProperty(el, '$c', { value: this });
+			Object.defineProperty(el, '$c', { value: this });
 
 			if (props) {
 				var properties = this.props;
@@ -851,7 +947,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				} else {
 					for (var c = constr;;) {
 						el.classList.add(c.elementIs);
-						c = getPrototypeOf(c.prototype).constructor;
+						c = Object.getPrototypeOf(c.prototype).constructor;
 
 						if (c == Component) {
 							break;
@@ -970,7 +1066,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			if (!blockName) {
 				for (var constr = this.constructor;;) {
-					var parentConstr = getPrototypeOf(constr.prototype).constructor;
+					var parentConstr = Object.getPrototypeOf(constr.prototype).constructor;
 
 					if (constr.template !== parentConstr.template) {
 						blockName = constr.elementIs;
@@ -1003,7 +1099,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 11 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1012,11 +1108,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var mixin = _require.utils.mixin;
 
-	var elementConstructorMap = __webpack_require__(12);
-	var ElementProtoMixin = __webpack_require__(13);
+	var elementConstructorMap = __webpack_require__(14);
+	var ElementProtoMixin = __webpack_require__(15);
 
-	var createObject = Object.create;
-	var getPrototypeOf = Object.getPrototypeOf;
 	var hasOwn = Object.prototype.hasOwnProperty;
 
 	var inheritedStaticProperties = ['template', 'elementExtends', 'elementAttributes', 'assets'];
@@ -1032,13 +1126,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		inheritedStaticProperties.forEach(function (name) {
 			if (!hasOwn.call(componentConstr, name)) {
-				componentConstr[name] = (parentComponentConstr || (parentComponentConstr = getPrototypeOf(componentConstr.prototype).constructor))[name];
+				componentConstr[name] = (parentComponentConstr || (parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor))[name];
 			}
 		});
 
 		var elementExtends = componentConstr.elementExtends;
 		var parentElementConstr = elementExtends ? elementConstructorMap[elementExtends] || window['HTML' + (elementExtends.charAt(0).toUpperCase() + elementExtends.slice(1)) + 'Element'] : HTMLElement;
-		var elementProto = createObject(parentElementConstr.prototype);
+		var elementProto = Object.create(parentElementConstr.prototype);
 
 		mixin(elementProto, ElementProtoMixin);
 		elementProto._rioniteComponentConstructor = componentConstr;
@@ -1051,7 +1145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = registerComponent;
 
 /***/ },
-/* 12 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1086,7 +1180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 13 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1095,7 +1189,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var nextTick = _require.utils.nextTick;
 
-	var defer = __webpack_require__(14);
+	var defer = __webpack_require__(16);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 
@@ -1162,7 +1256,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ElementProtoMixin;
 
 /***/ },
-/* 14 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1200,7 +1294,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = defer;
 
 /***/ },
-/* 15 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1209,8 +1303,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Cell = _require.Cell;
 
-	var pathPattern = __webpack_require__(16);
-	var compileString = __webpack_require__(17);
+	var pathPattern = __webpack_require__(18);
+	var compileString = __webpack_require__(19);
 
 	var reBinding = RegExp('\\{\\s*(' + pathPattern + ')\\s*\\}', 'g');
 
@@ -1313,7 +1407,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = bind;
 
 /***/ },
-/* 16 */
+/* 18 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1321,20 +1415,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = '[$\\w]+(?:\\??\\.[$\\w]+)*';
 
 /***/ },
-/* 17 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var pathToJSExpression = __webpack_require__(18);
-	var compilePath = __webpack_require__(19);
-
-	var reEscapableChars = /['\r\n]/g;
-	var charToRegExpMap = Object.create(null);
-
-	charToRegExpMap['\''] = '\\\'';
-	charToRegExpMap['\r'] = '\\r';
-	charToRegExpMap['\n'] = '\\n';
+	var pathToJSExpression = __webpack_require__(20);
+	var escapeString = __webpack_require__(4);
+	var compilePath = __webpack_require__(21);
 
 	var cache = Object.create(null);
 
@@ -1362,9 +1450,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				jsExpr.push(pathJSExpr[0]);
 			} else if (substr) {
-				jsExpr.push('\'' + (reEscapableChars.test(substr) ? substr.replace(reEscapableChars, function (chr) {
-					return charToRegExpMap[chr];
-				}) : substr) + '\'');
+				jsExpr.push('\'' + escapeString(substr) + '\'');
 			}
 		}
 
@@ -1374,7 +1460,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = compileString;
 
 /***/ },
-/* 18 */
+/* 20 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1407,12 +1493,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = pathToJSExpression;
 
 /***/ },
-/* 19 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var pathToJSExpression = __webpack_require__(18);
+	var pathToJSExpression = __webpack_require__(20);
 
 	var cache = Object.create(null);
 
@@ -1428,12 +1514,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = compilePath;
 
 /***/ },
-/* 20 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var hyphenize = __webpack_require__(9);
+	var hyphenize = __webpack_require__(11);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 
@@ -1448,7 +1534,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = defineAssets;
 
 /***/ },
-/* 21 */
+/* 23 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1486,7 +1572,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = listenAssets;
 
 /***/ },
-/* 22 */
+/* 24 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1494,7 +1580,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /***/ },
-/* 23 */
+/* 25 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1545,7 +1631,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = onEvent;
 
 /***/ },
-/* 24 */
+/* 26 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1584,7 +1670,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = htmlToFragment;
 
 /***/ },
-/* 25 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1604,10 +1690,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _insert = _ObservableList$proto.insert;
 	var _insertRange = _ObservableList$proto.insertRange;
 
-
-	var createObject = Object.create;
-	var defineProperty = Object.defineProperty;
-
 	/**
 	 * @class Rionite.KeyedList
 	 * @extends {cellx.ObservableList}
@@ -1619,9 +1701,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     keyName?: string
 	 * }) -> Rionite.KeyedList;
 	 */
+
 	var KeyedList = ObservableList.extend({
 		constructor: function KeyedList(items, opts) {
-			this._itemsByKey = createObject(null);
+			this._itemsByKey = Object.create(null);
 			this._keyName = opts && opts.keyName || 'id';
 
 			ObservableList.call(this, items, opts);
@@ -1672,7 +1755,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					key = nextUID();
 				} while (this._itemsByKey[key]);
 
-				defineProperty(value, this._keyName, {
+				Object.defineProperty(value, this._keyName, {
 					configurable: false,
 					enumerable: false,
 					writable: false,
@@ -1750,7 +1833,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = KeyedList;
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1759,9 +1842,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _Symbol = _require.js.Symbol;
 
-	var bind = __webpack_require__(15);
-	var Component = __webpack_require__(10);
-	var templateTagSupported = __webpack_require__(27).templateTagSupported;
+	var bind = __webpack_require__(17);
+	var Component = __webpack_require__(12);
+	var templateTagSupported = __webpack_require__(29).templateTagSupported;
 
 	var KEY_TEMPLATES_FIXED = _Symbol('templatesFixed');
 
@@ -1840,7 +1923,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1853,7 +1936,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.templateTagSupported = !template.firstChild;
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1862,10 +1945,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Cell = _require.Cell;
 
-	var bind = __webpack_require__(15);
-	var Component = __webpack_require__(10);
-	var pathPattern = __webpack_require__(16);
-	var compilePath = __webpack_require__(19);
+	var bind = __webpack_require__(17);
+	var Component = __webpack_require__(12);
+	var pathPattern = __webpack_require__(18);
+	var compilePath = __webpack_require__(21);
 
 	var slice = Array.prototype.slice;
 
@@ -1964,12 +2047,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var RtIfThen = __webpack_require__(28);
+	var RtIfThen = __webpack_require__(30);
 
 	module.exports = RtIfThen.extend('rt-if-else', {
 		Static: {
@@ -1980,7 +2063,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1992,13 +2075,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Cell = _require.Cell;
 	var Map = _require.js.Map;
 
-	var bind = __webpack_require__(15);
-	var Component = __webpack_require__(10);
-	var namePattern = __webpack_require__(31);
-	var pathPattern = __webpack_require__(16);
-	var compilePath = __webpack_require__(19);
+	var bind = __webpack_require__(17);
+	var Component = __webpack_require__(12);
+	var namePattern = __webpack_require__(33);
+	var pathPattern = __webpack_require__(18);
+	var compilePath = __webpack_require__(21);
 
-	var createObject = Object.create;
 	var slice = Array.prototype.slice;
 
 	var reForAttributeValue = RegExp('^\\s*(' + namePattern + ')\\s+of\\s+(' + pathPattern + ')\\s*$');
@@ -2112,7 +2194,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.emit('change');
 		},
 		_renderListItem: function _renderListItem(item, index) {
-			var _createObject;
+			var _Object$create;
 
 			var trackBy = this._trackBy;
 			var trackingValue = trackBy ? trackBy == '$index' ? index : item[trackBy] : item;
@@ -2169,15 +2251,15 @@ return /******/ (function(modules) { // webpackBootstrap
 			index = new Cell(index);
 
 			var content = this._rawContent.cloneNode(true);
-			var context = createObject(this._context, (_createObject = {}, _defineProperty(_createObject, this._itemName, {
+			var context = Object.create(this._context, (_Object$create = {}, _defineProperty(_Object$create, this._itemName, {
 				get: function get() {
 					return item.get();
 				}
-			}), _defineProperty(_createObject, '$index', {
+			}), _defineProperty(_Object$create, '$index', {
 				get: function get() {
 					return index.get();
 				}
-			}), _createObject));
+			}), _Object$create));
 
 			var newItem = {
 				item: item,
@@ -2228,7 +2310,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports) {
 
 	'use strict';

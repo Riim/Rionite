@@ -5,7 +5,6 @@ let namePattern = require('../namePattern');
 let pathPattern = require('../pathPattern');
 let compilePath = require('../utils/compilePath');
 
-let createObject = Object.create;
 let slice = Array.prototype.slice;
 
 let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ pathPattern })\\s*$`);
@@ -173,7 +172,7 @@ module.exports = Component.extend('rt-repeat', {
 		index = new Cell(index);
 
 		let content = this._rawContent.cloneNode(true);
-		let context = createObject(this._context, {
+		let context = Object.create(this._context, {
 			[this._itemName]: {
 				get() {
 					return item.get();
