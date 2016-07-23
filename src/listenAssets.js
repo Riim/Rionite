@@ -13,7 +13,7 @@ function listenAssets(component, assetsConfig) {
 				asset = component[name];
 
 				if (!asset) {
-					throw new TypeError(`Asset "${ name }" is not defined`);
+					continue;
 				}
 			}
 

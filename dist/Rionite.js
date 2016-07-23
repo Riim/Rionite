@@ -1554,7 +1554,7 @@ return /******/ (function(modules) { // webpackBootstrap
 					asset = component[name];
 
 					if (!asset) {
-						throw new TypeError('Asset "' + name + '" is not defined');
+						continue;
 					}
 				}
 
