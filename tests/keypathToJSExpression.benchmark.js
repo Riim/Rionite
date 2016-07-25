@@ -1,20 +1,20 @@
 var Benchmark = require('benchmark');
 
-function pathToJSExpression1(path) {
-	path = path.split('?');
+function keypathToJSExpression1(keypath) {
+	keypath = keypath.split('?');
 
-	var index = path.length - 2;
+	var index = keypath.length - 2;
 	var jsExpr = Array(index);
 
 	while (index) {
-		jsExpr[--index] = ' && (temp = temp' + path[index + 1] + ')';
+		jsExpr[--index] = ' && (temp = temp' + keypath[index + 1] + ')';
 	}
 
-	return `(temp = this.${ path[0] })${ jsExpr.join('') } && temp${ path[path.length - 1] }`;
+	return `(temp = this.${ keypath[0] })${ jsExpr.join('') } && temp${ keypath[keypath.length - 1] }`;
 }
 
-function pathToJSExpression2(path) {
-	var jsExpr = path.split('?');
+function keypathToJSExpression2(keypath) {
+	var jsExpr = keypath.split('?');
 	var index = jsExpr.length - 2;
 
 	while (index) {
@@ -24,8 +24,8 @@ function pathToJSExpression2(path) {
 	return `(temp = this.${ jsExpr[0] })${ jsExpr.slice(1, -1).join('') } && temp${ jsExpr[jsExpr.length - 1] }`;
 }
 
-function pathToJSExpression3(path) {
-	var jsExpr = path.split('?');
+function keypathToJSExpression3(keypath) {
+	var jsExpr = keypath.split('?');
 
 	var last = jsExpr.pop();
 	var first = jsExpr.shift();
@@ -41,22 +41,22 @@ var suite = new Benchmark.Suite();
 
 suite
 	.add('1.1', function() {
-		pathToJSExpression1('a.b?.c');
+		keypathToJSExpression1('a.b?.c');
 	})
 	.add('1.2', function() {
-		pathToJSExpression1('a?.b.c.d?.e?.f');
+		keypathToJSExpression1('a?.b.c.d?.e?.f');
 	})
 	.add('2.1', function() {
-		pathToJSExpression2('a.b?.c');
+		keypathToJSExpression2('a.b?.c');
 	})
 	.add('2.2', function() {
-		pathToJSExpression2('a?.b.c.d?.e?.f');
+		keypathToJSExpression2('a?.b.c.d?.e?.f');
 	})
 	.add('3.1', function() {
-		pathToJSExpression3('a.b?.c');
+		keypathToJSExpression3('a.b?.c');
 	})
 	.add('3.2', function() {
-		pathToJSExpression3('a?.b.c.d?.e?.f');
+		keypathToJSExpression3('a?.b.c.d?.e?.f');
 	})
 	.on('cycle', function(evt) {
 		console.log(String(evt.target));

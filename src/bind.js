@@ -1,8 +1,9 @@
 let { Cell } = require('cellx');
-let pathPattern = require('./pathPattern');
-let compileString = require('./utils/compileString');
+let ContentNodeType = require('./ContentNodeType');
+let parseContent = require('./parseContent');
+let compileContent = require('./compileContent');
 
-let reBinding = RegExp(`\\{\\s*(${ pathPattern })\\s*\\}`, 'g');
+let reBinding = /\{[^}]+\}/;
 
 function bind(node, component, context) {
 	if (!context) {
@@ -20,30 +21,33 @@ function bind(node, component, context) {
 					for (let i = attrs.length; i;) {
 						let attr = attrs.item(--i);
 						let value = attr.value;
-						let splitValue = value.split(reBinding);
 
-						if (splitValue.length > 1) {
-							let name = attr.name;
-							let cell = new Cell(compileString(splitValue, value), {
-								owner: context,
-								onChange({ value }) {
-									if (value === false || value == null) {
-										child.removeAttribute(name);
-									} else {
-										child.setAttribute(name, value === true ? '' : value);
+						if (reBinding.test(value)) {
+							let parsedValue = parseContent(value);
+
+							if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
+								let name = attr.name;
+								let cell = new Cell(compileContent(parsedValue, value), {
+									owner: context,
+									onChange({ value }) {
+										if (value === false || value == null) {
+											child.removeAttribute(name);
+										} else {
+											child.setAttribute(name, value === true ? '' : value);
+										}
 									}
+								});
+
+								value = cell.get();
+
+								if (value === false || value == null) {
+									child.removeAttribute(name);
+								} else {
+									child.setAttribute(name, value === true ? '' : value);
 								}
-							});
 
-							value = cell.get();
-
-							if (value === false || value == null) {
-								child.removeAttribute(name);
-							} else {
-								child.setAttribute(name, value === true ? '' : value);
+								bindings.push(cell);
 							}
-
-							bindings.push(cell);
 						}
 					}
 
@@ -64,19 +68,22 @@ function bind(node, component, context) {
 				}
 				case 3: {
 					let content = child.textContent;
-					let splitContent = content.split(reBinding);
 
-					if (splitContent.length > 1) {
-						let cell = new Cell(compileString(splitContent, content), {
-							owner: context,
-							onChange(evt) {
-								child.textContent = evt.value;
-							}
-						});
+					if (reBinding.test(content)) {
+						let parsedContent = parseContent(content);
 
-						child.textContent = cell.get();
+						if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
+							let cell = new Cell(compileContent(parsedContent, content), {
+								owner: context,
+								onChange(evt) {
+									child.textContent = evt.value;
+								}
+							});
 
-						bindings.push(cell);
+							child.textContent = cell.get();
+
+							bindings.push(cell);
+						}
 					}
 
 					break;

@@ -1,13 +1,15 @@
 let { Cell, js: { Map } } = require('cellx');
+let namePattern = require('../namePattern');
+let ContentNodeType = require('../ContentNodeType');
+let parseContent = require('../parseContent');
+let compileBinding = require('../compileBinding');
 let bind = require('../bind');
 let Component = require('../Component');
-let namePattern = require('../namePattern');
-let pathPattern = require('../pathPattern');
-let compilePath = require('../utils/compilePath');
 
 let slice = Array.prototype.slice;
 
-let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ pathPattern })\\s*$`);
+let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(\\S.*)$`);
+let invalidAttributeForMessage = 'Invalid value of attribute "for"';
 
 module.exports = Component.extend('rt-repeat', {
 	Static: {
@@ -42,12 +44,18 @@ module.exports = Component.extend('rt-repeat', {
 				let forAttrValue = props.for.match(reForAttributeValue);
 
 				if (!forAttrValue) {
-					throw new SyntaxError('Invalid value of attribute "for"');
+					throw new SyntaxError(invalidAttributeForMessage);
+				}
+
+				let parsedOf = parseContent(`{${ forAttrValue[2] }}`);
+
+				if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
+					throw new SyntaxError(invalidAttributeForMessage);
 				}
 
 				this._itemName = forAttrValue[1];
 
-				this._list = new Cell(compilePath(forAttrValue[2]), { owner: props.context });
+				this._list = new Cell(compileBinding(parsedOf[0]), { owner: props.context });
 
 				this._itemMap = new Map();
 

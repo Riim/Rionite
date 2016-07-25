@@ -1,4 +1,5 @@
 let DisposableMixin = require('./DisposableMixin');
+let formatters = require('./formatters');
 let Template = require('./Template');
 let ElementAttributes = require('./ElementAttributes');
 let Component = require('./Component');
@@ -14,14 +15,12 @@ let escapeString = require('./utils/escapeString');
 let escapeHTML = require('./utils/escapeHTML');
 let unescapeHTML = require('./utils/unescapeHTML');
 let isRegExp = require('./utils/isRegExp');
-let pathToJSExpression = require('./utils/pathToJSExpression');
-let compilePath = require('./utils/compilePath');
-let compileString = require('./utils/compileString');
 let defer = require('./utils/defer');
 let htmlToFragment = require('./utils/htmlToFragment');
 
 let Rionite = module.exports = {
 	DisposableMixin,
+	formatters,
 	Template,
 	ElementAttributes,
 	Component,
@@ -46,9 +45,6 @@ let Rionite = module.exports = {
 		escapeHTML,
 		unescapeHTML,
 		isRegExp,
-		pathToJSExpression,
-		compilePath,
-		compileString,
 		defer,
 		htmlToFragment
 	}

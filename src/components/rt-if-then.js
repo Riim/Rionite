@@ -1,12 +1,11 @@
 let { Cell } = require('cellx');
+let ContentNodeType = require('../ContentNodeType');
+let parseContent = require('../parseContent');
+let compileBinding = require('../compileBinding');
 let bind = require('../bind');
 let Component = require('../Component');
-let pathPattern = require('../pathPattern');
-let compilePath = require('../utils/compilePath');
 
 let slice = Array.prototype.slice;
-
-let rePath = RegExp(`^\\s*(${ pathPattern })\\s*$`);
 
 module.exports = Component.extend('rt-if-then', {
 	Static: {
@@ -30,11 +29,13 @@ module.exports = Component.extend('rt-if-then', {
 
 				props.content = document.importNode(this.element.content, true);
 
-				if (!rePath.test(props.if)) {
+				let parsedIf = parseContent(`{${ props.if }}`);
+
+				if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType.BINDING) {
 					throw new SyntaxError('Invalid value of attribute "if"');
 				}
 
-				let getState = compilePath(RegExp.$1);
+				let getState = compileBinding(parsedIf[0]);
 
 				this._if = new Cell(
 					this._elseMode ?

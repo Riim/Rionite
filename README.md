@@ -309,6 +309,7 @@ static template = `{user?.friends?.length}`;
 Для управления потоком вычисления в шаблоне используются компоненты `rt-if-then`, `rt-if-else` и `rt-repeat`.
 
 TODO:
+- formatters
 - больше про `rt-if-then`, `rt-if-else` и `rt-repeat` (strip)
 - callbacks и `movedElement`
 - удаление атрибута биндингом
