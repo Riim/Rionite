@@ -3,7 +3,7 @@ let ContentNodeType = require('./ContentNodeType');
 let parseContent = require('./parseContent');
 let compileContent = require('./compileContent');
 
-let reBinding = /\{[^}]+\}/;
+let reBinding = /{[^}]+}/;
 
 function bind(node, component, context) {
 	if (!context) {

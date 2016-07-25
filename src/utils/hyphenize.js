@@ -1,5 +1,5 @@
-let reHump = /\-?([A-Z])([^A-Z])/g;
-let reLongHump = /\-?([A-Z]+)/g;
+let reHump = /-?([A-Z])([^A-Z])/g;
+let reLongHump = /-?([A-Z]+)/g;
 let reMinus = /^-/;
 
 let cache = Object.create(null);

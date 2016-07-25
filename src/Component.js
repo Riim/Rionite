@@ -15,7 +15,7 @@ let map = Array.prototype.map;
 
 let KEY_RAW_CONTENT = Symbol('rawContent');
 
-let reClosedCustomElementTag = /<(\w+(?:\-\w+)+)([^>]*)\/>/g;
+let reClosedCustomElementTag = /<(\w+(?:-\w+)+)([^>]*)\/>/g;
 
 function created() {}
 function initialize() {}

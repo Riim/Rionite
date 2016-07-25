@@ -56,39 +56,40 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var DisposableMixin = __webpack_require__(1);
-	var formatters = __webpack_require__(3);
-	var Template = __webpack_require__(4);
-	var ElementAttributes = __webpack_require__(6);
-	var Component = __webpack_require__(13);
-	var registerComponent = __webpack_require__(14);
-	var KeyedList = __webpack_require__(31);
+	var KeyedList = __webpack_require__(1);
+	var DisposableMixin = __webpack_require__(3);
+	var ElementAttributes = __webpack_require__(4);
+	var Component = __webpack_require__(11);
+	var registerComponent = __webpack_require__(12);
+	var Template = __webpack_require__(31);
+	var formatters = __webpack_require__(24);
 	var RtContent = __webpack_require__(32);
 	var RtIfThen = __webpack_require__(34);
 	var RtIfElse = __webpack_require__(35);
 	var RtRepeat = __webpack_require__(36);
-	var camelize = __webpack_require__(11);
-	var hyphenize = __webpack_require__(12);
-	var escapeString = __webpack_require__(5);
-	var escapeHTML = __webpack_require__(8);
-	var unescapeHTML = __webpack_require__(9);
-	var isRegExp = __webpack_require__(10);
-	var defer = __webpack_require__(17);
+	var camelize = __webpack_require__(9);
+	var hyphenize = __webpack_require__(10);
+	var escapeString = __webpack_require__(25);
+	var escapeHTML = __webpack_require__(6);
+	var unescapeHTML = __webpack_require__(7);
+	var isRegExp = __webpack_require__(8);
+	var defer = __webpack_require__(15);
 	var htmlToFragment = __webpack_require__(30);
 
 	var Rionite = module.exports = {
+		KeyedList: KeyedList,
 		DisposableMixin: DisposableMixin,
-		formatters: formatters,
-		Template: Template,
 		ElementAttributes: ElementAttributes,
 		Component: Component,
 		registerComponent: registerComponent,
-		KeyedList: KeyedList,
 
+		Template: Template,
 		t: function t(tmpl) {
 			return new Template(tmpl);
 		},
 
+
+		formatters: formatters,
 
 		components: {
 			RtContent: RtContent,
@@ -112,6 +113,175 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _require = __webpack_require__(2);
+
+	var ObservableList = _require.ObservableList;
+	var nextUID = _require.utils.nextUID;
+	var _ObservableList$proto = ObservableList.prototype;
+	var _registerValue2 = _ObservableList$proto._registerValue;
+	var _unregisterValue2 = _ObservableList$proto._unregisterValue;
+	var _get = _ObservableList$proto.get;
+	var _set = _ObservableList$proto.set;
+	var _setRange = _ObservableList$proto.setRange;
+	var _add = _ObservableList$proto.add;
+	var _addRange2 = _ObservableList$proto._addRange;
+	var _insert = _ObservableList$proto.insert;
+	var _insertRange = _ObservableList$proto.insertRange;
+
+	/**
+	 * @class Rionite.KeyedList
+	 * @extends {cellx.ObservableList}
+	 *
+	 * @typesign new KeyedList(items?: Array|cellx.ObservableList, opts?: {
+	 *     adoptsItemChanges?: boolean,
+	 *     comparator?: (a, b) -> int,
+	 *     sorted?: boolean,
+	 *     keyName?: string
+	 * }) -> Rionite.KeyedList;
+	 */
+
+	var KeyedList = ObservableList.extend({
+		constructor: function KeyedList(items, opts) {
+			this._itemsByKey = Object.create(null);
+			this._keyName = opts && opts.keyName || 'id';
+
+			ObservableList.call(this, items, opts);
+		},
+
+		/**
+	  * @override
+	  * @typesign (value: Object);
+	  */
+		_registerValue: function _registerValue(value) {
+			this._itemsByKey[value[this._keyName]] = value;
+			_registerValue2.call(this, value);
+		},
+
+
+		/**
+	  * @override
+	  * @typesign (value: Object);
+	  */
+		_unregisterValue: function _unregisterValue(value) {
+			delete this._itemsByKey[value[this._keyName]];
+			_unregisterValue2.call(this, value);
+		},
+
+
+		/**
+	  * @typesign (values: Array);
+	  */
+		_checkValues: function _checkValues(values) {
+			for (var i = 0, l = values.length; i < l; i++) {
+				this._checkValue(values[i]);
+			}
+		},
+
+
+		/**
+	  * @typesign (value);
+	  */
+		_checkValue: function _checkValue(value) {
+			if (value !== Object(value)) {
+				throw new TypeError('Value must be an object');
+			}
+
+			var key = value[this._keyName];
+
+			if (key == null) {
+				do {
+					key = nextUID();
+				} while (this._itemsByKey[key]);
+
+				Object.defineProperty(value, this._keyName, {
+					configurable: false,
+					enumerable: false,
+					writable: false,
+					value: key
+				});
+			} else if (this._itemsByKey[key]) {
+				throw new TypeError('Key of value must be unique');
+			}
+		},
+
+
+		/**
+	  * @override
+	  * @typesign (key: int|string) -> *;
+	  */
+		get: function get(key) {
+			return typeof key == 'string' ? this._itemsByKey[key] : _get.call(this, key);
+		},
+
+
+		/**
+	  * @override
+	  */
+		set: function set(index, value) {
+			this._checkValue(value);
+			return _set.call(this, index, value);
+		},
+
+
+		/**
+	  * @override
+	  */
+		setRange: function setRange(index, values) {
+			this._checkValues(values);
+			return _setRange.call(this, index, values);
+		},
+
+
+		/**
+	  * @override
+	  */
+		add: function add(item) {
+			this._checkValue(item);
+			return _add.call(this, item);
+		},
+
+
+		/**
+	  * @override
+	  */
+		_addRange: function _addRange(items) {
+			this._checkValues(items);
+			_addRange2.call(this, items);
+		},
+
+
+		/**
+	  * @override
+	  */
+		insert: function insert(index, item) {
+			this._checkValue(item);
+			return _insert.call(this, index, item);
+		},
+
+
+		/**
+	  * @override
+	  */
+		insertRange: function insertRange(index, items) {
+			this._checkValues(items);
+			return _insertRange.call(this, index, items);
+		}
+	});
+
+	module.exports = KeyedList;
+
+/***/ },
+/* 2 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -384,115 +554,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = DisposableMixin;
 
 /***/ },
-/* 2 */
-/***/ function(module, exports) {
-
-	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
-
-/***/ },
-/* 3 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	module.exports = Object.create(null);
-
-/***/ },
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	var escapeString = __webpack_require__(5);
-
-	var re = /{{\s*(?:block\s+([$_a-zA-Z][$\w]*)|(\/)block|(s)uper)\s*}}/;
-
-	function Template(tmpl, parent) {
-		var _this = this;
-
-		var currentBlock = { js: [] };
-		var blocks = [currentBlock];
-		var blockMap = this._blocks = Object.create(parent ? parent._blocks : null);
-
-		this.parent = parent;
-
-		tmpl = tmpl.split(re);
-
-		for (var i = 0, l = tmpl.length; i < l;) {
-			if (i % 4) {
-				var name = tmpl[i];
-
-				if (name) {
-					currentBlock.js.push('this.' + name + '()');
-					currentBlock = { name: name, js: [] };
-					blocks.push(currentBlock);
-					blockMap[name] = currentBlock;
-				} else if (tmpl[i + 1]) {
-					if (blocks.length > 1) {
-						blocks.pop();
-						currentBlock = blocks[blocks.length - 1];
-					}
-				} else if (parent) {
-					if (blocks.length == 1) {
-						currentBlock.js.push('parent.render()');
-					} else if (parent._blocks[currentBlock.name]) {
-						currentBlock.js.push('_super()');
-					}
-				}
-
-				i += 3;
-			} else {
-				currentBlock.js.push('\'' + escapeString(tmpl[i]) + '\'');
-				i++;
-			}
-		}
-
-		Object.keys(blockMap).forEach(function (name) {
-			var _super = parent && parent._blocks[name];
-			var fn = Function('_super', 'return ' + blockMap[name].js.join(' + ') + ';');
-
-			blockMap[name] = function () {
-				return fn.call(_this._blocks, _super);
-			};
-		});
-
-		this._fn = Function('parent', 'return ' + blocks[0].js.join(' + ') + ';');
-	}
-
-	Template.prototype.extend = function (tmpl) {
-		return new Template(tmpl, this);
-	};
-
-	Template.prototype.render = function () {
-		return this._fn.call(this._blocks, this.parent);
-	};
-
-	module.exports = Template;
-
-/***/ },
-/* 5 */
-/***/ function(module, exports) {
-
-	'use strict';
-
-	var reEscapableChars = /[\\'\r\n]/g;
-	var charToSpecialMap = Object.create(null);
-
-	charToSpecialMap['\\'] = '\\\\';
-	charToSpecialMap['\''] = '\\\'';
-	charToSpecialMap['\r'] = '\\r';
-	charToSpecialMap['\n'] = '\\n';
-
-	function escapeString(str) {
-		return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) {
-			return charToSpecialMap[chr];
-		}) : str;
-	}
-
-	module.exports = escapeString;
-
-/***/ },
-/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -504,9 +566,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var EventEmitter = _require.EventEmitter;
 	var Cell = _require.Cell;
 
-	var attributeTypeHandlers = __webpack_require__(7);
-	var camelize = __webpack_require__(11);
-	var hyphenize = __webpack_require__(12);
+	var attributeTypeHandlers = __webpack_require__(5);
+	var camelize = __webpack_require__(9);
+	var hyphenize = __webpack_require__(10);
 
 	/**
 	 * @typesign new ElementAttributes(el: HTMLElement) -> Rionite.ElementAttributes;
@@ -577,7 +639,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ElementAttributes;
 
 /***/ },
-/* 7 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -586,9 +648,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Map = _require.js.Map;
 
-	var escapeHTML = __webpack_require__(8);
-	var unescapeHTML = __webpack_require__(9);
-	var isRegExp = __webpack_require__(10);
+	var escapeHTML = __webpack_require__(6);
+	var unescapeHTML = __webpack_require__(7);
+	var isRegExp = __webpack_require__(8);
 
 	module.exports = new Map([[Boolean, [function (value) {
 		return value !== null ? value != 'no' : false;
@@ -625,7 +687,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}]]]);
 
 /***/ },
-/* 8 */
+/* 6 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -647,7 +709,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = escapeHTML;
 
 /***/ },
-/* 9 */
+/* 7 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -669,7 +731,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = unescapeHTML;
 
 /***/ },
-/* 10 */
+/* 8 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -683,12 +745,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = isRegExp;
 
 /***/ },
-/* 11 */
+/* 9 */
 /***/ function(module, exports) {
 
 	"use strict";
 
-	var reHyphen = /[\-_]+([a-z]|$)/g;
+	var reHyphen = /[-_]+([a-z]|$)/g;
 
 	var cache = Object.create(null);
 
@@ -701,13 +763,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = camelize;
 
 /***/ },
-/* 12 */
+/* 10 */
 /***/ function(module, exports) {
 
 	'use strict';
 
-	var reHump = /\-?([A-Z])([^A-Z])/g;
-	var reLongHump = /\-?([A-Z]+)/g;
+	var reHump = /-?([A-Z])([^A-Z])/g;
+	var reLongHump = /-?([A-Z]+)/g;
 	var reMinus = /^-/;
 
 	var cache = Object.create(null);
@@ -723,7 +785,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = hyphenize;
 
 /***/ },
-/* 13 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -735,23 +797,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _Symbol = _require.js.Symbol;
 	var createClass = _require.utils.createClass;
 
-	var DisposableMixin = __webpack_require__(1);
-	var ElementAttributes = __webpack_require__(6);
-	var registerComponent = __webpack_require__(14);
-	var bind = __webpack_require__(18);
+	var DisposableMixin = __webpack_require__(3);
+	var ElementAttributes = __webpack_require__(4);
+	var registerComponent = __webpack_require__(12);
+	var bind = __webpack_require__(16);
 	var defineAssets = __webpack_require__(26);
 	var listenAssets = __webpack_require__(27);
 	var eventTypes = __webpack_require__(28);
 	var onEvent = __webpack_require__(29);
-	var camelize = __webpack_require__(11);
-	var defer = __webpack_require__(17);
+	var camelize = __webpack_require__(9);
+	var defer = __webpack_require__(15);
 	var htmlToFragment = __webpack_require__(30);
 
 	var map = Array.prototype.map;
 
 	var KEY_RAW_CONTENT = _Symbol('rawContent');
 
-	var reClosedCustomElementTag = /<(\w+(?:\-\w+)+)([^>]*)\/>/g;
+	var reClosedCustomElementTag = /<(\w+(?:-\w+)+)([^>]*)\/>/g;
 
 	function created() {}
 	function initialize() {}
@@ -1103,7 +1165,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 14 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1112,8 +1174,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var mixin = _require.utils.mixin;
 
-	var elementConstructorMap = __webpack_require__(15);
-	var ElementProtoMixin = __webpack_require__(16);
+	var elementConstructorMap = __webpack_require__(13);
+	var ElementProtoMixin = __webpack_require__(14);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 
@@ -1149,7 +1211,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = registerComponent;
 
 /***/ },
-/* 15 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1184,7 +1246,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 16 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1193,7 +1255,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var nextTick = _require.utils.nextTick;
 
-	var defer = __webpack_require__(17);
+	var defer = __webpack_require__(15);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 
@@ -1260,7 +1322,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ElementProtoMixin;
 
 /***/ },
-/* 17 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1298,7 +1360,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = defer;
 
 /***/ },
-/* 18 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1307,11 +1369,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Cell = _require.Cell;
 
-	var ContentNodeType = __webpack_require__(19);
-	var parseContent = __webpack_require__(20);
-	var compileContent = __webpack_require__(23);
+	var ContentNodeType = __webpack_require__(17);
+	var parseContent = __webpack_require__(18);
+	var compileContent = __webpack_require__(21);
 
-	var reBinding = /\{[^}]+\}/;
+	var reBinding = /{[^}]+}/;
 
 	function bind(node, component, context) {
 		if (!context) {
@@ -1418,7 +1480,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = bind;
 
 /***/ },
-/* 19 */
+/* 17 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1433,14 +1495,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 20 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var namePattern = __webpack_require__(21);
-	var keypathPattern = __webpack_require__(22);
-	var ContentNodeType = __webpack_require__(19);
+	var namePattern = __webpack_require__(19);
+	var keypathPattern = __webpack_require__(20);
+	var ContentNodeType = __webpack_require__(17);
 
 	var reNameOrEmpty = RegExp(namePattern + '|', 'g');
 	var reKeypathOrEmpty = RegExp(keypathPattern + '|', 'g');
@@ -1848,7 +1910,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = parseContent;
 
 /***/ },
-/* 21 */
+/* 19 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1856,7 +1918,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = '[$_a-zA-Z][$\\w]*';
 
 /***/ },
-/* 22 */
+/* 20 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -1864,18 +1926,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = '[$\\w]+(?:\\??\\.[$\\w]+)*';
 
 /***/ },
-/* 23 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-	var bindingToJSExpression = __webpack_require__(24);
-	var ContentNodeType = __webpack_require__(19);
-	var compileBinding = __webpack_require__(25);
-	var formatters = __webpack_require__(3);
-	var escapeString = __webpack_require__(5);
+	var bindingToJSExpression = __webpack_require__(22);
+	var ContentNodeType = __webpack_require__(17);
+	var compileBinding = __webpack_require__(23);
+	var formatters = __webpack_require__(24);
+	var escapeString = __webpack_require__(25);
 
 	var cache = Object.create(null);
 
@@ -1937,7 +1999,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = compileContent;
 
 /***/ },
-/* 24 */
+/* 22 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2003,15 +2065,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = bindingToJSExpression;
 
 /***/ },
-/* 25 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-	var bindingToJSExpression = __webpack_require__(24);
-	var formatters = __webpack_require__(3);
+	var bindingToJSExpression = __webpack_require__(22);
+	var formatters = __webpack_require__(24);
 
 	var cache = Object.create(null);
 
@@ -2045,12 +2107,42 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = compileBinding;
 
 /***/ },
+/* 24 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	module.exports = Object.create(null);
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var reEscapableChars = /[\\'\r\n]/g;
+	var charToSpecialMap = Object.create(null);
+
+	charToSpecialMap['\\'] = '\\\\';
+	charToSpecialMap['\''] = '\\\'';
+	charToSpecialMap['\r'] = '\\r';
+	charToSpecialMap['\n'] = '\\n';
+
+	function escapeString(str) {
+		return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) {
+			return charToSpecialMap[chr];
+		}) : str;
+	}
+
+	module.exports = escapeString;
+
+/***/ },
 /* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var hyphenize = __webpack_require__(12);
+	var hyphenize = __webpack_require__(10);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 
@@ -2206,162 +2298,71 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _require = __webpack_require__(2);
+	var escapeString = __webpack_require__(25);
 
-	var ObservableList = _require.ObservableList;
-	var nextUID = _require.utils.nextUID;
-	var _ObservableList$proto = ObservableList.prototype;
-	var _registerValue2 = _ObservableList$proto._registerValue;
-	var _unregisterValue2 = _ObservableList$proto._unregisterValue;
-	var _get = _ObservableList$proto.get;
-	var _set = _ObservableList$proto.set;
-	var _setRange = _ObservableList$proto.setRange;
-	var _add = _ObservableList$proto.add;
-	var _addRange2 = _ObservableList$proto._addRange;
-	var _insert = _ObservableList$proto.insert;
-	var _insertRange = _ObservableList$proto.insertRange;
+	var re = /{{\s*(?:block\s+([$_a-zA-Z][$\w]*)|(\/)block|(s)uper)\s*}}/;
 
-	/**
-	 * @class Rionite.KeyedList
-	 * @extends {cellx.ObservableList}
-	 *
-	 * @typesign new KeyedList(items?: Array|cellx.ObservableList, opts?: {
-	 *     adoptsItemChanges?: boolean,
-	 *     comparator?: (a, b) -> int,
-	 *     sorted?: boolean,
-	 *     keyName?: string
-	 * }) -> Rionite.KeyedList;
-	 */
+	function Template(tmpl, parent) {
+		var _this = this;
 
-	var KeyedList = ObservableList.extend({
-		constructor: function KeyedList(items, opts) {
-			this._itemsByKey = Object.create(null);
-			this._keyName = opts && opts.keyName || 'id';
+		var currentBlock = { js: [] };
+		var blocks = [currentBlock];
+		var blockMap = this._blocks = Object.create(parent ? parent._blocks : null);
 
-			ObservableList.call(this, items, opts);
-		},
+		this.parent = parent;
 
-		/**
-	  * @override
-	  * @typesign (value: Object);
-	  */
-		_registerValue: function _registerValue(value) {
-			this._itemsByKey[value[this._keyName]] = value;
-			_registerValue2.call(this, value);
-		},
+		tmpl = tmpl.split(re);
 
+		for (var i = 0, l = tmpl.length; i < l;) {
+			if (i % 4) {
+				var name = tmpl[i];
 
-		/**
-	  * @override
-	  * @typesign (value: Object);
-	  */
-		_unregisterValue: function _unregisterValue(value) {
-			delete this._itemsByKey[value[this._keyName]];
-			_unregisterValue2.call(this, value);
-		},
+				if (name) {
+					currentBlock.js.push('this.' + name + '()');
+					currentBlock = { name: name, js: [] };
+					blocks.push(currentBlock);
+					blockMap[name] = currentBlock;
+				} else if (tmpl[i + 1]) {
+					if (blocks.length > 1) {
+						blocks.pop();
+						currentBlock = blocks[blocks.length - 1];
+					}
+				} else if (parent) {
+					if (blocks.length == 1) {
+						currentBlock.js.push('parent.render()');
+					} else if (parent._blocks[currentBlock.name]) {
+						currentBlock.js.push('_super()');
+					}
+				}
 
-
-		/**
-	  * @typesign (values: Array);
-	  */
-		_checkValues: function _checkValues(values) {
-			for (var i = 0, l = values.length; i < l; i++) {
-				this._checkValue(values[i]);
+				i += 3;
+			} else {
+				currentBlock.js.push('\'' + escapeString(tmpl[i]) + '\'');
+				i++;
 			}
-		},
-
-
-		/**
-	  * @typesign (value);
-	  */
-		_checkValue: function _checkValue(value) {
-			if (value !== Object(value)) {
-				throw new TypeError('Value must be an object');
-			}
-
-			var key = value[this._keyName];
-
-			if (key == null) {
-				do {
-					key = nextUID();
-				} while (this._itemsByKey[key]);
-
-				Object.defineProperty(value, this._keyName, {
-					configurable: false,
-					enumerable: false,
-					writable: false,
-					value: key
-				});
-			} else if (this._itemsByKey[key]) {
-				throw new TypeError('Key of value must be unique');
-			}
-		},
-
-
-		/**
-	  * @override
-	  * @typesign (key: int|string) -> *;
-	  */
-		get: function get(key) {
-			return typeof key == 'string' ? this._itemsByKey[key] : _get.call(this, key);
-		},
-
-
-		/**
-	  * @override
-	  */
-		set: function set(index, value) {
-			this._checkValue(value);
-			return _set.call(this, index, value);
-		},
-
-
-		/**
-	  * @override
-	  */
-		setRange: function setRange(index, values) {
-			this._checkValues(values);
-			return _setRange.call(this, index, values);
-		},
-
-
-		/**
-	  * @override
-	  */
-		add: function add(item) {
-			this._checkValue(item);
-			return _add.call(this, item);
-		},
-
-
-		/**
-	  * @override
-	  */
-		_addRange: function _addRange(items) {
-			this._checkValues(items);
-			_addRange2.call(this, items);
-		},
-
-
-		/**
-	  * @override
-	  */
-		insert: function insert(index, item) {
-			this._checkValue(item);
-			return _insert.call(this, index, item);
-		},
-
-
-		/**
-	  * @override
-	  */
-		insertRange: function insertRange(index, items) {
-			this._checkValues(items);
-			return _insertRange.call(this, index, items);
 		}
-	});
 
-	module.exports = KeyedList;
+		Object.keys(blockMap).forEach(function (name) {
+			var _super = parent && parent._blocks[name];
+			var fn = Function('_super', 'return ' + blockMap[name].js.join(' + ') + ';');
+
+			blockMap[name] = function () {
+				return fn.call(_this._blocks, _super);
+			};
+		});
+
+		this._fn = Function('parent', 'return ' + blocks[0].js.join(' + ') + ';');
+	}
+
+	Template.prototype.extend = function (tmpl) {
+		return new Template(tmpl, this);
+	};
+
+	Template.prototype.render = function () {
+		return this._fn.call(this._blocks, this.parent);
+	};
+
+	module.exports = Template;
 
 /***/ },
 /* 32 */
@@ -2373,8 +2374,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _Symbol = _require.js.Symbol;
 
-	var bind = __webpack_require__(18);
-	var Component = __webpack_require__(13);
+	var bind = __webpack_require__(16);
+	var Component = __webpack_require__(11);
 	var templateTagSupported = __webpack_require__(33).templateTagSupported;
 
 	var KEY_TEMPLATES_FIXED = _Symbol('templatesFixed');
@@ -2476,11 +2477,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Cell = _require.Cell;
 
-	var ContentNodeType = __webpack_require__(19);
-	var parseContent = __webpack_require__(20);
-	var compileBinding = __webpack_require__(25);
-	var bind = __webpack_require__(18);
-	var Component = __webpack_require__(13);
+	var ContentNodeType = __webpack_require__(17);
+	var parseContent = __webpack_require__(18);
+	var compileBinding = __webpack_require__(23);
+	var bind = __webpack_require__(16);
+	var Component = __webpack_require__(11);
 
 	var slice = Array.prototype.slice;
 
@@ -2607,12 +2608,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Cell = _require.Cell;
 	var Map = _require.js.Map;
 
-	var namePattern = __webpack_require__(21);
-	var ContentNodeType = __webpack_require__(19);
-	var parseContent = __webpack_require__(20);
-	var compileBinding = __webpack_require__(25);
-	var bind = __webpack_require__(18);
-	var Component = __webpack_require__(13);
+	var namePattern = __webpack_require__(19);
+	var ContentNodeType = __webpack_require__(17);
+	var parseContent = __webpack_require__(18);
+	var compileBinding = __webpack_require__(23);
+	var bind = __webpack_require__(16);
+	var Component = __webpack_require__(11);
 
 	var slice = Array.prototype.slice;
 

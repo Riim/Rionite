@@ -1,4 +1,4 @@
-let reHyphen = /[\-_]+([a-z]|$)/g;
+let reHyphen = /[-_]+([a-z]|$)/g;
 
 let cache = Object.create(null);
 
