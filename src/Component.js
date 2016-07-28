@@ -14,6 +14,7 @@ let htmlToFragment = require('./utils/htmlToFragment');
 let map = Array.prototype.map;
 
 let KEY_RAW_CONTENT = Symbol('rawContent');
+let KEY_BLOCK_NAME_IN_MARKUP = Symbol('blockNameInMarkup');
 
 let reClosedCustomElementTag = /<(\w+(?:-\w+)+)([^>]*)\/>/g;
 
@@ -39,11 +40,10 @@ let Component = EventEmitter.extend({
 			let props = Static.props;
 
 			if (props) {
-				if (props.content) {
-					throw new TypeError('It is not necessary to declare property "content"');
-				}
-				if (props.context) {
-					throw new TypeError('It is not necessary to declare property "context"');
+				if (props.content || props.context) {
+					throw new TypeError(
+						`It is not necessary to declare property "${ props.content ? 'content' : 'context' }"`
+					);
 				}
 
 				Static.elementAttributes = props;
@@ -54,13 +54,15 @@ let Component = EventEmitter.extend({
 			return registerComponent(createClass(description));
 		},
 
-		template: null,
-
 		elementIs: void 0,
 		elementExtends: void 0,
 
 		elementAttributes: null,
 		props: null,
+
+		i18n: null,
+
+		template: null,
 
 		assets: null
 	},
@@ -135,8 +137,6 @@ let Component = EventEmitter.extend({
 
 	initialized: false,
 	isReady: false,
-
-	_blockNameInMarkup: void 0,
 
 	constructor: function Component(el, props) {
 		EventEmitter.call(this);
@@ -237,12 +237,9 @@ let Component = EventEmitter.extend({
 					if (!rawContent) {
 						let template = constr.template;
 
-						if (typeof template != 'string') {
-							template = template.render ? template.render(this) : template.call(this, this);
-						}
-
 						rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(
-							template.replace(reClosedCustomElementTag, '<$1$2></$1>')
+							(typeof template == 'string' ? template : template.render(constr))
+								.replace(reClosedCustomElementTag, '<$1$2></$1>')
 						);
 					}
 
@@ -331,26 +328,25 @@ let Component = EventEmitter.extend({
 			return selector[0];
 		}
 
-		let blockName = this._blockNameInMarkup;
+		let constr = this.constructor;
+		let blockName = constr[KEY_BLOCK_NAME_IN_MARKUP];
 
 		if (!blockName) {
-			for (let constr = this.constructor; ;) {
-				let parentConstr = Object.getPrototypeOf(constr.prototype).constructor;
+			let ctor = constr;
 
-				if (constr.template !== parentConstr.template) {
-					blockName = constr.elementIs;
-					break;
+			do {
+				if (ctor.template) {
+					blockName = ctor.elementIs;
 				}
 
-				if (parentConstr == Component) {
-					blockName = this.constructor.elementIs;
-					break;
-				}
+				ctor = Object.getPrototypeOf(ctor.prototype).constructor;
+			} while (ctor != Component);
 
-				constr = parentConstr;
+			if (!blockName) {
+				blockName = constr.elementIs;
 			}
 
-			this._blockNameInMarkup = blockName;
+			constr[KEY_BLOCK_NAME_IN_MARKUP] = blockName;
 		}
 
 		return selector.join('.' + blockName);

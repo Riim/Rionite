@@ -3,8 +3,9 @@ let DisposableMixin = require('./DisposableMixin');
 let ElementAttributes = require('./ElementAttributes');
 let Component = require('./Component');
 let registerComponent = require('./registerComponent');
-let Template = require('./Template');
 let formatters = require('./formatters');
+let getText = require('./getText');
+let Template = require('./Template');
 let RtContent = require('./components/rt-content');
 let RtIfThen = require('./components/rt-if-then');
 let RtIfElse = require('./components/rt-if-else');
@@ -25,12 +26,14 @@ let Rionite = module.exports = {
 	Component,
 	registerComponent,
 
+	formatters,
+
+	getText,
+
 	Template,
 	t(tmpl) {
 		return new Template(tmpl);
 	},
-
-	formatters,
 
 	components: {
 		RtContent,

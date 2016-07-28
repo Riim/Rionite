@@ -4,7 +4,14 @@ let ElementProtoMixin = require('./ElementProtoMixin');
 
 let hasOwn = Object.prototype.hasOwnProperty;
 
-let inheritedStaticProperties = ['template', 'elementExtends', 'elementAttributes', 'assets'];
+let inheritedStaticProperties = [	
+	'elementExtends',
+	'elementAttributes',
+	'props',
+	'i18n',
+	'template',
+	'assets'
+];
 
 function registerComponent(componentConstr) {
 	let elementIs = componentConstr.elementIs;

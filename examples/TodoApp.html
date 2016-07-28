@@ -40,15 +40,15 @@ var todos = new Rionite.KeyedList([
 
 Rionite.Component.extend('todo-view', {
 	Static: {
+		props: {
+			todoId: String
+		},
+
 		template: `
 			<input class="todo-view__cb-done" type="checkbox" checked="{todo.done}" rt-change="onCbDoneChange">
 			<span class="todo-view__text">{todo.text}</span>
 			<button rt-click="onBtnRemoveClick">remove</button>
-		`,
-
-		props: {
-			todoId: String
-		}
+		`
 	},
 
 	initialize: function() {
@@ -66,16 +66,14 @@ Rionite.Component.extend('todo-view', {
 
 Rionite.Component.extend('todo-app', {
 	Static: {
-		template: function() {
-			return `
-				<input class="todo-app__tf-new-todo">
-				<button rt-click="onBtnAddClick">Add #{nextNumber}</button>
-				<div>all: {todos.length} done: {doneTodos.length}</div>
-				<template is="rt-repeat" for="todo of todos">
-					<todo-view todo-id="{todo.id}"/>
-				</template>
-			`;
-		},
+		template: `
+			<input class="todo-app__tf-new-todo">
+			<button rt-click="onBtnAddClick">Add #{nextNumber}</button>
+			<div>all: {todos.length} done: {doneTodos.length}</div>
+			<template is="rt-repeat" for="todo of todos">
+				<todo-view todo-id="{todo.id}"/>
+			</template>
+		`,
 
 		assets: {
 			tfNewTodo: {}

@@ -19,11 +19,11 @@ npm install cellx rionite --save
 
 Rionite.Component.extend('hello-user', {
 	Static: {
-		template: 'Hello, {props.name}!',
-
 		props: {
 			name: String
-		}
+		},
+
+		template: 'Hello, {props.name}!'
 	},
 
     elementAttached: function() {
@@ -111,11 +111,11 @@ super-select {
 
 Rionite.Component.extend('hello-user', {
 	Static: {
-		template: 'Hello, {props.name}!',
-
 		props: {
 			name: 'Anonymous'
-		}
+		},
+
+		template: 'Hello, {props.name}!'
 	}
 });
 

@@ -7,12 +7,12 @@ let KEY_TEMPLATES_FIXED = Symbol('templatesFixed');
 
 module.exports = Component.extend('rt-content', {
 	Static: {
-		template: '',
-
 		elementAttributes: {
 			select: String,
 			getContext: String
-		}
+		},
+
+		template: ''
 	},
 
 	_rawContent: void 0,

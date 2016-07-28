@@ -1,61 +1,82 @@
+let namePattern = require('./namePattern');
 let escapeString = require('./utils/escapeString');
+let escapeHTML = require('./utils/escapeHTML');
 
-let re = /{{\s*(?:block\s+([$_a-zA-Z][$\w]*)|(\/)block|(s)uper)\s*}}/;
+let keypathPattern = `${ namePattern }(?:\\.${ namePattern })*`;
+let re = RegExp(
+	'{{' +
+		'(?:' +
+			'\\s*(?:' +
+				`block\\s+(${ namePattern })|(\\/)block|(s)uper\\(\\)|(${ keypathPattern })` +
+			`)\\s*|{\\s*(${ keypathPattern })\\s*}` +
+		')' +
+	'}}'
+);
 
-function Template(tmpl, parent) {
+function Template(tmpl, parent = null) {
+	this.parent = parent;
+
 	let currentBlock = { js: [] };
+
 	let blocks = [currentBlock];
 	let blockMap = this._blocks = Object.create(parent ? parent._blocks : null);
-
-	this.parent = parent;
 
 	tmpl = tmpl.split(re);
 
 	for (let i = 0, l = tmpl.length; i < l;) {
-		if (i % 4) {
+		if (i % 6) {
 			let name = tmpl[i];
 
 			if (name) {
-				currentBlock.js.push(`this.${ name }()`);
-				currentBlock = { name, js: [] };
+				currentBlock.js.push(`this.${ name }.call(this, data)`);
+				currentBlock = blockMap[name] = { name, js: [] };
 				blocks.push(currentBlock);
-				blockMap[name] = currentBlock;
 			} else if (tmpl[i + 1]) {
 				if (blocks.length > 1) {
 					blocks.pop();
 					currentBlock = blocks[blocks.length - 1];
 				}
-			} else if (parent) {
-				if (blocks.length == 1) {
-					currentBlock.js.push('parent.render()');
-				} else if (parent._blocks[currentBlock.name]) {
-					currentBlock.js.push('_super()');
+			} else if (tmpl[i + 2]) {
+				if (parent && blocks.length > 1 && parent._blocks[currentBlock.name]) {
+					currentBlock.js.push('_super.call(this, data)');
 				}
+			} else {
+				let keypath = tmpl[i + 2];
+				currentBlock.js.push(keypath ? `escape(data.${ keypath })` : 'data.' + tmpl[i + 3]);
 			}
 
-			i += 3;
+			i += 5;
 		} else {
-			currentBlock.js.push(`'${ escapeString(tmpl[i]) }'`);
+			let text = tmpl[i];
+
+			if (text) {
+				currentBlock.js.push(`'${ escapeString(text) }'`);
+			}
+
 			i++;
 		}
 	}
 
 	Object.keys(blockMap).forEach(name => {
 		let _super = parent && parent._blocks[name];
-		let fn = Function('_super', `return ${ blockMap[name].js.join(' + ') };`);
+		let inner = Function('_super', 'data', 'escape', `return [${ blockMap[name].js.join(', ') }].join('');`);
 
-		blockMap[name] = () => fn.call(this._blocks, _super);
+		blockMap[name] = function(data) {
+			return inner.call(this, _super, data, escapeHTML);
+		};
 	});
 
-	this._fn = Function('parent', `return ${ blocks[0].js.join(' + ') };`);
+	this._renderer = parent ?
+		parent._renderer :
+		Function('data', 'escape', `return [${ blocks[0].js.join(', ') }].join('');`);
 }
 
 Template.prototype.extend = function(tmpl) {
 	return new Template(tmpl, this);
 };
 
-Template.prototype.render = function() {
-	return this._fn.call(this._blocks, this.parent);
+Template.prototype.render = function(data) {
+	return this._renderer.call(this._blocks, data || {}, escapeHTML);
 };
 
 module.exports = Template;

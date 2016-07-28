@@ -794,20 +794,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ElementAttributes = __webpack_require__(4);
 	var Component = __webpack_require__(11);
 	var registerComponent = __webpack_require__(12);
-	var Template = __webpack_require__(31);
 	var formatters = __webpack_require__(24);
-	var RtContent = __webpack_require__(32);
-	var RtIfThen = __webpack_require__(34);
-	var RtIfElse = __webpack_require__(35);
-	var RtRepeat = __webpack_require__(36);
+	var getText = __webpack_require__(25);
+	var Template = __webpack_require__(32);
+	var RtContent = __webpack_require__(33);
+	var RtIfThen = __webpack_require__(35);
+	var RtIfElse = __webpack_require__(36);
+	var RtRepeat = __webpack_require__(37);
 	var camelize = __webpack_require__(9);
 	var hyphenize = __webpack_require__(10);
-	var escapeString = __webpack_require__(25);
+	var escapeString = __webpack_require__(26);
 	var escapeHTML = __webpack_require__(6);
 	var unescapeHTML = __webpack_require__(7);
 	var isRegExp = __webpack_require__(8);
 	var defer = __webpack_require__(15);
-	var htmlToFragment = __webpack_require__(30);
+	var htmlToFragment = __webpack_require__(31);
 
 	var Rionite = module.exports = {
 		KeyedList: KeyedList,
@@ -816,13 +817,15 @@ return /******/ (function(modules) { // webpackBootstrap
 		Component: Component,
 		registerComponent: registerComponent,
 
+		formatters: formatters,
+
+		getText: getText,
+
 		Template: Template,
 		t: function t(tmpl) {
 			return new Template(tmpl);
 		},
 
-
-		formatters: formatters,
 
 		components: {
 			RtContent: RtContent,
@@ -1534,17 +1537,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ElementAttributes = __webpack_require__(4);
 	var registerComponent = __webpack_require__(12);
 	var bind = __webpack_require__(16);
-	var defineAssets = __webpack_require__(26);
-	var listenAssets = __webpack_require__(27);
-	var eventTypes = __webpack_require__(28);
-	var onEvent = __webpack_require__(29);
+	var defineAssets = __webpack_require__(27);
+	var listenAssets = __webpack_require__(28);
+	var eventTypes = __webpack_require__(29);
+	var onEvent = __webpack_require__(30);
 	var camelize = __webpack_require__(9);
 	var defer = __webpack_require__(15);
-	var htmlToFragment = __webpack_require__(30);
+	var htmlToFragment = __webpack_require__(31);
 
 	var map = Array.prototype.map;
 
 	var KEY_RAW_CONTENT = _Symbol('rawContent');
+	var KEY_BLOCK_NAME_IN_MARKUP = _Symbol('blockNameInMarkup');
 
 	var reClosedCustomElementTag = /<(\w+(?:-\w+)+)([^>]*)\/>/g;
 
@@ -1570,11 +1574,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				var props = Static.props;
 
 				if (props) {
-					if (props.content) {
-						throw new TypeError('It is not necessary to declare property "content"');
-					}
-					if (props.context) {
-						throw new TypeError('It is not necessary to declare property "context"');
+					if (props.content || props.context) {
+						throw new TypeError('It is not necessary to declare property "' + (props.content ? 'content' : 'context') + '"');
 					}
 
 					Static.elementAttributes = props;
@@ -1586,13 +1587,15 @@ return /******/ (function(modules) { // webpackBootstrap
 			},
 
 
-			template: null,
-
 			elementIs: void 0,
 			elementExtends: void 0,
 
 			elementAttributes: null,
 			props: null,
+
+			i18n: null,
+
+			template: null,
 
 			assets: null
 		},
@@ -1667,8 +1670,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		initialized: false,
 		isReady: false,
-
-		_blockNameInMarkup: void 0,
 
 		constructor: function Component(el, props) {
 			EventEmitter.call(this);
@@ -1767,11 +1768,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						if (!rawContent) {
 							var template = constr.template;
 
-							if (typeof template != 'string') {
-								template = template.render ? template.render(this) : template.call(this, this);
-							}
-
-							rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(template.replace(reClosedCustomElementTag, '<$1$2></$1>'));
+							rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment((typeof template == 'string' ? template : template.render(constr)).replace(reClosedCustomElementTag, '<$1$2></$1>'));
 						}
 
 						var inputContent = this.props.content = document.createDocumentFragment();
@@ -1861,26 +1858,25 @@ return /******/ (function(modules) { // webpackBootstrap
 				return selector[0];
 			}
 
-			var blockName = this._blockNameInMarkup;
+			var constr = this.constructor;
+			var blockName = constr[KEY_BLOCK_NAME_IN_MARKUP];
 
 			if (!blockName) {
-				for (var constr = this.constructor;;) {
-					var parentConstr = Object.getPrototypeOf(constr.prototype).constructor;
+				var ctor = constr;
 
-					if (constr.template !== parentConstr.template) {
-						blockName = constr.elementIs;
-						break;
+				do {
+					if (ctor.template) {
+						blockName = ctor.elementIs;
 					}
 
-					if (parentConstr == Component) {
-						blockName = this.constructor.elementIs;
-						break;
-					}
+					ctor = Object.getPrototypeOf(ctor.prototype).constructor;
+				} while (ctor != Component);
 
-					constr = parentConstr;
+				if (!blockName) {
+					blockName = constr.elementIs;
 				}
 
-				this._blockNameInMarkup = blockName;
+				constr[KEY_BLOCK_NAME_IN_MARKUP] = blockName;
 			}
 
 			return selector.join('.' + blockName);
@@ -1912,7 +1908,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 
-	var inheritedStaticProperties = ['template', 'elementExtends', 'elementAttributes', 'assets'];
+	var inheritedStaticProperties = ['elementExtends', 'elementAttributes', 'props', 'i18n', 'template', 'assets'];
 
 	function registerComponent(componentConstr) {
 		var elementIs = componentConstr.elementIs;
@@ -2670,7 +2666,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ContentNodeType = __webpack_require__(17);
 	var compileBinding = __webpack_require__(23);
 	var formatters = __webpack_require__(24);
-	var escapeString = __webpack_require__(25);
+	var escapeString = __webpack_require__(26);
 
 	var cache = Object.create(null);
 
@@ -2841,14 +2837,118 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 24 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
-	module.exports = Object.create(null);
+	var getText = __webpack_require__(25);
+
+	var formatters = Object.create(null);
+	formatters.t = getText.t;
+	formatters.pt = getText.pt;
+	formatters.nt = getText.nt;
+	formatters.npt = getText.npt;
+
+	module.exports = formatters;
 
 /***/ },
 /* 25 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	var hasOwn = Object.prototype.hasOwnProperty;
+	var slice = Array.prototype.slice;
+
+	var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
+
+	var texts = void 0;
+	var getPluralIndex = void 0;
+
+	function configure(config) {
+		var localeSettings = getText.localeSettings = config.localeSettings;
+
+		texts = config.texts;
+		getPluralIndex = Function('n', 'return ' + localeSettings.plural + ';');
+	}
+
+	function getText(context, key, plural, args) {
+		var rawText = void 0;
+
+		if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
+			rawText = texts[context][key];
+
+			if (plural) {
+				rawText = rawText[getPluralIndex(args[0])];
+			}
+		} else {
+			rawText = key;
+		}
+
+		var data = Object.create(null);
+
+		args.forEach(function (arg, index) {
+			data[index + 1] = arg;
+		});
+
+		if (plural) {
+			data.n = args[0];
+		}
+
+		var text = [];
+
+		rawText = rawText.split(reInsert);
+
+		for (var i = 0, l = rawText.length; i < l;) {
+			if (i % 3) {
+				text.push(rawText[i + 1] ? rawText[i + 1].split('|')[getPluralIndex(data[rawText[i]])] : data[rawText[i]]);
+				i += 2;
+			} else {
+				text.push(rawText[i]);
+				i++;
+			}
+		}
+
+		return text.join('');
+	}
+
+	function t(key) {
+		return getText('', key, false, slice.call(arguments, 1));
+	}
+
+	function pt(key, context) {
+		return getText(context, key, false, slice.call(arguments, 1));
+	}
+
+	function nt(key /*, count*/) {
+		return getText('', key, true, slice.call(arguments, 1));
+	}
+
+	function npt(key, context /*, count*/) {
+		return getText(context, key, true, slice.call(arguments, 1));
+	}
+
+	getText.configure = configure;
+	getText.t = t;
+	getText.pt = pt;
+	getText.nt = nt;
+	getText.npt = npt;
+
+	configure({
+		localeSettings: {
+			// code: 'en',
+			// plural: 'n == 1 ? 0 : 1'
+			code: 'ru',
+			plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
+		},
+
+		texts: {}
+	});
+
+	module.exports = getText;
+
+/***/ },
+/* 26 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2870,7 +2970,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = escapeString;
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2890,7 +2990,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = defineAssets;
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2928,7 +3028,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = listenAssets;
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2936,7 +3036,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2987,7 +3087,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = onEvent;
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -3026,79 +3126,88 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = htmlToFragment;
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var escapeString = __webpack_require__(25);
+	var namePattern = __webpack_require__(19);
+	var escapeString = __webpack_require__(26);
+	var escapeHTML = __webpack_require__(6);
 
-	var re = /{{\s*(?:block\s+([$_a-zA-Z][$\w]*)|(\/)block|(s)uper)\s*}}/;
+	var keypathPattern = namePattern + '(?:\\.' + namePattern + ')*';
+	var re = RegExp('{{' + '(?:' + '\\s*(?:' + ('block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')') + (')\\s*|{\\s*(' + keypathPattern + ')\\s*}') + ')' + '}}');
 
-	function Template(tmpl, parent) {
-		var _this = this;
-
-		var currentBlock = { js: [] };
-		var blocks = [currentBlock];
-		var blockMap = this._blocks = Object.create(parent ? parent._blocks : null);
+	function Template(tmpl) {
+		var parent = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
 
 		this.parent = parent;
+
+		var currentBlock = { js: [] };
+
+		var blocks = [currentBlock];
+		var blockMap = this._blocks = Object.create(parent ? parent._blocks : null);
 
 		tmpl = tmpl.split(re);
 
 		for (var i = 0, l = tmpl.length; i < l;) {
-			if (i % 4) {
+			if (i % 6) {
 				var name = tmpl[i];
 
 				if (name) {
-					currentBlock.js.push('this.' + name + '()');
-					currentBlock = { name: name, js: [] };
+					currentBlock.js.push('this.' + name + '.call(this, data)');
+					currentBlock = blockMap[name] = { name: name, js: [] };
 					blocks.push(currentBlock);
-					blockMap[name] = currentBlock;
 				} else if (tmpl[i + 1]) {
 					if (blocks.length > 1) {
 						blocks.pop();
 						currentBlock = blocks[blocks.length - 1];
 					}
-				} else if (parent) {
-					if (blocks.length == 1) {
-						currentBlock.js.push('parent.render()');
-					} else if (parent._blocks[currentBlock.name]) {
-						currentBlock.js.push('_super()');
+				} else if (tmpl[i + 2]) {
+					if (parent && blocks.length > 1 && parent._blocks[currentBlock.name]) {
+						currentBlock.js.push('_super.call(this, data)');
 					}
+				} else {
+					var keypath = tmpl[i + 2];
+					currentBlock.js.push(keypath ? 'escape(data.' + keypath + ')' : 'data.' + tmpl[i + 3]);
 				}
 
-				i += 3;
+				i += 5;
 			} else {
-				currentBlock.js.push('\'' + escapeString(tmpl[i]) + '\'');
+				var text = tmpl[i];
+
+				if (text) {
+					currentBlock.js.push('\'' + escapeString(text) + '\'');
+				}
+
 				i++;
 			}
 		}
 
 		Object.keys(blockMap).forEach(function (name) {
 			var _super = parent && parent._blocks[name];
-			var fn = Function('_super', 'return ' + blockMap[name].js.join(' + ') + ';');
+			var inner = Function('_super', 'data', 'escape', 'return [' + blockMap[name].js.join(', ') + '].join(\'\');');
 
-			blockMap[name] = function () {
-				return fn.call(_this._blocks, _super);
+			blockMap[name] = function (data) {
+				return inner.call(this, _super, data, escapeHTML);
 			};
 		});
 
-		this._fn = Function('parent', 'return ' + blocks[0].js.join(' + ') + ';');
+		this._renderer = parent ? parent._renderer : Function('data', 'escape', 'return [' + blocks[0].js.join(', ') + '].join(\'\');');
 	}
 
 	Template.prototype.extend = function (tmpl) {
 		return new Template(tmpl, this);
 	};
 
-	Template.prototype.render = function () {
-		return this._fn.call(this._blocks, this.parent);
+	Template.prototype.render = function (data) {
+		return this._renderer.call(this._blocks, data || {}, escapeHTML);
 	};
 
 	module.exports = Template;
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3109,18 +3218,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var bind = __webpack_require__(16);
 	var Component = __webpack_require__(11);
-	var templateTagSupported = __webpack_require__(33).templateTagSupported;
+	var templateTagSupported = __webpack_require__(34).templateTagSupported;
 
 	var KEY_TEMPLATES_FIXED = _Symbol('templatesFixed');
 
 	module.exports = Component.extend('rt-content', {
 		Static: {
-			template: '',
-
 			elementAttributes: {
 				select: String,
 				getContext: String
-			}
+			},
+
+			template: ''
 		},
 
 		_rawContent: void 0,
@@ -3188,7 +3297,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -3201,7 +3310,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.templateTagSupported = !template.firstChild;
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -3313,12 +3422,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var RtIfThen = __webpack_require__(34);
+	var RtIfThen = __webpack_require__(35);
 
 	module.exports = RtIfThen.extend('rt-if-else', {
 		Static: {
@@ -3329,7 +3438,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
