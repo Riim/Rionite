@@ -2402,7 +2402,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var escapeString = __webpack_require__(26);
 	var escapeHTML = __webpack_require__(6);
 
-	var keypathPattern = namePattern + '(?:\\.' + namePattern + ')*';
+	var keypathPattern = '[$\\w]+(?:\\.[$\\w]+)*';
 	var re = RegExp('{{' + '(?:' + '\\s*(?:' + ('block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')') + (')\\s*|{\\s*(' + keypathPattern + ')\\s*}') + ')' + '}}');
 
 	function Template(tmpl) {

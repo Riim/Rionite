@@ -2,7 +2,7 @@ let namePattern = require('./namePattern');
 let escapeString = require('./utils/escapeString');
 let escapeHTML = require('./utils/escapeHTML');
 
-let keypathPattern = `${ namePattern }(?:\\.${ namePattern })*`;
+let keypathPattern = '[$\\w]+(?:\\.[$\\w]+)*';
 let re = RegExp(
 	'{{' +
 		'(?:' +

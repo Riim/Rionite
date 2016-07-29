@@ -184,7 +184,7 @@ Rionite.Component.extend('super-select', {
 Rionite.Component.extend('simple-counter', {
 	Static: {
 		template: `
-            <div>{value}</div>
+            <div>value: {value}</div>
             <button rt-click="onButtonClick">value++</button>
         `
 	},
@@ -324,7 +324,7 @@ TODO:
 Rionite.Component.extend('simple-counter', {
 	Static: {
 		template: `
-            <div>{value}</div>
+            <div>value: {value}</div>
             <button rt-click="onButtonClick">value++</button>
         `
 	},

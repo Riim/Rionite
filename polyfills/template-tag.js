@@ -18,7 +18,7 @@
 			}
 
 			if (this.tagName == 'TEMPLATE') {
-				var df = this.__contentische__ = document.createDocumentFragment();
+				var df = this.__contentische__ = d.createDocumentFragment();
 
 				for (var child; (child = this.firstChild);) {
 					df.appendChild(child);

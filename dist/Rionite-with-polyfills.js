@@ -719,7 +719,7 @@ document[REGISTER_ELEMENT] = function registerElement(type, options) {
 			}
 
 			if (this.tagName == 'TEMPLATE') {
-				var df = this.__contentische__ = document.createDocumentFragment();
+				var df = this.__contentische__ = d.createDocumentFragment();
 
 				for (var child; (child = this.firstChild);) {
 					df.appendChild(child);
@@ -3135,7 +3135,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var escapeString = __webpack_require__(26);
 	var escapeHTML = __webpack_require__(6);
 
-	var keypathPattern = namePattern + '(?:\\.' + namePattern + ')*';
+	var keypathPattern = '[$\\w]+(?:\\.[$\\w]+)*';
 	var re = RegExp('{{' + '(?:' + '\\s*(?:' + ('block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')') + (')\\s*|{\\s*(' + keypathPattern + ')\\s*}') + ')' + '}}');
 
 	function Template(tmpl) {

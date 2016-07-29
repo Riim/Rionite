@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<simple-counter></simple-counter>
+
+<script src="../node_modules/cellx/dist/cellx.js"></script>
+<script src="../dist/Rionite-with-polyfills.js"></script>
+<script>
+
+Rionite.Component.extend('simple-counter', {
+	Static: {
+		template: `
+			<div>value: {value}</div>
+			<button rt-click="onButtonClick">value++</button>
+		`
+	},
+
+	initialize() {
+		cellx.define(this, {
+			value: 0
+		});
+	},
+
+	onButtonClick() {
+		this.value++;
+	}
+});
+
+</script>
+
+</body>
+</html>
