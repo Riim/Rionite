@@ -289,7 +289,7 @@ class UserCard extends Component {
 
     @computed ageLess18 = function() {
         return this.user.age < 18;
-    };,
+    };
 
     initialize() {
         this.user = someUser;
@@ -303,8 +303,6 @@ registerComponent(UserCard);
 ```js
 static template = `{user?.friends?.length}`;
 ```
-
-При необходимости более сложной проверки можно создать вычисляемое свойство, как в примере с проверкой возраста выше.
 
 Для управления потоком вычисления в шаблоне используются компоненты `rt-if-then`, `rt-if-else` и `rt-repeat`.
 

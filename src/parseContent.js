@@ -114,7 +114,7 @@ function parseContent(content: string): Array<Object> {
 			chr = content[at];
 
 			return {
-				type: ContentNodeType.BINDING_KEYPATH,
+				type: ContentNodeType.KEYPATH,
 				at: keypathAt,
 				raw: content.slice(keypathAt, at),
 				value: keypath

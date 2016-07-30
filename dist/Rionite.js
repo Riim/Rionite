@@ -4,9 +4,9 @@
 	else if(typeof define === 'function' && define.amd)
 		define(["cellx"], factory);
 	else if(typeof exports === 'object')
-		exports["Rionite"] = factory(require("cellx"));
+		exports["rionite"] = factory(require("cellx"));
 	else
-		root["Rionite"] = factory(root["cellx"]);
+		root["rionite"] = factory(root["cellx"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_2__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -89,7 +89,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		getText: getText,
 
 		Template: Template,
-		t: function t(tmpl) {
+		template: function template(tmpl) {
 			return new Template(tmpl);
 		},
 
@@ -1483,8 +1483,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 		TEXT: 0,
-		BINDING: 1,
-		BINDING_KEYPATH: 2,
+		KEYPATH: 1,
+		BINDING: 2,
 		BINDING_FORMATTER: 3,
 		BINDING_FORMATTER_ARGUMENTS: 4,
 		BINDING_FORMATTER_ARGUMENT: 5
@@ -1612,7 +1612,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				chr = content[at];
 
 				return {
-					type: ContentNodeType.BINDING_KEYPATH,
+					type: ContentNodeType.KEYPATH,
 					at: keypathAt,
 					raw: content.slice(keypathAt, at),
 					value: keypath

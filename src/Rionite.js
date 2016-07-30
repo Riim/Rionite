@@ -31,7 +31,7 @@ let Rionite = module.exports = {
 	getText,
 
 	Template,
-	t(tmpl) {
+	template(tmpl) {
 		return new Template(tmpl);
 	},
 
