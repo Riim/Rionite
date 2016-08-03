@@ -1,9 +1,9 @@
+var Benchmark = require('benchmark');
+
 var html1 = 'textotext';
 var html2 = 'text&lt;o&gt;text';
 var html3 = 'textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext';
 var html4 = 'text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text';
-
-var Benchmark = require('benchmark');
 
 function unescapeHTML1(str) {
 	return str

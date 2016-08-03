@@ -893,7 +893,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (value: Object);
 	  */
 		_registerValue: function _registerValue(value) {
-			this._itemsByKey[value[this._keyName]] = value;
+			var itemsByKey = this._itemsByKey;
+			var key = value[this._keyName];
+
+			(itemsByKey[key] || (itemsByKey[key] = [])).push(value);
+
 			_registerValue2.call(this, value);
 		},
 
@@ -903,7 +907,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	  * @typesign (value: Object);
 	  */
 		_unregisterValue: function _unregisterValue(value) {
-			delete this._itemsByKey[value[this._keyName]];
+			var itemsByKey = this._itemsByKey;
+			var key = value[this._keyName];
+			var items = itemsByKey[key];
+
+			items.pop();
+
+			if (!items.length) {
+				delete itemsByKey[key];
+			}
+
 			_unregisterValue2.call(this, value);
 		},
 
@@ -939,8 +952,6 @@ return /******/ (function(modules) { // webpackBootstrap
 					writable: false,
 					value: key
 				});
-			} else if (this._itemsByKey[key]) {
-				throw new TypeError('Key of value must be unique');
 			}
 		},
 

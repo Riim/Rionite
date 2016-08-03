@@ -1,9 +1,9 @@
+var Benchmark = require('benchmark');
+
 var html1 = 'textotext';
 var html2 = 'text<o>text';
 var html3 = 'textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext';
 var html4 = 'text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text';
-
-var Benchmark = require('benchmark');
 
 function escapeHTML1(str) {
 	return str

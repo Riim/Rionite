@@ -36,7 +36,11 @@ let KeyedList = ObservableList.extend({
 	 * @typesign (value: Object);
 	 */
 	_registerValue(value) {
-		this._itemsByKey[value[this._keyName]] = value;
+		let itemsByKey = this._itemsByKey;
+		let key = value[this._keyName];
+
+		(itemsByKey[key] || (itemsByKey[key] = [])).push(value);
+
 		_registerValue.call(this, value);
 	},
 
@@ -45,7 +49,16 @@ let KeyedList = ObservableList.extend({
 	 * @typesign (value: Object);
 	 */
 	_unregisterValue(value) {
-		delete this._itemsByKey[value[this._keyName]];
+		let itemsByKey = this._itemsByKey;
+		let key = value[this._keyName];
+		let items = itemsByKey[key];
+
+		items.pop();
+
+		if (!items.length) {
+			delete itemsByKey[key];
+		}
+
 		_unregisterValue.call(this, value);
 	},
 
@@ -79,8 +92,6 @@ let KeyedList = ObservableList.extend({
 				writable: false,
 				value: key
 			});
-		} else if (this._itemsByKey[key]) {
-			throw new TypeError('Key of value must be unique');
 		}
 	},
 
