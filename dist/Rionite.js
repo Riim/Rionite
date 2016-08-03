@@ -224,6 +224,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 		/**
+	  * @typesign (key: int|string) -> boolean;
+	  */
+		has: function has(key) {
+			return typeof key == 'string' ? !!this._itemsByKey[key] : key < this.length;
+		},
+
+
+		/**
 	  * @override
 	  * @typesign (key: int|string) -> *;
 	  */

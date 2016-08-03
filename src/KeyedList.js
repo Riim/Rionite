@@ -96,6 +96,13 @@ let KeyedList = ObservableList.extend({
 	},
 
 	/**
+	 * @typesign (key: int|string) -> boolean;
+	 */
+	has(key) {
+		return typeof key == 'string' ? !!this._itemsByKey[key] : key < this.length;
+	},
+
+	/**
 	 * @override
 	 * @typesign (key: int|string) -> *;
 	 */
