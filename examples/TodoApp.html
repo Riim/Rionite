@@ -32,13 +32,13 @@ var Todo = cellx.EventEmitter.extend({
 	}
 });
 
-var todos = new Rionite.KeyedList([
+var todos = new rionite.IndexedList([
 	new Todo('Primum', true),
 	new Todo('Secundo'),
 	new Todo('Tertium')
 ]);
 
-Rionite.Component.extend('todo-view', {
+rionite.Component.extend('todo-view', {
 	Static: {
 		props: {
 			todoId: String
@@ -52,7 +52,7 @@ Rionite.Component.extend('todo-view', {
 	},
 
 	initialize: function() {
-		this.todo = todos.get(this.props.todoId);
+		this.todo = todos.get(this.props.todoId, 'id');
 	},
 
 	onCbDoneChange: function(evt) {
@@ -64,7 +64,7 @@ Rionite.Component.extend('todo-view', {
 	}
 });
 
-Rionite.Component.extend('todo-app', {
+rionite.Component.extend('todo-app', {
 	Static: {
 		template: `
 			<input class="todo-app__tf-new-todo">

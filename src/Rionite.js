@@ -1,4 +1,4 @@
-let KeyedList = require('./KeyedList');
+let IndexedList = require('./IndexedList');
 let DisposableMixin = require('./DisposableMixin');
 let ElementAttributes = require('./ElementAttributes');
 let Component = require('./Component');
@@ -20,7 +20,7 @@ let defer = require('./utils/defer');
 let htmlToFragment = require('./utils/htmlToFragment');
 
 let Rionite = module.exports = {
-	KeyedList,
+	IndexedList,
 	DisposableMixin,
 	ElementAttributes,
 	Component,

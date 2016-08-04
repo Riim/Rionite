@@ -47,12 +47,12 @@ Rionite.Component.extend('hello-user', {
 import { Component, registerComponent } from 'rionite';
 
 export default class HelloUser extends Component {
-	static template = 'Hello, {props.name}!';
-
     static elementIs = 'hello-user';
 	static props = {
         name: String
     };
+
+    static template = 'Hello, {props.name}!';
 
     elementAttached() {}
     elementDetached() {}
@@ -277,13 +277,13 @@ class User extends EventEmitter {
 let someUser = new User('Matroskin', '05/03/1986');
 
 class UserCard extends Component {
+    static elementIs = 'user-card';
+
 	static template = `
         <x-modal shown="{ageLess18}">
             Привет, {user.name}! Кажется вам ещё нет 18 лет.
         </x-modal>
     `;
-
-    static elementIs = 'user-card';
 
     @observable user = null;
 

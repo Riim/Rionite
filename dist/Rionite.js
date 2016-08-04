@@ -56,7 +56,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var KeyedList = __webpack_require__(1);
+	var IndexedList = __webpack_require__(1);
 	var DisposableMixin = __webpack_require__(3);
 	var ElementAttributes = __webpack_require__(4);
 	var Component = __webpack_require__(11);
@@ -78,7 +78,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var htmlToFragment = __webpack_require__(31);
 
 	var Rionite = module.exports = {
-		KeyedList: KeyedList,
+		IndexedList: IndexedList,
 		DisposableMixin: DisposableMixin,
 		ElementAttributes: ElementAttributes,
 		Component: Component,
@@ -128,42 +128,66 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _registerValue2 = _ObservableList$proto._registerValue;
 	var _unregisterValue2 = _ObservableList$proto._unregisterValue;
 	var _get = _ObservableList$proto.get;
-	var _set = _ObservableList$proto.set;
-	var _setRange = _ObservableList$proto.setRange;
-	var _add = _ObservableList$proto.add;
-	var _addRange2 = _ObservableList$proto._addRange;
-	var _insert = _ObservableList$proto.insert;
-	var _insertRange = _ObservableList$proto.insertRange;
 
 	/**
-	 * @class Rionite.KeyedList
+	 * @class Rionite.IndexedList
 	 * @extends {cellx.ObservableList}
 	 *
-	 * @typesign new KeyedList(items?: Array|cellx.ObservableList, opts?: {
+	 * @typesign new IndexedList(items?: Array|cellx.ObservableList, opts?: {
 	 *     adoptsItemChanges?: boolean,
 	 *     comparator?: (a, b) -> int,
 	 *     sorted?: boolean,
-	 *     keyName?: string
-	 * }) -> Rionite.KeyedList;
+	 *     keyIndexes?: Array<string|{ keyName: string, keyGenerator?: () -> string }>
+	 * }) -> Rionite.IndexedList;
 	 */
 
-	var KeyedList = ObservableList.extend({
-		constructor: function KeyedList(items, opts) {
-			this._itemsByKey = Object.create(null);
-			this._keyName = opts && opts.keyName || 'id';
+	var IndexedList = ObservableList.extend({
+		constructor: function IndexedList(items, opts) {
+			this._keyIndexesConfig = opts && opts.keyIndexes ? opts.keyIndexes.map(function (keyIndexConfig) {
+				return typeof keyIndexConfig == 'string' ? { keyName: keyIndexConfig } : keyIndexConfig;
+			}) : [{ keyName: 'id', keyGenerator: nextUID }];
+
+			this._keyIndexes = Object.create(null);
 
 			ObservableList.call(this, items, opts);
 		},
 
 		/**
 	  * @override
-	  * @typesign (value: Object);
 	  */
 		_registerValue: function _registerValue(value) {
-			var itemsByKey = this._itemsByKey;
-			var key = value[this._keyName];
+			if (value === Object(value)) {
+				var keyIndexesConfig = this._keyIndexesConfig;
+				var keyIndexes = this._keyIndexes;
 
-			(itemsByKey[key] || (itemsByKey[key] = [])).push(value);
+				for (var i = keyIndexesConfig.length; i;) {
+					var keyIndexConfig = keyIndexesConfig[--i];
+					var keyName = keyIndexConfig.keyName;
+					var keyIndex = keyIndexes[keyName] || (keyIndexes[keyName] = Object.create(null));
+					var key = value[keyName];
+
+					if (key == null) {
+						var keyGenerator = keyIndexConfig.keyGenerator;
+
+						if (keyGenerator) {
+							do {
+								key = keyGenerator();
+							} while (keyIndex[key]);
+
+							Object.defineProperty(value, keyName, {
+								configurable: false,
+								enumerable: false,
+								writable: false,
+								value: key
+							});
+						}
+					}
+
+					if (key != null) {
+						(keyIndex[key] || (keyIndex[key] = [])).push(value);
+					}
+				}
+			}
 
 			_registerValue2.call(this, value);
 		},
@@ -171,17 +195,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		/**
 	  * @override
-	  * @typesign (value: Object);
 	  */
 		_unregisterValue: function _unregisterValue(value) {
-			var itemsByKey = this._itemsByKey;
-			var key = value[this._keyName];
-			var items = itemsByKey[key];
+			if (value === Object(value)) {
+				var keyIndexesConfig = this._keyIndexesConfig;
+				var keyIndexes = this._keyIndexes;
 
-			items.pop();
+				for (var i = keyIndexesConfig.length; i;) {
+					var keyName = keyIndexesConfig[--i].keyName;
+					var key = value[keyName];
 
-			if (!items.length) {
-				delete itemsByKey[key];
+					if (key != null) {
+						var keyIndex = keyIndexes[keyName];
+						var items = keyIndex[key];
+
+						items.pop();
+
+						if (!items.length) {
+							delete keyIndex[key];
+						}
+					}
+				}
 			}
 
 			_unregisterValue2.call(this, value);
@@ -189,112 +223,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 		/**
-	  * @typesign (values: Array);
+	  * @override
+	  * @typesign (index: int) -> *;
+	  * @typesign (key: string, keyName?: string) -> *;
 	  */
-		_checkValues: function _checkValues(values) {
-			for (var i = 0, l = values.length; i < l; i++) {
-				this._checkValue(values[i]);
+		get: function get(key, keyName) {
+			if (keyName !== void 0) {
+				var keyIndex = this._keyIndexes[keyName];
+
+				if (!keyIndex) {
+					return void 0;
+				}
+
+				var items = keyIndex[key];
+				return items && items[items.length - 1];
 			}
-		},
 
-
-		/**
-	  * @typesign (value);
-	  */
-		_checkValue: function _checkValue(value) {
-			if (value !== Object(value)) {
-				throw new TypeError('Value must be an object');
-			}
-
-			var key = value[this._keyName];
-
-			if (key == null) {
-				do {
-					key = nextUID();
-				} while (this._itemsByKey[key]);
-
-				Object.defineProperty(value, this._keyName, {
-					configurable: false,
-					enumerable: false,
-					writable: false,
-					value: key
-				});
-			}
-		},
-
-
-		/**
-	  * @typesign (key: int|string) -> boolean;
-	  */
-		has: function has(key) {
-			return typeof key == 'string' ? !!this._itemsByKey[key] : key < this.length;
-		},
-
-
-		/**
-	  * @override
-	  * @typesign (key: int|string) -> *;
-	  */
-		get: function get(key) {
-			return typeof key == 'string' ? this._itemsByKey[key] : _get.call(this, key);
-		},
-
-
-		/**
-	  * @override
-	  */
-		set: function set(index, value) {
-			this._checkValue(value);
-			return _set.call(this, index, value);
-		},
-
-
-		/**
-	  * @override
-	  */
-		setRange: function setRange(index, values) {
-			this._checkValues(values);
-			return _setRange.call(this, index, values);
-		},
-
-
-		/**
-	  * @override
-	  */
-		add: function add(item) {
-			this._checkValue(item);
-			return _add.call(this, item);
-		},
-
-
-		/**
-	  * @override
-	  */
-		_addRange: function _addRange(items) {
-			this._checkValues(items);
-			_addRange2.call(this, items);
-		},
-
-
-		/**
-	  * @override
-	  */
-		insert: function insert(index, item) {
-			this._checkValue(item);
-			return _insert.call(this, index, item);
-		},
-
-
-		/**
-	  * @override
-	  */
-		insertRange: function insertRange(index, items) {
-			this._checkValues(items);
-			return _insertRange.call(this, index, items);
+			return _get.call(this, key);
 		}
 	});
 
-	module.exports = KeyedList;
+	module.exports = IndexedList;
 
 /***/ },
 /* 2 */
