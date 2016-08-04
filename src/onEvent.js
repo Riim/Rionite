@@ -33,8 +33,13 @@ function onEvent(evt) {
 				let handler = component[target.getAttribute(attrName)];
 
 				if (typeof handler == 'function') {
-					handler.call(component, evt, target);
-					targets.splice(i, 1);
+					if (handler.call(component, evt, target) === false) {
+						evt.isPropagationStopped = true;
+					}
+
+					if (evt.isPropagationStopped) {
+						return;
+					}
 				}
 			}
 		}
