@@ -856,10 +856,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _require = __webpack_require__(2);
 
 	var ObservableList = _require.ObservableList;
+	var Map = _require.js.Map;
 	var nextUID = _require.utils.nextUID;
 	var _ObservableList$proto = ObservableList.prototype;
 	var _registerValue2 = _ObservableList$proto._registerValue;
 	var _unregisterValue2 = _ObservableList$proto._unregisterValue;
+	var _contains = _ObservableList$proto.contains;
 	var _get = _ObservableList$proto.get;
 
 	/**
@@ -870,17 +872,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *     adoptsItemChanges?: boolean,
 	 *     comparator?: (a, b) -> int,
 	 *     sorted?: boolean,
-	 *     keyIndexes?: Array<string|{ keyName: string, keyGenerator?: () -> string }>
+	 *     indexes?: Array<string|{ keyName: string, keyGenerator?: () -> string }>
 	 * }) -> Rionite.IndexedList;
 	 */
 
 	var IndexedList = ObservableList.extend({
 		constructor: function IndexedList(items, opts) {
-			this._keyIndexesConfig = opts && opts.keyIndexes ? opts.keyIndexes.map(function (keyIndexConfig) {
-				return typeof keyIndexConfig == 'string' ? { keyName: keyIndexConfig } : keyIndexConfig;
+			this._indexesConfig = opts && opts.indexes ? opts.indexes.map(function (indexConfig) {
+				return typeof indexConfig == 'string' ? { keyName: indexConfig } : indexConfig;
 			}) : [{ keyName: 'id', keyGenerator: nextUID }];
 
-			this._keyIndexes = Object.create(null);
+			this._indexes = Object.create(null);
 
 			ObservableList.call(this, items, opts);
 		},
@@ -890,22 +892,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  */
 		_registerValue: function _registerValue(value) {
 			if (value === Object(value)) {
-				var keyIndexesConfig = this._keyIndexesConfig;
-				var keyIndexes = this._keyIndexes;
+				var indexesConfig = this._indexesConfig;
+				var indexes = this._indexes;
 
-				for (var i = keyIndexesConfig.length; i;) {
-					var keyIndexConfig = keyIndexesConfig[--i];
-					var keyName = keyIndexConfig.keyName;
-					var keyIndex = keyIndexes[keyName] || (keyIndexes[keyName] = Object.create(null));
+				for (var i = indexesConfig.length; i;) {
+					var indexConfig = indexesConfig[--i];
+					var keyName = indexConfig.keyName;
+					var index = indexes[keyName] || (indexes[keyName] = new Map());
 					var key = value[keyName];
 
 					if (key == null) {
-						var keyGenerator = keyIndexConfig.keyGenerator;
+						var keyGenerator = indexConfig.keyGenerator;
 
 						if (keyGenerator) {
 							do {
 								key = keyGenerator();
-							} while (keyIndex[key]);
+							} while (index.has(key));
 
 							Object.defineProperty(value, keyName, {
 								configurable: false,
@@ -917,7 +919,13 @@ return /******/ (function(modules) { // webpackBootstrap
 					}
 
 					if (key != null) {
-						(keyIndex[key] || (keyIndex[key] = [])).push(value);
+						var items = index.get(key);
+
+						if (items) {
+							items.push(value);
+						} else {
+							index.set(key, [value]);
+						}
 					}
 				}
 			}
@@ -931,21 +939,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  */
 		_unregisterValue: function _unregisterValue(value) {
 			if (value === Object(value)) {
-				var keyIndexesConfig = this._keyIndexesConfig;
-				var keyIndexes = this._keyIndexes;
+				var indexesConfig = this._indexesConfig;
+				var indexes = this._indexes;
 
-				for (var i = keyIndexesConfig.length; i;) {
-					var keyName = keyIndexesConfig[--i].keyName;
+				for (var i = indexesConfig.length; i;) {
+					var keyName = indexesConfig[--i].keyName;
 					var key = value[keyName];
 
 					if (key != null) {
-						var keyIndex = keyIndexes[keyName];
-						var items = keyIndex[key];
+						var index = indexes[keyName];
+						var items = index.get(key);
 
-						items.pop();
-
-						if (!items.length) {
-							delete keyIndex[key];
+						if (items.length == 1) {
+							index.delete(key);
+						} else {
+							items.pop();
 						}
 					}
 				}
@@ -957,19 +965,34 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		/**
 	  * @override
+	  * @typesign (value) -> boolean;
+	  * @typesign (key, keyName?: string) -> boolean;
+	  */
+		contains: function contains(key, keyName) {
+			if (arguments.length >= 2) {
+				var index = this._indexes[keyName];
+				return index ? index.has(key) : false;
+			}
+
+			return _contains.call(this, key);
+		},
+
+
+		/**
+	  * @override
 	  * @typesign (index: int) -> *;
-	  * @typesign (key: string, keyName?: string) -> *;
+	  * @typesign (key, keyName?: string) -> *;
 	  */
 		get: function get(key, keyName) {
-			if (keyName !== void 0) {
-				var keyIndex = this._keyIndexes[keyName];
+			if (arguments.length >= 2) {
+				var index = this._indexes[keyName];
 
-				if (!keyIndex) {
-					return void 0;
+				if (index) {
+					var items = index.get(key);
+					return items && items[items.length - 1];
 				}
 
-				var items = keyIndex[key];
-				return items && items[items.length - 1];
+				return void 0;
 			}
 
 			return _get.call(this, key);

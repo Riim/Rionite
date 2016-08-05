@@ -1,6 +1,6 @@
-let { ObservableList, utils: { nextUID } } = require('cellx');
+let { ObservableList, js: { Map }, utils: { nextUID } } = require('cellx');
 
-let { _registerValue, _unregisterValue, get } = ObservableList.prototype;
+let { _registerValue, _unregisterValue, contains, get } = ObservableList.prototype;
 
 /**
  * @class Rionite.IndexedList
@@ -10,18 +10,16 @@ let { _registerValue, _unregisterValue, get } = ObservableList.prototype;
  *     adoptsItemChanges?: boolean,
  *     comparator?: (a, b) -> int,
  *     sorted?: boolean,
- *     keyIndexes?: Array<string|{ keyName: string, keyGenerator?: () -> string }>
+ *     indexes?: Array<string|{ keyName: string, keyGenerator?: () -> string }>
  * }) -> Rionite.IndexedList;
  */
 let IndexedList = ObservableList.extend({
 	constructor: function IndexedList(items, opts) {
-		this._keyIndexesConfig = opts && opts.keyIndexes ?
-			opts.keyIndexes.map(
-				keyIndexConfig => typeof keyIndexConfig == 'string' ? { keyName: keyIndexConfig } : keyIndexConfig
-			) :
+		this._indexesConfig = opts && opts.indexes ?
+			opts.indexes.map(indexConfig => typeof indexConfig == 'string' ? { keyName: indexConfig } : indexConfig) :
 			[{ keyName: 'id', keyGenerator: nextUID }];
 
-		this._keyIndexes = Object.create(null);
+		this._indexes = Object.create(null);
 
 		ObservableList.call(this, items, opts);
 	},
@@ -31,22 +29,22 @@ let IndexedList = ObservableList.extend({
 	 */
 	_registerValue(value) {
 		if (value === Object(value)) {
-			let keyIndexesConfig = this._keyIndexesConfig;
-			let keyIndexes = this._keyIndexes;
+			let indexesConfig = this._indexesConfig;
+			let indexes = this._indexes;
 
-			for (let i = keyIndexesConfig.length; i;) {
-				let keyIndexConfig = keyIndexesConfig[--i];
-				let keyName = keyIndexConfig.keyName;
-				let keyIndex = keyIndexes[keyName] || (keyIndexes[keyName] = Object.create(null));
+			for (let i = indexesConfig.length; i;) {
+				let indexConfig = indexesConfig[--i];
+				let keyName = indexConfig.keyName;
+				let index = indexes[keyName] || (indexes[keyName] = new Map());
 				let key = value[keyName];
 
 				if (key == null) {
-					let keyGenerator = keyIndexConfig.keyGenerator;
+					let keyGenerator = indexConfig.keyGenerator;
 
 					if (keyGenerator) {
 						do {
 							key = keyGenerator();
-						} while (keyIndex[key]);
+						} while (index.has(key));
 
 						Object.defineProperty(value, keyName, {
 							configurable: false,
@@ -58,7 +56,13 @@ let IndexedList = ObservableList.extend({
 				}
 
 				if (key != null) {
-					(keyIndex[key] || (keyIndex[key] = [])).push(value);
+					let items = index.get(key);
+
+					if (items) {
+						items.push(value);
+					} else {
+						index.set(key, [value]);
+					}
 				}
 			}
 		}
@@ -71,21 +75,21 @@ let IndexedList = ObservableList.extend({
 	 */
 	_unregisterValue(value) {
 		if (value === Object(value)) {
-			let keyIndexesConfig = this._keyIndexesConfig;
-			let keyIndexes = this._keyIndexes;
+			let indexesConfig = this._indexesConfig;
+			let indexes = this._indexes;
 
-			for (let i = keyIndexesConfig.length; i;) {
-				let keyName = keyIndexesConfig[--i].keyName;
+			for (let i = indexesConfig.length; i;) {
+				let keyName = indexesConfig[--i].keyName;
 				let key = value[keyName];
 
 				if (key != null) {
-					let keyIndex = keyIndexes[keyName];
-					let items = keyIndex[key];
+					let index = indexes[keyName];
+					let items = index.get(key);
 
-					items.pop();
-
-					if (!items.length) {
-						delete keyIndex[key];
+					if (items.length == 1) {
+						index.delete(key);
+					} else {
+						items.pop();
 					}
 				}
 			}
@@ -96,19 +100,33 @@ let IndexedList = ObservableList.extend({
 
 	/**
 	 * @override
+	 * @typesign (value) -> boolean;
+	 * @typesign (key, keyName?: string) -> boolean;
+	 */
+	contains(key, keyName) {
+		if (arguments.length >= 2) {
+			let index = this._indexes[keyName];
+			return index ? index.has(key) : false;
+		}
+
+		return contains.call(this, key);
+	},
+
+	/**
+	 * @override
 	 * @typesign (index: int) -> *;
-	 * @typesign (key: string, keyName?: string) -> *;
+	 * @typesign (key, keyName?: string) -> *;
 	 */
 	get(key, keyName) {
-		if (keyName !== void 0) {
-			let keyIndex = this._keyIndexes[keyName];
+		if (arguments.length >= 2) {
+			let index = this._indexes[keyName];
 
-			if (!keyIndex) {
-				return void 0;
+			if (index) {
+				let items = index.get(key);
+				return items && items[items.length - 1];
 			}
 
-			let items = keyIndex[key];
-			return items && items[items.length - 1];
+			return void 0;
 		}
 
 		return get.call(this, key);
