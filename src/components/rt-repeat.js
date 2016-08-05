@@ -1,4 +1,4 @@
-let { Cell, js: { Map } } = require('cellx');
+let { Cell, js: { Map }, utils: { nextTick } } = require('cellx');
 let namePattern = require('../namePattern');
 let ContentNodeType = require('../ContentNodeType');
 let parseContent = require('../parseContent');
@@ -121,7 +121,9 @@ module.exports = Component.extend('rt-repeat', {
 			return;
 		}
 
-		this.emit('change');
+		nextTick(() => {
+			this.emit('change');
+		});
 	},
 
 	_renderListItem(item, index) {

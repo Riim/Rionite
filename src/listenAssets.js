@@ -1,6 +1,8 @@
 let hasOwn = Object.prototype.hasOwnProperty;
 
 function listenAssets(component, assetsConfig) {
+	let assets = component.assets;
+
 	for (let name in assetsConfig) {
 		if (hasOwn.call(assetsConfig, name)) {
 			let asset;
@@ -10,7 +12,7 @@ function listenAssets(component, assetsConfig) {
 			} else if (name == ':element') {
 				asset = component.element;
 			} else {
-				asset = component[name];
+				asset = assets[name];
 
 				if (!asset) {
 					continue;

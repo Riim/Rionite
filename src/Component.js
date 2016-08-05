@@ -131,9 +131,11 @@ let Component = EventEmitter.extend({
 		return props;
 	},
 
-	_elementAttached: null,
-
 	_bindings: null,
+
+	assets: null,
+
+	_elementAttached: null,
 
 	initialized: false,
 	isReady: false,
@@ -264,6 +266,7 @@ let Component = EventEmitter.extend({
 
 					if (!this.isReady) {
 						if (assetsConfig) {
+							this.assets = Object.create(null);
 							defineAssets(this, assetsConfig);
 						}
 
@@ -332,15 +335,15 @@ let Component = EventEmitter.extend({
 		let blockName = constr[KEY_BLOCK_NAME_IN_MARKUP];
 
 		if (!blockName) {
-			let ctor = constr;
+			let c = constr;
 
 			do {
-				if (ctor.template) {
-					blockName = ctor.elementIs;
+				if (c.template) {
+					blockName = c.elementIs;
 				}
 
-				ctor = Object.getPrototypeOf(ctor.prototype).constructor;
-			} while (ctor != Component);
+				c = Object.getPrototypeOf(c.prototype).constructor;
+			} while (c != Component);
 
 			if (!blockName) {
 				blockName = constr.elementIs;

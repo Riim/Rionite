@@ -1,4 +1,4 @@
-let { Cell } = require('cellx');
+let { Cell, utils: { nextTick } } = require('cellx');
 let ContentNodeType = require('../ContentNodeType');
 let parseContent = require('../parseContent');
 let compileBinding = require('../compileBinding');
@@ -96,6 +96,8 @@ module.exports = Component.extend('rt-if-then', {
 			}
 		}
 
-		this.emit('change');
+		nextTick(() => {
+			this.emit('change');
+		});
 	}
 });

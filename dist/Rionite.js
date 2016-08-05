@@ -899,9 +899,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			return props;
 		},
 
-		_elementAttached: null,
-
 		_bindings: null,
+
+		assets: null,
+
+		_elementAttached: null,
 
 		initialized: false,
 		isReady: false,
@@ -1027,6 +1029,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 						if (!_this.isReady) {
 							if (assetsConfig) {
+								_this.assets = Object.create(null);
 								defineAssets(_this, assetsConfig);
 							}
 
@@ -1097,15 +1100,15 @@ return /******/ (function(modules) { // webpackBootstrap
 			var blockName = constr[KEY_BLOCK_NAME_IN_MARKUP];
 
 			if (!blockName) {
-				var ctor = constr;
+				var c = constr;
 
 				do {
-					if (ctor.template) {
-						blockName = ctor.elementIs;
+					if (c.template) {
+						blockName = c.elementIs;
 					}
 
-					ctor = Object.getPrototypeOf(ctor.prototype).constructor;
-				} while (ctor != Component);
+					c = Object.getPrototypeOf(c.prototype).constructor;
+				} while (c != Component);
 
 				if (!blockName) {
 					blockName = constr.elementIs;
@@ -2215,9 +2218,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var hasOwn = Object.prototype.hasOwnProperty;
 
 	function defineAssets(component, assetsConfig) {
+		var assets = component.assets;
+
 		for (var name in assetsConfig) {
 			if (hasOwn.call(assetsConfig, name) && name.charAt(0) != ':') {
-				component[name] = component.$(assetsConfig[name].selector || '&__' + hyphenize(name));
+				assets[name] = component.$(assetsConfig[name].selector || '&__' + hyphenize(name));
 			}
 		}
 	}
@@ -2233,6 +2238,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var hasOwn = Object.prototype.hasOwnProperty;
 
 	function listenAssets(component, assetsConfig) {
+		var assets = component.assets;
+
 		for (var name in assetsConfig) {
 			if (hasOwn.call(assetsConfig, name)) {
 				var asset = void 0;
@@ -2242,7 +2249,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				} else if (name == ':element') {
 					asset = component.element;
 				} else {
-					asset = component[name];
+					asset = assets[name];
 
 					if (!asset) {
 						continue;
@@ -2558,6 +2565,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _require = __webpack_require__(2);
 
 	var Cell = _require.Cell;
+	var nextTick = _require.utils.nextTick;
 
 	var ContentNodeType = __webpack_require__(17);
 	var parseContent = __webpack_require__(18);
@@ -2635,6 +2643,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			this._render();
 		},
 		_render: function _render() {
+			var _this2 = this;
+
 			if (this._if.get()) {
 				var content = this.props.content.cloneNode(true);
 
@@ -2657,7 +2667,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 
-			this.emit('change');
+			nextTick(function () {
+				_this2.emit('change');
+			});
 		}
 	});
 
@@ -2689,6 +2701,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Cell = _require.Cell;
 	var Map = _require.js.Map;
+	var nextTick = _require.utils.nextTick;
 
 	var namePattern = __webpack_require__(19);
 	var ContentNodeType = __webpack_require__(17);
@@ -2814,7 +2827,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				return;
 			}
 
-			this.emit('change');
+			nextTick(function () {
+				_this.emit('change');
+			});
 		},
 		_renderListItem: function _renderListItem(item, index) {
 			var _Object$create;
