@@ -97,7 +97,7 @@ rionite.Component.extend('todo-app', {
 	},
 
 	onBtnAddClick() {
-		var tfNewTodo = this.tfNewTodo;
+		var tfNewTodo = this.assets.tfNewTodo;
 		todos.add(new Todo(tfNewTodo.value));
 		tfNewTodo.value = '';
 	}

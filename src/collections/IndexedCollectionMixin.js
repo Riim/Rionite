@@ -1,27 +1,14 @@
-let { ObservableList, js: { Map }, utils: { nextUID } } = require('cellx');
+let { ObservableCollectionMixin, js: { Map }, utils: { nextUID } } = require('cellx');
 
-let { _registerValue, _unregisterValue, contains, get } = ObservableList.prototype;
+let { _registerValue, _unregisterValue } = ObservableCollectionMixin.prototype;
 
-/**
- * @class Rionite.IndexedList
- * @extends {cellx.ObservableList}
- *
- * @typesign new IndexedList(items?: Array|cellx.ObservableList, opts?: {
- *     adoptsItemChanges?: boolean,
- *     comparator?: (a, b) -> int,
- *     sorted?: boolean,
- *     indexes?: Array<string|{ keyName: string, keyGenerator?: () -> string }>
- * }) -> Rionite.IndexedList;
- */
-let IndexedList = ObservableList.extend({
-	constructor: function IndexedList(items, opts) {
+let IndexedCollectionMixin = ObservableCollectionMixin.extend({
+	constructor: function IndexedCollectionMixin(opts) {
 		this._indexesConfig = opts && opts.indexes ?
 			opts.indexes.map(indexConfig => typeof indexConfig == 'string' ? { keyName: indexConfig } : indexConfig) :
 			[{ keyName: 'id', keyGenerator: nextUID }];
 
 		this._indexes = Object.create(null);
-
-		ObservableList.call(this, items, opts);
 	},
 
 	/**
@@ -96,41 +83,7 @@ let IndexedList = ObservableList.extend({
 		}
 
 		_unregisterValue.call(this, value);
-	},
-
-	/**
-	 * @override
-	 * @typesign (value) -> boolean;
-	 * @typesign (key, keyName?: string) -> boolean;
-	 */
-	contains(key, keyName) {
-		if (arguments.length >= 2) {
-			let index = this._indexes[keyName];
-			return index ? index.has(key) : false;
-		}
-
-		return contains.call(this, key);
-	},
-
-	/**
-	 * @override
-	 * @typesign (index: int) -> *;
-	 * @typesign (key, keyName?: string) -> *;
-	 */
-	get(key, keyName) {
-		if (arguments.length >= 2) {
-			let index = this._indexes[keyName];
-
-			if (index) {
-				let items = index.get(key);
-				return items && items[items.length - 1];
-			}
-
-			return void 0;
-		}
-
-		return get.call(this, key);
 	}
 });
 
-module.exports = IndexedList;
+module.exports = IndexedCollectionMixin;
