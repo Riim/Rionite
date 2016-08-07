@@ -1,4 +1,3 @@
-let { utils: { nextTick } } = require('cellx');
 let defer = require('./utils/defer');
 
 let hasOwn = Object.prototype.hasOwnProperty;
@@ -30,7 +29,7 @@ let ElementProtoMixin = {
 					component._elementAttached.set(true);
 				}
 			} else {
-				nextTick(() => {
+				defer(() => {
 					component._parentComponent = void 0;
 
 					if (!component.parentComponent) {

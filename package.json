@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.11.39",
+  "version": "0.11.40",
   "description": "",
   "main": "dist/Rionite-with-polyfills.js",
   "scripts": {
@@ -44,6 +44,6 @@
     "document-register-element": "^0.5.4"
   },
   "peerDependencies": {
-    "cellx": "^1.6.29"
+    "cellx": "^1.6.30"
   }
 }

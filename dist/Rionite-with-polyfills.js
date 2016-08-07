@@ -2075,10 +2075,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
-	var _require = __webpack_require__(2);
-
-	var nextTick = _require.utils.nextTick;
-
 	var defer = __webpack_require__(17);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
@@ -2110,7 +2106,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						component._elementAttached.set(true);
 					}
 				} else {
-					nextTick(function () {
+					defer(function () {
 						component._parentComponent = void 0;
 
 						if (!component.parentComponent) {
