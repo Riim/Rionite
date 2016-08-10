@@ -2307,11 +2307,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	module.exports = {
 		TEXT: 0,
-		KEYPATH: 1,
-		BINDING: 2,
+		BINDING: 1,
+		BINDING_KEYPATH: 2,
 		BINDING_FORMATTER: 3,
-		BINDING_FORMATTER_ARGUMENTS: 4,
-		BINDING_FORMATTER_ARGUMENT: 5
+		BINDING_FORMATTER_ARGUMENTS: 4
 	};
 
 /***/ },
@@ -2327,21 +2326,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	var reNameOrEmpty = RegExp(namePattern + '|', 'g');
 	var reKeypathOrEmpty = RegExp(keypathPattern + '|', 'g');
 	var reBooleanOrEmpty = /false|true|/g;
-	var reDecimalOrEmpty = /-?(?:\s*(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+	var reNumberOrEmpty = /(?:[+-]\s*)?(?:0b[01]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 	var reVacuumOrEmpty = /null|undefined|void 0|/g;
 
-	var NOT_VALUE = {};
+	var NOT_VALUE_AND_NOT_KEYPATH = {};
 
 	function parseContent(content) {
 		var at = 0;
-		var chr = content[0];
+		var chr = void 0;
 
 		var result = [];
 
 		for (var index; (index = content.indexOf('{', at)) > -1;) {
 			pushText(content.slice(at, index));
 			at = index;
-			chr = content[at];
+			chr = content.charAt(at);
 
 			var binding = readBinding();
 
@@ -2367,7 +2366,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				};
 			}
 
-			chr = content[++at];
+			at++;
+			chr = content.charAt(at);
+
 			return chr;
 		}
 
@@ -2420,7 +2421,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 
 			at = bindingAt;
-			chr = content[at];
+			chr = content.charAt(at);
 
 			return null;
 		}
@@ -2433,10 +2434,10 @@ return /******/ (function(modules) { // webpackBootstrap
 				var keypathAt = at;
 
 				at += keypath.length;
-				chr = content[at];
+				chr = content.charAt(at);
 
 				return {
-					type: ContentNodeType.KEYPATH,
+					type: ContentNodeType.BINDING_KEYPATH,
 					at: keypathAt,
 					raw: content.slice(keypathAt, at),
 					value: keypath
@@ -2457,7 +2458,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			if (name) {
 				at += name.length;
-				chr = content[at];
+				chr = content.charAt(at);
 
 				var args = chr == '(' ? readFormatterArguments() : null;
 
@@ -2471,7 +2472,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 
 			at = formatterAt;
-			chr = content[at];
+			chr = content.charAt(at);
 
 			return null;
 		}
@@ -2486,9 +2487,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			if (chr != ')') {
 				for (;;) {
-					var arg = readValue();
+					var arg = readValueOrFromThisKeypath();
 
-					if (arg !== NOT_VALUE) {
+					if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
 						skipWhitespaces();
 
 						if (chr == ',' || chr == ')') {
@@ -2505,7 +2506,8 @@ return /******/ (function(modules) { // webpackBootstrap
 					}
 
 					at = formatterArgumentsAt;
-					chr = content[at];
+					chr = content.charAt(at);
+
 					return null;
 				}
 			}
@@ -2518,6 +2520,11 @@ return /******/ (function(modules) { // webpackBootstrap
 				raw: content.slice(formatterArgumentsAt, at),
 				value: args
 			};
+		}
+
+		function readValueOrFromThisKeypath() {
+			var value = readValue();
+			return value === NOT_VALUE_AND_NOT_KEYPATH ? readFromThisKeypath() : value;
 		}
 
 		function readValue() {
@@ -2537,17 +2544,17 @@ return /******/ (function(modules) { // webpackBootstrap
 					}
 			}
 
-			var readers = [readBoolean, readDecimal, readVacuum];
+			var readers = [readBoolean, readNumber, readVacuum];
 
 			for (var i = 0, l = readers.length; i < l; i++) {
 				var value = readers[i]();
 
-				if (value !== NOT_VALUE) {
+				if (value !== NOT_VALUE_AND_NOT_KEYPATH) {
 					return value;
 				}
 			}
 
-			return NOT_VALUE;
+			return NOT_VALUE_AND_NOT_KEYPATH;
 		}
 
 		function readObject() {
@@ -2556,48 +2563,37 @@ return /******/ (function(modules) { // webpackBootstrap
 			next('{');
 			skipWhitespaces();
 
-			var obj = {};
+			for (; chr != '}';) {
+				if (chr == "'" || chr == '"' ? readString() !== NOT_VALUE_AND_NOT_KEYPATH : readObjectKey() !== null) {
+					skipWhitespaces();
 
-			if (chr != '}') {
-				for (;;) {
-					var key = chr == "'" || chr == '"' ? readString() : readObjectKey();
-
-					if (key !== null && key !== NOT_VALUE) {
+					if (chr == ':') {
+						next();
 						skipWhitespaces();
 
-						if (chr == ':') {
-							next();
+						if (readValueOrFromThisKeypath() !== NOT_VALUE_AND_NOT_KEYPATH) {
 							skipWhitespaces();
 
-							var value = readValue();
-
-							if (value !== NOT_VALUE) {
+							if (chr == ',') {
+								next();
 								skipWhitespaces();
-
-								if (chr == ',' || chr == '}') {
-									obj[key] = value;
-
-									if (chr == ',') {
-										next();
-										skipWhitespaces();
-										continue;
-									}
-
-									break;
-								}
+								continue;
+							} else if (chr == '}') {
+								break;
 							}
 						}
 					}
-
-					at = objectAt;
-					chr = content[at];
-					return NOT_VALUE;
 				}
+
+				at = objectAt;
+				chr = content.charAt(at);
+
+				return NOT_VALUE_AND_NOT_KEYPATH;
 			}
 
 			next();
 
-			return obj;
+			return content.slice(objectAt, at);
 		}
 
 		function readObjectKey() {
@@ -2606,7 +2602,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			if (key != '') {
 				at += key.length;
-				chr = content[at];
+				chr = content.charAt(at);
 				return key;
 			}
 
@@ -2619,37 +2615,22 @@ return /******/ (function(modules) { // webpackBootstrap
 			next('[');
 			skipWhitespaces();
 
-			var arr = [];
-
-			if (chr != ']') {
-				for (;;) {
-					var value = readValue();
-
-					if (value !== NOT_VALUE) {
-						skipWhitespaces();
-
-						if (chr == ',' || chr == ']') {
-							arr.push(value);
-
-							if (chr == ',') {
-								next();
-								skipWhitespaces();
-								continue;
-							}
-
-							break;
-						}
-					}
-
+			for (; chr != ']';) {
+				if (chr == ',') {
+					next();
+				} else if (readValueOrFromThisKeypath() === NOT_VALUE_AND_NOT_KEYPATH) {
 					at = arrayAt;
-					chr = content[at];
-					return NOT_VALUE;
+					chr = content.charAt(at);
+
+					return NOT_VALUE_AND_NOT_KEYPATH;
 				}
+
+				skipWhitespaces();
 			}
 
 			next();
 
-			return arr;
+			return content.slice(arrayAt, at);
 		}
 
 		function readBoolean() {
@@ -2658,29 +2639,34 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			if (bool != '') {
 				at += bool.length;
-				chr = content[at];
-				return bool == 'true';
+				chr = content.charAt(at);
+				return bool;
 			}
 
-			return NOT_VALUE;
+			return NOT_VALUE_AND_NOT_KEYPATH;
 		}
 
-		function readDecimal() {
-			reDecimalOrEmpty.lastIndex = at;
-			var decimal = reDecimalOrEmpty.exec(content)[0];
+		function readNumber() {
+			reNumberOrEmpty.lastIndex = at;
+			var num = reNumberOrEmpty.exec(content)[0];
 
-			if (decimal != '') {
-				at += decimal.length;
-				chr = content[at];
-				return +decimal;
+			if (num != '') {
+				at += num.length;
+				chr = content.charAt(at);
+				return num;
 			}
 
-			return NOT_VALUE;
+			return NOT_VALUE_AND_NOT_KEYPATH;
 		}
 
 		function readString() {
 			if (chr != "'" && chr != '"') {
-				next("'");
+				throw {
+					name: 'SyntaxError',
+					message: 'Expected "\'" or \'"\' instead of "' + chr + '"',
+					at: at,
+					content: content
+				};
 			}
 
 			var stringAt = at;
@@ -2698,8 +2684,8 @@ return /******/ (function(modules) { // webpackBootstrap
 				} else {
 					if (chr == '\r' || chr == '\n') {
 						at = stringAt;
-						chr = content[at];
-						return NOT_VALUE;
+						chr = content.charAt(at);
+						return NOT_VALUE_AND_NOT_KEYPATH;
 					}
 
 					str += chr;
@@ -2713,11 +2699,53 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			if (vacuum != '') {
 				at += vacuum.length;
-				chr = content[at];
+				chr = content.charAt(at);
 				return vacuum == 'null' ? null : void 0;
 			}
 
-			return NOT_VALUE;
+			return NOT_VALUE_AND_NOT_KEYPATH;
+		}
+
+		function readFromThisKeypath() {
+			var keypathAt = at;
+
+			if (content.slice(at, at + 4) != 'this') {
+				return NOT_VALUE_AND_NOT_KEYPATH;
+			}
+
+			at += 4;
+			chr = content.charAt(at);
+
+			for (;;) {
+				if (chr == '.') {
+					next();
+
+					reNameOrEmpty.lastIndex = at;
+					var name = reNameOrEmpty.exec(content)[0];
+
+					if (!name) {
+						break;
+					}
+
+					at += name.length;
+					chr = content.charAt(at);
+				} else if (chr == '[') {
+					next();
+
+					if ((chr == "'" || chr == '"' ? readString() === NOT_VALUE_AND_NOT_KEYPATH : readNumber() === NOT_VALUE_AND_NOT_KEYPATH && readFromThisKeypath() === NOT_VALUE_AND_NOT_KEYPATH) || chr != ']') {
+						break;
+					}
+
+					next();
+				} else {
+					return content.slice(keypathAt, at);
+				}
+			}
+
+			at = keypathAt;
+			chr = content.charAt(at);
+
+			return NOT_VALUE_AND_NOT_KEYPATH;
 		}
 
 		function skipWhitespaces() {

@@ -5,21 +5,22 @@ let ContentNodeType = require('./ContentNodeType');
 let reNameOrEmpty = RegExp(namePattern + '|', 'g');
 let reKeypathOrEmpty = RegExp(keypathPattern + '|', 'g');
 let reBooleanOrEmpty = /false|true|/g;
-let reDecimalOrEmpty = /-?(?:\s*(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+let reNumberOrEmpty =
+	/(?:[+-]\s*)?(?:0b[01]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 let reVacuumOrEmpty = /null|undefined|void 0|/g;
 
-let NOT_VALUE = {};
+let NOT_VALUE_AND_NOT_KEYPATH = {};
 
 function parseContent(content: string): Array<Object> {
 	let at = 0;
-	let chr = content[0];
+	let chr;
 
 	let result = [];
 
 	for (let index; (index = content.indexOf('{', at)) > -1;) {
 		pushText(content.slice(at, index));
 		at = index;
-		chr = content[at];
+		chr = content.charAt(at);
 
 		let binding = readBinding();
 
@@ -45,7 +46,9 @@ function parseContent(content: string): Array<Object> {
 			};
 		}
 
-		chr = content[++at];
+		at++;
+		chr = content.charAt(at);
+
 		return chr;
 	}
 
@@ -98,7 +101,7 @@ function parseContent(content: string): Array<Object> {
 		}
 
 		at = bindingAt;
-		chr = content[at];
+		chr = content.charAt(at);
 
 		return null;
 	}
@@ -111,10 +114,10 @@ function parseContent(content: string): Array<Object> {
 			let keypathAt = at;
 
 			at += keypath.length;
-			chr = content[at];
+			chr = content.charAt(at);
 
 			return {
-				type: ContentNodeType.KEYPATH,
+				type: ContentNodeType.BINDING_KEYPATH,
 				at: keypathAt,
 				raw: content.slice(keypathAt, at),
 				value: keypath
@@ -135,7 +138,7 @@ function parseContent(content: string): Array<Object> {
 
 		if (name) {
 			at += name.length;
-			chr = content[at];
+			chr = content.charAt(at);
 
 			let args = chr == '(' ? readFormatterArguments() : null;
 
@@ -149,7 +152,7 @@ function parseContent(content: string): Array<Object> {
 		}
 
 		at = formatterAt;
-		chr = content[at];
+		chr = content.charAt(at);
 
 		return null;
 	}
@@ -164,9 +167,9 @@ function parseContent(content: string): Array<Object> {
 
 		if (chr != ')') {
 			for (;;) {
-				let arg = readValue();
+				let arg = readValueOrFromThisKeypath();
 
-				if (arg !== NOT_VALUE) {
+				if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
 					skipWhitespaces();
 
 					if (chr == ',' || chr == ')') {
@@ -183,7 +186,8 @@ function parseContent(content: string): Array<Object> {
 				}
 
 				at = formatterArgumentsAt;
-				chr = content[at];
+				chr = content.charAt(at);
+
 				return null;
 			}
 		}
@@ -196,6 +200,11 @@ function parseContent(content: string): Array<Object> {
 			raw: content.slice(formatterArgumentsAt, at),
 			value: args
 		};
+	}
+
+	function readValueOrFromThisKeypath() {
+		let value = readValue();
+		return value === NOT_VALUE_AND_NOT_KEYPATH ? readFromThisKeypath() : value;
 	}
 
 	function readValue() {
@@ -212,17 +221,17 @@ function parseContent(content: string): Array<Object> {
 			}
 		}
 
-		let readers = [readBoolean, readDecimal, readVacuum];
+		let readers = [readBoolean, readNumber, readVacuum];
 
 		for (let i = 0, l = readers.length; i < l; i++) {
 			let value = readers[i]();
 
-			if (value !== NOT_VALUE) {
+			if (value !== NOT_VALUE_AND_NOT_KEYPATH) {
 				return value;
 			}
 		}
 
-		return NOT_VALUE;
+		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
 	function readObject() {
@@ -231,48 +240,37 @@ function parseContent(content: string): Array<Object> {
 		next('{');
 		skipWhitespaces();
 
-		let obj = {};
+		for (; chr != '}';) {
+			if (chr == "'" || chr == '"' ? readString() !== NOT_VALUE_AND_NOT_KEYPATH : readObjectKey() !== null) {
+				skipWhitespaces();
 
-		if (chr != '}') {
-			for (;;) {
-				let key = chr == "'" || chr == '"' ? readString() : readObjectKey();
-
-				if (key !== null && key !== NOT_VALUE) {
+				if (chr == ':') {
+					next();
 					skipWhitespaces();
 
-					if (chr == ':') {
-						next();
+					if (readValueOrFromThisKeypath() !== NOT_VALUE_AND_NOT_KEYPATH) {
 						skipWhitespaces();
 
-						let value = readValue();
-
-						if (value !== NOT_VALUE) {
+						if (chr == ',') {
+							next();
 							skipWhitespaces();
-
-							if (chr == ',' || chr == '}') {
-								obj[key] = value;
-
-								if (chr == ',') {
-									next();
-									skipWhitespaces();
-									continue;
-								}
-
-								break;
-							}
+							continue;
+						} else if (chr == '}') {
+							break;
 						}
 					}
 				}
-
-				at = objectAt;
-				chr = content[at];
-				return NOT_VALUE;
 			}
+
+			at = objectAt;
+			chr = content.charAt(at);
+
+			return NOT_VALUE_AND_NOT_KEYPATH;
 		}
 
 		next();
 
-		return obj;
+		return content.slice(objectAt, at);
 	}
 
 	function readObjectKey() {
@@ -281,7 +279,7 @@ function parseContent(content: string): Array<Object> {
 
 		if (key != '') {
 			at += key.length;
-			chr = content[at];
+			chr = content.charAt(at);
 			return key;
 		}
 
@@ -294,37 +292,22 @@ function parseContent(content: string): Array<Object> {
 		next('[');
 		skipWhitespaces();
 
-		let arr = [];
-
-		if (chr != ']') {
-			for (;;) {
-				let value = readValue();
-
-				if (value !== NOT_VALUE) {
-					skipWhitespaces();
-
-					if (chr == ',' || chr == ']') {
-						arr.push(value);
-
-						if (chr == ',') {
-							next();
-							skipWhitespaces();
-							continue;
-						}
-
-						break;
-					}
-				}
-
+		for (; chr != ']';) {
+			if (chr == ',') {
+				next();
+			} else if (readValueOrFromThisKeypath() === NOT_VALUE_AND_NOT_KEYPATH) {
 				at = arrayAt;
-				chr = content[at];
-				return NOT_VALUE;
+				chr = content.charAt(at);
+
+				return NOT_VALUE_AND_NOT_KEYPATH;
 			}
+
+			skipWhitespaces();
 		}
 
 		next();
 
-		return arr;
+		return content.slice(arrayAt, at);
 	}
 
 	function readBoolean() {
@@ -333,29 +316,34 @@ function parseContent(content: string): Array<Object> {
 
 		if (bool != '') {
 			at += bool.length;
-			chr = content[at];
-			return bool == 'true';
+			chr = content.charAt(at);
+			return bool;
 		}
 
-		return NOT_VALUE;
+		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	function readDecimal() {
-		reDecimalOrEmpty.lastIndex = at;
-		let decimal = reDecimalOrEmpty.exec(content)[0];
+	function readNumber() {
+		reNumberOrEmpty.lastIndex = at;
+		let num = reNumberOrEmpty.exec(content)[0];
 
-		if (decimal != '') {
-			at += decimal.length;
-			chr = content[at];
-			return +decimal;
+		if (num != '') {
+			at += num.length;
+			chr = content.charAt(at);
+			return num;
 		}
 
-		return NOT_VALUE;
+		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
 	function readString() {
 		if (chr != "'" && chr != '"') {
-			next("'");
+			throw {
+				name: 'SyntaxError',
+				message: `Expected "'" or '"' instead of "${ chr }"`,
+				at,
+				content
+			};
 		}
 
 		let stringAt = at;
@@ -373,8 +361,8 @@ function parseContent(content: string): Array<Object> {
 			} else {
 				if (chr == '\r' || chr == '\n') {
 					at = stringAt;
-					chr = content[at];
-					return NOT_VALUE;
+					chr = content.charAt(at);
+					return NOT_VALUE_AND_NOT_KEYPATH;
 				}
 
 				str += chr;
@@ -388,11 +376,59 @@ function parseContent(content: string): Array<Object> {
 
 		if (vacuum != '') {
 			at += vacuum.length;
-			chr = content[at];
+			chr = content.charAt(at);
 			return vacuum == 'null' ? null : void 0;
 		}
 
-		return NOT_VALUE;
+		return NOT_VALUE_AND_NOT_KEYPATH;
+	}
+
+	function readFromThisKeypath() {
+		let keypathAt = at;
+
+		if (content.slice(at, at + 4) != 'this') {
+			return NOT_VALUE_AND_NOT_KEYPATH;
+		}
+
+		at += 4;
+		chr = content.charAt(at);
+
+		for (;;) {
+			if (chr == '.') {
+				next();
+
+				reNameOrEmpty.lastIndex = at;
+				let name = reNameOrEmpty.exec(content)[0];
+
+				if (!name) {
+					break;
+				}
+
+				at += name.length;
+				chr = content.charAt(at);
+			} else if (chr == '[') {
+				next();
+
+				if (
+					(
+						(chr == "'" || chr == '"') ? readString() === NOT_VALUE_AND_NOT_KEYPATH :
+							readNumber() === NOT_VALUE_AND_NOT_KEYPATH &&
+							readFromThisKeypath() === NOT_VALUE_AND_NOT_KEYPATH
+					) || chr != ']'
+				) {
+					break;
+				}
+
+				next();
+			} else {
+				return content.slice(keypathAt, at);
+			}
+		}
+
+		at = keypathAt;
+		chr = content.charAt(at);
+
+		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
 	function skipWhitespaces() {
