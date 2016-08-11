@@ -956,7 +956,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			template: null,
 
-			assets: null
+			assets: {}
 		},
 
 		/**
