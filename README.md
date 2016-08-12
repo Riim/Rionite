@@ -486,3 +486,7 @@ Rionite.Component.extend('x-child', {
 
 </script>
 ```
+
+## Benchmarks
+
+[js-repaint-perfs](http://mathieuancelin.github.io/js-repaint-perfs/)

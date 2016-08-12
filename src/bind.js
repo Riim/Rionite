@@ -2,6 +2,7 @@ let { Cell } = require('cellx');
 let ContentNodeType = require('./ContentNodeType');
 let parseContent = require('./parseContent');
 let compileContent = require('./compileContent');
+let setAttribute = require('./utils/setAttribute');
 
 let reBinding = /{[^}]+}/;
 
@@ -10,7 +11,8 @@ function bind(node, component, context) {
 		context = component;
 	}
 
-	let bindings = [];
+	let bindings = null;
+	let childComponents = null;
 
 	function bind_(node) {
 		for (let child = node.firstChild; child; child = child.nextSibling) {
@@ -29,24 +31,14 @@ function bind(node, component, context) {
 								let name = attr.name;
 								let cell = new Cell(compileContent(parsedValue, value), {
 									owner: context,
-									onChange({ value }) {
-										if (value === false || value == null) {
-											child.removeAttribute(name);
-										} else {
-											child.setAttribute(name, value === true ? '' : value);
-										}
+									onChange(evt) {
+										setAttribute(child, name, evt.value);
 									}
 								});
 
-								value = cell.get();
+								setAttribute(child, name, cell.get());
 
-								if (value === false || value == null) {
-									child.removeAttribute(name);
-								} else {
-									child.setAttribute(name, value === true ? '' : value);
-								}
-
-								bindings.push(cell);
+								(bindings || (bindings = [])).push(cell);
 							}
 						}
 					}
@@ -57,7 +49,9 @@ function bind(node, component, context) {
 						childComponent.ownerComponent = component;
 						childComponent._parentComponent = void 0;
 						childComponent.props.context = context;
-						childComponent._elementAttached.set(true);
+						childComponent.isElementAttached = true;
+
+						(childComponents || (childComponents = [])).push(childComponent);
 					}
 
 					if (child.firstChild && (!childComponent || childComponent.constructor.template == null)) {
@@ -82,7 +76,7 @@ function bind(node, component, context) {
 
 							child.textContent = cell.get();
 
-							bindings.push(cell);
+							(bindings || (bindings = [])).push(cell);
 						}
 					}
 
@@ -94,7 +88,7 @@ function bind(node, component, context) {
 
 	bind_(node);
 
-	return bindings.length ? bindings : null;
+	return { bindings, childComponents };
 }
 
 module.exports = bind;

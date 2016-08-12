@@ -4,12 +4,13 @@ let ContentNodeType = require('../ContentNodeType');
 let parseContent = require('../parseContent');
 let compileBinding = require('../compileBinding');
 let bind = require('../bind');
+let attachChildComponentElements = require('../attachChildComponentElements');
 let Component = require('../Component');
 
 let slice = Array.prototype.slice;
 
 let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(\\S.*)$`);
-let invalidAttributeForMessage = 'Invalid value of attribute "for"';
+let invalidForAttributeMessage = 'Invalid value of attribute "for"';
 
 module.exports = Component.extend('rt-repeat', {
 	Static: {
@@ -31,99 +32,101 @@ module.exports = Component.extend('rt-repeat', {
 
 	_trackBy: void 0,
 
-	_lastNode: null,
-
-	_rawContent: null,
+	_rawItemContent: null,
 
 	_context: null,
 
-	_onElementAttachedChange(evt) {
-		if (evt.value) {
-			if (!this.initialized) {
-				let props = this.props;
-				let forAttrValue = props.for.match(reForAttributeValue);
+	_lastNode: null,
 
-				if (!forAttrValue) {
-					throw new SyntaxError(invalidAttributeForMessage);
-				}
+	_attachElement() {
+		if (!this.initialized) {
+			let props = this.props;
+			let forAttrValue = props.for.match(reForAttributeValue);
 
-				let parsedOf = parseContent(`{${ forAttrValue[2] }}`);
+			if (!forAttrValue) {
+				throw new SyntaxError(invalidForAttributeMessage);
+			}
 
-				if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
-					throw new SyntaxError(invalidAttributeForMessage);
-				}
+			let parsedOf = parseContent(`{${ forAttrValue[2] }}`);
 
-				this._itemName = forAttrValue[1];
+			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
+				throw new SyntaxError(invalidForAttributeMessage);
+			}
 
-				this._list = new Cell(compileBinding(parsedOf[0]), { owner: props.context });
+			this._itemName = forAttrValue[1];
 
-				this._itemMap = new Map();
+			this._list = new Cell(compileBinding(parsedOf[0]), { owner: props.context });
 
-				this._trackBy = props.trackBy;
+			this._itemMap = new Map();
 
-				let rawContent = this._rawContent = document.importNode(this.element.content, true);
+			this._trackBy = props.trackBy;
 
-				if (props.strip) {
-					let firstChild = rawContent.firstChild;
-					let lastChild = rawContent.lastChild;
+			let rawItemContent = this._rawItemContent = document.importNode(this.element.content, true);
 
-					if (firstChild == lastChild) {
-						if (firstChild.nodeType == 3) {
-							firstChild.textContent = firstChild.textContent.trim();
+			if (props.strip) {
+				let firstChild = rawItemContent.firstChild;
+				let lastChild = rawItemContent.lastChild;
+
+				if (firstChild == lastChild) {
+					if (firstChild.nodeType == 3) {
+						firstChild.textContent = firstChild.textContent.trim();
+					}
+				} else {
+					if (firstChild.nodeType == 3) {
+						if (!(firstChild.textContent = firstChild.textContent.replace(/^\s+/, ''))) {
+							rawItemContent.removeChild(firstChild);
 						}
-					} else {
-						if (firstChild.nodeType == 3) {
-							if (!(firstChild.textContent = firstChild.textContent.replace(/^\s+/, ''))) {
-								rawContent.removeChild(firstChild);
-							}
-						}
-						if (lastChild.nodeType == 3) {
-							if (!(lastChild.textContent = lastChild.textContent.replace(/\s+$/, ''))) {
-								rawContent.removeChild(lastChild);
-							}
+					}
+					if (lastChild.nodeType == 3) {
+						if (!(lastChild.textContent = lastChild.textContent.replace(/\s+$/, ''))) {
+							rawItemContent.removeChild(lastChild);
 						}
 					}
 				}
-
-				this._context = props.context;
-
-				this.initialized = true;
 			}
 
-			this._render();
+			this._context = props.context;
 
-			this._list.on('change', this._onListChange, this);
-		} else {
-			this._clearItemMap(this._itemMap);
-			this._list.off('change', this._onListChange, this);
+			this.initialized = true;
 		}
+
+		this._render(false);
+
+		this._list.on('change', this._onListChange, this);
+	},
+
+	_detachElement() {
+		this._clearWithItemMap(this._itemMap);
+		this._list.off('change', this._onListChange, this);
 	},
 
 	_onListChange() {
-		this._render();
+		this._render(true);
 	},
 
-	_render() {
+	_render(c) {
 		let oldItemMap = this._oldItemMap = this._itemMap;
 		this._itemMap = new Map();
 
 		let list = this._list.get();
-		let changed;
+		let changed = false;
 
 		if (list) {
 			this._lastNode = this.element;
-			changed = list.reduce((changed, item, index) => this._renderListItem(item, index) || changed, false);
+			changed = list.reduce((changed, item, index) => this._renderListItem(item, index) || changed, changed);
 		}
 
 		if (oldItemMap.size) {
-			this._clearItemMap(oldItemMap);
+			this._clearWithItemMap(oldItemMap);
 		} else if (!changed) {
 			return;
 		}
 
-		nextTick(() => {
-			this.emit('change');
-		});
+		if (c) {
+			nextTick(() => {
+				this.emit('change');
+			});
+		}
 	},
 
 	_renderListItem(item, index) {
@@ -170,9 +173,9 @@ module.exports = Component.extend('rt-repeat', {
 					df.appendChild(nodes[i]);
 				}
 
-				let lastNode = df.lastChild;
+				let newLastNode = df.lastChild;
 				this._lastNode.parentNode.insertBefore(df, this._lastNode.nextSibling);
-				this._lastNode = lastNode;
+				this._lastNode = newLastNode;
 			}
 
 			return true;
@@ -181,7 +184,7 @@ module.exports = Component.extend('rt-repeat', {
 		item = new Cell(item);
 		index = new Cell(index);
 
-		let content = this._rawContent.cloneNode(true);
+		let content = this._rawItemContent.cloneNode(true);
 		let context = Object.create(this._context, {
 			[this._itemName]: {
 				get() {
@@ -196,11 +199,13 @@ module.exports = Component.extend('rt-repeat', {
 			}
 		});
 
+		let { bindings, childComponents } = bind(content, this.ownerComponent, context);
+
 		let newItem = {
 			item,
 			index,
 			nodes: slice.call(content.childNodes),
-			bindings: bind(content, this.ownerComponent, context)
+			bindings
 		};
 
 		if (currentItems) {
@@ -209,19 +214,23 @@ module.exports = Component.extend('rt-repeat', {
 			this._itemMap.set(trackingValue, [newItem]);
 		}
 
-		let lastNode = content.lastChild;
+		let newLastNode = content.lastChild;
 		this._lastNode.parentNode.insertBefore(content, this._lastNode.nextSibling);
-		this._lastNode = lastNode;
+		this._lastNode = newLastNode;
+
+		if (childComponents) {
+			attachChildComponentElements(childComponents);
+		}
 
 		return true;
 	},
 
-	_clearItemMap(itemMap) {
-		itemMap.forEach(this._clearItems, this);
+	_clearWithItemMap(itemMap) {
+		itemMap.forEach(this._clearWithItems, this);
 		itemMap.clear();
 	},
 
-	_clearItems(items) {
+	_clearWithItems(items) {
 		for (let i = items.length; i;) {
 			let item = items[--i];
 			let bindings = item.bindings;

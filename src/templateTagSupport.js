@@ -3,4 +3,4 @@ div.innerHTML = '<template>1</template>';
 
 let template = div.firstChild;
 
-exports.templateTagSupported = !template.firstChild;
+exports.templateTagSupport = !template.firstChild;

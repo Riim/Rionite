@@ -65,11 +65,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var registerComponent = __webpack_require__(14);
 	var formatters = __webpack_require__(26);
 	var getText = __webpack_require__(27);
-	var Template = __webpack_require__(34);
-	var RtContent = __webpack_require__(35);
-	var RtIfThen = __webpack_require__(37);
-	var RtIfElse = __webpack_require__(38);
-	var RtRepeat = __webpack_require__(39);
+	var Template = __webpack_require__(36);
+	var RtContent = __webpack_require__(37);
+	var RtIfThen = __webpack_require__(39);
+	var RtIfElse = __webpack_require__(40);
+	var RtRepeat = __webpack_require__(41);
 	var camelize = __webpack_require__(11);
 	var hyphenize = __webpack_require__(12);
 	var escapeString = __webpack_require__(28);
@@ -77,7 +77,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var unescapeHTML = __webpack_require__(9);
 	var isRegExp = __webpack_require__(10);
 	var defer = __webpack_require__(17);
-	var htmlToFragment = __webpack_require__(33);
+	var htmlToFragment = __webpack_require__(35);
 
 	var Rionite = module.exports = {
 		IndexedCollectionMixin: IndexedCollectionMixin,
@@ -888,7 +888,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _require = __webpack_require__(2);
 
 	var EventEmitter = _require.EventEmitter;
-	var Cell = _require.Cell;
 	var _Symbol = _require.js.Symbol;
 	var createClass = _require.utils.createClass;
 
@@ -896,13 +895,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ElementAttributes = __webpack_require__(6);
 	var registerComponent = __webpack_require__(14);
 	var bind = __webpack_require__(18);
-	var defineAssets = __webpack_require__(29);
-	var listenAssets = __webpack_require__(30);
-	var eventTypes = __webpack_require__(31);
-	var onEvent = __webpack_require__(32);
+	var attachChildComponentElements = __webpack_require__(30);
+	var defineAssets = __webpack_require__(31);
+	var listenAssets = __webpack_require__(32);
+	var eventTypes = __webpack_require__(33);
+	var onEvent = __webpack_require__(34);
 	var camelize = __webpack_require__(11);
-	var defer = __webpack_require__(17);
-	var htmlToFragment = __webpack_require__(33);
+	var htmlToFragment = __webpack_require__(35);
 
 	var map = Array.prototype.map;
 
@@ -1027,7 +1026,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		assets: null,
 
-		_elementAttached: null,
+		isElementAttached: false,
 
 		initialized: false,
 		isReady: false,
@@ -1064,11 +1063,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 
-			this._elementAttached = new Cell(false, {
-				owner: this,
-				onChange: this._onElementAttachedChange
-			});
-
 			this.created();
 		},
 
@@ -1088,92 +1082,110 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 		},
-		_onElementAttachedChange: function _onElementAttachedChange(evt) {
-			var _this = this;
+		_attachElement: function _attachElement() {
+			if (!this.initialized) {
+				this.initialize();
+				this.initialized = true;
+			}
 
-			if (evt.value) {
-				if (!this.initialized) {
-					this.initialize();
-					this.initialized = true;
-				}
+			var constr = this.constructor;
+			var rawContent = constr[KEY_RAW_CONTENT];
+			var el = this.element;
 
-				var constr = this.constructor;
-				var rawContent = constr[KEY_RAW_CONTENT];
-				var el = this.element;
-
-				if (this.isReady) {
+			if (this.isReady) {
+				if (rawContent) {
 					for (var child; child = el.firstChild;) {
 						el.removeChild(child);
 					}
-				} else {
-					for (var c = constr;;) {
-						el.classList.add(c.elementIs);
-						c = Object.getPrototypeOf(c.prototype).constructor;
-
-						if (c == Component) {
-							break;
-						}
-					}
-
-					var attrs = this.elementAttributes;
-					var attributesConfig = constr.elementAttributes;
-
-					for (var name in attributesConfig) {
-						if (typeof attributesConfig[name] != 'function') {
-							var camelizedName = camelize(name);
-							attrs[camelizedName] = attrs[camelizedName];
-						}
-					}
-
-					if (constr.template != null) {
-						if (!rawContent) {
-							var template = constr.template;
-
-							rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment((typeof template == 'string' ? template : template.render(constr)).replace(reClosedCustomElementTag, '<$1$2></$1>'));
-						}
-
-						var inputContent = this.props.content = document.createDocumentFragment();
-
-						for (var _child; _child = el.firstChild;) {
-							inputContent.appendChild(_child);
-						}
-					}
-				}
-
-				var content = rawContent && rawContent.cloneNode(true);
-
-				if (content) {
-					this._bindings = bind(content, this);
-					this.element.appendChild(content);
-				}
-
-				if (!this.isReady || this.elementAttached !== elementAttached) {
-					defer(function () {
-						var assetsConfig = _this.constructor.assets;
-
-						if (!_this.isReady) {
-							if (assetsConfig) {
-								_this.assets = Object.create(null);
-								defineAssets(_this, assetsConfig);
-							}
-
-							_this.ready();
-
-							_this.isReady = true;
-						}
-
-						if (assetsConfig) {
-							listenAssets(_this, assetsConfig);
-						}
-
-						_this.elementAttached();
-					});
 				}
 			} else {
-				this.dispose();
-				this._destroyBindings();
-				this.elementDetached();
+				for (var c = constr;;) {
+					el.classList.add(c.elementIs);
+					c = Object.getPrototypeOf(c.prototype).constructor;
+
+					if (c == Component) {
+						break;
+					}
+				}
+
+				var attrs = this.elementAttributes;
+				var attributesConfig = constr.elementAttributes;
+
+				for (var name in attributesConfig) {
+					if (typeof attributesConfig[name] != 'function') {
+						var camelizedName = camelize(name);
+						attrs[camelizedName] = attrs[camelizedName];
+					}
+				}
+
+				if (constr.template != null) {
+					if (!rawContent) {
+						var template = constr.template;
+
+						rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment((typeof template == 'string' ? template : template.render(constr)).replace(reClosedCustomElementTag, '<$1$2></$1>'));
+					}
+
+					var inputContent = this.props.content = document.createDocumentFragment();
+
+					for (var _child; _child = el.firstChild;) {
+						inputContent.appendChild(_child);
+					}
+				}
 			}
+
+			if (rawContent) {
+				var content = rawContent.cloneNode(true);
+
+				var _bind = bind(content, this);
+
+				var bindings = _bind.bindings;
+				var childComponents = _bind.childComponents;
+
+
+				this._bindings = bindings;
+
+				this.element.appendChild(content);
+
+				if (childComponents) {
+					attachChildComponentElements(childComponents);
+				}
+
+				this._initAssets();
+			}
+
+			if (!this.isReady) {
+				if (!rawContent) {
+					this._initAssets();
+				}
+
+				this.ready();
+				this.isReady = true;
+			}
+
+			this.elementAttached();
+		},
+		_detachElement: function _detachElement() {
+			this.dispose();
+			this.elementDetached();
+		},
+		_initAssets: function _initAssets() {
+			this.assets = Object.create(null);
+
+			var assetsConfig = this.constructor.assets;
+
+			if (assetsConfig) {
+				defineAssets(this, assetsConfig);
+				listenAssets(this, assetsConfig);
+			}
+		},
+
+
+		/**
+	  * @override
+	  */
+		dispose: function dispose() {
+			this._destroyBindings();
+			DisposableMixin.prototype.dispose.call(this);
 		},
 		_destroyBindings: function _destroyBindings() {
 			var bindings = this._bindings;
@@ -1188,6 +1200,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 
 
+		// Callbacks
+
 		created: created,
 		initialize: initialize,
 		ready: ready,
@@ -1195,6 +1209,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		elementDetached: elementDetached,
 		elementMoved: elementMoved,
 		elementAttributeChanged: elementAttributeChanged,
+
+		// Utils
 
 		/**
 	  * @typesign (selector: string) -> ?Rionite.Component|HTMLElement;
@@ -1358,26 +1374,24 @@ return /******/ (function(modules) { // webpackBootstrap
 		attachedCallback: function attachedCallback() {
 			var component = this.$c;
 
-			if (component._elementAttached.get()) {
+			if (component.isElementAttached) {
 				if (component._parentComponent === null) {
 					component._parentComponent = void 0;
 					component.elementMoved();
-				} else {
-					component._parentComponent = void 0;
 				}
 			} else {
 				component._parentComponent = void 0;
 
 				if (component.parentComponent) {
 					if (component.ownerComponent) {
-						component._elementAttached.set(true);
+						component._attachElement();
 					}
 				} else {
 					defer(function () {
 						component._parentComponent = void 0;
 
 						if (!component.parentComponent) {
-							component._elementAttached.set(true);
+							component._attachElement();
 						}
 					});
 				}
@@ -1386,13 +1400,16 @@ return /******/ (function(modules) { // webpackBootstrap
 		detachedCallback: function detachedCallback() {
 			var component = this.$c;
 
-			component._parentComponent = null;
+			if (component.isElementAttached) {
+				component._parentComponent = null;
 
-			defer(function () {
-				if (component._parentComponent === null) {
-					component._elementAttached.set(false);
-				}
-			});
+				defer(function () {
+					if (component._parentComponent === null && component.isElementAttached) {
+						component.isElementAttached = false;
+						component._detachElement();
+					}
+				});
+			}
 		},
 		attributeChangedCallback: function attributeChangedCallback(name, oldValue, value) {
 			if (this.$c.isReady) {
@@ -1459,6 +1476,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ContentNodeType = __webpack_require__(19);
 	var parseContent = __webpack_require__(20);
 	var compileContent = __webpack_require__(23);
+	var setAttribute = __webpack_require__(29);
 
 	var reBinding = /{[^}]+}/;
 
@@ -1467,7 +1485,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			context = component;
 		}
 
-		var bindings = [];
+		var bindings = null;
+		var childComponents = null;
 
 		function bind_(node) {
 			var _loop = function _loop(child) {
@@ -1488,26 +1507,14 @@ return /******/ (function(modules) { // webpackBootstrap
 											var name = attr.name;
 											var cell = new Cell(compileContent(parsedValue, value), {
 												owner: context,
-												onChange: function onChange(_ref) {
-													var value = _ref.value;
-
-													if (value === false || value == null) {
-														child.removeAttribute(name);
-													} else {
-														child.setAttribute(name, value === true ? '' : value);
-													}
+												onChange: function onChange(evt) {
+													setAttribute(child, name, evt.value);
 												}
 											});
 
-											value = cell.get();
+											setAttribute(child, name, cell.get());
 
-											if (value === false || value == null) {
-												child.removeAttribute(name);
-											} else {
-												child.setAttribute(name, value === true ? '' : value);
-											}
-
-											bindings.push(cell);
+											(bindings || (bindings = [])).push(cell);
 										})();
 									}
 								}
@@ -1519,7 +1526,9 @@ return /******/ (function(modules) { // webpackBootstrap
 								childComponent.ownerComponent = component;
 								childComponent._parentComponent = void 0;
 								childComponent.props.context = context;
-								childComponent._elementAttached.set(true);
+								childComponent.isElementAttached = true;
+
+								(childComponents || (childComponents = [])).push(childComponent);
 							}
 
 							if (child.firstChild && (!childComponent || childComponent.constructor.template == null)) {
@@ -1545,7 +1554,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 									child.textContent = _cell.get();
 
-									bindings.push(_cell);
+									(bindings || (bindings = [])).push(_cell);
 								}
 							}
 
@@ -1561,7 +1570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		bind_(node);
 
-		return bindings.length ? bindings : null;
+		return { bindings: bindings, childComponents: childComponents };
 	}
 
 	module.exports = bind;
@@ -2357,6 +2366,41 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 29 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	function setAttribute(el, name, value) {
+		if (value === false || value == null) {
+			el.removeAttribute(name);
+		} else {
+			el.setAttribute(name, value === true ? '' : value);
+		}
+	}
+
+	module.exports = setAttribute;
+
+/***/ },
+/* 30 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	function attachChildComponentElements(childComponents) {
+		for (var i = 0, l = childComponents.length; i < l; i++) {
+			var childComponent = childComponents[i];
+
+			if (!childComponent.isElementAttached) {
+				childComponent.isElementAttached = true;
+				childComponent._attachElement();
+			}
+		}
+	}
+
+	module.exports = attachChildComponentElements;
+
+/***/ },
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2378,7 +2422,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = defineAssets;
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2418,7 +2462,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = listenAssets;
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2426,7 +2470,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2482,7 +2526,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = onEvent;
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2521,7 +2565,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = htmlToFragment;
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2602,7 +2646,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Template;
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2612,8 +2656,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _Symbol = _require.js.Symbol;
 
 	var bind = __webpack_require__(18);
+	var attachChildComponentElements = __webpack_require__(30);
 	var Component = __webpack_require__(13);
-	var templateTagSupported = __webpack_require__(36).templateTagSupported;
+	var templateTagSupport = __webpack_require__(38).templateTagSupport;
 
 	var KEY_TEMPLATES_FIXED = _Symbol('templatesFixed');
 
@@ -2629,70 +2674,79 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		_rawContent: void 0,
 
-		_onElementAttachedChange: function _onElementAttachedChange(evt) {
-			if (evt.value) {
-				var ownerComponent = this.ownerComponent;
-				var el = this.element;
-				var props = this.props;
+		_attachElement: function _attachElement() {
+			var ownerComponent = this.ownerComponent;
+			var el = this.element;
+			var props = this.props;
 
-				if (this.isReady) {
-					for (var child; child = el.firstChild;) {
-						el.removeChild(child);
-					}
-				} else {
-					var inputContent = props.content = document.createDocumentFragment();
+			if (this.isReady) {
+				for (var child; child = el.firstChild;) {
+					el.removeChild(child);
+				}
+			} else {
+				var inputContent = props.content = document.createDocumentFragment();
 
-					for (var _child; _child = el.firstChild;) {
-						inputContent.appendChild(_child);
-					}
-
-					var ownerComponentInputContent = ownerComponent.props.content;
-					var selector = this.elementAttributes.select;
-
-					if (selector) {
-						if (!templateTagSupported && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
-							var templates = ownerComponentInputContent.querySelectorAll('template');
-
-							for (var i = templates.length; i;) {
-								templates[--i].content;
-							}
-
-							ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
-						}
-
-						var selectedElements = ownerComponentInputContent.querySelectorAll(selector);
-						var selectedElementCount = selectedElements.length;
-
-						if (selectedElementCount) {
-							var rawContent = this._rawContent = document.createDocumentFragment();
-
-							for (var _i = 0; _i < selectedElementCount; _i++) {
-								rawContent.appendChild(selectedElements[_i].cloneNode(true));
-							}
-						} else {
-							this._rawContent = inputContent;
-						}
-					} else {
-						this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
-					}
-
-					this.isReady = true;
+				for (var _child; _child = el.firstChild;) {
+					inputContent.appendChild(_child);
 				}
 
-				var content = this._rawContent.cloneNode(true);
-				var getContext = props.getContext;
+				var ownerComponentInputContent = ownerComponent.props.content;
+				var selector = this.elementAttributes.select;
 
-				this._bindings = this._rawContent == props.content ? bind(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) : bind(content, ownerComponent.ownerComponent, getContext ? ownerComponent[getContext](this, ownerComponent.props.context) : ownerComponent.props.context);
+				if (selector) {
+					if (!templateTagSupport && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
+						var templates = ownerComponentInputContent.querySelectorAll('template');
 
-				el.appendChild(content);
-			} else {
-				this._destroyBindings();
+						for (var i = templates.length; i;) {
+							templates[--i].content;
+						}
+
+						ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
+					}
+
+					var selectedElements = ownerComponentInputContent.querySelectorAll(selector);
+					var selectedElementCount = selectedElements.length;
+
+					if (selectedElementCount) {
+						var rawContent = this._rawContent = document.createDocumentFragment();
+
+						for (var _i = 0; _i < selectedElementCount; _i++) {
+							rawContent.appendChild(selectedElements[_i].cloneNode(true));
+						}
+					} else {
+						this._rawContent = inputContent;
+					}
+				} else {
+					this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
+				}
+
+				this.isReady = true;
 			}
+
+			var content = this._rawContent.cloneNode(true);
+			var getContext = props.getContext;
+
+			var _ref = this._rawContent == props.content ? bind(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) : bind(content, ownerComponent.ownerComponent, getContext ? ownerComponent[getContext](this, ownerComponent.props.context) : ownerComponent.props.context);
+
+			var bindings = _ref.bindings;
+			var childComponents = _ref.childComponents;
+
+
+			this._bindings = bindings;
+
+			el.appendChild(content);
+
+			if (childComponents) {
+				attachChildComponentElements(childComponents);
+			}
+		},
+		_detachElement: function _detachElement() {
+			this._destroyBindings();
 		}
 	});
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2702,10 +2756,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var template = div.firstChild;
 
-	exports.templateTagSupported = !template.firstChild;
+	exports.templateTagSupport = !template.firstChild;
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2719,6 +2773,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var parseContent = __webpack_require__(20);
 	var compileBinding = __webpack_require__(25);
 	var bind = __webpack_require__(18);
+	var attachChildComponentElements = __webpack_require__(30);
 	var Component = __webpack_require__(13);
 
 	var slice = Array.prototype.slice;
@@ -2738,68 +2793,77 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		_nodes: null,
 
-		_onElementAttachedChange: function _onElementAttachedChange(evt) {
+		_attachElement: function _attachElement() {
 			var _this = this;
 
-			if (evt.value) {
-				if (!this.initialized) {
-					(function () {
-						var props = _this.props;
+			if (!this.initialized) {
+				(function () {
+					var props = _this.props;
 
-						props.content = document.importNode(_this.element.content, true);
+					props.content = document.importNode(_this.element.content, true);
 
-						var parsedIf = parseContent('{' + props.if + '}');
+					var parsedIf = parseContent('{' + props.if + '}');
 
-						if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType.BINDING) {
-							throw new SyntaxError('Invalid value of attribute "if"');
-						}
+					if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType.BINDING) {
+						throw new SyntaxError('Invalid value of attribute "if"');
+					}
 
-						var getState = compileBinding(parsedIf[0]);
+					var getState = compileBinding(parsedIf[0]);
 
-						_this._if = new Cell(_this._elseMode ? function () {
-							return !getState.call(this);
-						} : function () {
-							return !!getState.call(this);
-						}, { owner: props.context });
+					_this._if = new Cell(_this._elseMode ? function () {
+						return !getState.call(this);
+					} : function () {
+						return !!getState.call(this);
+					}, { owner: props.context });
 
-						_this.initialized = true;
-					})();
-				}
+					_this.initialized = true;
+				})();
+			}
 
-				this._render();
+			this._render(false);
 
-				this._if.on('change', this._onIfChange, this);
-			} else {
-				this._destroyBindings();
-				this._if.off('change', this._onIfChange, this);
+			this._if.on('change', this._onIfChange, this);
+		},
+		_detachElement: function _detachElement() {
+			this._destroyBindings();
+			this._if.off('change', this._onIfChange, this);
 
-				var nodes = this._nodes;
+			var nodes = this._nodes;
 
-				if (nodes) {
-					for (var i = nodes.length; i;) {
-						var node = nodes[--i];
-						var parentNode = node.parentNode;
+			if (nodes) {
+				for (var i = nodes.length; i;) {
+					var node = nodes[--i];
+					var parentNode = node.parentNode;
 
-						if (parentNode) {
-							parentNode.removeChild(node);
-						}
+					if (parentNode) {
+						parentNode.removeChild(node);
 					}
 				}
 			}
 		},
 		_onIfChange: function _onIfChange() {
-			this._render();
+			this._render(true);
 		},
-		_render: function _render() {
+		_render: function _render(changed) {
 			var _this2 = this;
 
 			if (this._if.get()) {
 				var content = this.props.content.cloneNode(true);
 
-				this._nodes = slice.call(content.childNodes);
+				var _bind = bind(content, this.ownerComponent, this.props.context);
 
-				this._bindings = bind(content, this.ownerComponent, this.props.context);
+				var bindings = _bind.bindings;
+				var childComponents = _bind.childComponents;
+
+
+				this._nodes = slice.call(content.childNodes);
+				this._bindings = bindings;
+
 				this.element.parentNode.insertBefore(content, this.element.nextSibling);
+
+				if (childComponents) {
+					attachChildComponentElements(childComponents);
+				}
 			} else {
 				this._destroyBindings();
 
@@ -2815,19 +2879,21 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}
 
-			nextTick(function () {
-				_this2.emit('change');
-			});
+			if (changed) {
+				nextTick(function () {
+					_this2.emit('change');
+				});
+			}
 		}
 	});
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var RtIfThen = __webpack_require__(37);
+	var RtIfThen = __webpack_require__(39);
 
 	module.exports = RtIfThen.extend('rt-if-else', {
 		Static: {
@@ -2838,7 +2904,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -2856,12 +2922,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	var parseContent = __webpack_require__(20);
 	var compileBinding = __webpack_require__(25);
 	var bind = __webpack_require__(18);
+	var attachChildComponentElements = __webpack_require__(30);
 	var Component = __webpack_require__(13);
 
 	var slice = Array.prototype.slice;
 
 	var reForAttributeValue = RegExp('^\\s*(' + namePattern + ')\\s+of\\s+(\\S.*)$');
-	var invalidAttributeForMessage = 'Invalid value of attribute "for"';
+	var invalidForAttributeMessage = 'Invalid value of attribute "for"';
 
 	module.exports = Component.extend('rt-repeat', {
 		Static: {
@@ -2883,101 +2950,102 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		_trackBy: void 0,
 
-		_lastNode: null,
-
-		_rawContent: null,
+		_rawItemContent: null,
 
 		_context: null,
 
-		_onElementAttachedChange: function _onElementAttachedChange(evt) {
-			if (evt.value) {
-				if (!this.initialized) {
-					var props = this.props;
-					var forAttrValue = props.for.match(reForAttributeValue);
+		_lastNode: null,
 
-					if (!forAttrValue) {
-						throw new SyntaxError(invalidAttributeForMessage);
-					}
+		_attachElement: function _attachElement() {
+			if (!this.initialized) {
+				var props = this.props;
+				var forAttrValue = props.for.match(reForAttributeValue);
 
-					var parsedOf = parseContent('{' + forAttrValue[2] + '}');
+				if (!forAttrValue) {
+					throw new SyntaxError(invalidForAttributeMessage);
+				}
 
-					if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
-						throw new SyntaxError(invalidAttributeForMessage);
-					}
+				var parsedOf = parseContent('{' + forAttrValue[2] + '}');
 
-					this._itemName = forAttrValue[1];
+				if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
+					throw new SyntaxError(invalidForAttributeMessage);
+				}
 
-					this._list = new Cell(compileBinding(parsedOf[0]), { owner: props.context });
+				this._itemName = forAttrValue[1];
 
-					this._itemMap = new Map();
+				this._list = new Cell(compileBinding(parsedOf[0]), { owner: props.context });
 
-					this._trackBy = props.trackBy;
+				this._itemMap = new Map();
 
-					var rawContent = this._rawContent = document.importNode(this.element.content, true);
+				this._trackBy = props.trackBy;
 
-					if (props.strip) {
-						var firstChild = rawContent.firstChild;
-						var lastChild = rawContent.lastChild;
+				var rawItemContent = this._rawItemContent = document.importNode(this.element.content, true);
 
-						if (firstChild == lastChild) {
-							if (firstChild.nodeType == 3) {
-								firstChild.textContent = firstChild.textContent.trim();
+				if (props.strip) {
+					var firstChild = rawItemContent.firstChild;
+					var lastChild = rawItemContent.lastChild;
+
+					if (firstChild == lastChild) {
+						if (firstChild.nodeType == 3) {
+							firstChild.textContent = firstChild.textContent.trim();
+						}
+					} else {
+						if (firstChild.nodeType == 3) {
+							if (!(firstChild.textContent = firstChild.textContent.replace(/^\s+/, ''))) {
+								rawItemContent.removeChild(firstChild);
 							}
-						} else {
-							if (firstChild.nodeType == 3) {
-								if (!(firstChild.textContent = firstChild.textContent.replace(/^\s+/, ''))) {
-									rawContent.removeChild(firstChild);
-								}
-							}
-							if (lastChild.nodeType == 3) {
-								if (!(lastChild.textContent = lastChild.textContent.replace(/\s+$/, ''))) {
-									rawContent.removeChild(lastChild);
-								}
+						}
+						if (lastChild.nodeType == 3) {
+							if (!(lastChild.textContent = lastChild.textContent.replace(/\s+$/, ''))) {
+								rawItemContent.removeChild(lastChild);
 							}
 						}
 					}
-
-					this._context = props.context;
-
-					this.initialized = true;
 				}
 
-				this._render();
+				this._context = props.context;
 
-				this._list.on('change', this._onListChange, this);
-			} else {
-				this._clearItemMap(this._itemMap);
-				this._list.off('change', this._onListChange, this);
+				this.initialized = true;
 			}
+
+			this._render(false);
+
+			this._list.on('change', this._onListChange, this);
+		},
+		_detachElement: function _detachElement() {
+			this._clearWithItemMap(this._itemMap);
+			this._list.off('change', this._onListChange, this);
 		},
 		_onListChange: function _onListChange() {
-			this._render();
+			this._render(true);
 		},
-		_render: function _render() {
+		_render: function _render(c) {
 			var _this = this;
 
 			var oldItemMap = this._oldItemMap = this._itemMap;
 			this._itemMap = new Map();
 
 			var list = this._list.get();
-			var changed = void 0;
+			var changed = false;
 
 			if (list) {
 				this._lastNode = this.element;
 				changed = list.reduce(function (changed, item, index) {
 					return _this._renderListItem(item, index) || changed;
-				}, false);
+				}, changed);
 			}
 
 			if (oldItemMap.size) {
-				this._clearItemMap(oldItemMap);
+				this._clearWithItemMap(oldItemMap);
 			} else if (!changed) {
 				return;
 			}
 
-			nextTick(function () {
-				_this.emit('change');
-			});
+			if (c) {
+				nextTick(function () {
+					_this.emit('change');
+				});
+			}
 		},
 		_renderListItem: function _renderListItem(item, index) {
 			var _Object$create;
@@ -3025,9 +3093,9 @@ return /******/ (function(modules) { // webpackBootstrap
 						df.appendChild(nodes[i]);
 					}
 
-					var _lastNode = df.lastChild;
+					var _newLastNode = df.lastChild;
 					this._lastNode.parentNode.insertBefore(df, this._lastNode.nextSibling);
-					this._lastNode = _lastNode;
+					this._lastNode = _newLastNode;
 				}
 
 				return true;
@@ -3036,7 +3104,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			item = new Cell(item);
 			index = new Cell(index);
 
-			var content = this._rawContent.cloneNode(true);
+			var content = this._rawItemContent.cloneNode(true);
 			var context = Object.create(this._context, (_Object$create = {}, _defineProperty(_Object$create, this._itemName, {
 				get: function get() {
 					return item.get();
@@ -3047,11 +3115,17 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}), _Object$create));
 
+			var _bind = bind(content, this.ownerComponent, context);
+
+			var bindings = _bind.bindings;
+			var childComponents = _bind.childComponents;
+
+
 			var newItem = {
 				item: item,
 				index: index,
 				nodes: slice.call(content.childNodes),
-				bindings: bind(content, this.ownerComponent, context)
+				bindings: bindings
 			};
 
 			if (currentItems) {
@@ -3060,17 +3134,21 @@ return /******/ (function(modules) { // webpackBootstrap
 				this._itemMap.set(trackingValue, [newItem]);
 			}
 
-			var lastNode = content.lastChild;
+			var newLastNode = content.lastChild;
 			this._lastNode.parentNode.insertBefore(content, this._lastNode.nextSibling);
-			this._lastNode = lastNode;
+			this._lastNode = newLastNode;
+
+			if (childComponents) {
+				attachChildComponentElements(childComponents);
+			}
 
 			return true;
 		},
-		_clearItemMap: function _clearItemMap(itemMap) {
-			itemMap.forEach(this._clearItems, this);
+		_clearWithItemMap: function _clearWithItemMap(itemMap) {
+			itemMap.forEach(this._clearWithItems, this);
 			itemMap.clear();
 		},
-		_clearItems: function _clearItems(items) {
+		_clearWithItems: function _clearWithItems(items) {
 			for (var i = items.length; i;) {
 				var item = items[--i];
 				var bindings = item.bindings;

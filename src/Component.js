@@ -1,14 +1,14 @@
-let { EventEmitter, Cell, js: { Symbol }, utils: { createClass } } = require('cellx');
+let { EventEmitter, js: { Symbol }, utils: { createClass } } = require('cellx');
 let DisposableMixin = require('./DisposableMixin');
 let ElementAttributes = require('./ElementAttributes');
 let registerComponent = require('./registerComponent');
 let bind = require('./bind');
+let attachChildComponentElements = require('./attachChildComponentElements');
 let defineAssets = require('./defineAssets');
 let listenAssets = require('./listenAssets');
 let eventTypes = require('./eventTypes');
 let onEvent = require('./onEvent');
 let camelize = require('./utils/camelize');
-let defer = require('./utils/defer');
 let htmlToFragment = require('./utils/htmlToFragment');
 
 let map = Array.prototype.map;
@@ -135,7 +135,7 @@ let Component = EventEmitter.extend({
 
 	assets: null,
 
-	_elementAttached: null,
+	isElementAttached: false,
 
 	initialized: false,
 	isReady: false,
@@ -175,11 +175,6 @@ let Component = EventEmitter.extend({
 			}
 		}
 
-		this._elementAttached = new Cell(false, {
-			owner: this,
-			onChange: this._onElementAttachedChange
-		});
-
 		this.created();
 	},
 
@@ -200,93 +195,109 @@ let Component = EventEmitter.extend({
 		}
 	},
 
-	_onElementAttachedChange(evt) {
-		if (evt.value) {
-			if (!this.initialized) {
-				this.initialize();
-				this.initialized = true;
-			}
+	_attachElement() {
+		if (!this.initialized) {
+			this.initialize();
+			this.initialized = true;
+		}
 
-			let constr = this.constructor;
-			let rawContent = constr[KEY_RAW_CONTENT];
-			let el = this.element;
+		let constr = this.constructor;
+		let rawContent = constr[KEY_RAW_CONTENT];
+		let el = this.element;
 
-			if (this.isReady) {
+		if (this.isReady) {
+			if (rawContent) {
 				for (let child; (child = el.firstChild);) {
 					el.removeChild(child);
 				}
-			} else {
-				for (let c = constr; ;) {
-					el.classList.add(c.elementIs);
-					c = Object.getPrototypeOf(c.prototype).constructor;
-
-					if (c == Component) {
-						break;
-					}
-				}
-
-				let attrs = this.elementAttributes;
-				let attributesConfig = constr.elementAttributes;
-
-				for (let name in attributesConfig) {
-					if (typeof attributesConfig[name] != 'function') {
-						let camelizedName = camelize(name);
-						attrs[camelizedName] = attrs[camelizedName];
-					}
-				}
-
-				if (constr.template != null) {
-					if (!rawContent) {
-						let template = constr.template;
-
-						rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(
-							(typeof template == 'string' ? template : template.render(constr))
-								.replace(reClosedCustomElementTag, '<$1$2></$1>')
-						);
-					}
-
-					let inputContent = this.props.content = document.createDocumentFragment();
-
-					for (let child; (child = el.firstChild);) {
-						inputContent.appendChild(child);
-					}
-				}
-			}
-
-			let content = rawContent && rawContent.cloneNode(true);
-
-			if (content) {
-				this._bindings = bind(content, this);
-				this.element.appendChild(content);
-			}
-
-			if (!this.isReady || this.elementAttached !== elementAttached) {
-				defer(() => {
-					let assetsConfig = this.constructor.assets;
-
-					if (!this.isReady) {
-						if (assetsConfig) {
-							this.assets = Object.create(null);
-							defineAssets(this, assetsConfig);
-						}
-
-						this.ready();
-
-						this.isReady = true;
-					}
-
-					if (assetsConfig) {
-						listenAssets(this, assetsConfig);
-					}
-
-					this.elementAttached();
-				});
 			}
 		} else {
-			this.dispose();
-			this._destroyBindings();
-			this.elementDetached();
+			for (let c = constr; ;) {
+				el.classList.add(c.elementIs);
+				c = Object.getPrototypeOf(c.prototype).constructor;
+
+				if (c == Component) {
+					break;
+				}
+			}
+
+			let attrs = this.elementAttributes;
+			let attributesConfig = constr.elementAttributes;
+
+			for (let name in attributesConfig) {
+				if (typeof attributesConfig[name] != 'function') {
+					let camelizedName = camelize(name);
+					attrs[camelizedName] = attrs[camelizedName];
+				}
+			}
+
+			if (constr.template != null) {
+				if (!rawContent) {
+					let template = constr.template;
+
+					rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(
+						(typeof template == 'string' ? template : template.render(constr))
+							.replace(reClosedCustomElementTag, '<$1$2></$1>')
+					);
+				}
+
+				let inputContent = this.props.content = document.createDocumentFragment();
+
+				for (let child; (child = el.firstChild);) {
+					inputContent.appendChild(child);
+				}
+			}
 		}
+
+		if (rawContent) {
+			let content = rawContent.cloneNode(true);
+			let { bindings, childComponents } = bind(content, this);
+
+			this._bindings = bindings;
+
+			this.element.appendChild(content);
+
+			if (childComponents) {
+				attachChildComponentElements(childComponents);
+			}
+
+			this._initAssets();
+		}
+
+		if (!this.isReady) {
+			if (!rawContent) {
+				this._initAssets();
+			}
+
+			this.ready();
+			this.isReady = true;
+		}
+
+		this.elementAttached();
+	},
+
+	_detachElement() {
+		this.dispose();
+		this.elementDetached();
+	},
+
+	_initAssets() {
+		this.assets = Object.create(null);
+
+		let assetsConfig = this.constructor.assets;
+
+		if (assetsConfig) {
+			defineAssets(this, assetsConfig);
+			listenAssets(this, assetsConfig);
+		}
+	},
+
+	/**
+	 * @override
+	 */
+	dispose() {
+		this._destroyBindings();
+		DisposableMixin.prototype.dispose.call(this);
 	},
 
 	_destroyBindings() {
@@ -301,6 +312,8 @@ let Component = EventEmitter.extend({
 		}
 	},
 
+	// Callbacks
+
 	created,
 	initialize,
 	ready,
@@ -308,6 +321,8 @@ let Component = EventEmitter.extend({
 	elementDetached,
 	elementMoved,
 	elementAttributeChanged,
+
+	// Utils
 
 	/**
 	 * @typesign (selector: string) -> ?Rionite.Component|HTMLElement;

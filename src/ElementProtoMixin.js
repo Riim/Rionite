@@ -14,26 +14,24 @@ let ElementProtoMixin = {
 	attachedCallback() {
 		let component = this.$c;
 
-		if (component._elementAttached.get()) {
+		if (component.isElementAttached) {
 			if (component._parentComponent === null) {
 				component._parentComponent = void 0;
 				component.elementMoved();
-			} else {
-				component._parentComponent = void 0;
 			}
 		} else {
 			component._parentComponent = void 0;
 
 			if (component.parentComponent) {
 				if (component.ownerComponent) {
-					component._elementAttached.set(true);
+					component._attachElement();
 				}
 			} else {
 				defer(() => {
 					component._parentComponent = void 0;
 
 					if (!component.parentComponent) {
-						component._elementAttached.set(true);
+						component._attachElement();
 					}
 				});
 			}
@@ -43,13 +41,16 @@ let ElementProtoMixin = {
 	detachedCallback() {
 		let component = this.$c;
 
-		component._parentComponent = null;
+		if (component.isElementAttached) {
+			component._parentComponent = null;
 
-		defer(() => {
-			if (component._parentComponent === null) {
-				component._elementAttached.set(false);
-			}
-		});
+			defer(() => {
+				if (component._parentComponent === null && component.isElementAttached) {
+					component.isElementAttached = false;
+					component._detachElement();
+				}
+			});
+		}
 	},
 
 	attributeChangedCallback(name, oldValue, value) {
