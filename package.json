@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.12.2",
+  "version": "0.12.3",
   "description": "",
   "main": "dist/Rionite-with-polyfills.js",
   "scripts": {
@@ -26,7 +26,7 @@
     "babel-preset-es2015": "^6.13.2",
     "benchmark": "^2.1.1",
     "cellx": "^1.6.30",
-    "eslint": "^3.2.2",
+    "eslint": "^3.3.0",
     "eslint-loader": "^1.5.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",

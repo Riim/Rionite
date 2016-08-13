@@ -47,9 +47,7 @@ function bind(node, component, context) {
 
 					if (childComponent) {
 						childComponent.ownerComponent = component;
-						childComponent._parentComponent = void 0;
 						childComponent.props.context = context;
-						childComponent.isElementAttached = true;
 
 						(childComponents || (childComponents = [])).push(childComponent);
 					}

@@ -8,19 +8,21 @@ function run(): void {
 	queue = null;
 
 	for (let i = 0, l = track.length; i < l; i++) {
+		let item = track[i];
+
 		try {
-			track[i]();
+			item.callback.call(item.context);
 		} catch (err) {
 			ErrorLogger.log(err);
 		}
 	}
 }
 
-function defer(cb: Function): void {
+function defer(cb: Function, context?): void {
 	if (queue) {
-		queue.push(cb);
+		queue.push({ callback: cb, context });
 	} else {
-		queue = [cb];
+		queue = [{ callback: cb, context }];
 		setTimeout(run, 1);
 	}
 }

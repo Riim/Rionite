@@ -165,6 +165,7 @@ let Component = EventEmitter.extend({
 
 		this.element = el;
 
+		el.rioniteComponent = this;
 		Object.defineProperty(el, '$c', { value: this });
 
 		if (props) {

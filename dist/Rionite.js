@@ -1053,6 +1053,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			this.element = el;
 
+			el.rioniteComponent = this;
 			Object.defineProperty(el, '$c', { value: this });
 
 			if (props) {
@@ -1358,22 +1359,33 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 
+	var _ElementProtoMixin;
+
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+	var _require = __webpack_require__(2);
+
+	var _Symbol = _require.js.Symbol;
+
 	var defer = __webpack_require__(17);
 
 	var hasOwn = Object.prototype.hasOwnProperty;
 
-	var ElementProtoMixin = {
-		get rioniteComponent() {
-			return this.$c;
-		},
+	var attached = _Symbol('attached');
+
+	var ElementProtoMixin = (_ElementProtoMixin = {
+		rioniteComponent: null,
 
 		get $c() {
 			return new this._rioniteComponentConstructor(this);
-		},
+		}
 
-		attachedCallback: function attachedCallback() {
-			var component = this.$c;
+	}, _defineProperty(_ElementProtoMixin, attached, false), _defineProperty(_ElementProtoMixin, 'attachedCallback', function attachedCallback() {
+		this[attached] = true;
 
+		var component = this.rioniteComponent;
+
+		if (component) {
 			if (component.isElementAttached) {
 				if (component._parentComponent === null) {
 					component._parentComponent = void 0;
@@ -1381,47 +1393,48 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			} else {
 				component._parentComponent = void 0;
-
-				if (component.parentComponent) {
-					if (component.ownerComponent) {
-						component._attachElement();
-					}
-				} else {
-					defer(function () {
-						component._parentComponent = void 0;
-
-						if (!component.parentComponent) {
-							component._attachElement();
-						}
-					});
-				}
+				component.isElementAttached = true;
+				component._attachElement();
 			}
-		},
-		detachedCallback: function detachedCallback() {
-			var component = this.$c;
+		} else {
+			defer(function () {
+				if (this[attached]) {
+					var _component = this.$c;
 
-			if (component.isElementAttached) {
-				component._parentComponent = null;
+					_component._parentComponent = void 0;
 
-				defer(function () {
-					if (component._parentComponent === null && component.isElementAttached) {
-						component.isElementAttached = false;
-						component._detachElement();
+					if (!_component.parentComponent) {
+						_component.isElementAttached = true;
+						_component._attachElement();
 					}
-				});
-			}
-		},
-		attributeChangedCallback: function attributeChangedCallback(name, oldValue, value) {
-			if (this.$c.isReady) {
-				var attrs = this.$c.elementAttributes;
-				var privateName = '_' + name;
-
-				if (hasOwn.call(attrs, privateName)) {
-					attrs[privateName].set(value);
 				}
+			}, this);
+		}
+	}), _defineProperty(_ElementProtoMixin, 'detachedCallback', function detachedCallback() {
+		this[attached] = false;
+
+		var component = this.rioniteComponent;
+
+		if (component && component.isElementAttached) {
+			component._parentComponent = null;
+
+			defer(function () {
+				if (component._parentComponent === null && component.isElementAttached) {
+					component.isElementAttached = false;
+					component._detachElement();
+				}
+			});
+		}
+	}), _defineProperty(_ElementProtoMixin, 'attributeChangedCallback', function attributeChangedCallback(name, oldValue, value) {
+		if (this.$c.isReady) {
+			var attrs = this.$c.elementAttributes;
+			var privateName = '_' + name;
+
+			if (hasOwn.call(attrs, privateName)) {
+				attrs[privateName].set(value);
 			}
 		}
-	};
+	}), _ElementProtoMixin);
 
 	module.exports = ElementProtoMixin;
 
@@ -1444,19 +1457,21 @@ return /******/ (function(modules) { // webpackBootstrap
 		queue = null;
 
 		for (var i = 0, l = track.length; i < l; i++) {
+			var item = track[i];
+
 			try {
-				track[i]();
+				item.callback.call(item.context);
 			} catch (err) {
 				ErrorLogger.log(err);
 			}
 		}
 	}
 
-	function defer(cb) {
+	function defer(cb, context) {
 		if (queue) {
-			queue.push(cb);
+			queue.push({ callback: cb, context: context });
 		} else {
-			queue = [cb];
+			queue = [{ callback: cb, context: context }];
 			setTimeout(run, 1);
 		}
 	}
@@ -1524,9 +1539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 							if (childComponent) {
 								childComponent.ownerComponent = component;
-								childComponent._parentComponent = void 0;
 								childComponent.props.context = context;
-								childComponent.isElementAttached = true;
 
 								(childComponents || (childComponents = [])).push(childComponent);
 							}

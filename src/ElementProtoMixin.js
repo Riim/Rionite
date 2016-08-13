@@ -1,47 +1,57 @@
+let { js: { Symbol } } = require('cellx');
 let defer = require('./utils/defer');
 
 let hasOwn = Object.prototype.hasOwnProperty;
 
+let attached = Symbol('attached');
+
 let ElementProtoMixin = {
-	get rioniteComponent() {
-		return this.$c;
-	},
+	rioniteComponent: null,
 
 	get $c() {
 		return new this._rioniteComponentConstructor(this);
 	},
 
+	[attached]: false,
+
 	attachedCallback() {
-		let component = this.$c;
+		this[attached] = true;
 
-		if (component.isElementAttached) {
-			if (component._parentComponent === null) {
-				component._parentComponent = void 0;
-				component.elementMoved();
-			}
-		} else {
-			component._parentComponent = void 0;
+		let component = this.rioniteComponent;
 
-			if (component.parentComponent) {
-				if (component.ownerComponent) {
-					component._attachElement();
+		if (component) {
+			if (component.isElementAttached) {
+				if (component._parentComponent === null) {
+					component._parentComponent = void 0;
+					component.elementMoved();
 				}
 			} else {
-				defer(() => {
+				component._parentComponent = void 0;
+				component.isElementAttached = true;
+				component._attachElement();
+			}
+		} else {
+			defer(function() {
+				if (this[attached]) {
+					let component = this.$c;
+
 					component._parentComponent = void 0;
 
 					if (!component.parentComponent) {
+						component.isElementAttached = true;
 						component._attachElement();
 					}
-				});
-			}
+				} 
+			}, this);
 		}
 	},
 
 	detachedCallback() {
-		let component = this.$c;
+		this[attached] = false;
 
-		if (component.isElementAttached) {
+		let component = this.rioniteComponent;
+
+		if (component && component.isElementAttached) {
 			component._parentComponent = null;
 
 			defer(() => {
