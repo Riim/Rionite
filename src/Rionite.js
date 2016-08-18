@@ -1,6 +1,3 @@
-let IndexedCollectionMixin = require('./collections/IndexedCollectionMixin');
-let IndexedMap = require('./collections/IndexedMap');
-let IndexedList = require('./collections/IndexedList');
 let DisposableMixin = require('./DisposableMixin');
 let ElementAttributes = require('./ElementAttributes');
 let Component = require('./Component');
@@ -22,9 +19,6 @@ let defer = require('./utils/defer');
 let htmlToFragment = require('./utils/htmlToFragment');
 
 let Rionite = module.exports = {
-	IndexedCollectionMixin,
-	IndexedMap,
-	IndexedList,
 	DisposableMixin,
 	ElementAttributes,
 	Component,
