@@ -691,7 +691,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			elementIs: void 0,
 			elementExtends: void 0,
 
-			elementAttributes: null,
+			elementAttributes: {},
 			props: null,
 
 			i18n: null,
@@ -1048,13 +1048,33 @@ return /******/ (function(modules) { // webpackBootstrap
 		});
 
 		var elementExtends = componentConstr.elementExtends;
+
 		var parentElementConstr = elementExtends ? elementConstructorMap[elementExtends] || window['HTML' + (elementExtends.charAt(0).toUpperCase() + elementExtends.slice(1)) + 'Element'] : HTMLElement;
-		var elementProto = Object.create(parentElementConstr.prototype);
+
+		var elementConstr = function elementConstr() {
+			parentElementConstr.call(this);
+		};
+		var elementProto = elementConstr.prototype = Object.create(parentElementConstr.prototype);
+
+		Object.defineProperty(elementConstr, 'observedAttributes', {
+			configurable: true,
+			enumerable: true,
+			get: function get() {
+				return Object.keys(componentConstr.elementAttributes);
+			}
+		});
 
 		mixin(elementProto, ElementProtoMixin);
+
+		Object.defineProperty(elementProto, 'constructor', {
+			configurable: true,
+			writable: true,
+			value: elementConstr
+		});
+
 		elementProto._rioniteComponentConstructor = componentConstr;
 
-		elementConstructorMap[elementIs] = document.registerElement(elementIs, elementExtends ? { extends: elementExtends, prototype: elementProto } : { prototype: elementProto });
+		elementConstructorMap[elementIs] = customElements.define(elementIs, elementConstr, elementExtends ? { extends: elementExtends } : null);
 
 		return componentConstr;
 	}
@@ -1143,7 +1163,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			return new this._rioniteComponentConstructor(this);
 		}
 
-	}, _defineProperty(_ElementProtoMixin, attached, false), _defineProperty(_ElementProtoMixin, 'attachedCallback', function attachedCallback() {
+	}, _defineProperty(_ElementProtoMixin, attached, false), _defineProperty(_ElementProtoMixin, 'connectedCallback', function connectedCallback() {
 		this[attached] = true;
 
 		var component = this.rioniteComponent;
@@ -1173,7 +1193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				}
 			}, this);
 		}
-	}), _defineProperty(_ElementProtoMixin, 'detachedCallback', function detachedCallback() {
+	}), _defineProperty(_ElementProtoMixin, 'disconnectedCallback', function disconnectedCallback() {
 		this[attached] = false;
 
 		var component = this.rioniteComponent;

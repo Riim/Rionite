@@ -32,18 +32,37 @@ function registerComponent(componentConstr) {
 	});
 
 	let elementExtends = componentConstr.elementExtends;
+
 	let parentElementConstr = elementExtends ?
 		elementConstructorMap[elementExtends] ||
 			window[`HTML${ elementExtends.charAt(0).toUpperCase() + elementExtends.slice(1) }Element`] :
 		HTMLElement;
-	let elementProto = Object.create(parentElementConstr.prototype);
+
+	let elementConstr = function() { parentElementConstr.call(this); };
+	let elementProto = elementConstr.prototype = Object.create(parentElementConstr.prototype);
+
+	Object.defineProperty(elementConstr, 'observedAttributes', {
+		configurable: true,
+		enumerable: true,
+		get() {
+			return Object.keys(componentConstr.elementAttributes);
+		}
+	});
 
 	mixin(elementProto, ElementProtoMixin);
+
+	Object.defineProperty(elementProto, 'constructor', {
+		configurable: true,
+		writable: true,
+		value: elementConstr
+	});
+
 	elementProto._rioniteComponentConstructor = componentConstr;
 
-	elementConstructorMap[elementIs] = document.registerElement(
+	elementConstructorMap[elementIs] = customElements.define(
 		elementIs,
-		elementExtends ? { extends: elementExtends, prototype: elementProto } : { prototype: elementProto }
+		elementConstr,
+		elementExtends ? { extends: elementExtends } : null
 	);
 
 	return componentConstr;

@@ -57,7 +57,7 @@ let Component = EventEmitter.extend({
 		elementIs: void 0,
 		elementExtends: void 0,
 
-		elementAttributes: null,
+		elementAttributes: {},
 		props: null,
 
 		i18n: null,
