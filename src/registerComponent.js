@@ -24,10 +24,11 @@ function registerComponent(componentConstr) {
 
 	inheritedStaticProperties.forEach(name => {
 		if (!hasOwn.call(componentConstr, name)) {
-			componentConstr[name] = (
+			Object.defineProperty(componentConstr, name, Object.getOwnPropertyDescriptor(
 				parentComponentConstr ||
-					(parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor)
-			)[name];
+					(parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor),
+				name
+			));
 		}
 	});
 
@@ -38,14 +39,17 @@ function registerComponent(componentConstr) {
 			window[`HTML${ elementExtends.charAt(0).toUpperCase() + elementExtends.slice(1) }Element`] :
 		HTMLElement;
 
-	let elementConstr = function() { parentElementConstr.call(this); };
+	let elementConstr = function(self) {
+		parentElementConstr.call(this, self);
+		return self;
+	};
 	let elementProto = elementConstr.prototype = Object.create(parentElementConstr.prototype);
 
 	Object.defineProperty(elementConstr, 'observedAttributes', {
 		configurable: true,
 		enumerable: true,
 		get() {
-			return Object.keys(componentConstr.elementAttributes);
+			return Object.keys(componentConstr.elementAttributes || {});
 		}
 	});
 

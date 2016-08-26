@@ -57,14 +57,14 @@ let Component = EventEmitter.extend({
 		elementIs: void 0,
 		elementExtends: void 0,
 
-		elementAttributes: {},
+		elementAttributes: null,
 		props: null,
 
 		i18n: null,
 
 		template: null,
 
-		assets: {}
+		assets: null
 	},
 
 	/**

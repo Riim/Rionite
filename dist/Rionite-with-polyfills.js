@@ -2114,14 +2114,14 @@ return /******/ (function(modules) { // webpackBootstrap
 			elementIs: void 0,
 			elementExtends: void 0,
 
-			elementAttributes: {},
+			elementAttributes: null,
 			props: null,
 
 			i18n: null,
 
 			template: null,
 
-			assets: {}
+			assets: null
 		},
 
 		/**
@@ -2466,7 +2466,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		inheritedStaticProperties.forEach(function (name) {
 			if (!hasOwn.call(componentConstr, name)) {
-				componentConstr[name] = (parentComponentConstr || (parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor))[name];
+				Object.defineProperty(componentConstr, name, Object.getOwnPropertyDescriptor(parentComponentConstr || (parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor), name));
 			}
 		});
 
@@ -2474,8 +2474,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		var parentElementConstr = elementExtends ? elementConstructorMap[elementExtends] || window['HTML' + (elementExtends.charAt(0).toUpperCase() + elementExtends.slice(1)) + 'Element'] : HTMLElement;
 
-		var elementConstr = function elementConstr() {
-			parentElementConstr.call(this);
+		var elementConstr = function elementConstr(self) {
+			parentElementConstr.call(this, self);
+			return self;
 		};
 		var elementProto = elementConstr.prototype = Object.create(parentElementConstr.prototype);
 
@@ -2483,7 +2484,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			configurable: true,
 			enumerable: true,
 			get: function get() {
-				return Object.keys(componentConstr.elementAttributes);
+				return Object.keys(componentConstr.elementAttributes || {});
 			}
 		});
 
