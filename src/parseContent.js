@@ -6,7 +6,7 @@ let reNameOrEmpty = RegExp(namePattern + '|', 'g');
 let reKeypathOrEmpty = RegExp(keypathPattern + '|', 'g');
 let reBooleanOrEmpty = /false|true|/g;
 let reNumberOrEmpty =
-	/(?:[+-]\s*)?(?:0b[01]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+	/(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 let reVacuumOrEmpty = /null|undefined|void 0|/g;
 
 let NOT_VALUE_AND_NOT_KEYPATH = {};

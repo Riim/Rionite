@@ -48,6 +48,6 @@
 		"es6": true
 	},
 	"globals": {
-		"$": true
+		"customElements": true
 	}
 }

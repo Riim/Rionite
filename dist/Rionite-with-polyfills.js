@@ -1806,27 +1806,47 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 	module.exports = mixin(Object.create(null), {
-		template: window.HTMLTemplateElement || HTMLElement,
-
+		a: window.HTMLAnchorElement,
+		blockquote: window.HTMLQuoteElement,
 		br: window.HTMLBRElement,
 		caption: window.HTMLTableCaptionElement,
 		col: window.HTMLTableColElement,
+		colgroup: window.HTMLTableColElement,
 		datalist: window.HTMLDataListElement,
+		del: window.HTMLModElement,
+		dir: window.HTMLDirectoryElement,
 		dl: window.HTMLDListElement,
+		document: window.HTMLDocument,
+		element: Element,
 		fieldset: window.HTMLFieldSetElement,
 		frameset: window.HTMLFrameSetElement,
+		h1: window.HTMLHeadingElement,
+		h2: window.HTMLHeadingElement,
+		h3: window.HTMLHeadingElement,
+		h4: window.HTMLHeadingElement,
+		h5: window.HTMLHeadingElement,
+		h6: window.HTMLHeadingElement,
 		hr: window.HTMLHRElement,
 		iframe: window.HTMLIFrameElement,
+		img: window.HTMLImageElement,
+		ins: window.HTMLModElement,
 		li: window.HTMLLIElement,
+		menuitem: window.HTMLMenuItemElement,
 		ol: window.HTMLOListElement,
 		optgroup: window.HTMLOptGroupElement,
+		p: window.HTMLParagraphElement,
+		q: window.HTMLQuoteElement,
 		tbody: window.HTMLTableSectionElement,
 		td: window.HTMLTableCellElement,
+		template: window.HTMLTemplateElement || HTMLElement,
 		textarea: window.HTMLTextAreaElement,
 		tfoot: window.HTMLTableSectionElement,
+		th: window.HTMLTableCellElement,
 		thead: window.HTMLTableSectionElement,
 		tr: window.HTMLTableRowElement,
-		ul: window.HTMLUListElement
+		ul: window.HTMLUListElement,
+		vhgroupv: window.HTMLUnknownElement,
+		vkeygen: window.HTMLUnknownElement
 	});
 
 /***/ },
@@ -2091,7 +2111,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var reNameOrEmpty = RegExp(namePattern + '|', 'g');
 	var reKeypathOrEmpty = RegExp(keypathPattern + '|', 'g');
 	var reBooleanOrEmpty = /false|true|/g;
-	var reNumberOrEmpty = /(?:[+-]\s*)?(?:0b[01]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+	var reNumberOrEmpty = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 	var reVacuumOrEmpty = /null|undefined|void 0|/g;
 
 	var NOT_VALUE_AND_NOT_KEYPATH = {};
@@ -2970,7 +2990,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	function onEvent(evt) {
 		var node = void 0;
 		var attrName = void 0;
-		var targets = [];
+		var targetElements = [];
 
 		if (evt instanceof Event) {
 			node = evt.target;
@@ -2982,7 +3002,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		for (;;) {
 			if (node.nodeType == 1 && node.hasAttribute(attrName)) {
-				targets.unshift(node);
+				targetElements.unshift(node);
 			}
 
 			node = node.parentNode;
@@ -2994,12 +3014,12 @@ return /******/ (function(modules) { // webpackBootstrap
 			var component = node.$c;
 
 			if (component) {
-				for (var i = targets.length; i;) {
-					var target = targets[--i];
-					var handler = component[target.getAttribute(attrName)];
+				for (var i = targetElements.length; i;) {
+					var targetElement = targetElements[--i];
+					var handler = component[targetElement.getAttribute(attrName)];
 
 					if (typeof handler == 'function') {
-						if (handler.call(component, evt, target) === false) {
+						if (handler.call(component, evt, targetElement.$c || targetElement) === false) {
 							evt.isPropagationStopped = true;
 						}
 

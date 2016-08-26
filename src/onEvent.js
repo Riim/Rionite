@@ -4,7 +4,7 @@
 function onEvent(evt) {
 	let node;
 	let attrName;
-	let targets = [];
+	let targetElements = [];
 
 	if (evt instanceof Event) {
 		node = evt.target;
@@ -16,7 +16,7 @@ function onEvent(evt) {
 
 	for (;;) {
 		if (node.nodeType == 1 && node.hasAttribute(attrName)) {
-			targets.unshift(node);
+			targetElements.unshift(node);
 		}
 
 		node = node.parentNode;
@@ -28,12 +28,12 @@ function onEvent(evt) {
 		let component = node.$c;
 
 		if (component) {
-			for (let i = targets.length; i;) {
-				let target = targets[--i];
-				let handler = component[target.getAttribute(attrName)];
+			for (let i = targetElements.length; i;) {
+				let targetElement = targetElements[--i];
+				let handler = component[targetElement.getAttribute(attrName)];
 
 				if (typeof handler == 'function') {
-					if (handler.call(component, evt, target) === false) {
+					if (handler.call(component, evt, targetElement.$c || targetElement) === false) {
 						evt.isPropagationStopped = true;
 					}
 
