@@ -2633,8 +2633,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			});
 		}
 	}), _defineProperty(_ElementProtoMixin, 'attributeChangedCallback', function attributeChangedCallback(name, oldValue, value) {
-		if (this.$c.isReady) {
-			var attrs = this.$c.elementAttributes;
+		var component = this.rioniteComponent;
+
+		if (component && component.isReady) {
+			var attrs = component.elementAttributes;
 			var privateName = '_' + name;
 
 			if (hasOwn.call(attrs, privateName)) {

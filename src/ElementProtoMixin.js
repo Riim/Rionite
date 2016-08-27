@@ -64,8 +64,10 @@ let ElementProtoMixin = {
 	},
 
 	attributeChangedCallback(name, oldValue, value) {
-		if (this.$c.isReady) {
-			let attrs = this.$c.elementAttributes;
+		let component = this.rioniteComponent;
+
+		if (component && component.isReady) {
+			let attrs = component.elementAttributes;
 			let privateName = '_' + name;
 
 			if (hasOwn.call(attrs, privateName)) {
