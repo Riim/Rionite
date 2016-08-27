@@ -64,7 +64,7 @@ let Component = EventEmitter.extend({
 
 		template: null,
 
-		assets: {}
+		assets: null
 	},
 
 	/**
