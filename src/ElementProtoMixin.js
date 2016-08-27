@@ -14,7 +14,7 @@ let ElementProtoMixin = {
 
 	[attached]: false,
 
-	attachedCallback() {
+	connectedCallback() {
 		this[attached] = true;
 
 		let component = this.rioniteComponent;
@@ -46,7 +46,7 @@ let ElementProtoMixin = {
 		}
 	},
 
-	detachedCallback() {
+	disconnectedCallback() {
 		this[attached] = false;
 
 		let component = this.rioniteComponent;
