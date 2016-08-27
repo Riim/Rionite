@@ -1,5 +1,5 @@
-let hasOwn = Object.prototype.hasOwnProperty;
-let slice = Array.prototype.slice;
+import { hasOwn } from './JS/Object';
+import { slice } from './JS/Array';
 
 let reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
 
@@ -13,7 +13,7 @@ function configure(config) {
 	getPluralIndex = Function('n', `return ${ localeSettings.plural };`);
 }
 
-function getText(context: string, key: string, plural: boolean, args: Array<string>): string {
+export default function getText(context: string, key: string, plural: boolean, args: Array<string>): string {
 	let rawText;
 
 	if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
@@ -85,5 +85,3 @@ configure({
 
 	texts: {}
 });
-
-module.exports = getText;

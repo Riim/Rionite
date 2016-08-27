@@ -1,24 +1,24 @@
-let DisposableMixin = require('./DisposableMixin');
-let ElementAttributes = require('./ElementAttributes');
-let Component = require('./Component');
-let registerComponent = require('./registerComponent');
-let formatters = require('./formatters');
-let getText = require('./getText');
-let Template = require('./Template');
-let RtContent = require('./components/rt-content');
-let RtIfThen = require('./components/rt-if-then');
-let RtIfElse = require('./components/rt-if-else');
-let RtRepeat = require('./components/rt-repeat');
-let camelize = require('./utils/camelize');
-let hyphenize = require('./utils/hyphenize');
-let escapeString = require('./utils/escapeString');
-let escapeHTML = require('./utils/escapeHTML');
-let unescapeHTML = require('./utils/unescapeHTML');
-let isRegExp = require('./utils/isRegExp');
-let defer = require('./utils/defer');
-let htmlToFragment = require('./utils/htmlToFragment');
+import DisposableMixin from './DisposableMixin';
+import ElementAttributes from './ElementAttributes';
+import Component from './Component';
+import registerComponent from './registerComponent';
+import formatters from './formatters';
+import getText from './getText';
+import Template from './Template';
+import RtContent from './Components/rt-content';
+import RtIfThen from './Components/rt-if-then';
+import RtIfElse from './Components/rt-if-else';
+import RtRepeat from './Components/rt-repeat';
+import camelize from './Utils/camelize';
+import hyphenize from './Utils/hyphenize';
+import escapeString from './Utils/escapeString';
+import escapeHTML from './Utils/escapeHTML';
+import unescapeHTML from './Utils/unescapeHTML';
+import isRegExp from './Utils/isRegExp';
+import defer from './Utils/defer';
+import htmlToFragment from './Utils/htmlToFragment';
 
-let Rionite = module.exports = {
+let Rionite = {
 	DisposableMixin,
 	ElementAttributes,
 	Component,
@@ -33,14 +33,14 @@ let Rionite = module.exports = {
 		return new Template(tmpl);
 	},
 
-	components: {
+	Components: {
 		RtContent,
 		RtIfThen,
 		RtIfElse,
 		RtRepeat
 	},
 
-	utils: {
+	Utils: {
 		camelize,
 		hyphenize,
 		escapeString,
@@ -52,3 +52,5 @@ let Rionite = module.exports = {
 	}
 };
 Rionite.Rionite = Rionite; // for destructuring
+
+export default Rionite;

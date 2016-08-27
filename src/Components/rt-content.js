@@ -1,12 +1,12 @@
-let { js: { Symbol } } = require('cellx');
-let bind = require('../bind');
-let attachChildComponentElements = require('../attachChildComponentElements');
-let Component = require('../Component');
-let templateTagSupport = require('../templateTagSupport').templateTagSupport;
+import { JS } from 'cellx';
+import bind from '../bind';
+import attachChildComponentElements from '../attachChildComponentElements';
+import Component from '../Component';
+import { templateTagSupport } from '../templateTagSupport';
 
-let KEY_TEMPLATES_FIXED = Symbol('templatesFixed');
+let KEY_TEMPLATES_FIXED = JS.Symbol('templatesFixed');
 
-module.exports = Component.extend('rt-content', {
+export default Component.extend('rt-content', {
 	Static: {
 		elementAttributes: {
 			select: String,

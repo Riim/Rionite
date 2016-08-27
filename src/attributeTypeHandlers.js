@@ -1,9 +1,11 @@
-let { js: { Map } } = require('cellx');
-let escapeHTML = require('./utils/escapeHTML');
-let unescapeHTML = require('./utils/unescapeHTML');
-let isRegExp = require('./utils/isRegExp');
+import { JS } from 'cellx';
+import escapeHTML from './Utils/escapeHTML';
+import unescapeHTML from './Utils/unescapeHTML';
+import isRegExp from './Utils/isRegExp';
 
-module.exports = new Map([
+let Map = JS.Map;
+
+export default new Map([
 	[Boolean, [value => {
 		return value !== null ? value != 'no' : false;
 	}, value => {

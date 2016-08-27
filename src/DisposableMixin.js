@@ -1,4 +1,6 @@
-let { EventEmitter, utils: { nextUID } } = require('cellx');
+import { EventEmitter, Utils } from 'cellx';
+
+let nextUID = Utils.nextUID;
 
 let DisposableMixin = EventEmitter.extend({
 	constructor: function DisposableMixin() {
@@ -225,4 +227,4 @@ let DisposableMixin = EventEmitter.extend({
 	}
 });
 
-module.exports = DisposableMixin;
+export default DisposableMixin;

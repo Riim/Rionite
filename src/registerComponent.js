@@ -1,8 +1,9 @@
-let { utils: { mixin } } = require('cellx');
-let elementConstructorMap = require('./elementConstructorMap');
-let ElementProtoMixin = require('./ElementProtoMixin');
+import { Utils } from 'cellx';
+import elementConstructorMap from './elementConstructorMap';
+import ElementProtoMixin from './ElementProtoMixin';
+import { hasOwn } from './JS/Object';
 
-let hasOwn = Object.prototype.hasOwnProperty;
+let mixin = Utils.mixin;
 
 let inheritedStaticProperties = [	
 	'elementExtends',
@@ -13,7 +14,7 @@ let inheritedStaticProperties = [
 	'assets'
 ];
 
-function registerComponent(componentConstr) {
+export default function registerComponent(componentConstr) {
 	let elementIs = componentConstr.elementIs;
 
 	if (!elementIs) {
@@ -71,5 +72,3 @@ function registerComponent(componentConstr) {
 
 	return componentConstr;
 }
-
-module.exports = registerComponent;

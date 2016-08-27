@@ -27,4 +27,4 @@ if (range.createContextualFragment) {
 	};
 }
 
-module.exports = htmlToFragment;
+export default htmlToFragment;

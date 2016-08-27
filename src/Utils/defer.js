@@ -1,4 +1,4 @@
-let { ErrorLogger } = require('cellx');
+import { ErrorLogger } from 'cellx';
 
 let queue;
 
@@ -18,7 +18,7 @@ function run(): void {
 	}
 }
 
-function defer(cb: Function, context?): void {
+export default function defer(cb: Function, context?): void {
 	if (queue) {
 		queue.push({ callback: cb, context });
 	} else {
@@ -26,5 +26,3 @@ function defer(cb: Function, context?): void {
 		setTimeout(run, 1);
 	}
 }
-
-module.exports = defer;

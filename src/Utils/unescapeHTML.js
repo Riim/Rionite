@@ -6,8 +6,6 @@ entityToCharMap['&lt;'] = '<';
 entityToCharMap['&gt;'] = '>';
 entityToCharMap['&quot;'] = '"';
 
-function unescapeHTML(str: string): string {
+export default function unescapeHTML(str: string): string {
 	return reEscapableEntities.test(str) ? str.replace(reEscapableEntities, entity => entityToCharMap[entity]) : str;
 }
-
-module.exports = unescapeHTML;

@@ -1,7 +1,7 @@
 /**
  * @typesign (evt: cellx~Event|Event);
  */
-function onEvent(evt) {
+export default function onEvent(evt) {
 	let node;
 	let attrName;
 	let targetElements = [];
@@ -45,5 +45,3 @@ function onEvent(evt) {
 		}
 	}
 }
-
-module.exports = onEvent;

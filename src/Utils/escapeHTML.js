@@ -6,8 +6,6 @@ charToEntityMap['<'] = '&lt;';
 charToEntityMap['>'] = '&gt;';
 charToEntityMap['"'] = '&quot;';
 
-function escapeHTML(str: string): string {
+export default function escapeHTML(str: string): string {
 	return reEscapableChars.test(str) ? str.replace(reEscapableChars, chr => charToEntityMap[chr]) : str;
 }
-
-module.exports = escapeHTML;

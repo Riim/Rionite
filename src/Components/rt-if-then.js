@@ -1,14 +1,15 @@
-let { Cell, utils: { nextTick } } = require('cellx');
-let ContentNodeType = require('../ContentNodeType');
-let parseContent = require('../parseContent');
-let compileBinding = require('../compileBinding');
-let bind = require('../bind');
-let attachChildComponentElements = require('../attachChildComponentElements');
-let Component = require('../Component');
+import { Cell, Utils } from 'cellx';
+import ContentNodeType from '../ContentNodeType';
+import parseContent from '../parseContent';
+import compileBinding from '../compileBinding';
+import bind from '../bind';
+import attachChildComponentElements from '../attachChildComponentElements';
+import Component from '../Component';
+import { slice } from '../JS/Array';
 
-let slice = Array.prototype.slice;
+let nextTick = Utils.nextTick;
 
-module.exports = Component.extend('rt-if-then', {
+export default Component.extend('rt-if-then', {
 	Static: {
 		elementExtends: 'template',
 

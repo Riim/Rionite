@@ -39,7 +39,7 @@ var todos = new window['cellx-indexed-collections'].IndexedList([
 	new Todo('Tertium')
 ]);
 
-rionite.Component.extend('todo-view', {
+Rionite.Component.extend('todo-view', {
 	Static: {
 		props: {
 			todoId: String
@@ -65,7 +65,7 @@ rionite.Component.extend('todo-view', {
 	}
 });
 
-rionite.Component.extend('todo-app', {
+Rionite.Component.extend('todo-app', {
 	Static: {
 		template: `
 			<input class="todo-app__tf-new-todo">

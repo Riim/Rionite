@@ -1,12 +1,12 @@
-let bindingToJSExpression = require('./bindingToJSExpression');
-let ContentNodeType = require('./ContentNodeType');
-let compileBinding = require('./compileBinding');
-let formatters = require('./formatters');
-let escapeString = require('./utils/escapeString');
+import bindingToJSExpression from './bindingToJSExpression';
+import ContentNodeType from './ContentNodeType';
+import compileBinding from './compileBinding';
+import formatters from './formatters';
+import escapeString from './Utils/escapeString';
 
 let cache = Object.create(null);
 
-function compileContent(parsedContent: Array<Object>, content: string): Function {
+export default function compileContent(parsedContent: Array<Object>, content: string): Function {
 	if (cache[content]) {
 		return cache[content];
 	}
@@ -54,5 +54,3 @@ function compileContent(parsedContent: Array<Object>, content: string): Function
 
 	return (cache[content] = Function(jsExpr));
 }
-
-module.exports = compileContent;

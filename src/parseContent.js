@@ -1,6 +1,6 @@
-let namePattern = require('./namePattern');
-let keypathPattern = require('./keypathPattern');
-let ContentNodeType = require('./ContentNodeType');
+import namePattern from './namePattern';
+import keypathPattern from './keypathPattern';
+import ContentNodeType from './ContentNodeType';
 
 let reNameOrEmpty = RegExp(namePattern + '|', 'g');
 let reKeypathOrEmpty = RegExp(keypathPattern + '|', 'g');
@@ -11,7 +11,7 @@ let reVacuumOrEmpty = /null|undefined|void 0|/g;
 
 let NOT_VALUE_AND_NOT_KEYPATH = {};
 
-function parseContent(content: string): Array<Object> {
+export default function parseContent(content: string): Array<Object> {
 	let at = 0;
 	let chr;
 
@@ -437,5 +437,3 @@ function parseContent(content: string): Array<Object> {
 		}
 	}
 }
-
-module.exports = parseContent;

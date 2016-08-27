@@ -1,9 +1,9 @@
-let bindingToJSExpression = require('./bindingToJSExpression');
-let formatters = require('./formatters');
+import bindingToJSExpression from './bindingToJSExpression';
+import formatters from './formatters';
 
 let cache = Object.create(null);
 
-function compileBinding(binding: Object): Function {
+export default function compileBinding(binding: Object): Function {
 	let bindingRaw = binding.raw;
 
 	if (cache[bindingRaw]) {
@@ -23,5 +23,3 @@ function compileBinding(binding: Object): Function {
 
 	return (cache[bindingRaw] = Function(jsExpr));
 }
-
-module.exports = compileBinding;

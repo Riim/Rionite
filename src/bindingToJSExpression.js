@@ -8,7 +8,11 @@ function formattersReducer(jsExpr, formatter) {
 	})`;
 }
 
-function bindingToJSExpression(binding: Object): { value: string, usesFormatters: boolean, usesTempVariable: boolean } {
+export default function bindingToJSExpression(binding: Object): {
+	value: string,
+	usesFormatters: boolean,
+	usesTempVariable: boolean
+} {
 	let bindingRaw = binding.raw;
 
 	if (cache[bindingRaw]) {
@@ -59,5 +63,3 @@ function bindingToJSExpression(binding: Object): { value: string, usesFormatters
 		usesTempVariable: true
 	});
 }
-
-module.exports = bindingToJSExpression;

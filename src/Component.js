@@ -1,17 +1,19 @@
-let { EventEmitter, js: { Symbol }, utils: { createClass } } = require('cellx');
-let DisposableMixin = require('./DisposableMixin');
-let ElementAttributes = require('./ElementAttributes');
-let registerComponent = require('./registerComponent');
-let bind = require('./bind');
-let attachChildComponentElements = require('./attachChildComponentElements');
-let defineAssets = require('./defineAssets');
-let listenAssets = require('./listenAssets');
-let eventTypes = require('./eventTypes');
-let onEvent = require('./onEvent');
-let camelize = require('./utils/camelize');
-let htmlToFragment = require('./utils/htmlToFragment');
+import { EventEmitter, JS, Utils } from 'cellx';
+import DisposableMixin from './DisposableMixin';
+import ElementAttributes from './ElementAttributes';
+import registerComponent from './registerComponent';
+import bind from './bind';
+import attachChildComponentElements from './attachChildComponentElements';
+import defineAssets from './defineAssets';
+import listenAssets from './listenAssets';
+import eventTypes from './eventTypes';
+import onEvent from './onEvent';
+import { map } from './JS/Array';
+import camelize from './Utils/camelize';
+import htmlToFragment from './Utils/htmlToFragment';
 
-let map = Array.prototype.map;
+let Symbol = JS.Symbol;
+let createClass = Utils.createClass;
 
 let KEY_RAW_CONTENT = Symbol('rawContent');
 let KEY_BLOCK_NAME_IN_MARKUP = Symbol('blockNameInMarkup');
@@ -372,8 +374,6 @@ let Component = EventEmitter.extend({
 	}
 });
 
-module.exports = Component;
-
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
@@ -381,3 +381,5 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 		document.addEventListener(type, onEvent);
 	});
 });
+
+export default Component;

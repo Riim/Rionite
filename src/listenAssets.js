@@ -1,6 +1,6 @@
-let hasOwn = Object.prototype.hasOwnProperty;
+import { hasOwn } from './JS/Object';
 
-function listenAssets(component, assetsConfig) {
+export default function listenAssets(component, assetsConfig) {
 	let assets = component.assets;
 
 	for (let name in assetsConfig) {
@@ -29,5 +29,3 @@ function listenAssets(component, assetsConfig) {
 		}
 	}
 }
-
-module.exports = listenAssets;

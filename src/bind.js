@@ -1,12 +1,12 @@
-let { Cell } = require('cellx');
-let ContentNodeType = require('./ContentNodeType');
-let parseContent = require('./parseContent');
-let compileContent = require('./compileContent');
-let setAttribute = require('./utils/setAttribute');
+import { Cell } from 'cellx';
+import ContentNodeType from './ContentNodeType';
+import parseContent from './parseContent';
+import compileContent from './compileContent';
+import setAttribute from './Utils/setAttribute';
 
 let reBinding = /{[^}]+}/;
 
-function bind(node, component, context) {
+export default function bind(node, component, context) {
 	if (!context) {
 		context = component;
 	}
@@ -88,5 +88,3 @@ function bind(node, component, context) {
 
 	return { bindings, childComponents };
 }
-
-module.exports = bind;

@@ -1,7 +1,7 @@
-let { EventEmitter, Cell } = require('cellx');
-let attributeTypeHandlers = require('./attributeTypeHandlers');
-let camelize = require('./utils/camelize');
-let hyphenize = require('./utils/hyphenize');
+import { EventEmitter, Cell } from 'cellx';
+import attributeTypeHandlers from './attributeTypeHandlers';
+import camelize from './Utils/camelize';
+import hyphenize from './Utils/hyphenize';
 
 /**
  * @typesign new ElementAttributes(el: HTMLElement) -> Rionite.ElementAttributes;
@@ -68,4 +68,4 @@ let ElementAttributes = EventEmitter.extend({
 	}
 });
 
-module.exports = ElementAttributes;
+export default ElementAttributes;

@@ -1,1 +1,1 @@
-module.exports = '[$_a-zA-Z][$\\w]*';
+export default '[$_a-zA-Z][$\\w]*';

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
 	TEXT: 0,
 	BINDING: 1,
 	BINDING_KEYPATH: 2,

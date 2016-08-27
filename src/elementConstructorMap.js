@@ -1,6 +1,8 @@
-let { utils: { mixin } } = require('cellx');
+import { Utils } from 'cellx';
 
-module.exports = mixin(Object.create(null), {
+let mixin = Utils.mixin;
+
+export default mixin(Object.create(null), {
 	a: window.HTMLAnchorElement,
 	blockquote: window.HTMLQuoteElement,
 	br: window.HTMLBRElement,

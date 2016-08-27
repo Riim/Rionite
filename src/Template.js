@@ -1,6 +1,6 @@
-let namePattern = require('./namePattern');
-let escapeString = require('./utils/escapeString');
-let escapeHTML = require('./utils/escapeHTML');
+import namePattern from './namePattern';
+import escapeString from './Utils/escapeString';
+import escapeHTML from './Utils/escapeHTML';
 
 let keypathPattern = '[$\\w]+(?:\\.[$\\w]+)*';
 let re = RegExp(
@@ -13,7 +13,7 @@ let re = RegExp(
 	'}}'
 );
 
-function Template(tmpl, parent = null) {
+export default function Template(tmpl, parent = null) {
 	this.parent = parent;
 
 	let currentBlock = { js: [] };
@@ -78,5 +78,3 @@ Template.prototype.extend = function(tmpl) {
 Template.prototype.render = function(data) {
 	return this._renderer.call(this._blocks, data || {}, escapeHTML);
 };
-
-module.exports = Template;

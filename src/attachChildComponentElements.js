@@ -1,4 +1,4 @@
-function attachChildComponentElements(childComponents) {
+export default function attachChildComponentElements(childComponents) {
 	for (let i = 0, l = childComponents.length; i < l; i++) {
 		let childComponent = childComponents[i];
 
@@ -8,5 +8,3 @@ function attachChildComponentElements(childComponents) {
 		}
 	}
 }
-
-module.exports = attachChildComponentElements;

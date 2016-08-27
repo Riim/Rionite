@@ -1,7 +1,8 @@
-let { js: { Symbol } } = require('cellx');
-let defer = require('./utils/defer');
+import { JS } from 'cellx';
+import { hasOwn } from './JS/Object';
+import defer from './Utils/defer';
 
-let hasOwn = Object.prototype.hasOwnProperty;
+let Symbol = JS.Symbol;
 
 let attached = Symbol('attached');
 
@@ -77,4 +78,4 @@ let ElementProtoMixin = {
 	}
 };
 
-module.exports = ElementProtoMixin;
+export default ElementProtoMixin;

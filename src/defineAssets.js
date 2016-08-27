@@ -1,8 +1,7 @@
-let hyphenize = require('./utils/hyphenize');
+import { hasOwn } from './JS/Object';
+import hyphenize from './Utils/hyphenize';
 
-let hasOwn = Object.prototype.hasOwnProperty;
-
-function defineAssets(component, assetsConfig) {
+export default function defineAssets(component, assetsConfig) {
 	let assets = component.assets;
 
 	for (let name in assetsConfig) {
@@ -11,5 +10,3 @@ function defineAssets(component, assetsConfig) {
 		}
 	}
 }
-
-module.exports = defineAssets;
