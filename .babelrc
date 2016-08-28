@@ -1,0 +1,10 @@
+{
+	"presets": [
+		["es2015", { "modules": false }]
+	],
+	"plugins": [
+		"external-helpers",
+		"syntax-flow",
+		"transform-flow-strip-types"
+	]
+}

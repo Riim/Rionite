@@ -75,7 +75,7 @@ export default function parseContent(content: string): Array<Object> {
 		next('{');
 		skipWhitespaces();
 
-		let keypath = readKeypath();
+		let keypath = readBindingKeypath();
 
 		if (keypath) {
 			skipWhitespaces();
@@ -106,7 +106,7 @@ export default function parseContent(content: string): Array<Object> {
 		return null;
 	}
 
-	function readKeypath() {
+	function readBindingKeypath() {
 		reKeypathOrEmpty.lastIndex = at;
 		let keypath = reKeypathOrEmpty.exec(content)[0];
 
@@ -167,7 +167,7 @@ export default function parseContent(content: string): Array<Object> {
 
 		if (chr != ')') {
 			for (;;) {
-				let arg = readValueOrFromThisKeypath();
+				let arg = readValueOrValueKeypath();
 
 				if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
 					skipWhitespaces();
@@ -202,9 +202,9 @@ export default function parseContent(content: string): Array<Object> {
 		};
 	}
 
-	function readValueOrFromThisKeypath() {
+	function readValueOrValueKeypath() {
 		let value = readValue();
-		return value === NOT_VALUE_AND_NOT_KEYPATH ? readFromThisKeypath() : value;
+		return value === NOT_VALUE_AND_NOT_KEYPATH ? readValueKeypath() : value;
 	}
 
 	function readValue() {
@@ -248,7 +248,7 @@ export default function parseContent(content: string): Array<Object> {
 					next();
 					skipWhitespaces();
 
-					if (readValueOrFromThisKeypath() !== NOT_VALUE_AND_NOT_KEYPATH) {
+					if (readValueOrValueKeypath() !== NOT_VALUE_AND_NOT_KEYPATH) {
 						skipWhitespaces();
 
 						if (chr == ',') {
@@ -295,7 +295,7 @@ export default function parseContent(content: string): Array<Object> {
 		for (; chr != ']';) {
 			if (chr == ',') {
 				next();
-			} else if (readValueOrFromThisKeypath() === NOT_VALUE_AND_NOT_KEYPATH) {
+			} else if (readValueOrValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH) {
 				at = arrayAt;
 				chr = content.charAt(at);
 
@@ -383,7 +383,7 @@ export default function parseContent(content: string): Array<Object> {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	function readFromThisKeypath() {
+	function readValueKeypath() {
 		let keypathAt = at;
 
 		if (content.slice(at, at + 4) != 'this') {
@@ -413,7 +413,7 @@ export default function parseContent(content: string): Array<Object> {
 					(
 						(chr == "'" || chr == '"') ? readString() === NOT_VALUE_AND_NOT_KEYPATH :
 							readNumber() === NOT_VALUE_AND_NOT_KEYPATH &&
-							readFromThisKeypath() === NOT_VALUE_AND_NOT_KEYPATH
+							readValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH
 					) || chr != ']'
 				) {
 					break;

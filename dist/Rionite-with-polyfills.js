@@ -2148,7 +2148,7 @@ function parseContent(content) {
 		next('{');
 		skipWhitespaces();
 
-		var keypath = readKeypath();
+		var keypath = readBindingKeypath();
 
 		if (keypath) {
 			skipWhitespaces();
@@ -2179,7 +2179,7 @@ function parseContent(content) {
 		return null;
 	}
 
-	function readKeypath() {
+	function readBindingKeypath() {
 		reKeypathOrEmpty.lastIndex = at;
 		var keypath = reKeypathOrEmpty.exec(content)[0];
 
@@ -2240,7 +2240,7 @@ function parseContent(content) {
 
 		if (chr != ')') {
 			for (;;) {
-				var arg = readValueOrFromThisKeypath();
+				var arg = readValueOrValueKeypath();
 
 				if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
 					skipWhitespaces();
@@ -2275,9 +2275,9 @@ function parseContent(content) {
 		};
 	}
 
-	function readValueOrFromThisKeypath() {
+	function readValueOrValueKeypath() {
 		var value = readValue();
-		return value === NOT_VALUE_AND_NOT_KEYPATH ? readFromThisKeypath() : value;
+		return value === NOT_VALUE_AND_NOT_KEYPATH ? readValueKeypath() : value;
 	}
 
 	function readValue() {
@@ -2324,7 +2324,7 @@ function parseContent(content) {
 					next();
 					skipWhitespaces();
 
-					if (readValueOrFromThisKeypath() !== NOT_VALUE_AND_NOT_KEYPATH) {
+					if (readValueOrValueKeypath() !== NOT_VALUE_AND_NOT_KEYPATH) {
 						skipWhitespaces();
 
 						if (chr == ',') {
@@ -2371,7 +2371,7 @@ function parseContent(content) {
 		for (; chr != ']';) {
 			if (chr == ',') {
 				next();
-			} else if (readValueOrFromThisKeypath() === NOT_VALUE_AND_NOT_KEYPATH) {
+			} else if (readValueOrValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH) {
 				at = arrayAt;
 				chr = content.charAt(at);
 
@@ -2459,7 +2459,7 @@ function parseContent(content) {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	function readFromThisKeypath() {
+	function readValueKeypath() {
 		var keypathAt = at;
 
 		if (content.slice(at, at + 4) != 'this') {
@@ -2485,7 +2485,7 @@ function parseContent(content) {
 			} else if (chr == '[') {
 				next();
 
-				if ((chr == "'" || chr == '"' ? readString() === NOT_VALUE_AND_NOT_KEYPATH : readNumber() === NOT_VALUE_AND_NOT_KEYPATH && readFromThisKeypath() === NOT_VALUE_AND_NOT_KEYPATH) || chr != ']') {
+				if ((chr == "'" || chr == '"' ? readString() === NOT_VALUE_AND_NOT_KEYPATH : readNumber() === NOT_VALUE_AND_NOT_KEYPATH && readValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH) || chr != ']') {
 					break;
 				}
 
