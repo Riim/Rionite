@@ -36,14 +36,11 @@ export default Component.extend('rt-if-then', {
 				throw new SyntaxError('Invalid value of attribute "if"');
 			}
 
-			let getState = compileBinding(parsedIf[0]);
+			let getIfValue = compileBinding(parsedIf[0]);
 
-			this._if = new Cell(
-				this._elseMode ?
-					function() { return !getState.call(this); } :
-					function() { return !!getState.call(this); },
-				{ owner: props.context }
-			);
+			this._if = new Cell(function() {
+				return !!getIfValue.call(this);
+			}, { owner: props.context });
 
 			this.initialized = true;
 		}
@@ -76,7 +73,7 @@ export default Component.extend('rt-if-then', {
 	},
 
 	_render(changed) {
-		if (this._if.get()) {
+		if (this._elseMode ? !this._if.get() : this._if.get()) {
 			let content = this.props.content.cloneNode(true);
 
 			let { bindings, childComponents } = bind(content, this.ownerComponent, this.props.context);

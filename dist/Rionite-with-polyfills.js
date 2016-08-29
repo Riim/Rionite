@@ -3569,12 +3569,10 @@ var RtIfThen = Component.extend('rt-if-then', {
 					throw new SyntaxError('Invalid value of attribute "if"');
 				}
 
-				var getState = compileBinding(parsedIf[0]);
+				var getIfValue = compileBinding(parsedIf[0]);
 
-				_this._if = new cellx.Cell(_this._elseMode ? function () {
-					return !getState.call(this);
-				} : function () {
-					return !!getState.call(this);
+				_this._if = new cellx.Cell(function () {
+					return !!getIfValue.call(this);
 				}, { owner: props.context });
 
 				_this.initialized = true;
@@ -3608,7 +3606,7 @@ var RtIfThen = Component.extend('rt-if-then', {
 	_render: function _render(changed) {
 		var _this2 = this;
 
-		if (this._if.get()) {
+		if (this._elseMode ? !this._if.get() : this._if.get()) {
 			var content = this.props.content.cloneNode(true);
 
 			var _bind = bind(content, this.ownerComponent, this.props.context);
