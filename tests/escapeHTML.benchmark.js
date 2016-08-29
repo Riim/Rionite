@@ -1,9 +1,9 @@
-var Benchmark = require('benchmark');
+let Benchmark = require('benchmark');
 
-var html1 = 'textotext';
-var html2 = 'text<o>text';
-var html3 = 'textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext';
-var html4 = 'text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text';
+let html1 = 'textotext';
+let html2 = 'text<o>text';
+let html3 = 'textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext';
+let html4 = 'text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text text<o>text';
 
 function escapeHTML1(str) {
 	return str
@@ -13,10 +13,10 @@ function escapeHTML1(str) {
 		.replace(/"/g, '&quot;');
 }
 
-var reAmpersand = /&/g;
-var reLessThan = /</g;
-var reGreaterThan = />/g;
-var reQuote = /"/g;
+let reAmpersand = /&/g;
+let reLessThan = /</g;
+let reGreaterThan = />/g;
+let reQuote = /"/g;
 
 function escapeHTML2(str) {
 	return str
@@ -34,8 +34,8 @@ function escapeHTML3(str) {
 		.split('"').join('&quot;');
 }
 
-var reEscapableChars = /[&<>"]/g;
-var charToEntityMap = Object.create(null);
+let reEscapableChars = /[&<>"]/g;
+let charToEntityMap = Object.create(null);
 
 charToEntityMap['&'] = '&amp;';
 charToEntityMap['<'] = '&lt;';
@@ -54,7 +54,7 @@ function escapeHTML5(str) {
 	}) : str;
 }
 
-var suite = new Benchmark.Suite();
+let suite = new Benchmark.Suite();
 
 suite
 	.add('1.1', function() {

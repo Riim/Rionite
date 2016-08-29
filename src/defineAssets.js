@@ -6,7 +6,16 @@ export default function defineAssets(component, assetsConfig) {
 
 	for (let name in assetsConfig) {
 		if (hasOwn.call(assetsConfig, name) && name.charAt(0) != ':') {
-			assets[name] = component.$(assetsConfig[name].selector || '&__' + hyphenize(name));
+			let asset;
+
+			Object.defineProperty(assets, name, {
+				configurable: true,
+				enumerable: true,
+
+				get() {
+					return asset || (asset = component.$(assetsConfig[name].selector || '&__' + hyphenize(name)));
+				}
+			});
 		}
 	}
 }

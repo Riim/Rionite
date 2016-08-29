@@ -18,8 +18,6 @@ let createClass = Utils.createClass;
 let KEY_RAW_CONTENT = Symbol('rawContent');
 let KEY_BLOCK_NAME_IN_MARKUP = Symbol('blockNameInMarkup');
 
-let reClosedCustomElementTag = /<(\w+(?:-\w+)+)([^>]*)\/>/g;
-
 function created() {}
 function initialize() {}
 function ready() {}
@@ -239,8 +237,7 @@ let Component = EventEmitter.extend({
 					let template = constr.template;
 
 					rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(
-						(typeof template == 'string' ? template : template.render(constr))
-							.replace(reClosedCustomElementTag, '<$1$2></$1>')
+						typeof template == 'string' ? template : template.render(constr)
 					);
 				}
 

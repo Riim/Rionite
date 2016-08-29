@@ -11,10 +11,10 @@
 <script src="../node_modules/benchmark/benchmark.js"></script>
 <script>
 
-var node1 = document.createElement('div');
-var node2 = document.createElement('div');
-var node1_ = document.createElement('div');
-var node2_ = document.createElement('div');
+let node1 = document.createElement('div');
+let node2 = document.createElement('div');
+let node1_ = document.createElement('div');
+let node2_ = document.createElement('div');
 
 node1.innerHTML = ' <span></span> ';
 node2.innerHTML = ' <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> ';
@@ -26,20 +26,20 @@ function moveChildNodes1(from, to) {
 }
 
 function moveChildNodes2(from, to) {
-	for (var child; (child = from.firstChild);) {
+	for (let child; (child = from.firstChild);) {
 		to.appendChild(child);
 	}
 }
 
 function moveChildNodes3(from, to) {
-	var childNodes = from.childNodes;
+	let childNodes = from.childNodes;
 
 	while (childNodes[0]) {
 		to.appendChild(childNodes[0]);
 	}
 }
 
-var suite = new Benchmark.Suite();
+let suite = new Benchmark.Suite();
 
 suite
 	.add('1.1', function() {

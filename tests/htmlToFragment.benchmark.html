@@ -11,8 +11,8 @@
 <script src="../node_modules/benchmark/benchmark.js"></script>
 <script>
 
-var html1 = ' <span></span> ';
-var html2 = ' <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> ';
+let html1 = ' <span></span> ';
+let html2 = ' <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> <span></span> ';
 
 function htmlToFragment1(html) {
 	let el = document.createElement('div');
@@ -38,7 +38,7 @@ function htmlToFragment2(html) {
     return range.createContextualFragment(html);
 }
 
-var suite = new Benchmark.Suite();
+let suite = new Benchmark.Suite();
 
 suite
 	.add('1.1', function() {

@@ -1452,10 +1452,25 @@ function attachChildComponentElements(childComponents) {
 function defineAssets(component, assetsConfig) {
 	var assets = component.assets;
 
-	for (var name in assetsConfig) {
+	var _loop = function _loop(name) {
 		if (hasOwn.call(assetsConfig, name) && name.charAt(0) != ':') {
-			assets[name] = component.$(assetsConfig[name].selector || '&__' + hyphenize(name));
+			(function () {
+				var asset = void 0;
+
+				Object.defineProperty(assets, name, {
+					configurable: true,
+					enumerable: true,
+
+					get: function get() {
+						return asset || (asset = component.$(assetsConfig[name].selector || '&__' + hyphenize(name)));
+					}
+				});
+			})();
 		}
+	};
+
+	for (var name in assetsConfig) {
+		_loop(name);
 	}
 }
 
@@ -1577,8 +1592,6 @@ var createClass$1 = cellx.Utils.createClass;
 
 var KEY_RAW_CONTENT = _Symbol('rawContent');
 var KEY_BLOCK_NAME_IN_MARKUP = _Symbol('blockNameInMarkup');
-
-var reClosedCustomElementTag = /<(\w+(?:-\w+)+)([^>]*)\/>/g;
 
 function created() {}
 function initialize() {}
@@ -1793,7 +1806,7 @@ var Component = cellx.EventEmitter.extend({
 				if (!rawContent) {
 					var template = constr.template;
 
-					rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment$1((typeof template == 'string' ? template : template.render(constr)).replace(reClosedCustomElementTag, '<$1$2></$1>'));
+					rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment$1(typeof template == 'string' ? template : template.render(constr));
 				}
 
 				var inputContent = this.props.content = document.createDocumentFragment();
