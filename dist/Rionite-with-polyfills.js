@@ -2074,7 +2074,7 @@ var ContentNodeType = {
 
 var namePattern = '[$_a-zA-Z][$\\w]*';
 
-var keypathPattern = '[$\\w]+(?:\\??\\.[$\\w]+)*';
+var keypathPattern = '(?:' + namePattern + '|\\[\\d+\\])(?:\\??(?:\\.' + namePattern + '|\\[\\d+\\]))*';
 
 var reNameOrEmpty = RegExp(namePattern + '|', 'g');
 var reKeypathOrEmpty = RegExp(keypathPattern + '|', 'g');
@@ -3376,7 +3376,7 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	});
 });
 
-var keypathPattern$1 = '[$\\w]+(?:\\.[$\\w]+)*';
+var keypathPattern$1 = '(?:' + namePattern + '|\\[\\d+\\])(?:(?:\\.' + namePattern + '|\\[\\d+\\]))*';
 var re = RegExp('{{' + '(?:' + '\\s*(?:' + ('block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern$1 + ')') + (')\\s*|{\\s*(' + keypathPattern$1 + ')\\s*}') + ')' + '}}');
 
 function Template(tmpl) {

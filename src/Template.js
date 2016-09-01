@@ -2,7 +2,7 @@ import namePattern from './namePattern';
 import escapeString from './Utils/escapeString';
 import escapeHTML from './Utils/escapeHTML';
 
-let keypathPattern = '[$\\w]+(?:\\.[$\\w]+)*';
+let keypathPattern = `(?:${ namePattern }|\\[\\d+\\])(?:(?:\\.${ namePattern }|\\[\\d+\\]))*`;
 let re = RegExp(
 	'{{' +
 		'(?:' +
