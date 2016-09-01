@@ -594,9 +594,9 @@ var mixin = cellx.Utils.mixin;
 var inheritedStaticProperties = ['elementExtends', 'elementAttributes', 'props', 'i18n', 'template', 'assets'];
 
 function registerComponent(componentConstr) {
-	var elementIs = componentConstr.elementIs;
+	var elIs = componentConstr.elementIs;
 
-	if (!elementIs) {
+	if (!elIs) {
 		throw new TypeError('Static property "elementIs" is required');
 	}
 
@@ -608,17 +608,17 @@ function registerComponent(componentConstr) {
 		}
 	});
 
-	var elementExtends = componentConstr.elementExtends;
+	var elExtends = componentConstr.elementExtends;
 
-	var parentElementConstr = elementExtends ? elementConstructorMap[elementExtends] || window['HTML' + (elementExtends.charAt(0).toUpperCase() + elementExtends.slice(1)) + 'Element'] : HTMLElement;
+	var parentElConstr = elExtends ? elementConstructorMap[elExtends] || window['HTML' + (elExtends.charAt(0).toUpperCase() + elExtends.slice(1)) + 'Element'] : HTMLElement;
 
-	var elementConstr = function elementConstr(self) {
-		parentElementConstr.call(this, self);
+	var elConstr = function elConstr(self) {
+		parentElConstr.call(this, self);
 		return self;
 	};
-	var elementProto = elementConstr.prototype = Object.create(parentElementConstr.prototype);
+	var elProto = elConstr.prototype = Object.create(parentElConstr.prototype);
 
-	Object.defineProperty(elementConstr, 'observedAttributes', {
+	Object.defineProperty(elConstr, 'observedAttributes', {
 		configurable: true,
 		enumerable: true,
 		get: function get() {
@@ -626,17 +626,17 @@ function registerComponent(componentConstr) {
 		}
 	});
 
-	mixin(elementProto, ElementProtoMixin);
+	mixin(elProto, ElementProtoMixin);
 
-	Object.defineProperty(elementProto, 'constructor', {
+	Object.defineProperty(elProto, 'constructor', {
 		configurable: true,
 		writable: true,
-		value: elementConstr
+		value: elConstr
 	});
 
-	elementProto._rioniteComponentConstructor = componentConstr;
+	elProto._rioniteComponentConstructor = componentConstr;
 
-	elementConstructorMap[elementIs] = customElements.define(elementIs, elementConstr, elementExtends ? { extends: elementExtends } : null);
+	elementConstructorMap[elIs] = customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
 
 	return componentConstr;
 }
@@ -1512,7 +1512,7 @@ var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change'
 function onEvent(evt) {
 	var node = void 0;
 	var attrName = void 0;
-	var targetElements = [];
+	var targetEls = [];
 
 	if (evt instanceof Event) {
 		node = evt.target;
@@ -1524,7 +1524,7 @@ function onEvent(evt) {
 
 	for (;;) {
 		if (node.nodeType == 1 && node.hasAttribute(attrName)) {
-			targetElements.unshift(node);
+			targetEls.unshift(node);
 		}
 
 		node = node.parentNode;
@@ -1536,12 +1536,12 @@ function onEvent(evt) {
 		var component = node.$c;
 
 		if (component) {
-			for (var i = targetElements.length; i;) {
-				var targetElement = targetElements[--i];
-				var handler = component[targetElement.getAttribute(attrName)];
+			for (var i = targetEls.length; i;) {
+				var targetEl = targetEls[--i];
+				var handler = component[targetEl.getAttribute(attrName)];
 
 				if (typeof handler == 'function') {
-					if (handler.call(component, evt, targetElement.$c || targetElement) === false) {
+					if (handler.call(component, evt, targetEl.$c || targetEl) === false) {
 						evt.isPropagationStopped = true;
 					}
 
@@ -1605,12 +1605,12 @@ var Component = cellx.EventEmitter.extend({
 	Implements: [DisposableMixin],
 
 	Static: {
-		extend: function extend(elementIs, description) {
+		extend: function extend(elIs, description) {
 			description.Extends = this;
 
 			var Static = description.Static || (description.Static = {});
 
-			Static.elementIs = elementIs;
+			Static.elementIs = elIs;
 
 			var props = Static.props;
 
@@ -1721,15 +1721,15 @@ var Component = cellx.EventEmitter.extend({
 		if (el == null) {
 			el = document.createElement(this.constructor.elementIs);
 		} else if (typeof el == 'string') {
-			var elementIs = this.constructor.elementIs;
+			var elIs = this.constructor.elementIs;
 			var html = el;
 
-			el = document.createElement(elementIs);
+			el = document.createElement(elIs);
 			el.innerHTML = html;
 
 			var firstChild = el.firstChild;
 
-			if (firstChild == el.lastChild && firstChild.nodeType == 1 && firstChild.tagName.toLowerCase() == elementIs) {
+			if (firstChild == el.lastChild && firstChild.nodeType == 1 && firstChild.tagName.toLowerCase() == elIs) {
 				el = firstChild;
 			}
 		}
@@ -2073,14 +2073,14 @@ var RtContent = Component.extend('rt-content', {
 					ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
 				}
 
-				var selectedElements = ownerComponentInputContent.querySelectorAll(selector);
-				var selectedElementCount = selectedElements.length;
+				var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+				var selectedElCount = selectedEls.length;
 
-				if (selectedElementCount) {
+				if (selectedElCount) {
 					var rawContent = this._rawContent = document.createDocumentFragment();
 
-					for (var _i = 0; _i < selectedElementCount; _i++) {
-						rawContent.appendChild(selectedElements[_i].cloneNode(true));
+					for (var _i = 0; _i < selectedElCount; _i++) {
+						rawContent.appendChild(selectedEls[_i].cloneNode(true));
 					}
 				} else {
 					this._rawContent = inputContent;

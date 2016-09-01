@@ -30,12 +30,12 @@ let Component = EventEmitter.extend({
 	Implements: [DisposableMixin],
 
 	Static: {
-		extend(elementIs, description) {
+		extend(elIs, description) {
 			description.Extends = this;
 
 			let Static = description.Static || (description.Static = {});
 
-			Static.elementIs = elementIs;
+			Static.elementIs = elIs;
 
 			let props = Static.props;
 
@@ -147,17 +147,17 @@ let Component = EventEmitter.extend({
 		if (el == null) {
 			el = document.createElement(this.constructor.elementIs);
 		} else if (typeof el == 'string') {
-			let elementIs = this.constructor.elementIs;
+			let elIs = this.constructor.elementIs;
 			let html = el;
 
-			el = document.createElement(elementIs);
+			el = document.createElement(elIs);
 			el.innerHTML = html;
 
 			let firstChild = el.firstChild;
 
 			if (
 				firstChild == el.lastChild && firstChild.nodeType == 1 &&
-					firstChild.tagName.toLowerCase() == elementIs
+					firstChild.tagName.toLowerCase() == elIs
 			) {
 				el = firstChild;
 			}

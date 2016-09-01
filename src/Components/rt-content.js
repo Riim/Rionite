@@ -48,14 +48,14 @@ export default Component.extend('rt-content', {
 					ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
 				}
 
-				let selectedElements = ownerComponentInputContent.querySelectorAll(selector);
-				let selectedElementCount = selectedElements.length;
+				let selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+				let selectedElCount = selectedEls.length;
 
-				if (selectedElementCount) {
+				if (selectedElCount) {
 					let rawContent = this._rawContent = document.createDocumentFragment();
 
-					for (let i = 0; i < selectedElementCount; i++) {
-						rawContent.appendChild(selectedElements[i].cloneNode(true));
+					for (let i = 0; i < selectedElCount; i++) {
+						rawContent.appendChild(selectedEls[i].cloneNode(true));
 					}
 				} else {
 					this._rawContent = inputContent;

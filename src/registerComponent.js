@@ -15,9 +15,9 @@ let inheritedStaticProperties = [
 ];
 
 export default function registerComponent(componentConstr) {
-	let elementIs = componentConstr.elementIs;
+	let elIs = componentConstr.elementIs;
 
-	if (!elementIs) {
+	if (!elIs) {
 		throw new TypeError('Static property "elementIs" is required');
 	}
 
@@ -33,20 +33,20 @@ export default function registerComponent(componentConstr) {
 		}
 	});
 
-	let elementExtends = componentConstr.elementExtends;
+	let elExtends = componentConstr.elementExtends;
 
-	let parentElementConstr = elementExtends ?
-		elementConstructorMap[elementExtends] ||
-			window[`HTML${ elementExtends.charAt(0).toUpperCase() + elementExtends.slice(1) }Element`] :
+	let parentElConstr = elExtends ?
+		elementConstructorMap[elExtends] ||
+			window[`HTML${ elExtends.charAt(0).toUpperCase() + elExtends.slice(1) }Element`] :
 		HTMLElement;
 
-	let elementConstr = function(self) {
-		parentElementConstr.call(this, self);
+	let elConstr = function(self) {
+		parentElConstr.call(this, self);
 		return self;
 	};
-	let elementProto = elementConstr.prototype = Object.create(parentElementConstr.prototype);
+	let elProto = elConstr.prototype = Object.create(parentElConstr.prototype);
 
-	Object.defineProperty(elementConstr, 'observedAttributes', {
+	Object.defineProperty(elConstr, 'observedAttributes', {
 		configurable: true,
 		enumerable: true,
 		get() {
@@ -54,21 +54,17 @@ export default function registerComponent(componentConstr) {
 		}
 	});
 
-	mixin(elementProto, ElementProtoMixin);
+	mixin(elProto, ElementProtoMixin);
 
-	Object.defineProperty(elementProto, 'constructor', {
+	Object.defineProperty(elProto, 'constructor', {
 		configurable: true,
 		writable: true,
-		value: elementConstr
+		value: elConstr
 	});
 
-	elementProto._rioniteComponentConstructor = componentConstr;
+	elProto._rioniteComponentConstructor = componentConstr;
 
-	elementConstructorMap[elementIs] = customElements.define(
-		elementIs,
-		elementConstr,
-		elementExtends ? { extends: elementExtends } : null
-	);
+	elementConstructorMap[elIs] = customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
 
 	return componentConstr;
 }
