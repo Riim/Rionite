@@ -42,7 +42,11 @@ var todos = new window['cellx-indexed-collections'].IndexedList([
 Rionite.Component.extend('todo-view', {
 	Static: {
 		props: {
-			todoId: String
+			todoId: {
+				type: String,
+				required: true,
+				readonly: true
+			}
 		},
 
 		template: `

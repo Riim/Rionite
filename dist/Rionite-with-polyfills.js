@@ -1742,9 +1742,9 @@ function isRegExp(value) {
 	return toString.call(value) == '[object RegExp]';
 }
 
-var Map = cellx.JS.Map;
+var Map$1 = cellx.JS.Map;
 
-var attributeTypeHandlers = new Map([[Boolean, [function (value) {
+var attributeTypeHandlerMap = new Map$1([[Boolean, [function (value) {
 	return value !== null ? value != 'no' : false;
 }, function (value) {
 	return value ? '' : null;
@@ -1802,6 +1802,10 @@ function hyphenize(str) {
 	}).replace(reMinus, ''));
 }
 
+var Map = cellx.JS.Map;
+
+var typeMap = new Map([['boolean', 'boolean'], [Boolean, 'boolean'], ['number', 'number'], [Number, 'number'], ['string', 'string'], [String, 'string']]);
+
 /**
  * @typesign new ElementAttributes(el: HTMLElement) -> Rionite.ElementAttributes;
  */
@@ -1813,9 +1817,33 @@ var ElementAttributes = cellx.EventEmitter.extend({
 		var attributesConfig = component.constructor.elementAttributes;
 
 		var _loop = function _loop(name) {
-			var defaultValue = attributesConfig[name];
-			var type = typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue);
-			var handlers = attributeTypeHandlers.get(type == 'function' ? defaultValue : type);
+			var attrConfig = attributesConfig[name];
+			var type = typeof attrConfig === 'undefined' ? 'undefined' : _typeof(attrConfig);
+			var defaultValue = void 0;
+			var required = void 0;
+			var readonly = void 0;
+
+			if (type == 'function') {
+				type = attrConfig;
+				required = readonly = false;
+			} else if (type == 'object' && (attrConfig.type !== void 0 || attrConfig.defaultValue !== void 0)) {
+				type = attrConfig.type;
+				defaultValue = attrConfig.default;
+
+				if (type === void 0) {
+					type = typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue);
+				} else if (defaultValue !== void 0 && (typeMap.get(type) || '') != (typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue))) {
+					throw new TypeError('Specified type does not match type of defaultValue');
+				}
+
+				required = attrConfig.required;
+				readonly = attrConfig.readonly;
+			} else {
+				defaultValue = attrConfig;
+				required = readonly = false;
+			}
+
+			var handlers = attributeTypeHandlerMap.get(type);
 
 			if (!handlers) {
 				throw new TypeError('Unsupported attribute type');
@@ -1824,7 +1852,17 @@ var ElementAttributes = cellx.EventEmitter.extend({
 			var camelizedName = camelize(name);
 			var hyphenizedName = hyphenize(name);
 
+			if (required && !el.hasAttribute(hyphenizedName)) {
+				throw new TypeError('Property "' + name + '" is required');
+			}
+
 			var attrValue = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new cellx.Cell(el.getAttribute(hyphenizedName), {
+				validate: readonly ? function (value, oldValue) {
+					if (oldValue) {
+						throw new TypeError('Property "' + name + '" is readonly');
+					}
+				} : null,
+
 				merge: function merge(value, oldValue) {
 					return oldValue && value === oldValue[0] ? oldValue : [value, handlers[0](value, defaultValue)];
 				},
@@ -1842,7 +1880,13 @@ var ElementAttributes = cellx.EventEmitter.extend({
 				get: function get() {
 					return attrValue.get()[1];
 				},
-				set: function set(value) {
+
+
+				set: readonly ? function (value) {
+					if (value !== attrValue.get()[1]) {
+						throw new TypeError('Property "' + name + '" is readonly');
+					}
+				} : function (value) {
 					value = handlers[1](value, defaultValue);
 
 					if (value === null) {
@@ -2044,8 +2088,12 @@ function registerComponent(componentConstr) {
 	Object.defineProperty(elConstr, 'observedAttributes', {
 		configurable: true,
 		enumerable: true,
+
 		get: function get() {
-			return Object.keys(componentConstr.elementAttributes || {});
+			var elementAttributes = componentConstr.elementAttributes;
+			return elementAttributes ? Object.keys(elementAttributes).map(function (name) {
+				return hyphenize(name);
+			}) : [];
 		}
 	});
 
@@ -3654,7 +3702,7 @@ var RtIfElse = RtIfThen.extend('rt-if-else', {
 	_elseMode: true
 });
 
-var Map$1 = cellx.JS.Map;
+var Map$2 = cellx.JS.Map;
 var nextTick$1 = cellx.Utils.nextTick;
 
 var reForAttributeValue = RegExp('^\\s*(' + namePattern + ')\\s+of\\s+(\\S.*)$');
@@ -3705,7 +3753,7 @@ var RtRepeat = Component.extend('rt-repeat', {
 
 			this._list = new cellx.Cell(compileBinding(parsedOf[0]), { owner: props.context });
 
-			this._itemMap = new Map$1();
+			this._itemMap = new Map$2();
 
 			this._trackBy = props.trackBy;
 
@@ -3753,7 +3801,7 @@ var RtRepeat = Component.extend('rt-repeat', {
 		var _this = this;
 
 		var oldItemMap = this._oldItemMap = this._itemMap;
-		this._itemMap = new Map$1();
+		this._itemMap = new Map$2();
 
 		var list = this._list.get();
 		var changed = false;

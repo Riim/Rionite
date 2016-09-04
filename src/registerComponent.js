@@ -2,6 +2,7 @@ import { Utils } from 'cellx';
 import elementConstructorMap from './elementConstructorMap';
 import ElementProtoMixin from './ElementProtoMixin';
 import { hasOwn } from './JS/Object';
+import hyphenize from './Utils/hyphenize';
 
 let mixin = Utils.mixin;
 
@@ -49,8 +50,10 @@ export default function registerComponent(componentConstr) {
 	Object.defineProperty(elConstr, 'observedAttributes', {
 		configurable: true,
 		enumerable: true,
+
 		get() {
-			return Object.keys(componentConstr.elementAttributes || {});
+			let elementAttributes = componentConstr.elementAttributes;
+			return elementAttributes ? Object.keys(elementAttributes).map(name => hyphenize(name)) : [];
 		}
 	});
 
