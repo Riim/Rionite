@@ -32,7 +32,7 @@ let ElementAttributes = EventEmitter.extend({
 			if (type == 'function') {
 				type = attrConfig;
 				required = readonly = false;
-			} else if (type == 'object' && (attrConfig.type !== void 0 || attrConfig.defaultValue !== void 0)) {
+			} else if (type == 'object' && (attrConfig.type !== void 0 || attrConfig.default !== void 0)) {
 				type = attrConfig.type;
 				defaultValue = attrConfig.default;
 

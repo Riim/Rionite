@@ -46,13 +46,13 @@ export default Component.extend('rt-repeat', {
 			let forAttrValue = props.for.match(reForAttributeValue);
 
 			if (!forAttrValue) {
-				throw new SyntaxError(invalidForAttributeMessage);
+				throw new SyntaxError(invalidForAttributeMessage + ` (${ props.for })`);
 			}
 
 			let parsedOf = parseContent(`{${ forAttrValue[2] }}`);
 
 			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
-				throw new SyntaxError(invalidForAttributeMessage);
+				throw new SyntaxError(invalidForAttributeMessage + ` (${ props.for })`);
 			}
 
 			this._itemName = forAttrValue[1];

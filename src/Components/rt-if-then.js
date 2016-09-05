@@ -33,7 +33,7 @@ export default Component.extend('rt-if-then', {
 			let parsedIf = parseContent(`{${ props.if }}`);
 
 			if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType.BINDING) {
-				throw new SyntaxError('Invalid value of attribute "if"');
+				throw new SyntaxError(`Invalid value of attribute "if" (${ props.if })`);
 			}
 
 			let getIfValue = compileBinding(parsedIf[0]);

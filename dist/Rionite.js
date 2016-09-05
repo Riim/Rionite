@@ -403,7 +403,7 @@ var ElementAttributes = cellx.EventEmitter.extend({
 			if (type == 'function') {
 				type = attrConfig;
 				required = readonly = false;
-			} else if (type == 'object' && (attrConfig.type !== void 0 || attrConfig.defaultValue !== void 0)) {
+			} else if (type == 'object' && (attrConfig.type !== void 0 || attrConfig.default !== void 0)) {
 				type = attrConfig.type;
 				defaultValue = attrConfig.default;
 
@@ -2191,7 +2191,7 @@ var RtIfThen = Component.extend('rt-if-then', {
 				var parsedIf = parseContent('{' + props.if + '}');
 
 				if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType.BINDING) {
-					throw new SyntaxError('Invalid value of attribute "if"');
+					throw new SyntaxError('Invalid value of attribute "if" (' + props.if + ')');
 				}
 
 				var getIfValue = compileBinding(parsedIf[0]);
@@ -2317,13 +2317,13 @@ var RtRepeat = Component.extend('rt-repeat', {
 			var forAttrValue = props.for.match(reForAttributeValue);
 
 			if (!forAttrValue) {
-				throw new SyntaxError(invalidForAttributeMessage);
+				throw new SyntaxError(invalidForAttributeMessage + (' (' + props.for + ')'));
 			}
 
 			var parsedOf = parseContent('{' + forAttrValue[2] + '}');
 
 			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
-				throw new SyntaxError(invalidForAttributeMessage);
+				throw new SyntaxError(invalidForAttributeMessage + (' (' + props.for + ')'));
 			}
 
 			this._itemName = forAttrValue[1];
