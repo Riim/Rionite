@@ -2081,9 +2081,9 @@ var KEY_TEMPLATES_FIXED = cellx.JS.Symbol('templatesFixed');
 
 var RtContent = Component.extend('rt-content', {
 	Static: {
-		elementAttributes: {
-			select: String,
-			getContext: String
+		props: {
+			select: { type: String, readonly: true },
+			getContext: { type: String, readonly: true }
 		},
 
 		template: ''
@@ -2168,8 +2168,8 @@ var RtIfThen = Component.extend('rt-if-then', {
 	Static: {
 		elementExtends: 'template',
 
-		elementAttributes: {
-			if: String
+		props: {
+			if: { type: String, required: true, readonly: true }
 		}
 	},
 
@@ -2289,10 +2289,10 @@ var RtRepeat = Component.extend('rt-repeat', {
 	Static: {
 		elementExtends: 'template',
 
-		elementAttributes: {
-			for: String,
-			trackBy: String,
-			strip: false
+		props: {
+			for: { type: String, required: true, readonly: true },
+			trackBy: { type: String, readonly: true },
+			strip: { default: false, readonly: true }
 		}
 	},
 

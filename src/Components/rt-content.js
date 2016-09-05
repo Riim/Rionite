@@ -8,9 +8,9 @@ let KEY_TEMPLATES_FIXED = JS.Symbol('templatesFixed');
 
 export default Component.extend('rt-content', {
 	Static: {
-		elementAttributes: {
-			select: String,
-			getContext: String
+		props: {
+			select: { type: String, readonly: true },
+			getContext: { type: String, readonly: true }
 		},
 
 		template: ''

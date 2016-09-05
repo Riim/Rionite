@@ -18,10 +18,10 @@ export default Component.extend('rt-repeat', {
 	Static: {
 		elementExtends: 'template',
 
-		elementAttributes: {
-			for: String,
-			trackBy: String,
-			strip: false
+		props: {
+			for: { type: String, required: true, readonly: true },
+			trackBy: { type: String, readonly: true },
+			strip: { default: false, readonly: true }
 		}
 	},
 

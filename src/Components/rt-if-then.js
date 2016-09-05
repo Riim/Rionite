@@ -13,8 +13,8 @@ export default Component.extend('rt-if-then', {
 	Static: {
 		elementExtends: 'template',
 
-		elementAttributes: {
-			if: String
+		props: {
+			if: { type: String, required: true, readonly: true }
 		}
 	},
 
