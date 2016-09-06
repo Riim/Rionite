@@ -25,6 +25,7 @@ let Rionite = {
 
 	ElementAttributes,
 	Template,
+
 	Component,
 
 	Components: {

@@ -2538,6 +2538,7 @@ var Rionite = {
 
 	ElementAttributes: ElementAttributes,
 	Template: Template,
+
 	Component: Component,
 
 	Components: {

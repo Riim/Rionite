@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.12.22",
+  "version": "0.12.23",
   "description": "",
   "main": "dist/Rionite-with-polyfills.js",
   "scripts": {
@@ -42,6 +42,6 @@
     "run-sequence": "^1.2.2"
   },
   "dependencies": {
-    "document-register-element": "^1.0.7"
+    "document-register-element": "^1.0.9"
   }
 }
