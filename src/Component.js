@@ -30,6 +30,8 @@ let Component = EventEmitter.extend({
 	Implements: [DisposableMixin],
 
 	Static: {
+		register: registerComponent,
+
 		extend(elIs, description) {
 			description.Extends = this;
 

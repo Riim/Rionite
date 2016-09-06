@@ -44,7 +44,7 @@ Rionite.Component.extend('hello-user', {
 Можно использовать ES.Next синтаксис:
 
 ```js
-import { Component, registerComponent } from 'rionite';
+import { Component } from 'rionite';
 
 export default class HelloUser extends Component {
     static elementIs = 'hello-user';
@@ -59,7 +59,7 @@ export default class HelloUser extends Component {
 }
 
 // Не забыть зарегистрировать компонент.
-registerComponent(HelloUser);
+Component.register(HelloUser);
 ```
 
 Элемент в приведённом примере отрендерится в следующий вид:
@@ -258,7 +258,7 @@ function birthdateToAge(birthdate) {
 ```js
 import { EventEmitter } from 'cellx';
 import { observable, computed } from 'cellx-decorators';
-import { Component, registerComponent } from 'rionite';
+import { Component } from 'rionite';
 
 class User extends EventEmitter {
     @observable name = void 0;
@@ -296,7 +296,7 @@ class UserCard extends Component {
     }
 }
 
-registerComponent(UserCard);
+Component.register(UserCard);
 ```
 
 Выражение биндинга может содержать символ `?` для проверки существования свойства:

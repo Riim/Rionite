@@ -1,7 +1,6 @@
 import DisposableMixin from './DisposableMixin';
 import ElementAttributes from './ElementAttributes';
 import Component from './Component';
-import registerComponent from './registerComponent';
 import formatters from './formatters';
 import getText from './getText';
 import Template from './Template';
@@ -20,18 +19,13 @@ import htmlToFragment from './Utils/htmlToFragment';
 
 let Rionite = {
 	DisposableMixin,
-	ElementAttributes,
-	Component,
-	registerComponent,
 
 	formatters,
-
 	getText,
 
+	ElementAttributes,
 	Template,
-	template(tmpl) {
-		return new Template(tmpl);
-	},
+	Component,
 
 	Components: {
 		RtContent,

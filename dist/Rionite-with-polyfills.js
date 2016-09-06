@@ -3076,6 +3076,8 @@ var Component = cellx.EventEmitter.extend({
 	Implements: [DisposableMixin],
 
 	Static: {
+		register: registerComponent,
+
 		extend: function extend(elIs, description) {
 			description.Extends = this;
 
@@ -3953,19 +3955,13 @@ var RtRepeat = Component.extend('rt-repeat', {
 
 var Rionite = {
 	DisposableMixin: DisposableMixin,
-	ElementAttributes: ElementAttributes,
-	Component: Component,
-	registerComponent: registerComponent,
 
 	formatters: formatters,
-
 	getText: getText,
 
+	ElementAttributes: ElementAttributes,
 	Template: Template,
-	template: function template(tmpl) {
-		return new Template(tmpl);
-	},
-
+	Component: Component,
 
 	Components: {
 		RtContent: RtContent,
