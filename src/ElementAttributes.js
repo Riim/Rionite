@@ -66,7 +66,7 @@ let ElementAttributes = EventEmitter.extend({
 				el.getAttribute(hyphenizedName),
 				{
 					validate: readonly ? (value, oldValue) => {
-						if (oldValue) {
+						if (oldValue && value !== oldValue[0]) {
 							throw new TypeError(`Property "${ name }" is readonly`);
 						}
 					} : null,

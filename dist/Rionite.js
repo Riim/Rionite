@@ -435,7 +435,7 @@ var ElementAttributes = cellx.EventEmitter.extend({
 
 			var attrValue = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new cellx.Cell(el.getAttribute(hyphenizedName), {
 				validate: readonly ? function (value, oldValue) {
-					if (oldValue) {
+					if (oldValue && value !== oldValue[0]) {
 						throw new TypeError('Property "' + name + '" is readonly');
 					}
 				} : null,
