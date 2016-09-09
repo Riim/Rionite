@@ -2932,7 +2932,7 @@ function defineAssets(component, assetsConfig) {
 	var assets = component.assets;
 
 	var _loop = function _loop(name) {
-		if (hasOwn.call(assetsConfig, name) && name.charAt(0) != ':') {
+		if (name.charAt(0) != ':') {
 			(function () {
 				var asset = void 0;
 
@@ -2957,27 +2957,25 @@ function listenAssets(component, assetsConfig) {
 	var assets = component.assets;
 
 	for (var name in assetsConfig) {
-		if (hasOwn.call(assetsConfig, name)) {
-			var asset = void 0;
+		var asset = void 0;
 
-			if (name == ':component') {
-				asset = component;
-			} else if (name == ':element') {
-				asset = component.element;
-			} else {
-				asset = assets[name];
+		if (name == ':component') {
+			asset = component;
+		} else if (name == ':element') {
+			asset = component.element;
+		} else {
+			asset = assets[name];
 
-				if (!asset) {
-					continue;
-				}
+			if (!asset) {
+				continue;
 			}
+		}
 
-			var assetConfig = assetsConfig[name];
+		var assetConfig = assetsConfig[name];
 
-			for (var key in assetConfig) {
-				if (hasOwn.call(assetConfig, key) && key.length > 3 && key.slice(0, 3) == 'on-') {
-					component.listenTo(asset, key.slice(3), assetConfig[key]);
-				}
+		for (var key in assetConfig) {
+			if (key.slice(0, 3) == 'on-' && key.length > 3) {
+				component.listenTo(asset, key.slice(3), assetConfig[key]);
 			}
 		}
 	}

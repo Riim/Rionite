@@ -1,30 +1,26 @@
-import { hasOwn } from './JS/Object';
-
 export default function listenAssets(component, assetsConfig) {
 	let assets = component.assets;
 
 	for (let name in assetsConfig) {
-		if (hasOwn.call(assetsConfig, name)) {
-			let asset;
+		let asset;
 
-			if (name == ':component') {
-				asset = component;
-			} else if (name == ':element') {
-				asset = component.element;
-			} else {
-				asset = assets[name];
+		if (name == ':component') {
+			asset = component;
+		} else if (name == ':element') {
+			asset = component.element;
+		} else {
+			asset = assets[name];
 
-				if (!asset) {
-					continue;
-				}
+			if (!asset) {
+				continue;
 			}
+		}
 
-			let assetConfig = assetsConfig[name];
+		let assetConfig = assetsConfig[name];
 
-			for (let key in assetConfig) {
-				if (hasOwn.call(assetConfig, key) && key.length > 3 && key.slice(0, 3) == 'on-') {
-					component.listenTo(asset, key.slice(3), assetConfig[key]);
-				}
+		for (let key in assetConfig) {
+			if (key.slice(0, 3) == 'on-' && key.length > 3) {
+				component.listenTo(asset, key.slice(3), assetConfig[key]);
 			}
 		}
 	}

@@ -1,11 +1,10 @@
-import { hasOwn } from './JS/Object';
 import hyphenize from './Utils/hyphenize';
 
 export default function defineAssets(component, assetsConfig) {
 	let assets = component.assets;
 
 	for (let name in assetsConfig) {
-		if (hasOwn.call(assetsConfig, name) && name.charAt(0) != ':') {
+		if (name.charAt(0) != ':') {
 			let asset;
 
 			Object.defineProperty(assets, name, {
