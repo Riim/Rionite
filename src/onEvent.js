@@ -4,7 +4,7 @@
 export default function onEvent(evt) {
 	let node;
 	let attrName;
-	let targetEls = [];
+	let targetEls;
 
 	if (evt instanceof Event) {
 		node = evt.target;
@@ -16,7 +16,7 @@ export default function onEvent(evt) {
 
 	for (;;) {
 		if (node.nodeType == 1 && node.hasAttribute(attrName)) {
-			targetEls.unshift(node);
+			(targetEls || (targetEls = [])).push(node);
 		}
 
 		node = node.parentNode;
@@ -27,14 +27,15 @@ export default function onEvent(evt) {
 
 		let component = node.$c;
 
-		if (component) {
-			for (let i = targetEls.length; i;) {
-				let targetEl = targetEls[--i];
+		if (component && targetEls) {
+			for (let i = 0, l = targetEls.length; i < l; i++) {
+				let targetEl = targetEls[i];
 				let handler = component[targetEl.getAttribute(attrName)];
 
 				if (typeof handler == 'function') {
 					if (handler.call(component, evt, targetEl.$c || targetEl) === false) {
 						evt.isPropagationStopped = true;
+						return;
 					}
 
 					if (evt.isPropagationStopped) {

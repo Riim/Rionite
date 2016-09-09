@@ -370,6 +370,10 @@ let Component = EventEmitter.extend({
 		}
 
 		return selector.join('.' + blockName);
+	},
+
+	_stopEventPropagation(evt) {
+		evt.isPropagationStopped = true;
 	}
 });
 

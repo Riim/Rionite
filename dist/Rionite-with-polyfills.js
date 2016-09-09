@@ -2991,7 +2991,7 @@ var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change'
 function onEvent(evt) {
 	var node = void 0;
 	var attrName = void 0;
-	var targetEls = [];
+	var targetEls = void 0;
 
 	if (evt instanceof Event) {
 		node = evt.target;
@@ -3003,7 +3003,7 @@ function onEvent(evt) {
 
 	for (;;) {
 		if (node.nodeType == 1 && node.hasAttribute(attrName)) {
-			targetEls.unshift(node);
+			(targetEls || (targetEls = [])).push(node);
 		}
 
 		node = node.parentNode;
@@ -3014,14 +3014,15 @@ function onEvent(evt) {
 
 		var component = node.$c;
 
-		if (component) {
-			for (var i = targetEls.length; i;) {
-				var targetEl = targetEls[--i];
+		if (component && targetEls) {
+			for (var i = 0, l = targetEls.length; i < l; i++) {
+				var targetEl = targetEls[i];
 				var handler = component[targetEl.getAttribute(attrName)];
 
 				if (typeof handler == 'function') {
 					if (handler.call(component, evt, targetEl.$c || targetEl) === false) {
 						evt.isPropagationStopped = true;
+						return;
 					}
 
 					if (evt.isPropagationStopped) {
@@ -3423,6 +3424,9 @@ var Component = cellx.EventEmitter.extend({
 		}
 
 		return selector.join('.' + blockName);
+	},
+	_stopEventPropagation: function _stopEventPropagation(evt) {
+		evt.isPropagationStopped = true;
 	}
 });
 

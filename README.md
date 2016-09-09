@@ -175,7 +175,7 @@ Rionite.Component.extend('super-select', {
 </script>
 ```
 
-Конструкции вида `{propertyName}` — это привязки данных — биндинги. Они будут автоматически обновляться в разметке при изменении соответствующих свойств. Сами свойства для этого должно быть реактивным и создаваться с помощью [cellx]()-а:
+Конструкции вида `{propertyName}` — это привязки данных — биндинги. Они будут автоматически обновляться в разметке при изменении соответствующих свойств. Сами свойства для этого должно быть реактивным и создаваться с помощью [cellx](https://github.com/Riim/cellx)-а:
 ```html
 <simple-counter></simple-counter>
 
@@ -254,7 +254,7 @@ function birthdateToAge(birthdate) {
 }
 ```
 
-Тоже самое в ES.Next синтаксисе с использованием модуля [cellx-decorators]():
+Тоже самое в ES.Next синтаксисе с использованием модуля [cellx-decorators](https://github.com/Riim/cellx-decorators):
 ```js
 import { EventEmitter } from 'cellx';
 import { observable, computed } from 'cellx-decorators';
