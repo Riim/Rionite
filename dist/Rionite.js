@@ -1639,6 +1639,7 @@ var createClass$1 = cellx.Utils.createClass;
 
 var KEY_RAW_CONTENT = _Symbol('rawContent');
 var KEY_BLOCK_NAME_IN_MARKUP = _Symbol('blockNameInMarkup');
+var KEY_SILENT = _Symbol('silent');
 
 function created() {}
 function initialize() {}
@@ -1805,7 +1806,13 @@ var Component = cellx.EventEmitter.extend({
 	_handleEvent: function _handleEvent(evt) {
 		cellx.EventEmitter.prototype._handleEvent.call(this, evt);
 
-		if (evt.bubbles !== false && !evt.isPropagationStopped) {
+		var silent = this[KEY_SILENT];
+
+		if (silent === void 0) {
+			silent = this[KEY_SILENT] = this.element.hasAttribute('rt-silent');
+		}
+
+		if (!silent && evt.bubbles !== false && !evt.isPropagationStopped) {
 			var parentComponent = this.parentComponent;
 
 			if (parentComponent) {
@@ -1991,9 +1998,6 @@ var Component = cellx.EventEmitter.extend({
 		}
 
 		return selector.join('.' + blockName);
-	},
-	_stopEventPropagation: function _stopEventPropagation(evt) {
-		evt.isPropagationStopped = true;
 	}
 });
 

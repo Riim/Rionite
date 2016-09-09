@@ -17,6 +17,7 @@ let createClass = Utils.createClass;
 
 let KEY_RAW_CONTENT = Symbol('rawContent');
 let KEY_BLOCK_NAME_IN_MARKUP = Symbol('blockNameInMarkup');
+let KEY_SILENT = Symbol('silent');
 
 function created() {}
 function initialize() {}
@@ -187,7 +188,13 @@ let Component = EventEmitter.extend({
 	_handleEvent(evt) {
 		EventEmitter.prototype._handleEvent.call(this, evt);
 
-		if (evt.bubbles !== false && !evt.isPropagationStopped) {
+		let silent = this[KEY_SILENT];
+
+		if (silent === void 0) {
+			silent = this[KEY_SILENT] = this.element.hasAttribute('rt-silent');
+		}
+
+		if (!silent && evt.bubbles !== false && !evt.isPropagationStopped) {
 			let parentComponent = this.parentComponent;
 
 			if (parentComponent) {
@@ -370,10 +377,6 @@ let Component = EventEmitter.extend({
 		}
 
 		return selector.join('.' + blockName);
-	},
-
-	_stopEventPropagation(evt) {
-		evt.isPropagationStopped = true;
 	}
 });
 
