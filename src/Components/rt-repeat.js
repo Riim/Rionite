@@ -1,7 +1,7 @@
 import { Cell, JS, Utils } from 'cellx';
 import namePattern from '../namePattern';
 import ContentNodeType from '../ContentNodeType';
-import parseContent from '../parseContent';
+import ContentParser from '../ContentParser';
 import compileBinding from '../compileBinding';
 import bind from '../bind';
 import attachChildComponentElements from '../attachChildComponentElements';
@@ -49,7 +49,7 @@ export default Component.extend('rt-repeat', {
 				throw new SyntaxError(invalidForAttributeMessage + ` (${ props.for })`);
 			}
 
-			let parsedOf = parseContent(`{${ forAttrValue[2] }}`);
+			let parsedOf = (new ContentParser(`{${ forAttrValue[2] }}`)).parse();
 
 			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
 				throw new SyntaxError(invalidForAttributeMessage + ` (${ props.for })`);

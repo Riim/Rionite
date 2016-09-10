@@ -1,6 +1,6 @@
 import { Cell } from 'cellx';
 import ContentNodeType from './ContentNodeType';
-import parseContent from './parseContent';
+import ContentParser from './ContentParser';
 import compileContent from './compileContent';
 import setAttribute from './Utils/setAttribute';
 
@@ -25,7 +25,7 @@ export default function bind(node, component, context) {
 						let value = attr.value;
 
 						if (reBinding.test(value)) {
-							let parsedValue = parseContent(value);
+							let parsedValue = (new ContentParser(value)).parse();
 
 							if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
 								let name = attr.name;
@@ -62,7 +62,7 @@ export default function bind(node, component, context) {
 					let content = child.textContent;
 
 					if (reBinding.test(content)) {
-						let parsedContent = parseContent(content);
+						let parsedContent = (new ContentParser(content)).parse();
 
 						if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
 							let cell = new Cell(compileContent(parsedContent, content), {

@@ -1,6 +1,6 @@
 import { Cell, Utils } from 'cellx';
 import ContentNodeType from '../ContentNodeType';
-import parseContent from '../parseContent';
+import ContentParser from '../ContentParser';
 import compileBinding from '../compileBinding';
 import bind from '../bind';
 import attachChildComponentElements from '../attachChildComponentElements';
@@ -30,7 +30,7 @@ export default Component.extend('rt-if-then', {
 
 			props.content = document.importNode(this.element.content, true);
 
-			let parsedIf = parseContent(`{${ props.if }}`);
+			let parsedIf = (new ContentParser(`{${ props.if }}`)).parse();
 
 			if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType.BINDING) {
 				throw new SyntaxError(`Invalid value of attribute "if" (${ props.if })`);

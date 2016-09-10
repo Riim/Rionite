@@ -2140,49 +2140,39 @@ var reVacuumOrEmpty = /null|undefined|void 0|/g;
 
 var NOT_VALUE_AND_NOT_KEYPATH = {};
 
-function parseContent(content) {
-	var at = 0;
-	var chr = void 0;
+var ContentParser = cellx.Utils.createClass({
+	constructor: function ContentParser(content) {
+		this.content = content;
+	},
 
-	var result = [];
+	parse: function parse() {
+		this.at = 0;
 
-	for (var index; (index = content.indexOf('{', at)) > -1;) {
-		pushText(content.slice(at, index));
-		at = index;
-		chr = content.charAt(at);
+		var result = this.result = [];
 
-		var binding = readBinding();
+		for (var index; (index = this.content.indexOf('{', this.at)) > -1;) {
+			this.pushText(this.content.slice(this.at, index));
 
-		if (binding) {
-			result.push(binding);
-		} else {
-			pushText(chr);
-			next('{');
-		}
-	}
+			this.at = index;
+			this.chr = this.content.charAt(index);
 
-	pushText(content.slice(at));
+			var binding = this.readBinding();
 
-	return result;
-
-	function next(c) {
-		if (c && c != chr) {
-			throw {
-				name: 'SyntaxError',
-				message: 'Expected "' + c + '" instead of "' + chr + '"',
-				at: at,
-				content: content
-			};
+			if (binding) {
+				result.push(binding);
+			} else {
+				this.pushText(this.chr);
+				this.next('{');
+			}
 		}
 
-		at++;
-		chr = content.charAt(at);
+		this.pushText(this.content.slice(this.at));
 
-		return chr;
-	}
-
-	function pushText(value) {
+		return result;
+	},
+	pushText: function pushText(value) {
 		if (value.length) {
+			var result = this.result;
 			var resultLength = result.length;
 
 			if (resultLength && result[resultLength - 1].type == ContentNodeType.TEXT) {
@@ -2190,123 +2180,108 @@ function parseContent(content) {
 			} else {
 				result.push({
 					type: ContentNodeType.TEXT,
-					at: at,
+					at: this.at,
 					raw: value,
 					value: value
 				});
 			}
 		}
-	}
+	},
+	readBinding: function readBinding() {
+		var bindingAt = this.at;
 
-	function readBinding() {
-		var bindingAt = at;
+		this.next('{');
+		this.skipWhitespaces();
 
-		next('{');
-		skipWhitespaces();
-
-		var keypath = readBindingKeypath();
+		var keypath = this.readBindingKeypath();
 
 		if (keypath) {
-			skipWhitespaces();
-
 			var formatters = [];
 
-			for (var formatter; chr == '|' && (formatter = readFormatter());) {
+			for (var formatter; this.skipWhitespaces() == '|' && (formatter = this.readFormatter());) {
 				formatters.push(formatter);
-				skipWhitespaces();
 			}
 
-			if (chr == '}') {
-				next();
+			if (this.chr == '}') {
+				this.next();
 
 				return {
 					type: ContentNodeType.BINDING,
 					at: bindingAt,
-					raw: content.slice(bindingAt, at),
+					raw: this.content.slice(bindingAt, this.at),
 					keypath: keypath,
 					formatters: formatters
 				};
 			}
 		}
 
-		at = bindingAt;
-		chr = content.charAt(at);
+		this.at = bindingAt;
+		this.chr = this.content.charAt(bindingAt);
 
 		return null;
-	}
-
-	function readBindingKeypath() {
-		reKeypathOrEmpty.lastIndex = at;
-		var keypath = reKeypathOrEmpty.exec(content)[0];
+	},
+	readBindingKeypath: function readBindingKeypath() {
+		reKeypathOrEmpty.lastIndex = this.at;
+		var keypath = reKeypathOrEmpty.exec(this.content)[0];
 
 		if (keypath) {
-			var keypathAt = at;
+			var keypathAt = this.at;
 
-			at += keypath.length;
-			chr = content.charAt(at);
+			this.chr = this.content.charAt(this.at += keypath.length);
 
 			return {
 				type: ContentNodeType.BINDING_KEYPATH,
 				at: keypathAt,
-				raw: content.slice(keypathAt, at),
+				raw: this.content.slice(keypathAt, this.at),
 				value: keypath
 			};
 		}
 
 		return null;
-	}
+	},
+	readFormatter: function readFormatter() {
+		var formatterAt = this.at;
 
-	function readFormatter() {
-		var formatterAt = at;
+		this.next('|');
+		this.skipWhitespaces();
 
-		next('|');
-		skipWhitespaces();
-
-		reNameOrEmpty.lastIndex = at;
-		var name = reNameOrEmpty.exec(content)[0];
+		reNameOrEmpty.lastIndex = this.at;
+		var name = reNameOrEmpty.exec(this.content)[0];
 
 		if (name) {
-			at += name.length;
-			chr = content.charAt(at);
-
-			var args = chr == '(' ? readFormatterArguments() : null;
+			var args = (this.chr = this.content.charAt(this.at += name.length)) == '(' ? this.readFormatterArguments() : null;
 
 			return {
 				type: ContentNodeType.BINDING_FORMATTER,
 				at: formatterAt,
-				raw: content.slice(formatterAt, at),
+				raw: this.content.slice(formatterAt, this.at),
 				name: name,
 				arguments: args
 			};
 		}
 
-		at = formatterAt;
-		chr = content.charAt(at);
+		this.at = formatterAt;
+		this.chr = this.content.charAt(formatterAt);
 
 		return null;
-	}
-
-	function readFormatterArguments() {
-		var formatterArgumentsAt = at;
-
-		next('(');
-		skipWhitespaces();
-
+	},
+	readFormatterArguments: function readFormatterArguments() {
+		var formatterArgumentsAt = this.at;
 		var args = [];
 
-		if (chr != ')') {
+		this.next('(');
+
+		if (this.skipWhitespaces() != ')') {
 			for (;;) {
-				var arg = readValueOrValueKeypath();
+				var arg = this.readValueOrValueKeypath();
 
 				if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
-					skipWhitespaces();
-
-					if (chr == ',' || chr == ')') {
+					if (this.skipWhitespaces() == ',' || this.chr == ')') {
 						args.push(arg);
 
-						if (chr == ',') {
-							next();
-							skipWhitespaces();
+						if (this.chr == ',') {
+							this.next();
+							this.skipWhitespaces();
 							continue;
 						}
 
@@ -2314,49 +2289,47 @@ function parseContent(content) {
 					}
 				}
 
-				at = formatterArgumentsAt;
-				chr = content.charAt(at);
+				this.at = formatterArgumentsAt;
+				this.chr = this.content.charAt(formatterArgumentsAt);
 
 				return null;
 			}
 		}
 
-		next();
+		this.next();
 
 		return {
 			type: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
 			at: formatterArgumentsAt,
-			raw: content.slice(formatterArgumentsAt, at),
+			raw: this.content.slice(formatterArgumentsAt, this.at),
 			value: args
 		};
-	}
-
-	function readValueOrValueKeypath() {
-		var value = readValue();
-		return value === NOT_VALUE_AND_NOT_KEYPATH ? readValueKeypath() : value;
-	}
-
-	function readValue() {
-		switch (chr) {
+	},
+	readValueOrValueKeypath: function readValueOrValueKeypath() {
+		var value = this.readValue();
+		return value === NOT_VALUE_AND_NOT_KEYPATH ? this.readValueKeypath() : value;
+	},
+	readValue: function readValue() {
+		switch (this.chr) {
 			case '{':
 				{
-					return readObject();
+					return this.readObject();
 				}
 			case '[':
 				{
-					return readArray();
+					return this.readArray();
 				}
 			case "'":
 			case '"':
 				{
-					return readString();
+					return this.readString();
 				}
 		}
 
-		var readers = [readBoolean, readNumber, readVacuum];
+		var readers = ['readBoolean', 'readNumber', 'readVacuum'];
 
 		for (var i = 0, l = readers.length; i < l; i++) {
-			var value = readers[i]();
+			var value = this[readers[i]]();
 
 			if (value !== NOT_VALUE_AND_NOT_KEYPATH) {
 				return value;
@@ -2364,205 +2337,199 @@ function parseContent(content) {
 		}
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	}
+	},
+	readObject: function readObject() {
+		var objectAt = this.at;
 
-	function readObject() {
-		var objectAt = at;
+		this.next('{');
 
-		next('{');
-		skipWhitespaces();
+		while (this.skipWhitespaces() != '}') {
+			if ((this.chr == "'" || this.chr == '"' ? this.readString() !== NOT_VALUE_AND_NOT_KEYPATH : this.readObjectKey() !== null) && this.skipWhitespaces() == ':') {
+				this.next();
+				this.skipWhitespaces();
 
-		for (; chr != '}';) {
-			if (chr == "'" || chr == '"' ? readString() !== NOT_VALUE_AND_NOT_KEYPATH : readObjectKey() !== null) {
-				skipWhitespaces();
-
-				if (chr == ':') {
-					next();
-					skipWhitespaces();
-
-					if (readValueOrValueKeypath() !== NOT_VALUE_AND_NOT_KEYPATH) {
-						skipWhitespaces();
-
-						if (chr == ',') {
-							next();
-							skipWhitespaces();
-							continue;
-						} else if (chr == '}') {
-							break;
-						}
+				if (this.readValueOrValueKeypath() !== NOT_VALUE_AND_NOT_KEYPATH) {
+					if (this.skipWhitespaces() == ',') {
+						this.next();
+						continue;
+					} else if (this.chr == '}') {
+						break;
 					}
 				}
 			}
 
-			at = objectAt;
-			chr = content.charAt(at);
+			this.at = objectAt;
+			this.chr = this.content.charAt(objectAt);
 
 			return NOT_VALUE_AND_NOT_KEYPATH;
 		}
 
-		next();
+		this.next();
 
-		return content.slice(objectAt, at);
-	}
+		return this.content.slice(objectAt, this.at);
+	},
+	readObjectKey: function readObjectKey() {
+		reNameOrEmpty.lastIndex = this.at;
+		var key = reNameOrEmpty.exec(this.content)[0];
 
-	function readObjectKey() {
-		reNameOrEmpty.lastIndex = at;
-		var key = reNameOrEmpty.exec(content)[0];
-
-		if (key != '') {
-			at += key.length;
-			chr = content.charAt(at);
+		if (key) {
+			this.chr = this.content.charAt(this.at += key.length);
 			return key;
 		}
 
 		return null;
-	}
+	},
+	readArray: function readArray() {
+		var arrayAt = this.at;
 
-	function readArray() {
-		var arrayAt = at;
+		this.next('[');
 
-		next('[');
-		skipWhitespaces();
-
-		for (; chr != ']';) {
-			if (chr == ',') {
-				next();
-			} else if (readValueOrValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH) {
-				at = arrayAt;
-				chr = content.charAt(at);
+		while (this.skipWhitespaces() != ']') {
+			if (this.chr == ',') {
+				this.next();
+			} else if (this.readValueOrValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH) {
+				this.at = arrayAt;
+				this.chr = this.content.charAt(arrayAt);
 
 				return NOT_VALUE_AND_NOT_KEYPATH;
 			}
-
-			skipWhitespaces();
 		}
 
-		next();
+		this.next();
 
-		return content.slice(arrayAt, at);
-	}
+		return this.content.slice(arrayAt, this.at);
+	},
+	readBoolean: function readBoolean() {
+		reBooleanOrEmpty.lastIndex = this.at;
+		var bool = reBooleanOrEmpty.exec(this.content)[0];
 
-	function readBoolean() {
-		reBooleanOrEmpty.lastIndex = at;
-		var bool = reBooleanOrEmpty.exec(content)[0];
-
-		if (bool != '') {
-			at += bool.length;
-			chr = content.charAt(at);
+		if (bool) {
+			this.chr = this.content.charAt(this.at += bool.length);
 			return bool;
 		}
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	}
+	},
+	readNumber: function readNumber() {
+		reNumberOrEmpty.lastIndex = this.at;
+		var num = reNumberOrEmpty.exec(this.content)[0];
 
-	function readNumber() {
-		reNumberOrEmpty.lastIndex = at;
-		var num = reNumberOrEmpty.exec(content)[0];
-
-		if (num != '') {
-			at += num.length;
-			chr = content.charAt(at);
+		if (num) {
+			this.chr = this.content.charAt(this.at += num.length);
 			return num;
 		}
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	}
-
-	function readString() {
-		if (chr != "'" && chr != '"') {
+	},
+	readString: function readString() {
+		if (this.chr != "'" && this.chr != '"') {
 			throw {
 				name: 'SyntaxError',
-				message: 'Expected "\'" or \'"\' instead of "' + chr + '"',
-				at: at,
-				content: content
+				message: 'Expected "\'" or \'"\' instead of "' + this.chr + '"',
+				at: this.at,
+				content: this.content
 			};
 		}
 
-		var stringAt = at;
-		var quote = chr;
+		var stringAt = this.at;
+
+		var quote = this.chr;
 		var str = '';
 
-		while (next()) {
-			if (chr == quote) {
-				next();
-				return str;
+		while (this.next()) {
+			if (this.chr == quote) {
+				this.next();
+				return quote + str + quote;
 			}
 
-			if (chr == '\\') {
-				str += chr + (next() || '');
+			if (this.chr == '\\') {
+				str += this.chr + this.next();
 			} else {
-				if (chr == '\r' || chr == '\n') {
-					at = stringAt;
-					chr = content.charAt(at);
-					return NOT_VALUE_AND_NOT_KEYPATH;
+				if (this.chr == '\r' || this.chr == '\n') {
+					break;
 				}
 
-				str += chr;
+				str += this.chr;
 			}
 		}
-	}
 
-	function readVacuum() {
-		reVacuumOrEmpty.lastIndex = at;
-		var vacuum = reVacuumOrEmpty.exec(content)[0];
+		this.at = stringAt;
+		this.chr = this.content.charAt(stringAt);
 
-		if (vacuum != '') {
-			at += vacuum.length;
-			chr = content.charAt(at);
-			return vacuum == 'null' ? null : void 0;
+		return NOT_VALUE_AND_NOT_KEYPATH;
+	},
+	readVacuum: function readVacuum() {
+		reVacuumOrEmpty.lastIndex = this.at;
+		var vacuum = reVacuumOrEmpty.exec(this.content)[0];
+
+		if (vacuum) {
+			this.chr = this.content.charAt(this.at += vacuum.length);
+			return vacuum;
 		}
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	}
-
-	function readValueKeypath() {
-		var keypathAt = at;
-
-		if (content.slice(at, at + 4) != 'this') {
+	},
+	readValueKeypath: function readValueKeypath() {
+		if (this.content.slice(this.at, this.at + 4) != 'this') {
 			return NOT_VALUE_AND_NOT_KEYPATH;
 		}
 
-		at += 4;
-		chr = content.charAt(at);
+		var keypathAt = this.at;
+
+		this.chr = this.content.charAt(this.at += 4);
 
 		for (;;) {
-			if (chr == '.') {
-				next();
+			if (this.chr == '.') {
+				this.next();
 
-				reNameOrEmpty.lastIndex = at;
-				var name = reNameOrEmpty.exec(content)[0];
+				reNameOrEmpty.lastIndex = this.at;
+				var name = reNameOrEmpty.exec(this.content)[0];
 
 				if (!name) {
 					break;
 				}
 
-				at += name.length;
-				chr = content.charAt(at);
-			} else if (chr == '[') {
-				next();
+				this.chr = this.content.charAt(this.at += name.length);
+			} else if (this.chr == '[') {
+				this.next();
 
-				if ((chr == "'" || chr == '"' ? readString() === NOT_VALUE_AND_NOT_KEYPATH : readNumber() === NOT_VALUE_AND_NOT_KEYPATH && readValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH) || chr != ']') {
+				if ((this.chr == "'" || this.chr == '"' ? this.readString() === NOT_VALUE_AND_NOT_KEYPATH : this.readNumber() === NOT_VALUE_AND_NOT_KEYPATH && this.readValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH) || this.chr != ']') {
 					break;
 				}
 
-				next();
+				this.next();
 			} else {
-				return content.slice(keypathAt, at);
+				return this.content.slice(keypathAt, this.at);
 			}
 		}
 
-		at = keypathAt;
-		chr = content.charAt(at);
+		this.at = keypathAt;
+		this.chr = this.content.charAt(keypathAt);
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	}
-
-	function skipWhitespaces() {
-		while (chr && chr <= ' ') {
-			next();
+	},
+	next: function next(c) {
+		if (c && c != this.chr) {
+			throw {
+				name: 'SyntaxError',
+				message: 'Expected "' + c + '" instead of "' + this.chr + '"',
+				at: this.at,
+				content: this.content
+			};
 		}
+
+		return this.chr = this.content.charAt(++this.at);
+	},
+	skipWhitespaces: function skipWhitespaces() {
+		var chr = this.chr;
+
+		while (chr && chr <= ' ') {
+			chr = this.next();
+		}
+
+		return chr;
 	}
-}
+});
 
 var cache$3 = Object.create(null);
 
@@ -2846,7 +2813,7 @@ function bind(node, component, context) {
 							var value = attr.value;
 
 							if (reBinding.test(value)) {
-								var parsedValue = parseContent(value);
+								var parsedValue = new ContentParser(value).parse();
 
 								if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
 									(function () {
@@ -2886,7 +2853,7 @@ function bind(node, component, context) {
 						var content = child.textContent;
 
 						if (reBinding.test(content)) {
-							var parsedContent = parseContent(content);
+							var parsedContent = new ContentParser(content).parse();
 
 							if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
 								var _cell = new cellx.Cell(compileContent(parsedContent, content), {
@@ -3627,7 +3594,7 @@ var RtIfThen = Component.extend('rt-if-then', {
 
 				props.content = document.importNode(_this.element.content, true);
 
-				var parsedIf = parseContent('{' + props.if + '}');
+				var parsedIf = new ContentParser('{' + props.if + '}').parse();
 
 				if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType.BINDING) {
 					throw new SyntaxError('Invalid value of attribute "if" (' + props.if + ')');
@@ -3759,7 +3726,7 @@ var RtRepeat = Component.extend('rt-repeat', {
 				throw new SyntaxError(invalidForAttributeMessage + (' (' + props.for + ')'));
 			}
 
-			var parsedOf = parseContent('{' + forAttrValue[2] + '}');
+			var parsedOf = new ContentParser('{' + forAttrValue[2] + '}').parse();
 
 			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
 				throw new SyntaxError(invalidForAttributeMessage + (' (' + props.for + ')'));
