@@ -1,9 +1,9 @@
 import DisposableMixin from './DisposableMixin';
-import ElementAttributes from './ElementAttributes';
-import Component from './Component';
 import formatters from './formatters';
 import getText from './getText';
-import Template from './Template';
+import ElementAttributes from './ElementAttributes';
+import ComponentTemplate from './ComponentTemplate';
+import Component from './Component';
 import RtContent from './Components/rt-content';
 import RtIfThen from './Components/rt-if-then';
 import RtIfElse from './Components/rt-if-else';
@@ -24,7 +24,7 @@ let Rionite = {
 	getText,
 
 	ElementAttributes,
-	Template,
+	ComponentTemplate,
 
 	Component,
 

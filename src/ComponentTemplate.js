@@ -13,7 +13,7 @@ let re = RegExp(
 	'}}'
 );
 
-export default function Template(tmpl, parent = null) {
+export default function ComponentTemplate(tmpl, parent = null) {
 	this.parent = parent;
 
 	let currentBlock = { js: [] };
@@ -71,10 +71,10 @@ export default function Template(tmpl, parent = null) {
 		Function('data', 'escape', `return [${ blocks[0].js.join(', ') }].join('');`);
 }
 
-Template.prototype.extend = function(tmpl) {
-	return new Template(tmpl, this);
+ComponentTemplate.prototype.extend = function(tmpl) {
+	return new ComponentTemplate(tmpl, this);
 };
 
-Template.prototype.render = function(data) {
+ComponentTemplate.prototype.render = function(data) {
 	return this._renderer.call(this._blocks, data || {}, escapeHTML);
 };

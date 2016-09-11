@@ -284,6 +284,103 @@ var DisposableMixin = cellx.EventEmitter.extend({
 	}
 });
 
+var hasOwn = Object.prototype.hasOwnProperty;
+var toString = Object.prototype.toString;
+
+var slice = Array.prototype.slice;
+var map = Array.prototype.map;
+
+var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
+
+var texts = void 0;
+var getPluralIndex = void 0;
+
+function configure(config) {
+	var localeSettings = getText.localeSettings = config.localeSettings;
+
+	texts = config.texts;
+	getPluralIndex = Function('n', 'return ' + localeSettings.plural + ';');
+}
+
+function getText(context, key, plural, args) {
+	var rawText = void 0;
+
+	if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
+		rawText = texts[context][key];
+
+		if (plural) {
+			rawText = rawText[getPluralIndex(args[0])];
+		}
+	} else {
+		rawText = key;
+	}
+
+	var data = Object.create(null);
+
+	args.forEach(function (arg, index) {
+		data[index + 1] = arg;
+	});
+
+	if (plural) {
+		data.n = args[0];
+	}
+
+	var text = [];
+
+	rawText = rawText.split(reInsert);
+
+	for (var i = 0, l = rawText.length; i < l;) {
+		if (i % 3) {
+			text.push(rawText[i + 1] ? rawText[i + 1].split('|')[getPluralIndex(data[rawText[i]])] : data[rawText[i]]);
+			i += 2;
+		} else {
+			text.push(rawText[i]);
+			i++;
+		}
+	}
+
+	return text.join('');
+}
+
+function t(key) {
+	return getText('', key, false, slice.call(arguments, 1));
+}
+
+function pt(key, context) {
+	return getText(context, key, false, slice.call(arguments, 1));
+}
+
+function nt(key /*, count*/) {
+	return getText('', key, true, slice.call(arguments, 1));
+}
+
+function npt(key, context /*, count*/) {
+	return getText(context, key, true, slice.call(arguments, 1));
+}
+
+getText.configure = configure;
+getText.t = t;
+getText.pt = pt;
+getText.nt = nt;
+getText.npt = npt;
+
+configure({
+	localeSettings: {
+		// code: 'en',
+		// plural: 'n == 1 ? 0 : 1'
+		code: 'ru',
+		plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
+	},
+
+	texts: {}
+});
+
+var formatters = Object.create(null);
+formatters.t = getText.t;
+formatters.pt = getText.pt;
+formatters.nt = getText.nt;
+formatters.npt = getText.npt;
+
 var reEscapableChars = /[&<>"]/g;
 var charToEntityMap = Object.create(null);
 
@@ -311,9 +408,6 @@ function unescapeHTML(str) {
 		return entityToCharMap[entity];
 	}) : str;
 }
-
-var hasOwn = Object.prototype.hasOwnProperty;
-var toString = Object.prototype.toString;
 
 function isRegExp(value) {
 	return toString.call(value) == '[object RegExp]';
@@ -488,6 +582,91 @@ var ElementAttributes = cellx.EventEmitter.extend({
 		}
 	}
 });
+
+var namePattern = '[$_a-zA-Z][$\\w]*';
+
+var reEscapableChars$1 = /[\\'\r\n]/g;
+var charToSpecialMap = Object.create(null);
+
+charToSpecialMap['\\'] = '\\\\';
+charToSpecialMap['\''] = '\\\'';
+charToSpecialMap['\r'] = '\\r';
+charToSpecialMap['\n'] = '\\n';
+
+function escapeString(str) {
+	return reEscapableChars$1.test(str) ? str.replace(reEscapableChars$1, function (chr) {
+		return charToSpecialMap[chr];
+	}) : str;
+}
+
+var keypathPattern = '(?:' + namePattern + '|\\[\\d+\\])(?:(?:\\.' + namePattern + '|\\[\\d+\\]))*';
+var re = RegExp('{{' + '(?:' + '\\s*(?:' + ('block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')') + (')\\s*|{\\s*(' + keypathPattern + ')\\s*}') + ')' + '}}');
+
+function ComponentTemplate(tmpl) {
+	var parent = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+
+	this.parent = parent;
+
+	var currentBlock = { js: [] };
+
+	var blocks = [currentBlock];
+	var blockMap = this._blocks = Object.create(parent ? parent._blocks : null);
+
+	tmpl = tmpl.split(re);
+
+	for (var i = 0, l = tmpl.length; i < l;) {
+		if (i % 6) {
+			var name = tmpl[i];
+
+			if (name) {
+				currentBlock.js.push('this.' + name + '.call(this, data)');
+				currentBlock = blockMap[name] = { name: name, js: [] };
+				blocks.push(currentBlock);
+			} else if (tmpl[i + 1]) {
+				if (blocks.length > 1) {
+					blocks.pop();
+					currentBlock = blocks[blocks.length - 1];
+				}
+			} else if (tmpl[i + 2]) {
+				if (parent && blocks.length > 1 && parent._blocks[currentBlock.name]) {
+					currentBlock.js.push('_super.call(this, data)');
+				}
+			} else {
+				var keypath = tmpl[i + 2];
+				currentBlock.js.push(keypath ? 'escape(data.' + keypath + ')' : 'data.' + tmpl[i + 3]);
+			}
+
+			i += 5;
+		} else {
+			var text = tmpl[i];
+
+			if (text) {
+				currentBlock.js.push('\'' + escapeString(text) + '\'');
+			}
+
+			i++;
+		}
+	}
+
+	Object.keys(blockMap).forEach(function (name) {
+		var _super = parent && parent._blocks[name];
+		var inner = Function('_super', 'data', 'escape', 'return [' + blockMap[name].js.join(', ') + '].join(\'\');');
+
+		blockMap[name] = function (data) {
+			return inner.call(this, _super, data, escapeHTML);
+		};
+	});
+
+	this._renderer = parent ? parent._renderer : Function('data', 'escape', 'return [' + blocks[0].js.join(', ') + '].join(\'\');');
+}
+
+ComponentTemplate.prototype.extend = function (tmpl) {
+	return new ComponentTemplate(tmpl, this);
+};
+
+ComponentTemplate.prototype.render = function (data) {
+	return this._renderer.call(this._blocks, data || {}, escapeHTML);
+};
 
 var mixin$1 = cellx.Utils.mixin;
 
@@ -697,12 +876,10 @@ var ContentNodeType = {
 	BINDING_FORMATTER_ARGUMENTS: 4
 };
 
-var namePattern = '[$_a-zA-Z][$\\w]*';
-
-var keypathPattern = '(?:' + namePattern + '|\\[\\d+\\])(?:\\??(?:\\.' + namePattern + '|\\[\\d+\\]))*';
+var keypathPattern$1 = '(?:' + namePattern + '|\\[\\d+\\])(?:\\??(?:\\.' + namePattern + '|\\[\\d+\\]))*';
 
 var reNameOrEmpty = RegExp(namePattern + '|', 'g');
-var reKeypathOrEmpty = RegExp(keypathPattern + '|', 'g');
+var reKeypathOrEmpty = RegExp(keypathPattern$1 + '|', 'g');
 var reBooleanOrEmpty = /false|true|/g;
 var reNumberOrEmpty = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 var reVacuumOrEmpty = /null|undefined|void 0|/g;
@@ -1158,100 +1335,6 @@ function bindingToJSExpression(binding) {
 	};
 }
 
-var slice = Array.prototype.slice;
-var map = Array.prototype.map;
-
-var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
-
-var texts = void 0;
-var getPluralIndex = void 0;
-
-function configure(config) {
-	var localeSettings = getText.localeSettings = config.localeSettings;
-
-	texts = config.texts;
-	getPluralIndex = Function('n', 'return ' + localeSettings.plural + ';');
-}
-
-function getText(context, key, plural, args) {
-	var rawText = void 0;
-
-	if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
-		rawText = texts[context][key];
-
-		if (plural) {
-			rawText = rawText[getPluralIndex(args[0])];
-		}
-	} else {
-		rawText = key;
-	}
-
-	var data = Object.create(null);
-
-	args.forEach(function (arg, index) {
-		data[index + 1] = arg;
-	});
-
-	if (plural) {
-		data.n = args[0];
-	}
-
-	var text = [];
-
-	rawText = rawText.split(reInsert);
-
-	for (var i = 0, l = rawText.length; i < l;) {
-		if (i % 3) {
-			text.push(rawText[i + 1] ? rawText[i + 1].split('|')[getPluralIndex(data[rawText[i]])] : data[rawText[i]]);
-			i += 2;
-		} else {
-			text.push(rawText[i]);
-			i++;
-		}
-	}
-
-	return text.join('');
-}
-
-function t(key) {
-	return getText('', key, false, slice.call(arguments, 1));
-}
-
-function pt(key, context) {
-	return getText(context, key, false, slice.call(arguments, 1));
-}
-
-function nt(key /*, count*/) {
-	return getText('', key, true, slice.call(arguments, 1));
-}
-
-function npt(key, context /*, count*/) {
-	return getText(context, key, true, slice.call(arguments, 1));
-}
-
-getText.configure = configure;
-getText.t = t;
-getText.pt = pt;
-getText.nt = nt;
-getText.npt = npt;
-
-configure({
-	localeSettings: {
-		// code: 'en',
-		// plural: 'n == 1 ? 0 : 1'
-		code: 'ru',
-		plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
-	},
-
-	texts: {}
-});
-
-var formatters = Object.create(null);
-formatters.t = getText.t;
-formatters.pt = getText.pt;
-formatters.nt = getText.nt;
-formatters.npt = getText.npt;
-
 var cache$4 = Object.create(null);
 
 function compileBinding(binding) {
@@ -1279,20 +1362,6 @@ function compileBinding(binding) {
 	}
 
 	return cache$4[bindingRaw] = Function(jsExpr);
-}
-
-var reEscapableChars$1 = /[\\'\r\n]/g;
-var charToSpecialMap = Object.create(null);
-
-charToSpecialMap['\\'] = '\\\\';
-charToSpecialMap['\''] = '\\\'';
-charToSpecialMap['\r'] = '\\r';
-charToSpecialMap['\n'] = '\\n';
-
-function escapeString(str) {
-	return reEscapableChars$1.test(str) ? str.replace(reEscapableChars$1, function (chr) {
-		return charToSpecialMap[chr];
-	}) : str;
 }
 
 var cache$2 = Object.create(null);
@@ -1976,75 +2045,6 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	});
 });
 
-var keypathPattern$1 = '(?:' + namePattern + '|\\[\\d+\\])(?:(?:\\.' + namePattern + '|\\[\\d+\\]))*';
-var re = RegExp('{{' + '(?:' + '\\s*(?:' + ('block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern$1 + ')') + (')\\s*|{\\s*(' + keypathPattern$1 + ')\\s*}') + ')' + '}}');
-
-function Template(tmpl) {
-	var parent = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
-
-	this.parent = parent;
-
-	var currentBlock = { js: [] };
-
-	var blocks = [currentBlock];
-	var blockMap = this._blocks = Object.create(parent ? parent._blocks : null);
-
-	tmpl = tmpl.split(re);
-
-	for (var i = 0, l = tmpl.length; i < l;) {
-		if (i % 6) {
-			var name = tmpl[i];
-
-			if (name) {
-				currentBlock.js.push('this.' + name + '.call(this, data)');
-				currentBlock = blockMap[name] = { name: name, js: [] };
-				blocks.push(currentBlock);
-			} else if (tmpl[i + 1]) {
-				if (blocks.length > 1) {
-					blocks.pop();
-					currentBlock = blocks[blocks.length - 1];
-				}
-			} else if (tmpl[i + 2]) {
-				if (parent && blocks.length > 1 && parent._blocks[currentBlock.name]) {
-					currentBlock.js.push('_super.call(this, data)');
-				}
-			} else {
-				var keypath = tmpl[i + 2];
-				currentBlock.js.push(keypath ? 'escape(data.' + keypath + ')' : 'data.' + tmpl[i + 3]);
-			}
-
-			i += 5;
-		} else {
-			var text = tmpl[i];
-
-			if (text) {
-				currentBlock.js.push('\'' + escapeString(text) + '\'');
-			}
-
-			i++;
-		}
-	}
-
-	Object.keys(blockMap).forEach(function (name) {
-		var _super = parent && parent._blocks[name];
-		var inner = Function('_super', 'data', 'escape', 'return [' + blockMap[name].js.join(', ') + '].join(\'\');');
-
-		blockMap[name] = function (data) {
-			return inner.call(this, _super, data, escapeHTML);
-		};
-	});
-
-	this._renderer = parent ? parent._renderer : Function('data', 'escape', 'return [' + blocks[0].js.join(', ') + '].join(\'\');');
-}
-
-Template.prototype.extend = function (tmpl) {
-	return new Template(tmpl, this);
-};
-
-Template.prototype.render = function (data) {
-	return this._renderer.call(this._blocks, data || {}, escapeHTML);
-};
-
 var div = document.createElement('div');
 div.innerHTML = '<template>1</template>';
 
@@ -2510,7 +2510,7 @@ var Rionite = {
 	getText: getText,
 
 	ElementAttributes: ElementAttributes,
-	Template: Template,
+	ComponentTemplate: ComponentTemplate,
 
 	Component: Component,
 
