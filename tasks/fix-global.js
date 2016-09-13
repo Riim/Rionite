@@ -1,7 +1,7 @@
 var gulp = require('gulp');
 var replace = require('gulp-replace');
 
-gulp.task('fix-global', function(d) {
+gulp.task('fix-global', function() {
 	return gulp.src('dist/Rionite.js')
 		.pipe(replace(
 			'(global.Rionite = factory(global.cellx));',
