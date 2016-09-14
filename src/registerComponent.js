@@ -9,7 +9,6 @@ let mixin = Utils.mixin;
 let inheritedStaticProperties = [	
 	'elementExtends',
 	'elementAttributes',
-	'props',
 	'i18n',
 	'template',
 	'assets'
@@ -20,6 +19,16 @@ export default function registerComponent(componentConstr) {
 
 	if (!elIs) {
 		throw new TypeError('Static property "elementIs" is required');
+	}
+
+	if (!hasOwn.call(componentConstr, 'elementAttributes') && hasOwn.call(componentConstr, 'props')) {
+		let props = componentConstr.props;
+
+		if (props.content || props.context) {
+			throw new TypeError(`No need to declare property "${ props.content ? 'content' : 'context' }"`);
+		}
+
+		componentConstr.elementAttributes = props;
 	}
 
 	let parentComponentConstr;

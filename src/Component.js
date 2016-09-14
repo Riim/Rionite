@@ -33,28 +33,20 @@ let Component = EventEmitter.extend({
 	Static: {
 		register: registerComponent,
 
-		extend(elIs, description) {
+		extend: function extend(elIs, description) {
 			description.Extends = this;
 
 			let Static = description.Static || (description.Static = {});
 
-			Static.elementIs = elIs;
-
-			let props = Static.props;
-
-			if (props) {
-				if (props.content || props.context) {
-					throw new TypeError(
-						`It is not necessary to declare property "${ props.content ? 'content' : 'context' }"`
-					);
-				}
-
-				Static.elementAttributes = props;
-			} else if (Static.elementAttributes) {
-				Static.props = Static.elementAttributes;
+			if (!Static.hasOwnProperty('extend')) {
+				Static.extend = this.extend;
+			} else if (Static.extend === void 0) {
+				Static.extend = extend;
 			}
 
-			return registerComponent(createClass(description));
+			Static.elementIs = elIs;
+
+			return registerComponent(createClass(description, false));
 		},
 
 		elementIs: void 0,
