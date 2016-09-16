@@ -926,22 +926,22 @@ THE SOFTWARE.
         document[ADD_EVENT_LISTENER](DOM_CONTENT_LOADED, onReadyStateChange);
         document[ADD_EVENT_LISTENER]('readystatechange', onReadyStateChange);
   
-      [HTMLElementPrototype, DocumentFragment.prototype].forEach(function(proto) {
-        var origCloneNode = proto.cloneNode;
+        [HTMLElementPrototype, DocumentFragment.prototype].forEach(function(proto) {
+          var origCloneNode = proto.cloneNode;
 
-        proto.cloneNode = function(deep) {
-          var
-            node = origCloneNode.call(this, !!deep),
-            i
-          ;
-          if (node.nodeType !== 11) {
-            i = getTypeIndex(node);
-            if (-1 < i) patch(node, protos[i]);
-          }
-          if (deep) loopAndSetup(node.querySelectorAll(query));
-          return node;
-        };
-      });
+          proto.cloneNode = function(deep) {
+            var
+              node = origCloneNode.call(this, !!deep),
+              i
+            ;
+            if (node.nodeType !== 11) {
+              i = getTypeIndex(node);
+              if (-1 < i) patch(node, protos[i]);
+            }
+            if (deep) loopAndSetup(node.querySelectorAll(query));
+            return node;
+          };
+        });
       }
   
       if (-2 < (
@@ -1274,13 +1274,13 @@ THE SOFTWARE.
       });
     }
     if (is) definition[EXTENDS] = is;
-    document[REGISTER_ELEMENT](name, definition);
     name = name.toUpperCase();
     constructors[name] = {
       constructor: Class,
       create: is ? [is, secondArgument(name)] : [name]
     };
     nodeNames.set(Class, name);
+    document[REGISTER_ELEMENT](name.toLowerCase(), definition);
     whenDefined(name);
     waitingList[name].r();
   }
