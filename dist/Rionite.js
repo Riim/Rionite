@@ -929,10 +929,10 @@ var ContentParser = cellx.Utils.createClass({
 	pushText: function pushText(value) {
 		if (value.length) {
 			var result = this.result;
-			var resultLength = result.length;
+			var resultLen = result.length;
 
-			if (resultLength && result[resultLength - 1].type == ContentNodeType.TEXT) {
-				result[resultLength - 1].value = result[resultLength - 1].raw += value;
+			if (resultLen && result[resultLen - 1].type == ContentNodeType.TEXT) {
+				result[resultLen - 1].value = result[resultLen - 1].raw += value;
 			} else {
 				result.push({
 					type: ContentNodeType.TEXT,
@@ -1305,9 +1305,9 @@ function bindingToJSExpression(binding) {
 	var keypath = binding.keypath.value.split('?');
 	var formatters = binding.formatters;
 
-	var keypathLength = keypath.length;
+	var keypathLen = keypath.length;
 
-	if (keypathLength == 1) {
+	if (keypathLen == 1) {
 		if (formatters.length) {
 			return cache$3[bindingRaw] = {
 				value: formatters.reduce(formattersReducer, 'this.' + keypath[0]),
@@ -1323,7 +1323,7 @@ function bindingToJSExpression(binding) {
 		};
 	}
 
-	var index = keypathLength - 2;
+	var index = keypathLen - 2;
 	var jsExpr = Array(index);
 
 	while (index) {
@@ -1332,14 +1332,14 @@ function bindingToJSExpression(binding) {
 
 	if (formatters.length) {
 		return cache$3[bindingRaw] = {
-			value: '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && ' + formatters.reduce(formattersReducer, 'temp' + keypath[keypathLength - 1]),
+			value: '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && ' + formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1]),
 			usesFormatters: true,
 			usesTempVariable: true
 		};
 	}
 
 	return cache$3[bindingRaw] = {
-		value: '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && temp' + keypath[keypathLength - 1],
+		value: '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && temp' + keypath[keypathLen - 1],
 		usesFormatters: false,
 		usesTempVariable: true
 	};

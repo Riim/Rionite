@@ -22,9 +22,9 @@ export default function bindingToJSExpression(binding: Object): {
 	let keypath = binding.keypath.value.split('?');
 	let formatters = binding.formatters;
 
-	let keypathLength = keypath.length;
+	let keypathLen = keypath.length;
 
-	if (keypathLength == 1) {
+	if (keypathLen == 1) {
 		if (formatters.length) {
 			return (cache[bindingRaw] = {
 				value: formatters.reduce(formattersReducer, 'this.' + keypath[0]),
@@ -40,7 +40,7 @@ export default function bindingToJSExpression(binding: Object): {
 		});
 	}
 
-	let index = keypathLength - 2;
+	let index = keypathLen - 2;
 	let jsExpr = Array(index);
 
 	while (index) {
@@ -50,7 +50,7 @@ export default function bindingToJSExpression(binding: Object): {
 	if (formatters.length) {
 		return (cache[bindingRaw] = {
 			value: `(temp = this.${ keypath[0] })${ jsExpr.join('') } && ${
-				formatters.reduce(formattersReducer, 'temp' + keypath[keypathLength - 1])
+				formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1])
 			}`,
 			usesFormatters: true,
 			usesTempVariable: true
@@ -58,7 +58,7 @@ export default function bindingToJSExpression(binding: Object): {
 	}
 
 	return (cache[bindingRaw] = {
-		value: `(temp = this.${ keypath[0] })${ jsExpr.join('') } && temp${ keypath[keypathLength - 1] }`,
+		value: `(temp = this.${ keypath[0] })${ jsExpr.join('') } && temp${ keypath[keypathLen - 1] }`,
 		usesFormatters: false,
 		usesTempVariable: true
 	});

@@ -46,10 +46,10 @@ export default Utils.createClass({
 	pushText(value: string): void {
 		if (value.length) {
 			let result = this.result;
-			let resultLength = result.length;
+			let resultLen = result.length;
 
-			if (resultLength && result[resultLength - 1].type == ContentNodeType.TEXT) {
-				result[resultLength - 1].value = result[resultLength - 1].raw += value;
+			if (resultLen && result[resultLen - 1].type == ContentNodeType.TEXT) {
+				result[resultLen - 1].value = result[resultLen - 1].raw += value;
 			} else {
 				result.push({
 					type: ContentNodeType.TEXT,
