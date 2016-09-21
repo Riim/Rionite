@@ -51,8 +51,7 @@ export default function registerComponent(componentConstr) {
 		HTMLElement;
 
 	let elConstr = function(self) {
-		parentElConstr.call(this, self);
-		return self;
+		return parentElConstr.call(this, self);
 	};
 	let elProto = elConstr.prototype = Object.create(parentElConstr.prototype);
 

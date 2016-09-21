@@ -2296,8 +2296,7 @@ function registerComponent(componentConstr) {
 	var parentElConstr = elExtends ? elementConstructorMap[elExtends] || window['HTML' + (elExtends.charAt(0).toUpperCase() + elExtends.slice(1)) + 'Element'] : HTMLElement;
 
 	var elConstr = function elConstr(self) {
-		parentElConstr.call(this, self);
-		return self;
+		return parentElConstr.call(this, self);
 	};
 	var elProto = elConstr.prototype = Object.create(parentElConstr.prototype);
 
