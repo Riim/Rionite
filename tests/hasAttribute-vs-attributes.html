@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<script src="../node_modules/benchmark/node_modules/lodash/lodash.js"></script>
+<script src="../node_modules/benchmark/node_modules/platform/platform.js"></script>
+<script src="../node_modules/benchmark/benchmark.js"></script>
+<script>
+
+let el = document.createElement('div');
+el.setAttribute('test', '1');
+
+function hasAttribute1(el, name) {
+	return el.hasAttribute(name);
+}
+
+function hasAttribute2(el, name) {
+	return el.attributes[name];
+}
+
+function hasAttribute3(el, name) {
+	return el.attributes.hasOwnProperty(name);
+}
+
+function hasAttribute4(el, name) {
+	return el.attributes.getNamedItem(name);
+}
+
+let suite = new Benchmark.Suite();
+
+suite
+	.add('1', function() {
+		hasAttribute1(el, 'test');
+	})
+	.add('2', function() {
+		hasAttribute2(el, 'test');
+	})
+	.add('3', function() {
+		hasAttribute3(el, 'test');
+	})
+	.add('4', function() {
+		hasAttribute4(el, 'test');
+	})
+	.on('cycle', function(evt) {
+		document.body.innerHTML += '<br>' + String(evt.target);
+	})
+	.run({ 'async': true });
+
+// 1 x 10,909,397 ops/sec ±7.29% (47 runs sampled)
+// 2 x 6,636,528 ops/sec ±4.08% (54 runs sampled)
+// 3 x 3,677,249 ops/sec ±5.59% (52 runs sampled)
+// 4 x 2,426,622 ops/sec ±6.00% (54 runs sampled)
+
+</script>
+
+</body>
+</html>

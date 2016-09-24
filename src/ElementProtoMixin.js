@@ -4,7 +4,7 @@ import defer from './Utils/defer';
 
 let Symbol = JS.Symbol;
 
-let attached = Symbol('attached');
+let attached = Symbol('Rionite.ElementProtoMixin.attached');
 
 let ElementProtoMixin = {
 	rioniteComponent: null,

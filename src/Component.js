@@ -2,6 +2,8 @@ import { EventEmitter, JS, Utils } from 'cellx';
 import DisposableMixin from './DisposableMixin';
 import ElementAttributes from './ElementAttributes';
 import registerComponent from './registerComponent';
+import setElementClasses from './setElementClasses';
+import initAttributes from './initAttributes';
 import bind from './bind';
 import attachChildComponentElements from './attachChildComponentElements';
 import defineAssets from './defineAssets';
@@ -15,9 +17,9 @@ import htmlToFragment from './Utils/htmlToFragment';
 let Symbol = JS.Symbol;
 let createClass = Utils.createClass;
 
-let KEY_RAW_CONTENT = Symbol('rawContent');
-let KEY_BLOCK_NAME_IN_MARKUP = Symbol('blockNameInMarkup');
-let KEY_SILENT = Symbol('silent');
+let KEY_RAW_CONTENT = Symbol('Rionite.Component.rawContent');
+let KEY_BLOCK_NAME_IN_MARKUP = Symbol('Rionite.Component.blockNameInMarkup');
+let KEY_SILENT = Symbol('Rionite.Component#silent');
 
 function created() {}
 function initialize() {}
@@ -214,29 +216,13 @@ let Component = EventEmitter.extend({
 				}
 			}
 		} else {
-			for (let c = constr; ;) {
-				el.classList.add(c.elementIs);
-				c = Object.getPrototypeOf(c.prototype).constructor;
+			setElementClasses(el, constr);
+			initAttributes(this, constr);
 
-				if (c == Component) {
-					break;
-				}
-			}
+			let template = constr.template;
 
-			let attrs = this.elementAttributes;
-			let attributesConfig = constr.elementAttributes;
-
-			for (let name in attributesConfig) {
-				if (typeof attributesConfig[name] != 'function') {
-					let camelizedName = camelize(name);
-					attrs[camelizedName] = attrs[camelizedName];
-				}
-			}
-
-			if (constr.template != null) {
+			if (template != null) {
 				if (!rawContent) {
-					let template = constr.template;
-
 					rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(
 						typeof template == 'string' ? template : template.render(constr)
 					);

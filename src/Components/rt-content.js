@@ -4,7 +4,7 @@ import attachChildComponentElements from '../attachChildComponentElements';
 import Component from '../Component';
 import { templateTagSupport } from '../templateTagSupport';
 
-let KEY_TEMPLATES_FIXED = JS.Symbol('templatesFixed');
+let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 
 export default Component.extend('rt-content', {
 	Static: {

@@ -2195,7 +2195,7 @@ var _ElementProtoMixin;
 
 var _Symbol$1 = cellx.JS.Symbol;
 
-var attached = _Symbol$1('attached');
+var attached = _Symbol$1('Rionite.ElementProtoMixin.attached');
 
 var ElementProtoMixin = (_ElementProtoMixin = {
 	rioniteComponent: null,
@@ -2325,6 +2325,29 @@ function registerComponent(componentConstr) {
 	elementConstructorMap[elIs] = customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
 
 	return componentConstr;
+}
+
+function setElementClasses(el, constr) {
+	for (var c = constr;;) {
+		el.classList.add(c.elementIs);
+		c = Object.getPrototypeOf(c.prototype).constructor;
+
+		if (c == Component) {
+			break;
+		}
+	}
+}
+
+function initAttributes(component, constr) {
+	var attrs = component.elementAttributes;
+	var attributesConfig = constr.elementAttributes;
+
+	for (var name in attributesConfig) {
+		if (typeof attributesConfig[name] != 'function') {
+			var camelizedName = camelize(name);
+			attrs[camelizedName] = attrs[camelizedName];
+		}
+	}
 }
 
 var ContentNodeType = {
@@ -3132,9 +3155,9 @@ var htmlToFragment$1 = htmlToFragment;
 var _Symbol = cellx.JS.Symbol;
 var createClass$1 = cellx.Utils.createClass;
 
-var KEY_RAW_CONTENT = _Symbol('rawContent');
-var KEY_BLOCK_NAME_IN_MARKUP = _Symbol('blockNameInMarkup');
-var KEY_SILENT = _Symbol('silent');
+var KEY_RAW_CONTENT = _Symbol('Rionite.Component.rawContent');
+var KEY_BLOCK_NAME_IN_MARKUP = _Symbol('Rionite.Component.blockNameInMarkup');
+var KEY_SILENT = _Symbol('Rionite.Component#silent');
 
 function created() {}
 function initialize() {}
@@ -3327,29 +3350,13 @@ var Component = cellx.EventEmitter.extend({
 				}
 			}
 		} else {
-			for (var c = constr;;) {
-				el.classList.add(c.elementIs);
-				c = Object.getPrototypeOf(c.prototype).constructor;
+			setElementClasses(el, constr);
+			initAttributes(this, constr);
 
-				if (c == Component) {
-					break;
-				}
-			}
+			var template = constr.template;
 
-			var attrs = this.elementAttributes;
-			var attributesConfig = constr.elementAttributes;
-
-			for (var name in attributesConfig) {
-				if (typeof attributesConfig[name] != 'function') {
-					var camelizedName = camelize(name);
-					attrs[camelizedName] = attrs[camelizedName];
-				}
-			}
-
-			if (constr.template != null) {
+			if (template != null) {
 				if (!rawContent) {
-					var template = constr.template;
-
 					rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment$1(typeof template == 'string' ? template : template.render(constr));
 				}
 
@@ -3504,7 +3511,7 @@ var template = div.firstChild;
 
 var templateTagSupport = !template.firstChild;
 
-var KEY_TEMPLATES_FIXED = cellx.JS.Symbol('templatesFixed');
+var KEY_TEMPLATES_FIXED = cellx.JS.Symbol('Rionite.RtContent#templatesFixed');
 
 var RtContent = Component.extend('rt-content', {
 	Static: {
