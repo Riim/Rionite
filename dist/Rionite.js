@@ -2370,7 +2370,7 @@ var RtRepeat = Component.extend('rt-repeat', {
 		if (list) {
 			this._lastNode = this.element;
 			changed = list.reduce(function (changed, item, index) {
-				return _this._renderListItem(item, index) || changed;
+				return _this._renderItem(item, index) || changed;
 			}, changed);
 		}
 
@@ -2386,7 +2386,7 @@ var RtRepeat = Component.extend('rt-repeat', {
 			});
 		}
 	},
-	_renderListItem: function _renderListItem(item, index) {
+	_renderItem: function _renderItem(item, index) {
 		var _Object$create;
 
 		var trackBy = this._trackBy;

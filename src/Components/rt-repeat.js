@@ -115,7 +115,7 @@ export default Component.extend('rt-repeat', {
 
 		if (list) {
 			this._lastNode = this.element;
-			changed = list.reduce((changed, item, index) => this._renderListItem(item, index) || changed, changed);
+			changed = list.reduce((changed, item, index) => this._renderItem(item, index) || changed, changed);
 		}
 
 		if (oldItemMap.size) {
@@ -131,7 +131,7 @@ export default Component.extend('rt-repeat', {
 		}
 	},
 
-	_renderListItem(item, index) {
+	_renderItem(item, index) {
 		let trackBy = this._trackBy;
 		let trackingValue = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
 		let prevItems = this._oldItemMap.get(trackingValue);

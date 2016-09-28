@@ -1,10 +1,10 @@
-let Benchmark = require('benchmark');
+var Benchmark = require('benchmark');
 
 function keypathToJSExpression1(keypath) {
 	keypath = keypath.split('?');
 
-	let index = keypath.length - 2;
-	let jsExpr = Array(index);
+	var index = keypath.length - 2;
+	var jsExpr = Array(index);
 
 	while (index) {
 		jsExpr[--index] = ' && (temp = temp' + keypath[index + 1] + ')';
@@ -14,8 +14,8 @@ function keypathToJSExpression1(keypath) {
 }
 
 function keypathToJSExpression2(keypath) {
-	let jsExpr = keypath.split('?');
-	let index = jsExpr.length - 2;
+	var jsExpr = keypath.split('?');
+	var index = jsExpr.length - 2;
 
 	while (index) {
 		jsExpr[index] = ' && (temp = temp' + jsExpr[index--] + ')';
@@ -25,19 +25,19 @@ function keypathToJSExpression2(keypath) {
 }
 
 function keypathToJSExpression3(keypath) {
-	let jsExpr = keypath.split('?');
+	var jsExpr = keypath.split('?');
 
-	let last = jsExpr.pop();
-	let first = jsExpr.shift();
+	var last = jsExpr.pop();
+	var first = jsExpr.shift();
 
-	for (let i = jsExpr.length; i;) {
+	for (var i = jsExpr.length; i;) {
 		jsExpr[--i] = ' && (temp = temp' + jsExpr[i] + ')';
 	}
 
 	return `(temp = this.${ first })${ jsExpr.join('') } && temp${ last }`;
 }
 
-let suite = new Benchmark.Suite();
+var suite = new Benchmark.Suite();
 
 suite
 	.add('1.1', function() {

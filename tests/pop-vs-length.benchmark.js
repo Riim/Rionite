@@ -1,21 +1,21 @@
-let Benchmark = require('benchmark');
+var Benchmark = require('benchmark');
 
 function getArray() {
 	return [1];
 }
 
 function pop() {
-	let arr = getArray();
+	var arr = getArray();
 	arr.pop();
 	return arr.length;
 }
 
 function length() {
-	let arr = getArray();
+	var arr = getArray();
 	return --arr.length;
 }
 
-let suite = new Benchmark.Suite();
+var suite = new Benchmark.Suite();
 
 suite
 	.add('pop', function() {

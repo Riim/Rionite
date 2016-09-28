@@ -633,12 +633,13 @@ THE SOFTWARE.
   
     targets = IE8 && [],
   
+    attachShadow = HTMLElementPrototype.attachShadow,
     dispatchEvent = HTMLElementPrototype.dispatchEvent,
     getAttribute = HTMLElementPrototype.getAttribute,
     hasAttribute = HTMLElementPrototype.hasAttribute,
     removeAttribute = HTMLElementPrototype.removeAttribute,
     setAttribute = HTMLElementPrototype.setAttribute,
-  
+
     // replaced later on
     createElement = document.createElement,
     patchedCreateElement = createElement,
@@ -676,6 +677,7 @@ THE SOFTWARE.
     callDOMAttrModified,
     getAttributesMirror,
     observer,
+    observe,
   
     // based on setting prototype capability
     // will check proto or the expando attribute
@@ -910,13 +912,22 @@ THE SOFTWARE.
               }
             });
           }(executeAction(ATTACHED), executeAction(DETACHED)));
-          observer.observe(
-            document,
-            {
-              childList: true,
-              subtree: true
-            }
-          );
+          observe = function (node) {
+            observer.observe(
+              node,
+              {
+                childList: true,
+                subtree: true
+              }
+            );
+            return node;
+          };
+          observe(document);
+          if (attachShadow) {
+            HTMLElementPrototype.attachShadow = function () {
+              return observe(attachShadow.apply(this, arguments));
+            };
+          }
         } else {
           asapQueue = [];
           document[ADD_EVENT_LISTENER]('DOMNodeInserted', onDOMNode(ATTACHED));
@@ -925,7 +936,7 @@ THE SOFTWARE.
   
         document[ADD_EVENT_LISTENER](DOM_CONTENT_LOADED, onReadyStateChange);
         document[ADD_EVENT_LISTENER]('readystatechange', onReadyStateChange);
-  
+
         [HTMLElementPrototype, DocumentFragment.prototype].forEach(function(proto) {
           var origCloneNode = proto.cloneNode;
 
@@ -943,7 +954,7 @@ THE SOFTWARE.
           };
         });
       }
-  
+
       if (-2 < (
         indexOf.call(types, PREFIX_IS + upperType) +
         indexOf.call(types, PREFIX_TAG + upperType)

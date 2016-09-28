@@ -1,9 +1,9 @@
-let Benchmark = require('benchmark');
+var Benchmark = require('benchmark');
 
-let html1 = 'textotext';
-let html2 = 'text&lt;o&gt;text';
-let html3 = 'textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext';
-let html4 = 'text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text';
+var html1 = 'textotext';
+var html2 = 'text&lt;o&gt;text';
+var html3 = 'textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext textotext';
+var html4 = 'text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text text&lt;o&gt;text';
 
 function unescapeHTML1(str) {
 	return str
@@ -13,10 +13,10 @@ function unescapeHTML1(str) {
 		.replace(/&amp;/g, '&');
 }
 
-let reLessThanEntity = /&lt;/g;
-let reGreaterThanEntity = /&gt;/g;
-let reQuoteEntity = /&quot;/g;
-let reAmpersandEntity = /&amp;/g;
+var reLessThanEntity = /&lt;/g;
+var reGreaterThanEntity = /&gt;/g;
+var reQuoteEntity = /&quot;/g;
+var reAmpersandEntity = /&amp;/g;
 
 function unescapeHTML2(str) {
 	return str
@@ -34,8 +34,8 @@ function unescapeHTML3(str) {
 		.split('&quot;').join('"');
 }
 
-let reEscapableEntities = /&(?:amp|lt|gt|quot);/g;
-let entityToCharMap = Object.create(null);
+var reEscapableEntities = /&(?:amp|lt|gt|quot);/g;
+var entityToCharMap = Object.create(null);
 
 entityToCharMap['&amp;'] = '&';
 entityToCharMap['&lt;'] = '<';
@@ -54,7 +54,7 @@ function unescapeHTML5(str) {
 	}) : str;
 }
 
-let suite = new Benchmark.Suite();
+var suite = new Benchmark.Suite();
 
 suite
 	.add('1.1', function() {

@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.12.37",
+  "version": "0.12.38",
   "description": "",
   "main": "dist/Rionite-with-polyfills.js",
   "scripts": {
@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "babel-eslint": "^6.1.2",
+    "babel-eslint": "^7.0.0",
     "babel-plugin-external-helpers": "^6.8.0",
     "babel-plugin-syntax-flow": "^6.13.0",
     "babel-plugin-transform-flow-strip-types": "^6.14.0",
@@ -40,6 +40,6 @@
     "run-sequence": "^1.2.2"
   },
   "dependencies": {
-    "document-register-element": "^1.1.1"
+    "document-register-element": "^1.2.0"
   }
 }
