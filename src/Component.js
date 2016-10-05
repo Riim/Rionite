@@ -37,18 +37,8 @@ let Component = EventEmitter.extend({
 
 		extend: function extend(elIs, description) {
 			description.Extends = this;
-
-			let Static = description.Static || (description.Static = {});
-
-			if (!Static.hasOwnProperty('extend')) {
-				Static.extend = this.extend;
-			} else if (Static.extend === void 0) {
-				Static.extend = extend;
-			}
-
-			Static.elementIs = elIs;
-
-			return registerComponent(createClass(description, false));
+			(description.Static || (description.Static = {})).elementIs = elIs;
+			return registerComponent(createClass(description));
 		},
 
 		elementIs: void 0,

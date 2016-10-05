@@ -6,14 +6,6 @@ import hyphenize from './Utils/hyphenize';
 
 let mixin = Utils.mixin;
 
-let inheritedStaticProperties = [	
-	'elementExtends',
-	'elementAttributes',
-	'i18n',
-	'template',
-	'assets'
-];
-
 export default function registerComponent(componentConstr) {
 	let elIs = componentConstr.elementIs;
 
@@ -21,27 +13,15 @@ export default function registerComponent(componentConstr) {
 		throw new TypeError('Static property "elementIs" is required');
 	}
 
-	if (!hasOwn.call(componentConstr, 'elementAttributes') && hasOwn.call(componentConstr, 'props')) {
+	if (hasOwn.call(componentConstr, 'props')) {
 		let props = componentConstr.props;
 
-		if (props.content || props.context) {
+		if (props && (props.content || props.context)) {
 			throw new TypeError(`No need to declare property "${ props.content ? 'content' : 'context' }"`);
 		}
 
 		componentConstr.elementAttributes = props;
 	}
-
-	let parentComponentConstr;
-
-	inheritedStaticProperties.forEach(name => {
-		if (!hasOwn.call(componentConstr, name)) {
-			Object.defineProperty(componentConstr, name, Object.getOwnPropertyDescriptor(
-				parentComponentConstr ||
-					(parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor),
-				name
-			));
-		}
-	});
 
 	let elExtends = componentConstr.elementExtends;
 

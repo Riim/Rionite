@@ -2275,8 +2275,6 @@ var ElementProtoMixin = (_ElementProtoMixin = {
 
 var mixin = cellx.Utils.mixin;
 
-var inheritedStaticProperties = ['elementExtends', 'elementAttributes', 'i18n', 'template', 'assets'];
-
 function registerComponent(componentConstr) {
 	var elIs = componentConstr.elementIs;
 
@@ -2284,23 +2282,15 @@ function registerComponent(componentConstr) {
 		throw new TypeError('Static property "elementIs" is required');
 	}
 
-	if (!hasOwn.call(componentConstr, 'elementAttributes') && hasOwn.call(componentConstr, 'props')) {
+	if (hasOwn.call(componentConstr, 'props')) {
 		var props = componentConstr.props;
 
-		if (props.content || props.context) {
+		if (props && (props.content || props.context)) {
 			throw new TypeError('No need to declare property "' + (props.content ? 'content' : 'context') + '"');
 		}
 
 		componentConstr.elementAttributes = props;
 	}
-
-	var parentComponentConstr = void 0;
-
-	inheritedStaticProperties.forEach(function (name) {
-		if (!hasOwn.call(componentConstr, name)) {
-			Object.defineProperty(componentConstr, name, Object.getOwnPropertyDescriptor(parentComponentConstr || (parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor), name));
-		}
-	});
 
 	var elExtends = componentConstr.elementExtends;
 
@@ -3186,18 +3176,8 @@ var Component = cellx.EventEmitter.extend({
 
 		extend: function extend(elIs, description) {
 			description.Extends = this;
-
-			var Static = description.Static || (description.Static = {});
-
-			if (!Static.hasOwnProperty('extend')) {
-				Static.extend = this.extend;
-			} else if (Static.extend === void 0) {
-				Static.extend = extend;
-			}
-
-			Static.elementIs = elIs;
-
-			return registerComponent(createClass$1(description, false));
+			(description.Static || (description.Static = {})).elementIs = elIs;
+			return registerComponent(createClass$1(description));
 		},
 
 		elementIs: void 0,
