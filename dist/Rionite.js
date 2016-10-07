@@ -1,29 +1,8 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('cellx')) :
-  typeof define === 'function' && define.amd ? define(['cellx'], factory) :
-  (global.Rionite = global.rionite = factory(global.cellx));
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('cellx')) :
+	typeof define === 'function' && define.amd ? define(['cellx'], factory) :
+	(global.Rionite = global.rionite = factory(global.cellx));
 }(this, (function (cellx) { 'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-  return typeof obj;
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
-};
-
-var defineProperty = function (obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-};
 
 var nextUID = cellx.Utils.nextUID;
 
@@ -41,7 +20,7 @@ var DisposableMixin = cellx.EventEmitter.extend({
 		var listenings = void 0;
 
 		if (Array.isArray(target) || target instanceof NodeList || target instanceof HTMLCollection || target.addClass && target.each) {
-			if ((typeof type === 'undefined' ? 'undefined' : _typeof(type)) == 'object' && !Array.isArray(type)) {
+			if (typeof type == 'object' && !Array.isArray(type)) {
 				if (arguments.length < 3) {
 					listener = this;
 				}
@@ -54,7 +33,7 @@ var DisposableMixin = cellx.EventEmitter.extend({
 			for (var i = 0, l = target.length; i < l; i++) {
 				listenings.push(this.listenTo(target[i], type, listener, context));
 			}
-		} else if ((typeof type === 'undefined' ? 'undefined' : _typeof(type)) == 'object') {
+		} else if (typeof type == 'object') {
 			listenings = [];
 
 			if (Array.isArray(type)) {
@@ -81,7 +60,7 @@ var DisposableMixin = cellx.EventEmitter.extend({
 				context = this;
 			}
 
-			if ((typeof listener === 'undefined' ? 'undefined' : _typeof(listener)) == 'object') {
+			if (typeof listener == 'object') {
 				var _listeners = listener;
 
 				listenings = [];
@@ -288,6 +267,7 @@ var hasOwn = Object.prototype.hasOwnProperty;
 var toString = Object.prototype.toString;
 
 var slice = Array.prototype.slice;
+var push = Array.prototype.push;
 var map = Array.prototype.map;
 
 var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
@@ -302,7 +282,7 @@ function configure(config) {
 	getPluralIndex = Function('n', 'return ' + localeSettings.plural + ';');
 }
 
-function getText(context, key, plural, args) {
+function getText(context /*: string*/, key /*: string*/, plural /*: boolean*/, args /*: Array<string>*/) /*: string*/ {
 	var rawText = void 0;
 
 	if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
@@ -389,7 +369,7 @@ charToEntityMap['<'] = '&lt;';
 charToEntityMap['>'] = '&gt;';
 charToEntityMap['"'] = '&quot;';
 
-function escapeHTML(str) {
+function escapeHTML(str /*: string*/) /*: string*/ {
 	return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) {
 		return charToEntityMap[chr];
 	}) : str;
@@ -403,13 +383,13 @@ entityToCharMap['&lt;'] = '<';
 entityToCharMap['&gt;'] = '>';
 entityToCharMap['&quot;'] = '"';
 
-function unescapeHTML(str) {
+function unescapeHTML(str /*: string*/) /*: string*/ {
 	return reEscapableEntities.test(str) ? str.replace(reEscapableEntities, function (entity) {
 		return entityToCharMap[entity];
 	}) : str;
 }
 
-function isRegExp(value) {
+function isRegExp(value /*: any*/) /*: boolean*/ {
 	return toString.call(value) == '[object RegExp]';
 }
 
@@ -453,7 +433,7 @@ var reHyphen = /[-_]+([a-z]|$)/g;
 
 var cache = Object.create(null);
 
-function camelize(str) {
+function camelize(str /*: string*/) /*: string*/ {
 	return cache[str] || (cache[str] = str.replace(reHyphen, function (match, chr) {
 		return chr.toUpperCase();
 	}));
@@ -465,7 +445,7 @@ var reMinus = /^-/;
 
 var cache$1 = Object.create(null);
 
-function hyphenize(str) {
+function hyphenize(str /*: string*/) /*: string*/ {
 	return cache$1[str] || (cache$1[str] = str.replace(reHump, function (match, chr1, chr2) {
 		return '-' + chr1.toLowerCase() + chr2;
 	}).replace(reLongHump, function (match, chars) {
@@ -489,7 +469,7 @@ var ElementAttributes = cellx.EventEmitter.extend({
 
 		var _loop = function _loop(name) {
 			var attrConfig = attributesConfig[name];
-			var type = typeof attrConfig === 'undefined' ? 'undefined' : _typeof(attrConfig);
+			var type = typeof attrConfig;
 			var defaultValue = void 0;
 			var required = void 0;
 			var readonly = void 0;
@@ -502,8 +482,8 @@ var ElementAttributes = cellx.EventEmitter.extend({
 				defaultValue = attrConfig.default;
 
 				if (type === void 0) {
-					type = typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue);
-				} else if (defaultValue !== void 0 && (typeMap.get(type) || '') != (typeof defaultValue === 'undefined' ? 'undefined' : _typeof(defaultValue))) {
+					type = typeof defaultValue;
+				} else if (defaultValue !== void 0 && (typeMap.get(type) || '') != typeof defaultValue) {
 					throw new TypeError('Specified type does not match type of defaultValue');
 				}
 
@@ -593,7 +573,7 @@ charToSpecialMap['\''] = '\\\'';
 charToSpecialMap['\r'] = '\\r';
 charToSpecialMap['\n'] = '\\n';
 
-function escapeString(str) {
+function escapeString(str /*: string*/) /*: string*/ {
 	return reEscapableChars$1.test(str) ? str.replace(reEscapableChars$1, function (chr) {
 		return charToSpecialMap[chr];
 	}) : str;
@@ -603,7 +583,7 @@ var keypathPattern = '(?:' + namePattern + '|\\[\\d+\\])(?:(?:\\.' + namePattern
 var re = RegExp('{{' + '(?:' + '\\s*(?:' + ('block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')') + (')\\s*|{\\s*(' + keypathPattern + ')\\s*}') + ')' + '}}');
 
 function ComponentTemplate(tmpl) {
-	var parent = arguments.length <= 1 || arguments[1] === undefined ? null : arguments[1];
+	var parent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
 	this.parent = parent;
 
@@ -716,7 +696,7 @@ var elementConstructorMap = mixin$1(Object.create(null), {
 
 var queue = void 0;
 
-function run() {
+function run() /*: void*/ {
 	var track = queue;
 
 	queue = null;
@@ -732,7 +712,7 @@ function run() {
 	}
 }
 
-function defer(cb, context) {
+function defer(cb /*: Function*/, context /*:: ?*/) /*: void*/ {
 	if (queue) {
 		queue.push({ callback: cb, context: context });
 	} else {
@@ -743,9 +723,9 @@ function defer(cb, context) {
 
 var _ElementProtoMixin;
 
-var _Symbol$1 = cellx.JS.Symbol;
+var Symbol$1 = cellx.JS.Symbol;
 
-var attached = _Symbol$1('Rionite.ElementProtoMixin.attached');
+var attached = Symbol$1('Rionite.ElementProtoMixin.attached');
 
 var ElementProtoMixin = (_ElementProtoMixin = {
 	rioniteComponent: null,
@@ -754,7 +734,7 @@ var ElementProtoMixin = (_ElementProtoMixin = {
 		return new this._rioniteComponentConstructor(this);
 	}
 
-}, defineProperty(_ElementProtoMixin, attached, false), defineProperty(_ElementProtoMixin, 'connectedCallback', function connectedCallback() {
+}, _ElementProtoMixin[attached] = false, _ElementProtoMixin.connectedCallback = function connectedCallback() {
 	this[attached] = true;
 
 	var component = this.rioniteComponent;
@@ -784,7 +764,7 @@ var ElementProtoMixin = (_ElementProtoMixin = {
 			}
 		}, this);
 	}
-}), defineProperty(_ElementProtoMixin, 'disconnectedCallback', function disconnectedCallback() {
+}, _ElementProtoMixin.disconnectedCallback = function disconnectedCallback() {
 	this[attached] = false;
 
 	var component = this.rioniteComponent;
@@ -799,7 +779,7 @@ var ElementProtoMixin = (_ElementProtoMixin = {
 			}
 		});
 	}
-}), defineProperty(_ElementProtoMixin, 'attributeChangedCallback', function attributeChangedCallback(name, oldValue, value) {
+}, _ElementProtoMixin.attributeChangedCallback = function attributeChangedCallback(name, oldValue, value) {
 	var component = this.rioniteComponent;
 
 	if (component && component.isReady) {
@@ -810,7 +790,9 @@ var ElementProtoMixin = (_ElementProtoMixin = {
 			attrs[privateName].set(value);
 		}
 	}
-}), _ElementProtoMixin);
+}, _ElementProtoMixin);
+
+var KEY_MARKUP_BLOCK_NAMES = cellx.JS.Symbol('Rionite.Component.markupBlockNames');
 
 var mixin = cellx.Utils.mixin;
 
@@ -829,6 +811,12 @@ function registerComponent(componentConstr) {
 		}
 
 		componentConstr.elementAttributes = props;
+	}
+
+	var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
+
+	if (componentConstr.template !== parentComponentConstr.template && componentConstr.template) {
+		push.apply(componentConstr[KEY_MARKUP_BLOCK_NAMES] = [elIs], parentComponentConstr[KEY_MARKUP_BLOCK_NAMES]);
 	}
 
 	var elExtends = componentConstr.elementExtends;
@@ -908,8 +896,8 @@ var reVacuumOrEmpty = /null|undefined|void 0|/g;
 
 var NOT_VALUE_AND_NOT_KEYPATH = {};
 
-var ContentParser = cellx.Utils.createClass({
-	constructor: function ContentParser(content) {
+var ContentParser$1 = cellx.Utils.createClass({
+	constructor: function ContentParser(content /*: string*/) {
 		this.content = content;
 	},
 
@@ -938,7 +926,7 @@ var ContentParser = cellx.Utils.createClass({
 
 		return result;
 	},
-	pushText: function pushText(value) {
+	pushText: function pushText(value /*: string*/) {
 		if (value.length) {
 			var result = this.result;
 			var resultLen = result.length;
@@ -1276,7 +1264,7 @@ var ContentParser = cellx.Utils.createClass({
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	},
-	next: function next(c) {
+	next: function next(c /*:: ?: string*/) {
 		if (c && c != this.chr) {
 			throw {
 				name: 'SyntaxError',
@@ -1307,7 +1295,11 @@ function formattersReducer(jsExpr, formatter) {
 	return '(this[\'' + formatter.name + '\'] || formatters[\'' + formatter.name + '\']).call(this, ' + jsExpr + (args && args.value.length ? ', ' + args.raw.slice(1, -1) : '') + ')';
 }
 
-function bindingToJSExpression(binding) {
+function bindingToJSExpression(binding /*: Object*/) /*: {
+                                                                    	value: string,
+                                                                    	usesFormatters: boolean,
+                                                                    	usesTempVariable: boolean
+                                                                    }*/ {
 	var bindingRaw = binding.raw;
 
 	if (cache$3[bindingRaw]) {
@@ -1359,7 +1351,7 @@ function bindingToJSExpression(binding) {
 
 var cache$4 = Object.create(null);
 
-function compileBinding(binding) {
+function compileBinding(binding /*: Object*/) /*: Function*/ {
 	var bindingRaw = binding.raw;
 
 	if (cache$4[bindingRaw]) {
@@ -1380,7 +1372,7 @@ function compileBinding(binding) {
 			};
 		}();
 
-		if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+		if (typeof _ret === "object") return _ret.v;
 	}
 
 	return cache$4[bindingRaw] = Function(jsExpr);
@@ -1388,7 +1380,7 @@ function compileBinding(binding) {
 
 var cache$2 = Object.create(null);
 
-function compileContent(parsedContent, content) {
+function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/) /*: Function*/ {
 	if (cache$2[content]) {
 		return cache$2[content];
 	}
@@ -1437,13 +1429,13 @@ function compileContent(parsedContent, content) {
 			};
 		}();
 
-		if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+		if (typeof _ret === "object") return _ret.v;
 	}
 
 	return cache$2[content] = Function(jsExpr);
 }
 
-function setAttribute(el, name, value) {
+function setAttribute(el /*: HTMLElement*/, name /*: string*/, value /*: any*/) /*: void*/ {
 	if (value === false || value == null) {
 		el.removeAttribute(name);
 	} else {
@@ -1473,7 +1465,7 @@ function bind(node, component, context) {
 							var value = attr.value;
 
 							if (reBinding.test(value)) {
-								var parsedValue = new ContentParser(value).parse();
+								var parsedValue = new ContentParser$1(value).parse();
 
 								if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
 									(function () {
@@ -1513,7 +1505,7 @@ function bind(node, component, context) {
 						var content = child.textContent;
 
 						if (reBinding.test(content)) {
-							var parsedContent = new ContentParser(content).parse();
+							var parsedContent = new ContentParser$1(content).parse();
 
 							if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
 								var _cell = new cellx.Cell(compileContent(parsedContent, content), {
@@ -1556,6 +1548,7 @@ function attachChildComponentElements(childComponents) {
 }
 
 function defineAssets(component, assetsConfig) {
+	var markupBlockNames = component.constructor[KEY_MARKUP_BLOCK_NAMES];
 	var assets = component.assets;
 
 	var _loop = function _loop(name) {
@@ -1568,7 +1561,30 @@ function defineAssets(component, assetsConfig) {
 					enumerable: true,
 
 					get: function get() {
-						return asset || (asset = component.$(assetsConfig[name].selector || '&__' + hyphenize(name)));
+						if (asset === void 0) {
+							var selector = assetsConfig[name].selector;
+
+							if (selector) {
+								asset = component.$(selector);
+							} else {
+								var nameWithDelim = '__' + hyphenize(name);
+								var el = component.element.getElementsByClassName(markupBlockNames[0] + nameWithDelim)[0];
+
+								if (!el) {
+									for (var i = 1, l = markupBlockNames.length; i < l; i++) {
+										el = component.element.getElementsByClassName(markupBlockNames[i] + nameWithDelim)[0];
+
+										if (el) {
+											break;
+										}
+									}
+								}
+
+								asset = el ? el.$c || el : null;
+							}
+						}
+
+						return asset;
 					}
 				});
 			})();
@@ -1666,7 +1682,7 @@ if (range.createContextualFragment) {
 	(function () {
 		var selected = false;
 
-		htmlToFragment = function htmlToFragment(html) {
+		htmlToFragment = function htmlToFragment(html /*: string*/) /*: DocumentFragment*/ {
 			if (!selected) {
 				range.selectNode(document.body);
 				selected = true;
@@ -1676,7 +1692,7 @@ if (range.createContextualFragment) {
 		};
 	})();
 } else {
-	htmlToFragment = function htmlToFragment(html) {
+	htmlToFragment = function htmlToFragment(html /*: string*/) /*: DocumentFragment*/ {
 		var el = document.createElement('div');
 		var df = document.createDocumentFragment();
 
@@ -1692,12 +1708,13 @@ if (range.createContextualFragment) {
 
 var htmlToFragment$1 = htmlToFragment;
 
-var _Symbol = cellx.JS.Symbol;
-var createClass$1 = cellx.Utils.createClass;
+var _Static;
 
-var KEY_RAW_CONTENT = _Symbol('Rionite.Component.rawContent');
-var KEY_BLOCK_NAME_IN_MARKUP = _Symbol('Rionite.Component.blockNameInMarkup');
-var KEY_SILENT = _Symbol('Rionite.Component#silent');
+var Symbol = cellx.JS.Symbol;
+var createClass = cellx.Utils.createClass;
+
+var KEY_RAW_CONTENT = Symbol('Rionite.Component.rawContent');
+var KEY_SILENT = Symbol('Rionite.Component#silent');
 
 function created() {}
 function initialize() {}
@@ -1710,13 +1727,13 @@ function elementAttributeChanged() {}
 var Component = cellx.EventEmitter.extend({
 	Implements: [DisposableMixin],
 
-	Static: {
+	Static: (_Static = {
 		register: registerComponent,
 
 		extend: function extend(elIs, description) {
 			description.Extends = this;
 			(description.Static || (description.Static = {})).elementIs = elIs;
-			return registerComponent(createClass$1(description));
+			return registerComponent(createClass(description));
 		},
 
 		elementIs: void 0,
@@ -1727,10 +1744,9 @@ var Component = cellx.EventEmitter.extend({
 
 		i18n: null,
 
-		template: null,
+		template: null
 
-		assets: null
-	},
+	}, _Static[KEY_MARKUP_BLOCK_NAMES] = [], _Static.assets = null, _Static),
 
 	/**
   * @type {?Rionite.Component}
@@ -1996,33 +2012,7 @@ var Component = cellx.EventEmitter.extend({
 	},
 	_prepareSelector: function _prepareSelector(selector) {
 		selector = selector.split('&');
-
-		if (selector.length == 1) {
-			return selector[0];
-		}
-
-		var constr = this.constructor;
-		var blockName = constr[KEY_BLOCK_NAME_IN_MARKUP];
-
-		if (!blockName) {
-			var c = constr;
-
-			do {
-				if (c.template) {
-					blockName = c.elementIs;
-				}
-
-				c = Object.getPrototypeOf(c.prototype).constructor;
-			} while (c != Component);
-
-			if (!blockName) {
-				blockName = constr.elementIs;
-			}
-
-			constr[KEY_BLOCK_NAME_IN_MARKUP] = blockName;
-		}
-
-		return selector.join('.' + blockName);
+		return selector.length == 1 ? selector[0] : selector.join('.' + this.constructor[KEY_MARKUP_BLOCK_NAMES][0]);
 	}
 });
 
@@ -2152,7 +2142,7 @@ var RtIfThen = Component.extend('rt-if-then', {
 
 				props.content = document.importNode(_this.element.content, true);
 
-				var parsedIf = new ContentParser('{' + props.if + '}').parse();
+				var parsedIf = new ContentParser$1('{' + props.if + '}').parse();
 
 				if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType.BINDING) {
 					throw new SyntaxError('Invalid value of attribute "if" (' + props.if + ')');
@@ -2284,7 +2274,7 @@ var RtRepeat = Component.extend('rt-repeat', {
 				throw new SyntaxError(invalidForAttributeMessage + (' (' + props.for + ')'));
 			}
 
-			var parsedOf = new ContentParser('{' + forAttrValue[2] + '}').parse();
+			var parsedOf = new ContentParser$1('{' + forAttrValue[2] + '}').parse();
 
 			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
 				throw new SyntaxError(invalidForAttributeMessage + (' (' + props.for + ')'));
@@ -2424,15 +2414,15 @@ var RtRepeat = Component.extend('rt-repeat', {
 		index = new cellx.Cell(index);
 
 		var content = this._rawItemContent.cloneNode(true);
-		var context = Object.create(this._context, (_Object$create = {}, defineProperty(_Object$create, this._itemName, {
+		var context = Object.create(this._context, (_Object$create = {}, _Object$create[this._itemName] = {
 			get: function get() {
 				return item.get();
 			}
-		}), defineProperty(_Object$create, '$index', {
+		}, _Object$create.$index = {
 			get: function get() {
 				return index.get();
 			}
-		}), _Object$create));
+		}, _Object$create));
 
 		var _bind = bind(content, this.ownerComponent, context);
 
@@ -2521,7 +2511,7 @@ var Rionite = {
 		htmlToFragment: htmlToFragment$1
 	}
 };
-Rionite.Rionite = Rionite;
+Rionite.Rionite = Rionite; // for destructuring
 
 return Rionite;
 

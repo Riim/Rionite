@@ -1,7 +1,9 @@
 import { Utils } from 'cellx';
 import elementConstructorMap from './elementConstructorMap';
 import ElementProtoMixin from './ElementProtoMixin';
+import { KEY_MARKUP_BLOCK_NAMES } from './keys';
 import { hasOwn } from './JS/Object';
+import { push } from './JS/Array';
 import hyphenize from './Utils/hyphenize';
 
 let mixin = Utils.mixin;
@@ -21,6 +23,12 @@ export default function registerComponent(componentConstr) {
 		}
 
 		componentConstr.elementAttributes = props;
+	}
+
+	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
+
+	if (componentConstr.template !== parentComponentConstr.template && componentConstr.template) {
+		push.apply((componentConstr[KEY_MARKUP_BLOCK_NAMES] = [elIs]), parentComponentConstr[KEY_MARKUP_BLOCK_NAMES]);
 	}
 
 	let elExtends = componentConstr.elementExtends;

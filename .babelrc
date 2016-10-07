@@ -1,10 +1,10 @@
 {
 	"presets": [
-		["es2015", { "modules": false }]
+		["@riim/babel-preset", { "modules": false }]
 	],
 	"plugins": [
 		"external-helpers",
 		"syntax-flow",
-		"transform-flow-strip-types"
+		"transform-flow-comments"
 	]
 }

@@ -10,6 +10,7 @@ import defineAssets from './defineAssets';
 import listenAssets from './listenAssets';
 import eventTypes from './eventTypes';
 import onEvent from './onEvent';
+import { KEY_MARKUP_BLOCK_NAMES } from './keys';
 import { map } from './JS/Array';
 import camelize from './Utils/camelize';
 import htmlToFragment from './Utils/htmlToFragment';
@@ -18,7 +19,6 @@ let Symbol = JS.Symbol;
 let createClass = Utils.createClass;
 
 let KEY_RAW_CONTENT = Symbol('Rionite.Component.rawContent');
-let KEY_BLOCK_NAME_IN_MARKUP = Symbol('Rionite.Component.blockNameInMarkup');
 let KEY_SILENT = Symbol('Rionite.Component#silent');
 
 function created() {}
@@ -50,6 +50,8 @@ let Component = EventEmitter.extend({
 		i18n: null,
 
 		template: null,
+
+		[KEY_MARKUP_BLOCK_NAMES]: [],
 
 		assets: null
 	},
@@ -318,33 +320,7 @@ let Component = EventEmitter.extend({
 
 	_prepareSelector(selector) {
 		selector = selector.split('&');
-
-		if (selector.length == 1) {
-			return selector[0];
-		}
-
-		let constr = this.constructor;
-		let blockName = constr[KEY_BLOCK_NAME_IN_MARKUP];
-
-		if (!blockName) {
-			let c = constr;
-
-			do {
-				if (c.template) {
-					blockName = c.elementIs;
-				}
-
-				c = Object.getPrototypeOf(c.prototype).constructor;
-			} while (c != Component);
-
-			if (!blockName) {
-				blockName = constr.elementIs;
-			}
-
-			constr[KEY_BLOCK_NAME_IN_MARKUP] = blockName;
-		}
-
-		return selector.join('.' + blockName);
+		return selector.length == 1 ? selector[0] : selector.join('.' + this.constructor[KEY_MARKUP_BLOCK_NAMES][0]);
 	}
 });
 
