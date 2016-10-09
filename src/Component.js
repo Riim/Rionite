@@ -10,7 +10,7 @@ import defineAssets from './defineAssets';
 import listenAssets from './listenAssets';
 import eventTypes from './eventTypes';
 import onEvent from './onEvent';
-import { KEY_MARKUP_BLOCK_NAMES } from './keys';
+import { KEY_MARKUP_BLOCK_NAMES, KEY_ASSET_CLASS_NAMES } from './keys';
 import { map } from './JS/Array';
 import camelize from './Utils/camelize';
 import htmlToFragment from './Utils/htmlToFragment';
@@ -51,7 +51,8 @@ let Component = EventEmitter.extend({
 
 		template: null,
 
-		[KEY_MARKUP_BLOCK_NAMES]: [],
+		[KEY_MARKUP_BLOCK_NAMES]: null,
+		[KEY_ASSET_CLASS_NAMES]: null,
 
 		assets: null
 	},

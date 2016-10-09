@@ -1,7 +1,7 @@
 import { Utils } from 'cellx';
 import elementConstructorMap from './elementConstructorMap';
 import ElementProtoMixin from './ElementProtoMixin';
-import { KEY_MARKUP_BLOCK_NAMES } from './keys';
+import { KEY_MARKUP_BLOCK_NAMES, KEY_ASSET_CLASS_NAMES } from './keys';
 import { hasOwn } from './JS/Object';
 import { push } from './JS/Array';
 import hyphenize from './Utils/hyphenize';
@@ -28,8 +28,13 @@ export default function registerComponent(componentConstr) {
 	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
 
 	if (componentConstr.template !== parentComponentConstr.template && componentConstr.template) {
-		push.apply((componentConstr[KEY_MARKUP_BLOCK_NAMES] = [elIs]), parentComponentConstr[KEY_MARKUP_BLOCK_NAMES]);
+		push.apply(
+			(componentConstr[KEY_MARKUP_BLOCK_NAMES] = [elIs]),
+			parentComponentConstr[KEY_MARKUP_BLOCK_NAMES] || []
+		);
 	}
+
+	componentConstr[KEY_ASSET_CLASS_NAMES] = Object.create(parentComponentConstr[KEY_ASSET_CLASS_NAMES] || null);
 
 	let elExtends = componentConstr.elementExtends;
 

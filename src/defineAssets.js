@@ -1,8 +1,11 @@
-import { KEY_MARKUP_BLOCK_NAMES } from './keys';
+import { KEY_MARKUP_BLOCK_NAMES, KEY_ASSET_CLASS_NAMES } from './keys';
 import hyphenize from './Utils/hyphenize';
 
 export default function defineAssets(component, assetsConfig) {
-	let markupBlockNames = component.constructor[KEY_MARKUP_BLOCK_NAMES];
+	let constr = component.constructor;
+	let markupBlockNames = constr[KEY_MARKUP_BLOCK_NAMES];
+	let assetClassNames = constr[KEY_ASSET_CLASS_NAMES];
+	let el = component.element;
 	let assets = component.assets;
 
 	for (let name in assetsConfig) {
@@ -15,26 +18,32 @@ export default function defineAssets(component, assetsConfig) {
 
 				get() {
 					if (asset === void 0) {
-						let selector = assetsConfig[name].selector;
+						let className = assetClassNames[name];
 
-						if (selector) {
-							asset = component.$(selector);
+						if (className) {
+							let assetEl = el.getElementsByClassName(className)[0];
+							asset = assetEl ? assetEl.$c || assetEl : null;
 						} else {
-							let nameWithDelim = '__' + hyphenize(name);
-							let el = component.element.getElementsByClassName(markupBlockNames[0] + nameWithDelim)[0];
+							let selector = assetsConfig[name].selector;
 
-							if (!el) {
-								for (let i = 1, l = markupBlockNames.length; i < l; i++) {
-									el = component.element
-										.getElementsByClassName(markupBlockNames[i] + nameWithDelim)[0];
+							if (selector) {
+								asset = component.$(selector);
+							} else {
+								let nameWithDelim = '__' + hyphenize(name);
+								let assetEl;
 
-									if (el) {
+								for (let i = markupBlockNames.length; i;) {
+									className = markupBlockNames[--i] + nameWithDelim;
+									assetEl = el.getElementsByClassName(className)[0];
+
+									if (assetEl) {
+										assetClassNames[name] = className;
 										break;
 									}
 								}
-							}
 
-							asset = el ? el.$c || el : null;
+								asset = assetEl ? assetEl.$c || assetEl : null;
+							}
 						}
 					}
 

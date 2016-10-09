@@ -793,6 +793,7 @@ var ElementProtoMixin = (_ElementProtoMixin = {
 }, _ElementProtoMixin);
 
 var KEY_MARKUP_BLOCK_NAMES = cellx.JS.Symbol('Rionite.Component.markupBlockNames');
+var KEY_ASSET_CLASS_NAMES = cellx.JS.Symbol('Rionite.Component.assetClassNames');
 
 var mixin = cellx.Utils.mixin;
 
@@ -816,8 +817,10 @@ function registerComponent(componentConstr) {
 	var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
 
 	if (componentConstr.template !== parentComponentConstr.template && componentConstr.template) {
-		push.apply(componentConstr[KEY_MARKUP_BLOCK_NAMES] = [elIs], parentComponentConstr[KEY_MARKUP_BLOCK_NAMES]);
+		push.apply(componentConstr[KEY_MARKUP_BLOCK_NAMES] = [elIs], parentComponentConstr[KEY_MARKUP_BLOCK_NAMES] || []);
 	}
+
+	componentConstr[KEY_ASSET_CLASS_NAMES] = Object.create(parentComponentConstr[KEY_ASSET_CLASS_NAMES] || null);
 
 	var elExtends = componentConstr.elementExtends;
 
@@ -1548,7 +1551,10 @@ function attachChildComponentElements(childComponents) {
 }
 
 function defineAssets(component, assetsConfig) {
-	var markupBlockNames = component.constructor[KEY_MARKUP_BLOCK_NAMES];
+	var constr = component.constructor;
+	var markupBlockNames = constr[KEY_MARKUP_BLOCK_NAMES];
+	var assetClassNames = constr[KEY_ASSET_CLASS_NAMES];
+	var el = component.element;
 	var assets = component.assets;
 
 	var _loop = function _loop(name) {
@@ -1562,25 +1568,32 @@ function defineAssets(component, assetsConfig) {
 
 					get: function get() {
 						if (asset === void 0) {
-							var selector = assetsConfig[name].selector;
+							var className = assetClassNames[name];
 
-							if (selector) {
-								asset = component.$(selector);
+							if (className) {
+								var assetEl = el.getElementsByClassName(className)[0];
+								asset = assetEl ? assetEl.$c || assetEl : null;
 							} else {
-								var nameWithDelim = '__' + hyphenize(name);
-								var el = component.element.getElementsByClassName(markupBlockNames[0] + nameWithDelim)[0];
+								var selector = assetsConfig[name].selector;
 
-								if (!el) {
-									for (var i = 1, l = markupBlockNames.length; i < l; i++) {
-										el = component.element.getElementsByClassName(markupBlockNames[i] + nameWithDelim)[0];
+								if (selector) {
+									asset = component.$(selector);
+								} else {
+									var nameWithDelim = '__' + hyphenize(name);
+									var _assetEl = void 0;
 
-										if (el) {
+									for (var i = markupBlockNames.length; i;) {
+										className = markupBlockNames[--i] + nameWithDelim;
+										_assetEl = el.getElementsByClassName(className)[0];
+
+										if (_assetEl) {
+											assetClassNames[name] = className;
 											break;
 										}
 									}
-								}
 
-								asset = el ? el.$c || el : null;
+									asset = _assetEl ? _assetEl.$c || _assetEl : null;
+								}
 							}
 						}
 
@@ -1746,7 +1759,7 @@ var Component = cellx.EventEmitter.extend({
 
 		template: null
 
-	}, _Static[KEY_MARKUP_BLOCK_NAMES] = [], _Static.assets = null, _Static),
+	}, _Static[KEY_MARKUP_BLOCK_NAMES] = null, _Static[KEY_ASSET_CLASS_NAMES] = null, _Static.assets = null, _Static),
 
 	/**
   * @type {?Rionite.Component}
