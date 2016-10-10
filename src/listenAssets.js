@@ -8,18 +8,20 @@ export default function listenAssets(component, assetsConfig) {
 			asset = component;
 		} else if (name == ':element') {
 			asset = component.element;
-		} else {
-			asset = assets[name];
-
-			if (!asset) {
-				continue;
-			}
 		}
 
 		let assetConfig = assetsConfig[name];
 
 		for (let key in assetConfig) {
 			if (key.slice(0, 3) == 'on-' && key.length > 3) {
+				if (!asset) {
+					asset = assets[name];
+
+					if (!asset) {
+						break;
+					}
+				}
+
 				component.listenTo(asset, key.slice(3), assetConfig[key]);
 			}
 		}
