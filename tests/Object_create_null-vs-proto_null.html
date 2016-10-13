@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<script src="../node_modules/lodash/lodash.js"></script>
+<script src="../node_modules/platform/platform.js"></script>
+<script src="../node_modules/benchmark/benchmark.js"></script>
+<script>
+
+function literal() {
+	return {};
+}
+
+function ObjectCreate() {
+	return Object.create(null);
+}
+
+function proto() {
+	return { __proto__: null };
+}
+
+var suite = new Benchmark.Suite();
+
+suite
+	.add('literal', function() {
+		literal();
+	})
+	.add('ObjectCreate', function() {
+		ObjectCreate();
+	})
+	.add('proto', function() {
+		proto();
+	})
+	.on('cycle', function(evt) {
+		document.body.innerHTML += '<br>' + String(evt.target);
+	})
+	.run({ 'async': true });
+
+// literal x 68,474,290 ops/sec ±2.03% (61 runs sampled)
+// ObjectCreate x 11,366,198 ops/sec ±2.42% (57 runs sampled)
+// proto x 7,623,502 ops/sec ±2.34% (59 runs sampled)
+
+</script>
+
+</body>
+</html>

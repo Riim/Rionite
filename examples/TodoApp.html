@@ -42,11 +42,7 @@ var todos = new cellxIndexedCollections.IndexedList([
 Rionite.Component.extend('todo-view', {
 	Static: {
 		props: {
-			todoId: {
-				type: String,
-				required: true,
-				readonly: true
-			}
+			todoId: { type: String, required: true, readonly: true }
 		},
 
 		template: `
@@ -76,7 +72,7 @@ Rionite.Component.extend('todo-app', {
 			<button rt-click="onBtnAddClick">Add #{nextNumber}</button>
 			<div>all: {todos.length} done: {doneTodos.length}</div>
 			<template is="rt-repeat" for="todo of todos">
-				<todo-view todo-id="{todo.id}"/>
+				<todo-view todo-id="{todo.id}"></todo-view>
 			</template>
 		`,
 
