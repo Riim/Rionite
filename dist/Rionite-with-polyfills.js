@@ -1916,7 +1916,7 @@ function hyphenize(str /*: string*/) /*: string*/ {
 
 var Map = cellx.JS.Map;
 
-var typeMap = new Map([['boolean', 'boolean'], [Boolean, 'boolean'], ['number', 'number'], [Number, 'number'], ['string', 'string'], [String, 'string']]);
+var typeMap = new Map([[Boolean, 'boolean'], ['boolean', 'boolean'], [Number, 'number'], ['number', 'number'], [String, 'string'], ['string', 'string']]);
 
 /**
  * @typesign new ElementAttributes(el: HTMLElement) -> Rionite.ElementAttributes;
@@ -1944,7 +1944,7 @@ var ElementAttributes = cellx.EventEmitter.extend({
 
 				if (type === void 0) {
 					type = typeof defaultValue;
-				} else if (defaultValue !== void 0 && (typeMap.get(type) || '') != typeof defaultValue) {
+				} else if (defaultValue !== void 0 && typeMap.get(type) !== typeof defaultValue) {
 					throw new TypeError('Specified type does not match type of defaultValue');
 				}
 
@@ -1968,48 +1968,60 @@ var ElementAttributes = cellx.EventEmitter.extend({
 				throw new TypeError('Property "' + name + '" is required');
 			}
 
-			var attrValue = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new cellx.Cell(el.getAttribute(hyphenizedName), {
-				validate: readonly ? function (value, oldValue) {
-					if (oldValue && value !== oldValue[0]) {
-						throw new TypeError('Property "' + name + '" is readonly');
-					}
-				} : null,
+			var descriptor = void 0;
 
-				merge: function merge(value, oldValue) {
-					return oldValue && value === oldValue[0] ? oldValue : [value, handlers[0](value, defaultValue)];
-				},
-				onChange: function onChange(evt) {
-					if (component.isReady) {
-						component.elementAttributeChanged(hyphenizedName, evt.oldValue[1], evt.value[1]);
-					}
-				}
-			});
+			if (readonly) {
+				(function () {
+					var value = handlers[0](el.getAttribute(hyphenizedName), defaultValue);
 
-			var descriptor = {
-				configurable: true,
-				enumerable: true,
+					descriptor = {
+						configurable: true,
+						enumerable: true,
 
-				get: function get() {
-					return attrValue.get()[1];
-				},
+						get: function get() {
+							return value;
+						},
+						set: function set(v) {
+							if (v !== value) {
+								throw new TypeError('Property "' + name + '" is readonly');
+							}
+						}
+					};
+				})();
+			} else {
+				(function () {
+					var value = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new cellx.Cell(el.getAttribute(hyphenizedName), {
+						merge: function merge(value, oldValue) {
+							return oldValue && value === oldValue[0] ? oldValue : [value, handlers[0](value, defaultValue)];
+						},
+						onChange: function onChange(evt) {
+							if (component.isReady) {
+								component.elementAttributeChanged(hyphenizedName, evt.oldValue[1], evt.value[1]);
+							}
+						}
+					});
 
+					descriptor = {
+						configurable: true,
+						enumerable: true,
 
-				set: readonly ? function (value) {
-					if (value !== attrValue.get()[1]) {
-						throw new TypeError('Property "' + name + '" is readonly');
-					}
-				} : function (value) {
-					value = handlers[1](value, defaultValue);
+						get: function get() {
+							return value.get()[1];
+						},
+						set: function set(v) {
+							v = handlers[1](v, defaultValue);
 
-					if (value === null) {
-						el.removeAttribute(hyphenizedName);
-					} else {
-						el.setAttribute(hyphenizedName, value);
-					}
+							if (v === null) {
+								el.removeAttribute(hyphenizedName);
+							} else {
+								el.setAttribute(hyphenizedName, v);
+							}
 
-					attrValue.set(value);
-				}
-			};
+							value.set(v);
+						}
+					};
+				})();
+			}
 
 			Object.defineProperty(_this, camelizedName, descriptor);
 

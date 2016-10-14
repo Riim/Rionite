@@ -6,12 +6,12 @@ import hyphenize from './Utils/hyphenize';
 let Map = JS.Map;
 
 let typeMap = new Map([
-	['boolean', 'boolean'],
 	[Boolean, 'boolean'],
-	['number', 'number'],
+	['boolean', 'boolean'],
 	[Number, 'number'],
-	['string', 'string'],
-	[String, 'string']
+	['number', 'number'],
+	[String, 'string'],
+	['string', 'string']
 ]);
 
 /**
@@ -38,7 +38,7 @@ let ElementAttributes = EventEmitter.extend({
 
 				if (type === void 0) {
 					type = typeof defaultValue;
-				} else if (defaultValue !== void 0 && (typeMap.get(type) || '') != typeof defaultValue) {
+				} else if (defaultValue !== void 0 && typeMap.get(type) !== typeof defaultValue) {
 					throw new TypeError('Specified type does not match type of defaultValue');
 				}
 
@@ -62,51 +62,64 @@ let ElementAttributes = EventEmitter.extend({
 				throw new TypeError(`Property "${ name }" is required`);
 			}
 
-			let attrValue = this['_' + camelizedName] = this['_' + hyphenizedName] = new Cell(
-				el.getAttribute(hyphenizedName),
-				{
-					validate: readonly ? (value, oldValue) => {
-						if (oldValue && value !== oldValue[0]) {
-							throw new TypeError(`Property "${ name }" is readonly`);
-						}
-					} : null,
+			let descriptor;
 
-					merge(value, oldValue) {
-						return oldValue && value === oldValue[0] ? oldValue : [value, handlers[0](value, defaultValue)];
+			if (readonly) {
+				let value = handlers[0](el.getAttribute(hyphenizedName), defaultValue);
+
+				descriptor = {
+					configurable: true,
+					enumerable: true,
+
+					get() {
+						return value;
 					},
 
-					onChange(evt) {
-						if (component.isReady) {
-							component.elementAttributeChanged(hyphenizedName, evt.oldValue[1], evt.value[1]);
+					set(v) {
+						if (v !== value) {
+							throw new TypeError(`Property "${ name }" is readonly`);
 						}
 					}
-				}
-			);
+				};
+			} else {
+				let value = this['_' + camelizedName] = this['_' + hyphenizedName] = new Cell(
+					el.getAttribute(hyphenizedName),
+					{
+						merge(value, oldValue) {
+							return oldValue && value === oldValue[0] ?
+								oldValue :
+								[value, handlers[0](value, defaultValue)];
+						},
 
-			let descriptor = {
-				configurable: true,
-				enumerable: true,
-
-				get() {
-					return attrValue.get()[1];
-				},
-
-				set: readonly ? value => {
-					if (value !== attrValue.get()[1]) {
-						throw new TypeError(`Property "${ name }" is readonly`);
+						onChange(evt) {
+							if (component.isReady) {
+								component.elementAttributeChanged(hyphenizedName, evt.oldValue[1], evt.value[1]);
+							}
+						}
 					}
-				} : value => {
-					value = handlers[1](value, defaultValue);
+				);
 
-					if (value === null) {
-						el.removeAttribute(hyphenizedName);
-					} else {
-						el.setAttribute(hyphenizedName, value);
+				descriptor = {
+					configurable: true,
+					enumerable: true,
+
+					get() {
+						return value.get()[1];
+					},
+
+					set(v) {
+						v = handlers[1](v, defaultValue);
+
+						if (v === null) {
+							el.removeAttribute(hyphenizedName);
+						} else {
+							el.setAttribute(hyphenizedName, v);
+						}
+
+						value.set(v);
 					}
-
-					attrValue.set(value);
-				}
-			};
+				};
+			}
 
 			Object.defineProperty(this, camelizedName, descriptor);
 
