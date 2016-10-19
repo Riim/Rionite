@@ -327,7 +327,7 @@ function t(key) {
 }
 
 function pt(key, context) {
-	return getText(context, key, false, slice.call(arguments, 1));
+	return getText(context, key, false, slice.call(arguments, 2));
 }
 
 function nt(key /*, count*/) {
@@ -335,7 +335,7 @@ function nt(key /*, count*/) {
 }
 
 function npt(key, context /*, count*/) {
-	return getText(context, key, true, slice.call(arguments, 1));
+	return getText(context, key, true, slice.call(arguments, 2));
 }
 
 getText.configure = configure;
