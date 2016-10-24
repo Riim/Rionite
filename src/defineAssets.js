@@ -17,7 +17,7 @@ export default function defineAssets(component, assetsConfig) {
 				enumerable: true,
 
 				get() {
-					if (asset === void 0) {
+					if (!asset) {
 						let className = assetClassNames[name];
 
 						if (className) {

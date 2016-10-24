@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.12.45",
+  "version": "0.12.46",
   "description": "",
   "main": "dist/Rionite-with-polyfills.js",
   "scripts": {
@@ -24,8 +24,8 @@
     "babel-plugin-syntax-flow": "^6.13.0",
     "babel-plugin-transform-flow-comments": "^6.17.0",
     "benchmark": "^2.1.1",
-    "cellx": "^1.6.55",
-    "cellx-indexed-collections": "^1.0.4",
+    "cellx": "^1.6.56",
+    "cellx-indexed-collections": "^1.0.5",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.0",
     "gulp-rename": "^1.2.2",

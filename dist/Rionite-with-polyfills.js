@@ -3040,7 +3040,7 @@ function defineAssets(component, assetsConfig) {
 					enumerable: true,
 
 					get: function get() {
-						if (asset === void 0) {
+						if (!asset) {
 							var className = assetClassNames[name];
 
 							if (className) {
