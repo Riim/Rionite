@@ -266,21 +266,10 @@ var DisposableMixin = cellx.EventEmitter.extend({
 var hasOwn = Object.prototype.hasOwnProperty;
 var toString = Object.prototype.toString;
 
-var slice = Array.prototype.slice;
-var push = Array.prototype.push;
-var map = Array.prototype.map;
-
 var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
 
 var texts = void 0;
 var getPluralIndex = void 0;
-
-function configure(config) {
-	var localeSettings = getText.localeSettings = config.localeSettings;
-
-	texts = config.texts;
-	getPluralIndex = Function('n', 'return ' + localeSettings.plural + ';');
-}
 
 function getText(context /*: string*/, key /*: string*/, plural /*: boolean*/, args /*: Array<string>*/) /*: string*/ {
 	var rawText = void 0;
@@ -297,9 +286,9 @@ function getText(context /*: string*/, key /*: string*/, plural /*: boolean*/, a
 
 	var data = Object.create(null);
 
-	args.forEach(function (arg, index) {
-		data[index + 1] = arg;
-	});
+	for (var i = args.length; i;) {
+		data[i] = args[--i];
+	}
 
 	if (plural) {
 		data.n = args[0];
@@ -309,45 +298,66 @@ function getText(context /*: string*/, key /*: string*/, plural /*: boolean*/, a
 
 	rawText = rawText.split(reInsert);
 
-	for (var i = 0, l = rawText.length; i < l;) {
-		if (i % 3) {
-			text.push(rawText[i + 1] ? rawText[i + 1].split('|')[getPluralIndex(data[rawText[i]])] : data[rawText[i]]);
-			i += 2;
+	for (var _i = 0, l = rawText.length; _i < l;) {
+		if (_i % 3) {
+			text.push(rawText[_i + 1] ? rawText[_i + 1].split('|')[getPluralIndex(data[rawText[_i]])] : data[rawText[_i]]);
+			_i += 2;
 		} else {
-			text.push(rawText[i]);
-			i++;
+			text.push(rawText[_i]);
+			_i++;
 		}
 	}
 
 	return text.join('');
 }
 
+function configure(config) {
+	texts = config.texts;
+	getPluralIndex = Function('n', 'return ' + config.localeSettings.plural + ';');
+
+	getText.localeSettings = config.localeSettings;
+}
+
 function t(key) {
-	return getText('', key, false, slice.call(arguments, 1));
+	for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+		args[_key - 1] = arguments[_key];
+	}
+
+	return getText('', key, false, args);
 }
 
 function pt(key, context) {
-	return getText(context, key, false, slice.call(arguments, 2));
+	for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
+		args[_key2 - 2] = arguments[_key2];
+	}
+
+	return getText(context, key, false, args);
 }
 
-function nt(key /*, count*/) {
-	return getText('', key, true, slice.call(arguments, 1));
+function nt$1(key) {
+	for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+		args[_key3 - 1] = arguments[_key3];
+	}
+
+	return getText('', key, true, args);
 }
 
-function npt(key, context /*, count*/) {
-	return getText(context, key, true, slice.call(arguments, 2));
+function npt$1(key, context) {
+	for (var _len4 = arguments.length, args = Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
+		args[_key4 - 2] = arguments[_key4];
+	}
+
+	return getText(context, key, true, args);
 }
 
 getText.configure = configure;
 getText.t = t;
 getText.pt = pt;
-getText.nt = nt;
-getText.npt = npt;
+getText.nt = nt$1;
+getText.npt = npt$1;
 
 configure({
 	localeSettings: {
-		// code: 'en',
-		// plural: 'n == 1 ? 0 : 1'
 		code: 'ru',
 		plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
 	},
@@ -356,10 +366,57 @@ configure({
 });
 
 var formatters = Object.create(null);
+
+formatters.not = function not(value) {
+	return !value;
+};
+
+formatters.eq = function eq(value, arg) {
+	return value == arg;
+};
+formatters.identical = function identical(value, arg) {
+	return value === arg;
+};
+
+formatters.lt = function lt(value, arg) {
+	return value < arg;
+};
+formatters.lte = function lte(value, arg) {
+	return value <= arg;
+};
+formatters.gt = function gt(value, arg) {
+	return value > arg;
+};
+formatters.gte = function gte(value, arg) {
+	return value >= arg;
+};
+
+formatters.join = function join(arr) {
+	var separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ', ';
+
+	return arr.join(separator);
+};
+
 formatters.t = getText.t;
 formatters.pt = getText.pt;
-formatters.nt = getText.nt;
-formatters.npt = getText.npt;
+
+formatters.nt = function nt(count, key) {
+	for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
+		args[_key - 2] = arguments[_key];
+	}
+
+	args.unshift(count);
+	return getText('', key, true, args);
+};
+
+formatters.npt = function npt(count, key, context) {
+	for (var _len2 = arguments.length, args = Array(_len2 > 3 ? _len2 - 3 : 0), _key2 = 3; _key2 < _len2; _key2++) {
+		args[_key2 - 3] = arguments[_key2];
+	}
+
+	args.unshift(count);
+	return getText(context, key, true, args);
+};
 
 var reEscapableChars = /[&<>"]/g;
 var charToEntityMap = Object.create(null);
@@ -806,6 +863,10 @@ var ElementProtoMixin = (_ElementProtoMixin = {
 
 var KEY_MARKUP_BLOCK_NAMES = cellx.JS.Symbol('Rionite.Component.markupBlockNames');
 var KEY_ASSET_CLASS_NAMES = cellx.JS.Symbol('Rionite.Component.assetClassNames');
+
+var slice = Array.prototype.slice;
+var push = Array.prototype.push;
+var map = Array.prototype.map;
 
 var mixin = cellx.Utils.mixin;
 

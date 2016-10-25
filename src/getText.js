@@ -1,17 +1,9 @@
 import { hasOwn } from './JS/Object';
-import { slice } from './JS/Array';
 
 let reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
 
 let texts;
 let getPluralIndex;
-
-function configure(config) {
-	let localeSettings = getText.localeSettings = config.localeSettings;
-
-	texts = config.texts;
-	getPluralIndex = Function('n', `return ${ localeSettings.plural };`);
-}
 
 export default function getText(context: string, key: string, plural: boolean, args: Array<string>): string {
 	let rawText;
@@ -28,9 +20,9 @@ export default function getText(context: string, key: string, plural: boolean, a
 
 	let data = Object.create(null);
 
-	args.forEach((arg, index) => {
-		data[index + 1] = arg;
-	});
+	for (let i = args.length; i;) {
+		data[i] = args[--i];
+	}
 
 	if (plural) {
 		data.n = args[0];
@@ -53,20 +45,27 @@ export default function getText(context: string, key: string, plural: boolean, a
 	return text.join('');
 }
 
-function t(key) {
-	return getText('', key, false, slice.call(arguments, 1));
+function configure(config) {
+	texts = config.texts;
+	getPluralIndex = Function('n', `return ${ config.localeSettings.plural };`);
+
+	getText.localeSettings = config.localeSettings;
 }
 
-function pt(key, context) {
-	return getText(context, key, false, slice.call(arguments, 2));
+function t(key, ...args) {
+	return getText('', key, false, args);
 }
 
-function nt(key/*, count*/) {
-	return getText('', key, true, slice.call(arguments, 1));
+function pt(key, context, ...args) {
+	return getText(context, key, false, args);
 }
 
-function npt(key, context/*, count*/) {
-	return getText(context, key, true, slice.call(arguments, 2));
+function nt(key, ...args) {
+	return getText('', key, true, args);
+}
+
+function npt(key, context, ...args) {
+	return getText(context, key, true, args);
 }
 
 getText.configure = configure;
@@ -77,8 +76,6 @@ getText.npt = npt;
 
 configure({
 	localeSettings: {
-		// code: 'en',
-		// plural: 'n == 1 ? 0 : 1'
 		code: 'ru',
 		plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
 	},
