@@ -6,6 +6,7 @@ import setElementClasses from './setElementClasses';
 import initAttributes from './initAttributes';
 import bind from './bind';
 import attachChildComponentElements from './attachChildComponentElements';
+import bindEvents from './bindEvents';
 import eventTypes from './eventTypes';
 import onEvent from './onEvent';
 import { map } from './JS/Array';
@@ -48,7 +49,9 @@ let Component = EventEmitter.extend({
 		_rawContent: null,
 
 		_markupBlockNames: null,
-		_assetClassNames: null
+		_assetClassNames: null,
+
+		events: null
 	},
 
 	/**
@@ -236,9 +239,15 @@ let Component = EventEmitter.extend({
 			if (childComponents) {
 				attachChildComponentElements(childComponents);
 			}
+
+			bindEvents(this, constr.events);
 		}
 
 		if (!this.isReady) {
+			if (!rawContent) {
+				bindEvents(this, constr.events);
+			}
+
 			this.ready();
 			this.isReady = true;
 		}

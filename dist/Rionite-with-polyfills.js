@@ -3081,6 +3081,30 @@ function attachChildComponentElements(childComponents) {
 	}
 }
 
+function bindEvents(component, events) {
+	for (var assetName in events) {
+		var asset = void 0;
+
+		if (assetName == ':component') {
+			asset = component;
+		} else if (assetName == ':element') {
+			asset = component.element;
+		} else {
+			asset = component.$(assetName);
+
+			if (!asset) {
+				continue;
+			}
+		}
+
+		var assetEvents = events[assetName];
+
+		for (var evtName in assetEvents) {
+			component.listenTo(asset, evtName, assetEvents[evtName]);
+		}
+	}
+}
+
 var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /**
@@ -3201,7 +3225,9 @@ var Component = cellx.EventEmitter.extend({
 		_rawContent: null,
 
 		_markupBlockNames: null,
-		_assetClassNames: null
+		_assetClassNames: null,
+
+		events: null
 	},
 
 	/**
@@ -3388,9 +3414,15 @@ var Component = cellx.EventEmitter.extend({
 			if (childComponents) {
 				attachChildComponentElements(childComponents);
 			}
+
+			bindEvents(this, constr.events);
 		}
 
 		if (!this.isReady) {
+			if (!rawContent) {
+				bindEvents(this, constr.events);
+			}
+
 			this.ready();
 			this.isReady = true;
 		}
