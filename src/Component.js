@@ -6,20 +6,14 @@ import setElementClasses from './setElementClasses';
 import initAttributes from './initAttributes';
 import bind from './bind';
 import attachChildComponentElements from './attachChildComponentElements';
-import defineAssets from './defineAssets';
-import listenAssets from './listenAssets';
 import eventTypes from './eventTypes';
 import onEvent from './onEvent';
-import { KEY_MARKUP_BLOCK_NAMES, KEY_ASSET_CLASS_NAMES } from './keys';
 import { map } from './JS/Array';
 import camelize from './Utils/camelize';
 import htmlToFragment from './Utils/htmlToFragment';
 
-let Symbol = JS.Symbol;
+let Map = JS.Map;
 let createClass = Utils.createClass;
-
-let KEY_RAW_CONTENT = Symbol('Rionite.Component.rawContent');
-let KEY_SILENT = Symbol('Rionite.Component#silent');
 
 function created() {}
 function initialize() {}
@@ -51,10 +45,10 @@ let Component = EventEmitter.extend({
 
 		template: null,
 
-		[KEY_MARKUP_BLOCK_NAMES]: null,
-		[KEY_ASSET_CLASS_NAMES]: null,
+		_rawContent: null,
 
-		assets: null
+		_markupBlockNames: null,
+		_assetClassNames: null
 	},
 
 	/**
@@ -130,6 +124,8 @@ let Component = EventEmitter.extend({
 	initialized: false,
 	isReady: false,
 
+	_isComponentSilent: void 0,
+
 	constructor: function Component(el, props) {
 		EventEmitter.call(this);
 		DisposableMixin.call(this);
@@ -175,10 +171,10 @@ let Component = EventEmitter.extend({
 	_handleEvent(evt) {
 		EventEmitter.prototype._handleEvent.call(this, evt);
 
-		let silent = this[KEY_SILENT];
+		let silent = this._isComponentSilent;
 
 		if (silent === void 0) {
-			silent = this[KEY_SILENT] = this.element.hasAttribute('rt-silent');
+			silent = this._isComponentSilent = this.element.hasAttribute('rt-silent');
 		}
 
 		if (!silent && evt.bubbles !== false && !evt.isPropagationStopped) {
@@ -199,7 +195,7 @@ let Component = EventEmitter.extend({
 		}
 
 		let constr = this.constructor;
-		let rawContent = constr[KEY_RAW_CONTENT];
+		let rawContent = constr._rawContent;
 		let el = this.element;
 
 		if (this.isReady) {
@@ -216,7 +212,7 @@ let Component = EventEmitter.extend({
 
 			if (template != null) {
 				if (!rawContent) {
-					rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment(
+					rawContent = constr._rawContent = htmlToFragment(
 						typeof template == 'string' ? template : template.render(constr)
 					);
 				}
@@ -240,15 +236,9 @@ let Component = EventEmitter.extend({
 			if (childComponents) {
 				attachChildComponentElements(childComponents);
 			}
-
-			this._initAssets();
 		}
 
 		if (!this.isReady) {
-			if (!rawContent) {
-				this._initAssets();
-			}
-
 			this.ready();
 			this.isReady = true;
 		}
@@ -259,17 +249,6 @@ let Component = EventEmitter.extend({
 	_detachElement() {
 		this.dispose();
 		this.elementDetached();
-	},
-
-	_initAssets() {
-		this.assets = Object.create(null);
-
-		let assetsConfig = this.constructor.assets;
-
-		if (assetsConfig) {
-			defineAssets(this, assetsConfig);
-			listenAssets(this, assetsConfig);
-		}
 	},
 
 	/**
@@ -305,23 +284,57 @@ let Component = EventEmitter.extend({
 	// Utils
 
 	/**
-	 * @typesign (selector: string) -> ?Rionite.Component|HTMLElement;
+	 * @typesign (name: string, containerEl?: HTMLElement) -> ?Rionite.Component|HTMLElement;
 	 */
-	$(selector) {
-		let el = this.element.querySelector(this._prepareSelector(selector));
-		return el && (el.$c || el);
+	$(name, containerEl/*, _all*/) {
+		let _all = arguments[2];
+		let asset = (this.assets || (this.assets = new Map())).get(_all ? name + '*' : name);
+
+		if (!asset) {
+			if (!containerEl) {
+				containerEl = this.element;
+			}
+
+			let constr = this.constructor;
+			let className = constr._assetClassNames[name];
+			let els;
+
+			if (className) {
+				els = containerEl.getElementsByClassName(className);
+			} else {
+				let markupBlockNames = constr._markupBlockNames;
+
+				for (let i = markupBlockNames.length; i;) {
+					className = markupBlockNames[--i] + '__' + name;
+
+					els = containerEl.getElementsByClassName(className);
+
+					if (els.length) {
+						constr._assetClassNames[name] = className;
+						break;
+					}
+				}
+			}
+
+			if (_all) {
+				this.assets.set(name + '*', els);
+				return els;
+			}
+
+			let assetEl = els[0];
+
+			asset = assetEl ? assetEl.$c || assetEl : null;
+			this.assets.set(name, asset);
+		}
+
+		return asset;
 	},
 
 	/**
-	 * @typesign (selector: string) -> Array<Rionite.Component|HTMLElement>;
+	 * @typesign (name: string, containerEl?: HTMLElement) -> Array<Rionite.Component|HTMLElement>;
 	 */
-	$$(selector) {
-		return map.call(this.element.querySelectorAll(this._prepareSelector(selector)), el => el.$c || el);
-	},
-
-	_prepareSelector(selector) {
-		selector = selector.split('&');
-		return selector.length == 1 ? selector[0] : selector.join('.' + this.constructor[KEY_MARKUP_BLOCK_NAMES][0]);
+	$$(name, containerEl) {
+		return map.call(this.$(name, containerEl, true), el => el.$c || el);
 	}
 });
 

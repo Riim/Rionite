@@ -74,11 +74,7 @@ Rionite.Component.extend('todo-app', {
 			<template is="rt-repeat" for="todo of todos">
 				<todo-view todo-id="{todo.id}"></todo-view>
 			</template>
-		`,
-
-		assets: {
-			tfNewTodo: {}
-		}
+		`
 	},
 
 	initialize() {
@@ -98,7 +94,7 @@ Rionite.Component.extend('todo-app', {
 	},
 
 	onBtnAddClick() {
-		var tfNewTodo = this.assets.tfNewTodo;
+		var tfNewTodo = this.$('tf-new-todo');
 		todos.add(new Todo(tfNewTodo.value));
 		tfNewTodo.value = '';
 	}

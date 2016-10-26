@@ -792,9 +792,9 @@ function defer(cb /*: Function*/, context /*:: ?*/) /*: void*/ {
 
 var _ElementProtoMixin;
 
-var Symbol$1 = cellx.JS.Symbol;
+var Symbol = cellx.JS.Symbol;
 
-var attached = Symbol$1('Rionite.ElementProtoMixin.attached');
+var attached = Symbol('Rionite.ElementProtoMixin.attached');
 
 var ElementProtoMixin = (_ElementProtoMixin = {
 	rioniteComponent: null,
@@ -861,9 +861,6 @@ var ElementProtoMixin = (_ElementProtoMixin = {
 	}
 }, _ElementProtoMixin);
 
-var KEY_MARKUP_BLOCK_NAMES = cellx.JS.Symbol('Rionite.Component.markupBlockNames');
-var KEY_ASSET_CLASS_NAMES = cellx.JS.Symbol('Rionite.Component.assetClassNames');
-
 var slice = Array.prototype.slice;
 var push = Array.prototype.push;
 var map = Array.prototype.map;
@@ -890,10 +887,10 @@ function registerComponent(componentConstr) {
 	var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
 
 	if (componentConstr.template !== parentComponentConstr.template && componentConstr.template) {
-		push.apply(componentConstr[KEY_MARKUP_BLOCK_NAMES] = [elIs], parentComponentConstr[KEY_MARKUP_BLOCK_NAMES] || []);
+		push.apply(componentConstr._markupBlockNames = [elIs], parentComponentConstr._markupBlockNames || []);
 	}
 
-	componentConstr[KEY_ASSET_CLASS_NAMES] = Object.create(parentComponentConstr[KEY_ASSET_CLASS_NAMES] || null);
+	componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames || null);
 
 	var elExtends = componentConstr.elementExtends;
 
@@ -1623,95 +1620,6 @@ function attachChildComponentElements(childComponents) {
 	}
 }
 
-function defineAssets(component, assetsConfig) {
-	var constr = component.constructor;
-	var markupBlockNames = constr[KEY_MARKUP_BLOCK_NAMES];
-	var assetClassNames = constr[KEY_ASSET_CLASS_NAMES];
-	var el = component.element;
-	var assets = component.assets;
-
-	var _loop = function _loop(name) {
-		if (name.charAt(0) != ':') {
-			(function () {
-				var asset = void 0;
-
-				Object.defineProperty(assets, name, {
-					configurable: true,
-					enumerable: true,
-
-					get: function get() {
-						if (!asset) {
-							var className = assetClassNames[name];
-
-							if (className) {
-								var assetEl = el.getElementsByClassName(className)[0];
-								asset = assetEl ? assetEl.$c || assetEl : null;
-							} else {
-								var selector = assetsConfig[name].selector;
-
-								if (selector) {
-									asset = component.$(selector);
-								} else {
-									var nameWithDelim = '__' + hyphenize(name);
-									var _assetEl = void 0;
-
-									for (var i = markupBlockNames.length; i;) {
-										className = markupBlockNames[--i] + nameWithDelim;
-										_assetEl = el.getElementsByClassName(className)[0];
-
-										if (_assetEl) {
-											assetClassNames[name] = className;
-											break;
-										}
-									}
-
-									asset = _assetEl ? _assetEl.$c || _assetEl : null;
-								}
-							}
-						}
-
-						return asset;
-					}
-				});
-			})();
-		}
-	};
-
-	for (var name in assetsConfig) {
-		_loop(name);
-	}
-}
-
-function listenAssets(component, assetsConfig) {
-	var assets = component.assets;
-
-	for (var name in assetsConfig) {
-		var asset = void 0;
-
-		if (name == ':component') {
-			asset = component;
-		} else if (name == ':element') {
-			asset = component.element;
-		}
-
-		var assetConfig = assetsConfig[name];
-
-		for (var key in assetConfig) {
-			if (key.slice(0, 3) == 'on-' && key.length > 3) {
-				if (!asset) {
-					asset = assets[name];
-
-					if (!asset) {
-						break;
-					}
-				}
-
-				component.listenTo(asset, key.slice(3), assetConfig[key]);
-			}
-		}
-	}
-}
-
 var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
 
 /**
@@ -1796,13 +1704,8 @@ if (range.createContextualFragment) {
 
 var htmlToFragment$1 = htmlToFragment;
 
-var _Static;
-
-var Symbol = cellx.JS.Symbol;
+var Map$2 = cellx.JS.Map;
 var createClass = cellx.Utils.createClass;
-
-var KEY_RAW_CONTENT = Symbol('Rionite.Component.rawContent');
-var KEY_SILENT = Symbol('Rionite.Component#silent');
 
 function created() {}
 function initialize() {}
@@ -1815,7 +1718,7 @@ function elementAttributeChanged() {}
 var Component = cellx.EventEmitter.extend({
 	Implements: [DisposableMixin],
 
-	Static: (_Static = {
+	Static: {
 		register: registerComponent,
 
 		extend: function extend(elIs, description) {
@@ -1832,9 +1735,13 @@ var Component = cellx.EventEmitter.extend({
 
 		i18n: null,
 
-		template: null
+		template: null,
 
-	}, _Static[KEY_MARKUP_BLOCK_NAMES] = null, _Static[KEY_ASSET_CLASS_NAMES] = null, _Static.assets = null, _Static),
+		_rawContent: null,
+
+		_markupBlockNames: null,
+		_assetClassNames: null
+	},
 
 	/**
   * @type {?Rionite.Component}
@@ -1909,6 +1816,8 @@ var Component = cellx.EventEmitter.extend({
 	initialized: false,
 	isReady: false,
 
+	_isComponentSilent: void 0,
+
 	constructor: function Component(el, props) {
 		cellx.EventEmitter.call(this);
 		DisposableMixin.call(this);
@@ -1951,10 +1860,10 @@ var Component = cellx.EventEmitter.extend({
 	_handleEvent: function _handleEvent(evt) {
 		cellx.EventEmitter.prototype._handleEvent.call(this, evt);
 
-		var silent = this[KEY_SILENT];
+		var silent = this._isComponentSilent;
 
 		if (silent === void 0) {
-			silent = this[KEY_SILENT] = this.element.hasAttribute('rt-silent');
+			silent = this._isComponentSilent = this.element.hasAttribute('rt-silent');
 		}
 
 		if (!silent && evt.bubbles !== false && !evt.isPropagationStopped) {
@@ -1974,7 +1883,7 @@ var Component = cellx.EventEmitter.extend({
 		}
 
 		var constr = this.constructor;
-		var rawContent = constr[KEY_RAW_CONTENT];
+		var rawContent = constr._rawContent;
 		var el = this.element;
 
 		if (this.isReady) {
@@ -1991,7 +1900,7 @@ var Component = cellx.EventEmitter.extend({
 
 			if (template != null) {
 				if (!rawContent) {
-					rawContent = constr[KEY_RAW_CONTENT] = htmlToFragment$1(typeof template == 'string' ? template : template.render(constr));
+					rawContent = constr._rawContent = htmlToFragment$1(typeof template == 'string' ? template : template.render(constr));
 				}
 
 				var inputContent = this.props.content = document.createDocumentFragment();
@@ -2018,15 +1927,9 @@ var Component = cellx.EventEmitter.extend({
 			if (childComponents) {
 				attachChildComponentElements(childComponents);
 			}
-
-			this._initAssets();
 		}
 
 		if (!this.isReady) {
-			if (!rawContent) {
-				this._initAssets();
-			}
-
 			this.ready();
 			this.isReady = true;
 		}
@@ -2036,16 +1939,6 @@ var Component = cellx.EventEmitter.extend({
 	_detachElement: function _detachElement() {
 		this.dispose();
 		this.elementDetached();
-	},
-	_initAssets: function _initAssets() {
-		this.assets = Object.create(null);
-
-		var assetsConfig = this.constructor.assets;
-
-		if (assetsConfig) {
-			defineAssets(this, assetsConfig);
-			listenAssets(this, assetsConfig);
-		}
 	},
 
 
@@ -2082,25 +1975,60 @@ var Component = cellx.EventEmitter.extend({
 	// Utils
 
 	/**
-  * @typesign (selector: string) -> ?Rionite.Component|HTMLElement;
+  * @typesign (name: string, containerEl?: HTMLElement) -> ?Rionite.Component|HTMLElement;
   */
-	$: function $(selector) {
-		var el = this.element.querySelector(this._prepareSelector(selector));
-		return el && (el.$c || el);
+	$: function $(name, containerEl /*, _all*/) {
+		var _all = arguments[2];
+		var asset = (this.assets || (this.assets = new Map$2())).get(_all ? name + '*' : name);
+
+		if (!asset) {
+			if (!containerEl) {
+				containerEl = this.element;
+			}
+
+			var constr = this.constructor;
+			var className = constr._assetClassNames[name];
+			var els = void 0;
+
+			if (className) {
+				els = containerEl.getElementsByClassName(className);
+			} else {
+				var markupBlockNames = constr._markupBlockNames;
+
+				for (var i = markupBlockNames.length; i;) {
+					className = markupBlockNames[--i] + '__' + name;
+
+					els = containerEl.getElementsByClassName(className);
+
+					if (els.length) {
+						constr._assetClassNames[name] = className;
+						break;
+					}
+				}
+			}
+
+			if (_all) {
+				this.assets.set(name + '*', els);
+				return els;
+			}
+
+			var assetEl = els[0];
+
+			asset = assetEl ? assetEl.$c || assetEl : null;
+			this.assets.set(name, asset);
+		}
+
+		return asset;
 	},
 
 
 	/**
-  * @typesign (selector: string) -> Array<Rionite.Component|HTMLElement>;
+  * @typesign (name: string, containerEl?: HTMLElement) -> Array<Rionite.Component|HTMLElement>;
   */
-	$$: function $$(selector) {
-		return map.call(this.element.querySelectorAll(this._prepareSelector(selector)), function (el) {
+	$$: function $$(name, containerEl) {
+		return map.call(this.$(name, containerEl, true), function (el) {
 			return el.$c || el;
 		});
-	},
-	_prepareSelector: function _prepareSelector(selector) {
-		selector = selector.split('&');
-		return selector.length == 1 ? selector[0] : selector.join('.' + this.constructor[KEY_MARKUP_BLOCK_NAMES][0]);
 	}
 });
 
@@ -2321,7 +2249,7 @@ var RtIfElse = RtIfThen.extend('rt-if-else', {
 	_elseMode: true
 });
 
-var Map$2 = cellx.JS.Map;
+var Map$3 = cellx.JS.Map;
 var nextTick$1 = cellx.Utils.nextTick;
 
 var reForAttributeValue = RegExp('^\\s*(' + namePattern + ')\\s+of\\s+(\\S.*)$');
@@ -2372,7 +2300,7 @@ var RtRepeat = Component.extend('rt-repeat', {
 
 			this._list = new cellx.Cell(compileBinding(parsedOf[0]), { owner: props.context });
 
-			this._itemMap = new Map$2();
+			this._itemMap = new Map$3();
 
 			this._trackBy = props.trackBy;
 
@@ -2420,7 +2348,7 @@ var RtRepeat = Component.extend('rt-repeat', {
 		var _this = this;
 
 		var oldItemMap = this._oldItemMap = this._itemMap;
-		this._itemMap = new Map$2();
+		this._itemMap = new Map$3();
 
 		var list = this._list.get();
 		var changed = false;
