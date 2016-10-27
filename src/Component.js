@@ -293,19 +293,26 @@ let Component = EventEmitter.extend({
 	// Utils
 
 	/**
-	 * @typesign (name: string, containerEl?: HTMLElement) -> ?Rionite.Component|HTMLElement;
+	 * @typesign (name: string, opts?: {
+	 *     container?: Rionite.Component|HTMLElement,
+	 *     useCache?: boolean,
+	 *     all?: boolean
+	 * }) -> ?Rionite.Component|HTMLElement;
 	 */
-	$(name, containerEl/*, _all*/) {
-		let _all = arguments[2];
-		let asset = (this.assets || (this.assets = new Map())).get(_all ? name + '*' : name);
+	$(name, opts) {
+		let useCache = !opts || opts.useCache !== false;
+		let all = opts && opts.all;
+
+		let asset = useCache && (this.assets || (this.assets = new Map())).get(all ? name + '*' : name);
 
 		if (!asset) {
-			if (!containerEl) {
-				containerEl = this.element;
-			}
+			let container = opts && opts.container;
 
 			let constr = this.constructor;
 			let className = constr._assetClassNames[name];
+			let containerEl = container ?
+				(container instanceof Component ? container.element : container) :
+				this.element;
 			let els;
 
 			if (className) {
@@ -325,7 +332,7 @@ let Component = EventEmitter.extend({
 				}
 			}
 
-			if (_all) {
+			if (all) {
 				this.assets.set(name + '*', els);
 				return els;
 			}
@@ -340,10 +347,13 @@ let Component = EventEmitter.extend({
 	},
 
 	/**
-	 * @typesign (name: string, containerEl?: HTMLElement) -> Array<Rionite.Component|HTMLElement>;
+	 * @typesign (name: string, opts?: {
+	 *     container?: Rionite.Component|HTMLElement,
+	 *     useCache?: boolean
+	 * }) -> Array<Rionite.Component|HTMLElement>;
 	 */
-	$$(name, containerEl) {
-		return map.call(this.$(name, containerEl, true), el => el.$c || el);
+	$$(name, opts) {
+		return map.call(this.$(name, { __proto__: opts, all: true }), el => el.$c || el);
 	}
 });
 

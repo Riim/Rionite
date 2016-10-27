@@ -1995,19 +1995,24 @@ var Component = cellx.EventEmitter.extend({
 	// Utils
 
 	/**
-  * @typesign (name: string, containerEl?: HTMLElement) -> ?Rionite.Component|HTMLElement;
+  * @typesign (name: string, opts?: {
+  *     container?: Rionite.Component|HTMLElement,
+  *     useCache?: boolean,
+  *     all?: boolean
+  * }) -> ?Rionite.Component|HTMLElement;
   */
-	$: function $(name, containerEl /*, _all*/) {
-		var _all = arguments[2];
-		var asset = (this.assets || (this.assets = new Map$2())).get(_all ? name + '*' : name);
+	$: function $(name, opts) {
+		var useCache = !opts || opts.useCache !== false;
+		var all = opts && opts.all;
+
+		var asset = useCache && (this.assets || (this.assets = new Map$2())).get(all ? name + '*' : name);
 
 		if (!asset) {
-			if (!containerEl) {
-				containerEl = this.element;
-			}
+			var container = opts && opts.container;
 
 			var constr = this.constructor;
 			var className = constr._assetClassNames[name];
+			var containerEl = container ? container instanceof Component ? container.element : container : this.element;
 			var els = void 0;
 
 			if (className) {
@@ -2027,7 +2032,7 @@ var Component = cellx.EventEmitter.extend({
 				}
 			}
 
-			if (_all) {
+			if (all) {
 				this.assets.set(name + '*', els);
 				return els;
 			}
@@ -2043,10 +2048,13 @@ var Component = cellx.EventEmitter.extend({
 
 
 	/**
-  * @typesign (name: string, containerEl?: HTMLElement) -> Array<Rionite.Component|HTMLElement>;
+  * @typesign (name: string, opts?: {
+  *     container?: Rionite.Component|HTMLElement,
+  *     useCache?: boolean
+  * }) -> Array<Rionite.Component|HTMLElement>;
   */
-	$$: function $$(name, containerEl) {
-		return map.call(this.$(name, containerEl, true), function (el) {
+	$$: function $$(name, opts) {
+		return map.call(this.$(name, { __proto__: opts, all: true }), function (el) {
 			return el.$c || el;
 		});
 	}
