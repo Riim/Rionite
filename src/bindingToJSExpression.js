@@ -8,11 +8,7 @@ function formattersReducer(jsExpr, formatter) {
 	})`;
 }
 
-export default function bindingToJSExpression(binding: Object): {
-	value: string,
-	usesFormatters: boolean,
-	usesTempVariable: boolean
-} {
+export default function bindingToJSExpression(binding: Object): { value: string, usesFormatters: boolean } {
 	let bindingRaw = binding.raw;
 
 	if (cache[bindingRaw]) {
@@ -28,15 +24,13 @@ export default function bindingToJSExpression(binding: Object): {
 		if (formatters.length) {
 			return (cache[bindingRaw] = {
 				value: formatters.reduce(formattersReducer, 'this.' + keypath[0]),
-				usesFormatters: true,
-				usesTempVariable: false
+				usesFormatters: true
 			});
 		}
 
 		return (cache[bindingRaw] = {
 			value: 'this.' + keypath[0],
-			usesFormatters: false,
-			usesTempVariable: false
+			usesFormatters: false
 		});
 	}
 
@@ -47,19 +41,14 @@ export default function bindingToJSExpression(binding: Object): {
 		jsExpr[--index] = ` && (temp = temp${ keypath[index + 1] })`;
 	}
 
-	if (formatters.length) {
-		return (cache[bindingRaw] = {
-			value: `(temp = this.${ keypath[0] })${ jsExpr.join('') } && ${
-				formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1])
-			}`,
-			usesFormatters: true,
-			usesTempVariable: true
-		});
-	}
+	let usesFormatters = !!formatters.length;
 
 	return (cache[bindingRaw] = {
-		value: `(temp = this.${ keypath[0] })${ jsExpr.join('') } && temp${ keypath[keypathLen - 1] }`,
-		usesFormatters: false,
-		usesTempVariable: true
+		value: `(temp = this.${ keypath[0] })${ jsExpr.join('') } && ${
+			usesFormatters ?
+				formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1]) :
+				'temp' + keypath[keypathLen - 1]
+		}`,
+		usesFormatters
 	});
 }

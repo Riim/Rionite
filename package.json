@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "description": "",
   "main": "dist/Rionite-with-polyfills.js",
   "scripts": {
@@ -19,7 +19,7 @@
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
     "@riim/babel-preset": "^1.0.0",
-    "babel-eslint": "^7.0.0",
+    "babel-eslint": "^7.1.0",
     "babel-plugin-external-helpers": "^6.18.0",
     "babel-plugin-syntax-flow": "^6.18.0",
     "babel-plugin-transform-flow-comments": "^6.17.0",

@@ -20,7 +20,6 @@ export default function compileContent(parsedContent: Array<Object>, content: st
 	}
 
 	let usesFormatters = false;
-	let usesTempVariable = false;
 	let jsExpr = [];
 
 	for (let i = 0, l = parsedContent.length; i < l; i++) {
@@ -34,15 +33,12 @@ export default function compileContent(parsedContent: Array<Object>, content: st
 			if (!usesFormatters && bindingJSExpr.usesFormatters) {
 				usesFormatters = true;
 			}
-			if (!usesTempVariable && bindingJSExpr.usesTempVariable) {
-				usesTempVariable = true;
-			}
 
 			jsExpr.push(bindingJSExpr.value);
 		}
 	}
 
-	jsExpr = `${ usesTempVariable ? 'var temp; ' : '' }return [${ jsExpr.join(', ') }].join('');`;
+	jsExpr = `var temp; return [${ jsExpr.join(', ') }].join('');`;
 
 	if (usesFormatters) {
 		let inner = Function('formatters', jsExpr);

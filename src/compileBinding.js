@@ -11,7 +11,7 @@ export default function compileBinding(binding: Object): Function {
 	}
 
 	let bindingJSExpr = bindingToJSExpression(binding);
-	let jsExpr = `${ bindingJSExpr.usesTempVariable ? 'var temp; ' : '' }return ${ bindingJSExpr.value };`;
+	let jsExpr = `var temp; return ${ bindingJSExpr.value };`;
 
 	if (bindingJSExpr.usesFormatters) {
 		let inner = Function('formatters', jsExpr);

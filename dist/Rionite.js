@@ -1368,11 +1368,7 @@ function formattersReducer(jsExpr, formatter) {
 	return '(this[\'' + formatter.name + '\'] || formatters[\'' + formatter.name + '\']).call(this, ' + jsExpr + (args && args.value.length ? ', ' + args.raw.slice(1, -1) : '') + ')';
 }
 
-function bindingToJSExpression(binding /*: Object*/) /*: {
-                                                                    	value: string,
-                                                                    	usesFormatters: boolean,
-                                                                    	usesTempVariable: boolean
-                                                                    }*/ {
+function bindingToJSExpression(binding /*: Object*/) /*: { value: string, usesFormatters: boolean }*/ {
 	var bindingRaw = binding.raw;
 
 	if (cache$3[bindingRaw]) {
@@ -1388,15 +1384,13 @@ function bindingToJSExpression(binding /*: Object*/) /*: {
 		if (formatters.length) {
 			return cache$3[bindingRaw] = {
 				value: formatters.reduce(formattersReducer, 'this.' + keypath[0]),
-				usesFormatters: true,
-				usesTempVariable: false
+				usesFormatters: true
 			};
 		}
 
 		return cache$3[bindingRaw] = {
 			value: 'this.' + keypath[0],
-			usesFormatters: false,
-			usesTempVariable: false
+			usesFormatters: false
 		};
 	}
 
@@ -1407,18 +1401,11 @@ function bindingToJSExpression(binding /*: Object*/) /*: {
 		jsExpr[--index] = ' && (temp = temp' + keypath[index + 1] + ')';
 	}
 
-	if (formatters.length) {
-		return cache$3[bindingRaw] = {
-			value: '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && ' + formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1]),
-			usesFormatters: true,
-			usesTempVariable: true
-		};
-	}
+	var usesFormatters = !!formatters.length;
 
 	return cache$3[bindingRaw] = {
-		value: '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && temp' + keypath[keypathLen - 1],
-		usesFormatters: false,
-		usesTempVariable: true
+		value: '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && ' + (usesFormatters ? formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1]) : 'temp' + keypath[keypathLen - 1]),
+		usesFormatters: usesFormatters
 	};
 }
 
@@ -1432,7 +1419,7 @@ function compileBinding(binding /*: Object*/) /*: Function*/ {
 	}
 
 	var bindingJSExpr = bindingToJSExpression(binding);
-	var jsExpr = (bindingJSExpr.usesTempVariable ? 'var temp; ' : '') + 'return ' + bindingJSExpr.value + ';';
+	var jsExpr = 'var temp; return ' + bindingJSExpr.value + ';';
 
 	if (bindingJSExpr.usesFormatters) {
 		var _ret = function () {
@@ -1467,7 +1454,6 @@ function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/)
 	}
 
 	var usesFormatters = false;
-	var usesTempVariable = false;
 	var jsExpr = [];
 
 	for (var i = 0, l = parsedContent.length; i < l; i++) {
@@ -1481,15 +1467,12 @@ function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/)
 			if (!usesFormatters && bindingJSExpr.usesFormatters) {
 				usesFormatters = true;
 			}
-			if (!usesTempVariable && bindingJSExpr.usesTempVariable) {
-				usesTempVariable = true;
-			}
 
 			jsExpr.push(bindingJSExpr.value);
 		}
 	}
 
-	jsExpr = (usesTempVariable ? 'var temp; ' : '') + 'return [' + jsExpr.join(', ') + '].join(\'\');';
+	jsExpr = 'var temp; return [' + jsExpr.join(', ') + '].join(\'\');';
 
 	if (usesFormatters) {
 		var _ret = function () {
