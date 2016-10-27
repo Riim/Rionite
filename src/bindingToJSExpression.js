@@ -4,7 +4,7 @@ function formattersReducer(jsExpr, formatter) {
 	let args = formatter.arguments;
 
 	return `(this['${ formatter.name }'] || formatters['${ formatter.name }']).call(this, ${ jsExpr }${
-		args && args.value.length ? ', ' + args.raw.slice(1, -1) : ''
+		args && args.value.length ? ', ' + args.value.join(', ') : ''
 	})`;
 }
 
@@ -16,21 +16,14 @@ export default function bindingToJSExpression(binding: Object): { value: string,
 	}
 
 	let keypath = binding.keypath.value.split('?');
-	let formatters = binding.formatters;
-
 	let keypathLen = keypath.length;
+	let formatters = binding.formatters;
+	let usesFormatters = !!formatters.length;
 
 	if (keypathLen == 1) {
-		if (formatters.length) {
-			return (cache[bindingRaw] = {
-				value: formatters.reduce(formattersReducer, 'this.' + keypath[0]),
-				usesFormatters: true
-			});
-		}
-
 		return (cache[bindingRaw] = {
-			value: 'this.' + keypath[0],
-			usesFormatters: false
+			value: usesFormatters ? formatters.reduce(formattersReducer, 'this.' + keypath[0]) : 'this.' + keypath[0],
+			usesFormatters
 		});
 	}
 
@@ -40,8 +33,6 @@ export default function bindingToJSExpression(binding: Object): { value: string,
 	while (index) {
 		jsExpr[--index] = ` && (temp = temp${ keypath[index + 1] })`;
 	}
-
-	let usesFormatters = !!formatters.length;
 
 	return (cache[bindingRaw] = {
 		value: `(temp = this.${ keypath[0] })${ jsExpr.join('') } && ${

@@ -1,6 +1,7 @@
 import { Utils } from 'cellx';
 import namePattern from './namePattern';
 import keypathPattern from './keypathPattern';
+import keypathToJSExpression from './keypathToJSExpression';
 import ContentNodeType from './ContentNodeType';
 
 let reNameOrEmpty = RegExp(namePattern + '|', 'g');
@@ -222,20 +223,24 @@ export default Utils.createClass({
 
 		this.next('{');
 
+		let obj = '{';
+
 		while (this.skipWhitespaces() != '}') {
-			if ((
-				this.chr == "'" || this.chr == '"' ?
-					this.readString() !== NOT_VALUE_AND_NOT_KEYPATH :
-					this.readObjectKey() !== null
-			) && this.skipWhitespaces() == ':') {
+			let key = this.chr == "'" || this.chr == '"' ? this.readString() : this.readObjectKey();
+
+			if (key !== NOT_VALUE_AND_NOT_KEYPATH && key !== null && this.skipWhitespaces() == ':') {
 				this.next();
 				this.skipWhitespaces();
 
-				if (this.readValueOrValueKeypath() !== NOT_VALUE_AND_NOT_KEYPATH) {
+				let v = this.readValueOrValueKeypath();
+
+				if (v !== NOT_VALUE_AND_NOT_KEYPATH) {
 					if (this.skipWhitespaces() == ',') {
+						obj += key + ':' + v + ',';
 						this.next();
 						continue;
 					} else if (this.chr == '}') {
+						obj += key + ':' + v + '}';
 						break;
 					}
 				}
@@ -249,7 +254,7 @@ export default Utils.createClass({
 
 		this.next();
 
-		return this.content.slice(objectAt, this.at);
+		return obj;
 	},
 
 	readObjectKey() {
@@ -269,20 +274,29 @@ export default Utils.createClass({
 
 		this.next('[');
 
+		let arr = '[';
+
 		while (this.skipWhitespaces() != ']') {
 			if (this.chr == ',') {
+				arr += ',';
 				this.next();
-			} else if (this.readValueOrValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH) {
-				this.at = arrayAt;
-				this.chr = this.content.charAt(arrayAt);
+			} else {
+				let v = this.readValueOrValueKeypath();
 
-				return NOT_VALUE_AND_NOT_KEYPATH;
+				if (v === NOT_VALUE_AND_NOT_KEYPATH) {
+					this.at = arrayAt;
+					this.chr = this.content.charAt(arrayAt);
+
+					return NOT_VALUE_AND_NOT_KEYPATH;
+				} else {
+					arr += v;
+				}
 			}
 		}
 
 		this.next();
 
-		return this.content.slice(arrayAt, this.at);
+		return arr + ']';
 	},
 
 	readBoolean() {
@@ -360,47 +374,13 @@ export default Utils.createClass({
 	},
 
 	readValueKeypath() {
-		if (this.content.slice(this.at, this.at + 4) != 'this') {
-			return NOT_VALUE_AND_NOT_KEYPATH;
+		reKeypathOrEmpty.lastIndex = this.at;
+		let keypath = reKeypathOrEmpty.exec(this.content)[0];
+
+		if (keypath) {
+			this.chr = this.content.charAt((this.at += keypath.length));
+			return keypathToJSExpression(keypath);
 		}
-
-		let keypathAt = this.at;
-
-		this.chr = this.content.charAt((this.at += 4));
-
-		for (;;) {
-			if (this.chr == '.') {
-				this.next();
-
-				reNameOrEmpty.lastIndex = this.at;
-				let name = reNameOrEmpty.exec(this.content)[0];
-
-				if (!name) {
-					break;
-				}
-
-				this.chr = this.content.charAt((this.at += name.length));
-			} else if (this.chr == '[') {
-				this.next();
-
-				if (
-					(
-						(this.chr == "'" || this.chr == '"') ? this.readString() === NOT_VALUE_AND_NOT_KEYPATH :
-							this.readNumber() === NOT_VALUE_AND_NOT_KEYPATH &&
-							this.readValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH
-					) || this.chr != ']'
-				) {
-					break;
-				}
-
-				this.next();
-			} else {
-				return this.content.slice(keypathAt, this.at);
-			}
-		}
-
-		this.at = keypathAt;
-		this.chr = this.content.charAt(keypathAt);
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	},

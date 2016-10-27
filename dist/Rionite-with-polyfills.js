@@ -2422,6 +2422,31 @@ var ContentNodeType = {
 
 var keypathPattern$1 = '(?:' + namePattern + '|\\[\\d+\\])(?:\\??(?:\\.' + namePattern + '|\\[\\d+\\]))*';
 
+var cache$2 = Object.create(null);
+
+function keypathToJSExpression(keypath) {
+	if (cache$2[keypath]) {
+		return cache$2[keypath];
+	}
+
+	keypath = keypath.split('?');
+
+	var keypathLen = keypath.length;
+
+	if (keypathLen == 1) {
+		return cache$2[keypath] = 'this.' + keypath[0];
+	}
+
+	var index = keypath.length - 2;
+	var jsExpr = Array(index);
+
+	while (index) {
+		jsExpr[--index] = ' && (temp = temp' + keypath[index + 1] + ')';
+	}
+
+	return cache$2[keypath] = '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && temp' + keypath[keypath.length - 1];
+}
+
 var reNameOrEmpty = RegExp(namePattern + '|', 'g');
 var reKeypathOrEmpty = RegExp(keypathPattern$1 + '|', 'g');
 var reBooleanOrEmpty = /false|true|/g;
@@ -2633,16 +2658,24 @@ var ContentParser$1 = cellx.Utils.createClass({
 
 		this.next('{');
 
+		var obj = '{';
+
 		while (this.skipWhitespaces() != '}') {
-			if ((this.chr == "'" || this.chr == '"' ? this.readString() !== NOT_VALUE_AND_NOT_KEYPATH : this.readObjectKey() !== null) && this.skipWhitespaces() == ':') {
+			var key = this.chr == "'" || this.chr == '"' ? this.readString() : this.readObjectKey();
+
+			if (key !== NOT_VALUE_AND_NOT_KEYPATH && key !== null && this.skipWhitespaces() == ':') {
 				this.next();
 				this.skipWhitespaces();
 
-				if (this.readValueOrValueKeypath() !== NOT_VALUE_AND_NOT_KEYPATH) {
+				var v = this.readValueOrValueKeypath();
+
+				if (v !== NOT_VALUE_AND_NOT_KEYPATH) {
 					if (this.skipWhitespaces() == ',') {
+						obj += key + ':' + v + ',';
 						this.next();
 						continue;
 					} else if (this.chr == '}') {
+						obj += key + ':' + v + '}';
 						break;
 					}
 				}
@@ -2656,7 +2689,7 @@ var ContentParser$1 = cellx.Utils.createClass({
 
 		this.next();
 
-		return this.content.slice(objectAt, this.at);
+		return obj;
 	},
 	readObjectKey: function readObjectKey() {
 		reNameOrEmpty.lastIndex = this.at;
@@ -2674,20 +2707,29 @@ var ContentParser$1 = cellx.Utils.createClass({
 
 		this.next('[');
 
+		var arr = '[';
+
 		while (this.skipWhitespaces() != ']') {
 			if (this.chr == ',') {
+				arr += ',';
 				this.next();
-			} else if (this.readValueOrValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH) {
-				this.at = arrayAt;
-				this.chr = this.content.charAt(arrayAt);
+			} else {
+				var v = this.readValueOrValueKeypath();
 
-				return NOT_VALUE_AND_NOT_KEYPATH;
+				if (v === NOT_VALUE_AND_NOT_KEYPATH) {
+					this.at = arrayAt;
+					this.chr = this.content.charAt(arrayAt);
+
+					return NOT_VALUE_AND_NOT_KEYPATH;
+				} else {
+					arr += v;
+				}
 			}
 		}
 
 		this.next();
 
-		return this.content.slice(arrayAt, this.at);
+		return arr + ']';
 	},
 	readBoolean: function readBoolean() {
 		reBooleanOrEmpty.lastIndex = this.at;
@@ -2760,41 +2802,13 @@ var ContentParser$1 = cellx.Utils.createClass({
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	},
 	readValueKeypath: function readValueKeypath() {
-		if (this.content.slice(this.at, this.at + 4) != 'this') {
-			return NOT_VALUE_AND_NOT_KEYPATH;
+		reKeypathOrEmpty.lastIndex = this.at;
+		var keypath = reKeypathOrEmpty.exec(this.content)[0];
+
+		if (keypath) {
+			this.chr = this.content.charAt(this.at += keypath.length);
+			return keypathToJSExpression(keypath);
 		}
-
-		var keypathAt = this.at;
-
-		this.chr = this.content.charAt(this.at += 4);
-
-		for (;;) {
-			if (this.chr == '.') {
-				this.next();
-
-				reNameOrEmpty.lastIndex = this.at;
-				var name = reNameOrEmpty.exec(this.content)[0];
-
-				if (!name) {
-					break;
-				}
-
-				this.chr = this.content.charAt(this.at += name.length);
-			} else if (this.chr == '[') {
-				this.next();
-
-				if ((this.chr == "'" || this.chr == '"' ? this.readString() === NOT_VALUE_AND_NOT_KEYPATH : this.readNumber() === NOT_VALUE_AND_NOT_KEYPATH && this.readValueKeypath() === NOT_VALUE_AND_NOT_KEYPATH) || this.chr != ']') {
-					break;
-				}
-
-				this.next();
-			} else {
-				return this.content.slice(keypathAt, this.at);
-			}
-		}
-
-		this.at = keypathAt;
-		this.chr = this.content.charAt(keypathAt);
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	},
@@ -2821,37 +2835,30 @@ var ContentParser$1 = cellx.Utils.createClass({
 	}
 });
 
-var cache$3 = Object.create(null);
+var cache$4 = Object.create(null);
 
 function formattersReducer(jsExpr, formatter) {
 	var args = formatter.arguments;
 
-	return '(this[\'' + formatter.name + '\'] || formatters[\'' + formatter.name + '\']).call(this, ' + jsExpr + (args && args.value.length ? ', ' + args.raw.slice(1, -1) : '') + ')';
+	return '(this[\'' + formatter.name + '\'] || formatters[\'' + formatter.name + '\']).call(this, ' + jsExpr + (args && args.value.length ? ', ' + args.value.join(', ') : '') + ')';
 }
 
 function bindingToJSExpression(binding /*: Object*/) /*: { value: string, usesFormatters: boolean }*/ {
 	var bindingRaw = binding.raw;
 
-	if (cache$3[bindingRaw]) {
-		return cache$3[bindingRaw];
+	if (cache$4[bindingRaw]) {
+		return cache$4[bindingRaw];
 	}
 
 	var keypath = binding.keypath.value.split('?');
-	var formatters = binding.formatters;
-
 	var keypathLen = keypath.length;
+	var formatters = binding.formatters;
+	var usesFormatters = !!formatters.length;
 
 	if (keypathLen == 1) {
-		if (formatters.length) {
-			return cache$3[bindingRaw] = {
-				value: formatters.reduce(formattersReducer, 'this.' + keypath[0]),
-				usesFormatters: true
-			};
-		}
-
-		return cache$3[bindingRaw] = {
-			value: 'this.' + keypath[0],
-			usesFormatters: false
+		return cache$4[bindingRaw] = {
+			value: usesFormatters ? formatters.reduce(formattersReducer, 'this.' + keypath[0]) : 'this.' + keypath[0],
+			usesFormatters: usesFormatters
 		};
 	}
 
@@ -2862,21 +2869,19 @@ function bindingToJSExpression(binding /*: Object*/) /*: { value: string, usesFo
 		jsExpr[--index] = ' && (temp = temp' + keypath[index + 1] + ')';
 	}
 
-	var usesFormatters = !!formatters.length;
-
-	return cache$3[bindingRaw] = {
+	return cache$4[bindingRaw] = {
 		value: '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && ' + (usesFormatters ? formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1]) : 'temp' + keypath[keypathLen - 1]),
 		usesFormatters: usesFormatters
 	};
 }
 
-var cache$4 = Object.create(null);
+var cache$5 = Object.create(null);
 
 function compileBinding(binding /*: Object*/) /*: Function*/ {
 	var bindingRaw = binding.raw;
 
-	if (cache$4[bindingRaw]) {
-		return cache$4[bindingRaw];
+	if (cache$5[bindingRaw]) {
+		return cache$5[bindingRaw];
 	}
 
 	var bindingJSExpr = bindingToJSExpression(binding);
@@ -2887,7 +2892,7 @@ function compileBinding(binding /*: Object*/) /*: Function*/ {
 			var inner = Function('formatters', jsExpr);
 
 			return {
-				v: cache$4[bindingRaw] = function () {
+				v: cache$5[bindingRaw] = function () {
 					return inner.call(this, formatters);
 				}
 			};
@@ -2896,21 +2901,21 @@ function compileBinding(binding /*: Object*/) /*: Function*/ {
 		if (typeof _ret === "object") return _ret.v;
 	}
 
-	return cache$4[bindingRaw] = Function(jsExpr);
+	return cache$5[bindingRaw] = Function(jsExpr);
 }
 
-var cache$2 = Object.create(null);
+var cache$3 = Object.create(null);
 
 function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/) /*: Function*/ {
-	if (cache$2[content]) {
-		return cache$2[content];
+	if (cache$3[content]) {
+		return cache$3[content];
 	}
 
 	if (parsedContent.length == 1) {
 		var node = parsedContent[0];
 
 		if (node.type == ContentNodeType.BINDING) {
-			return cache$2[content] = compileBinding(node);
+			return cache$3[content] = compileBinding(node);
 		}
 	}
 
@@ -2940,7 +2945,7 @@ function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/)
 			var inner = Function('formatters', jsExpr);
 
 			return {
-				v: cache$2[content] = function () {
+				v: cache$3[content] = function () {
 					return inner.call(this, formatters);
 				}
 			};
@@ -2949,7 +2954,7 @@ function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/)
 		if (typeof _ret === "object") return _ret.v;
 	}
 
-	return cache$2[content] = Function(jsExpr);
+	return cache$3[content] = Function(jsExpr);
 }
 
 function setAttribute(el /*: HTMLElement*/, name /*: string*/, value /*: any*/) /*: void*/ {
