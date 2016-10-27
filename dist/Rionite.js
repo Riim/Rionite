@@ -986,11 +986,11 @@ function keypathToJSExpression(keypath) {
 	return cache$2[keypath] = '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && temp' + keypath[keypath.length - 1];
 }
 
-var reNameOrEmpty = RegExp(namePattern + '|', 'g');
-var reKeypathOrEmpty = RegExp(keypathPattern$1 + '|', 'g');
-var reBooleanOrEmpty = /false|true|/g;
-var reNumberOrEmpty = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
-var reVacuumOrEmpty = /null|undefined|void 0|/g;
+var reNameOrNothing = RegExp(namePattern + '|', 'g');
+var reKeypathOrNothing = RegExp(keypathPattern$1 + '|', 'g');
+var reBooleanOrNothing = /false|true|/g;
+var reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+var reVacuumOrNothing = /null|undefined|void 0|/g;
 
 var NOT_VALUE_AND_NOT_KEYPATH = {};
 
@@ -1075,8 +1075,8 @@ var ContentParser$1 = cellx.Utils.createClass({
 		return null;
 	},
 	readBindingKeypath: function readBindingKeypath() {
-		reKeypathOrEmpty.lastIndex = this.at;
-		var keypath = reKeypathOrEmpty.exec(this.content)[0];
+		reKeypathOrNothing.lastIndex = this.at;
+		var keypath = reKeypathOrNothing.exec(this.content)[0];
 
 		if (keypath) {
 			var keypathAt = this.at;
@@ -1099,8 +1099,8 @@ var ContentParser$1 = cellx.Utils.createClass({
 		this.next('|');
 		this.skipWhitespaces();
 
-		reNameOrEmpty.lastIndex = this.at;
-		var name = reNameOrEmpty.exec(this.content)[0];
+		reNameOrNothing.lastIndex = this.at;
+		var name = reNameOrNothing.exec(this.content)[0];
 
 		if (name) {
 			var args = (this.chr = this.content.charAt(this.at += name.length)) == '(' ? this.readFormatterArguments() : null;
@@ -1231,8 +1231,8 @@ var ContentParser$1 = cellx.Utils.createClass({
 		return obj;
 	},
 	readObjectKey: function readObjectKey() {
-		reNameOrEmpty.lastIndex = this.at;
-		var key = reNameOrEmpty.exec(this.content)[0];
+		reNameOrNothing.lastIndex = this.at;
+		var key = reNameOrNothing.exec(this.content)[0];
 
 		if (key) {
 			this.chr = this.content.charAt(this.at += key.length);
@@ -1271,8 +1271,8 @@ var ContentParser$1 = cellx.Utils.createClass({
 		return arr + ']';
 	},
 	readBoolean: function readBoolean() {
-		reBooleanOrEmpty.lastIndex = this.at;
-		var bool = reBooleanOrEmpty.exec(this.content)[0];
+		reBooleanOrNothing.lastIndex = this.at;
+		var bool = reBooleanOrNothing.exec(this.content)[0];
 
 		if (bool) {
 			this.chr = this.content.charAt(this.at += bool.length);
@@ -1282,8 +1282,8 @@ var ContentParser$1 = cellx.Utils.createClass({
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	},
 	readNumber: function readNumber() {
-		reNumberOrEmpty.lastIndex = this.at;
-		var num = reNumberOrEmpty.exec(this.content)[0];
+		reNumberOrNothing.lastIndex = this.at;
+		var num = reNumberOrNothing.exec(this.content)[0];
 
 		if (num) {
 			this.chr = this.content.charAt(this.at += num.length);
@@ -1330,8 +1330,8 @@ var ContentParser$1 = cellx.Utils.createClass({
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	},
 	readVacuum: function readVacuum() {
-		reVacuumOrEmpty.lastIndex = this.at;
-		var vacuum = reVacuumOrEmpty.exec(this.content)[0];
+		reVacuumOrNothing.lastIndex = this.at;
+		var vacuum = reVacuumOrNothing.exec(this.content)[0];
 
 		if (vacuum) {
 			this.chr = this.content.charAt(this.at += vacuum.length);
@@ -1341,8 +1341,8 @@ var ContentParser$1 = cellx.Utils.createClass({
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	},
 	readValueKeypath: function readValueKeypath() {
-		reKeypathOrEmpty.lastIndex = this.at;
-		var keypath = reKeypathOrEmpty.exec(this.content)[0];
+		reKeypathOrNothing.lastIndex = this.at;
+		var keypath = reKeypathOrNothing.exec(this.content)[0];
 
 		if (keypath) {
 			this.chr = this.content.charAt(this.at += keypath.length);

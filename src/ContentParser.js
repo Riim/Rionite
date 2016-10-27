@@ -4,12 +4,12 @@ import keypathPattern from './keypathPattern';
 import keypathToJSExpression from './keypathToJSExpression';
 import ContentNodeType from './ContentNodeType';
 
-let reNameOrEmpty = RegExp(namePattern + '|', 'g');
-let reKeypathOrEmpty = RegExp(keypathPattern + '|', 'g');
-let reBooleanOrEmpty = /false|true|/g;
-let reNumberOrEmpty =
+let reNameOrNothing = RegExp(namePattern + '|', 'g');
+let reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
+let reBooleanOrNothing = /false|true|/g;
+let reNumberOrNothing =
 	/(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
-let reVacuumOrEmpty = /null|undefined|void 0|/g;
+let reVacuumOrNothing = /null|undefined|void 0|/g;
 
 let NOT_VALUE_AND_NOT_KEYPATH = {};
 
@@ -97,8 +97,8 @@ export default Utils.createClass({
 	},
 
 	readBindingKeypath() {
-		reKeypathOrEmpty.lastIndex = this.at;
-		let keypath = reKeypathOrEmpty.exec(this.content)[0];
+		reKeypathOrNothing.lastIndex = this.at;
+		let keypath = reKeypathOrNothing.exec(this.content)[0];
 
 		if (keypath) {
 			let keypathAt = this.at;
@@ -122,8 +122,8 @@ export default Utils.createClass({
 		this.next('|');
 		this.skipWhitespaces();
 
-		reNameOrEmpty.lastIndex = this.at;
-		let name = reNameOrEmpty.exec(this.content)[0];
+		reNameOrNothing.lastIndex = this.at;
+		let name = reNameOrNothing.exec(this.content)[0];
 
 		if (name) {
 			let args = (this.chr = this.content.charAt((this.at += name.length))) == '(' ?
@@ -258,8 +258,8 @@ export default Utils.createClass({
 	},
 
 	readObjectKey() {
-		reNameOrEmpty.lastIndex = this.at;
-		let key = reNameOrEmpty.exec(this.content)[0];
+		reNameOrNothing.lastIndex = this.at;
+		let key = reNameOrNothing.exec(this.content)[0];
 
 		if (key) {
 			this.chr = this.content.charAt((this.at += key.length));
@@ -300,8 +300,8 @@ export default Utils.createClass({
 	},
 
 	readBoolean() {
-		reBooleanOrEmpty.lastIndex = this.at;
-		let bool = reBooleanOrEmpty.exec(this.content)[0];
+		reBooleanOrNothing.lastIndex = this.at;
+		let bool = reBooleanOrNothing.exec(this.content)[0];
 
 		if (bool) {
 			this.chr = this.content.charAt((this.at += bool.length));
@@ -312,8 +312,8 @@ export default Utils.createClass({
 	},
 
 	readNumber() {
-		reNumberOrEmpty.lastIndex = this.at;
-		let num = reNumberOrEmpty.exec(this.content)[0];
+		reNumberOrNothing.lastIndex = this.at;
+		let num = reNumberOrNothing.exec(this.content)[0];
 
 		if (num) {
 			this.chr = this.content.charAt((this.at += num.length));
@@ -362,8 +362,8 @@ export default Utils.createClass({
 	},
 
 	readVacuum() {
-		reVacuumOrEmpty.lastIndex = this.at;
-		let vacuum = reVacuumOrEmpty.exec(this.content)[0];
+		reVacuumOrNothing.lastIndex = this.at;
+		let vacuum = reVacuumOrNothing.exec(this.content)[0];
 
 		if (vacuum) {
 			this.chr = this.content.charAt((this.at += vacuum.length));
@@ -374,8 +374,8 @@ export default Utils.createClass({
 	},
 
 	readValueKeypath() {
-		reKeypathOrEmpty.lastIndex = this.at;
-		let keypath = reKeypathOrEmpty.exec(this.content)[0];
+		reKeypathOrNothing.lastIndex = this.at;
+		let keypath = reKeypathOrNothing.exec(this.content)[0];
 
 		if (keypath) {
 			this.chr = this.content.charAt((this.at += keypath.length));
