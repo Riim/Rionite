@@ -42,7 +42,7 @@ let ElementProtoMixin = {
 						component.isElementAttached = true;
 						component._attachElement();
 					}
-				} 
+				}
 			}, this);
 		}
 	},

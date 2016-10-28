@@ -82,18 +82,30 @@ let ElementAttributes = EventEmitter.extend({
 					}
 				};
 			} else {
-				let value = this['_' + camelizedName] = this['_' + hyphenizedName] = new Cell(
+				let oldValue;
+				let value;
+				let isReady;
+
+				let rawValue = this['_' + camelizedName] = this['_' + hyphenizedName] = new Cell(
 					el.getAttribute(hyphenizedName),
 					{
-						merge(value, oldValue) {
-							return oldValue && value === oldValue[0] ?
-								oldValue :
-								[value, handlers[0](value, defaultValue)];
+						merge(v, ov) {
+							if (v !== ov) {
+								oldValue = value;
+								value = handlers[0](v, defaultValue);
+							}
+
+							isReady = component.isReady;
+
+							return v;
 						},
 
 						onChange(evt) {
-							if (component.isReady) {
-								component.elementAttributeChanged(hyphenizedName, evt.oldValue[1], evt.value[1]);
+							evt.oldValue = oldValue;
+							evt.value = value;
+
+							if (isReady) {
+								component.elementAttributeChanged(hyphenizedName, oldValue, value);
 							}
 						}
 					}
@@ -104,7 +116,7 @@ let ElementAttributes = EventEmitter.extend({
 					enumerable: true,
 
 					get() {
-						return value.get()[1];
+						return value;
 					},
 
 					set(v) {
@@ -116,7 +128,7 @@ let ElementAttributes = EventEmitter.extend({
 							el.setAttribute(hyphenizedName, v);
 						}
 
-						value.set(v);
+						rawValue.set(v);
 					}
 				};
 			}

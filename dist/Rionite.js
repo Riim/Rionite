@@ -586,13 +586,27 @@ var ElementAttributes = cellx.EventEmitter.extend({
 				})();
 			} else {
 				(function () {
-					var value = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new cellx.Cell(el.getAttribute(hyphenizedName), {
-						merge: function merge(value, oldValue) {
-							return oldValue && value === oldValue[0] ? oldValue : [value, handlers[0](value, defaultValue)];
+					var oldValue = void 0;
+					var value = void 0;
+					var isReady = void 0;
+
+					var rawValue = _this['_' + camelizedName] = _this['_' + hyphenizedName] = new cellx.Cell(el.getAttribute(hyphenizedName), {
+						merge: function merge(v, ov) {
+							if (v !== ov) {
+								oldValue = value;
+								value = handlers[0](v, defaultValue);
+							}
+
+							isReady = component.isReady;
+
+							return v;
 						},
 						onChange: function onChange(evt) {
-							if (component.isReady) {
-								component.elementAttributeChanged(hyphenizedName, evt.oldValue[1], evt.value[1]);
+							evt.oldValue = oldValue;
+							evt.value = value;
+
+							if (isReady) {
+								component.elementAttributeChanged(hyphenizedName, oldValue, value);
 							}
 						}
 					});
@@ -602,7 +616,7 @@ var ElementAttributes = cellx.EventEmitter.extend({
 						enumerable: true,
 
 						get: function get() {
-							return value.get()[1];
+							return value;
 						},
 						set: function set(v) {
 							v = handlers[1](v, defaultValue);
@@ -613,7 +627,7 @@ var ElementAttributes = cellx.EventEmitter.extend({
 								el.setAttribute(hyphenizedName, v);
 							}
 
-							value.set(v);
+							rawValue.set(v);
 						}
 					};
 				})();
