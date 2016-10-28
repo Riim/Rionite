@@ -298,8 +298,14 @@ let Component = EventEmitter.extend({
 	 *     useCache?: boolean,
 	 *     all?: boolean
 	 * }) -> ?Rionite.Component|HTMLElement;
+	 *
+	 * @typesign (name: string, useCache?: boolean) -> ?Rionite.Component|HTMLElement;
 	 */
 	$(name, opts) {
+		if (typeof opts == 'boolean') {
+			opts = { useCache: opts };
+		}
+
 		let useCache = !opts || opts.useCache !== false;
 		let all = opts && opts.all;
 
@@ -351,8 +357,14 @@ let Component = EventEmitter.extend({
 	 *     container?: Rionite.Component|HTMLElement,
 	 *     useCache?: boolean
 	 * }) -> Array<Rionite.Component|HTMLElement>;
+	 *
+	 * @typesign (name: string, useCache?: boolean) -> Array<Rionite.Component|HTMLElement>;
 	 */
 	$$(name, opts) {
+		if (typeof opts == 'boolean') {
+			opts = { useCache: opts };
+		}
+
 		return map.call(this.$(name, { __proto__: opts, all: true }), el => el.$c || el);
 	}
 });

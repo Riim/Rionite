@@ -2000,8 +2000,14 @@ var Component = cellx.EventEmitter.extend({
   *     useCache?: boolean,
   *     all?: boolean
   * }) -> ?Rionite.Component|HTMLElement;
+  *
+  * @typesign (name: string, useCache?: boolean) -> ?Rionite.Component|HTMLElement;
   */
 	$: function $(name, opts) {
+		if (typeof opts == 'boolean') {
+			opts = { useCache: opts };
+		}
+
 		var useCache = !opts || opts.useCache !== false;
 		var all = opts && opts.all;
 
@@ -2052,8 +2058,14 @@ var Component = cellx.EventEmitter.extend({
   *     container?: Rionite.Component|HTMLElement,
   *     useCache?: boolean
   * }) -> Array<Rionite.Component|HTMLElement>;
+  *
+  * @typesign (name: string, useCache?: boolean) -> Array<Rionite.Component|HTMLElement>;
   */
 	$$: function $$(name, opts) {
+		if (typeof opts == 'boolean') {
+			opts = { useCache: opts };
+		}
+
 		return map.call(this.$(name, { __proto__: opts, all: true }), function (el) {
 			return el.$c || el;
 		});
