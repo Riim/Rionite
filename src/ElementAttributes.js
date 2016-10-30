@@ -116,6 +116,7 @@ let ElementAttributes = EventEmitter.extend({
 					enumerable: true,
 
 					get() {
+						rawValue.get();
 						return value;
 					},
 

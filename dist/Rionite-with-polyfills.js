@@ -2077,6 +2077,7 @@ var ElementAttributes = cellx.EventEmitter.extend({
 						enumerable: true,
 
 						get: function get() {
+							rawValue.get();
 							return value;
 						},
 						set: function set(v) {
