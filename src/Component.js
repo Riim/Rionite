@@ -120,7 +120,7 @@ let Component = EventEmitter.extend({
 
 	_bindings: null,
 
-	assets: null,
+	_assets: null,
 
 	isElementAttached: false,
 
@@ -309,7 +309,8 @@ let Component = EventEmitter.extend({
 		let useCache = !opts || opts.useCache !== false;
 		let all = opts && opts.all;
 
-		let asset = useCache && (this.assets || (this.assets = new Map())).get(all ? name + '*' : name);
+		let assets = this._assets || (this._assets = new Map());
+		let asset = useCache && assets.get(all ? name + '*' : name);
 
 		if (!asset) {
 			let container = opts && opts.container;
@@ -339,14 +340,14 @@ let Component = EventEmitter.extend({
 			}
 
 			if (all) {
-				this.assets.set(name + '*', els);
+				assets.set(name + '*', els);
 				return els;
 			}
 
 			let assetEl = els[0];
 
 			asset = assetEl ? assetEl.$c || assetEl : null;
-			this.assets.set(name, asset);
+			assets.set(name, asset);
 		}
 
 		return asset;

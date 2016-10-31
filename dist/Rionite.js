@@ -1838,7 +1838,7 @@ var Component = cellx.EventEmitter.extend({
 
 	_bindings: null,
 
-	assets: null,
+	_assets: null,
 
 	isElementAttached: false,
 
@@ -2026,7 +2026,8 @@ var Component = cellx.EventEmitter.extend({
 		var useCache = !opts || opts.useCache !== false;
 		var all = opts && opts.all;
 
-		var asset = useCache && (this.assets || (this.assets = new Map$2())).get(all ? name + '*' : name);
+		var assets = this._assets || (this._assets = new Map$2());
+		var asset = useCache && assets.get(all ? name + '*' : name);
 
 		if (!asset) {
 			var container = opts && opts.container;
@@ -2054,14 +2055,14 @@ var Component = cellx.EventEmitter.extend({
 			}
 
 			if (all) {
-				this.assets.set(name + '*', els);
+				assets.set(name + '*', els);
 				return els;
 			}
 
 			var assetEl = els[0];
 
 			asset = assetEl ? assetEl.$c || assetEl : null;
-			this.assets.set(name, asset);
+			assets.set(name, asset);
 		}
 
 		return asset;
