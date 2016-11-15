@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<script src="../node_modules/lodash/lodash.js"></script>
+<script src="../node_modules/platform/platform.js"></script>
+<script src="../node_modules/benchmark/benchmark.js"></script>
+<script>
+
+function Constr() {}
+
+let proto = {
+	__proto__: Function.prototype,
+	constructor: Constr,
+	method1: function() {},
+	method2: function() {},
+	method3: function() {},
+	method4: function() {},
+	method5: function() {},
+	method6: function() {},
+	method7: function() {},
+	method8: function() {},
+	method9: function() {},
+	method10: function() {},
+	method11: function() {},
+	method12: function() {},
+	method13: function() {},
+	method14: function() {},
+	method15: function() {},
+	method16: function() {}
+};
+
+function zero() {
+	function fn() {}
+	fn.constructor = Constr;
+	return fn;
+}
+
+function proto1() {
+	function fn() {}
+	fn.__proto__ = proto;
+	return fn;
+}
+
+function assign1() {
+	function fn() {}
+	Object.assign(fn, proto);
+	return fn;
+}
+
+function assign2() {
+	function fn() {}
+	for (let name in proto) {
+		fn[name] = proto[name];
+	}
+	return fn;
+}
+
+let suite = new Benchmark.Suite();
+
+suite
+	.add('zero', function() {
+		zero();
+	})
+	.add('proto1', function() {
+		proto1();
+	})
+	.add('assign1', function() {
+		assign1();
+	})
+	.add('assign2', function() {
+		assign2();
+	})
+	.on('cycle', function(evt) {
+		document.body.innerHTML += '<br>' + String(evt.target);
+	})
+	.run({ 'async': true });
+
+// zero x 32,268,957 ops/sec ±1.26% (58 runs sampled)
+// proto1 x 4,443,873 ops/sec ±1.01% (61 runs sampled)
+// assign1 x 233,372 ops/sec ±0.98% (59 runs sampled)
+// assign2 x 1,054,954 ops/sec ±1.22% (59 runs sampled)
+
+</script>
+
+</body>
+</html>

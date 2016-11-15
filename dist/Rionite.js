@@ -1738,6 +1738,7 @@ function created() {}
 function initialize() {}
 function ready() {}
 function elementAttached() {}
+function beforeElementDetach() {}
 function elementDetached() {}
 function elementMoved() {}
 function elementAttributeChanged() {}
@@ -1972,6 +1973,7 @@ var Component = cellx.EventEmitter.extend({
 		this.elementAttached();
 	},
 	_detachElement: function _detachElement() {
+		this.beforeElementDetach();
 		this.dispose();
 		this.elementDetached();
 	},
@@ -2003,6 +2005,7 @@ var Component = cellx.EventEmitter.extend({
 	initialize: initialize,
 	ready: ready,
 	elementAttached: elementAttached,
+	beforeElementDetach: beforeElementDetach,
 	elementDetached: elementDetached,
 	elementMoved: elementMoved,
 	elementAttributeChanged: elementAttributeChanged,
@@ -2230,9 +2233,9 @@ var RtIfThen = Component.extend('rt-if-then', {
 			})();
 		}
 
-		this._render(false);
-
 		this._if.on('change', this._onIfChange, this);
+
+		this._render(false);
 	},
 	_detachElement: function _detachElement() {
 		this._destroyBindings();
@@ -2389,9 +2392,9 @@ var RtRepeat = Component.extend('rt-repeat', {
 			this.initialized = true;
 		}
 
-		this._render(false);
-
 		this._list.on('change', this._onListChange, this);
+
+		this._render(false);
 	},
 	_detachElement: function _detachElement() {
 		this._clearWithItemMap(this._itemMap);

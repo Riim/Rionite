@@ -20,6 +20,7 @@ function created() {}
 function initialize() {}
 function ready() {}
 function elementAttached() {}
+function beforeElementDetach() {}
 function elementDetached() {}
 function elementMoved() {}
 function elementAttributeChanged() {}
@@ -256,6 +257,7 @@ let Component = EventEmitter.extend({
 	},
 
 	_detachElement() {
+		this.beforeElementDetach();
 		this.dispose();
 		this.elementDetached();
 	},
@@ -286,6 +288,7 @@ let Component = EventEmitter.extend({
 	initialize,
 	ready,
 	elementAttached,
+	beforeElementDetach,
 	elementDetached,
 	elementMoved,
 	elementAttributeChanged,

@@ -45,9 +45,9 @@ export default Component.extend('rt-if-then', {
 			this.initialized = true;
 		}
 
-		this._render(false);
-
 		this._if.on('change', this._onIfChange, this);
+
+		this._render(false);
 	},
 
 	_detachElement() {

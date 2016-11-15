@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
-;(function(window){'use strict';
+;(function(window, polyfill){'use strict';
 
   // DO NOT USE THIS FILE DIRECTLY, IT WON'T WORK
   // THIS IS A PROJECT BASED ON A BUILD SYSTEM
@@ -433,7 +433,12 @@ THE SOFTWARE.
   }));
   
   
-    var
+    
+  // passed at runtime, configurable
+  // via nodejs module
+  if (!polyfill) polyfill = 'auto';
+  
+  var
     // V0 polyfill entry
     REGISTER_ELEMENT = 'registerElement',
   
@@ -513,7 +518,7 @@ THE SOFTWARE.
     fixGetClass = false,
     DRECEV1 = '__dreCEv1',
     customElements = window.customElements,
-    usableCustomElements = !!(
+    usableCustomElements = polyfill !== 'force' && !!(
       customElements &&
       customElements.define &&
       customElements.get &&
@@ -954,7 +959,7 @@ THE SOFTWARE.
           };
         });
       }
-
+  
       if (-2 < (
         indexOf.call(types, PREFIX_IS + upperType) +
         indexOf.call(types, PREFIX_TAG + upperType)
@@ -1388,7 +1393,7 @@ THE SOFTWARE.
   }
   
   // if customElements is not there at all
-  if (!customElements) polyfillV1();
+  if (!customElements || polyfill === 'force') polyfillV1();
   else {
     // if available test extends work as expected
     try {
@@ -3199,6 +3204,7 @@ function created() {}
 function initialize() {}
 function ready() {}
 function elementAttached() {}
+function beforeElementDetach() {}
 function elementDetached() {}
 function elementMoved() {}
 function elementAttributeChanged() {}
@@ -3433,6 +3439,7 @@ var Component = cellx.EventEmitter.extend({
 		this.elementAttached();
 	},
 	_detachElement: function _detachElement() {
+		this.beforeElementDetach();
 		this.dispose();
 		this.elementDetached();
 	},
@@ -3464,6 +3471,7 @@ var Component = cellx.EventEmitter.extend({
 	initialize: initialize,
 	ready: ready,
 	elementAttached: elementAttached,
+	beforeElementDetach: beforeElementDetach,
 	elementDetached: elementDetached,
 	elementMoved: elementMoved,
 	elementAttributeChanged: elementAttributeChanged,
@@ -3691,9 +3699,9 @@ var RtIfThen = Component.extend('rt-if-then', {
 			})();
 		}
 
-		this._render(false);
-
 		this._if.on('change', this._onIfChange, this);
+
+		this._render(false);
 	},
 	_detachElement: function _detachElement() {
 		this._destroyBindings();
@@ -3850,9 +3858,9 @@ var RtRepeat = Component.extend('rt-repeat', {
 			this.initialized = true;
 		}
 
-		this._render(false);
-
 		this._list.on('change', this._onListChange, this);
+
+		this._render(false);
 	},
 	_detachElement: function _detachElement() {
 		this._clearWithItemMap(this._itemMap);

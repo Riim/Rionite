@@ -92,9 +92,9 @@ export default Component.extend('rt-repeat', {
 			this.initialized = true;
 		}
 
-		this._render(false);
-
 		this._list.on('change', this._onListChange, this);
+
+		this._render(false);
 	},
 
 	_detachElement() {
