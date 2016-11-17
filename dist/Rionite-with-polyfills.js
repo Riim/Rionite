@@ -1837,6 +1837,13 @@ formatters.not = function not(value) {
 	return !value;
 };
 
+formatters.or = function key(value, arg) {
+	return value || arg;
+};
+formatters.default = function key(value, arg) {
+	return value == null ? arg : value;
+};
+
 formatters.eq = function eq(value, arg) {
 	return value == arg;
 };
@@ -1865,7 +1872,6 @@ formatters.join = function join(arr) {
 
 formatters.t = getText.t;
 formatters.pt = getText.pt;
-
 formatters.nt = function nt(count, key) {
 	for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
 		args[_key - 2] = arguments[_key];
@@ -1874,7 +1880,6 @@ formatters.nt = function nt(count, key) {
 	args.unshift(count);
 	return getText('', key, true, args);
 };
-
 formatters.npt = function npt(count, key, context) {
 	for (var _len2 = arguments.length, args = Array(_len2 > 3 ? _len2 - 3 : 0), _key2 = 3; _key2 < _len2; _key2++) {
 		args[_key2 - 3] = arguments[_key2];
@@ -1882,6 +1887,14 @@ formatters.npt = function npt(count, key, context) {
 
 	args.unshift(count);
 	return getText(context, key, true, args);
+};
+
+formatters.key = function key(obj, key) {
+	return obj && obj[key];
+};
+
+formatters.json = function json(value) {
+	return JSON.stringify(value);
 };
 
 var reEscapableChars = /[&<>"]/g;
