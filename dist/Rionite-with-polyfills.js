@@ -1465,9 +1465,9 @@ THE SOFTWARE.
 })(document);
 
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('cellx')) :
-	typeof define === 'function' && define.amd ? define(['cellx'], factory) :
-	(global.Rionite = global.rionite = factory(global.cellx));
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('cellx')) :
+    typeof define === 'function' && define.amd ? define(['cellx'], factory) :
+    (global.Rionite = global.rionite = factory(global.cellx));
 }(this, (function (cellx) { 'use strict';
 
 var nextUID = cellx.Utils.nextUID;
@@ -1733,102 +1733,83 @@ var hasOwn = Object.prototype.hasOwnProperty;
 var toString = Object.prototype.toString;
 
 var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
-
-var texts = void 0;
-var getPluralIndex = void 0;
-
-function getText(context /*: string*/, key /*: string*/, plural /*: boolean*/, args /*: Array<string>*/) /*: string*/ {
-	var rawText = void 0;
-
-	if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
-		rawText = texts[context][key];
-
-		if (plural) {
-			rawText = rawText[getPluralIndex(args[0])];
-		}
-	} else {
-		rawText = key;
-	}
-
-	var data = Object.create(null);
-
-	for (var i = args.length; i;) {
-		data[i] = args[--i];
-	}
-
-	if (plural) {
-		data.n = args[0];
-	}
-
-	var text = [];
-
-	rawText = rawText.split(reInsert);
-
-	for (var _i = 0, l = rawText.length; _i < l;) {
-		if (_i % 3) {
-			text.push(rawText[_i + 1] ? rawText[_i + 1].split('|')[getPluralIndex(data[rawText[_i]])] : data[rawText[_i]]);
-			_i += 2;
-		} else {
-			text.push(rawText[_i]);
-			_i++;
-		}
-	}
-
-	return text.join('');
-}
-
+var texts;
+var getPluralIndex;
+var getText = function getText(context, key, plural, args) {
+    var rawText;
+    if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
+        rawText = (plural ? texts[context][key][getPluralIndex(+args[0])] : texts[context][key]);
+    }
+    else {
+        rawText = key;
+    }
+    var data = Object.create(null);
+    for (var i = args.length; i;) {
+        data[i] = args[--i];
+    }
+    if (plural) {
+        data.n = args[0];
+    }
+    var splittedRawText = rawText.split(reInsert);
+    var text = [];
+    for (var i = 0, l = splittedRawText.length; i < l;) {
+        if (i % 3) {
+            text.push(splittedRawText[i + 1] ?
+                splittedRawText[i + 1].split('|')[getPluralIndex(data[splittedRawText[i]])] :
+                data[splittedRawText[i]]);
+            i += 2;
+        }
+        else {
+            text.push(splittedRawText[i]);
+            i++;
+        }
+    }
+    return text.join('');
+};
 function configure(config) {
-	texts = config.texts;
-	getPluralIndex = Function('n', 'return ' + config.localeSettings.plural + ';');
-
-	getText.localeSettings = config.localeSettings;
+    texts = config.texts;
+    getPluralIndex = Function('n', "return " + config.localeSettings.plural + ";");
+    getText.localeSettings = config.localeSettings;
 }
-
 function t(key) {
-	for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-		args[_key - 1] = arguments[_key];
-	}
-
-	return getText('', key, false, args);
+    var args = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
+    return getText('', key, false, args);
 }
-
 function pt(key, context) {
-	for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {
-		args[_key2 - 2] = arguments[_key2];
-	}
-
-	return getText(context, key, false, args);
+    var args = [];
+    for (var _i = 2; _i < arguments.length; _i++) {
+        args[_i - 2] = arguments[_i];
+    }
+    return getText(context, key, false, args);
 }
-
 function nt$1(key) {
-	for (var _len3 = arguments.length, args = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-		args[_key3 - 1] = arguments[_key3];
-	}
-
-	return getText('', key, true, args);
+    var args = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
+    return getText('', key, true, args);
 }
-
 function npt$1(key, context) {
-	for (var _len4 = arguments.length, args = Array(_len4 > 2 ? _len4 - 2 : 0), _key4 = 2; _key4 < _len4; _key4++) {
-		args[_key4 - 2] = arguments[_key4];
-	}
-
-	return getText(context, key, true, args);
+    var args = [];
+    for (var _i = 2; _i < arguments.length; _i++) {
+        args[_i - 2] = arguments[_i];
+    }
+    return getText(context, key, true, args);
 }
-
 getText.configure = configure;
 getText.t = t;
 getText.pt = pt;
 getText.nt = nt$1;
 getText.npt = npt$1;
-
 configure({
-	localeSettings: {
-		code: 'ru',
-		plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
-	},
-
-	texts: {}
+    localeSettings: {
+        code: 'ru',
+        plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
+    },
+    texts: {}
 });
 
 var formatters = Object.create(null);
@@ -1899,34 +1880,26 @@ formatters.json = function json(value) {
 
 var reEscapableChars = /[&<>"]/g;
 var charToEntityMap = Object.create(null);
-
 charToEntityMap['&'] = '&amp;';
 charToEntityMap['<'] = '&lt;';
 charToEntityMap['>'] = '&gt;';
 charToEntityMap['"'] = '&quot;';
-
-function escapeHTML(str /*: string*/) /*: string*/ {
-	return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) {
-		return charToEntityMap[chr];
-	}) : str;
+function escapeHTML(str) {
+    return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) { return charToEntityMap[chr]; }) : str;
 }
 
 var reEscapableEntities = /&(?:amp|lt|gt|quot);/g;
 var entityToCharMap = Object.create(null);
-
 entityToCharMap['&amp;'] = '&';
 entityToCharMap['&lt;'] = '<';
 entityToCharMap['&gt;'] = '>';
 entityToCharMap['&quot;'] = '"';
-
-function unescapeHTML(str /*: string*/) /*: string*/ {
-	return reEscapableEntities.test(str) ? str.replace(reEscapableEntities, function (entity) {
-		return entityToCharMap[entity];
-	}) : str;
+function unescapeHTML(str) {
+    return reEscapableEntities.test(str) ? str.replace(reEscapableEntities, function (entity) { return entityToCharMap[entity]; }) : str;
 }
 
-function isRegExp(value /*: any*/) /*: boolean*/ {
-	return toString.call(value) == '[object RegExp]';
+function isRegExp(value) {
+    return toString.call(value) == '[object RegExp]';
 }
 
 var Map$1 = cellx.JS.Map;
@@ -1966,27 +1939,23 @@ var attributeTypeHandlerMap = new Map$1([[Boolean, [function (value) {
 }]]]);
 
 var reHyphen = /[-_]+([a-z]|$)/g;
-
 var cache = Object.create(null);
-
-function camelize(str /*: string*/) /*: string*/ {
-	return cache[str] || (cache[str] = str.replace(reHyphen, function (match, chr) {
-		return chr.toUpperCase();
-	}));
+function camelize(str) {
+    return cache[str] || (cache[str] = str.replace(reHyphen, function (match, chr) {
+        return chr.toUpperCase();
+    }));
 }
 
 var reHump = /-?([A-Z])([^A-Z])/g;
 var reLongHump = /-?([A-Z]+)/g;
 var reMinus = /^-/;
-
 var cache$1 = Object.create(null);
-
-function hyphenize(str /*: string*/) /*: string*/ {
-	return cache$1[str] || (cache$1[str] = str.replace(reHump, function (match, chr1, chr2) {
-		return '-' + chr1.toLowerCase() + chr2;
-	}).replace(reLongHump, function (match, chars) {
-		return '-' + chars.toLowerCase();
-	}).replace(reMinus, ''));
+function hyphenize(str) {
+    return cache$1[str] || (cache$1[str] = str.replace(reHump, function (match, alphaChar, notAlphaChar) {
+        return '-' + alphaChar.toLowerCase() + notAlphaChar;
+    }).replace(reLongHump, function (match, chars) {
+        return '-' + chars.toLowerCase();
+    }).replace(reMinus, ''));
 }
 
 var Map = cellx.JS.Map;
@@ -2130,16 +2099,12 @@ var namePattern = '[$_a-zA-Z][$\\w]*';
 
 var reEscapableChars$1 = /[\\'\r\n]/g;
 var charToSpecialMap = Object.create(null);
-
 charToSpecialMap['\\'] = '\\\\';
 charToSpecialMap['\''] = '\\\'';
 charToSpecialMap['\r'] = '\\r';
 charToSpecialMap['\n'] = '\\n';
-
-function escapeString(str /*: string*/) /*: string*/ {
-	return reEscapableChars$1.test(str) ? str.replace(reEscapableChars$1, function (chr) {
-		return charToSpecialMap[chr];
-	}) : str;
+function escapeString(str) {
+    return reEscapableChars$1.test(str) ? str.replace(reEscapableChars$1, function (chr) { return charToSpecialMap[chr]; }) : str;
 }
 
 var keypathPattern = '(?:' + namePattern + '|\\[\\d+\\])(?:(?:\\.' + namePattern + '|\\[\\d+\\]))*';
@@ -2212,76 +2177,72 @@ ComponentTemplate.prototype.render = function (data) {
 };
 
 var mixin$1 = cellx.Utils.mixin;
-
 var elementConstructorMap = mixin$1(Object.create(null), {
-	a: window.HTMLAnchorElement,
-	blockquote: window.HTMLQuoteElement,
-	br: window.HTMLBRElement,
-	caption: window.HTMLTableCaptionElement,
-	col: window.HTMLTableColElement,
-	colgroup: window.HTMLTableColElement,
-	datalist: window.HTMLDataListElement,
-	del: window.HTMLModElement,
-	dir: window.HTMLDirectoryElement,
-	dl: window.HTMLDListElement,
-	document: window.HTMLDocument,
-	element: Element,
-	fieldset: window.HTMLFieldSetElement,
-	frameset: window.HTMLFrameSetElement,
-	h1: window.HTMLHeadingElement,
-	h2: window.HTMLHeadingElement,
-	h3: window.HTMLHeadingElement,
-	h4: window.HTMLHeadingElement,
-	h5: window.HTMLHeadingElement,
-	h6: window.HTMLHeadingElement,
-	hr: window.HTMLHRElement,
-	iframe: window.HTMLIFrameElement,
-	img: window.HTMLImageElement,
-	ins: window.HTMLModElement,
-	li: window.HTMLLIElement,
-	menuitem: window.HTMLMenuItemElement,
-	ol: window.HTMLOListElement,
-	optgroup: window.HTMLOptGroupElement,
-	p: window.HTMLParagraphElement,
-	q: window.HTMLQuoteElement,
-	tbody: window.HTMLTableSectionElement,
-	td: window.HTMLTableCellElement,
-	template: window.HTMLTemplateElement || HTMLElement,
-	textarea: window.HTMLTextAreaElement,
-	tfoot: window.HTMLTableSectionElement,
-	th: window.HTMLTableCellElement,
-	thead: window.HTMLTableSectionElement,
-	tr: window.HTMLTableRowElement,
-	ul: window.HTMLUListElement,
-	vhgroupv: window.HTMLUnknownElement,
-	vkeygen: window.HTMLUnknownElement
+    a: window.HTMLAnchorElement,
+    blockquote: window.HTMLQuoteElement,
+    br: window.HTMLBRElement,
+    caption: window.HTMLTableCaptionElement,
+    col: window.HTMLTableColElement,
+    colgroup: window.HTMLTableColElement,
+    datalist: window.HTMLDataListElement,
+    del: window.HTMLModElement,
+    dir: window.HTMLDirectoryElement,
+    dl: window.HTMLDListElement,
+    document: window.HTMLDocument,
+    element: Element,
+    fieldset: window.HTMLFieldSetElement,
+    frameset: window.HTMLFrameSetElement,
+    h1: window.HTMLHeadingElement,
+    h2: window.HTMLHeadingElement,
+    h3: window.HTMLHeadingElement,
+    h4: window.HTMLHeadingElement,
+    h5: window.HTMLHeadingElement,
+    h6: window.HTMLHeadingElement,
+    hr: window.HTMLHRElement,
+    iframe: window.HTMLIFrameElement,
+    img: window.HTMLImageElement,
+    ins: window.HTMLModElement,
+    li: window.HTMLLIElement,
+    menuitem: window.HTMLMenuItemElement,
+    ol: window.HTMLOListElement,
+    optgroup: window.HTMLOptGroupElement,
+    p: window.HTMLParagraphElement,
+    q: window.HTMLQuoteElement,
+    tbody: window.HTMLTableSectionElement,
+    td: window.HTMLTableCellElement,
+    template: window.HTMLTemplateElement || HTMLElement,
+    textarea: window.HTMLTextAreaElement,
+    tfoot: window.HTMLTableSectionElement,
+    th: window.HTMLTableCellElement,
+    thead: window.HTMLTableSectionElement,
+    tr: window.HTMLTableRowElement,
+    ul: window.HTMLUListElement,
+    vhgroupv: window.HTMLUnknownElement,
+    vkeygen: window.HTMLUnknownElement
 });
 
-var queue = void 0;
-
-function run() /*: void*/ {
-	var track = queue;
-
-	queue = null;
-
-	for (var i = 0, l = track.length; i < l; i++) {
-		var item = track[i];
-
-		try {
-			item.callback.call(item.context);
-		} catch (err) {
-			cellx.ErrorLogger.log(err);
-		}
-	}
+var queue;
+function run() {
+    var track = queue;
+    queue = null;
+    for (var _i = 0, track_1 = track; _i < track_1.length; _i++) {
+        var item = track_1[_i];
+        try {
+            item.callback.call(item.context);
+        }
+        catch (err) {
+            cellx.ErrorLogger.log(err);
+        }
+    }
 }
-
-function defer(cb /*: Function*/, context /*:: ?*/) /*: void*/ {
-	if (queue) {
-		queue.push({ callback: cb, context: context });
-	} else {
-		queue = [{ callback: cb, context: context }];
-		setTimeout(run, 1);
-	}
+function defer(cb, context) {
+    if (queue) {
+        queue.push({ callback: cb, context: context });
+    }
+    else {
+        queue = [{ callback: cb, context: context }];
+        setTimeout(run, 1);
+    }
 }
 
 var _ElementProtoMixin;
@@ -2445,39 +2406,35 @@ function initAttributes(component, constr) {
 	}
 }
 
-var ContentNodeType = {
-	TEXT: 0,
-	BINDING: 1,
-	BINDING_KEYPATH: 2,
-	BINDING_FORMATTER: 3,
-	BINDING_FORMATTER_ARGUMENTS: 4
-};
+var ContentNodeType;
+(function (ContentNodeType) {
+    ContentNodeType[ContentNodeType["TEXT"] = 0] = "TEXT";
+    ContentNodeType[ContentNodeType["BINDING"] = 1] = "BINDING";
+    ContentNodeType[ContentNodeType["BINDING_KEYPATH"] = 2] = "BINDING_KEYPATH";
+    ContentNodeType[ContentNodeType["BINDING_FORMATTER"] = 3] = "BINDING_FORMATTER";
+    ContentNodeType[ContentNodeType["BINDING_FORMATTER_ARGUMENTS"] = 4] = "BINDING_FORMATTER_ARGUMENTS";
+})(ContentNodeType || (ContentNodeType = {}));
 
-var keypathPattern$1 = '(?:' + namePattern + '|\\[\\d+\\])(?:\\??(?:\\.' + namePattern + '|\\[\\d+\\]))*';
+var ContentNodeType$1 = ContentNodeType;
+
+var keypathPattern$1 = "(?:" + namePattern + "|\\[\\d+\\])(?:\\??(?:\\." + namePattern + "|\\[\\d+\\]))*";
 
 var cache$2 = Object.create(null);
-
 function keypathToJSExpression(keypath) {
-	if (cache$2[keypath]) {
-		return cache$2[keypath];
-	}
-
-	keypath = keypath.split('?');
-
-	var keypathLen = keypath.length;
-
-	if (keypathLen == 1) {
-		return cache$2[keypath] = 'this.' + keypath[0];
-	}
-
-	var index = keypath.length - 2;
-	var jsExpr = Array(index);
-
-	while (index) {
-		jsExpr[--index] = ' && (temp = temp' + keypath[index + 1] + ')';
-	}
-
-	return cache$2[keypath] = '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && temp' + keypath[keypath.length - 1];
+    if (cache$2[keypath]) {
+        return cache$2[keypath];
+    }
+    var splittedKeypath = keypath.split('?');
+    var splittedKeypathLen = splittedKeypath.length;
+    if (splittedKeypathLen == 1) {
+        return (cache$2[keypath] = 'this.' + keypath);
+    }
+    var index = splittedKeypathLen - 2;
+    var jsExpr = Array(index);
+    while (index) {
+        jsExpr[--index] = ' && (temp = temp' + splittedKeypath[index + 1] + ')';
+    }
+    return (cache$2[keypath] = "(temp = this." + splittedKeypath[0] + ")" + jsExpr.join('') + " && temp" + splittedKeypath[splittedKeypathLen - 1]);
 }
 
 var reNameOrNothing = RegExp(namePattern + '|', 'g');
@@ -2523,11 +2480,11 @@ var ContentParser$1 = cellx.Utils.createClass({
 			var result = this.result;
 			var resultLen = result.length;
 
-			if (resultLen && result[resultLen - 1].type == ContentNodeType.TEXT) {
+			if (resultLen && result[resultLen - 1].type == ContentNodeType$1.TEXT) {
 				result[resultLen - 1].value = result[resultLen - 1].raw += value;
 			} else {
 				result.push({
-					type: ContentNodeType.TEXT,
+					type: ContentNodeType$1.TEXT,
 					at: this.at,
 					raw: value,
 					value: value
@@ -2554,7 +2511,7 @@ var ContentParser$1 = cellx.Utils.createClass({
 				this.next();
 
 				return {
-					type: ContentNodeType.BINDING,
+					type: ContentNodeType$1.BINDING,
 					at: bindingAt,
 					raw: this.content.slice(bindingAt, this.at),
 					keypath: keypath,
@@ -2578,7 +2535,7 @@ var ContentParser$1 = cellx.Utils.createClass({
 			this.chr = this.content.charAt(this.at += keypath.length);
 
 			return {
-				type: ContentNodeType.BINDING_KEYPATH,
+				type: ContentNodeType$1.BINDING_KEYPATH,
 				at: keypathAt,
 				raw: this.content.slice(keypathAt, this.at),
 				value: keypath
@@ -2600,7 +2557,7 @@ var ContentParser$1 = cellx.Utils.createClass({
 			var args = (this.chr = this.content.charAt(this.at += name.length)) == '(' ? this.readFormatterArguments() : null;
 
 			return {
-				type: ContentNodeType.BINDING_FORMATTER,
+				type: ContentNodeType$1.BINDING_FORMATTER,
 				at: formatterAt,
 				raw: this.content.slice(formatterAt, this.at),
 				name: name,
@@ -2647,7 +2604,7 @@ var ContentParser$1 = cellx.Utils.createClass({
 		this.next();
 
 		return {
-			type: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
+			type: ContentNodeType$1.BINDING_FORMATTER_ARGUMENTS,
 			at: formatterArgumentsAt,
 			raw: this.content.slice(formatterArgumentsAt, this.at),
 			value: args
@@ -2947,7 +2904,7 @@ function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/)
 	if (parsedContent.length == 1) {
 		var node = parsedContent[0];
 
-		if (node.type == ContentNodeType.BINDING) {
+		if (node.type == ContentNodeType$1.BINDING) {
 			return cache$3[content] = compileBinding(node);
 		}
 	}
@@ -2958,7 +2915,7 @@ function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/)
 	for (var i = 0, l = parsedContent.length; i < l; i++) {
 		var _node = parsedContent[i];
 
-		if (_node.type == ContentNodeType.TEXT) {
+		if (_node.type == ContentNodeType$1.TEXT) {
 			jsExpr.push('\'' + escapeString(_node.value) + '\'');
 		} else {
 			var bindingJSExpr = bindingToJSExpression(_node);
@@ -2990,12 +2947,13 @@ function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/)
 	return cache$3[content] = Function(jsExpr);
 }
 
-function setAttribute(el /*: HTMLElement*/, name /*: string*/, value /*: any*/) /*: void*/ {
-	if (value === false || value == null) {
-		el.removeAttribute(name);
-	} else {
-		el.setAttribute(name, value === true ? '' : value);
-	}
+function setAttribute(el, name, value) {
+    if (value === false || value == null) {
+        el.removeAttribute(name);
+    }
+    else {
+        el.setAttribute(name, value === true ? '' : value);
+    }
 }
 
 var reBinding = /{[^}]+}/;
@@ -3022,7 +2980,7 @@ function bind(node, component, context) {
 							if (reBinding.test(value)) {
 								var parsedValue = new ContentParser$1(value).parse();
 
-								if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
+								if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType$1.BINDING) {
 									(function () {
 										var name = attr.name;
 										var cell = new cellx.Cell(compileContent(parsedValue, value), {
@@ -3062,7 +3020,7 @@ function bind(node, component, context) {
 						if (reBinding.test(content)) {
 							var parsedContent = new ContentParser$1(content).parse();
 
-							if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
+							if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType$1.BINDING) {
 								var _cell = new cellx.Cell(compileContent(parsedContent, content), {
 									owner: context,
 									onChange: function onChange(evt) {
@@ -3126,7 +3084,11 @@ function bindEvents(component, events) {
 	}
 }
 
-var eventTypes = ['click', 'dblclick', 'mousedown', 'mouseup', 'input', 'change', 'submit', 'focusin', 'focusout'];
+var eventTypes = [
+    'click', 'dblclick', 'mousedown', 'mouseup',
+    'input', 'change', 'submit',
+    'focusin', 'focusout'
+];
 
 /**
  * @typesign (evt: cellx~Event|Event);
@@ -3178,36 +3140,28 @@ function onEvent(evt) {
 }
 
 var range = document.createRange();
-var htmlToFragment = void 0;
-
+var htmlToFragment;
 if (range.createContextualFragment) {
-	(function () {
-		var selected = false;
-
-		htmlToFragment = function htmlToFragment(html /*: string*/) /*: DocumentFragment*/ {
-			if (!selected) {
-				range.selectNode(document.body);
-				selected = true;
-			}
-
-			return range.createContextualFragment(html);
-		};
-	})();
-} else {
-	htmlToFragment = function htmlToFragment(html /*: string*/) /*: DocumentFragment*/ {
-		var el = document.createElement('div');
-		var df = document.createDocumentFragment();
-
-		el.innerHTML = html;
-
-		for (var child; child = el.firstChild;) {
-			df.appendChild(child);
-		}
-
-		return df;
-	};
+    var selected_1 = false;
+    htmlToFragment = function (html) {
+        if (!selected_1) {
+            range.selectNode(document.body);
+            selected_1 = true;
+        }
+        return range.createContextualFragment(html);
+    };
 }
-
+else {
+    htmlToFragment = function (html) {
+        var el = document.createElement('div');
+        var df = document.createDocumentFragment();
+        el.innerHTML = html;
+        for (var child = void 0; (child = el.firstChild);) {
+            df.appendChild(child);
+        }
+        return df;
+    };
+}
 var htmlToFragment$1 = htmlToFragment;
 
 var Map$2 = cellx.JS.Map;
@@ -3580,9 +3534,7 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 var div = document.createElement('div');
 div.innerHTML = '<template>1</template>';
-
 var template = div.firstChild;
-
 var templateTagSupport = !template.firstChild;
 
 var KEY_TEMPLATES_FIXED = cellx.JS.Symbol('Rionite.RtContent#templatesFixed');
@@ -3698,7 +3650,7 @@ var RtIfThen = Component.extend('rt-if-then', {
 
 				var parsedIf = new ContentParser$1('{' + props.if + '}').parse();
 
-				if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType.BINDING) {
+				if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType$1.BINDING) {
 					throw new SyntaxError('Invalid value of attribute "if" (' + props.if + ')');
 				}
 
@@ -3830,7 +3782,7 @@ var RtRepeat = Component.extend('rt-repeat', {
 
 			var parsedOf = new ContentParser$1('{' + forAttrValue[2] + '}').parse();
 
-			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
+			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType$1.BINDING) {
 				throw new SyntaxError(invalidForAttributeMessage + (' (' + props.for + ')'));
 			}
 

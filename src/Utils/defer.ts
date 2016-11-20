@@ -1,15 +1,13 @@
 import { ErrorLogger } from 'cellx';
 
-let queue;
+let queue: Array<{ callback: () => void, context: any }> | null;
 
-function run(): void {
-	let track = queue;
+function run() {
+	let track = queue as Array<{ callback: () => void, context: any }>;
 
 	queue = null;
 
-	for (let i = 0, l = track.length; i < l; i++) {
-		let item = track[i];
-
+	for (let item of track) {
 		try {
 			item.callback.call(item.context);
 		} catch (err) {
@@ -18,7 +16,7 @@ function run(): void {
 	}
 }
 
-export default function defer(cb: Function, context?): void {
+export default function defer(cb: () => void, context?: any) {
 	if (queue) {
 		queue.push({ callback: cb, context });
 	} else {

@@ -1,0 +1,9 @@
+enum ContentNodeType {
+	TEXT,
+	BINDING,
+	BINDING_KEYPATH,
+	BINDING_FORMATTER,
+	BINDING_FORMATTER_ARGUMENTS
+};
+
+export default ContentNodeType;
