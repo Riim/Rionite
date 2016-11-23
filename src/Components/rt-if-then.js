@@ -69,7 +69,9 @@ export default Component.extend('rt-if-then', {
 	},
 
 	_onIfChange() {
-		this._render(true);
+		if (this.element.parentNode) {
+			this._render(true);
+		}
 	},
 
 	_render(changed) {

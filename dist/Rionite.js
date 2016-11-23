@@ -2220,7 +2220,9 @@ var RtIfThen = Component.extend('rt-if-then', {
 		}
 	},
 	_onIfChange: function _onIfChange() {
-		this._render(true);
+		if (this.element.parentNode) {
+			this._render(true);
+		}
 	},
 	_render: function _render(changed) {
 		var _this2 = this;
@@ -2366,7 +2368,9 @@ var RtRepeat = Component.extend('rt-repeat', {
 		this._list.off('change', this._onListChange, this);
 	},
 	_onListChange: function _onListChange() {
-		this._render(true);
+		if (this.element.parentNode) {
+			this._render(true);
+		}
 	},
 	_render: function _render(c) {
 		var _this = this;

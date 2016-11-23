@@ -103,7 +103,9 @@ export default Component.extend('rt-repeat', {
 	},
 
 	_onListChange() {
-		this._render(true);
+		if (this.element.parentNode) {
+			this._render(true);
+		}
 	},
 
 	_render(c) {
