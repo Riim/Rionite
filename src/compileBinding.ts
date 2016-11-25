@@ -3,7 +3,7 @@ import formatters from './formatters';
 
 let cache = Object.create(null);
 
-export default function compileBinding(binding: Object): Function {
+export default function compileBinding(binding: ContentBinding): Function {
 	let bindingRaw = binding.raw;
 
 	if (cache[bindingRaw]) {

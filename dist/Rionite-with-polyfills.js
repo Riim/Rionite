@@ -1812,70 +1812,62 @@ configure({
     texts: {}
 });
 
-var formatters = Object.create(null);
-
-formatters.not = function not(value) {
-	return !value;
-};
-
-formatters.or = function key(value, arg) {
-	return value || arg;
-};
-formatters.default = function key(value, arg) {
-	return value == null ? arg : value;
-};
-
-formatters.eq = function eq(value, arg) {
-	return value == arg;
-};
-formatters.identical = function identical(value, arg) {
-	return value === arg;
-};
-
-formatters.lt = function lt(value, arg) {
-	return value < arg;
-};
-formatters.lte = function lte(value, arg) {
-	return value <= arg;
-};
-formatters.gt = function gt(value, arg) {
-	return value > arg;
-};
-formatters.gte = function gte(value, arg) {
-	return value >= arg;
-};
-
-formatters.join = function join(arr) {
-	var separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ', ';
-
-	return arr.join(separator);
-};
-
-formatters.t = getText.t;
-formatters.pt = getText.pt;
-formatters.nt = function nt(count, key) {
-	for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
-		args[_key - 2] = arguments[_key];
-	}
-
-	args.unshift(count);
-	return getText('', key, true, args);
-};
-formatters.npt = function npt(count, key, context) {
-	for (var _len2 = arguments.length, args = Array(_len2 > 3 ? _len2 - 3 : 0), _key2 = 3; _key2 < _len2; _key2++) {
-		args[_key2 - 3] = arguments[_key2];
-	}
-
-	args.unshift(count);
-	return getText(context, key, true, args);
-};
-
-formatters.key = function key(obj, key) {
-	return obj && obj[key];
-};
-
-formatters.json = function json(value) {
-	return JSON.stringify(value);
+var formatters = {
+    or: function or(value, arg) {
+        return value || arg;
+    },
+    "default": function default_(value, arg) {
+        return value === void 0 ? arg : value;
+    },
+    not: function not(value) {
+        return !value;
+    },
+    eq: function eq(value, arg) {
+        return value == arg;
+    },
+    identical: function identical(value, arg) {
+        return value === arg;
+    },
+    lt: function lt(value, arg) {
+        return value < arg;
+    },
+    lte: function lte(value, arg) {
+        return value <= arg;
+    },
+    gt: function gt(value, arg) {
+        return value > arg;
+    },
+    gte: function gte(value, arg) {
+        return value >= arg;
+    },
+    join: function join(arr, separator) {
+        if (separator === void 0) { separator = ', '; }
+        return arr.join(separator);
+    },
+    t: getText.t,
+    pt: getText.pt,
+    nt: function nt(count, key) {
+        var args = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            args[_i - 2] = arguments[_i];
+        }
+        args.unshift(count);
+        return getText('', key, true, args);
+    },
+    npt: function npt(count, key, context) {
+        var args = [];
+        for (var _i = 3; _i < arguments.length; _i++) {
+            args[_i - 3] = arguments[_i];
+        }
+        args.unshift(count);
+        return getText(context, key, true, args);
+    },
+    key: function key(obj, key) {
+        return obj && obj[key];
+    },
+    json: function json(value) {
+        return JSON.stringify(value);
+    }
 };
 
 var reEscapableChars = /[&<>"]/g;
@@ -2825,72 +2817,53 @@ var ContentParser$1 = cellx.Utils.createClass({
 });
 
 var cache$4 = Object.create(null);
-
 function formattersReducer(jsExpr, formatter) {
-	var args = formatter.arguments;
-
-	return '(this[\'' + formatter.name + '\'] || formatters[\'' + formatter.name + '\']).call(this, ' + jsExpr + (args && args.value.length ? ', ' + args.value.join(', ') : '') + ')';
+    var args = formatter.arguments;
+    return "(this['" + formatter.name + "'] || formatters['" + formatter.name + "']).call(this, " + jsExpr + (args && args.value.length ? ', ' + args.value.join(', ') : '') + ")";
 }
-
-function bindingToJSExpression(binding /*: Object*/) /*: { value: string, usesFormatters: boolean }*/ {
-	var bindingRaw = binding.raw;
-
-	if (cache$4[bindingRaw]) {
-		return cache$4[bindingRaw];
-	}
-
-	var keypath = binding.keypath.value.split('?');
-	var keypathLen = keypath.length;
-	var formatters = binding.formatters;
-	var usesFormatters = !!formatters.length;
-
-	if (keypathLen == 1) {
-		return cache$4[bindingRaw] = {
-			value: usesFormatters ? formatters.reduce(formattersReducer, 'this.' + keypath[0]) : 'this.' + keypath[0],
-			usesFormatters: usesFormatters
-		};
-	}
-
-	var index = keypathLen - 2;
-	var jsExpr = Array(index);
-
-	while (index) {
-		jsExpr[--index] = ' && (temp = temp' + keypath[index + 1] + ')';
-	}
-
-	return cache$4[bindingRaw] = {
-		value: '(temp = this.' + keypath[0] + ')' + jsExpr.join('') + ' && ' + (usesFormatters ? formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1]) : 'temp' + keypath[keypathLen - 1]),
-		usesFormatters: usesFormatters
-	};
+function bindingToJSExpression(binding) {
+    var bindingRaw = binding.raw;
+    if (cache$4[bindingRaw]) {
+        return cache$4[bindingRaw];
+    }
+    var keypath = binding.keypath.value.split('?');
+    var keypathLen = keypath.length;
+    var formatters = binding.formatters;
+    var usesFormatters = !!formatters.length;
+    if (keypathLen == 1) {
+        return (cache$4[bindingRaw] = {
+            value: usesFormatters ? formatters.reduce(formattersReducer, 'this.' + keypath[0]) : 'this.' + keypath[0],
+            usesFormatters: usesFormatters
+        });
+    }
+    var index = keypathLen - 2;
+    var jsExpr = Array(index);
+    while (index) {
+        jsExpr[--index] = " && (temp = temp" + keypath[index + 1] + ")";
+    }
+    return (cache$4[bindingRaw] = {
+        value: "(temp = this." + keypath[0] + ")" + jsExpr.join('') + " && " + (usesFormatters ?
+            formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1]) :
+            'temp' + keypath[keypathLen - 1]),
+        usesFormatters: usesFormatters
+    });
 }
 
 var cache$5 = Object.create(null);
-
-function compileBinding(binding /*: Object*/) /*: Function*/ {
-	var bindingRaw = binding.raw;
-
-	if (cache$5[bindingRaw]) {
-		return cache$5[bindingRaw];
-	}
-
-	var bindingJSExpr = bindingToJSExpression(binding);
-	var jsExpr = 'var temp; return ' + bindingJSExpr.value + ';';
-
-	if (bindingJSExpr.usesFormatters) {
-		var _ret = function () {
-			var inner = Function('formatters', jsExpr);
-
-			return {
-				v: cache$5[bindingRaw] = function () {
-					return inner.call(this, formatters);
-				}
-			};
-		}();
-
-		if (typeof _ret === "object") return _ret.v;
-	}
-
-	return cache$5[bindingRaw] = Function(jsExpr);
+function compileBinding(binding) {
+    var bindingRaw = binding.raw;
+    if (cache$5[bindingRaw]) {
+        return cache$5[bindingRaw];
+    }
+    var bindingJSExpr = bindingToJSExpression(binding);
+    var jsExpr = "var temp; return " + bindingJSExpr.value + ";";
+    if (bindingJSExpr.usesFormatters) {
+        var inner_1 = Function('formatters', jsExpr);
+        return (cache$5[bindingRaw] = function () {
+            return inner_1.call(this, formatters);
+        });
+    }
+    return (cache$5[bindingRaw] = Function(jsExpr));
 }
 
 var ContentNodeType$2 = ContentParser$1.ContentNodeType;

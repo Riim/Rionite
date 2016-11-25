@@ -1,6 +1,6 @@
-let cache = Object.create(null);
+let cache = Object.create(null) as { [key: string]: { value: string, usesFormatters: boolean } };
 
-function formattersReducer(jsExpr, formatter) {
+function formattersReducer(jsExpr: string, formatter: ContentBindingFormatter): string {
 	let args = formatter.arguments;
 
 	return `(this['${ formatter.name }'] || formatters['${ formatter.name }']).call(this, ${ jsExpr }${
@@ -8,7 +8,7 @@ function formattersReducer(jsExpr, formatter) {
 	})`;
 }
 
-export default function bindingToJSExpression(binding: Object): { value: string, usesFormatters: boolean } {
+export default function bindingToJSExpression(binding: ContentBinding): { value: string, usesFormatters: boolean } {
 	let bindingRaw = binding.raw;
 
 	if (cache[bindingRaw]) {

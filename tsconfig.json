@@ -5,6 +5,7 @@
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"preserveConstEnums": true,
-		"strictNullChecks": true
+		"strictNullChecks": true,
+		"suppressImplicitAnyIndexErrors": true
 	}
 }
