@@ -1,8 +1,7 @@
 import { Utils } from 'cellx';
+import keypathToJSExpression from './keypathToJSExpression';
 import namePattern from './namePattern';
 import keypathPattern from './keypathPattern';
-import keypathToJSExpression from './keypathToJSExpression';
-import ContentNodeType from './ContentNodeType';
 
 let reNameOrNothing = RegExp(namePattern + '|', 'g');
 let reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
@@ -13,7 +12,19 @@ let reVacuumOrNothing = /null|undefined|void 0|/g;
 
 let NOT_VALUE_AND_NOT_KEYPATH = {};
 
+let ContentNodeType = {
+	TEXT: 0,
+	BINDING: 1,
+	BINDING_KEYPATH: 2,
+	BINDING_FORMATTER: 3,
+	BINDING_FORMATTER_ARGUMENTS: 4
+};
+
 export default Utils.createClass({
+	Static: {
+		ContentNodeType
+	},
+
 	constructor: function ContentParser(content: string) {
 		this.content = content;
 	},

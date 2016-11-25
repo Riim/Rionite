@@ -1,8 +1,9 @@
 import { Cell } from 'cellx';
-import ContentNodeType from './ContentNodeType';
 import ContentParser from './ContentParser';
 import compileContent from './compileContent';
 import setAttribute from './Utils/setAttribute';
+
+let ContentNodeType = ContentParser.ContentNodeType;
 
 let reBinding = /{[^}]+}/;
 

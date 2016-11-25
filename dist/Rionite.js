@@ -629,8 +629,6 @@ var ElementAttributes = cellx.EventEmitter.extend({
 	}
 });
 
-var namePattern = '[$_a-zA-Z][$\\w]*';
-
 var reEscapableChars$1 = /[\\'\r\n]/g;
 var charToSpecialMap = Object.create(null);
 charToSpecialMap['\\'] = '\\\\';
@@ -641,74 +639,74 @@ function escapeString(str) {
     return reEscapableChars$1.test(str) ? str.replace(reEscapableChars$1, function (chr) { return charToSpecialMap[chr]; }) : str;
 }
 
-var keypathPattern = '(?:' + namePattern + '|\\[\\d+\\])(?:(?:\\.' + namePattern + '|\\[\\d+\\]))*';
-var re = RegExp('{{' + '(?:' + '\\s*(?:' + ('block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')') + (')\\s*|{\\s*(' + keypathPattern + ')\\s*}') + ')' + '}}');
+var namePattern = '[$_a-zA-Z][$\\w]*';
 
-function ComponentTemplate(tmpl) {
-	var parent = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
-
-	this.parent = parent;
-
-	var currentBlock = { js: [] };
-
-	var blocks = [currentBlock];
-	var blockMap = this._blocks = Object.create(parent ? parent._blocks : null);
-
-	tmpl = tmpl.split(re);
-
-	for (var i = 0, l = tmpl.length; i < l;) {
-		if (i % 6) {
-			var name = tmpl[i];
-
-			if (name) {
-				currentBlock.js.push('this.' + name + '.call(this, data)');
-				currentBlock = blockMap[name] = { name: name, js: [] };
-				blocks.push(currentBlock);
-			} else if (tmpl[i + 1]) {
-				if (blocks.length > 1) {
-					blocks.pop();
-					currentBlock = blocks[blocks.length - 1];
-				}
-			} else if (tmpl[i + 2]) {
-				if (parent && blocks.length > 1 && parent._blocks[currentBlock.name]) {
-					currentBlock.js.push('_super.call(this, data)');
-				}
-			} else {
-				var keypath = tmpl[i + 2];
-				currentBlock.js.push(keypath ? 'escape(data.' + keypath + ')' : 'data.' + tmpl[i + 3]);
-			}
-
-			i += 5;
-		} else {
-			var text = tmpl[i];
-
-			if (text) {
-				currentBlock.js.push('\'' + escapeString(text) + '\'');
-			}
-
-			i++;
-		}
-	}
-
-	Object.keys(blockMap).forEach(function (name) {
-		var _super = parent && parent._blocks[name];
-		var inner = Function('_super', 'data', 'escape', 'return [' + blockMap[name].js.join(', ') + '].join(\'\');');
-
-		blockMap[name] = function (data) {
-			return inner.call(this, _super, data, escapeHTML);
-		};
-	});
-
-	this._renderer = parent ? parent._renderer : Function('data', 'escape', 'return [' + blocks[0].js.join(', ') + '].join(\'\');');
-}
-
-ComponentTemplate.prototype.extend = function (tmpl) {
-	return new ComponentTemplate(tmpl, this);
-};
-
-ComponentTemplate.prototype.render = function (data) {
-	return this._renderer.call(this._blocks, data || {}, escapeHTML);
-};
+var keypathPattern = '(?:' + namePattern + '|\\[\\d+\\])(?:\\.' + namePattern + '|\\[\\d+\\])*';
+var re = RegExp('\\{\\{' +
+    '(?:' +
+    '\\s*(?:' +
+    'block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')' +
+    ')\\s*|\\{\\s*(' + keypathPattern + ')\\s*\\}' +
+    ')' +
+    '\\}\\}');
+var ComponentTemplate = (function () {
+    function ComponentTemplate(tmpl, parent) {
+        if (parent === void 0) { parent = null; }
+        this.parent = parent;
+        var currentBlock = { name: null, source: [] };
+        var blocks = [currentBlock];
+        var blockMap = {};
+        var splittedTemplate = tmpl.split(re);
+        for (var i = 0, l = splittedTemplate.length; i < l;) {
+            if (i % 6) {
+                var blockName = splittedTemplate[i];
+                if (blockName) {
+                    currentBlock.source.push("this." + blockName + ".call(this, data)");
+                    currentBlock = { name: blockName, source: [] };
+                    blocks.push((blockMap[blockName] = currentBlock));
+                }
+                else if (splittedTemplate[i + 1]) {
+                    if (blocks.length > 1) {
+                        blocks.pop();
+                        currentBlock = blocks[blocks.length - 1];
+                    }
+                }
+                else if (splittedTemplate[i + 2]) {
+                    if (parent && blocks.length > 1 && parent._blockMap[currentBlock.name]) {
+                        currentBlock.source.push('$super.call(this, data)');
+                    }
+                }
+                else {
+                    var keypath = splittedTemplate[i + 3];
+                    currentBlock.source.push(keypath ? "escape(data." + keypath + ")" : 'data.' + splittedTemplate[i + 4]);
+                }
+                i += 5;
+            }
+            else {
+                var text = splittedTemplate[i];
+                if (text) {
+                    currentBlock.source.push("'" + escapeString(text) + "'");
+                }
+                i++;
+            }
+        }
+        this._renderer = parent ? parent._renderer : Function('data', 'escape', "return [" + blocks[0].source.join(', ') + "].join('');");
+        Object.keys(blockMap).forEach(function (name) {
+            var parentBlock = parent && parent._blockMap[name];
+            var inner = Function('$super', 'data', 'escape', "return [" + blockMap[name].source.join(', ') + "].join('');");
+            this[name] = function (data) {
+                return inner.call(this, parentBlock, data, escapeHTML);
+            };
+        }, (this._blockMap = Object.create(parent && parent._blockMap)));
+    }
+    ComponentTemplate.prototype.extend = function (tmpl) {
+        return new ComponentTemplate(tmpl, this);
+    };
+    ComponentTemplate.prototype.render = function (data) {
+        return this._renderer.call(this._blockMap, data || {}, escapeHTML);
+    };
+    return ComponentTemplate;
+}());
 
 var mixin$1 = cellx.Utils.mixin;
 var elementConstructorMap = mixin$1(Object.create(null), {
@@ -940,19 +938,6 @@ function initAttributes(component, constr) {
 	}
 }
 
-var ContentNodeType;
-(function (ContentNodeType) {
-    ContentNodeType[ContentNodeType["TEXT"] = 0] = "TEXT";
-    ContentNodeType[ContentNodeType["BINDING"] = 1] = "BINDING";
-    ContentNodeType[ContentNodeType["BINDING_KEYPATH"] = 2] = "BINDING_KEYPATH";
-    ContentNodeType[ContentNodeType["BINDING_FORMATTER"] = 3] = "BINDING_FORMATTER";
-    ContentNodeType[ContentNodeType["BINDING_FORMATTER_ARGUMENTS"] = 4] = "BINDING_FORMATTER_ARGUMENTS";
-})(ContentNodeType || (ContentNodeType = {}));
-
-var ContentNodeType$1 = ContentNodeType;
-
-var keypathPattern$1 = "(?:" + namePattern + "|\\[\\d+\\])(?:\\??(?:\\." + namePattern + "|\\[\\d+\\]))*";
-
 var cache$2 = Object.create(null);
 function keypathToJSExpression(keypath) {
     if (cache$2[keypath]) {
@@ -971,6 +956,8 @@ function keypathToJSExpression(keypath) {
     return (cache$2[keypath] = "(temp = this." + splittedKeypath[0] + ")" + jsExpr.join('') + " && temp" + splittedKeypath[splittedKeypathLen - 1]);
 }
 
+var keypathPattern$1 = "(?:" + namePattern + "|\\[\\d+\\])(?:\\??(?:\\." + namePattern + "|\\[\\d+\\]))*";
+
 var reNameOrNothing = RegExp(namePattern + '|', 'g');
 var reKeypathOrNothing = RegExp(keypathPattern$1 + '|', 'g');
 var reBooleanOrNothing = /false|true|/g;
@@ -979,7 +966,19 @@ var reVacuumOrNothing = /null|undefined|void 0|/g;
 
 var NOT_VALUE_AND_NOT_KEYPATH = {};
 
+var ContentNodeType$1 = {
+	TEXT: 0,
+	BINDING: 1,
+	BINDING_KEYPATH: 2,
+	BINDING_FORMATTER: 3,
+	BINDING_FORMATTER_ARGUMENTS: 4
+};
+
 var ContentParser$1 = cellx.Utils.createClass({
+	Static: {
+		ContentNodeType: ContentNodeType$1
+	},
+
 	constructor: function ContentParser(content /*: string*/) {
 		this.content = content;
 	},
@@ -1428,6 +1427,8 @@ function compileBinding(binding /*: Object*/) /*: Function*/ {
 	return cache$5[bindingRaw] = Function(jsExpr);
 }
 
+var ContentNodeType$2 = ContentParser$1.ContentNodeType;
+
 var cache$3 = Object.create(null);
 
 function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/) /*: Function*/ {
@@ -1438,7 +1439,7 @@ function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/)
 	if (parsedContent.length == 1) {
 		var node = parsedContent[0];
 
-		if (node.type == ContentNodeType$1.BINDING) {
+		if (node.type == ContentNodeType$2.BINDING) {
 			return cache$3[content] = compileBinding(node);
 		}
 	}
@@ -1449,7 +1450,7 @@ function compileContent(parsedContent /*: Array<Object>*/, content /*: string*/)
 	for (var i = 0, l = parsedContent.length; i < l; i++) {
 		var _node = parsedContent[i];
 
-		if (_node.type == ContentNodeType$1.TEXT) {
+		if (_node.type == ContentNodeType$2.TEXT) {
 			jsExpr.push('\'' + escapeString(_node.value) + '\'');
 		} else {
 			var bindingJSExpr = bindingToJSExpression(_node);
@@ -1490,6 +1491,8 @@ function setAttribute(el, name, value) {
     }
 }
 
+var ContentNodeType = ContentParser$1.ContentNodeType;
+
 var reBinding = /{[^}]+}/;
 
 function bind(node, component, context) {
@@ -1514,7 +1517,7 @@ function bind(node, component, context) {
 							if (reBinding.test(value)) {
 								var parsedValue = new ContentParser$1(value).parse();
 
-								if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType$1.BINDING) {
+								if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
 									(function () {
 										var name = attr.name;
 										var cell = new cellx.Cell(compileContent(parsedValue, value), {
@@ -1554,7 +1557,7 @@ function bind(node, component, context) {
 						if (reBinding.test(content)) {
 							var parsedContent = new ContentParser$1(content).parse();
 
-							if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType$1.BINDING) {
+							if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
 								var _cell = new cellx.Cell(compileContent(parsedContent, content), {
 									owner: context,
 									onChange: function onChange(evt) {
@@ -2157,6 +2160,7 @@ var RtContent = Component.extend('rt-content', {
 });
 
 var nextTick = cellx.Utils.nextTick;
+var ContentNodeType$3 = ContentParser$1.ContentNodeType;
 
 var RtIfThen = Component.extend('rt-if-then', {
 	Static: {
@@ -2184,7 +2188,7 @@ var RtIfThen = Component.extend('rt-if-then', {
 
 				var parsedIf = new ContentParser$1('{' + props.if + '}').parse();
 
-				if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType$1.BINDING) {
+				if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType$3.BINDING) {
 					throw new SyntaxError('Invalid value of attribute "if" (' + props.if + ')');
 				}
 
@@ -2277,6 +2281,7 @@ var RtIfElse = RtIfThen.extend('rt-if-else', {
 
 var Map$3 = cellx.JS.Map;
 var nextTick$1 = cellx.Utils.nextTick;
+var ContentNodeType$4 = ContentParser$1.ContentNodeType;
 
 var reForAttributeValue = RegExp('^\\s*(' + namePattern + ')\\s+of\\s+(\\S.*)$');
 var invalidForAttributeMessage = 'Invalid value of attribute "for"';
@@ -2318,7 +2323,7 @@ var RtRepeat = Component.extend('rt-repeat', {
 
 			var parsedOf = new ContentParser$1('{' + forAttrValue[2] + '}').parse();
 
-			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType$1.BINDING) {
+			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType$4.BINDING) {
 				throw new SyntaxError(invalidForAttributeMessage + (' (' + props.for + ')'));
 			}
 

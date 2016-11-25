@@ -1,15 +1,15 @@
 import { Cell, JS, Utils } from 'cellx';
-import namePattern from '../namePattern';
-import ContentNodeType from '../ContentNodeType';
 import ContentParser from '../ContentParser';
 import compileBinding from '../compileBinding';
 import bind from '../bind';
 import attachChildComponentElements from '../attachChildComponentElements';
 import Component from '../Component';
+import namePattern from '../namePattern';
 import { slice } from '../JS/Array';
 
 let Map = JS.Map;
 let nextTick = Utils.nextTick;
+let ContentNodeType = ContentParser.ContentNodeType;
 
 let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(\\S.*)$`);
 let invalidForAttributeMessage = 'Invalid value of attribute "for"';

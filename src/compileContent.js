@@ -1,8 +1,10 @@
+import ContentParser from './ContentParser';
 import bindingToJSExpression from './bindingToJSExpression';
-import ContentNodeType from './ContentNodeType';
 import compileBinding from './compileBinding';
 import formatters from './formatters';
 import escapeString from './Utils/escapeString';
+
+let ContentNodeType = ContentParser.ContentNodeType;
 
 let cache = Object.create(null);
 

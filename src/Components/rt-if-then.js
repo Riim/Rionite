@@ -1,5 +1,4 @@
 import { Cell, Utils } from 'cellx';
-import ContentNodeType from '../ContentNodeType';
 import ContentParser from '../ContentParser';
 import compileBinding from '../compileBinding';
 import bind from '../bind';
@@ -8,6 +7,7 @@ import Component from '../Component';
 import { slice } from '../JS/Array';
 
 let nextTick = Utils.nextTick;
+let ContentNodeType = ContentParser.ContentNodeType;
 
 export default Component.extend('rt-if-then', {
 	Static: {
