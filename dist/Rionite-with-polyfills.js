@@ -1465,9 +1465,9 @@ THE SOFTWARE.
 })(document);
 
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('cellx')) :
-    typeof define === 'function' && define.amd ? define(['cellx'], factory) :
-    (global.Rionite = global.rionite = factory(global.cellx));
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('cellx')) :
+	typeof define === 'function' && define.amd ? define(['cellx'], factory) :
+	(global.Rionite = global.rionite = factory(global.cellx));
 }(this, (function (cellx) { 'use strict';
 
 var nextUID = cellx.Utils.nextUID;
@@ -1694,16 +1694,16 @@ var DisposableMixin = cellx.EventEmitter.extend({
 		var _this5 = this;
 
 		var id = nextUID();
-		var component = this;
+		var disposable = this;
 
 		var cancelCallback = function cancelCallback() {
 			delete _this5._disposables[id];
 		};
 
 		function wrapper() {
-			if (component._disposables[id]) {
-				delete component._disposables[id];
-				return cb.apply(component, arguments);
+			if (disposable._disposables[id]) {
+				delete disposable._disposables[id];
+				return cb.apply(disposable, arguments);
 			}
 		}
 		wrapper.cancel = cancelCallback;
@@ -1895,40 +1895,48 @@ function isRegExp(value) {
 }
 
 var Map$1 = cellx.JS.Map;
-
-var attributeTypeHandlerMap = new Map$1([[Boolean, [function (value) {
-	return value !== null ? value != 'no' : false;
-}, function (value) {
-	return value ? '' : null;
-}]], ['boolean', [function (value, defaultValue) {
-	return value !== null ? value != 'no' : defaultValue;
-}, function (value, defaultValue) {
-	return value ? '' : defaultValue ? 'no' : null;
-}]], [Number, [function (value) {
-	return value !== null ? +value : void 0;
-}, function (value) {
-	return value !== void 0 ? String(+value) : null;
-}]], ['number', [function (value, defaultValue) {
-	return value !== null ? +value : defaultValue;
-}, function (value) {
-	return value !== void 0 ? String(+value) : null;
-}]], [String, [function (value) {
-	return value !== null ? value : void 0;
-}, function (value) {
-	return value !== void 0 ? String(value) : null;
-}]], ['string', [function (value, defaultValue) {
-	return value !== null ? value : defaultValue;
-}, function (value) {
-	return value !== void 0 ? String(value) : null;
-}]], [Object, [function (value) {
-	return value !== null ? Object(Function('return ' + unescapeHTML(value) + ';')()) : void 0;
-}, function (value) {
-	return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
-}]], ['object', [function (value, defaultValue) {
-	return value !== null ? Object(Function('return ' + unescapeHTML(value) + ';')()) : defaultValue;
-}, function (value) {
-	return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
-}]]]);
+var attributeTypeHandlerMap = new Map$1([
+    [Boolean, [function (value) {
+                return value !== null ? value != 'no' : false;
+            }, function (value) {
+                return value ? '' : null;
+            }]],
+    ['boolean', [function (value, defaultValue) {
+                return value !== null ? value != 'no' : defaultValue;
+            }, function (value, defaultValue) {
+                return value ? '' : (defaultValue ? 'no' : null);
+            }]],
+    [Number, [function (value) {
+                return value !== null ? +value : void 0;
+            }, function (value) {
+                return value !== void 0 ? String(+value) : null;
+            }]],
+    ['number', [function (value, defaultValue) {
+                return value !== null ? +value : defaultValue;
+            }, function (value) {
+                return value !== void 0 ? String(+value) : null;
+            }]],
+    [String, [function (value) {
+                return value !== null ? value : void 0;
+            }, function (value) {
+                return value !== void 0 ? String(value) : null;
+            }]],
+    ['string', [function (value, defaultValue) {
+                return value !== null ? value : defaultValue;
+            }, function (value) {
+                return value !== void 0 ? String(value) : null;
+            }]],
+    [Object, [function (value) {
+                return value !== null ? Object(Function("return " + unescapeHTML(value) + ";")()) : void 0;
+            }, function (value) {
+                return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
+            }]],
+    ['object', [function (value, defaultValue) {
+                return value !== null ? Object(Function("return " + unescapeHTML(value) + ";")()) : defaultValue;
+            }, function (value) {
+                return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
+            }]]
+]);
 
 var reHyphen = /[-_]+([a-z]|$)/g;
 var cache = Object.create(null);

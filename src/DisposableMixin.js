@@ -193,16 +193,16 @@ let DisposableMixin = EventEmitter.extend({
 	 */
 	registerCallback(cb) {
 		let id = nextUID();
-		let component = this;
+		let disposable = this;
 
 		let cancelCallback = () => {
 			delete this._disposables[id];
 		};
 
 		function wrapper() {
-			if (component._disposables[id]) {
-				delete component._disposables[id];
-				return cb.apply(component, arguments);
+			if (disposable._disposables[id]) {
+				delete disposable._disposables[id];
+				return cb.apply(disposable, arguments);
 			}
 		}
 		wrapper.cancel = cancelCallback;
