@@ -1,4 +1,3 @@
-import { Utils } from 'cellx';
 import keypathToJSExpression from './keypathToJSExpression';
 import namePattern from './namePattern';
 import keypathPattern from './keypathPattern';
@@ -20,21 +19,24 @@ let ContentNodeType = {
 	BINDING_FORMATTER_ARGUMENTS: 4
 };
 
-export default Utils.createClass({
-	Static: {
-		ContentNodeType
-	},
+export default class ContentParser {
+	static ContentNodeType = ContentNodeType;
 
-	constructor: function ContentParser(content: string) {
+	content: string;
+	at: number;
+	chr: string;
+	result: Content;
+
+	constructor(content: string) {
 		this.content = content;
-	},
+	}
 
-	parse(): Array<Object> {
+	parse(): Content {
 		this.at = 0;
 
-		let result = this.result = [];
+		let result = this.result = [] as Content;
 
-		for (let index; (index = this.content.indexOf('{', this.at)) > -1;) {
+		for (let index: number; (index = this.content.indexOf('{', this.at)) > -1;) {
 			this.pushText(this.content.slice(this.at, index));
 
 			this.at = index;
@@ -53,7 +55,7 @@ export default Utils.createClass({
 		this.pushText(this.content.slice(this.at));
 
 		return result;
-	},
+	}
 
 	pushText(value: string): void {
 		if (value.length) {
@@ -61,7 +63,7 @@ export default Utils.createClass({
 			let resultLen = result.length;
 
 			if (resultLen && result[resultLen - 1].type == ContentNodeType.TEXT) {
-				result[resultLen - 1].value = result[resultLen - 1].raw += value;
+				(result[resultLen - 1] as ContentText).value = result[resultLen - 1].raw += value;
 			} else {
 				result.push({
 					type: ContentNodeType.TEXT,
@@ -71,9 +73,9 @@ export default Utils.createClass({
 				});
 			}
 		}
-	},
+	}
 
-	readBinding() {
+	readBinding(): ContentBinding | null {
 		let bindingAt = this.at;
 
 		this.next('{');
@@ -82,9 +84,12 @@ export default Utils.createClass({
 		let keypath = this.readBindingKeypath();
 
 		if (keypath) {
-			let formatters = [];
+			let formatters = [] as Array<ContentBindingFormatter>;
 
-			for (let formatter; this.skipWhitespaces() == '|' && (formatter = this.readFormatter());) {
+			for (
+				let formatter: ContentBindingFormatter | null;
+				this.skipWhitespaces() == '|' && (formatter = this.readFormatter());
+			) {
 				formatters.push(formatter);
 			}
 
@@ -105,11 +110,11 @@ export default Utils.createClass({
 		this.chr = this.content.charAt(bindingAt);
 
 		return null;
-	},
+	}
 
-	readBindingKeypath() {
+	readBindingKeypath(): ContentBindingKeypath | null {
 		reKeypathOrNothing.lastIndex = this.at;
-		let keypath = reKeypathOrNothing.exec(this.content)[0];
+		let keypath = (reKeypathOrNothing.exec(this.content) as RegExpExecArray)[0];
 
 		if (keypath) {
 			let keypathAt = this.at;
@@ -125,16 +130,16 @@ export default Utils.createClass({
 		}
 
 		return null;
-	},
+	}
 
-	readFormatter() {
+	readFormatter(): ContentBindingFormatter | null {
 		let formatterAt = this.at;
 
 		this.next('|');
 		this.skipWhitespaces();
 
 		reNameOrNothing.lastIndex = this.at;
-		let name = reNameOrNothing.exec(this.content)[0];
+		let name = (reNameOrNothing.exec(this.content) as RegExpExecArray)[0];
 
 		if (name) {
 			let args = (this.chr = this.content.charAt((this.at += name.length))) == '(' ?
@@ -154,11 +159,11 @@ export default Utils.createClass({
 		this.chr = this.content.charAt(formatterAt);
 
 		return null;
-	},
+	}
 
-	readFormatterArguments() {
+	readFormatterArguments(): ContentBindingFormatterArguments | null {
 		let formatterArgumentsAt = this.at;
-		let args = [];
+		let args = [] as Array<string>;
 
 		this.next('(');
 
@@ -168,7 +173,7 @@ export default Utils.createClass({
 
 				if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
 					if (this.skipWhitespaces() == ',' || this.chr == ')') {
-						args.push(arg);
+						args.push(arg as string);
 
 						if (this.chr == ',') {
 							this.next();
@@ -195,14 +200,14 @@ export default Utils.createClass({
 			raw: this.content.slice(formatterArgumentsAt, this.at),
 			value: args
 		};
-	},
+	}
 
-	readValueOrValueKeypath() {
+	readValueOrValueKeypath(): string | Object {
 		let value = this.readValue();
 		return value === NOT_VALUE_AND_NOT_KEYPATH ? this.readValueKeypath() : value;
-	},
+	}
 
-	readValue() {
+	readValue(): string | Object {
 		switch (this.chr) {
 			case '{': {
 				return this.readObject();
@@ -227,9 +232,9 @@ export default Utils.createClass({
 		}
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	},
+	}
 
-	readObject() {
+	readObject(): string | Object {
 		let objectAt = this.at;
 
 		this.next('{');
@@ -266,11 +271,11 @@ export default Utils.createClass({
 		this.next();
 
 		return obj;
-	},
+	}
 
-	readObjectKey() {
+	readObjectKey(): string | null {
 		reNameOrNothing.lastIndex = this.at;
-		let key = reNameOrNothing.exec(this.content)[0];
+		let key = (reNameOrNothing.exec(this.content) as RegExpExecArray)[0];
 
 		if (key) {
 			this.chr = this.content.charAt((this.at += key.length));
@@ -278,9 +283,9 @@ export default Utils.createClass({
 		}
 
 		return null;
-	},
+	}
 
-	readArray() {
+	readArray(): string | Object {
 		let arrayAt = this.at;
 
 		this.next('[');
@@ -308,11 +313,11 @@ export default Utils.createClass({
 		this.next();
 
 		return arr + ']';
-	},
+	}
 
-	readBoolean() {
+	readBoolean(): string | Object {
 		reBooleanOrNothing.lastIndex = this.at;
-		let bool = reBooleanOrNothing.exec(this.content)[0];
+		let bool = (reBooleanOrNothing.exec(this.content) as RegExpExecArray)[0];
 
 		if (bool) {
 			this.chr = this.content.charAt((this.at += bool.length));
@@ -320,11 +325,11 @@ export default Utils.createClass({
 		}
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	},
+	}
 
-	readNumber() {
+	readNumber(): string | Object {
 		reNumberOrNothing.lastIndex = this.at;
-		let num = reNumberOrNothing.exec(this.content)[0];
+		let num = (reNumberOrNothing.exec(this.content) as RegExpExecArray)[0];
 
 		if (num) {
 			this.chr = this.content.charAt((this.at += num.length));
@@ -332,9 +337,9 @@ export default Utils.createClass({
 		}
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	},
+	}
 
-	readString() {
+	readString(): string | Object {
 		if (this.chr != "'" && this.chr != '"') {
 			throw {
 				name: 'SyntaxError',
@@ -355,10 +360,10 @@ export default Utils.createClass({
 				return quote + str + quote;
 			}
 
-			if (this.chr == '\\') {
+			if ((this.chr as string) == '\\') {
 				str += this.chr + this.next();
 			} else {
-				if (this.chr == '\r' || this.chr == '\n') {
+				if ((this.chr as string) == '\r' || (this.chr as string) == '\n') {
 					break;
 				}
 
@@ -370,11 +375,11 @@ export default Utils.createClass({
 		this.chr = this.content.charAt(stringAt);
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	},
+	}
 
-	readVacuum() {
+	readVacuum(): string | Object {
 		reVacuumOrNothing.lastIndex = this.at;
-		let vacuum = reVacuumOrNothing.exec(this.content)[0];
+		let vacuum = (reVacuumOrNothing.exec(this.content) as RegExpExecArray)[0];
 
 		if (vacuum) {
 			this.chr = this.content.charAt((this.at += vacuum.length));
@@ -382,11 +387,11 @@ export default Utils.createClass({
 		}
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	},
+	}
 
-	readValueKeypath() {
+	readValueKeypath(): string | Object {
 		reKeypathOrNothing.lastIndex = this.at;
-		let keypath = reKeypathOrNothing.exec(this.content)[0];
+		let keypath = (reKeypathOrNothing.exec(this.content) as RegExpExecArray)[0];
 
 		if (keypath) {
 			this.chr = this.content.charAt((this.at += keypath.length));
@@ -394,7 +399,7 @@ export default Utils.createClass({
 		}
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
-	},
+	}
 
 	next(c?: string): string {
 		if (c && c != this.chr) {
@@ -407,9 +412,9 @@ export default Utils.createClass({
 		}
 
 		return (this.chr = this.content.charAt(++this.at));
-	},
+	}
 
-	skipWhitespaces() {
+	skipWhitespaces(): string {
 		let chr = this.chr;
 
 		while (chr && chr <= ' ') {
@@ -418,4 +423,4 @@ export default Utils.createClass({
 
 		return chr;
 	}
-});
+}

@@ -1,3 +1,10 @@
+interface ContentText {
+	type: number,
+	at: number,
+	raw: string,
+	value: string
+}
+
 interface ContentBindingFormatterArguments {
 	type: number,
 	at: number,
@@ -27,3 +34,5 @@ interface ContentBinding {
 	keypath: ContentBindingKeypath,
 	formatters: Array<ContentBindingFormatter>
 }
+
+type Content = Array<ContentText | ContentBinding>;
