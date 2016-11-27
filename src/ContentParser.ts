@@ -34,7 +34,7 @@ export default class ContentParser {
 	parse(): Content {
 		this.at = 0;
 
-		let result = this.result = [] as Content;
+		let result: Content = this.result = [];
 
 		for (let index: number; (index = this.content.indexOf('{', this.at)) > -1;) {
 			this.pushText(this.content.slice(this.at, index));
@@ -84,7 +84,7 @@ export default class ContentParser {
 		let keypath = this.readBindingKeypath();
 
 		if (keypath) {
-			let formatters = [] as Array<ContentBindingFormatter>;
+			let formatters: Array<ContentBindingFormatter> = [];
 
 			for (
 				let formatter: ContentBindingFormatter | null;
@@ -163,7 +163,7 @@ export default class ContentParser {
 
 	readFormatterArguments(): ContentBindingFormatterArguments | null {
 		let formatterArgumentsAt = this.at;
-		let args = [] as Array<string>;
+		let args: Array<string> = [];
 
 		this.next('(');
 

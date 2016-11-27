@@ -55,10 +55,10 @@ export default class ComponentTemplate {
 	constructor(tmpl: string, parent: ComponentTemplate | null = null) {
 		this.parent = parent;
 
-		let currentBlock = { name: null, source: [] } as ComponentTemplateBlockDescription;
+		let currentBlock: ComponentTemplateBlockDescription = { name: null, source: [] };
 
 		let blocks = [currentBlock];
-		let blockMap = {} as { [name: string]: ComponentTemplateBlockDescription };
+		let blockMap: { [name: string]: ComponentTemplateBlockDescription } = {};
 
 		let splittedTemplate = tmpl.split(re);
 
@@ -112,7 +112,7 @@ export default class ComponentTemplate {
 			this[name] = function(this: ComponentTemplateBlockMap, data: Object): string {
 				return inner.call(this, parentBlock, data, escapeHTML);
 			};
-		}, (this._blockMap = Object.create(parent && parent._blockMap) as any));
+		}, (this._blockMap = Object.create(parent && parent._blockMap) as ComponentTemplateBlockMap));
 	}
 
 	extend(tmpl: string) {

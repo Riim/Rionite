@@ -35,7 +35,7 @@ let getText = <GetText>function getText(context: string, key: string, plural: bo
 	let rawText: string;
 
 	if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
-		rawText = (plural ? texts[context][key][getPluralIndex(+args[0])] : texts[context][key]) as string;
+		rawText = (plural ? texts[context][key][getPluralIndex(+args[0])] : texts[context][key] as string);
 	} else {
 		rawText = key;
 	}
@@ -51,7 +51,7 @@ let getText = <GetText>function getText(context: string, key: string, plural: bo
 	}
 
 	let splittedRawText = rawText.split(reInsert);
-	let text = [] as Array<string>;
+	let text: Array<string> = [];
 
 	for (let i = 0, l = splittedRawText.length; i < l;) {
 		if (i % 3) {

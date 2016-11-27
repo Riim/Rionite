@@ -1,4 +1,4 @@
-let cache = Object.create(null) as { [key: string]: { value: string, usesFormatters: boolean } };
+let cache: { [key: string]: { value: string, usesFormatters: boolean } } = Object.create(null);
 
 function formattersReducer(jsExpr: string, formatter: ContentBindingFormatter): string {
 	let args = formatter.arguments;
