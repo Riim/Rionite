@@ -1,10 +1,10 @@
 {
   "name": "rionite",
-  "version": "0.14.19",
+  "version": "0.14.21",
   "description": "",
   "main": "dist/Rionite-with-polyfills.js",
   "scripts": {
-    "build": "./node_modules/.bin/rollup -c && ./node_modules/.bin/gulp",
+    "build": "./node_modules/.bin/webpack && ./node_modules/.bin/gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,13 +18,14 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "@riim/babel-preset": "^1.0.0",
+    "@riim/babel-preset-2015": "^1.0.0",
+    "awesome-typescript-loader": "^3.0.0-beta.9",
     "babel-eslint": "^7.1.1",
-    "babel-plugin-external-helpers": "^6.18.0",
-    "babel-plugin-syntax-flow": "^6.18.0",
+    "babel-loader": "^6.2.8",
     "babel-plugin-transform-flow-comments": "^6.17.0",
     "benchmark": "^2.1.2",
     "cellx-indexed-collections": "^1.0.7",
+    "eslint-loader": "^1.6.1",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.2",
@@ -33,12 +34,9 @@
     "gulp-uglify": "^2.0.0",
     "pump": "^1.0.1",
     "require-dir": "^0.3.1",
-    "rollup": "^0.36.4",
-    "rollup-plugin-babel": "^2.6.1",
-    "rollup-plugin-eslint": "^3.0.0",
-    "rollup-plugin-typescript": "^0.8.1",
     "run-sequence": "^1.2.2",
-    "typescript": "^2.1.1"
+    "typescript": "^2.1.1",
+    "webpack": "^2.1.0-beta.27"
   },
   "dependencies": {
     "cellx": "^1.6.80",

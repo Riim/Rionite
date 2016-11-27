@@ -1,11 +1,11 @@
 var gulp = require('gulp');
 var replace = require('gulp-replace');
 
-gulp.task('fix-global', function() {
+gulp.task('fix-default', function() {
 	return gulp.src('dist/Rionite.js')
 		.pipe(replace(
-			'root["rionite"] = factory(root["cellx"]);',
-			'root["Rionite"] = root["rionite"] = factory(root["cellx"]);'
+			'exports.default = Rionite;',
+			'module.exports = Rionite.default = Rionite;'
 		))
 		.pipe(gulp.dest('dist'));
 });
