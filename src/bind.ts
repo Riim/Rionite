@@ -1,21 +1,27 @@
-import { Cell } from 'cellx';
+import cellx = require('cellx');
+import Component from './Component';
 import ContentParser from './ContentParser';
 import compileContent from './compileContent';
 import setAttribute from './Utils/setAttribute';
 
+let Cell = cellx.Cell;
 let ContentNodeType = ContentParser.ContentNodeType;
 
 let reBinding = /{[^}]+}/;
 
-export default function bind(node, component, context) {
+export default function bind(
+	node: Node,
+	component: Component,
+	context?: Component
+): { bindings: Array<cellx.Cell<any>> | null, childComponents: Array<Component> | null } {
 	if (!context) {
 		context = component;
 	}
 
-	let bindings = null;
-	let childComponents = null;
+	let bindings: Array<cellx.Cell<any>> | null = null;
+	let childComponents: Array<Component> | null = null;
 
-	function bind_(node) {
+	function bind_(node: Node) {
 		for (let child = node.firstChild; child; child = child.nextSibling) {
 			switch (child.nodeType) {
 				case 1: {
@@ -30,21 +36,21 @@ export default function bind(node, component, context) {
 
 							if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
 								let name = attr.name;
-								let cell = new Cell(compileContent(parsedValue, value), {
+								let cell = new Cell<any>(compileContent(parsedValue, value), {
 									owner: context,
 									onChange(evt) {
-										setAttribute(child, name, evt.value);
+										setAttribute(child as Element, name, evt['value']);
 									}
 								});
 
-								setAttribute(child, name, cell.get());
+								setAttribute(child as Element, name, cell.get());
 
 								(bindings || (bindings = [])).push(cell);
 							}
 						}
 					}
 
-					let childComponent = child.$c;
+					let childComponent = (child as any).$c;
 
 					if (childComponent) {
 						childComponent.ownerComponent = component;
@@ -60,16 +66,16 @@ export default function bind(node, component, context) {
 					break;
 				}
 				case 3: {
-					let content = child.textContent;
+					let content = child.textContent as string;
 
 					if (reBinding.test(content)) {
 						let parsedContent = (new ContentParser(content)).parse();
 
 						if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
-							let cell = new Cell(compileContent(parsedContent, content), {
+							let cell = new Cell<any>(compileContent(parsedContent, content), {
 								owner: context,
 								onChange(evt) {
-									child.textContent = evt.value;
+									child.textContent = evt['value'];
 								}
 							});
 

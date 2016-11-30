@@ -1,6 +1,6 @@
-import { Utils } from 'cellx';
+import cellx = require('cellx');
 
-let mixin = Utils.mixin;
+let mixin = cellx.Utils.mixin;
 
 declare class HTMLMenuItemElement extends HTMLElement {}
 

@@ -1,13 +1,13 @@
 import DisposableMixin from './DisposableMixin';
 import formatters from './formatters';
 import getText from './getText';
-import ElementAttributes from './ElementAttributes';
-import ComponentTemplate from './ComponentTemplate';
 import Component from './Component';
 import RtContent from './Components/rt-content';
 import RtIfThen from './Components/rt-if-then';
 import RtIfElse from './Components/rt-if-else';
 import RtRepeat from './Components/rt-repeat';
+import ElementAttributes from './ElementAttributes';
+import ComponentTemplate from './ComponentTemplate';
 import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
 import escapeString from './Utils/escapeString';
@@ -23,9 +23,6 @@ let Rionite = {
 	formatters,
 	getText,
 
-	ElementAttributes,
-	ComponentTemplate,
-
 	Component,
 
 	Components: {
@@ -34,6 +31,9 @@ let Rionite = {
 		RtIfElse,
 		RtRepeat
 	},
+
+	ElementAttributes,
+	ComponentTemplate,
 
 	Utils: {
 		camelize,

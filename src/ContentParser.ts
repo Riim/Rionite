@@ -32,15 +32,21 @@ export default class ContentParser {
 	}
 
 	parse(): Content {
+		let content = this.content;
+
+		if (!content) {
+			return [];
+		}
+
 		this.at = 0;
 
 		let result: Content = this.result = [];
 
-		for (let index: number; (index = this.content.indexOf('{', this.at)) > -1;) {
-			this.pushText(this.content.slice(this.at, index));
+		for (let index: number; (index = content.indexOf('{', this.at)) > -1;) {
+			this.pushText(content.slice(this.at, index));
 
 			this.at = index;
-			this.chr = this.content.charAt(index);
+			this.chr = content.charAt(index);
 
 			let binding = this.readBinding();
 
@@ -52,18 +58,18 @@ export default class ContentParser {
 			}
 		}
 
-		this.pushText(this.content.slice(this.at));
+		this.pushText(content.slice(this.at));
 
 		return result;
 	}
 
 	pushText(value: string): void {
-		if (value.length) {
+		if (value) {
 			let result = this.result;
 			let resultLen = result.length;
 
 			if (resultLen && result[resultLen - 1].type == ContentNodeType.TEXT) {
-				(result[resultLen - 1] as ContentText).value = result[resultLen - 1].raw += value;
+				(result[resultLen - 1] as IContentText).value = result[resultLen - 1].raw += value;
 			} else {
 				result.push({
 					type: ContentNodeType.TEXT,
@@ -75,7 +81,7 @@ export default class ContentParser {
 		}
 	}
 
-	readBinding(): ContentBinding | null {
+	readBinding(): IContentBinding | null {
 		let bindingAt = this.at;
 
 		this.next('{');
@@ -84,10 +90,10 @@ export default class ContentParser {
 		let keypath = this.readBindingKeypath();
 
 		if (keypath) {
-			let formatters: Array<ContentBindingFormatter> = [];
+			let formatters: Array<IContentBindingFormatter> = [];
 
 			for (
-				let formatter: ContentBindingFormatter | null;
+				let formatter: IContentBindingFormatter | null;
 				this.skipWhitespaces() == '|' && (formatter = this.readFormatter());
 			) {
 				formatters.push(formatter);
@@ -112,19 +118,21 @@ export default class ContentParser {
 		return null;
 	}
 
-	readBindingKeypath(): ContentBindingKeypath | null {
+	readBindingKeypath(): IContentBindingKeypath | null {
+		let content = this.content;
+
 		reKeypathOrNothing.lastIndex = this.at;
-		let keypath = (reKeypathOrNothing.exec(this.content) as RegExpExecArray)[0];
+		let keypath = (reKeypathOrNothing.exec(content) as RegExpExecArray)[0];
 
 		if (keypath) {
 			let keypathAt = this.at;
 
-			this.chr = this.content.charAt((this.at += keypath.length));
+			this.chr = content.charAt((this.at += keypath.length));
 
 			return {
 				type: ContentNodeType.BINDING_KEYPATH,
 				at: keypathAt,
-				raw: this.content.slice(keypathAt, this.at),
+				raw: content.slice(keypathAt, this.at),
 				value: keypath
 			};
 		}
@@ -132,36 +140,38 @@ export default class ContentParser {
 		return null;
 	}
 
-	readFormatter(): ContentBindingFormatter | null {
+	readFormatter(): IContentBindingFormatter | null {
 		let formatterAt = this.at;
 
 		this.next('|');
 		this.skipWhitespaces();
 
+		let content = this.content;
+
 		reNameOrNothing.lastIndex = this.at;
-		let name = (reNameOrNothing.exec(this.content) as RegExpExecArray)[0];
+		let name = (reNameOrNothing.exec(content) as RegExpExecArray)[0];
 
 		if (name) {
-			let args = (this.chr = this.content.charAt((this.at += name.length))) == '(' ?
+			let args = (this.chr = content.charAt((this.at += name.length))) == '(' ?
 				this.readFormatterArguments() :
 				null;
 
 			return {
 				type: ContentNodeType.BINDING_FORMATTER,
 				at: formatterAt,
-				raw: this.content.slice(formatterAt, this.at),
+				raw: content.slice(formatterAt, this.at),
 				name,
 				arguments: args
 			};
 		}
 
 		this.at = formatterAt;
-		this.chr = this.content.charAt(formatterAt);
+		this.chr = content.charAt(formatterAt);
 
 		return null;
 	}
 
-	readFormatterArguments(): ContentBindingFormatterArguments | null {
+	readFormatterArguments(): IContentBindingFormatterArguments | null {
 		let formatterArgumentsAt = this.at;
 		let args: Array<string> = [];
 
@@ -223,8 +233,8 @@ export default class ContentParser {
 
 		let readers = ['readBoolean', 'readNumber', 'readVacuum'];
 
-		for (let i = 0, l = readers.length; i < l; i++) {
-			let value = this[readers[i]]();
+		for (let reader of readers) {
+			let value = this[reader]();
 
 			if (value !== NOT_VALUE_AND_NOT_KEYPATH) {
 				return value;

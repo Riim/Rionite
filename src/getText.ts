@@ -1,26 +1,26 @@
-import { hasOwn } from './JS/Object';
+let hasOwn = Object.prototype.hasOwnProperty;
 
 let reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
 
-interface LocaleSettings {
+interface ILocaleSettings {
 	code: string;
 	plural: string;
 }
 
-interface LocalizationTexts {
+interface ILocalizationTexts {
 	[context: string]: {
 		[key: string]: string | Array<string>
 	}
 }
 
-interface GetTextConfig {
-	localeSettings: LocaleSettings;
-	texts: LocalizationTexts;
+interface IGetTextConfig {
+	localeSettings: ILocaleSettings;
+	texts: ILocalizationTexts;
 }
 
-interface GetText {
-	localeSettings: LocaleSettings;
-	configure(config: GetTextConfig): void;
+interface IGetText {
+	localeSettings: ILocaleSettings;
+	configure(config: IGetTextConfig): void;
 	(context: string, key: string, plural: boolean, args: Array<any>): string;
 	t(key: string, ...args: Array<any>): string;
 	pt(key: string, context: string, ...args: Array<any>): string;
@@ -28,10 +28,10 @@ interface GetText {
 	npt(key: string, context: string, ...args: Array<any>): string;
 }
 
-let texts: LocalizationTexts;
+let texts: ILocalizationTexts;
 let getPluralIndex: (n: number) => number;
 
-let getText = <GetText>function getText(context: string, key: string, plural: boolean, args: Array<any>): string {
+let getText = <IGetText>function getText(context: string, key: string, plural: boolean, args: Array<any>): string {
 	let rawText: string;
 
 	if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
@@ -71,7 +71,7 @@ let getText = <GetText>function getText(context: string, key: string, plural: bo
 	return text.join('');
 }
 
-function configure(config: GetTextConfig) {
+function configure(config: IGetTextConfig) {
 	texts = config.texts;
 	getPluralIndex = Function('n', `return ${ config.localeSettings.plural };`) as (n: number) => number;
 

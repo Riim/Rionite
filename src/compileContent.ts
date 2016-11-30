@@ -8,17 +8,13 @@ let ContentNodeType = ContentParser.ContentNodeType;
 
 let cache = Object.create(null);
 
-export default function compileContent(parsedContent: Content, content: string): Function {
+export default function compileContent(parsedContent: Content, content: string): () => any {
 	if (cache[content]) {
 		return cache[content];
 	}
 
-	if (parsedContent.length == 1) {
-		let node = parsedContent[0];
-
-		if (node.type == ContentNodeType.BINDING) {
-			return (cache[content] = compileBinding(node as ContentBinding));
-		}
+	if (parsedContent.length == 1 && parsedContent[0].type == ContentNodeType.BINDING) {
+		return (cache[content] = compileBinding(parsedContent[0] as IContentBinding));
 	}
 
 	let usesFormatters = false;
@@ -28,9 +24,9 @@ export default function compileContent(parsedContent: Content, content: string):
 		let node = parsedContent[i];
 
 		if (node.type == ContentNodeType.TEXT) {
-			jsExpr.push(`'${ escapeString((node as ContentText).value) }'`);
+			jsExpr.push(`'${ escapeString((node as IContentText).value) }'`);
 		} else {
-			let bindingJSExpr = bindingToJSExpression(node as ContentBinding);
+			let bindingJSExpr = bindingToJSExpression(node as IContentBinding);
 
 			if (!usesFormatters && bindingJSExpr.usesFormatters) {
 				usesFormatters = true;
@@ -50,5 +46,5 @@ export default function compileContent(parsedContent: Content, content: string):
 		});
 	}
 
-	return (cache[content] = Function(jsExpr));
+	return (cache[content] = Function(jsExpr) as any);
 }

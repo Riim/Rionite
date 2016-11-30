@@ -1,18 +1,18 @@
 import { Cell, JS, Utils } from 'cellx';
-import ContentParser from '../ContentParser';
-import compileBinding from '../compileBinding';
+import Component from '../Component';
+import compileKeypath from '../compileKeypath';
 import bind from '../bind';
 import attachChildComponentElements from '../attachChildComponentElements';
-import Component from '../Component';
 import namePattern from '../namePattern';
-import { slice } from '../JS/Array';
+import keypathPattern from '../keypathPattern';
+import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 
 let Map = JS.Map;
 let nextTick = Utils.nextTick;
-let ContentNodeType = ContentParser.ContentNodeType;
 
-let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(\\S.*)$`);
-let invalidForAttributeMessage = 'Invalid value of attribute "for"';
+let slice = Array.prototype.slice;
+
+let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern })\\s*$`);
 
 export default Component.extend('rt-repeat', {
 	Static: {
@@ -46,18 +46,12 @@ export default Component.extend('rt-repeat', {
 			let forAttrValue = props.for.match(reForAttributeValue);
 
 			if (!forAttrValue) {
-				throw new SyntaxError(invalidForAttributeMessage + ` (${ props.for })`);
-			}
-
-			let parsedOf = (new ContentParser(`{${ forAttrValue[2] }}`)).parse();
-
-			if (parsedOf.length > 1 || parsedOf[0].type != ContentNodeType.BINDING) {
-				throw new SyntaxError(invalidForAttributeMessage + ` (${ props.for })`);
+				throw new SyntaxError(`Invalid value of attribute "for" (${ props.for })`);
 			}
 
 			this._itemName = forAttrValue[1];
 
-			this._list = new Cell(compileBinding(parsedOf[0]), { owner: props.context });
+			this._list = new Cell(compileKeypath(forAttrValue[2]), { owner: props.context });
 
 			this._itemMap = new Map();
 
@@ -222,7 +216,7 @@ export default Component.extend('rt-repeat', {
 		this._lastNode.parentNode.insertBefore(content, this._lastNode.nextSibling);
 		this._lastNode = newLastNode;
 
-		if (childComponents) {
+		if (!nativeCustomElementsFeature && childComponents) {
 			attachChildComponentElements(childComponents);
 		}
 

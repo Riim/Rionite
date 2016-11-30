@@ -1,6 +1,6 @@
+import namePattern from './namePattern';
 import escapeString from './Utils/escapeString';
 import escapeHTML from './Utils/escapeHTML';
-import namePattern from './namePattern';
 
 let keypathPattern = '(?:' + namePattern + '|\\[\\d+\\])(?:\\.' + namePattern + '|\\[\\d+\\])*';
 let re = RegExp(
@@ -13,52 +13,52 @@ let re = RegExp(
 	'\\}\\}'
 );
 
-interface ComponentTemplateBlockDescription {
+interface IComponentTemplateBlockDescription {
 	name: string | null;
 	source: Array<string>;
 }
 
-interface ComponentTemplateBlock {
+interface IComponentTemplateBlock {
 	(
-		this: ComponentTemplateBlockMap,
+		this: IComponentTemplateBlockMap,
 		data: Object
 	): string;
 }
 
-interface ComponentTemplateBlockInner {
+interface IComponentTemplateBlockInner {
 	(
-		this: ComponentTemplateBlockMap,
-		$super: ComponentTemplateBlock,
+		this: IComponentTemplateBlockMap,
+		$super: IComponentTemplateBlock,
 		data: Object,
 		escape: (value: string) => string
 	): string;
 }
 
-interface ComponentTemplateRenderer {
+interface IComponentTemplateRenderer {
 	(
-		this: ComponentTemplateBlockMap,
+		this: IComponentTemplateBlockMap,
 		data: Object,
 		escape: (value: string) => string
 	): string;
 }
 
-interface ComponentTemplateBlockMap {
-	[name: string]: ComponentTemplateBlock;
+interface IComponentTemplateBlockMap {
+	[name: string]: IComponentTemplateBlock;
 }
 
 export default class ComponentTemplate {
 	parent: ComponentTemplate | null;
 
-	_renderer: ComponentTemplateRenderer;
-	_blockMap: ComponentTemplateBlockMap;
+	_renderer: IComponentTemplateRenderer;
+	_blockMap: IComponentTemplateBlockMap;
 
 	constructor(tmpl: string, parent: ComponentTemplate | null = null) {
 		this.parent = parent;
 
-		let currentBlock: ComponentTemplateBlockDescription = { name: null, source: [] };
+		let currentBlock: IComponentTemplateBlockDescription = { name: null, source: [] };
 
 		let blocks = [currentBlock];
-		let blockMap: { [name: string]: ComponentTemplateBlockDescription } = {};
+		let blockMap: { [name: string]: IComponentTemplateBlockDescription } = {};
 
 		let splittedTemplate = tmpl.split(re);
 
@@ -100,19 +100,19 @@ export default class ComponentTemplate {
 		this._renderer = parent ? parent._renderer : Function(
 			'data', 'escape',
 			`return [${ blocks[0].source.join(', ') }].join('');`
-		) as ComponentTemplateRenderer;
+		) as IComponentTemplateRenderer;
 
-		Object.keys(blockMap).forEach(function(this: ComponentTemplateBlockMap, name: string) {
+		Object.keys(blockMap).forEach(function(this: IComponentTemplateBlockMap, name: string) {
 			let parentBlock = parent && parent._blockMap[name];
 			let inner = Function(
 				'$super', 'data', 'escape',
 				`return [${ blockMap[name].source.join(', ') }].join('');`
-			) as ComponentTemplateBlockInner;
+			) as IComponentTemplateBlockInner;
 
-			this[name] = function(this: ComponentTemplateBlockMap, data: Object): string {
+			this[name] = function(this: IComponentTemplateBlockMap, data: Object): string {
 				return inner.call(this, parentBlock, data, escapeHTML);
 			};
-		}, (this._blockMap = Object.create(parent && parent._blockMap) as ComponentTemplateBlockMap));
+		}, (this._blockMap = Object.create(parent && parent._blockMap) as IComponentTemplateBlockMap));
 	}
 
 	extend(tmpl: string) {

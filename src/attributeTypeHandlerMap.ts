@@ -1,9 +1,9 @@
-import { JS } from 'cellx';
+import cellx = require('cellx');
+import isRegExp from './Utils/isRegExp';
 import escapeHTML from './Utils/escapeHTML';
 import unescapeHTML from './Utils/unescapeHTML';
-import isRegExp from './Utils/isRegExp';
 
-let Map = JS.Map;
+let Map = cellx.JS.Map;
 
 export default new Map<any, [
 	(value: string | null, defaultValue?: any) => any,

@@ -3,7 +3,7 @@ import formatters from './formatters';
 
 let cache = Object.create(null);
 
-export default function compileBinding(binding: ContentBinding): Function {
+export default function compileBinding(binding: IContentBinding): () => any {
 	let bindingRaw = binding.raw;
 
 	if (cache[bindingRaw]) {
@@ -21,5 +21,5 @@ export default function compileBinding(binding: ContentBinding): Function {
 		});
 	}
 
-	return (cache[bindingRaw] = Function(jsExpr));
+	return (cache[bindingRaw] = Function(jsExpr) as any);
 }

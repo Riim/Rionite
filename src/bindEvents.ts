@@ -1,6 +1,11 @@
-export default function bindEvents(component, events) {
+import Component from './Component';
+
+export default function bindEvents(
+	component: Component,
+	events: { [assetName: string]: { [eventName: string]: Function } }
+): void {
 	for (let assetName in events) {
-		let asset;
+		let asset: Component | Element | null;
 
 		if (assetName == ':component') {
 			asset = component;

@@ -1,8 +1,8 @@
 import { JS } from 'cellx';
+import Component from '../Component';
 import bind from '../bind';
 import attachChildComponentElements from '../attachChildComponentElements';
-import Component from '../Component';
-import { templateTagSupport } from '../templateTagSupport';
+import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 
 let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 
@@ -38,7 +38,7 @@ export default Component.extend('rt-content', {
 			let selector = this.elementAttributes.select;
 
 			if (selector) {
-				if (!templateTagSupport && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
+				if (!templateTagFeature && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
 					let templates = ownerComponentInputContent.querySelectorAll('template');
 
 					for (let i = templates.length; i;) {
@@ -88,7 +88,7 @@ export default Component.extend('rt-content', {
 
 		el.appendChild(content);
 
-		if (childComponents) {
+		if (!nativeCustomElementsFeature && childComponents) {
 			attachChildComponentElements(childComponents);
 		}
 	},

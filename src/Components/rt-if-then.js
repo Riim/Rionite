@@ -1,13 +1,16 @@
 import { Cell, Utils } from 'cellx';
-import ContentParser from '../ContentParser';
-import compileBinding from '../compileBinding';
+import Component from '../Component';
+import compileKeypath from '../compileKeypath';
 import bind from '../bind';
 import attachChildComponentElements from '../attachChildComponentElements';
-import Component from '../Component';
-import { slice } from '../JS/Array';
+import keypathPattern from '../keypathPattern';
+import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 
 let nextTick = Utils.nextTick;
-let ContentNodeType = ContentParser.ContentNodeType;
+
+let slice = Array.prototype.slice;
+
+let reKeypath = RegExp(`^${ keypathPattern }$`);
 
 export default Component.extend('rt-if-then', {
 	Static: {
@@ -30,13 +33,13 @@ export default Component.extend('rt-if-then', {
 
 			props.content = document.importNode(this.element.content, true);
 
-			let parsedIf = (new ContentParser(`{${ props.if }}`)).parse();
+			let if_ = (props.if || '').trim();
 
-			if (parsedIf.length > 1 || parsedIf[0].type != ContentNodeType.BINDING) {
-				throw new SyntaxError(`Invalid value of attribute "if" (${ props.if })`);
+			if (!reKeypath.test(if_)) {
+				throw new SyntaxError(`Invalid value of attribute "if" (${ if_ })`);
 			}
 
-			let getIfValue = compileBinding(parsedIf[0]);
+			let getIfValue = compileKeypath(if_);
 
 			this._if = new Cell(function() {
 				return !!getIfValue.call(this);
@@ -85,7 +88,7 @@ export default Component.extend('rt-if-then', {
 
 			this.element.parentNode.insertBefore(content, this.element.nextSibling);
 
-			if (childComponents) {
+			if (!nativeCustomElementsFeature && childComponents) {
 				attachChildComponentElements(childComponents);
 			}
 		} else {

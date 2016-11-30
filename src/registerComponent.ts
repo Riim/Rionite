@@ -1,13 +1,15 @@
-import { Utils } from 'cellx';
+import cellx = require('cellx');
+import Component from './Component';
 import elementConstructorMap from './elementConstructorMap';
 import ElementProtoMixin from './ElementProtoMixin';
-import { hasOwn } from './JS/Object';
-import { push } from './JS/Array';
 import hyphenize from './Utils/hyphenize';
 
-let mixin = Utils.mixin;
+let mixin = cellx.Utils.mixin;
 
-export default function registerComponent(componentConstr) {
+let hasOwn = Object.prototype.hasOwnProperty;
+let push = Array.prototype.push;
+
+export default function registerComponent(componentConstr: typeof Component) {
 	let elIs = componentConstr.elementIs;
 
 	if (!elIs) {
@@ -17,8 +19,8 @@ export default function registerComponent(componentConstr) {
 	if (hasOwn.call(componentConstr, 'props')) {
 		let props = componentConstr.props;
 
-		if (props && (props.content || props.context)) {
-			throw new TypeError(`No need to declare property "${ props.content ? 'content' : 'context' }"`);
+		if (props && (props['content'] || props['context'])) {
+			throw new TypeError(`No need to declare property "${ props['content'] ? 'content' : 'context' }"`);
 		}
 
 		componentConstr.elementAttributes = props;
@@ -33,7 +35,7 @@ export default function registerComponent(componentConstr) {
 		);
 	}
 
-	componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames || null);
+	componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames);
 
 	let elExtends = componentConstr.elementExtends;
 
@@ -42,7 +44,7 @@ export default function registerComponent(componentConstr) {
 			window[`HTML${ elExtends.charAt(0).toUpperCase() + elExtends.slice(1) }Element`] :
 		HTMLElement;
 
-	let elConstr = function(self) {
+	let elConstr = function(self: any) {
 		return parentElConstr.call(this, self);
 	};
 	let elProto = elConstr.prototype = Object.create(parentElConstr.prototype);
@@ -67,7 +69,11 @@ export default function registerComponent(componentConstr) {
 
 	elProto._rioniteComponentConstructor = componentConstr;
 
-	elementConstructorMap[elIs] = customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
+	elementConstructorMap[elIs] = (window as any).customElements.define(
+		elIs,
+		elConstr,
+		elExtends ? { extends: elExtends } : null
+	);
 
-	return componentConstr;
+	return (componentConstr._registeredComponent = componentConstr);
 }

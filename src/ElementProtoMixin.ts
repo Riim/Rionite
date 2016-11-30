@@ -1,8 +1,9 @@
-import { JS } from 'cellx';
-import { hasOwn } from './JS/Object';
+import cellx = require('cellx');
 import defer from './Utils/defer';
 
-let Symbol = JS.Symbol;
+let Symbol = cellx.JS.Symbol;
+
+let hasOwn = Object.prototype.hasOwnProperty;
 
 let attached = Symbol('Rionite.ElementProtoMixin.attached');
 
@@ -64,7 +65,7 @@ let ElementProtoMixin = {
 		}
 	},
 
-	attributeChangedCallback(name, oldValue, value) {
+	attributeChangedCallback(name: string, oldValue: string | null, value: string | null) {
 		let component = this.rioniteComponent;
 
 		if (component && component.isReady) {

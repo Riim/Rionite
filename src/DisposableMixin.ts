@@ -6,41 +6,40 @@ let nextUID = cellx.Utils.nextUID;
 type ListeningTarget = cellx.EventEmitter | EventTarget | Array<cellx.EventEmitter | EventTarget> | NodeList |
 	HTMLCollection;
 
-interface Listener {
+interface IListener {
 	(evt: cellx.IEvent | Event): boolean | undefined;
 }
 
-interface Listening {
+interface IListening {
 	stop: () => void,
 	dispose: () => void
 }
 
-export default class DisposableMixin extends EventEmitter {
+export default class DisposableMixin {
 	_disposables: { [id: string]: any };
 
 	constructor() {
-		super();
 		this._disposables = {};
 	}
 
 	listenTo(
 		target: ListeningTarget | Array<ListeningTarget>,
 		type: string | Array<string>,
-		listener: Listener | Array<Listener>,
+		listener: IListener | Array<IListener>,
 		context?: any
-	): Listening;
+	): IListening;
 	listenTo(
 		target: ListeningTarget | Array<ListeningTarget>,
-		listeners: { [type: string]: Listener | Array<Listener> },
+		listeners: { [type: string]: IListener | Array<IListener> },
 		context?: any
-	): Listening;
+	): IListening;
 	listenTo(
 		target: ListeningTarget | Array<ListeningTarget>,
-		typeOrListeners: string | Array<string> | { [type: string]: Listener | Array<Listener> },
-		listenerOrContext?: Listener | Array<Listener> | any,
+		typeOrListeners: string | Array<string> | { [type: string]: IListener | Array<IListener> },
+		listenerOrContext?: IListener | Array<IListener> | any,
 		context?: any
-	): Listening {
-		let listenings: Array<Listening>;
+	): IListening {
+		let listenings: Array<IListening>;
 
 		if (typeof typeOrListeners == 'object') {
 			listenings = [];
@@ -105,9 +104,9 @@ export default class DisposableMixin extends EventEmitter {
 	_listenTo(
 		target: cellx.EventEmitter | EventTarget,
 		type: string,
-		listener: Listener,
+		listener: IListener,
 		context: any
-	): Listening {
+	): IListening {
 		if (target instanceof EventEmitter) {
 			target.on(type, listener, context);
 		} else if (target.addEventListener) {

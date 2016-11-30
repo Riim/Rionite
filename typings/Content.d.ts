@@ -1,38 +1,38 @@
-interface ContentText {
+interface IContentText {
 	type: number,
 	at: number,
 	raw: string,
 	value: string
 }
 
-interface ContentBindingFormatterArguments {
+interface IContentBindingFormatterArguments {
 	type: number,
 	at: number,
 	raw: string,
 	value: Array<string>
 }
 
-interface ContentBindingFormatter {
+interface IContentBindingFormatter {
 	type: number,
 	at: number,
 	raw: string,
 	name: string,
-	arguments: ContentBindingFormatterArguments | null
+	arguments: IContentBindingFormatterArguments | null
 }
 
-interface ContentBindingKeypath {
+interface IContentBindingKeypath {
 	type: number,
 	at: number,
 	raw: string,
 	value: string
 }
 
-interface ContentBinding {
+interface IContentBinding {
 	type: number,
 	at: number,
 	raw: string,
-	keypath: ContentBindingKeypath,
-	formatters: Array<ContentBindingFormatter>
+	keypath: IContentBindingKeypath,
+	formatters: Array<IContentBindingFormatter>
 }
 
-type Content = Array<ContentText | ContentBinding>;
+type Content = Array<IContentText | IContentBinding>;
