@@ -18,13 +18,11 @@ export default function compileContent(parsedContent: Content, content: string):
 	}
 
 	let usesFormatters = false;
-	let jsExpr: Array<string> | string = [];
+	let jsExprParts: Array<string> = [];
 
-	for (let i = 0, l = parsedContent.length; i < l; i++) {
-		let node = parsedContent[i];
-
+	for (let node of parsedContent) {
 		if (node.type == ContentNodeType.TEXT) {
-			jsExpr.push(`'${ escapeString((node as IContentText).value) }'`);
+			jsExprParts.push(`'${ escapeString((node as IContentText).value) }'`);
 		} else {
 			let bindingJSExpr = bindingToJSExpression(node as IContentBinding);
 
@@ -32,11 +30,11 @@ export default function compileContent(parsedContent: Content, content: string):
 				usesFormatters = true;
 			}
 
-			jsExpr.push(bindingJSExpr.value);
+			jsExprParts.push(bindingJSExpr.value);
 		}
 	}
 
-	jsExpr = `var temp; return [${ jsExpr.join(', ') }].join('');`;
+	let jsExpr = `var temp; return [${ jsExprParts.join(', ') }].join('');`;
 
 	if (usesFormatters) {
 		let inner = Function('formatters', jsExpr);

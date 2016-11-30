@@ -23,9 +23,9 @@ export default class RtIfThen extends Component {
 		if: { type: String, required: true, readonly: true }
 	};
 
-	_if: IfCell;
-
 	_elseMode = false;
+
+	_if: IfCell;
 
 	_nodes: Array<Node> | null;
 

@@ -4,8 +4,6 @@ import defer from './Utils/defer';
 
 let Symbol = cellx.JS.Symbol;
 
-let hasOwn = Object.prototype.hasOwnProperty;
-
 let attached = Symbol('Rionite.ElementProtoMixin.attached');
 
 let ElementProtoMixin = {
@@ -70,12 +68,7 @@ let ElementProtoMixin = {
 		let component = this.rioniteComponent as Component;
 
 		if (component && component.isReady) {
-			let attrs = component.elementAttributes;
-			let privateName = '_' + name;
-
-			if (hasOwn.call(attrs, privateName)) {
-				attrs[privateName].set(value);
-			}
+			component.elementAttributes['_' + name].set(value);
 		}
 	}
 };

@@ -4,7 +4,7 @@ import Component from './Component';
 export default function onEvent(evt: cellx.IEvent | Event) {
 	let node: Node;
 	let attrName: string;
-	let targetEls: any;
+	let targetEls: Array<Element> | undefined;
 
 	if (evt instanceof Event) {
 		node = evt.target as Node;
@@ -16,7 +16,7 @@ export default function onEvent(evt: cellx.IEvent | Event) {
 
 	for (;;) {
 		if (node.nodeType == 1 && (node as Element).hasAttribute(attrName)) {
-			(targetEls || (targetEls = [])).push(node);
+			(targetEls || (targetEls = [])).push(node as Element);
 		}
 
 		node = node.parentNode;

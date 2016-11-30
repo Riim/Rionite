@@ -441,8 +441,8 @@ function bindContent(content, ownerComponent, context) {
     if (!context) {
         context = ownerComponent;
     }
-    var bindings = null;
-    var childComponents = null;
+    var bindings;
+    var childComponents;
     function bind_(content) {
         var _loop_1 = function (child) {
             switch (child.nodeType) {
@@ -507,7 +507,10 @@ function bindContent(content, ownerComponent, context) {
         }
     }
     bind_(content);
-    return { bindings: bindings, childComponents: childComponents };
+    return {
+        bindings: bindings || null,
+        childComponents: childComponents || null
+    };
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = bindContent;
@@ -2080,8 +2083,9 @@ var RtRepeat = (function (_super) {
             }
             else {
                 var df = document.createDocumentFragment();
-                for (var i = 0, l = nodes.length; i < l; i++) {
-                    df.appendChild(nodes[i]);
+                for (var _i = 0, nodes_1 = nodes; _i < nodes_1.length; _i++) {
+                    var node = nodes_1[_i];
+                    df.appendChild(node);
                 }
                 var newLastNode_1 = df.lastChild;
                 this._lastNode.parentNode.insertBefore(df, this._lastNode.nextSibling);
@@ -2172,7 +2176,6 @@ Component_1.default.register(RtRepeat);
 var cellx = __webpack_require__(0);
 var defer_1 = __webpack_require__(16);
 var Symbol = cellx.JS.Symbol;
-var hasOwn = Object.prototype.hasOwnProperty;
 var attached = Symbol('Rionite.ElementProtoMixin.attached');
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
@@ -2226,11 +2229,7 @@ var ElementProtoMixin = (_a = {
     _a.attributeChangedCallback = function (name, oldValue, value) {
         var component = this.rioniteComponent;
         if (component && component.isReady) {
-            var attrs = component.elementAttributes;
-            var privateName = '_' + name;
-            if (hasOwn.call(attrs, privateName)) {
-                attrs[privateName].set(value);
-            }
+            component.elementAttributes['_' + name].set(value);
         }
     },
     _a);
@@ -2418,21 +2417,21 @@ function compileContent(parsedContent, content) {
         return (cache[content] = compileBinding_1.default(parsedContent[0]));
     }
     var usesFormatters = false;
-    var jsExpr = [];
-    for (var i = 0, l = parsedContent.length; i < l; i++) {
-        var node = parsedContent[i];
+    var jsExprParts = [];
+    for (var _i = 0, parsedContent_1 = parsedContent; _i < parsedContent_1.length; _i++) {
+        var node = parsedContent_1[_i];
         if (node.type == ContentNodeType.TEXT) {
-            jsExpr.push("'" + escapeString_1.default(node.value) + "'");
+            jsExprParts.push("'" + escapeString_1.default(node.value) + "'");
         }
         else {
             var bindingJSExpr = bindingToJSExpression_1.default(node);
             if (!usesFormatters && bindingJSExpr.usesFormatters) {
                 usesFormatters = true;
             }
-            jsExpr.push(bindingJSExpr.value);
+            jsExprParts.push(bindingJSExpr.value);
         }
     }
-    jsExpr = "var temp; return [" + jsExpr.join(', ') + "].join('');";
+    var jsExpr = "var temp; return [" + jsExprParts.join(', ') + "].join('');";
     if (usesFormatters) {
         var inner_1 = Function('formatters', jsExpr);
         return (cache[content] = function () {
@@ -2595,23 +2594,25 @@ var elementConstructorMap_1 = __webpack_require__(36);
 var ElementProtoMixin_1 = __webpack_require__(29);
 var hyphenize_1 = __webpack_require__(9);
 var mixin = cellx.Utils.mixin;
-var hasOwn = Object.prototype.hasOwnProperty;
 var push = Array.prototype.push;
 function registerComponent(componentConstr) {
     var elIs = componentConstr.elementIs;
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
-    if (hasOwn.call(componentConstr, 'props')) {
+    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
+    if (componentConstr.props !== parentComponentConstr.props) {
         var props = componentConstr.props;
         if (props && (props['content'] || props['context'])) {
             throw new TypeError("No need to declare property \"" + (props['content'] ? 'content' : 'context') + "\"");
         }
         componentConstr.elementAttributes = props;
     }
-    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
     if (componentConstr.template !== parentComponentConstr.template && componentConstr.template) {
-        push.apply((componentConstr._markupBlockNames = [elIs]), parentComponentConstr._markupBlockNames || []);
+        componentConstr._markupBlockNames = [elIs];
+        if (parentComponentConstr._markupBlockNames) {
+            push.apply(componentConstr._markupBlockNames, parentComponentConstr._markupBlockNames);
+        }
     }
     componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames || null);
     var elExtends = componentConstr.elementExtends;
@@ -2628,7 +2629,14 @@ function registerComponent(componentConstr) {
         enumerable: true,
         get: function () {
             var elementAttributes = componentConstr.elementAttributes;
-            return elementAttributes ? Object.keys(elementAttributes).map(function (name) { return hyphenize_1.default(name); }) : [];
+            if (!elementAttributes) {
+                return [];
+            }
+            var observedAttributes = [];
+            for (var name_1 in elementAttributes) {
+                observedAttributes.push(hyphenize_1.default(name_1));
+            }
+            return observedAttributes;
         }
     });
     mixin(elProto, ElementProtoMixin_1.default);

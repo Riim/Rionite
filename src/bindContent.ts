@@ -18,8 +18,8 @@ export default function bindContent(
 		context = ownerComponent;
 	}
 
-	let bindings: Array<cellx.Cell<any>> | null = null;
-	let childComponents: Array<Component> | null = null;
+	let bindings: Array<cellx.Cell<any>> | undefined;
+	let childComponents: Array<Component> | undefined;
 
 	function bind_(content: Node) {
 		for (let child = content.firstChild; child; child = child.nextSibling) {
@@ -93,5 +93,8 @@ export default function bindContent(
 
 	bind_(content);
 
-	return { bindings, childComponents };
+	return {
+		bindings: bindings || null,
+		childComponents: childComponents || null
+	};
 }

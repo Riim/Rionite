@@ -48,7 +48,7 @@ let elementMoved: any;
 let elementAttributeChanged: any;
 
 export default class Component extends EventEmitter implements DisposableMixin {
-	static extend(elIs: any, description: any): any {
+	static extend(elIs: string, description: any): typeof Component {
 		description.Extends = this;
 		(description.Static || (description.Static = {})).elementIs = elIs;
 		return (registerComponent as any)(createClass(description));
@@ -63,7 +63,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static elementAttributes: { [name: string]: any; } | null;
 	static props: { [name: string]: any; } | null;
 
-	static i18n: { [key: string]: any; } | null;
+	static i18n: { [key: string]: any; };
 
 	static template: string | IComponentTemplate | null;
 
@@ -330,7 +330,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 		if (!assetList) {
 			let constr = this.constructor as typeof Component;
-			let className = (constr._assetClassNames as IComponentAssetClassNames)[name];
+			let className = constr._assetClassNames[name];
 
 			if (className) {
 				assetList = containerEl.getElementsByClassName(className);
@@ -348,7 +348,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 					assetList = containerEl.getElementsByClassName(className);
 
 					if (assetList.length) {
-						(constr._assetClassNames as IComponentAssetClassNames)[name] = className;
+						constr._assetClassNames[name] = className;
 						assets.set(key, assetList);
 						break;
 					}

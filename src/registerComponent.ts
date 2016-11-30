@@ -6,7 +6,6 @@ import hyphenize from './Utils/hyphenize';
 
 let mixin = cellx.Utils.mixin;
 
-let hasOwn = Object.prototype.hasOwnProperty;
 let push = Array.prototype.push;
 
 export default function registerComponent(componentConstr: typeof Component) {
@@ -16,7 +15,9 @@ export default function registerComponent(componentConstr: typeof Component) {
 		throw new TypeError('Static property "elementIs" is required');
 	}
 
-	if (hasOwn.call(componentConstr, 'props')) {
+	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
+
+	if (componentConstr.props !== parentComponentConstr.props) {
 		let props = componentConstr.props;
 
 		if (props && (props['content'] || props['context'])) {
@@ -26,13 +27,12 @@ export default function registerComponent(componentConstr: typeof Component) {
 		componentConstr.elementAttributes = props;
 	}
 
-	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
-
 	if (componentConstr.template !== parentComponentConstr.template && componentConstr.template) {
-		push.apply(
-			(componentConstr._markupBlockNames = [elIs]),
-			parentComponentConstr._markupBlockNames || []
-		);
+		componentConstr._markupBlockNames = [elIs];
+
+		if (parentComponentConstr._markupBlockNames) {
+			push.apply(componentConstr._markupBlockNames, parentComponentConstr._markupBlockNames);
+		}
 	}
 
 	componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames || null);
@@ -55,7 +55,18 @@ export default function registerComponent(componentConstr: typeof Component) {
 
 		get() {
 			let elementAttributes = componentConstr.elementAttributes;
-			return elementAttributes ? Object.keys(elementAttributes).map(name => hyphenize(name)) : [];
+
+			if (!elementAttributes) {
+				return [];
+			}
+
+			let observedAttributes = [];
+
+			for (let name in elementAttributes) {
+				observedAttributes.push(hyphenize(name));
+			}
+
+			return observedAttributes;
 		}
 	});
 

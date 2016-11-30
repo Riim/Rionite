@@ -178,8 +178,8 @@ export default class RtRepeat extends Component {
 			} else {
 				let df = document.createDocumentFragment();
 
-				for (let i = 0, l = nodes.length; i < l; i++) {
-					df.appendChild(nodes[i]);
+				for (let node of nodes) {
+					df.appendChild(node);
 				}
 
 				let newLastNode = df.lastChild;
