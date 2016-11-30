@@ -25,7 +25,7 @@ module.exports = function(env) {
 
 	return {
 		entry: {
-			Rionite: [path.join(__dirname, 'src/Rionite.js')]
+			Rionite: [path.join(__dirname, 'src/Rionite.ts')]
 		},
 
 		output: {

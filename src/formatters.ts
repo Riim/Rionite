@@ -5,7 +5,7 @@ export default {
 		return value || arg;
 	},
 	default: function default_(value: any, arg: any): any {
-		return value === void 0 ? arg : value;
+		return value === undefined ? arg : value;
 	},
 
 	not: function not(value: any): boolean {

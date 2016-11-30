@@ -2,7 +2,7 @@ import Component from './Component';
 
 export default function bindEvents(
 	component: Component,
-	events: { [assetName: string]: { [eventName: string]: Function } }
+	events: { [assetName: string]: { [eventName: string]: Function; } }
 ): void {
 	for (let assetName in events) {
 		let asset: Component | Element | null;

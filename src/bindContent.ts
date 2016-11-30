@@ -9,20 +9,20 @@ let ContentNodeType = ContentParser.ContentNodeType;
 
 let reBinding = /{[^}]+}/;
 
-export default function bind(
-	node: Node,
-	component: Component,
-	context?: Component
+export default function bindContent(
+	content: Node,
+	ownerComponent: Component,
+	context?: Object
 ): { bindings: Array<cellx.Cell<any>> | null, childComponents: Array<Component> | null } {
 	if (!context) {
-		context = component;
+		context = ownerComponent;
 	}
 
 	let bindings: Array<cellx.Cell<any>> | null = null;
 	let childComponents: Array<Component> | null = null;
 
-	function bind_(node: Node) {
-		for (let child = node.firstChild; child; child = child.nextSibling) {
+	function bind_(content: Node) {
+		for (let child = content.firstChild; child; child = child.nextSibling) {
 			switch (child.nodeType) {
 				case 1: {
 					let attrs = child.attributes;
@@ -53,7 +53,7 @@ export default function bind(
 					let childComponent = (child as any).$c;
 
 					if (childComponent) {
-						childComponent.ownerComponent = component;
+						childComponent.ownerComponent = ownerComponent;
 						childComponent.props.context = context;
 
 						(childComponents || (childComponents = [])).push(childComponent);
@@ -91,7 +91,7 @@ export default function bind(
 		}
 	}
 
-	bind_(node);
+	bind_(content);
 
 	return { bindings, childComponents };
 }

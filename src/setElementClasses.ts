@@ -4,7 +4,7 @@ export default function setElementClasses(el: Element, constr: typeof Component)
 	let c = constr;
 
 	do {
-		el.classList.add(c.elementIs as string);
+		el.classList.add(c.elementIs);
 		c = Object.getPrototypeOf(c.prototype).constructor;
 	} while (c != Component);
 }

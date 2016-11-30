@@ -1,25 +1,25 @@
-import { JS } from 'cellx';
+import cellx = require('cellx');
 import Component from '../Component';
-import bind from '../bind';
+import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 
-let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
+let KEY_TEMPLATES_FIXED = cellx.JS.Symbol('Rionite.RtContent#templatesFixed');
 
-export default Component.extend('rt-content', {
-	Static: {
-		props: {
-			select: { type: String, readonly: true },
-			getContext: { type: String, readonly: true }
-		},
+export default class RtContent extends Component {
+	static elementIs = 'rt-content';
 
-		template: ''
-	},
+	static props = {
+		select: { type: String, readonly: true },
+		getContext: { type: String, readonly: true }
+	};
 
-	_rawContent: void 0,
+	static template = '';
 
-	_attachElement() {
-		let ownerComponent = this.ownerComponent;
+	_rawContent: DocumentFragment;
+
+	_attachElement(): void {
+		let ownerComponent = this.ownerComponent as Component;
 		let el = this.element;
 		let props = this.props;
 
@@ -34,8 +34,8 @@ export default Component.extend('rt-content', {
 				inputContent.appendChild(child);
 			}
 
-			let ownerComponentInputContent = ownerComponent.props.content;
-			let selector = this.elementAttributes.select;
+			let ownerComponentInputContent = ownerComponent.props.content as DocumentFragment;
+			let selector = this.elementAttributes['select'];
 
 			if (selector) {
 				if (!templateTagFeature && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
@@ -68,17 +68,17 @@ export default Component.extend('rt-content', {
 		}
 
 		let content = this._rawContent.cloneNode(true);
-		let getContext = props.getContext;
+		let getContext = props['getContext'];
 
 		let { bindings, childComponents } = this._rawContent == props.content ?
-			bind(
+			bindContent(
 				content,
 				ownerComponent,
 				getContext ? ownerComponent[getContext](this, props.context) : props.context
 			) :
-			bind(
+			bindContent(
 				content,
-				ownerComponent.ownerComponent,
+				ownerComponent.ownerComponent as Component,
 				getContext ?
 					ownerComponent[getContext](this, ownerComponent.props.context) :
 					ownerComponent.props.context
@@ -91,9 +91,11 @@ export default Component.extend('rt-content', {
 		if (!nativeCustomElementsFeature && childComponents) {
 			attachChildComponentElements(childComponents);
 		}
-	},
+	}
 
-	_detachElement() {
+	_detachElement(): void {
 		this._destroyBindings();
 	}
-});
+}
+
+Component.register(RtContent);

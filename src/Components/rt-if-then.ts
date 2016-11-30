@@ -1,39 +1,41 @@
-import { Cell, Utils } from 'cellx';
+import cellx = require('cellx');
 import Component from '../Component';
 import compileKeypath from '../compileKeypath';
-import bind from '../bind';
+import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import keypathPattern from '../keypathPattern';
 import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 
-let nextTick = Utils.nextTick;
+let Cell = cellx.Cell;
+let nextTick = cellx.Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
+type IfCell = cellx.Cell<boolean>;
+
 let reKeypath = RegExp(`^${ keypathPattern }$`);
 
-export default Component.extend('rt-if-then', {
-	Static: {
-		elementExtends: 'template',
+export default class RtIfThen extends Component {
+	static elementIs = 'rt-if-then';
+	static elementExtends = 'template';
 
-		props: {
-			if: { type: String, required: true, readonly: true }
-		}
-	},
+	static props = {
+		if: { type: String, required: true, readonly: true }
+	};
 
-	_if: null,
+	_if: IfCell;
 
-	_elseMode: false,
+	_elseMode = false;
 
-	_nodes: null,
+	_nodes: Array<Node> | null;
 
-	_attachElement() {
+	_attachElement(): void {
 		if (!this.initialized) {
 			let props = this.props;
 
-			props.content = document.importNode(this.element.content, true);
+			props.content = document.importNode((this.element as any).content, true) as DocumentFragment;
 
-			let if_ = (props.if || '').trim();
+			let if_ = (props['if'] || '').trim();
 
 			if (!reKeypath.test(if_)) {
 				throw new SyntaxError(`Invalid value of attribute "if" (${ if_ })`);
@@ -41,9 +43,9 @@ export default Component.extend('rt-if-then', {
 
 			let getIfValue = compileKeypath(if_);
 
-			this._if = new Cell(function() {
+			this._if = new Cell<boolean>(function() {
 				return !!getIfValue.call(this);
-			}, { owner: props.context });
+			}, { owner: props.context as Object });
 
 			this.initialized = true;
 		}
@@ -51,9 +53,9 @@ export default Component.extend('rt-if-then', {
 		this._if.on('change', this._onIfChange, this);
 
 		this._render(false);
-	},
+	}
 
-	_detachElement() {
+	_detachElement(): void {
 		this._destroyBindings();
 		this._if.off('change', this._onIfChange, this);
 
@@ -69,19 +71,23 @@ export default Component.extend('rt-if-then', {
 				}
 			}
 		}
-	},
+	}
 
-	_onIfChange() {
+	_onIfChange(): void {
 		if (this.element.parentNode) {
 			this._render(true);
 		}
-	},
+	}
 
-	_render(changed) {
+	_render(changed: boolean): void {
 		if (this._elseMode ? !this._if.get() : this._if.get()) {
-			let content = this.props.content.cloneNode(true);
+			let content = (this.props.content as DocumentFragment).cloneNode(true);
 
-			let { bindings, childComponents } = bind(content, this.ownerComponent, this.props.context);
+			let { bindings, childComponents } = bindContent(
+				content,
+				(this.ownerComponent as Component),
+				this.props.context as Object
+			);
 
 			this._nodes = slice.call(content.childNodes);
 			this._bindings = bindings;
@@ -112,4 +118,6 @@ export default Component.extend('rt-if-then', {
 			});
 		}
 	}
-});
+}
+
+Component.register(RtIfThen);

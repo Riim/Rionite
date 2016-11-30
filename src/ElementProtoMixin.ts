@@ -1,4 +1,5 @@
 import cellx = require('cellx');
+import Component from './Component';
 import defer from './Utils/defer';
 
 let Symbol = cellx.JS.Symbol;
@@ -10,25 +11,25 @@ let attached = Symbol('Rionite.ElementProtoMixin.attached');
 let ElementProtoMixin = {
 	rioniteComponent: null,
 
-	get $c() {
+	get $c(): Component {
 		return new this._rioniteComponentConstructor(this);
 	},
 
 	[attached]: false,
 
-	connectedCallback() {
+	connectedCallback(): void {
 		this[attached] = true;
 
-		let component = this.rioniteComponent;
+		let component = this.rioniteComponent as Component;
 
 		if (component) {
 			if (component.isElementAttached) {
 				if (component._parentComponent === null) {
-					component._parentComponent = void 0;
+					component._parentComponent = undefined;
 					component.elementMoved();
 				}
 			} else {
-				component._parentComponent = void 0;
+				component._parentComponent = undefined;
 				component.isElementAttached = true;
 				component._attachElement();
 			}
@@ -37,7 +38,7 @@ let ElementProtoMixin = {
 				if (this[attached]) {
 					let component = this.$c;
 
-					component._parentComponent = void 0;
+					component._parentComponent = undefined;
 
 					if (!component.parentComponent) {
 						component.isElementAttached = true;
@@ -48,10 +49,10 @@ let ElementProtoMixin = {
 		}
 	},
 
-	disconnectedCallback() {
+	disconnectedCallback(): void {
 		this[attached] = false;
 
-		let component = this.rioniteComponent;
+		let component = this.rioniteComponent as Component;
 
 		if (component && component.isElementAttached) {
 			component._parentComponent = null;
@@ -65,8 +66,8 @@ let ElementProtoMixin = {
 		}
 	},
 
-	attributeChangedCallback(name: string, oldValue: string | null, value: string | null) {
-		let component = this.rioniteComponent;
+	attributeChangedCallback(name: string, oldValue: string | null, value: string | null): void {
+		let component = this.rioniteComponent as Component;
 
 		if (component && component.isReady) {
 			let attrs = component.elementAttributes;

@@ -35,13 +35,13 @@ export default class ElementAttributes extends EventEmitter {
 				if (type == 'function') {
 					type = attrConfig;
 					required = readonly = false;
-				} else if (type == 'object' && (attrConfig.type !== void 0 || attrConfig.default !== void 0)) {
+				} else if (type == 'object' && (attrConfig.type !== undefined || attrConfig.default !== undefined)) {
 					type = attrConfig.type;
 					defaultValue = attrConfig.default;
 
-					if (type === void 0) {
+					if (type === undefined) {
 						type = typeof defaultValue;
-					} else if (defaultValue !== void 0 && typeMap.get(type) !== typeof defaultValue) {
+					} else if (defaultValue !== undefined && typeMap.get(type) !== typeof defaultValue) {
 						throw new TypeError('Specified type does not match type of defaultValue');
 					}
 

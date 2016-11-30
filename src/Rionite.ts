@@ -46,6 +46,6 @@ let Rionite = {
 		htmlToFragment
 	}
 };
-Rionite.Rionite = Rionite; // for destructuring
+Rionite['Rionite'] = Rionite; // for destructuring
 
 export default Rionite;

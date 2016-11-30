@@ -1,87 +1,98 @@
-import { Cell, JS, Utils } from 'cellx';
+import cellx = require('cellx');
 import Component from '../Component';
 import compileKeypath from '../compileKeypath';
-import bind from '../bind';
+import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import namePattern from '../namePattern';
 import keypathPattern from '../keypathPattern';
 import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 
-let Map = JS.Map;
-let nextTick = Utils.nextTick;
+let Cell = cellx.Cell;
+let Map = cellx.JS.Map;
+let nextTick = cellx.Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
+type ListCell = cellx.Cell<cellx.ObservableList<Object>>;
+type Item = {
+	item: cellx.Cell<Object>,
+	index: cellx.Cell<number>,
+	nodes: Array<Node>,
+	bindings: cellx.Cell<any>[] | null
+};
+type ItemList = Array<Item>;
+type ItemMap = Map<any, ItemList>;
+
 let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern })\\s*$`);
 
-export default Component.extend('rt-repeat', {
-	Static: {
-		elementExtends: 'template',
+export default class RtRepeat extends Component {
+	static elementIs = 'rt-repeat';
+	static elementExtends = 'template';
 
-		props: {
-			for: { type: String, required: true, readonly: true },
-			trackBy: { type: String, readonly: true },
-			strip: { default: false, readonly: true }
-		}
-	},
+	static props = {
+		for: { type: String, required: true, readonly: true },
+		trackBy: { type: String, readonly: true },
+		strip: { default: false, readonly: true }
+	};
 
-	_itemName: void 0,
+	_itemName: string;
 
-	_list: null,
+	_list: ListCell;
 
-	_itemMap: null,
-	_oldItemMap: null,
+	_itemMap: ItemMap;
+	_oldItemMap: ItemMap;
 
-	_trackBy: void 0,
+	_trackBy: string;
 
-	_rawItemContent: null,
+	_rawItemContent: DocumentFragment;
 
-	_context: null,
+	_context: Object;
 
-	_lastNode: null,
+	_lastNode: Node;
 
-	_attachElement() {
+	_attachElement(): void {
 		if (!this.initialized) {
 			let props = this.props;
-			let forAttrValue = props.for.match(reForAttributeValue);
+			let forAttrValue = props['for'].match(reForAttributeValue);
 
 			if (!forAttrValue) {
-				throw new SyntaxError(`Invalid value of attribute "for" (${ props.for })`);
+				throw new SyntaxError(`Invalid value of attribute "for" (${ props['for'] })`);
 			}
 
 			this._itemName = forAttrValue[1];
 
-			this._list = new Cell(compileKeypath(forAttrValue[2]), { owner: props.context });
+			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: props.context as Object });
 
-			this._itemMap = new Map();
+			this._itemMap = new Map<any, ItemList>();
 
-			this._trackBy = props.trackBy;
+			this._trackBy = props['trackBy'];
 
-			let rawItemContent = this._rawItemContent = document.importNode(this.element.content, true);
+			let rawItemContent = this._rawItemContent =
+				document.importNode((this.element as any).content, true) as DocumentFragment;
 
-			if (props.strip) {
+			if (props['strip']) {
 				let firstChild = rawItemContent.firstChild;
 				let lastChild = rawItemContent.lastChild;
 
 				if (firstChild == lastChild) {
 					if (firstChild.nodeType == 3) {
-						firstChild.textContent = firstChild.textContent.trim();
+						firstChild.textContent = (firstChild.textContent as string).trim();
 					}
 				} else {
 					if (firstChild.nodeType == 3) {
-						if (!(firstChild.textContent = firstChild.textContent.replace(/^\s+/, ''))) {
+						if (!(firstChild.textContent = (firstChild.textContent as string).replace(/^\s+/, ''))) {
 							rawItemContent.removeChild(firstChild);
 						}
 					}
 					if (lastChild.nodeType == 3) {
-						if (!(lastChild.textContent = lastChild.textContent.replace(/\s+$/, ''))) {
+						if (!(lastChild.textContent = (lastChild.textContent as string).replace(/\s+$/, ''))) {
 							rawItemContent.removeChild(lastChild);
 						}
 					}
 				}
 			}
 
-			this._context = props.context;
+			this._context = props.context as Object;
 
 			this.initialized = true;
 		}
@@ -89,22 +100,22 @@ export default Component.extend('rt-repeat', {
 		this._list.on('change', this._onListChange, this);
 
 		this._render(false);
-	},
+	}
 
-	_detachElement() {
+	_detachElement(): void {
 		this._clearWithItemMap(this._itemMap);
 		this._list.off('change', this._onListChange, this);
-	},
+	}
 
-	_onListChange() {
+	_onListChange(): void {
 		if (this.element.parentNode) {
 			this._render(true);
 		}
-	},
+	}
 
-	_render(c) {
+	_render(c: boolean): void {
 		let oldItemMap = this._oldItemMap = this._itemMap;
-		this._itemMap = new Map();
+		this._itemMap = new Map<any, ItemList>();
 
 		let list = this._list.get();
 		let changed = false;
@@ -125,22 +136,22 @@ export default Component.extend('rt-repeat', {
 				this.emit('change');
 			});
 		}
-	},
+	}
 
-	_renderItem(item, index) {
+	_renderItem(item: Object, index: number): boolean {
 		let trackBy = this._trackBy;
 		let trackingValue = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
 		let prevItems = this._oldItemMap.get(trackingValue);
 		let currentItems = this._itemMap.get(trackingValue);
 
 		if (prevItems) {
-			let prevItem;
+			let prevItem: Item;
 
 			if (prevItems.length == 1) {
 				prevItem = prevItems[0];
 				this._oldItemMap.delete(trackingValue);
 			} else {
-				prevItem = prevItems.shift();
+				prevItem = prevItems.shift() as Item;
 			}
 
 			if (currentItems) {
@@ -179,29 +190,29 @@ export default Component.extend('rt-repeat', {
 			return true;
 		}
 
-		item = new Cell(item);
-		index = new Cell(index);
+		let itemCell = new Cell(item);
+		let indexCell = new Cell(index);
 
 		let content = this._rawItemContent.cloneNode(true);
 		let context = Object.create(this._context, {
 			[this._itemName]: {
 				get() {
-					return item.get();
+					return itemCell.get();
 				}
 			},
 
 			$index: {
 				get() {
-					return index.get();
+					return indexCell.get();
 				}
 			}
 		});
 
-		let { bindings, childComponents } = bind(content, this.ownerComponent, context);
+		let { bindings, childComponents } = bindContent(content, this.ownerComponent as Component, context);
 
 		let newItem = {
-			item,
-			index,
+			item: itemCell,
+			index: indexCell,
 			nodes: slice.call(content.childNodes),
 			bindings
 		};
@@ -221,14 +232,14 @@ export default Component.extend('rt-repeat', {
 		}
 
 		return true;
-	},
+	}
 
-	_clearWithItemMap(itemMap) {
+	_clearWithItemMap(itemMap: ItemMap): void {
 		itemMap.forEach(this._clearWithItems, this);
 		itemMap.clear();
-	},
+	}
 
-	_clearWithItems(items) {
+	_clearWithItems(items: ItemList): void {
 		for (let i = items.length; i;) {
 			let item = items[--i];
 			let bindings = item.bindings;
@@ -251,4 +262,6 @@ export default Component.extend('rt-repeat', {
 			}
 		}
 	}
-});
+}
+
+Component.register(RtRepeat);

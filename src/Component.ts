@@ -4,7 +4,7 @@ import registerComponent from './registerComponent';
 import ElementAttributes from './ElementAttributes';
 import setElementClasses from './setElementClasses';
 import initAttributes from './initAttributes';
-import bind from './bind';
+import bindContent from './bindContent';
 import attachChildComponentElements from './attachChildComponentElements';
 import bindEvents from './bindEvents';
 import eventTypes from './eventTypes';
@@ -54,25 +54,25 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		return (registerComponent as any)(createClass(description));
 	}
 
-	static _registeredComponent: typeof Component | null = null;
+	static _registeredComponent: typeof Component;
 	static register = registerComponent;
 
-	static elementIs: string | undefined = void 0;
-	static elementExtends: string | undefined = void 0;
+	static elementIs: string;
+	static elementExtends: string;
 
-	static elementAttributes: { [name: string]: any } | null = null;
-	static props: { [name: string]: any } | null = null;
+	static elementAttributes: { [name: string]: any; } | null;
+	static props: { [name: string]: any; } | null;
 
-	static i18n: { [key: string]: any } | null = null;
+	static i18n: { [key: string]: any; } | null;
 
-	static template: string | IComponentTemplate | null = null;
+	static template: string | IComponentTemplate | null;
 
-	static _rawContent: DocumentFragment | null = null;
+	static _rawContent: DocumentFragment;
 
-	static _markupBlockNames: Array<string> | null = null;
-	static _assetClassNames: IComponentAssetClassNames | null = null;
+	static _markupBlockNames: Array<string>;
+	static _assetClassNames: IComponentAssetClassNames;
 
-	static events: { [assetName: string]: { [eventName: string]: Function } } | null = null;
+	static events: { [assetName: string]: { [eventName: string]: Function }; } | null;
 
 	_disposables: any;
 	listenTo: any;
@@ -86,7 +86,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	_parentComponent: Component | null | undefined = null;
 
 	get parentComponent(): Component | null {
-		if (this._parentComponent !== void 0) {
+		if (this._parentComponent !== undefined) {
 			return this._parentComponent;
 		}
 
@@ -130,18 +130,18 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		return props;
 	}
 
-	_bindings: Array<cellx.Cell<any>> | null = null;
+	_bindings: Array<cellx.Cell<any>> | null;
 
-	_assets: Map<string, NodeListOf<Element>> | null = null;
+	_assets: Map<string, NodeListOf<Element>>;
 
 	isElementAttached = false;
 
 	initialized = false;
 	isReady = false;
 
-	_isComponentSilent: boolean | undefined = void 0;
+	_isComponentSilent: boolean;
 
-	constructor(el: Element | string | null | undefined, props: { [name: string]: any }) {
+	constructor(el: Element | string | null | undefined, props: { [name: string]: any; }) {
 		super();
 		DisposableMixin.call(this);
 
@@ -152,9 +152,9 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		}
 
 		if (el == null) {
-			el = document.createElement(constr.elementIs as string);
+			el = document.createElement(constr.elementIs);
 		} else if (typeof el == 'string') {
-			let elIs = constr.elementIs as string;
+			let elIs = constr.elementIs;
 			let html = el;
 
 			el = document.createElement(elIs);
@@ -193,7 +193,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 		let silent = this._isComponentSilent;
 
-		if (silent === void 0) {
+		if (silent === undefined) {
 			silent = this._isComponentSilent = this.element.hasAttribute('rt-silent');
 		}
 
@@ -247,7 +247,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 		if (rawContent) {
 			let content = rawContent.cloneNode(true);
-			let { bindings, childComponents } = bind(content, this);
+			let { bindings, childComponents } = bindContent(content, this);
 
 			this._bindings = bindings;
 

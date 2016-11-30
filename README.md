@@ -261,8 +261,8 @@ import { observable, computed } from 'cellx-decorators';
 import { Component } from 'rionite';
 
 class User extends EventEmitter {
-    @observable name = void 0;
-    @observable birthdate = void 0;
+    @observable name = undefined;
+    @observable birthdate = undefined;
 
     @computed age = function() {
         return birthdateToAge(this.birthdate);

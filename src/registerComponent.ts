@@ -35,7 +35,7 @@ export default function registerComponent(componentConstr: typeof Component) {
 		);
 	}
 
-	componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames);
+	componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames || null);
 
 	let elExtends = componentConstr.elementExtends;
 

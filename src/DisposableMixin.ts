@@ -16,11 +16,7 @@ interface IListening {
 }
 
 export default class DisposableMixin {
-	_disposables: { [id: string]: any };
-
-	constructor() {
-		this._disposables = {};
-	}
+	_disposables: { [id: string]: any; } = {};
 
 	listenTo(
 		target: ListeningTarget | Array<ListeningTarget>,
@@ -30,12 +26,12 @@ export default class DisposableMixin {
 	): IListening;
 	listenTo(
 		target: ListeningTarget | Array<ListeningTarget>,
-		listeners: { [type: string]: IListener | Array<IListener> },
+		listeners: { [type: string]: IListener | Array<IListener>; },
 		context?: any
 	): IListening;
 	listenTo(
 		target: ListeningTarget | Array<ListeningTarget>,
-		typeOrListeners: string | Array<string> | { [type: string]: IListener | Array<IListener> },
+		typeOrListeners: string | Array<string> | { [type: string]: IListener | Array<IListener>; },
 		listenerOrContext?: IListener | Array<IListener> | any,
 		context?: any
 	): IListening {

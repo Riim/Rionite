@@ -22,31 +22,31 @@ export default new Map<any, [
 	}]],
 
 	[Number, [(value: string | null): number | undefined => {
-		return value !== null ? +value : void 0;
+		return value !== null ? +value : undefined;
 	}, (value: any): string | null => {
-		return value !== void 0 ? String(+value) : null;
+		return value !== undefined ? String(+value) : null;
 	}]],
 
 	['number', [(value: string | null, defaultValue: number): number => {
 		return value !== null ? +value : defaultValue;
 	}, (value: any): string | null => {
-		return value !== void 0 ? String(+value) : null;
+		return value !== undefined ? String(+value) : null;
 	}]],
 
 	[String, [(value: string | null): string | undefined => {
-		return value !== null ? value : void 0;
+		return value !== null ? value : undefined;
 	}, (value: any): string | null => {
-		return value !== void 0 ? String(value) : null;
+		return value !== undefined ? String(value) : null;
 	}]],
 
 	['string', [(value: string | null, defaultValue: string): string => {
 		return value !== null ? value : defaultValue;
 	}, (value: any): string | null => {
-		return value !== void 0 ? String(value) : null;
+		return value !== undefined ? String(value) : null;
 	}]],
 
 	[Object, [(value: string | null): Object | undefined => {
-		return value !== null ? Object(Function(`return ${ unescapeHTML(value) };`)()) : void 0;
+		return value !== null ? Object(Function(`return ${ unescapeHTML(value) };`)()) : undefined;
 	}, (value: any): string | null => {
 		return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
 	}]],
