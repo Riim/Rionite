@@ -1,2 +1,2 @@
-import cellx = require('cellx');
-export default function onEvent(evt: cellx.IEvent | Event): void;
+import { IEvent } from 'cellx';
+export default function onEvent(evt: IEvent | Event): void;

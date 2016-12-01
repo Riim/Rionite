@@ -1,8 +1,8 @@
-import cellx = require('cellx');
+import { JS } from 'cellx';
 import Component from './Component';
 import defer from './Utils/defer';
 
-let Symbol = cellx.JS.Symbol;
+let Symbol = JS.Symbol;
 
 let attached = Symbol('Rionite.ElementProtoMixin.attached');
 

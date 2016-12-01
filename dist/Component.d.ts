@@ -1,4 +1,4 @@
-import cellx = require('cellx');
+import { IEvent, EventEmitter, Cell } from 'cellx';
 import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
 import ElementAttributes from './ElementAttributes';
@@ -16,7 +16,7 @@ export interface IComponentTemplate {
 export interface IComponentAssetClassNames {
     [assetName: string]: string;
 }
-export default class Component extends cellx.EventEmitter implements DisposableMixin {
+export default class Component extends EventEmitter implements DisposableMixin {
     static extend(elIs: string, description: any): typeof Component;
     static _registeredComponent: typeof Component;
     static register: typeof registerComponent;
@@ -52,7 +52,7 @@ export default class Component extends cellx.EventEmitter implements DisposableM
     element: IComponentElement;
     readonly elementAttributes: ElementAttributes;
     readonly props: IComponentProperties;
-    _bindings: Array<cellx.Cell<any>> | null;
+    _bindings: Array<Cell<any>> | null;
     _assets: Map<string, NodeListOf<HTMLElement>>;
     isElementAttached: boolean;
     initialized: boolean;
@@ -61,7 +61,7 @@ export default class Component extends cellx.EventEmitter implements DisposableM
     constructor(el: HTMLElement | string | null | undefined, props: {
         [name: string]: any;
     });
-    _handleEvent(evt: cellx.IEvent): void;
+    _handleEvent(evt: IEvent): void;
     _attachElement(): void;
     _detachElement(): void;
     dispose(): Component;

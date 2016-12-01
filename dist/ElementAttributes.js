@@ -4,12 +4,11 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var cellx = require("cellx");
+var cellx_1 = require("cellx");
 var attributeTypeHandlerMap_1 = require("./attributeTypeHandlerMap");
 var camelize_1 = require("./Utils/camelize");
 var hyphenize_1 = require("./Utils/hyphenize");
-var Cell = cellx.Cell;
-var Map = cellx.JS.Map;
+var Map = cellx_1.JS.Map;
 var typeMap = new Map([
     [Boolean, 'boolean'],
     ['boolean', 'boolean'],
@@ -80,7 +79,7 @@ var ElementAttributes = (function (_super) {
                     var oldValue_1;
                     var value_2;
                     var isReady_1;
-                    var rawValue_1 = this_1['_' + camelizedName] = this_1['_' + hyphenizedName] = new Cell(el.getAttribute(hyphenizedName), {
+                    var rawValue_1 = this_1['_' + camelizedName] = this_1['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
                         merge: function (v, ov) {
                             if (v !== ov) {
                                 oldValue_1 = value_2;
@@ -129,6 +128,6 @@ var ElementAttributes = (function (_super) {
         return _this;
     }
     return ElementAttributes;
-}(cellx.EventEmitter));
+}(cellx_1.EventEmitter));
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ElementAttributes;

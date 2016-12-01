@@ -1,7 +1,7 @@
 "use strict";
-var cellx = require("cellx");
+var cellx_1 = require("cellx");
 var defer_1 = require("./Utils/defer");
-var Symbol = cellx.JS.Symbol;
+var Symbol = cellx_1.JS.Symbol;
 var attached = Symbol('Rionite.ElementProtoMixin.attached');
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,

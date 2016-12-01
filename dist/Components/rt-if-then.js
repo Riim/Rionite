@@ -10,7 +10,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var cellx = require("cellx");
+var cellx_1 = require("cellx");
 var Component_1 = require("../Component");
 var d_1 = require("../d");
 var compileKeypath_1 = require("../compileKeypath");
@@ -18,8 +18,7 @@ var bindContent_1 = require("../bindContent");
 var attachChildComponentElements_1 = require("../attachChildComponentElements");
 var keypathPattern_1 = require("../keypathPattern");
 var Features_1 = require("../Features");
-var Cell = cellx.Cell;
-var nextTick = cellx.Utils.nextTick;
+var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
 var reKeypath = RegExp("^" + keypathPattern_1.default + "$");
 var RtIfThen = (function (_super) {
@@ -38,7 +37,7 @@ var RtIfThen = (function (_super) {
                 throw new SyntaxError("Invalid value of attribute \"if\" (" + if_ + ")");
             }
             var getIfValue_1 = compileKeypath_1.default(if_);
-            this._if = new Cell(function () {
+            this._if = new cellx_1.Cell(function () {
                 return !!getIfValue_1.call(this);
             }, { owner: props.context });
             this.initialized = true;

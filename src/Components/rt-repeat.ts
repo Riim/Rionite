@@ -1,4 +1,4 @@
-import cellx = require('cellx');
+import { ObservableList, Cell, JS, Utils } from 'cellx';
 import Component from '../Component';
 import d from '../d';
 import compileKeypath from '../compileKeypath';
@@ -8,18 +8,17 @@ import namePattern from '../namePattern';
 import keypathPattern from '../keypathPattern';
 import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 
-let Cell = cellx.Cell;
-let Map = cellx.JS.Map;
-let nextTick = cellx.Utils.nextTick;
+let Map = JS.Map;
+let nextTick = Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
-export type ListCell = cellx.Cell<cellx.ObservableList<Object>>;
+export type ListCell = Cell<ObservableList<Object>>;
 export type Item = {
-	item: cellx.Cell<Object>,
-	index: cellx.Cell<number>,
+	item: Cell<Object>,
+	index: Cell<number>,
 	nodes: Array<Node>,
-	bindings: cellx.Cell<any>[] | null
+	bindings: Cell<any>[] | null
 };
 export type ItemList = Array<Item>;
 export type ItemMap = Map<any, ItemList>;

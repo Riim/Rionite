@@ -1,7 +1,7 @@
-import cellx = require('cellx');
+import { IEvent } from 'cellx';
 import Component from './Component';
 
-export default function onEvent(evt: cellx.IEvent | Event) {
+export default function onEvent(evt: IEvent | Event) {
 	let node: Node;
 	let attrName: string;
 	let targetEls: Array<HTMLElement> | undefined;
@@ -34,11 +34,11 @@ export default function onEvent(evt: cellx.IEvent | Event) {
 
 				if (typeof handler == 'function') {
 					if (handler.call(component, evt, (targetEl as any).$c || targetEl) === false) {
-						(evt as cellx.IEvent).isPropagationStopped = true;
+						(evt as IEvent).isPropagationStopped = true;
 						return;
 					}
 
-					if ((evt as cellx.IEvent).isPropagationStopped) {
+					if ((evt as IEvent).isPropagationStopped) {
 						return;
 					}
 				}

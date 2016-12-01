@@ -1,4 +1,4 @@
-import cellx = require('cellx');
+import { Cell, Utils } from 'cellx';
 import Component from '../Component';
 import d from '../d';
 import compileKeypath from '../compileKeypath';
@@ -7,12 +7,11 @@ import attachChildComponentElements from '../attachChildComponentElements';
 import keypathPattern from '../keypathPattern';
 import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 
-let Cell = cellx.Cell;
-let nextTick = cellx.Utils.nextTick;
+let nextTick = Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
-export type IfCell = cellx.Cell<boolean>;
+export type IfCell = Cell<boolean>;
 
 let reKeypath = RegExp(`^${ keypathPattern }$`);
 

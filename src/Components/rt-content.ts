@@ -1,11 +1,11 @@
-import cellx = require('cellx');
+import { JS } from 'cellx';
 import Component from '../Component';
 import d from '../d';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 
-let KEY_TEMPLATES_FIXED = cellx.JS.Symbol('Rionite.RtContent#templatesFixed');
+let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 
 @d.Component({
 	elementIs: 'rt-content',

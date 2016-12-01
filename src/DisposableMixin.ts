@@ -1,13 +1,12 @@
-import cellx = require('cellx');
+import { IEvent, EventEmitter, Utils } from 'cellx';
 
-let EventEmitter = cellx.EventEmitter;
-let nextUID = cellx.Utils.nextUID;
+let nextUID = Utils.nextUID;
 
-export type ListeningTarget = cellx.EventEmitter | EventTarget | Array<cellx.EventEmitter | EventTarget> | NodeList |
+export type ListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList |
 	HTMLCollection;
 
 export interface IListener {
-	(evt: cellx.IEvent | Event): boolean | undefined;
+	(evt: IEvent | Event): boolean | undefined;
 }
 
 export interface IListening {
@@ -98,7 +97,7 @@ export default class DisposableMixin {
 	}
 
 	_listenTo(
-		target: cellx.EventEmitter | EventTarget,
+		target: EventEmitter | EventTarget,
 		type: string,
 		listener: IListener,
 		context: any

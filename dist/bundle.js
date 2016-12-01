@@ -91,7 +91,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var cellx = __webpack_require__(0);
+var cellx_1 = __webpack_require__(0);
 var DisposableMixin_1 = __webpack_require__(15);
 var registerComponent_1 = __webpack_require__(41);
 var ElementAttributes_1 = __webpack_require__(16);
@@ -106,8 +106,8 @@ var camelize_1 = __webpack_require__(4);
 var getUID_1 = __webpack_require__(31);
 var htmlToFragment_1 = __webpack_require__(18);
 var Features_1 = __webpack_require__(3);
-var Map = cellx.JS.Map;
-var createClass = cellx.Utils.createClass;
+var Map = cellx_1.JS.Map;
+var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
 var created;
 var initialize;
@@ -345,7 +345,7 @@ var Component = (function (_super) {
         return assetList;
     };
     return Component;
-}(cellx.EventEmitter));
+}(cellx_1.EventEmitter));
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Component;
 Component.register = registerComponent_1.default;
@@ -468,11 +468,10 @@ exports.default = attachChildComponentElements;
 
 "use strict";
 "use strict";
-var cellx = __webpack_require__(0);
+var cellx_1 = __webpack_require__(0);
 var ContentParser_1 = __webpack_require__(14);
 var compileContent_1 = __webpack_require__(36);
 var setAttribute_1 = __webpack_require__(32);
-var Cell = cellx.Cell;
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var reBinding = /{[^}]+}/;
 function bindContent(content, ownerComponent, context) {
@@ -493,7 +492,7 @@ function bindContent(content, ownerComponent, context) {
                             var parsedValue = (new ContentParser_1.default(value)).parse();
                             if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
                                 var name_1 = attr.name;
-                                var cell = new Cell(compileContent_1.default(parsedValue, value), {
+                                var cell = new cellx_1.Cell(compileContent_1.default(parsedValue, value), {
                                     owner: context,
                                     onChange: function (evt) {
                                         setAttribute_1.default(child, name_1, evt['value']);
@@ -526,7 +525,7 @@ function bindContent(content, ownerComponent, context) {
                     if (reBinding.test(content_1)) {
                         var parsedContent = (new ContentParser_1.default(content_1)).parse();
                         if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
-                            var cell = new Cell(compileContent_1.default(parsedContent, content_1), {
+                            var cell = new cellx_1.Cell(compileContent_1.default(parsedContent, content_1), {
                                 owner: context,
                                 onChange: function (evt) {
                                     child.textContent = evt['value'];
@@ -718,7 +717,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var cellx = __webpack_require__(0);
+var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var d_1 = __webpack_require__(2);
 var compileKeypath_1 = __webpack_require__(22);
@@ -726,8 +725,7 @@ var bindContent_1 = __webpack_require__(6);
 var attachChildComponentElements_1 = __webpack_require__(5);
 var keypathPattern_1 = __webpack_require__(12);
 var Features_1 = __webpack_require__(3);
-var Cell = cellx.Cell;
-var nextTick = cellx.Utils.nextTick;
+var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
 var reKeypath = RegExp("^" + keypathPattern_1.default + "$");
 var RtIfThen = (function (_super) {
@@ -746,7 +744,7 @@ var RtIfThen = (function (_super) {
                 throw new SyntaxError("Invalid value of attribute \"if\" (" + if_ + ")");
             }
             var getIfValue_1 = compileKeypath_1.default(if_);
-            this._if = new Cell(function () {
+            this._if = new cellx_1.Cell(function () {
                 return !!getIfValue_1.call(this);
             }, { owner: props.context });
             this.initialized = true;
@@ -1165,9 +1163,8 @@ ContentParser.ContentNodeType = ContentNodeType;
 
 "use strict";
 "use strict";
-var cellx = __webpack_require__(0);
-var EventEmitter = cellx.EventEmitter;
-var nextUID = cellx.Utils.nextUID;
+var cellx_1 = __webpack_require__(0);
+var nextUID = cellx_1.Utils.nextUID;
 var DisposableMixin = (function () {
     function DisposableMixin() {
         this._disposables = {};
@@ -1231,7 +1228,7 @@ var DisposableMixin = (function () {
     };
     DisposableMixin.prototype._listenTo = function (target, type, listener, context) {
         var _this = this;
-        if (target instanceof EventEmitter) {
+        if (target instanceof cellx_1.EventEmitter) {
             target.on(type, listener, context);
         }
         else if (target.addEventListener) {
@@ -1246,7 +1243,7 @@ var DisposableMixin = (function () {
         var id = nextUID();
         var stopListening = function () {
             if (_this._disposables[id]) {
-                if (target instanceof EventEmitter) {
+                if (target instanceof cellx_1.EventEmitter) {
                     target.off(type, listener, context);
                 }
                 else {
@@ -1340,12 +1337,11 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var cellx = __webpack_require__(0);
+var cellx_1 = __webpack_require__(0);
 var attributeTypeHandlerMap_1 = __webpack_require__(33);
 var camelize_1 = __webpack_require__(4);
 var hyphenize_1 = __webpack_require__(10);
-var Cell = cellx.Cell;
-var Map = cellx.JS.Map;
+var Map = cellx_1.JS.Map;
 var typeMap = new Map([
     [Boolean, 'boolean'],
     ['boolean', 'boolean'],
@@ -1416,7 +1412,7 @@ var ElementAttributes = (function (_super) {
                     var oldValue_1;
                     var value_2;
                     var isReady_1;
-                    var rawValue_1 = this_1['_' + camelizedName] = this_1['_' + hyphenizedName] = new Cell(el.getAttribute(hyphenizedName), {
+                    var rawValue_1 = this_1['_' + camelizedName] = this_1['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
                         merge: function (v, ov) {
                             if (v !== ov) {
                                 oldValue_1 = value_2;
@@ -1465,7 +1461,7 @@ var ElementAttributes = (function (_super) {
         return _this;
     }
     return ElementAttributes;
-}(cellx.EventEmitter));
+}(cellx_1.EventEmitter));
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ElementAttributes;
 
@@ -1476,8 +1472,7 @@ exports.default = ElementAttributes;
 
 "use strict";
 "use strict";
-var cellx = __webpack_require__(0);
-var ErrorLogger = cellx.ErrorLogger;
+var cellx_1 = __webpack_require__(0);
 var queue;
 function run() {
     var track = queue;
@@ -1488,7 +1483,7 @@ function run() {
             item.callback.call(item.context);
         }
         catch (err) {
-            ErrorLogger.log(err);
+            cellx_1.ErrorLogger.log(err);
         }
     }
 }
@@ -1892,13 +1887,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var cellx = __webpack_require__(0);
+var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var d_1 = __webpack_require__(2);
 var bindContent_1 = __webpack_require__(6);
 var attachChildComponentElements_1 = __webpack_require__(5);
 var Features_1 = __webpack_require__(3);
-var KEY_TEMPLATES_FIXED = cellx.JS.Symbol('Rionite.RtContent#templatesFixed');
+var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
 var RtContent = (function (_super) {
     __extends(RtContent, _super);
     function RtContent() {
@@ -2032,7 +2027,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var cellx = __webpack_require__(0);
+var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var d_1 = __webpack_require__(2);
 var compileKeypath_1 = __webpack_require__(22);
@@ -2041,9 +2036,8 @@ var attachChildComponentElements_1 = __webpack_require__(5);
 var namePattern_1 = __webpack_require__(7);
 var keypathPattern_1 = __webpack_require__(12);
 var Features_1 = __webpack_require__(3);
-var Cell = cellx.Cell;
-var Map = cellx.JS.Map;
-var nextTick = cellx.Utils.nextTick;
+var Map = cellx_1.JS.Map;
+var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
 var reForAttributeValue = RegExp("^\\s*(" + namePattern_1.default + ")\\s+of\\s+(" + keypathPattern_1.default + ")\\s*$");
 var RtRepeat = (function (_super) {
@@ -2059,7 +2053,7 @@ var RtRepeat = (function (_super) {
                 throw new SyntaxError("Invalid value of attribute \"for\" (" + props['for'] + ")");
             }
             this._itemName = forAttrValue[1];
-            this._list = new Cell(compileKeypath_1.default(forAttrValue[2]), { owner: props.context });
+            this._list = new cellx_1.Cell(compileKeypath_1.default(forAttrValue[2]), { owner: props.context });
             this._itemMap = new Map();
             this._trackBy = props['trackBy'];
             var rawItemContent = this._rawItemContent =
@@ -2166,8 +2160,8 @@ var RtRepeat = (function (_super) {
             }
             return true;
         }
-        var itemCell = new Cell(item);
-        var indexCell = new Cell(index);
+        var itemCell = new cellx_1.Cell(item);
+        var indexCell = new cellx_1.Cell(index);
         var content = this._rawItemContent.cloneNode(true);
         var context = Object.create(this._context, (_a = {},
             _a[this._itemName] = {
@@ -2249,9 +2243,9 @@ exports.default = RtRepeat;
 
 "use strict";
 "use strict";
-var cellx = __webpack_require__(0);
+var cellx_1 = __webpack_require__(0);
 var defer_1 = __webpack_require__(17);
-var Symbol = cellx.JS.Symbol;
+var Symbol = cellx_1.JS.Symbol;
 var attached = Symbol('Rionite.ElementProtoMixin.attached');
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
@@ -2320,10 +2314,10 @@ var _a;
 
 "use strict";
 "use strict";
-var cellx = __webpack_require__(0);
-var nextUID = cellx.Utils.nextUID;
+var cellx_1 = __webpack_require__(0);
+var nextUID = cellx_1.Utils.nextUID;
 var hasOwn = Object.prototype.hasOwnProperty;
-var KEY_UID = cellx.JS.Symbol('uid');
+var KEY_UID = cellx_1.JS.Symbol('uid');
 var getUID;
 if (typeof KEY_UID == 'symbol') {
     getUID = function getUID(obj) {
@@ -2363,11 +2357,11 @@ exports.default = setAttribute;
 
 "use strict";
 "use strict";
-var cellx = __webpack_require__(0);
+var cellx_1 = __webpack_require__(0);
 var isRegExp_1 = __webpack_require__(19);
 var escapeHTML_1 = __webpack_require__(8);
 var unescapeHTML_1 = __webpack_require__(20);
-var Map = cellx.JS.Map;
+var Map = cellx_1.JS.Map;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = new Map([
     [Boolean, [function (value) {
@@ -2526,8 +2520,8 @@ exports.default = compileContent;
 
 "use strict";
 "use strict";
-var cellx = __webpack_require__(0);
-var mixin = cellx.Utils.mixin;
+var cellx_1 = __webpack_require__(0);
+var mixin = cellx_1.Utils.mixin;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = mixin(Object.create(null), {
     a: window.HTMLAnchorElement,
@@ -2665,11 +2659,11 @@ exports.default = onEvent;
 
 "use strict";
 "use strict";
-var cellx = __webpack_require__(0);
+var cellx_1 = __webpack_require__(0);
 var elementConstructorMap_1 = __webpack_require__(37);
 var ElementProtoMixin_1 = __webpack_require__(30);
 var hyphenize_1 = __webpack_require__(10);
-var mixin = cellx.Utils.mixin;
+var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
 function registerComponent(componentConstr) {
     if (componentConstr._registeredComponent === componentConstr) {

@@ -1,6 +1,6 @@
 "use strict";
-var cellx = require("cellx");
-var mixin = cellx.Utils.mixin;
+var cellx_1 = require("cellx");
+var mixin = cellx_1.Utils.mixin;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = mixin(Object.create(null), {
     a: window.HTMLAnchorElement,

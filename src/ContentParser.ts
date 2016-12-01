@@ -9,6 +9,13 @@ export interface IContentText {
 	value: string
 }
 
+export interface IContentBindingKeypath {
+	type: number,
+	at: number,
+	raw: string,
+	value: string
+}
+
 export interface IContentBindingFormatterArguments {
 	type: number,
 	at: number,
@@ -22,13 +29,6 @@ export interface IContentBindingFormatter {
 	raw: string,
 	name: string,
 	arguments: IContentBindingFormatterArguments | null
-}
-
-export interface IContentBindingKeypath {
-	type: number,
-	at: number,
-	raw: string,
-	value: string
 }
 
 export interface IContentBinding {

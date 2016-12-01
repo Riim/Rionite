@@ -1,11 +1,10 @@
-import cellx = require('cellx');
+import { EventEmitter, Cell, JS } from 'cellx';
 import Component from './Component';
 import attributeTypeHandlerMap from './attributeTypeHandlerMap';
 import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
 
-let Cell = cellx.Cell;
-let Map = cellx.JS.Map;
+let Map = JS.Map;
 
 let typeMap = new Map<any, string>([
 	[Boolean, 'boolean'],
@@ -16,7 +15,7 @@ let typeMap = new Map<any, string>([
 	['string', 'string']
 ]);
 
-export default class ElementAttributes extends cellx.EventEmitter {
+export default class ElementAttributes extends EventEmitter {
 	constructor(el: HTMLElement) {
 		super();
 

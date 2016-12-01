@@ -1,8 +1,8 @@
 "use strict";
-var cellx = require("cellx");
-var nextUID = cellx.Utils.nextUID;
+var cellx_1 = require("cellx");
+var nextUID = cellx_1.Utils.nextUID;
 var hasOwn = Object.prototype.hasOwnProperty;
-var KEY_UID = cellx.JS.Symbol('uid');
+var KEY_UID = cellx_1.JS.Symbol('uid');
 var getUID;
 if (typeof KEY_UID == 'symbol') {
     getUID = function getUID(obj) {

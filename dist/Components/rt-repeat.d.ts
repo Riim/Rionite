@@ -1,11 +1,11 @@
-import cellx = require('cellx');
+import { ObservableList, Cell } from 'cellx';
 import Component from '../Component';
-export declare type ListCell = cellx.Cell<cellx.ObservableList<Object>>;
+export declare type ListCell = Cell<ObservableList<Object>>;
 export declare type Item = {
-    item: cellx.Cell<Object>;
-    index: cellx.Cell<number>;
+    item: Cell<Object>;
+    index: Cell<number>;
     nodes: Array<Node>;
-    bindings: cellx.Cell<any>[] | null;
+    bindings: Cell<any>[] | null;
 };
 export declare type ItemList = Array<Item>;
 export declare type ItemMap = Map<any, ItemList>;

@@ -4,7 +4,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var cellx = require("cellx");
+var cellx_1 = require("cellx");
 var DisposableMixin_1 = require("./DisposableMixin");
 var registerComponent_1 = require("./registerComponent");
 var ElementAttributes_1 = require("./ElementAttributes");
@@ -19,8 +19,8 @@ var camelize_1 = require("./Utils/camelize");
 var getUID_1 = require("./Utils/getUID");
 var htmlToFragment_1 = require("./Utils/htmlToFragment");
 var Features_1 = require("./Features");
-var Map = cellx.JS.Map;
-var createClass = cellx.Utils.createClass;
+var Map = cellx_1.JS.Map;
+var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
 var created;
 var initialize;
@@ -258,7 +258,7 @@ var Component = (function (_super) {
         return assetList;
     };
     return Component;
-}(cellx.EventEmitter));
+}(cellx_1.EventEmitter));
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Component;
 Component.register = registerComponent_1.default;

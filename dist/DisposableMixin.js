@@ -1,7 +1,6 @@
 "use strict";
-var cellx = require("cellx");
-var EventEmitter = cellx.EventEmitter;
-var nextUID = cellx.Utils.nextUID;
+var cellx_1 = require("cellx");
+var nextUID = cellx_1.Utils.nextUID;
 var DisposableMixin = (function () {
     function DisposableMixin() {
         this._disposables = {};
@@ -65,7 +64,7 @@ var DisposableMixin = (function () {
     };
     DisposableMixin.prototype._listenTo = function (target, type, listener, context) {
         var _this = this;
-        if (target instanceof EventEmitter) {
+        if (target instanceof cellx_1.EventEmitter) {
             target.on(type, listener, context);
         }
         else if (target.addEventListener) {
@@ -80,7 +79,7 @@ var DisposableMixin = (function () {
         var id = nextUID();
         var stopListening = function () {
             if (_this._disposables[id]) {
-                if (target instanceof EventEmitter) {
+                if (target instanceof cellx_1.EventEmitter) {
                     target.off(type, listener, context);
                 }
                 else {

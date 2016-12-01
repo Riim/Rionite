@@ -1,6 +1,4 @@
-import cellx = require('cellx');
-
-let ErrorLogger = cellx.ErrorLogger;
+import { ErrorLogger } from 'cellx';
 
 let queue: Array<{ callback: () => void, context: any }> | null;
 

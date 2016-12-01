@@ -10,7 +10,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var cellx = require("cellx");
+var cellx_1 = require("cellx");
 var Component_1 = require("../Component");
 var d_1 = require("../d");
 var compileKeypath_1 = require("../compileKeypath");
@@ -19,9 +19,8 @@ var attachChildComponentElements_1 = require("../attachChildComponentElements");
 var namePattern_1 = require("../namePattern");
 var keypathPattern_1 = require("../keypathPattern");
 var Features_1 = require("../Features");
-var Cell = cellx.Cell;
-var Map = cellx.JS.Map;
-var nextTick = cellx.Utils.nextTick;
+var Map = cellx_1.JS.Map;
+var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
 var reForAttributeValue = RegExp("^\\s*(" + namePattern_1.default + ")\\s+of\\s+(" + keypathPattern_1.default + ")\\s*$");
 var RtRepeat = (function (_super) {
@@ -37,7 +36,7 @@ var RtRepeat = (function (_super) {
                 throw new SyntaxError("Invalid value of attribute \"for\" (" + props['for'] + ")");
             }
             this._itemName = forAttrValue[1];
-            this._list = new Cell(compileKeypath_1.default(forAttrValue[2]), { owner: props.context });
+            this._list = new cellx_1.Cell(compileKeypath_1.default(forAttrValue[2]), { owner: props.context });
             this._itemMap = new Map();
             this._trackBy = props['trackBy'];
             var rawItemContent = this._rawItemContent =
@@ -144,8 +143,8 @@ var RtRepeat = (function (_super) {
             }
             return true;
         }
-        var itemCell = new Cell(item);
-        var indexCell = new Cell(index);
+        var itemCell = new cellx_1.Cell(item);
+        var indexCell = new cellx_1.Cell(index);
         var content = this._rawItemContent.cloneNode(true);
         var context = Object.create(this._context, (_a = {},
             _a[this._itemName] = {

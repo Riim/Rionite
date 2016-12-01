@@ -1,9 +1,8 @@
 "use strict";
-var cellx = require("cellx");
+var cellx_1 = require("cellx");
 var ContentParser_1 = require("./ContentParser");
 var compileContent_1 = require("./compileContent");
 var setAttribute_1 = require("./Utils/setAttribute");
-var Cell = cellx.Cell;
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var reBinding = /{[^}]+}/;
 function bindContent(content, ownerComponent, context) {
@@ -24,7 +23,7 @@ function bindContent(content, ownerComponent, context) {
                             var parsedValue = (new ContentParser_1.default(value)).parse();
                             if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
                                 var name_1 = attr.name;
-                                var cell = new Cell(compileContent_1.default(parsedValue, value), {
+                                var cell = new cellx_1.Cell(compileContent_1.default(parsedValue, value), {
                                     owner: context,
                                     onChange: function (evt) {
                                         setAttribute_1.default(child, name_1, evt['value']);
@@ -57,7 +56,7 @@ function bindContent(content, ownerComponent, context) {
                     if (reBinding.test(content_1)) {
                         var parsedContent = (new ContentParser_1.default(content_1)).parse();
                         if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
-                            var cell = new Cell(compileContent_1.default(parsedContent, content_1), {
+                            var cell = new cellx_1.Cell(compileContent_1.default(parsedContent, content_1), {
                                 owner: context,
                                 onChange: function (evt) {
                                     child.textContent = evt['value'];

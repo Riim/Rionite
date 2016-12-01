@@ -1,4 +1,4 @@
-import cellx = require('cellx');
+import { IEvent, EventEmitter, Cell, JS, Utils } from 'cellx';
 import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
 import ElementAttributes from './ElementAttributes';
@@ -14,8 +14,8 @@ import getUID from './Utils/getUID';
 import htmlToFragment from './Utils/htmlToFragment';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
 
-let Map = cellx.JS.Map;
-let createClass = (cellx.Utils as any).createClass;
+let Map = JS.Map;
+let createClass = (Utils as any).createClass;
 
 let map = Array.prototype.map;
 
@@ -46,7 +46,7 @@ let elementDetached: any;
 let elementMoved: any;
 let elementAttributeChanged: any;
 
-export default class Component extends cellx.EventEmitter implements DisposableMixin {
+export default class Component extends EventEmitter implements DisposableMixin {
 	static extend(elIs: string, description: any): typeof Component {
 		description.Extends = this;
 		(description.Static || (description.Static = {})).elementIs = elIs;
@@ -129,7 +129,7 @@ export default class Component extends cellx.EventEmitter implements DisposableM
 		return props;
 	}
 
-	_bindings: Array<cellx.Cell<any>> | null;
+	_bindings: Array<Cell<any>> | null;
 
 	_assets: Map<string, NodeListOf<HTMLElement>>;
 
@@ -187,7 +187,7 @@ export default class Component extends cellx.EventEmitter implements DisposableM
 		this.created();
 	}
 
-	_handleEvent(evt: cellx.IEvent): void {
+	_handleEvent(evt: IEvent): void {
 		super._handleEvent(evt);
 
 		let silent = this._isComponentSilent;

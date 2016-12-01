@@ -1,6 +1,6 @@
-import cellx = require('cellx');
+import { Cell } from 'cellx';
 import Component from '../Component';
-export declare type IfCell = cellx.Cell<boolean>;
+export declare type IfCell = Cell<boolean>;
 export default class RtIfThen extends Component {
     _elseMode: boolean;
     _if: IfCell;

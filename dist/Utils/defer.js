@@ -1,6 +1,5 @@
 "use strict";
-var cellx = require("cellx");
-var ErrorLogger = cellx.ErrorLogger;
+var cellx_1 = require("cellx");
 var queue;
 function run() {
     var track = queue;
@@ -11,7 +10,7 @@ function run() {
             item.callback.call(item.context);
         }
         catch (err) {
-            ErrorLogger.log(err);
+            cellx_1.ErrorLogger.log(err);
         }
     }
 }

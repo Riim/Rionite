@@ -1,10 +1,10 @@
-import cellx = require('cellx');
+import { Utils } from 'cellx';
 import Component from './Component';
 import elementConstructorMap from './elementConstructorMap';
 import ElementProtoMixin from './ElementProtoMixin';
 import hyphenize from './Utils/hyphenize';
 
-let mixin = cellx.Utils.mixin;
+let mixin = Utils.mixin;
 
 let push = Array.prototype.push;
 
