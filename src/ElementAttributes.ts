@@ -17,7 +17,7 @@ let typeMap = new Map<any, string>([
 ]);
 
 export default class ElementAttributes extends cellx.EventEmitter {
-	constructor(el: Element) {
+	constructor(el: HTMLElement) {
 		super();
 
 		let component = (el as any).$c as Component;

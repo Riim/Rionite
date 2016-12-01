@@ -19,7 +19,7 @@ let createClass = (cellx.Utils as any).createClass;
 
 let map = Array.prototype.map;
 
-export interface IComponentElement extends Element {
+export interface IComponentElement extends HTMLElement {
 	rioniteComponent: Component | null;
 	$c: Component;
 }
@@ -131,7 +131,7 @@ export default class Component extends cellx.EventEmitter implements DisposableM
 
 	_bindings: Array<cellx.Cell<any>> | null;
 
-	_assets: Map<string, NodeListOf<Element>>;
+	_assets: Map<string, NodeListOf<HTMLElement>>;
 
 	isElementAttached = false;
 
@@ -140,7 +140,7 @@ export default class Component extends cellx.EventEmitter implements DisposableM
 
 	_isComponentSilent: boolean;
 
-	constructor(el: Element | string | null | undefined, props: { [name: string]: any; }) {
+	constructor(el: HTMLElement | string | null | undefined, props: { [name: string]: any; }) {
 		super();
 		DisposableMixin.call(this);
 
@@ -163,11 +163,11 @@ export default class Component extends cellx.EventEmitter implements DisposableM
 
 			if (
 				firstChild == el.lastChild && firstChild.nodeType == 1 && (
-					(firstChild as Element).tagName.toLowerCase() == elIs ||
-						(firstChild as Element).getAttribute('is') == elIs
+					(firstChild as HTMLElement).tagName.toLowerCase() == elIs ||
+						(firstChild as HTMLElement).getAttribute('is') == elIs
 				)
 			) {
-				el = firstChild as Element;
+				el = firstChild as HTMLElement;
 			}
 		}
 
@@ -309,19 +309,19 @@ export default class Component extends cellx.EventEmitter implements DisposableM
 
 	// Utils
 
-	$(name: string, container?: Component | Element): Component | Element | null {
+	$(name: string, container?: Component | HTMLElement): Component | HTMLElement | null {
 		let assetList = this._getAssetList(name, container);
 		return assetList && assetList.length ? (assetList[0] as IComponentElement).$c || assetList[0] : null;
 	}
 
-	$$(name: string, container?: Component | Element): Array<Component | Element> {
+	$$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement> {
 		let assetList = this._getAssetList(name, container);
 		return assetList ? map.call(assetList, (el: any) => el.$c || el) : [];
 	}
 
-	_getAssetList(name: string, container?: Component | Element): NodeListOf<Element> | undefined {
-		let assets = this._assets || (this._assets = new Map<string, NodeListOf<Element>>());
-		let containerEl: Element = container ?
+	_getAssetList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined {
+		let assets = this._assets || (this._assets = new Map<string, NodeListOf<HTMLElement>>());
+		let containerEl: HTMLElement = container ?
 			(container instanceof Component ? container.element : container) :
 			this.element;
 		let key = container ? getUID(containerEl) + '/' + name : name;
@@ -332,7 +332,7 @@ export default class Component extends cellx.EventEmitter implements DisposableM
 			let className = constr._assetClassNames[name];
 
 			if (className) {
-				assetList = containerEl.getElementsByClassName(className);
+				assetList = containerEl.getElementsByClassName(className) as NodeListOf<HTMLElement>;
 				assets.set(key, assetList);
 			} else {
 				let markupBlockNames = constr._markupBlockNames;
@@ -344,7 +344,7 @@ export default class Component extends cellx.EventEmitter implements DisposableM
 				for (let i = markupBlockNames.length; i;) {
 					className = markupBlockNames[--i] + '__' + name;
 
-					assetList = containerEl.getElementsByClassName(className);
+					assetList = containerEl.getElementsByClassName(className) as NodeListOf<HTMLElement>;
 
 					if (assetList.length) {
 						constr._assetClassNames[name] = className;

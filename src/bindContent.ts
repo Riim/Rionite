@@ -39,11 +39,11 @@ export default function bindContent(
 								let cell = new Cell<any>(compileContent(parsedValue, value), {
 									owner: context,
 									onChange(evt) {
-										setAttribute(child as Element, name, evt['value']);
+										setAttribute(child as HTMLElement, name, evt['value']);
 									}
 								});
 
-								setAttribute(child as Element, name, cell.get());
+								setAttribute(child as HTMLElement, name, cell.get());
 
 								(bindings || (bindings = [])).push(cell);
 							}

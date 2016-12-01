@@ -2,7 +2,7 @@ import cellx = require('cellx');
 import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
 import ElementAttributes from './ElementAttributes';
-export interface IComponentElement extends Element {
+export interface IComponentElement extends HTMLElement {
     rioniteComponent: Component | null;
     $c: Component;
 }
@@ -53,12 +53,12 @@ export default class Component extends cellx.EventEmitter implements DisposableM
     readonly elementAttributes: ElementAttributes;
     readonly props: IComponentProperties;
     _bindings: Array<cellx.Cell<any>> | null;
-    _assets: Map<string, NodeListOf<Element>>;
+    _assets: Map<string, NodeListOf<HTMLElement>>;
     isElementAttached: boolean;
     initialized: boolean;
     isReady: boolean;
     _isComponentSilent: boolean;
-    constructor(el: Element | string | null | undefined, props: {
+    constructor(el: HTMLElement | string | null | undefined, props: {
         [name: string]: any;
     });
     _handleEvent(evt: cellx.IEvent): void;
@@ -74,7 +74,7 @@ export default class Component extends cellx.EventEmitter implements DisposableM
     elementDetached(): void;
     elementMoved(): void;
     elementAttributeChanged(name: string, oldValue: any, value: any): void;
-    $(name: string, container?: Component | Element): Component | Element | null;
-    $$(name: string, container?: Component | Element): Array<Component | Element>;
-    _getAssetList(name: string, container?: Component | Element): NodeListOf<Element> | undefined;
+    $(name: string, container?: Component | HTMLElement): Component | HTMLElement | null;
+    $$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement>;
+    _getAssetList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined;
 }

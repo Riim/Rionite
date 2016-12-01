@@ -5,7 +5,7 @@ export default function bindEvents(
 	events: { [assetName: string]: { [eventName: string]: Function; } }
 ): void {
 	for (let assetName in events) {
-		let asset: Component | Element | null;
+		let asset: Component | HTMLElement | null;
 
 		if (assetName == ':component') {
 			asset = component;
