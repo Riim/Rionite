@@ -64,7 +64,7 @@ export default function registerComponent(componentConstr: typeof Component) {
 				return [];
 			}
 
-			let observedAttrs = [];
+			let observedAttrs: Array<string> = [];
 
 			for (let name in elAttrsConfig) {
 				observedAttrs.push(hyphenize(name));

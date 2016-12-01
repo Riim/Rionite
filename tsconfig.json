@@ -1,13 +1,18 @@
 {
 	"compilerOptions": {
+		"declaration": true,
 		"experimentalDecorators": true,
 		"module": "commonjs",
 		"noImplicitAny": true,
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
+		"outDir": "dist",
 		"preserveConstEnums": true,
 		"strictNullChecks": true,
 		"suppressImplicitAnyIndexErrors": true,
 		"target": "es5"
-	}
+	},
+	"files": [
+		"src/Rionite.ts"
+	]
 }

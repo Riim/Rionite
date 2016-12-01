@@ -26,13 +26,13 @@ export default class RtContent extends Component {
 		let props = this.props;
 
 		if (this.isReady) {
-			for (let child; (child = el.firstChild);) {
+			for (let child: Node; (child = el.firstChild);) {
 				el.removeChild(child);
 			}
 		} else {
 			let inputContent = props.content = document.createDocumentFragment();
 
-			for (let child; (child = el.firstChild);) {
+			for (let child: Node; (child = el.firstChild);) {
 				inputContent.appendChild(child);
 			}
 

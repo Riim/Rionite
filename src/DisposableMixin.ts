@@ -3,14 +3,14 @@ import cellx = require('cellx');
 let EventEmitter = cellx.EventEmitter;
 let nextUID = cellx.Utils.nextUID;
 
-type ListeningTarget = cellx.EventEmitter | EventTarget | Array<cellx.EventEmitter | EventTarget> | NodeList |
+export type ListeningTarget = cellx.EventEmitter | EventTarget | Array<cellx.EventEmitter | EventTarget> | NodeList |
 	HTMLCollection;
 
-interface IListener {
+export interface IListener {
 	(evt: cellx.IEvent | Event): boolean | undefined;
 }
 
-interface IListening {
+export interface IListening {
 	stop: () => void,
 	dispose: () => void
 }

@@ -1,4 +1,4 @@
-import Component from './Component';
+import { IComponentTemplate, default as Component } from './Component';
 
 let d = {
 	Component: function Component_(config: {

@@ -1,3 +1,5 @@
+import { IContentBindingFormatter, IContentBinding } from './ContentParser';
+
 let cache: { [key: string]: { value: string, usesFormatters: boolean }; } = Object.create(null);
 
 function formattersReducer(jsExpr: string, formatter: IContentBindingFormatter): string {

@@ -2,6 +2,45 @@ import keypathToJSExpression from './keypathToJSExpression';
 import namePattern from './namePattern';
 import keypathPattern from './keypathPattern';
 
+export interface IContentText {
+	type: number,
+	at: number,
+	raw: string,
+	value: string
+}
+
+export interface IContentBindingFormatterArguments {
+	type: number,
+	at: number,
+	raw: string,
+	value: Array<string>
+}
+
+export interface IContentBindingFormatter {
+	type: number,
+	at: number,
+	raw: string,
+	name: string,
+	arguments: IContentBindingFormatterArguments | null
+}
+
+export interface IContentBindingKeypath {
+	type: number,
+	at: number,
+	raw: string,
+	value: string
+}
+
+export interface IContentBinding {
+	type: number,
+	at: number,
+	raw: string,
+	keypath: IContentBindingKeypath,
+	formatters: Array<IContentBindingFormatter>
+}
+
+export type Content = Array<IContentText | IContentBinding>;
+
 let reNameOrNothing = RegExp(namePattern + '|', 'g');
 let reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
 let reBooleanOrNothing = /false|true|/g;

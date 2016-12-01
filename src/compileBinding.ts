@@ -1,5 +1,6 @@
 import bindingToJSExpression from './bindingToJSExpression';
 import formatters from './formatters';
+import { IContentBinding } from './ContentParser';
 
 let cache = Object.create(null);
 

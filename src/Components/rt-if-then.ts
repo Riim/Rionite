@@ -12,7 +12,7 @@ let nextTick = cellx.Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
-type IfCell = cellx.Cell<boolean>;
+export type IfCell = cellx.Cell<boolean>;
 
 let reKeypath = RegExp(`^${ keypathPattern }$`);
 

@@ -18,7 +18,7 @@ interface IComponentTemplateBlockDescription {
 	source: Array<string>;
 }
 
-interface IComponentTemplateBlock {
+export interface IComponentTemplateBlock {
 	(
 		this: IComponentTemplateBlockMap,
 		data: Object
@@ -34,7 +34,7 @@ interface IComponentTemplateBlockInner {
 	): string;
 }
 
-interface IComponentTemplateRenderer {
+export interface IComponentTemplateRenderer {
 	(
 		this: IComponentTemplateBlockMap,
 		data: Object,
@@ -42,7 +42,7 @@ interface IComponentTemplateRenderer {
 	): string;
 }
 
-interface IComponentTemplateBlockMap {
+export interface IComponentTemplateBlockMap {
 	[name: string]: IComponentTemplateBlock;
 }
 

@@ -14,15 +14,15 @@ let nextTick = cellx.Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
-type ListCell = cellx.Cell<cellx.ObservableList<Object>>;
-type Item = {
+export type ListCell = cellx.Cell<cellx.ObservableList<Object>>;
+export type Item = {
 	item: cellx.Cell<Object>,
 	index: cellx.Cell<number>,
 	nodes: Array<Node>,
 	bindings: cellx.Cell<any>[] | null
 };
-type ItemList = Array<Item>;
-type ItemMap = Map<any, ItemList>;
+export type ItemList = Array<Item>;
+export type ItemMap = Map<any, ItemList>;
 
 let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern })\\s*$`);
 

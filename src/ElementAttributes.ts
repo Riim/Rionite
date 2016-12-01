@@ -4,7 +4,6 @@ import attributeTypeHandlerMap from './attributeTypeHandlerMap';
 import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
 
-let EventEmitter = cellx.EventEmitter;
 let Cell = cellx.Cell;
 let Map = cellx.JS.Map;
 
@@ -17,7 +16,7 @@ let typeMap = new Map<any, string>([
 	['string', 'string']
 ]);
 
-export default class ElementAttributes extends EventEmitter {
+export default class ElementAttributes extends cellx.EventEmitter {
 	constructor(el: Element) {
 		super();
 

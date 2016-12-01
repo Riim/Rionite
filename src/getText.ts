@@ -2,23 +2,23 @@ let hasOwn = Object.prototype.hasOwnProperty;
 
 let reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
 
-interface ILocaleSettings {
+export interface ILocaleSettings {
 	code: string;
 	plural: string;
 }
 
-interface ILocalizationTexts {
+export interface ILocalizationTexts {
 	[context: string]: {
 		[key: string]: string | Array<string>
 	}
 }
 
-interface IGetTextConfig {
+export interface IGetTextConfig {
 	localeSettings: ILocaleSettings;
 	texts: ILocalizationTexts;
 }
 
-interface IGetText {
+export interface IGetText {
 	localeSettings: ILocaleSettings;
 	configure(config: IGetTextConfig): void;
 	(context: string, key: string, plural: boolean, args: Array<any>): string;

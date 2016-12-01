@@ -1,4 +1,4 @@
-import ContentParser from './ContentParser';
+import { IContentText, IContentBinding, Content, default as ContentParser } from './ContentParser';
 import bindingToJSExpression from './bindingToJSExpression';
 import compileBinding from './compileBinding';
 import formatters from './formatters';

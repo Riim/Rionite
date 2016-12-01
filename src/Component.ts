@@ -14,23 +14,26 @@ import getUID from './Utils/getUID';
 import htmlToFragment from './Utils/htmlToFragment';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
 
-let EventEmitter = cellx.EventEmitter;
 let Map = cellx.JS.Map;
 let createClass = (cellx.Utils as any).createClass;
 
 let map = Array.prototype.map;
 
-interface IComponentElement extends Element {
+export interface IComponentElement extends Element {
 	rioniteComponent: Component | null;
 	$c: Component;
 }
 
-interface IComponentProperties extends ElementAttributes {
+export interface IComponentProperties extends ElementAttributes {
 	content: DocumentFragment | null;
 	context: Object | null;
 }
 
-interface IComponentAssetClassNames {
+export interface IComponentTemplate {
+	render: (data: Object) => string;
+}
+
+export interface IComponentAssetClassNames {
 	[assetName: string]: string;
 }
 
@@ -43,7 +46,7 @@ let elementDetached: any;
 let elementMoved: any;
 let elementAttributeChanged: any;
 
-export default class Component extends EventEmitter implements DisposableMixin {
+export default class Component extends cellx.EventEmitter implements DisposableMixin {
 	static extend(elIs: string, description: any): typeof Component {
 		description.Extends = this;
 		(description.Static || (description.Static = {})).elementIs = elIs;
