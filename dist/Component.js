@@ -4,21 +4,21 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var cellx = require('cellx');
-var DisposableMixin_1 = require('./DisposableMixin');
-var registerComponent_1 = require('./registerComponent');
-var ElementAttributes_1 = require('./ElementAttributes');
-var setElementClasses_1 = require('./setElementClasses');
-var initAttributes_1 = require('./initAttributes');
-var bindContent_1 = require('./bindContent');
-var attachChildComponentElements_1 = require('./attachChildComponentElements');
-var bindEvents_1 = require('./bindEvents');
-var eventTypes_1 = require('./eventTypes');
-var onEvent_1 = require('./onEvent');
-var camelize_1 = require('./Utils/camelize');
-var getUID_1 = require('./Utils/getUID');
-var htmlToFragment_1 = require('./Utils/htmlToFragment');
-var Features_1 = require('./Features');
+var cellx = require("cellx");
+var DisposableMixin_1 = require("./DisposableMixin");
+var registerComponent_1 = require("./registerComponent");
+var ElementAttributes_1 = require("./ElementAttributes");
+var setElementClasses_1 = require("./setElementClasses");
+var initAttributes_1 = require("./initAttributes");
+var bindContent_1 = require("./bindContent");
+var attachChildComponentElements_1 = require("./attachChildComponentElements");
+var bindEvents_1 = require("./bindEvents");
+var eventTypes_1 = require("./eventTypes");
+var onEvent_1 = require("./onEvent");
+var camelize_1 = require("./Utils/camelize");
+var getUID_1 = require("./Utils/getUID");
+var htmlToFragment_1 = require("./Utils/htmlToFragment");
+var Features_1 = require("./Features");
 var Map = cellx.JS.Map;
 var createClass = cellx.Utils.createClass;
 var map = Array.prototype.map;
@@ -33,14 +33,14 @@ var elementAttributeChanged;
 var Component = (function (_super) {
     __extends(Component, _super);
     function Component(el, props) {
-        _super.call(this);
-        this.ownerComponent = null;
-        this._parentComponent = null;
-        this.isElementAttached = false;
-        this.initialized = false;
-        this.isReady = false;
-        DisposableMixin_1.default.call(this);
-        var constr = this.constructor;
+        var _this = _super.call(this) || this;
+        _this.ownerComponent = null;
+        _this._parentComponent = null;
+        _this.isElementAttached = false;
+        _this.initialized = false;
+        _this.isReady = false;
+        DisposableMixin_1.default.call(_this);
+        var constr = _this.constructor;
         if (constr._registeredComponent !== constr) {
             throw new TypeError('Component must be registered');
         }
@@ -58,16 +58,17 @@ var Component = (function (_super) {
                 el = firstChild;
             }
         }
-        this.element = el;
-        el.rioniteComponent = this;
-        Object.defineProperty(el, '$c', { value: this });
+        _this.element = el;
+        el.rioniteComponent = _this;
+        Object.defineProperty(el, '$c', { value: _this });
         if (props) {
-            var properties = this.props;
+            var properties = _this.props;
             for (var name_1 in props) {
                 properties[camelize_1.default(name_1)] = props[name_1];
             }
         }
-        this.created();
+        _this.created();
+        return _this;
     }
     Component.extend = function (elIs, description) {
         description.Extends = this;
@@ -256,11 +257,11 @@ var Component = (function (_super) {
         }
         return assetList;
     };
-    Component.register = registerComponent_1.default;
     return Component;
 }(cellx.EventEmitter));
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Component;
+Component.register = registerComponent_1.default;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
 var ComponentProto = Component.prototype;
 Object.getOwnPropertyNames(DisposableMixinProto).forEach(function (name) {

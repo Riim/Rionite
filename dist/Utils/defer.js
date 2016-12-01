@@ -1,5 +1,5 @@
 "use strict";
-var cellx = require('cellx');
+var cellx = require("cellx");
 var ErrorLogger = cellx.ErrorLogger;
 var queue;
 function run() {

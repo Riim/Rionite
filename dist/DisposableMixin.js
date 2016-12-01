@@ -1,5 +1,5 @@
 "use strict";
-var cellx = require('cellx');
+var cellx = require("cellx");
 var EventEmitter = cellx.EventEmitter;
 var nextUID = cellx.Utils.nextUID;
 var DisposableMixin = (function () {

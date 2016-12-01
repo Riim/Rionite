@@ -10,17 +10,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var cellx = require('cellx');
-var Component_1 = require('../Component');
-var d_1 = require('../d');
-var bindContent_1 = require('../bindContent');
-var attachChildComponentElements_1 = require('../attachChildComponentElements');
-var Features_1 = require('../Features');
+var cellx = require("cellx");
+var Component_1 = require("../Component");
+var d_1 = require("../d");
+var bindContent_1 = require("../bindContent");
+var attachChildComponentElements_1 = require("../attachChildComponentElements");
+var Features_1 = require("../Features");
 var KEY_TEMPLATES_FIXED = cellx.JS.Symbol('Rionite.RtContent#templatesFixed');
 var RtContent = (function (_super) {
     __extends(RtContent, _super);
     function RtContent() {
-        _super.apply(this, arguments);
+        return _super.apply(this, arguments) || this;
     }
     RtContent.prototype._attachElement = function () {
         var ownerComponent = this.ownerComponent;
@@ -79,17 +79,17 @@ var RtContent = (function (_super) {
     RtContent.prototype._detachElement = function () {
         this._destroyBindings();
     };
-    RtContent = __decorate([
-        d_1.default.Component({
-            elementIs: 'rt-content',
-            props: {
-                select: { type: String, readonly: true },
-                getContext: { type: String, readonly: true }
-            },
-            template: ''
-        })
-    ], RtContent);
     return RtContent;
 }(Component_1.default));
+RtContent = __decorate([
+    d_1.default.Component({
+        elementIs: 'rt-content',
+        props: {
+            select: { type: String, readonly: true },
+            getContext: { type: String, readonly: true }
+        },
+        template: ''
+    })
+], RtContent);
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RtContent;

@@ -7,17 +7,6 @@ module.exports = function(env) {
 	}
 
 	var plugins = [
-		new webpack.LoaderOptionsPlugin({
-			options: {
-				context: __dirname,
-
-				babel: {
-					presets: ['@riim/babel-preset-2015'],
-					plugins: ['transform-flow-comments']
-				}
-			}
-		}),
-
 		new webpack.DefinePlugin({
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		})
@@ -25,7 +14,7 @@ module.exports = function(env) {
 
 	return {
 		entry: {
-			Rionite: [path.join(__dirname, 'src/Rionite.ts')]
+			bundle: [path.join(__dirname, 'dist/Rionite.js')]
 		},
 
 		output: {
@@ -36,33 +25,6 @@ module.exports = function(env) {
 		},
 
 		externals: ['cellx'],
-
-		module: {
-			loaders: [
-				{
-					test: /\.js$/,
-					exclude: /(?:node_modules|bower_components)/,
-					enforce: 'pre',
-					loader: 'eslint-loader'
-				},
-				{
-					test: /\.js$/,
-					exclude: /(?:node_modules|bower_components)/,
-					loader: 'babel-loader'
-				},
-				{
-					test: /\.ts$/,
-					exclude: /(?:node_modules|bower_components)/,
-					loader: 'awesome-typescript-loader'
-				}
-			]
-		},
-
-		resolve: {
-			extensions: ['.ts', '.tsx', '.js', '.jsx']
-		},
-
-		watch: env.dev,
 
 		node: {
 			console: false,

@@ -1,11 +1,11 @@
 {
   "name": "rionite",
-  "version": "0.15.13",
+  "version": "0.15.14",
   "description": "",
-  "main": "dist/Rionite-with-polyfills.js",
+  "main": "dist/bundle.polyfills.js",
   "typings": "dist/Rionite.d.ts",
   "scripts": {
-    "build": "./node_modules/.bin/webpack && ./node_modules/.bin/gulp",
+    "build": "./node_modules/.bin/tsc && ./node_modules/.bin/webpack && ./node_modules/.bin/gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

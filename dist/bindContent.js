@@ -1,8 +1,8 @@
 "use strict";
-var cellx = require('cellx');
-var ContentParser_1 = require('./ContentParser');
-var compileContent_1 = require('./compileContent');
-var setAttribute_1 = require('./Utils/setAttribute');
+var cellx = require("cellx");
+var ContentParser_1 = require("./ContentParser");
+var compileContent_1 = require("./compileContent");
+var setAttribute_1 = require("./Utils/setAttribute");
 var Cell = cellx.Cell;
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var reBinding = /{[^}]+}/;
@@ -13,11 +13,11 @@ function bindContent(content, ownerComponent, context) {
     var bindings;
     var childComponents;
     function bind_(content) {
-        var _loop_1 = function(child) {
+        var _loop_1 = function (child) {
             switch (child.nodeType) {
                 case 1: {
                     var attrs = child.attributes;
-                    var _loop_2 = function(i) {
+                    var _loop_2 = function (i) {
                         var attr = attrs.item(--i);
                         var value = attr.value;
                         if (reBinding.test(value)) {

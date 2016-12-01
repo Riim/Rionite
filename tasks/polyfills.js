@@ -5,8 +5,8 @@ gulp.task('polyfills', function() {
 	return gulp.src([
 		'polyfills/document-register-element.max.js',
 		'polyfills/template-tag.js',
-		'dist/Rionite.js'
+		'dist/bundle.js'
 	])
-		.pipe(concat('Rionite-with-polyfills.js'))
+		.pipe(concat('bundle.polyfills.js'))
 		.pipe(gulp.dest('dist'));
 });

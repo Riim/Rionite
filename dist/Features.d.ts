@@ -1,2 +1,2 @@
-export declare let templateTag: false;
+export declare let templateTag: boolean;
 export declare let nativeCustomElements: boolean;

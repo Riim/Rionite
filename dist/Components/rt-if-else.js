@@ -10,21 +10,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var d_1 = require('../d');
-var rt_if_then_1 = require('./rt-if-then');
+var d_1 = require("../d");
+var rt_if_then_1 = require("./rt-if-then");
 var RtIfElse = (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
-        _super.apply(this, arguments);
-        this._elseMode = true;
+        var _this = _super.apply(this, arguments) || this;
+        _this._elseMode = true;
+        return _this;
     }
-    RtIfElse = __decorate([
-        d_1.default.Component({
-            elementIs: 'rt-if-else',
-            elementExtends: 'template'
-        })
-    ], RtIfElse);
     return RtIfElse;
 }(rt_if_then_1.default));
+RtIfElse = __decorate([
+    d_1.default.Component({
+        elementIs: 'rt-if-else',
+        elementExtends: 'template'
+    })
+], RtIfElse);
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RtIfElse;

@@ -4,10 +4,10 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-var cellx = require('cellx');
-var attributeTypeHandlerMap_1 = require('./attributeTypeHandlerMap');
-var camelize_1 = require('./Utils/camelize');
-var hyphenize_1 = require('./Utils/hyphenize');
+var cellx = require("cellx");
+var attributeTypeHandlerMap_1 = require("./attributeTypeHandlerMap");
+var camelize_1 = require("./Utils/camelize");
+var hyphenize_1 = require("./Utils/hyphenize");
 var Cell = cellx.Cell;
 var Map = cellx.JS.Map;
 var typeMap = new Map([
@@ -21,11 +21,11 @@ var typeMap = new Map([
 var ElementAttributes = (function (_super) {
     __extends(ElementAttributes, _super);
     function ElementAttributes(el) {
-        _super.call(this);
+        var _this = _super.call(this) || this;
         var component = el.$c;
         var elAttrsConfig = component.constructor.elementAttributes;
         if (elAttrsConfig) {
-            var _loop_1 = function(name_1) {
+            var _loop_1 = function (name_1) {
                 var elAttrConfig = elAttrsConfig[name_1];
                 var type = typeof elAttrConfig;
                 var defaultValue;
@@ -126,6 +126,7 @@ var ElementAttributes = (function (_super) {
                 _loop_1(name_1);
             }
         }
+        return _this;
     }
     return ElementAttributes;
 }(cellx.EventEmitter));

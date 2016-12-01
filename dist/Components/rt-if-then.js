@@ -10,14 +10,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var cellx = require('cellx');
-var Component_1 = require('../Component');
-var d_1 = require('../d');
-var compileKeypath_1 = require('../compileKeypath');
-var bindContent_1 = require('../bindContent');
-var attachChildComponentElements_1 = require('../attachChildComponentElements');
-var keypathPattern_1 = require('../keypathPattern');
-var Features_1 = require('../Features');
+var cellx = require("cellx");
+var Component_1 = require("../Component");
+var d_1 = require("../d");
+var compileKeypath_1 = require("../compileKeypath");
+var bindContent_1 = require("../bindContent");
+var attachChildComponentElements_1 = require("../attachChildComponentElements");
+var keypathPattern_1 = require("../keypathPattern");
+var Features_1 = require("../Features");
 var Cell = cellx.Cell;
 var nextTick = cellx.Utils.nextTick;
 var slice = Array.prototype.slice;
@@ -25,8 +25,9 @@ var reKeypath = RegExp("^" + keypathPattern_1.default + "$");
 var RtIfThen = (function (_super) {
     __extends(RtIfThen, _super);
     function RtIfThen() {
-        _super.apply(this, arguments);
-        this._elseMode = false;
+        var _this = _super.apply(this, arguments) || this;
+        _this._elseMode = false;
+        return _this;
     }
     RtIfThen.prototype._attachElement = function () {
         if (!this.initialized) {
@@ -93,16 +94,16 @@ var RtIfThen = (function (_super) {
             });
         }
     };
-    RtIfThen = __decorate([
-        d_1.default.Component({
-            elementIs: 'rt-if-then',
-            elementExtends: 'template',
-            props: {
-                if: { type: String, required: true, readonly: true }
-            }
-        })
-    ], RtIfThen);
     return RtIfThen;
 }(Component_1.default));
+RtIfThen = __decorate([
+    d_1.default.Component({
+        elementIs: 'rt-if-then',
+        elementExtends: 'template',
+        props: {
+            if: { type: String, required: true, readonly: true }
+        }
+    })
+], RtIfThen);
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RtIfThen;

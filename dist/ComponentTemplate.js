@@ -1,7 +1,7 @@
 "use strict";
-var namePattern_1 = require('./namePattern');
-var escapeString_1 = require('./Utils/escapeString');
-var escapeHTML_1 = require('./Utils/escapeHTML');
+var namePattern_1 = require("./namePattern");
+var escapeString_1 = require("./Utils/escapeString");
+var escapeHTML_1 = require("./Utils/escapeHTML");
 var keypathPattern = '(?:' + namePattern_1.default + '|\\[\\d+\\])(?:\\.' + namePattern_1.default + '|\\[\\d+\\])*';
 var re = RegExp('\\{\\{' +
     '(?:' +

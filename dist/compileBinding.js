@@ -1,6 +1,6 @@
 "use strict";
-var bindingToJSExpression_1 = require('./bindingToJSExpression');
-var formatters_1 = require('./formatters');
+var bindingToJSExpression_1 = require("./bindingToJSExpression");
+var formatters_1 = require("./formatters");
 var cache = Object.create(null);
 function compileBinding(binding) {
     var bindingRaw = binding.raw;

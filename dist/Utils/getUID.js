@@ -1,5 +1,5 @@
 "use strict";
-var cellx = require('cellx');
+var cellx = require("cellx");
 var nextUID = cellx.Utils.nextUID;
 var hasOwn = Object.prototype.hasOwnProperty;
 var KEY_UID = cellx.JS.Symbol('uid');

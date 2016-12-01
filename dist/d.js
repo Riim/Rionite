@@ -1,5 +1,5 @@
 "use strict";
-var Component_1 = require('./Component');
+var Component_1 = require("./Component");
 var d = {
     Component: function Component_(config) {
         return function (componentConstr) {

@@ -1,6 +1,6 @@
 "use strict";
-var cellx = require('cellx');
-var defer_1 = require('./Utils/defer');
+var cellx = require("cellx");
+var defer_1 = require("./Utils/defer");
 var Symbol = cellx.JS.Symbol;
 var attached = Symbol('Rionite.ElementProtoMixin.attached');
 var ElementProtoMixin = (_a = {
@@ -58,8 +58,7 @@ var ElementProtoMixin = (_a = {
             component.elementAttributes['_' + name].set(value);
         }
     },
-    _a
-);
+    _a);
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ElementProtoMixin;
 var _a;

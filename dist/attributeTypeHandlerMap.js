@@ -1,8 +1,8 @@
 "use strict";
-var cellx = require('cellx');
-var isRegExp_1 = require('./Utils/isRegExp');
-var escapeHTML_1 = require('./Utils/escapeHTML');
-var unescapeHTML_1 = require('./Utils/unescapeHTML');
+var cellx = require("cellx");
+var isRegExp_1 = require("./Utils/isRegExp");
+var escapeHTML_1 = require("./Utils/escapeHTML");
+var unescapeHTML_1 = require("./Utils/unescapeHTML");
 var Map = cellx.JS.Map;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = new Map([

@@ -1,8 +1,8 @@
 "use strict";
-var cellx = require('cellx');
-var elementConstructorMap_1 = require('./elementConstructorMap');
-var ElementProtoMixin_1 = require('./ElementProtoMixin');
-var hyphenize_1 = require('./Utils/hyphenize');
+var cellx = require("cellx");
+var elementConstructorMap_1 = require("./elementConstructorMap");
+var ElementProtoMixin_1 = require("./ElementProtoMixin");
+var hyphenize_1 = require("./Utils/hyphenize");
 var mixin = cellx.Utils.mixin;
 var push = Array.prototype.push;
 function registerComponent(componentConstr) {
@@ -31,7 +31,7 @@ function registerComponent(componentConstr) {
     var elExtends = componentConstr.elementExtends;
     var parentElConstr = elExtends ?
         elementConstructorMap_1.default[elExtends] ||
-            window[("HTML" + (elExtends.charAt(0).toUpperCase() + elExtends.slice(1)) + "Element")] :
+            window["HTML" + (elExtends.charAt(0).toUpperCase() + elExtends.slice(1)) + "Element"] :
         HTMLElement;
     var elConstr = function (self) {
         return parentElConstr.call(this, self);

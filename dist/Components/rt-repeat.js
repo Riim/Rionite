@@ -10,15 +10,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var cellx = require('cellx');
-var Component_1 = require('../Component');
-var d_1 = require('../d');
-var compileKeypath_1 = require('../compileKeypath');
-var bindContent_1 = require('../bindContent');
-var attachChildComponentElements_1 = require('../attachChildComponentElements');
-var namePattern_1 = require('../namePattern');
-var keypathPattern_1 = require('../keypathPattern');
-var Features_1 = require('../Features');
+var cellx = require("cellx");
+var Component_1 = require("../Component");
+var d_1 = require("../d");
+var compileKeypath_1 = require("../compileKeypath");
+var bindContent_1 = require("../bindContent");
+var attachChildComponentElements_1 = require("../attachChildComponentElements");
+var namePattern_1 = require("../namePattern");
+var keypathPattern_1 = require("../keypathPattern");
+var Features_1 = require("../Features");
 var Cell = cellx.Cell;
 var Map = cellx.JS.Map;
 var nextTick = cellx.Utils.nextTick;
@@ -27,7 +27,7 @@ var reForAttributeValue = RegExp("^\\s*(" + namePattern_1.default + ")\\s+of\\s+
 var RtRepeat = (function (_super) {
     __extends(RtRepeat, _super);
     function RtRepeat() {
-        _super.apply(this, arguments);
+        return _super.apply(this, arguments) || this;
     }
     RtRepeat.prototype._attachElement = function () {
         if (!this.initialized) {
@@ -158,8 +158,7 @@ var RtRepeat = (function (_super) {
                     return indexCell.get();
                 }
             },
-            _a
-        ));
+            _a));
         var _b = bindContent_1.default(content, this.ownerComponent, context), bindings = _b.bindings, childComponents = _b.childComponents;
         var newItem = {
             item: itemCell,
@@ -205,18 +204,18 @@ var RtRepeat = (function (_super) {
             }
         }
     };
-    RtRepeat = __decorate([
-        d_1.default.Component({
-            elementIs: 'rt-repeat',
-            elementExtends: 'template',
-            props: {
-                for: { type: String, required: true, readonly: true },
-                trackBy: { type: String, readonly: true },
-                strip: { default: false, readonly: true }
-            }
-        })
-    ], RtRepeat);
     return RtRepeat;
 }(Component_1.default));
+RtRepeat = __decorate([
+    d_1.default.Component({
+        elementIs: 'rt-repeat',
+        elementExtends: 'template',
+        props: {
+            for: { type: String, required: true, readonly: true },
+            trackBy: { type: String, readonly: true },
+            strip: { default: false, readonly: true }
+        }
+    })
+], RtRepeat);
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RtRepeat;

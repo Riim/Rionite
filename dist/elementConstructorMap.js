@@ -1,5 +1,5 @@
 "use strict";
-var cellx = require('cellx');
+var cellx = require("cellx");
 var mixin = cellx.Utils.mixin;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = mixin(Object.create(null), {

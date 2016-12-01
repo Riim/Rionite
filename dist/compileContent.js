@@ -1,9 +1,9 @@
 "use strict";
-var ContentParser_1 = require('./ContentParser');
-var bindingToJSExpression_1 = require('./bindingToJSExpression');
-var compileBinding_1 = require('./compileBinding');
-var formatters_1 = require('./formatters');
-var escapeString_1 = require('./Utils/escapeString');
+var ContentParser_1 = require("./ContentParser");
+var bindingToJSExpression_1 = require("./bindingToJSExpression");
+var compileBinding_1 = require("./compileBinding");
+var formatters_1 = require("./formatters");
+var escapeString_1 = require("./Utils/escapeString");
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var cache = Object.create(null);
 function compileContent(parsedContent, content) {

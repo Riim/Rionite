@@ -1,7 +1,7 @@
 "use strict";
-var keypathToJSExpression_1 = require('./keypathToJSExpression');
-var namePattern_1 = require('./namePattern');
-var keypathPattern_1 = require('./keypathPattern');
+var keypathToJSExpression_1 = require("./keypathToJSExpression");
+var namePattern_1 = require("./namePattern");
+var keypathPattern_1 = require("./keypathPattern");
 var reNameOrNothing = RegExp(namePattern_1.default + '|', 'g');
 var reKeypathOrNothing = RegExp(keypathPattern_1.default + '|', 'g');
 var reBooleanOrNothing = /false|true|/g;
@@ -328,8 +328,8 @@ var ContentParser = (function () {
         }
         return chr;
     };
-    ContentParser.ContentNodeType = ContentNodeType;
     return ContentParser;
 }());
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ContentParser;
+ContentParser.ContentNodeType = ContentNodeType;

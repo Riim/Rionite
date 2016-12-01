@@ -1,5 +1,5 @@
 "use strict";
-var camelize_1 = require('./Utils/camelize');
+var camelize_1 = require("./Utils/camelize");
 function initAttributes(component, constr) {
     var elAttrsConfig = constr.elementAttributes;
     if (elAttrsConfig) {

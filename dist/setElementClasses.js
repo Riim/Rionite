@@ -1,5 +1,5 @@
 "use strict";
-var Component_1 = require('./Component');
+var Component_1 = require("./Component");
 function setElementClasses(el, constr) {
     var c = constr;
     do {
