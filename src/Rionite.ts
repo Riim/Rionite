@@ -18,7 +18,25 @@ import isRegExp from './Utils/isRegExp';
 import defer from './Utils/defer';
 import htmlToFragment from './Utils/htmlToFragment';
 
-let Rionite = {
+let Components = {
+	RtContent,
+	RtIfThen,
+	RtIfElse,
+	RtRepeat
+};
+
+let Utils = {
+	camelize,
+	hyphenize,
+	escapeString,
+	escapeHTML,
+	unescapeHTML,
+	isRegExp,
+	defer,
+	htmlToFragment
+};
+
+export {
 	DisposableMixin,
 
 	formatters,
@@ -27,27 +45,10 @@ let Rionite = {
 	Component,
 	d,
 
-	Components: {
-		RtContent,
-		RtIfThen,
-		RtIfElse,
-		RtRepeat
-	},
+	Components,
 
 	ElementAttributes,
 	ComponentTemplate,
 
-	Utils: {
-		camelize,
-		hyphenize,
-		escapeString,
-		escapeHTML,
-		unescapeHTML,
-		isRegExp,
-		defer,
-		htmlToFragment
-	}
+	Utils
 };
-Rionite['Rionite'] = Rionite; // for destructuring
-
-export default Rionite;

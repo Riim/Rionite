@@ -1754,16 +1754,23 @@ exports.default = keypathToJSExpression;
 "use strict";
 "use strict";
 var DisposableMixin_1 = __webpack_require__(15);
+exports.DisposableMixin = DisposableMixin_1.default;
 var formatters_1 = __webpack_require__(11);
+exports.formatters = formatters_1.default;
 var getText_1 = __webpack_require__(23);
+exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
+exports.Component = Component_1.default;
 var d_1 = __webpack_require__(2);
+exports.d = d_1.default;
 var rt_content_1 = __webpack_require__(27);
 var rt_if_then_1 = __webpack_require__(13);
 var rt_if_else_1 = __webpack_require__(28);
 var rt_repeat_1 = __webpack_require__(29);
 var ElementAttributes_1 = __webpack_require__(16);
+exports.ElementAttributes = ElementAttributes_1.default;
 var ComponentTemplate_1 = __webpack_require__(26);
+exports.ComponentTemplate = ComponentTemplate_1.default;
 var camelize_1 = __webpack_require__(4);
 var hyphenize_1 = __webpack_require__(10);
 var escapeString_1 = __webpack_require__(9);
@@ -1772,34 +1779,24 @@ var unescapeHTML_1 = __webpack_require__(20);
 var isRegExp_1 = __webpack_require__(19);
 var defer_1 = __webpack_require__(17);
 var htmlToFragment_1 = __webpack_require__(18);
-var Rionite = {
-    DisposableMixin: DisposableMixin_1.default,
-    formatters: formatters_1.default,
-    getText: getText_1.default,
-    Component: Component_1.default,
-    d: d_1.default,
-    Components: {
-        RtContent: rt_content_1.default,
-        RtIfThen: rt_if_then_1.default,
-        RtIfElse: rt_if_else_1.default,
-        RtRepeat: rt_repeat_1.default
-    },
-    ElementAttributes: ElementAttributes_1.default,
-    ComponentTemplate: ComponentTemplate_1.default,
-    Utils: {
-        camelize: camelize_1.default,
-        hyphenize: hyphenize_1.default,
-        escapeString: escapeString_1.default,
-        escapeHTML: escapeHTML_1.default,
-        unescapeHTML: unescapeHTML_1.default,
-        isRegExp: isRegExp_1.default,
-        defer: defer_1.default,
-        htmlToFragment: htmlToFragment_1.default
-    }
+var Components = {
+    RtContent: rt_content_1.default,
+    RtIfThen: rt_if_then_1.default,
+    RtIfElse: rt_if_else_1.default,
+    RtRepeat: rt_repeat_1.default
 };
-Rionite['Rionite'] = Rionite; // for destructuring
-Rionite.__esModule = true;
-module.exports = Rionite.default = Rionite;
+exports.Components = Components;
+var Utils = {
+    camelize: camelize_1.default,
+    hyphenize: hyphenize_1.default,
+    escapeString: escapeString_1.default,
+    escapeHTML: escapeHTML_1.default,
+    unescapeHTML: unescapeHTML_1.default,
+    isRegExp: isRegExp_1.default,
+    defer: defer_1.default,
+    htmlToFragment: htmlToFragment_1.default
+};
+exports.Utils = Utils;
 
 
 /***/ },
