@@ -30,10 +30,6 @@ interface IComponentProperties extends ElementAttributes {
 	context: Object | null;
 }
 
-interface IComponentTemplate {
-	render: (data: Object) => string;
-}
-
 interface IComponentAssetClassNames {
 	[assetName: string]: string;
 }

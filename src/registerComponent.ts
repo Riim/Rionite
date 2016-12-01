@@ -9,6 +9,10 @@ let mixin = cellx.Utils.mixin;
 let push = Array.prototype.push;
 
 export default function registerComponent(componentConstr: typeof Component) {
+	if (componentConstr._registeredComponent === componentConstr) {
+		throw new TypeError('Component already registered');
+	}
+
 	let elIs = componentConstr.elementIs;
 
 	if (!elIs) {
@@ -54,19 +58,19 @@ export default function registerComponent(componentConstr: typeof Component) {
 		enumerable: true,
 
 		get() {
-			let elementAttributes = componentConstr.elementAttributes;
+			let elAttrsConfig = componentConstr.elementAttributes;
 
-			if (!elementAttributes) {
+			if (!elAttrsConfig) {
 				return [];
 			}
 
-			let observedAttributes = [];
+			let observedAttrs = [];
 
-			for (let name in elementAttributes) {
-				observedAttributes.push(hyphenize(name));
+			for (let name in elAttrsConfig) {
+				observedAttrs.push(hyphenize(name));
 			}
 
-			return observedAttributes;
+			return observedAttrs;
 		}
 	});
 

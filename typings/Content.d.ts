@@ -1,3 +1,7 @@
+interface IComponentTemplate {
+	render: (data: Object) => string;
+}
+
 interface IContentText {
 	type: number,
 	at: number,

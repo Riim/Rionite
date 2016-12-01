@@ -1,5 +1,6 @@
 import cellx = require('cellx');
 import Component from '../Component';
+import d from '../d';
 import compileKeypath from '../compileKeypath';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
@@ -15,14 +16,14 @@ type IfCell = cellx.Cell<boolean>;
 
 let reKeypath = RegExp(`^${ keypathPattern }$`);
 
-export default class RtIfThen extends Component {
-	static elementIs = 'rt-if-then';
-	static elementExtends = 'template';
-
-	static props = {
+@d.Component({
+	elementIs: 'rt-if-then',
+	elementExtends: 'template',
+	props: {
 		if: { type: String, required: true, readonly: true }
-	};
-
+	}
+})
+export default class RtIfThen extends Component {
 	_elseMode = false;
 
 	_if: IfCell;
@@ -119,5 +120,3 @@ export default class RtIfThen extends Component {
 		}
 	}
 }
-
-Component.register(RtIfThen);

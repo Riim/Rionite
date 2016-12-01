@@ -22,22 +22,24 @@ export default class ElementAttributes extends EventEmitter {
 		super();
 
 		let component = (el as any).$c as Component;
-		let attributesConfig = (component.constructor as typeof Component).elementAttributes;
+		let elAttrsConfig = (component.constructor as typeof Component).elementAttributes;
 
-		if (attributesConfig) {
-			for (let name in attributesConfig) {
-				let attrConfig = attributesConfig[name];
-				let type = typeof attrConfig;
+		if (elAttrsConfig) {
+			for (let name in elAttrsConfig) {
+				let elAttrConfig = elAttrsConfig[name];
+				let type = typeof elAttrConfig;
 				let defaultValue: any;
 				let required: boolean;
 				let readonly: boolean;
 
 				if (type == 'function') {
-					type = attrConfig;
+					type = elAttrConfig;
 					required = readonly = false;
-				} else if (type == 'object' && (attrConfig.type !== undefined || attrConfig.default !== undefined)) {
-					type = attrConfig.type;
-					defaultValue = attrConfig.default;
+				} else if (
+					type == 'object' && (elAttrConfig.type !== undefined || elAttrConfig.default !== undefined)
+				) {
+					type = elAttrConfig.type;
+					defaultValue = elAttrConfig.default;
 
 					if (type === undefined) {
 						type = typeof defaultValue;
@@ -45,10 +47,10 @@ export default class ElementAttributes extends EventEmitter {
 						throw new TypeError('Specified type does not match type of defaultValue');
 					}
 
-					required = attrConfig.required;
-					readonly = attrConfig.readonly;
+					required = elAttrConfig.required;
+					readonly = elAttrConfig.readonly;
 				} else {
-					defaultValue = attrConfig;
+					defaultValue = elAttrConfig;
 					required = readonly = false;
 				}
 

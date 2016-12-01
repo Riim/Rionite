@@ -1,5 +1,6 @@
 import cellx = require('cellx');
 import Component from '../Component';
+import d from '../d';
 import compileKeypath from '../compileKeypath';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
@@ -25,16 +26,16 @@ type ItemMap = Map<any, ItemList>;
 
 let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern })\\s*$`);
 
-export default class RtRepeat extends Component {
-	static elementIs = 'rt-repeat';
-	static elementExtends = 'template';
-
-	static props = {
+@d.Component({
+	elementIs: 'rt-repeat',
+	elementExtends: 'template',
+	props: {
 		for: { type: String, required: true, readonly: true },
 		trackBy: { type: String, readonly: true },
 		strip: { default: false, readonly: true }
-	};
-
+	}
+})
+export default class RtRepeat extends Component {
 	_itemName: string;
 
 	_list: ListCell;
@@ -263,5 +264,3 @@ export default class RtRepeat extends Component {
 		}
 	}
 }
-
-Component.register(RtRepeat);

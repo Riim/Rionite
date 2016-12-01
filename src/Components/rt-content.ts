@@ -1,21 +1,21 @@
 import cellx = require('cellx');
 import Component from '../Component';
+import d from '../d';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 
 let KEY_TEMPLATES_FIXED = cellx.JS.Symbol('Rionite.RtContent#templatesFixed');
 
-export default class RtContent extends Component {
-	static elementIs = 'rt-content';
-
-	static props = {
+@d.Component({
+	elementIs: 'rt-content',
+	props: {
 		select: { type: String, readonly: true },
 		getContext: { type: String, readonly: true }
-	};
-
-	static template = '';
-
+	},
+	template: ''
+})
+export default class RtContent extends Component {
 	_rawContent: DocumentFragment;
 
 	_attachElement(): void {
@@ -97,5 +97,3 @@ export default class RtContent extends Component {
 		this._destroyBindings();
 	}
 }
-
-Component.register(RtContent);

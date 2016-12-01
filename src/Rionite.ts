@@ -2,6 +2,7 @@ import DisposableMixin from './DisposableMixin';
 import formatters from './formatters';
 import getText from './getText';
 import Component from './Component';
+import d from './d';
 import RtContent from './Components/rt-content';
 import RtIfThen from './Components/rt-if-then';
 import RtIfElse from './Components/rt-if-else';
@@ -24,6 +25,7 @@ let Rionite = {
 	getText,
 
 	Component,
+	d,
 
 	Components: {
 		RtContent,
