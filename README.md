@@ -44,22 +44,21 @@ Rionite.Component.extend('hello-user', {
 Можно использовать ES.Next синтаксис:
 
 ```js
-import { Component } from 'rionite';
+import { Component, d } from 'rionite';
 
-export default class HelloUser extends Component {
-    static elementIs = 'hello-user';
-	static props = {
+@d.Component({
+    elementIs: 'hello-user',
+
+    props: {
         name: String
-    };
+    },
 
-    static template = 'Hello, {props.name}!';
-
+    template: 'Hello, {props.name}!'
+})
+export default class HelloUser extends Component {
     elementAttached() {}
     elementDetached() {}
 }
-
-// Не забыть зарегистрировать компонент.
-Component.register(HelloUser);
 ```
 
 Элемент в приведённом примере отрендерится в следующий вид:
@@ -258,7 +257,7 @@ function birthdateToAge(birthdate) {
 ```js
 import { EventEmitter } from 'cellx';
 import { observable, computed } from 'cellx-decorators';
-import { Component } from 'rionite';
+import { Component, d } from 'rionite';
 
 class User extends EventEmitter {
     @observable name = undefined;
@@ -276,15 +275,16 @@ class User extends EventEmitter {
 
 let someUser = new User('Matroskin', '05/03/1986');
 
-class UserCard extends Component {
-    static elementIs = 'user-card';
+@d.Component({
+    elementIs: 'user-card',
 
-	static template = `
+    template: `
         <x-modal shown="{ageLess18}">
             Привет, {user.name}! Кажется вам ещё нет 18 лет.
         </x-modal>
-    `;
-
+    `
+})
+class UserCard extends Component {
     @observable user = null;
 
     @computed ageLess18 = function() {
@@ -295,8 +295,6 @@ class UserCard extends Component {
         this.user = someUser;
     }
 }
-
-Component.register(UserCard);
 ```
 
 Выражение биндинга может содержать символ `?` для проверки существования свойства:

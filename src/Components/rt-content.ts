@@ -9,10 +9,12 @@ let KEY_TEMPLATES_FIXED = cellx.JS.Symbol('Rionite.RtContent#templatesFixed');
 
 @d.Component({
 	elementIs: 'rt-content',
+
 	props: {
 		select: { type: String, readonly: true },
 		getContext: { type: String, readonly: true }
 	},
+
 	template: ''
 })
 export default class RtContent extends Component {

@@ -19,6 +19,7 @@ let reKeypath = RegExp(`^${ keypathPattern }$`);
 @d.Component({
 	elementIs: 'rt-if-then',
 	elementExtends: 'template',
+
 	props: {
 		if: { type: String, required: true, readonly: true }
 	}

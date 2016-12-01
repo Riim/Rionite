@@ -29,6 +29,7 @@ let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPa
 @d.Component({
 	elementIs: 'rt-repeat',
 	elementExtends: 'template',
+
 	props: {
 		for: { type: String, required: true, readonly: true },
 		trackBy: { type: String, readonly: true },
