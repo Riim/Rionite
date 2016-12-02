@@ -5,7 +5,7 @@ let cache: { [key: string]: { value: string, usesFormatters: boolean }; } = Obje
 function formattersReducer(jsExpr: string, formatter: IContentBindingFormatter): string {
 	let args = formatter.arguments;
 
-	return `(this['${ formatter.name }'] || formatters['${ formatter.name }']).call(this, ${ jsExpr }${
+	return `(this.${ formatter.name } || formatters.${ formatter.name }).call(this, ${ jsExpr }${
 		args && args.value.length ? ', ' + args.value.join(', ') : ''
 	})`;
 }
@@ -17,30 +17,32 @@ export default function bindingToJSExpression(binding: IContentBinding): { value
 		return cache[bindingRaw];
 	}
 
-	let keypath = binding.keypath.value.split('?');
-	let keypathLen = keypath.length;
+	let keys = binding.keypath.value.split('.');
+	let keyCount = keys.length;
 	let formatters = binding.formatters;
 	let usesFormatters = !!formatters.length;
 
-	if (keypathLen == 1) {
+	if (keyCount == 1) {
 		return (cache[bindingRaw] = {
-			value: usesFormatters ? formatters.reduce(formattersReducer, 'this.' + keypath[0]) : 'this.' + keypath[0],
+			value: usesFormatters ?
+				formatters.reduce(formattersReducer, `this['${ keys[0] }']`) :
+				`this['${ keys[0] }']`,
 			usesFormatters
 		});
 	}
 
-	let index = keypathLen - 2;
+	let index = keyCount - 2;
 	let jsExpr = Array(index);
 
 	while (index) {
-		jsExpr[--index] = ` && (temp = temp${ keypath[index + 1] })`;
+		jsExpr[--index] = ` && (temp = temp['${ keys[index + 1] }'])`;
 	}
 
 	return (cache[bindingRaw] = {
-		value: `(temp = this.${ keypath[0] })${ jsExpr.join('') } && ${
+		value: `(temp = this['${ keys[0] }'])${ jsExpr.join('') } && ${
 			usesFormatters ?
-				formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1]) :
-				'temp' + keypath[keypathLen - 1]
+				formatters.reduce(formattersReducer, `temp['${ keys[keyCount - 1] }']`) :
+				`temp['${ keys[keyCount - 1] }']`
 		}`,
 		usesFormatters
 	});

@@ -5,22 +5,19 @@ export default function keypathToJSExpression(keypath: string): string {
 		return cache[keypath];
 	}
 
-	let splittedKeypath = keypath.split('?');
-	let splittedKeypathLen = splittedKeypath.length;
+	let keys = keypath.split('.');
+	let keyCount = keys.length;
 
-	if (splittedKeypathLen == 1) {
-		return (cache[keypath] = 'this.' + keypath);
+	if (keyCount == 1) {
+		return (cache[keypath] = `this['${ keypath }']`);
 	}
 
-	let index = splittedKeypathLen - 2;
+	let index = keyCount - 2;
 	let jsExpr = Array(index);
 
 	while (index) {
-		jsExpr[--index] = ' && (temp = temp' + splittedKeypath[index + 1] + ')';
+		jsExpr[--index] = ` && (temp = temp['${ keys[index + 1] }'])`;
 	}
 
-	return (
-		cache[keypath] = `(temp = this.${ splittedKeypath[0] })${ jsExpr.join('') } && temp${
-			splittedKeypath[splittedKeypathLen - 1] }`
-	);
+	return (cache[keypath] = `(temp = this['${ keys[0] }'])${ jsExpr.join('') } && temp['${ keys[keyCount - 1] }']`);
 }

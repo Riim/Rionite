@@ -3,13 +3,11 @@ var namePattern_1 = require("./namePattern");
 var escapeString_1 = require("./Utils/escapeString");
 var escapeHTML_1 = require("./Utils/escapeHTML");
 var keypathPattern = '(?:' + namePattern_1.default + '|\\[\\d+\\])(?:\\.' + namePattern_1.default + '|\\[\\d+\\])*';
-var re = RegExp('\\{\\{' +
-    '(?:' +
+var re = RegExp('\\{\\{(?:' +
     '\\s*(?:' +
     'block\\s+(' + namePattern_1.default + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')' +
     ')\\s*|\\{\\s*(' + keypathPattern + ')\\s*\\}' +
-    ')' +
-    '\\}\\}');
+    ')\\}\\}');
 var ComponentTemplate = (function () {
     function ComponentTemplate(tmpl, parent) {
         this.parent = parent || null;

@@ -4,17 +4,17 @@ function keypathToJSExpression(keypath) {
     if (cache[keypath]) {
         return cache[keypath];
     }
-    var splittedKeypath = keypath.split('?');
-    var splittedKeypathLen = splittedKeypath.length;
-    if (splittedKeypathLen == 1) {
-        return (cache[keypath] = 'this.' + keypath);
+    var keys = keypath.split('.');
+    var keyCount = keys.length;
+    if (keyCount == 1) {
+        return (cache[keypath] = "this['" + keypath + "']");
     }
-    var index = splittedKeypathLen - 2;
+    var index = keyCount - 2;
     var jsExpr = Array(index);
     while (index) {
-        jsExpr[--index] = ' && (temp = temp' + splittedKeypath[index + 1] + ')';
+        jsExpr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
     }
-    return (cache[keypath] = "(temp = this." + splittedKeypath[0] + ")" + jsExpr.join('') + " && temp" + splittedKeypath[splittedKeypathLen - 1]);
+    return (cache[keypath] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && temp['" + keys[keyCount - 1] + "']");
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = keypathToJSExpression;

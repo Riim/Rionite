@@ -4,13 +4,11 @@ import escapeHTML from './Utils/escapeHTML';
 
 let keypathPattern = '(?:' + namePattern + '|\\[\\d+\\])(?:\\.' + namePattern + '|\\[\\d+\\])*';
 let re = RegExp(
-	'\\{\\{' +
-		'(?:' +
-			'\\s*(?:' +
-				'block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')' +
-			')\\s*|\\{\\s*(' + keypathPattern + ')\\s*\\}' +
-		')' +
-	'\\}\\}'
+	'\\{\\{(?:' +
+		'\\s*(?:' +
+			'block\\s+(' + namePattern + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')' +
+		')\\s*|\\{\\s*(' + keypathPattern + ')\\s*\\}' +
+	')\\}\\}'
 );
 
 interface IComponentTemplateBlockDescription {
@@ -115,7 +113,7 @@ export default class ComponentTemplate {
 		}, (this._blockMap = Object.create(parent ? parent._blockMap : null) as IComponentTemplateBlockMap));
 	}
 
-	extend(tmpl: string) {
+	extend(tmpl: string): ComponentTemplate {
 		return new ComponentTemplate(tmpl, this);
 	}
 

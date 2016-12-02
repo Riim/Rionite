@@ -697,7 +697,7 @@ exports.default = {
 "use strict";
 var namePattern_1 = __webpack_require__(7);
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = "(?:" + namePattern_1.default + "|\\[\\d+\\])(?:\\??(?:\\." + namePattern_1.default + "|\\[\\d+\\]))*";
+exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\." + namePattern_1.default + "|\\d+)*";
 
 
 /***/ },
@@ -1575,32 +1575,34 @@ exports.default = unescapeHTML;
 var cache = Object.create(null);
 function formattersReducer(jsExpr, formatter) {
     var args = formatter.arguments;
-    return "(this['" + formatter.name + "'] || formatters['" + formatter.name + "']).call(this, " + jsExpr + (args && args.value.length ? ', ' + args.value.join(', ') : '') + ")";
+    return "(this." + formatter.name + " || formatters." + formatter.name + ").call(this, " + jsExpr + (args && args.value.length ? ', ' + args.value.join(', ') : '') + ")";
 }
 function bindingToJSExpression(binding) {
     var bindingRaw = binding.raw;
     if (cache[bindingRaw]) {
         return cache[bindingRaw];
     }
-    var keypath = binding.keypath.value.split('?');
-    var keypathLen = keypath.length;
+    var keys = binding.keypath.value.split('.');
+    var keyCount = keys.length;
     var formatters = binding.formatters;
     var usesFormatters = !!formatters.length;
-    if (keypathLen == 1) {
+    if (keyCount == 1) {
         return (cache[bindingRaw] = {
-            value: usesFormatters ? formatters.reduce(formattersReducer, 'this.' + keypath[0]) : 'this.' + keypath[0],
+            value: usesFormatters ?
+                formatters.reduce(formattersReducer, "this['" + keys[0] + "']") :
+                "this['" + keys[0] + "']",
             usesFormatters: usesFormatters
         });
     }
-    var index = keypathLen - 2;
+    var index = keyCount - 2;
     var jsExpr = Array(index);
     while (index) {
-        jsExpr[--index] = " && (temp = temp" + keypath[index + 1] + ")";
+        jsExpr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
     }
     return (cache[bindingRaw] = {
-        value: "(temp = this." + keypath[0] + ")" + jsExpr.join('') + " && " + (usesFormatters ?
-            formatters.reduce(formattersReducer, 'temp' + keypath[keypathLen - 1]) :
-            'temp' + keypath[keypathLen - 1]),
+        value: "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && " + (usesFormatters ?
+            formatters.reduce(formattersReducer, "temp['" + keys[keyCount - 1] + "']") :
+            "temp['" + keys[keyCount - 1] + "']"),
         usesFormatters: usesFormatters
     });
 }
@@ -1724,17 +1726,17 @@ function keypathToJSExpression(keypath) {
     if (cache[keypath]) {
         return cache[keypath];
     }
-    var splittedKeypath = keypath.split('?');
-    var splittedKeypathLen = splittedKeypath.length;
-    if (splittedKeypathLen == 1) {
-        return (cache[keypath] = 'this.' + keypath);
+    var keys = keypath.split('.');
+    var keyCount = keys.length;
+    if (keyCount == 1) {
+        return (cache[keypath] = "this['" + keypath + "']");
     }
-    var index = splittedKeypathLen - 2;
+    var index = keyCount - 2;
     var jsExpr = Array(index);
     while (index) {
-        jsExpr[--index] = ' && (temp = temp' + splittedKeypath[index + 1] + ')';
+        jsExpr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
     }
-    return (cache[keypath] = "(temp = this." + splittedKeypath[0] + ")" + jsExpr.join('') + " && temp" + splittedKeypath[splittedKeypathLen - 1]);
+    return (cache[keypath] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && temp['" + keys[keyCount - 1] + "']");
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = keypathToJSExpression;
@@ -1802,13 +1804,11 @@ var namePattern_1 = __webpack_require__(7);
 var escapeString_1 = __webpack_require__(9);
 var escapeHTML_1 = __webpack_require__(8);
 var keypathPattern = '(?:' + namePattern_1.default + '|\\[\\d+\\])(?:\\.' + namePattern_1.default + '|\\[\\d+\\])*';
-var re = RegExp('\\{\\{' +
-    '(?:' +
+var re = RegExp('\\{\\{(?:' +
     '\\s*(?:' +
     'block\\s+(' + namePattern_1.default + ')|(\\/)block|(s)uper\\(\\)|(' + keypathPattern + ')' +
     ')\\s*|\\{\\s*(' + keypathPattern + ')\\s*\\}' +
-    ')' +
-    '\\}\\}');
+    ')\\}\\}');
 var ComponentTemplate = (function () {
     function ComponentTemplate(tmpl, parent) {
         this.parent = parent || null;
