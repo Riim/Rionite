@@ -297,11 +297,6 @@ class UserCard extends Component {
 }
 ```
 
-Выражение биндинга может содержать символ `?` для проверки существования свойства:
-```js
-static template = `{user?.friends?.length}`;
-```
-
 Для управления потоком вычисления в шаблоне используются компоненты `rt-if-then`, `rt-if-else` и `rt-repeat`.
 
 TODO:
