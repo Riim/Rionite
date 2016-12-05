@@ -1,5 +1,14 @@
 export default [
-	'click', 'dblclick', 'mousedown', 'mouseup',
-	'input', 'change', 'submit',
-	'focusin', 'focusout'
+	'change',
+	'click',
+	'dblclick',
+	'focusin',
+	'focusout',
+	'input',
+	'keydown',
+	'keypress',
+	'keyup',
+	'mousedown',
+	'mouseup',
+	'submit'
 ];

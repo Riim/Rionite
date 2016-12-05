@@ -1,7 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = [
-    'click', 'dblclick', 'mousedown', 'mouseup',
-    'input', 'change', 'submit',
-    'focusin', 'focusout'
+    'change',
+    'click',
+    'dblclick',
+    'focusin',
+    'focusout',
+    'input',
+    'keydown',
+    'keypress',
+    'keyup',
+    'mousedown',
+    'mouseup',
+    'submit'
 ];
