@@ -1,3 +1,4 @@
+import { IEvent } from 'cellx';
 import { IComponentTemplate, default as Component } from './Component';
 declare let d: {
     Component: (config: {
@@ -15,7 +16,7 @@ declare let d: {
         template?: string | IComponentTemplate | null | undefined;
         events?: {
             [assetName: string]: {
-                [eventName: string]: Function;
+                [eventName: string]: (this: Component, evt: Event | IEvent) => boolean | void;
             };
         } | null | undefined;
     }) => (componentConstr: typeof Component) => void;

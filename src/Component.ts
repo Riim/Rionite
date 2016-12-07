@@ -316,7 +316,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	$$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement> {
 		let assetList = this._getAssetList(name, container);
-		return assetList ? map.call(assetList, (el: any) => el.$c || el) : [];
+		return assetList ? map.call(assetList, (el: IComponentElement) => el.$c || el) : [];
 	}
 
 	_getAssetList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined {
