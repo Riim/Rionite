@@ -2163,7 +2163,7 @@ exports.default = {
 "use strict";
 var namePattern_1 = __webpack_require__(7);
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\." + namePattern_1.default + "|\\d+)*";
+exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\.(?:" + namePattern_1.default + "|\\d+))*";
 
 
 /***/ },
