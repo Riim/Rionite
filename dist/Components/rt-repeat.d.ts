@@ -1,19 +1,19 @@
 import { ObservableList, Cell } from 'cellx';
 import Component from '../Component';
-export declare type ListCell = Cell<ObservableList<Object>>;
-export declare type Item = {
+export declare type TRtRepeatListCell = Cell<ObservableList<Object>>;
+export declare type TRtRepeatItem = {
     item: Cell<Object>;
     index: Cell<number>;
     nodes: Array<Node>;
     bindings: Cell<any>[] | null;
 };
-export declare type ItemList = Array<Item>;
-export declare type ItemMap = Map<any, ItemList>;
+export declare type TRtRepeatItemList = Array<TRtRepeatItem>;
+export declare type TRtRepeatItemMap = Map<any, TRtRepeatItemList>;
 export default class RtRepeat extends Component {
     _itemName: string;
-    _list: ListCell;
-    _itemMap: ItemMap;
-    _oldItemMap: ItemMap;
+    _list: TRtRepeatListCell;
+    _itemMap: TRtRepeatItemMap;
+    _oldItemMap: TRtRepeatItemMap;
     _trackBy: string;
     _rawItemContent: DocumentFragment;
     _context: Object;
@@ -23,6 +23,6 @@ export default class RtRepeat extends Component {
     _onListChange(): void;
     _render(c: boolean): void;
     _renderItem(item: Object, index: number): boolean;
-    _clearWithItemMap(itemMap: ItemMap): void;
-    _clearWithItems(items: ItemList): void;
+    _clearWithItemMap(itemMap: TRtRepeatItemMap): void;
+    _clearWithItems(items: TRtRepeatItemList): void;
 }

@@ -30,7 +30,7 @@ export interface IContentBinding {
     keypath: IContentBindingKeypath;
     formatters: Array<IContentBindingFormatter>;
 }
-export declare type Content = Array<IContentText | IContentBinding>;
+export declare type TContent = Array<IContentText | IContentBinding>;
 export default class ContentParser {
     static ContentNodeType: {
         TEXT: number;
@@ -42,9 +42,9 @@ export default class ContentParser {
     content: string;
     at: number;
     chr: string;
-    result: Content;
+    result: TContent;
     constructor(content: string);
-    parse(): Content;
+    parse(): TContent;
     pushText(value: string): void;
     readBinding(): IContentBinding | null;
     readBindingKeypath(): IContentBindingKeypath | null;

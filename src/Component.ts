@@ -37,6 +37,10 @@ export interface IComponentAssetClassNames {
 	[assetName: string]: string;
 }
 
+export interface IComponentEvents {
+	[assetName: string]: { [eventName: string]: (this: Component, evt: IEvent | Event) => boolean | void; };
+}
+
 let created: any;
 let initialize: any;
 let ready: any;
@@ -71,7 +75,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static _markupBlockNames: Array<string>;
 	static _assetClassNames: IComponentAssetClassNames;
 
-	static events: { [assetName: string]: { [eventName: string]: Function }; } | null;
+	static events: IComponentEvents | null;
 
 	_disposables: any;
 	listenTo: any;

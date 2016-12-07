@@ -1,5 +1,5 @@
 import { IEvent, EventEmitter } from 'cellx';
-export declare type ListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList | HTMLCollection;
+export declare type TListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList | HTMLCollection;
 export interface IListener {
     (evt: IEvent | Event): boolean | undefined;
 }
@@ -11,8 +11,8 @@ export default class DisposableMixin {
     _disposables: {
         [id: string]: any;
     };
-    listenTo(target: ListeningTarget | Array<ListeningTarget>, type: string | Array<string>, listener: IListener | Array<IListener>, context?: any): IListening;
-    listenTo(target: ListeningTarget | Array<ListeningTarget>, listeners: {
+    listenTo(target: TListeningTarget | Array<TListeningTarget>, type: string | Array<string>, listener: IListener | Array<IListener>, context?: any): IListening;
+    listenTo(target: TListeningTarget | Array<TListeningTarget>, listeners: {
         [type: string]: IListener | Array<IListener>;
     }, context?: any): IListening;
     _listenTo(target: EventEmitter | EventTarget, type: string, listener: IListener, context: any): IListening;

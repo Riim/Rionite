@@ -39,7 +39,7 @@ export interface IContentBinding {
 	formatters: Array<IContentBindingFormatter>
 }
 
-export type Content = Array<IContentText | IContentBinding>;
+export type TContent = Array<IContentText | IContentBinding>;
 
 let reNameOrNothing = RegExp(namePattern + '|', 'g');
 let reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
@@ -64,13 +64,13 @@ export default class ContentParser {
 	content: string;
 	at: number;
 	chr: string;
-	result: Content;
+	result: TContent;
 
 	constructor(content: string) {
 		this.content = content;
 	}
 
-	parse(): Content {
+	parse(): TContent {
 		let content = this.content;
 
 		if (!content) {
@@ -79,7 +79,7 @@ export default class ContentParser {
 
 		this.at = 0;
 
-		let result: Content = this.result = [];
+		let result: TContent = this.result = [];
 
 		for (let index: number; (index = content.indexOf('{', this.at)) > -1;) {
 			this.pushText(content.slice(this.at, index));

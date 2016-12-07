@@ -13,15 +13,15 @@ let nextTick = Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
-export type ListCell = Cell<ObservableList<Object>>;
-export type Item = {
+export type TRtRepeatListCell = Cell<ObservableList<Object>>;
+export type TRtRepeatItem = {
 	item: Cell<Object>,
 	index: Cell<number>,
 	nodes: Array<Node>,
 	bindings: Cell<any>[] | null
 };
-export type ItemList = Array<Item>;
-export type ItemMap = Map<any, ItemList>;
+export type TRtRepeatItemList = Array<TRtRepeatItem>;
+export type TRtRepeatItemMap = Map<any, TRtRepeatItemList>;
 
 let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern })\\s*$`);
 
@@ -38,10 +38,10 @@ let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPa
 export default class RtRepeat extends Component {
 	_itemName: string;
 
-	_list: ListCell;
+	_list: TRtRepeatListCell;
 
-	_itemMap: ItemMap;
-	_oldItemMap: ItemMap;
+	_itemMap: TRtRepeatItemMap;
+	_oldItemMap: TRtRepeatItemMap;
 
 	_trackBy: string;
 
@@ -64,7 +64,7 @@ export default class RtRepeat extends Component {
 
 			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: props.context as Object });
 
-			this._itemMap = new Map<any, ItemList>();
+			this._itemMap = new Map<any, TRtRepeatItemList>();
 
 			this._trackBy = props['trackBy'];
 
@@ -116,7 +116,7 @@ export default class RtRepeat extends Component {
 
 	_render(c: boolean): void {
 		let oldItemMap = this._oldItemMap = this._itemMap;
-		this._itemMap = new Map<any, ItemList>();
+		this._itemMap = new Map<any, TRtRepeatItemList>();
 
 		let list = this._list.get();
 		let changed = false;
@@ -146,13 +146,13 @@ export default class RtRepeat extends Component {
 		let currentItems = this._itemMap.get(trackingValue);
 
 		if (prevItems) {
-			let prevItem: Item;
+			let prevItem: TRtRepeatItem;
 
 			if (prevItems.length == 1) {
 				prevItem = prevItems[0];
 				this._oldItemMap.delete(trackingValue);
 			} else {
-				prevItem = prevItems.shift() as Item;
+				prevItem = prevItems.shift() as TRtRepeatItem;
 			}
 
 			if (currentItems) {
@@ -235,12 +235,12 @@ export default class RtRepeat extends Component {
 		return true;
 	}
 
-	_clearWithItemMap(itemMap: ItemMap): void {
+	_clearWithItemMap(itemMap: TRtRepeatItemMap): void {
 		itemMap.forEach(this._clearWithItems, this);
 		itemMap.clear();
 	}
 
-	_clearWithItems(items: ItemList): void {
+	_clearWithItems(items: TRtRepeatItemList): void {
 		for (let i = items.length; i;) {
 			let item = items[--i];
 			let bindings = item.bindings;

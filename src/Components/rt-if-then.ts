@@ -11,7 +11,7 @@ let nextTick = Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
-export type IfCell = Cell<boolean>;
+export type TRtIfThenIfCell = Cell<boolean>;
 
 let reKeypath = RegExp(`^${ keypathPattern }$`);
 
@@ -26,7 +26,7 @@ let reKeypath = RegExp(`^${ keypathPattern }$`);
 export default class RtIfThen extends Component {
 	_elseMode = false;
 
-	_if: IfCell;
+	_if: TRtIfThenIfCell;
 
 	_nodes: Array<Node> | null;
 

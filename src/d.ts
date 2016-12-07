@@ -1,5 +1,4 @@
-import { IEvent } from 'cellx';
-import { IComponentTemplate, default as Component } from './Component';
+import { IComponentTemplate, IComponentEvents, default as Component } from './Component';
 
 let d = {
 	Component: function Component_(config: {
@@ -9,9 +8,7 @@ let d = {
 		props?: { [name: string]: any; } | null,
 		i18n?: { [key: string]: any; },
 		template?: string | IComponentTemplate | null,
-		events?: {
-			[assetName: string]: { [eventName: string]: (this: Component, evt: IEvent | Event) => boolean | void; };
-		} | null
+		events?: IComponentEvents | null
 	}) {
 		return function(componentConstr: typeof Component): void {
 			if (config.elementIs) {

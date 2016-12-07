@@ -2,7 +2,7 @@ import { IEvent, EventEmitter, Utils } from 'cellx';
 
 let nextUID = Utils.nextUID;
 
-export type ListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList |
+export type TListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList |
 	HTMLCollection;
 
 export interface IListener {
@@ -18,18 +18,18 @@ export default class DisposableMixin {
 	_disposables: { [id: string]: any; } = {};
 
 	listenTo(
-		target: ListeningTarget | Array<ListeningTarget>,
+		target: TListeningTarget | Array<TListeningTarget>,
 		type: string | Array<string>,
 		listener: IListener | Array<IListener>,
 		context?: any
 	): IListening;
 	listenTo(
-		target: ListeningTarget | Array<ListeningTarget>,
+		target: TListeningTarget | Array<TListeningTarget>,
 		listeners: { [type: string]: IListener | Array<IListener>; },
 		context?: any
 	): IListening;
 	listenTo(
-		target: ListeningTarget | Array<ListeningTarget>,
+		target: TListeningTarget | Array<TListeningTarget>,
 		typeOrListeners: string | Array<string> | { [type: string]: IListener | Array<IListener>; },
 		listenerOrContext?: IListener | Array<IListener> | any,
 		context?: any

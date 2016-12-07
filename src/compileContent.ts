@@ -1,4 +1,4 @@
-import { IContentText, IContentBinding, Content, default as ContentParser } from './ContentParser';
+import { IContentText, IContentBinding, TContent, default as ContentParser } from './ContentParser';
 import bindingToJSExpression from './bindingToJSExpression';
 import compileBinding from './compileBinding';
 import formatters from './formatters';
@@ -8,7 +8,7 @@ let ContentNodeType = ContentParser.ContentNodeType;
 
 let cache = Object.create(null);
 
-export default function compileContent(parsedContent: Content, content: string): () => any {
+export default function compileContent(parsedContent: TContent, content: string): () => any {
 	if (cache[content]) {
 		return cache[content];
 	}

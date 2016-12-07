@@ -1,6 +1,2 @@
-import Component from './Component';
-export default function bindEvents(component: Component, events: {
-    [assetName: string]: {
-        [eventName: string]: Function;
-    };
-}): void;
+import { IComponentEvents, default as Component } from './Component';
+export default function bindEvents(component: Component, events: IComponentEvents): void;
