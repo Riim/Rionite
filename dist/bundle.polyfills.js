@@ -1606,7 +1606,7 @@ var Component = (function (_super) {
             el = document.createElement(elIs);
             el.innerHTML = html;
             var firstChild = el.firstChild;
-            if (firstChild == el.lastChild && firstChild.nodeType == 1 && (firstChild.tagName.toLowerCase() == elIs ||
+            if (firstChild && firstChild == el.lastChild && firstChild.nodeType == 1 && (firstChild.tagName.toLowerCase() == elIs ||
                 firstChild.getAttribute('is') == elIs)) {
                 el = firstChild;
             }
@@ -1812,9 +1812,9 @@ var Component = (function (_super) {
     };
     return Component;
 }(cellx_1.EventEmitter));
+Component.register = registerComponent_1.default;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Component;
-Component.register = registerComponent_1.default;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
 var ComponentProto = Component.prototype;
 Object.getOwnPropertyNames(DisposableMixinProto).forEach(function (name) {
@@ -2618,9 +2618,9 @@ var ContentParser = (function () {
     };
     return ContentParser;
 }());
+ContentParser.ContentNodeType = ContentNodeType;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ContentParser;
-ContentParser.ContentNodeType = ContentNodeType;
 
 
 /***/ },

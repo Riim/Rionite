@@ -93,7 +93,7 @@ export default class RtIfThen extends Component {
 			this._nodes = slice.call(content.childNodes);
 			this._bindings = bindings;
 
-			this.element.parentNode.insertBefore(content, this.element.nextSibling);
+			(this.element.parentNode as Node).insertBefore(content, this.element.nextSibling);
 
 			if (!nativeCustomElementsFeature && childComponents) {
 				attachChildComponentElements(childComponents);
@@ -106,7 +106,7 @@ export default class RtIfThen extends Component {
 			if (nodes) {
 				for (let i = nodes.length; i;) {
 					let node = nodes[--i];
-					node.parentNode.removeChild(node);
+					(node.parentNode as Node).removeChild(node);
 				}
 
 				this._nodes = null;

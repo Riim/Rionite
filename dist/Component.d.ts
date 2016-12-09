@@ -18,7 +18,7 @@ export interface IComponentAssetClassNames {
 }
 export interface IComponentEvents {
     [assetName: string]: {
-        [eventName: string]: (this: Component, evt: IEvent | Event) => boolean | void;
+        [eventName: string]: (this: Component, evt: IEvent | Event, target: HTMLElement) => boolean | void;
     };
 }
 export default class Component extends EventEmitter implements DisposableMixin {

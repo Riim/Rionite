@@ -74,7 +74,7 @@ export default function bindContent(
 							let cell = new Cell<any>(compileContent(parsedContent, content), {
 								owner: context,
 								onChange(evt) {
-									child.textContent = evt['value'];
+									(child as Node).textContent = evt['value'];
 								}
 							});
 

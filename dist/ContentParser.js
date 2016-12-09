@@ -330,6 +330,6 @@ var ContentParser = (function () {
     };
     return ContentParser;
 }());
+ContentParser.ContentNodeType = ContentNodeType;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ContentParser;
-ContentParser.ContentNodeType = ContentNodeType;

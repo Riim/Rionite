@@ -38,7 +38,9 @@ export interface IComponentAssetClassNames {
 }
 
 export interface IComponentEvents {
-	[assetName: string]: { [eventName: string]: (this: Component, evt: IEvent | Event) => boolean | void; };
+	[assetName: string]: {
+		[eventName: string]: (this: Component, evt: IEvent | Event, target: HTMLElement) => boolean | void;
+	};
 }
 
 let created: any;
@@ -166,7 +168,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			let firstChild = el.firstChild;
 
 			if (
-				firstChild == el.lastChild && firstChild.nodeType == 1 && (
+				firstChild && firstChild == el.lastChild && firstChild.nodeType == 1 && (
 					(firstChild as HTMLElement).tagName.toLowerCase() == elIs ||
 						(firstChild as HTMLElement).getAttribute('is') == elIs
 				)
@@ -223,7 +225,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 		if (this.isReady) {
 			if (rawContent) {
-				for (let child: Node; (child = el.firstChild);) {
+				for (let child: Node | null; (child = el.firstChild);) {
 					el.removeChild(child);
 				}
 			}
@@ -242,7 +244,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 				let inputContent = this.props.content = document.createDocumentFragment();
 
-				for (let child: Node; (child = el.firstChild);) {
+				for (let child: Node | null; (child = el.firstChild);) {
 					inputContent.appendChild(child);
 				}
 			}

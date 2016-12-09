@@ -72,8 +72,8 @@ export default class RtRepeat extends Component {
 				document.importNode((this.element as any).content, true) as DocumentFragment;
 
 			if (props['strip']) {
-				let firstChild = rawItemContent.firstChild;
-				let lastChild = rawItemContent.lastChild;
+				let firstChild = rawItemContent.firstChild as Node;
+				let lastChild = rawItemContent.lastChild as Node;
 
 				if (firstChild == lastChild) {
 					if (firstChild.nodeType == 3) {
@@ -174,7 +174,7 @@ export default class RtRepeat extends Component {
 
 			if (nodes.length == 1) {
 				let node = nodes[0];
-				this._lastNode.parentNode.insertBefore(node, this._lastNode.nextSibling);
+				(this._lastNode.parentNode as Node).insertBefore(node, this._lastNode.nextSibling);
 				this._lastNode = node;
 			} else {
 				let df = document.createDocumentFragment();
@@ -183,8 +183,8 @@ export default class RtRepeat extends Component {
 					df.appendChild(node);
 				}
 
-				let newLastNode = df.lastChild;
-				this._lastNode.parentNode.insertBefore(df, this._lastNode.nextSibling);
+				let newLastNode = df.lastChild as Node;
+				(this._lastNode.parentNode as Node).insertBefore(df, this._lastNode.nextSibling);
 				this._lastNode = newLastNode;
 			}
 
@@ -224,8 +224,8 @@ export default class RtRepeat extends Component {
 			this._itemMap.set(trackingValue, [newItem]);
 		}
 
-		let newLastNode = content.lastChild;
-		this._lastNode.parentNode.insertBefore(content, this._lastNode.nextSibling);
+		let newLastNode = content.lastChild as Node;
+		(this._lastNode.parentNode as Node).insertBefore(content, this._lastNode.nextSibling);
 		this._lastNode = newLastNode;
 
 		if (!nativeCustomElementsFeature && childComponents) {

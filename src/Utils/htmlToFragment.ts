@@ -19,7 +19,7 @@ if (range.createContextualFragment) {
 
 		el.innerHTML = html;
 
-		for (let child: Node; (child = el.firstChild);) {
+		for (let child: Node | null; (child = el.firstChild);) {
 			df.appendChild(child);
 		}
 

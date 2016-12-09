@@ -2,7 +2,7 @@ import { IEvent } from 'cellx';
 import Component from './Component';
 
 export default function onEvent(evt: IEvent | Event) {
-	let node: Node;
+	let node: Node | null;
 	let attrName: string;
 	let targetEls: Array<HTMLElement> | undefined;
 

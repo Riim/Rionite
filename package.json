@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.16.7",
+  "version": "0.16.8",
   "description": "",
   "main": "dist/bundle.polyfills.js",
   "typings": "dist/Rionite.d.ts",
@@ -29,7 +29,7 @@
     "pump": "^1.0.1",
     "require-dir": "^0.3.1",
     "run-sequence": "^1.2.2",
-    "typescript": "^2.1.1",
+    "typescript": "^2.1.4",
     "webpack": "^2.1.0-beta.27"
   },
   "dependencies": {
