@@ -3408,7 +3408,7 @@ var RtContent = (function (_super) {
             this.isReady = true;
         }
         var content = this._rawContent.cloneNode(true);
-        var getContext = props['getContext'];
+        var getContext = props['get-context'];
         var _a = this._rawContent == props.content ?
             bindContent_1.default(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) :
             bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
@@ -3522,7 +3522,7 @@ var RtRepeat = (function (_super) {
             this._itemName = forAttrValue[1];
             this._list = new cellx_1.Cell(compileKeypath_1.default(forAttrValue[2]), { owner: props.context });
             this._itemMap = new Map();
-            this._trackBy = props['trackBy'];
+            this._trackBy = props['track-by'];
             var rawItemContent = this._rawItemContent =
                 document.importNode(this.element.content, true);
             if (props['strip']) {
