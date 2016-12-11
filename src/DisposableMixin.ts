@@ -2,6 +2,28 @@ import { IEvent, EventEmitter, Utils } from 'cellx';
 
 let nextUID = Utils.nextUID;
 
+export interface IDisposable {
+	dispose(): any;
+	[key: string]: any;
+}
+
+export interface IDisposableListening extends IDisposable {
+	stop(): void;
+}
+
+export interface IDisposableTimeout extends IDisposable {
+	clear(): void;
+}
+
+export interface IDisposableInterval extends IDisposable {
+	clear(): void;
+}
+
+export interface IDisposableCallback extends IDisposable {
+	(): void;
+	cancel(): void;
+}
+
 export type TListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList |
 	HTMLCollection;
 
@@ -9,32 +31,27 @@ export interface IListener {
 	(evt: IEvent | Event): boolean | undefined;
 }
 
-export interface IListening {
-	stop: () => void,
-	dispose: () => void
-}
-
-export default class DisposableMixin {
-	_disposables: { [id: string]: any; } = {};
+export default class DisposableMixin implements IDisposable {
+	_disposables: { [id: string]: IDisposable; } = {};
 
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
 		type: string | Array<string>,
 		listener: IListener | Array<IListener>,
 		context?: any
-	): IListening;
+	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
 		listeners: { [type: string]: IListener | Array<IListener>; },
 		context?: any
-	): IListening;
+	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
 		typeOrListeners: string | Array<string> | { [type: string]: IListener | Array<IListener>; },
 		listenerOrContext?: IListener | Array<IListener> | any,
 		context?: any
-	): IListening {
-		let listenings: Array<IListening>;
+	): IDisposableListening {
+		let listenings: Array<IDisposableListening>;
 
 		if (typeof typeOrListeners == 'object') {
 			listenings = [];
@@ -101,7 +118,7 @@ export default class DisposableMixin {
 		type: string,
 		listener: IListener,
 		context: any
-	): IListening {
+	): IDisposableListening {
 		if (target instanceof EventEmitter) {
 			target.on(type, listener, context);
 		} else if (target.addEventListener) {
@@ -136,7 +153,7 @@ export default class DisposableMixin {
 		return listening;
 	}
 
-	setTimeout(cb: Function, delay: number): { clear: () => void, dispose: () => void } {
+	setTimeout(cb: Function, delay: number): IDisposableTimeout {
 		let id = nextUID();
 
 		let timeoutId = setTimeout(() => {
@@ -159,7 +176,7 @@ export default class DisposableMixin {
 		return timeout;
 	}
 
-	setInterval(cb: Function, delay: number): { clear: () => void, dispose: () => void } {
+	setInterval(cb: Function, delay: number): IDisposableInterval {
 		let id = nextUID();
 
 		let intervalId = setInterval(() => {
@@ -181,7 +198,7 @@ export default class DisposableMixin {
 		return interval;
 	}
 
-	registerCallback(cb: Function): { (): void, cancel: () => void, dispose: () => void } {
+	registerCallback(cb: Function): IDisposableCallback {
 		let id = nextUID();
 		let disposable = this;
 
@@ -189,18 +206,18 @@ export default class DisposableMixin {
 			delete this._disposables[id];
 		};
 
-		let wrapper = function wrapper() {
+		let callback = function callback() {
 			if (disposable._disposables[id]) {
 				delete disposable._disposables[id];
 				return cb.apply(disposable, arguments);
 			}
-		} as { (): void, cancel: () => void, dispose: () => void };
-		wrapper.cancel = cancelCallback;
-		wrapper.dispose = cancelCallback;
+		} as IDisposableCallback;
+		callback.cancel = cancelCallback;
+		callback.dispose = cancelCallback;
 
-		this._disposables[id] = wrapper;
+		this._disposables[id] = callback;
 
-		return wrapper;
+		return callback;
 	}
 
 	dispose(): DisposableMixin {

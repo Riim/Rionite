@@ -1,4 +1,13 @@
-import { TListeningTarget, IListener, IListening, default as DisposableMixin } from './DisposableMixin';
+import {
+	IDisposable,
+	IDisposableListening,
+	IDisposableTimeout,
+	IDisposableInterval,
+	IDisposableCallback,
+	TListeningTarget,
+	IListener,
+	default as DisposableMixin
+} from './DisposableMixin';
 import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
 import {
@@ -55,9 +64,13 @@ let Utils = {
 };
 
 export {
+	IDisposable,
+	IDisposableListening,
+	IDisposableTimeout,
+	IDisposableInterval,
+	IDisposableCallback,
 	TListeningTarget,
 	IListener,
-	IListening,
 	DisposableMixin,
 
 	formatters,

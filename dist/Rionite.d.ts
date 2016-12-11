@@ -1,4 +1,4 @@
-import { TListeningTarget, IListener, IListening, default as DisposableMixin } from './DisposableMixin';
+import { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, default as DisposableMixin } from './DisposableMixin';
 import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
 import { IComponentElement, IComponentProperties, IComponentTemplate, IComponentAssetClassNames, IComponentEvents, default as Component } from './Component';
@@ -25,4 +25,4 @@ declare let Utils: {
     defer: (cb: () => void, context?: any) => void;
     htmlToFragment: (html: string) => DocumentFragment;
 };
-export { TListeningTarget, IListener, IListening, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IComponentElement, IComponentProperties, IComponentTemplate, IComponentAssetClassNames, IComponentEvents, Component, d, TRtIfThenIfCell, TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, ElementAttributes, IComponentTemplateBlock, IComponentTemplateRenderer, IComponentTemplateBlockMap, ComponentTemplate, Utils };
+export { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IComponentElement, IComponentProperties, IComponentTemplate, IComponentAssetClassNames, IComponentEvents, Component, d, TRtIfThenIfCell, TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, ElementAttributes, IComponentTemplateBlock, IComponentTemplateRenderer, IComponentTemplateBlockMap, ComponentTemplate, Utils };

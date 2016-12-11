@@ -2769,16 +2769,16 @@ var DisposableMixin = (function () {
         var cancelCallback = function () {
             delete _this._disposables[id];
         };
-        var wrapper = function wrapper() {
+        var callback = function callback() {
             if (disposable._disposables[id]) {
                 delete disposable._disposables[id];
                 return cb.apply(disposable, arguments);
             }
         };
-        wrapper.cancel = cancelCallback;
-        wrapper.dispose = cancelCallback;
-        this._disposables[id] = wrapper;
-        return wrapper;
+        callback.cancel = cancelCallback;
+        callback.dispose = cancelCallback;
+        this._disposables[id] = callback;
+        return callback;
     };
     DisposableMixin.prototype.dispose = function () {
         var disposables = this._disposables;
