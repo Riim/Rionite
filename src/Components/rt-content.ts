@@ -20,7 +20,7 @@ let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 export default class RtContent extends Component {
 	_rawContent: DocumentFragment;
 
-	_attachElement(): void {
+	_attachElement() {
 		let ownerComponent = this.ownerComponent as Component;
 		let el = this.element;
 		let props = this.props;
@@ -95,7 +95,7 @@ export default class RtContent extends Component {
 		}
 	}
 
-	_detachElement(): void {
+	_detachElement() {
 		this._destroyBindings();
 	}
 }

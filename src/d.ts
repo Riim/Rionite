@@ -10,7 +10,7 @@ let d = {
 		template?: string | IComponentTemplate | null,
 		events?: IComponentEvents | null
 	}) {
-		return function(componentConstr: typeof Component): void {
+		return function(componentConstr: typeof Component) {
 			if (config.elementIs) {
 				componentConstr.elementIs = config.elementIs;
 			}

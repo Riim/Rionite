@@ -102,7 +102,7 @@ export default class ContentParser {
 		return result;
 	}
 
-	pushText(value: string): void {
+	pushText(value: string) {
 		if (value) {
 			let result = this.result;
 			let resultLen = result.length;

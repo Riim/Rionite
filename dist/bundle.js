@@ -515,7 +515,8 @@ function bindContent(content, ownerComponent, context) {
                         childComponent.props.context = context;
                         (childComponents || (childComponents = [])).push(childComponent);
                     }
-                    if (child.firstChild && (!childComponent || childComponent.constructor.template == null)) {
+                    if (child.firstChild &&
+                        (!childComponent || childComponent.constructor.template == null)) {
                         bind_(child);
                     }
                     break;

@@ -30,7 +30,7 @@ export default class RtIfThen extends Component {
 
 	_nodes: Array<Node> | null;
 
-	_attachElement(): void {
+	_attachElement() {
 		if (!this.initialized) {
 			let props = this.props;
 
@@ -56,7 +56,7 @@ export default class RtIfThen extends Component {
 		this._render(false);
 	}
 
-	_detachElement(): void {
+	_detachElement() {
 		this._destroyBindings();
 		this._if.off('change', this._onIfChange, this);
 
@@ -74,13 +74,13 @@ export default class RtIfThen extends Component {
 		}
 	}
 
-	_onIfChange(): void {
+	_onIfChange() {
 		if (this.element.parentNode) {
 			this._render(true);
 		}
 	}
 
-	_render(changed: boolean): void {
+	_render(changed: boolean) {
 		if (this._elseMode ? !this._if.get() : this._if.get()) {
 			let content = (this.props.content as DocumentFragment).cloneNode(true);
 

@@ -193,7 +193,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		this.created();
 	}
 
-	_handleEvent(evt: IEvent): void {
+	_handleEvent(evt: IEvent) {
 		super._handleEvent(evt);
 
 		let silent = this._isComponentSilent;
@@ -290,7 +290,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		return DisposableMixin.prototype.dispose.call(this);
 	}
 
-	_destroyBindings(): void {
+	_destroyBindings() {
 		let bindings = this._bindings;
 
 		if (bindings) {
@@ -304,14 +304,14 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	// Callbacks
 
-	created(): void {}
-	initialize(): void {}
-	ready(): void {}
-	elementAttached(): void {}
-	beforeElementDetach(): void {}
-	elementDetached(): void {}
-	elementMoved(): void {}
-	elementAttributeChanged(name: string, oldValue: any, value: any): void {}
+	created() {}
+	initialize() {}
+	ready() {}
+	elementAttached() {}
+	beforeElementDetach() {}
+	elementDetached() {}
+	elementMoved() {}
+	elementAttributeChanged(name: string, oldValue: any, value: any) {}
 
 	// Utils
 

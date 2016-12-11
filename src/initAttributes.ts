@@ -1,7 +1,7 @@
 import Component from './Component';
 import camelize from './Utils/camelize';
 
-export default function initAttributes(component: Component, constr: typeof Component): void {
+export default function initAttributes(component: Component, constr: typeof Component) {
 	let elAttrsConfig = constr.elementAttributes;
 
 	if (elAttrsConfig) {

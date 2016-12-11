@@ -51,7 +51,7 @@ export default class RtRepeat extends Component {
 
 	_lastNode: Node;
 
-	_attachElement(): void {
+	_attachElement() {
 		if (!this.initialized) {
 			let props = this.props;
 			let forAttrValue = props['for'].match(reForAttributeValue);
@@ -103,18 +103,18 @@ export default class RtRepeat extends Component {
 		this._render(false);
 	}
 
-	_detachElement(): void {
+	_detachElement() {
 		this._clearWithItemMap(this._itemMap);
 		this._list.off('change', this._onListChange, this);
 	}
 
-	_onListChange(): void {
+	_onListChange() {
 		if (this.element.parentNode) {
 			this._render(true);
 		}
 	}
 
-	_render(c: boolean): void {
+	_render(c: boolean) {
 		let oldItemMap = this._oldItemMap = this._itemMap;
 		this._itemMap = new Map<any, TRtRepeatItemList>();
 
@@ -235,12 +235,12 @@ export default class RtRepeat extends Component {
 		return true;
 	}
 
-	_clearWithItemMap(itemMap: TRtRepeatItemMap): void {
+	_clearWithItemMap(itemMap: TRtRepeatItemMap) {
 		itemMap.forEach(this._clearWithItems, this);
 		itemMap.clear();
 	}
 
-	_clearWithItems(items: TRtRepeatItemList): void {
+	_clearWithItems(items: TRtRepeatItemList) {
 		for (let i = items.length; i;) {
 			let item = items[--i];
 			let bindings = item.bindings;

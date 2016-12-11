@@ -1,5 +1,5 @@
 import { Cell } from 'cellx';
-import Component from './Component';
+import { IComponentElement, default as Component } from './Component';
 import ContentParser from './ContentParser';
 import compileContent from './compileContent';
 import setAttribute from './Utils/setAttribute';
@@ -49,16 +49,19 @@ export default function bindContent(
 						}
 					}
 
-					let childComponent = (child as any).$c;
+					let childComponent = (child as IComponentElement).$c;
 
 					if (childComponent) {
 						childComponent.ownerComponent = ownerComponent;
-						childComponent.props.context = context;
+						childComponent.props.context = context as Object;
 
 						(childComponents || (childComponents = [])).push(childComponent);
 					}
 
-					if (child.firstChild && (!childComponent || childComponent.constructor.template == null)) {
+					if (
+						child.firstChild &&
+							(!childComponent || (childComponent.constructor as typeof Component).template == null)
+					) {
 						bind_(child);
 					}
 
