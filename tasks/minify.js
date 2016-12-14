@@ -5,7 +5,7 @@ var rename = require('gulp-rename');
 
 gulp.task('minify', function(done) {
 	pump([
-		gulp.src(['dist/bundle.js', 'dist/bundle.polyfills.js']),
+		gulp.src(['dist/rionite.js', 'dist/rionite.polyfills.js']),
 		uglify(),
 		rename({ suffix: '.min' }),
 		gulp.dest('dist')

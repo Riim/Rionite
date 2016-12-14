@@ -1,9 +1,9 @@
 {
   "name": "rionite",
-  "version": "0.16.12",
+  "version": "0.16.15",
   "description": "",
-  "main": "dist/bundle.polyfills.js",
-  "typings": "dist/Rionite.d.ts",
+  "main": "dist/rionite.polyfills.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "build": "./node_modules/.bin/tsc && ./node_modules/.bin/webpack && ./node_modules/.bin/gulp",
     "test": "echo \"Error: no test specified\" && exit 1"

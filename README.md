@@ -14,7 +14,7 @@ npm install cellx rionite --save
 <hello-user name="Matroskin"></hello-user>
 
 <script src="./node_modules/cellx/dist/cellx.js"></script>
-<script src="./node_modules/rionite/dist/Rionite-with-polyfills.js"></script>
+<script src="./node_modules/rionite/dist/rionite.polyfills.js"></script>
 <script>
 
 Rionite.Component.extend('hello-user', {

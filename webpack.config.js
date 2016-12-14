@@ -14,7 +14,7 @@ module.exports = function(env) {
 
 	return {
 		entry: {
-			bundle: [path.join(__dirname, 'dist/Rionite.js')]
+			rionite: [path.join(__dirname, 'dist/index.js')]
 		},
 
 		output: {
