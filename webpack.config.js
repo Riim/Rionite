@@ -18,10 +18,10 @@ module.exports = function(env) {
 		},
 
 		output: {
-			library: 'rionite',
-			libraryTarget: 'umd',
+			filename: '[name].js',
 			path: path.join(__dirname, 'dist'),
-			filename: '[name].js'
+			library: 'rionite',
+			libraryTarget: 'umd'
 		},
 
 		externals: ['cellx'],

@@ -16,9 +16,9 @@ export interface IComponentTemplate {
 export interface IComponentAssetClassNames {
     [assetName: string]: string;
 }
-export interface IComponentEvents {
+export interface IComponentEvents<T> {
     [assetName: string]: {
-        [eventName: string]: (this: Component, evt: IEvent | Event, target: HTMLElement) => boolean | void;
+        [eventName: string]: (this: T, evt: IEvent | Event, target: HTMLElement) => boolean | void;
     };
 }
 export default class Component extends EventEmitter implements DisposableMixin {
@@ -40,7 +40,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     static _rawContent: DocumentFragment;
     static _markupBlockNames: Array<string>;
     static _assetClassNames: IComponentAssetClassNames;
-    static events: IComponentEvents | null;
+    static events: IComponentEvents<Component> | null;
     _disposables: any;
     listenTo: any;
     _listenTo: any;

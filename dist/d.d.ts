@@ -1,6 +1,6 @@
 import { IComponentTemplate, IComponentEvents, default as Component } from './Component';
 declare let d: {
-    Component: (config: {
+    Component: <T extends Component>(config: {
         elementIs?: string | undefined;
         elementExtends?: string | undefined;
         elementAttributes?: {
@@ -13,7 +13,7 @@ declare let d: {
             [key: string]: any;
         } | undefined;
         template?: string | IComponentTemplate | null | undefined;
-        events?: IComponentEvents | null | undefined;
+        events?: IComponentEvents<T> | null | undefined;
     }) => (componentConstr: typeof Component) => void;
 };
 export default d;

@@ -1,14 +1,14 @@
 import { IComponentTemplate, IComponentEvents, default as Component } from './Component';
 
 let d = {
-	Component: function Component_(config: {
+	Component: function Component_<T extends Component>(config: {
 		elementIs?: string,
 		elementExtends?: string,
 		elementAttributes?: { [name: string]: any; } | null,
 		props?: { [name: string]: any; } | null,
 		i18n?: { [key: string]: any; },
 		template?: string | IComponentTemplate | null,
-		events?: IComponentEvents | null
+		events?: IComponentEvents<T> | null
 	}) {
 		return function(componentConstr: typeof Component) {
 			if (config.elementIs) {
