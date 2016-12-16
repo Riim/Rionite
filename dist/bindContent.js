@@ -23,6 +23,9 @@ function bindContent(content, ownerComponent, context) {
                             var parsedValue = (new ContentParser_1.default(value)).parse();
                             if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
                                 var name_1 = attr.name;
+                                if (name_1.charAt(0) == '_') {
+                                    name_1 = name_1.slice(1);
+                                }
                                 var cell = new cellx_1.Cell(compileContent_1.default(parsedValue, value), {
                                     owner: context,
                                     onChange: function (evt) {

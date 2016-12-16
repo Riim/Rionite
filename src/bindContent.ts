@@ -35,6 +35,11 @@ export default function bindContent(
 
 							if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
 								let name = attr.name;
+
+								if (name.charAt(0) == '_') {
+									name = name.slice(1);
+								}
+
 								let cell = new Cell<any>(compileContent(parsedValue, value), {
 									owner: context,
 									onChange(evt) {
