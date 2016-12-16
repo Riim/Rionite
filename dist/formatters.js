@@ -51,7 +51,8 @@ exports.default = {
         args.unshift(count);
         return getText_1.default(context, key, true, args);
     },
-    key: function key(obj, key) {
+    // Safary: "Cannot declare a parameter named 'key' as it shadows the name of a strict mode function."
+    key: function key_(obj, key) {
         return obj && obj[key];
     },
     json: function json(value) {
