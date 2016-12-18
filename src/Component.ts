@@ -47,7 +47,6 @@ let created: any;
 let initialize: any;
 let ready: any;
 let elementAttached: any;
-let beforeElementDetach: any;
 let elementDetached: any;
 let elementMoved: any;
 let elementAttributeChanged: any;
@@ -280,9 +279,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	}
 
 	_detachElement() {
-		this.beforeElementDetach();
-		this.dispose();
 		this.elementDetached();
+		this.dispose();
 	}
 
 	dispose(): Component {
@@ -308,7 +306,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	initialize() {}
 	ready() {}
 	elementAttached() {}
-	beforeElementDetach() {}
 	elementDetached() {}
 	elementMoved() {}
 	elementAttributeChanged(name: string, oldValue: any, value: any) {}
@@ -382,7 +379,6 @@ created = ComponentProto.created;
 initialize = ComponentProto.initialize;
 ready = ComponentProto.ready;
 elementAttached = ComponentProto.elementAttached;
-beforeElementDetach = ComponentProto.beforeElementDetach;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;
 elementAttributeChanged = ComponentProto.elementAttributeChanged;

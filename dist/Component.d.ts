@@ -71,7 +71,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
     initialize(): void;
     ready(): void;
     elementAttached(): void;
-    beforeElementDetach(): void;
     elementDetached(): void;
     elementMoved(): void;
     elementAttributeChanged(name: string, oldValue: any, value: any): void;

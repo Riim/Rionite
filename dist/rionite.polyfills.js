@@ -1581,7 +1581,6 @@ var created;
 var initialize;
 var ready;
 var elementAttached;
-var beforeElementDetach;
 var elementDetached;
 var elementMoved;
 var elementAttributeChanged;
@@ -1742,9 +1741,8 @@ var Component = (function (_super) {
         this.elementAttached();
     };
     Component.prototype._detachElement = function () {
-        this.beforeElementDetach();
-        this.dispose();
         this.elementDetached();
+        this.dispose();
     };
     Component.prototype.dispose = function () {
         this._destroyBindings();
@@ -1764,7 +1762,6 @@ var Component = (function (_super) {
     Component.prototype.initialize = function () { };
     Component.prototype.ready = function () { };
     Component.prototype.elementAttached = function () { };
-    Component.prototype.beforeElementDetach = function () { };
     Component.prototype.elementDetached = function () { };
     Component.prototype.elementMoved = function () { };
     Component.prototype.elementAttributeChanged = function (name, oldValue, value) { };
@@ -1828,7 +1825,6 @@ created = ComponentProto.created;
 initialize = ComponentProto.initialize;
 ready = ComponentProto.ready;
 elementAttached = ComponentProto.elementAttached;
-beforeElementDetach = ComponentProto.beforeElementDetach;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;
 elementAttributeChanged = ComponentProto.elementAttributeChanged;
