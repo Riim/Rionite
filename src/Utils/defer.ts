@@ -1,9 +1,9 @@
 import { ErrorLogger } from 'cellx';
 
-let queue: Array<{ callback: () => void, context: any }> | null;
+let queue: Array<{ callback: () => void; context: any }> | null;
 
 function run() {
-	let track = queue as Array<{ callback: () => void, context: any }>;
+	let track = queue as Array<{ callback: () => void; context: any }>;
 
 	queue = null;
 

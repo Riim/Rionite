@@ -4,7 +4,7 @@ import defer from './Utils/defer';
 
 let Symbol = JS.Symbol;
 
-let attached = Symbol('Rionite.ElementProtoMixin.attached');
+let KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
 
 let ElementProtoMixin = {
 	rioniteComponent: null,
@@ -13,10 +13,10 @@ let ElementProtoMixin = {
 		return new this._rioniteComponentConstructor(this);
 	},
 
-	[attached]: false,
+	[KEY_ATTACHED]: false,
 
 	connectedCallback() {
-		this[attached] = true;
+		this[KEY_ATTACHED] = true;
 
 		let component = this.rioniteComponent as Component;
 
@@ -33,7 +33,7 @@ let ElementProtoMixin = {
 			}
 		} else {
 			defer(function() {
-				if (this[attached]) {
+				if (this[KEY_ATTACHED]) {
 					let component = this.$c;
 
 					component._parentComponent = undefined;
@@ -48,7 +48,7 @@ let ElementProtoMixin = {
 	},
 
 	disconnectedCallback() {
-		this[attached] = false;
+		this[KEY_ATTACHED] = false;
 
 		let component = this.rioniteComponent as Component;
 

@@ -5,7 +5,7 @@
 
 	var style = d.createElement('style');
 	style.type = 'text/css';
-	style.textContent = 'template { display: none !important; }';
+	style.textContent = 'template { display: none !important }';
 	d.getElementsByTagName('head')[0].appendChild(style);
 
 	Object.defineProperty(HTMLElement.prototype, 'content', {

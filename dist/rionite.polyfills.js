@@ -1439,7 +1439,7 @@ THE SOFTWARE.
 
 	var style = d.createElement('style');
 	style.type = 'text/css';
-	style.textContent = 'template { display: none !important; }';
+	style.textContent = 'template { display: none !important }';
 	d.getElementsByTagName('head')[0].appendChild(style);
 
 	Object.defineProperty(HTMLElement.prototype, 'content', {
@@ -3715,16 +3715,16 @@ exports.default = RtRepeat;
 var cellx_1 = __webpack_require__(0);
 var defer_1 = __webpack_require__(17);
 var Symbol = cellx_1.JS.Symbol;
-var attached = Symbol('Rionite.ElementProtoMixin.attached');
+var KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
         get $c() {
             return new this._rioniteComponentConstructor(this);
         }
     },
-    _a[attached] = false,
+    _a[KEY_ATTACHED] = false,
     _a.connectedCallback = function () {
-        this[attached] = true;
+        this[KEY_ATTACHED] = true;
         var component = this.rioniteComponent;
         if (component) {
             if (component.isElementAttached) {
@@ -3741,7 +3741,7 @@ var ElementProtoMixin = (_a = {
         }
         else {
             defer_1.default(function () {
-                if (this[attached]) {
+                if (this[KEY_ATTACHED]) {
                     var component_1 = this.$c;
                     component_1._parentComponent = undefined;
                     if (!component_1.parentComponent) {
@@ -3753,7 +3753,7 @@ var ElementProtoMixin = (_a = {
         }
     },
     _a.disconnectedCallback = function () {
-        this[attached] = false;
+        this[KEY_ATTACHED] = false;
         var component = this.rioniteComponent;
         if (component && component.isElementAttached) {
             component._parentComponent = null;

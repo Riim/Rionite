@@ -64,10 +64,10 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static elementIs: string;
 	static elementExtends: string;
 
-	static elementAttributes: { [name: string]: any; } | null;
-	static props: { [name: string]: any; } | null;
+	static elementAttributes: { [name: string]: any } | null;
+	static props: { [name: string]: any } | null;
 
-	static i18n: { [key: string]: any; };
+	static i18n: { [key: string]: any };
 
 	static template: string | IComponentTemplate | null;
 
@@ -145,7 +145,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	_isComponentSilent: boolean;
 
-	constructor(el: HTMLElement | string | null | undefined, props: { [name: string]: any; }) {
+	constructor(el: HTMLElement | string | null | undefined, props: { [name: string]: any }) {
 		super();
 		DisposableMixin.call(this);
 

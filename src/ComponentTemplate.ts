@@ -56,7 +56,7 @@ export default class ComponentTemplate {
 		let currentBlock: IComponentTemplateBlockDescription = { name: null, source: [] };
 
 		let blocks = [currentBlock];
-		let blockMap: { [name: string]: IComponentTemplateBlockDescription; } = {};
+		let blockMap: { [name: string]: IComponentTemplateBlockDescription } = {};
 
 		let splittedTemplate = tmpl.split(re);
 

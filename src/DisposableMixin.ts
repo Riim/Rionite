@@ -32,7 +32,7 @@ export interface IListener {
 }
 
 export default class DisposableMixin implements IDisposable {
-	_disposables: { [id: string]: IDisposable; } = {};
+	_disposables: { [id: string]: IDisposable } = {};
 
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
@@ -42,12 +42,12 @@ export default class DisposableMixin implements IDisposable {
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
-		listeners: { [type: string]: IListener | Array<IListener>; },
+		listeners: { [type: string]: IListener | Array<IListener> },
 		context?: any
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
-		typeOrListeners: string | Array<string> | { [type: string]: IListener | Array<IListener>; },
+		typeOrListeners: string | Array<string> | { [type: string]: IListener | Array<IListener> },
 		listenerOrContext?: IListener | Array<IListener> | any,
 		context?: any
 	): IDisposableListening {
