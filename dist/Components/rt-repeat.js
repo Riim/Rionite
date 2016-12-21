@@ -38,7 +38,7 @@ var RtRepeat = (function (_super) {
             this._itemName = forAttrValue[1];
             this._list = new cellx_1.Cell(compileKeypath_1.default(forAttrValue[2]), { owner: props.context });
             this._itemMap = new Map();
-            this._trackBy = props['track-by'];
+            this._trackBy = props['trackBy'];
             var rawItemContent = this._rawItemContent =
                 document.importNode(this.element.content, true);
             if (props['strip']) {

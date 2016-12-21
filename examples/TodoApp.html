@@ -41,7 +41,7 @@ var todos = new cellxIndexedCollections.IndexedList([
 
 class TodoView extends Rionite.Component {
 	initialize() {
-		this.todo = todos.get(this.props['todo-id'], 'id');
+		this.todo = todos.get(this.props['todoId'], 'id');
 	}
 
 	onCbDoneChange(evt) {

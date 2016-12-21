@@ -64,7 +64,7 @@ var RtContent = (function (_super) {
             this.isReady = true;
         }
         var content = this._rawContent.cloneNode(true);
-        var getContext = props['get-context'];
+        var getContext = props['getContext'];
         var _a = this._rawContent == props.content ?
             bindContent_1.default(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) :
             bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?

@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.16.25",
+  "version": "0.16.26",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -26,14 +26,14 @@
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.5.4",
     "gulp-uglify": "^2.0.0",
-    "pump": "^1.0.1",
+    "pump": "^1.0.2",
     "require-dir": "^0.3.1",
     "run-sequence": "^1.2.2",
     "typescript": "^2.1.4",
     "webpack": "^2.2.0-rc.1"
   },
   "dependencies": {
-    "cellx": "^1.6.87",
+    "cellx": "^1.6.88",
     "document-register-element": "^1.3.0"
   }
 }

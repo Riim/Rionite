@@ -70,7 +70,7 @@ export default class RtContent extends Component {
 		}
 
 		let content = this._rawContent.cloneNode(true);
-		let getContext = props['get-context'];
+		let getContext = props['getContext'];
 
 		let { bindings, childComponents } = this._rawContent == props.content ?
 			bindContent(
