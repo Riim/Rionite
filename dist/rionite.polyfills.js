@@ -1578,6 +1578,23 @@ var Features_1 = __webpack_require__(3);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
+function findChildComponentElements(node, ownerComponent, context, _childComponents) {
+    for (var child = node.firstChild; child; child = child.nextSibling) {
+        if (child.nodeType == 1) {
+            var childComponent = child.$c;
+            if (childComponent) {
+                childComponent.ownerComponent = ownerComponent;
+                childComponent.props.context = context;
+                (_childComponents || (_childComponents = [])).push(childComponent);
+            }
+            if (child.firstChild &&
+                (!childComponent || childComponent.constructor.template == null)) {
+                findChildComponentElements(child, ownerComponent, context, _childComponents);
+            }
+        }
+    }
+    return _childComponents || null;
+}
 var created;
 var initialize;
 var ready;
@@ -1709,6 +1726,10 @@ var Component = (function (_super) {
             initElementAttributes_1.default(this, constr);
             var template = constr.template;
             if (template == null) {
+                var childComponents = findChildComponentElements(el, this, this);
+                if (childComponents) {
+                    attachChildComponentElements_1.default(childComponents);
+                }
                 if (constr.events) {
                     bindEvents_1.default(this, constr.events);
                 }
@@ -1732,9 +1753,9 @@ var Component = (function (_super) {
                 if (constr.events) {
                     bindEvents_1.default(this, constr.events);
                 }
-                this.ready();
-                this.isReady = true;
             }
+            this.ready();
+            this.isReady = true;
         }
         this.elementAttached();
     };
@@ -1943,7 +1964,7 @@ function bindContent(content, ownerComponent, context) {
     }
     var bindings;
     var childComponents;
-    function bind_(content) {
+    function bind(content) {
         var _loop_1 = function (child) {
             switch (child.nodeType) {
                 case 1: {
@@ -1983,7 +2004,7 @@ function bindContent(content, ownerComponent, context) {
                     }
                     if (child.firstChild &&
                         (!childComponent || childComponent.constructor.template == null)) {
-                        bind_(child);
+                        bind(child);
                     }
                     break;
                 }
@@ -2010,7 +2031,7 @@ function bindContent(content, ownerComponent, context) {
             _loop_1(child);
         }
     }
-    bind_(content);
+    bind(content);
     return {
         bindings: bindings || null,
         childComponents: childComponents || null
@@ -3417,6 +3438,9 @@ var RtContent = (function (_super) {
                 bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _a.bindings, childComponents = _a.childComponents;
             this._bindings = bindings;
             if (content) {
+                for (var child = void 0; (child = el.firstChild);) {
+                    el.removeChild(child);
+                }
                 el.appendChild(content);
             }
             if (!Features_1.nativeCustomElements && childComponents) {
@@ -3427,12 +3451,6 @@ var RtContent = (function (_super) {
     };
     RtContent.prototype._detachElement = function () {
         this._freezeBindings();
-    };
-    RtContent.prototype._clearElement = function () {
-        var el = this.element;
-        for (var child = void 0; (child = el.firstChild);) {
-            el.removeChild(child);
-        }
     };
     return RtContent;
 }(Component_1.default));

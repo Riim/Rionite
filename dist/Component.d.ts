@@ -60,7 +60,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     initialized: boolean;
     isReady: boolean;
     _isComponentSilent: boolean;
-    constructor(el: HTMLElement | string | null | undefined, props: {
+    constructor(el: HTMLElement | string | null | undefined, props?: {
         [name: string]: any;
     });
     _handleEvent(evt: IEvent): void;

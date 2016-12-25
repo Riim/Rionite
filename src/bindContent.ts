@@ -21,7 +21,7 @@ export default function bindContent(
 	let bindings: Array<IFreezableCell> | undefined;
 	let childComponents: Array<Component> | undefined;
 
-	function bind_(content: Node) {
+	function bind(content: Node) {
 		for (let child = content.firstChild; child; child = child.nextSibling) {
 			switch (child.nodeType) {
 				case 1: {
@@ -68,7 +68,7 @@ export default function bindContent(
 						child.firstChild &&
 							(!childComponent || (childComponent.constructor as typeof Component).template == null)
 					) {
-						bind_(child);
+						bind(child);
 					}
 
 					break;
@@ -99,7 +99,7 @@ export default function bindContent(
 		}
 	}
 
-	bind_(content);
+	bind(content);
 
 	return {
 		bindings: bindings || null,

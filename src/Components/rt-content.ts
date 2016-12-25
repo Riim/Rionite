@@ -76,6 +76,10 @@ export default class RtContent extends Component {
 			this._bindings = bindings;
 
 			if (content) {
+				for (let child: Node | null; (child = el.firstChild);) {
+					el.removeChild(child);
+				}
+
 				el.appendChild(content);
 			}
 
@@ -89,13 +93,5 @@ export default class RtContent extends Component {
 
 	_detachElement() {
 		this._freezeBindings();
-	}
-
-	_clearElement() {
-		let el = this.element;
-
-		for (let child: Node | null; (child = el.firstChild);) {
-			el.removeChild(child);
-		}
 	}
 }

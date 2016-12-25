@@ -11,7 +11,7 @@ function bindContent(content, ownerComponent, context) {
     }
     var bindings;
     var childComponents;
-    function bind_(content) {
+    function bind(content) {
         var _loop_1 = function (child) {
             switch (child.nodeType) {
                 case 1: {
@@ -51,7 +51,7 @@ function bindContent(content, ownerComponent, context) {
                     }
                     if (child.firstChild &&
                         (!childComponent || childComponent.constructor.template == null)) {
-                        bind_(child);
+                        bind(child);
                     }
                     break;
                 }
@@ -78,7 +78,7 @@ function bindContent(content, ownerComponent, context) {
             _loop_1(child);
         }
     }
-    bind_(content);
+    bind(content);
     return {
         bindings: bindings || null,
         childComponents: childComponents || null

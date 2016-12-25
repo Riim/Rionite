@@ -23,6 +23,23 @@ var Features_1 = require("./Features");
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
+function findChildComponentElements(node, ownerComponent, context, _childComponents) {
+    for (var child = node.firstChild; child; child = child.nextSibling) {
+        if (child.nodeType == 1) {
+            var childComponent = child.$c;
+            if (childComponent) {
+                childComponent.ownerComponent = ownerComponent;
+                childComponent.props.context = context;
+                (_childComponents || (_childComponents = [])).push(childComponent);
+            }
+            if (child.firstChild &&
+                (!childComponent || childComponent.constructor.template == null)) {
+                findChildComponentElements(child, ownerComponent, context, _childComponents);
+            }
+        }
+    }
+    return _childComponents || null;
+}
 var created;
 var initialize;
 var ready;
@@ -154,6 +171,10 @@ var Component = (function (_super) {
             initElementAttributes_1.default(this, constr);
             var template = constr.template;
             if (template == null) {
+                var childComponents = findChildComponentElements(el, this, this);
+                if (childComponents) {
+                    attachChildComponentElements_1.default(childComponents);
+                }
                 if (constr.events) {
                     bindEvents_1.default(this, constr.events);
                 }
@@ -177,9 +198,9 @@ var Component = (function (_super) {
                 if (constr.events) {
                     bindEvents_1.default(this, constr.events);
                 }
-                this.ready();
-                this.isReady = true;
             }
+            this.ready();
+            this.isReady = true;
         }
         this.elementAttached();
     };

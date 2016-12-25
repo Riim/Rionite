@@ -63,6 +63,9 @@ var RtContent = (function (_super) {
                 bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _a.bindings, childComponents = _a.childComponents;
             this._bindings = bindings;
             if (content) {
+                for (var child = void 0; (child = el.firstChild);) {
+                    el.removeChild(child);
+                }
                 el.appendChild(content);
             }
             if (!Features_1.nativeCustomElements && childComponents) {
@@ -73,12 +76,6 @@ var RtContent = (function (_super) {
     };
     RtContent.prototype._detachElement = function () {
         this._freezeBindings();
-    };
-    RtContent.prototype._clearElement = function () {
-        var el = this.element;
-        for (var child = void 0; (child = el.firstChild);) {
-            el.removeChild(child);
-        }
     };
     return RtContent;
 }(Component_1.default));

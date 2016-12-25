@@ -44,6 +44,35 @@ export interface IComponentEvents<T> {
 	};
 }
 
+function findChildComponentElements(
+	node: Node,
+	ownerComponent: Component,
+	context: Object,
+	_childComponents?: Array<Component> | undefined
+): Array<Component> | null {
+	for (let child = node.firstChild; child; child = child.nextSibling) {
+		if (child.nodeType == 1) {
+			let childComponent = (child as IComponentElement).$c;
+
+			if (childComponent) {
+				childComponent.ownerComponent = ownerComponent;
+				childComponent.props.context = context as Object;
+
+				(_childComponents || (_childComponents = [])).push(childComponent);
+			}
+
+			if (
+				child.firstChild &&
+					(!childComponent || (childComponent.constructor as typeof Component).template == null)
+			) {
+				findChildComponentElements(child, ownerComponent, context, _childComponents);
+			}
+		}
+	}
+
+	return _childComponents || null;
+}
+
 let created: any;
 let initialize: any;
 let ready: any;
@@ -146,7 +175,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	_isComponentSilent: boolean;
 
-	constructor(el: HTMLElement | string | null | undefined, props: { [name: string]: any }) {
+	constructor(el: HTMLElement | string | null | undefined, props?: { [name: string]: any }) {
 		super();
 		DisposableMixin.call(this);
 
@@ -236,6 +265,12 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			let template = constr.template;
 
 			if (template == null) {
+				let childComponents = findChildComponentElements(el, this, this);
+
+				if (childComponents) {
+					attachChildComponentElements(childComponents);
+				}
+
 				if (constr.events) {
 					bindEvents(this, constr.events);
 				}
@@ -268,10 +303,10 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				if (constr.events) {
 					bindEvents(this, constr.events);
 				}
-
-				this.ready();
-				this.isReady = true;
 			}
+
+			this.ready();
+			this.isReady = true;
 		}
 
 		this.elementAttached();
