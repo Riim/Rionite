@@ -1,10 +1,11 @@
-import { IEvent, EventEmitter, Cell, JS, Utils } from 'cellx';
+import { IEvent, EventEmitter, JS, Utils } from 'cellx';
 import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
 import ElementAttributes from './ElementAttributes';
-import setElementClasses from './setElementClasses';
-import initAttributes from './initAttributes';
+import initElementClasses from './initElementClasses';
+import initElementAttributes from './initElementAttributes';
 import bindContent from './bindContent';
+import { IFreezableCell, freezeBindings, unfreezeBindings } from './componentBinding';
 import attachChildComponentElements from './attachChildComponentElements';
 import bindEvents from './bindEvents';
 import eventTypes from './eventTypes';
@@ -25,7 +26,7 @@ export interface IComponentElement extends HTMLElement {
 }
 
 export interface IComponentProperties extends ElementAttributes {
-	content: DocumentFragment | null;
+	_content: DocumentFragment | null;
 	context: Object | null;
 }
 
@@ -121,7 +122,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	get props(): IComponentProperties {
 		let props = Object.create(this.elementAttributes) as IComponentProperties;
 
-		props.content = null;
+		props._content = null;
 		props.context = null;
 
 		Object.defineProperty(this, 'props', {
@@ -134,7 +135,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		return props;
 	}
 
-	_bindings: Array<Cell<any>> | null;
+	_bindings: Array<IFreezableCell> | null;
 
 	_assets: Map<string, NodeListOf<HTMLElement>>;
 
@@ -219,60 +220,58 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		}
 
 		let constr = this.constructor as typeof Component;
-		let rawContent = constr._rawContent;
-		let el = this.element;
 
 		if (this.isReady) {
-			if (rawContent) {
-				for (let child: Node | null; (child = el.firstChild);) {
-					el.removeChild(child);
-				}
+			this._unfreezeBindings();
+
+			if (constr.events) {
+				bindEvents(this, constr.events);
 			}
 		} else {
-			setElementClasses(el, constr);
-			initAttributes(this, constr);
+			let el = this.element;
+
+			initElementClasses(el, constr);
+			initElementAttributes(this, constr);
 
 			let template = constr.template;
 
-			if (template != null) {
+			if (template == null) {
+				if (constr.events) {
+					bindEvents(this, constr.events);
+				}
+			} else {
+				let inputContent = this.props._content = document.createDocumentFragment();
+
+				for (let child: Node | null; (child = el.firstChild);) {
+					inputContent.appendChild(child);
+				}
+
+				let rawContent = constr._rawContent;
+
 				if (!rawContent) {
 					rawContent = constr._rawContent = htmlToFragment(
 						typeof template == 'string' ? template : template.render(constr)
 					);
 				}
 
-				let inputContent = this.props.content = document.createDocumentFragment();
+				let content = rawContent.cloneNode(true);
+				let { bindings, childComponents } = bindContent(content, this);
 
-				for (let child: Node | null; (child = el.firstChild);) {
-					inputContent.appendChild(child);
+				this._bindings = bindings;
+
+				this.element.appendChild(content);
+
+				if (!nativeCustomElementsFeature && childComponents) {
+					attachChildComponentElements(childComponents);
 				}
+
+				if (constr.events) {
+					bindEvents(this, constr.events);
+				}
+
+				this.ready();
+				this.isReady = true;
 			}
-		}
-
-		if (rawContent) {
-			let content = rawContent.cloneNode(true);
-			let { bindings, childComponents } = bindContent(content, this);
-
-			this._bindings = bindings;
-
-			this.element.appendChild(content);
-
-			if (!nativeCustomElementsFeature && childComponents) {
-				attachChildComponentElements(childComponents);
-			}
-
-			if (constr.events) {
-				bindEvents(this, constr.events);
-			}
-		}
-
-		if (!this.isReady) {
-			if (!rawContent && constr.events) {
-				bindEvents(this, constr.events);
-			}
-
-			this.ready();
-			this.isReady = true;
 		}
 
 		this.elementAttached();
@@ -284,19 +283,19 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	}
 
 	dispose(): Component {
-		this._destroyBindings();
+		this._freezeBindings();
 		return DisposableMixin.prototype.dispose.call(this);
 	}
 
-	_destroyBindings() {
-		let bindings = this._bindings;
+	_freezeBindings() {
+		if (this._bindings){
+			freezeBindings(this._bindings);
+		}
+	}
 
-		if (bindings) {
-			for (let i = bindings.length; i;) {
-				bindings[--i].off();
-			}
-
-			this._bindings = null;
+	_unfreezeBindings() {
+		if (this._bindings){
+			unfreezeBindings(this._bindings);
 		}
 	}
 
@@ -370,7 +369,7 @@ let DisposableMixinProto = DisposableMixin.prototype;
 let ComponentProto = Component.prototype;
 
 Object.getOwnPropertyNames(DisposableMixinProto).forEach(name => {
-	if (name != 'constructor') {
+	if (!(name in ComponentProto)) {
 		Object.defineProperty(ComponentProto, name, Object.getOwnPropertyDescriptor(DisposableMixinProto, name));
 	}
 });

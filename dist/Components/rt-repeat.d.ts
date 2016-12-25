@@ -23,6 +23,6 @@ export default class RtRepeat extends Component {
     _onListChange(): void;
     _render(c: boolean): void;
     _renderItem(item: Object, index: number): boolean;
-    _clearWithItemMap(itemMap: TRtRepeatItemMap): void;
-    _clearWithItems(items: TRtRepeatItemList): void;
+    _clearByItemMap(itemMap: TRtRepeatItemMap): void;
+    _clearByItems(items: TRtRepeatItemList): void;
 }

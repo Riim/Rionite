@@ -1,6 +1,6 @@
 import Component from './Component';
 
-export default function setElementClasses(el: HTMLElement, constr: typeof Component) {
+export default function initElementClasses(el: HTMLElement, constr: typeof Component) {
 	let c = constr;
 
 	do {

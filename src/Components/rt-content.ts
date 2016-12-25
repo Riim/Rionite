@@ -18,84 +18,84 @@ let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 	template: ''
 })
 export default class RtContent extends Component {
-	_rawContent: DocumentFragment;
-
 	_attachElement() {
-		let ownerComponent = this.ownerComponent as Component;
-		let el = this.element;
-		let props = this.props;
-
 		if (this.isReady) {
-			for (let child: Node | null; (child = el.firstChild);) {
-				el.removeChild(child);
-			}
+			this._unfreezeBindings();
 		} else {
-			let inputContent = props.content = document.createDocumentFragment();
+			let ownerComponent = this.ownerComponent as Component;
+			let ownerComponentInputContent = ownerComponent.props._content as DocumentFragment;
+			let content: DocumentFragment | undefined;
 
-			for (let child: Node | null; (child = el.firstChild);) {
-				inputContent.appendChild(child);
-			}
+			if (ownerComponentInputContent.firstChild) {
+				let selector = this.elementAttributes['select'];
 
-			let ownerComponentInputContent = ownerComponent.props.content as DocumentFragment;
-			let selector = this.elementAttributes['select'];
+				if (selector) {
+					if (!templateTagFeature && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
+						let templates = ownerComponentInputContent.querySelectorAll('template');
 
-			if (selector) {
-				if (!templateTagFeature && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
-					let templates = ownerComponentInputContent.querySelectorAll('template');
+						for (let i = templates.length; i;) {
+							templates[--i].content;
+						}
 
-					for (let i = templates.length; i;) {
-						templates[--i].content;
+						ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
 					}
 
-					ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
-				}
+					let selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+					let selectedElCount = selectedEls.length;
 
-				let selectedEls = ownerComponentInputContent.querySelectorAll(selector);
-				let selectedElCount = selectedEls.length;
+					if (selectedElCount) {
+						content = document.createDocumentFragment();
 
-				if (selectedElCount) {
-					let rawContent = this._rawContent = document.createDocumentFragment();
-
-					for (let i = 0; i < selectedElCount; i++) {
-						rawContent.appendChild(selectedEls[i].cloneNode(true));
+						for (let i = 0; i < selectedElCount; i++) {
+							content.appendChild(selectedEls[i].cloneNode(true));
+						}
 					}
 				} else {
-					this._rawContent = inputContent;
+					content = ownerComponentInputContent;
 				}
-			} else {
-				this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
+			}
+
+			let el = this.element;
+			let props = this.props;
+			let getContext = props['getContext'];
+
+			let { bindings, childComponents } = content ?
+				bindContent(
+					content,
+					ownerComponent.ownerComponent as Component,
+					getContext ?
+						ownerComponent[getContext](this, ownerComponent.props.context) :
+						ownerComponent.props.context
+				) :
+				bindContent(
+					el,
+					ownerComponent,
+					getContext ? ownerComponent[getContext](this, props.context) : props.context
+				);
+
+			this._bindings = bindings;
+
+			if (content) {
+				el.appendChild(content);
+			}
+
+			if (!nativeCustomElementsFeature && childComponents) {
+				attachChildComponentElements(childComponents);
 			}
 
 			this.isReady = true;
 		}
-
-		let content = this._rawContent.cloneNode(true);
-		let getContext = props['getContext'];
-
-		let { bindings, childComponents } = this._rawContent == props.content ?
-			bindContent(
-				content,
-				ownerComponent,
-				getContext ? ownerComponent[getContext](this, props.context) : props.context
-			) :
-			bindContent(
-				content,
-				ownerComponent.ownerComponent as Component,
-				getContext ?
-					ownerComponent[getContext](this, ownerComponent.props.context) :
-					ownerComponent.props.context
-			);
-
-		this._bindings = bindings;
-
-		el.appendChild(content);
-
-		if (!nativeCustomElementsFeature && childComponents) {
-			attachChildComponentElements(childComponents);
-		}
 	}
 
 	_detachElement() {
-		this._destroyBindings();
+		this._freezeBindings();
+	}
+
+	_clearElement() {
+		let el = this.element;
+
+		for (let child: Node | null; (child = el.firstChild);) {
+			el.removeChild(child);
+		}
 	}
 }

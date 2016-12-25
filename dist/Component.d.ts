@@ -1,13 +1,14 @@
-import { IEvent, EventEmitter, Cell } from 'cellx';
+import { IEvent, EventEmitter } from 'cellx';
 import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
 import ElementAttributes from './ElementAttributes';
+import { IFreezableCell } from './componentBinding';
 export interface IComponentElement extends HTMLElement {
     rioniteComponent: Component | null;
     $c: Component;
 }
 export interface IComponentProperties extends ElementAttributes {
-    content: DocumentFragment | null;
+    _content: DocumentFragment | null;
     context: Object | null;
 }
 export interface IComponentTemplate {
@@ -53,7 +54,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     element: IComponentElement;
     readonly elementAttributes: ElementAttributes;
     readonly props: IComponentProperties;
-    _bindings: Array<Cell<any>> | null;
+    _bindings: Array<IFreezableCell> | null;
     _assets: Map<string, NodeListOf<HTMLElement>>;
     isElementAttached: boolean;
     initialized: boolean;
@@ -66,7 +67,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
     _attachElement(): void;
     _detachElement(): void;
     dispose(): Component;
-    _destroyBindings(): void;
+    _freezeBindings(): void;
+    _unfreezeBindings(): void;
     created(): void;
     initialize(): void;
     ready(): void;

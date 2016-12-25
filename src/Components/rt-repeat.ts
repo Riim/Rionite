@@ -104,7 +104,7 @@ export default class RtRepeat extends Component {
 	}
 
 	_detachElement() {
-		this._clearWithItemMap(this._itemMap);
+		this._clearByItemMap(this._itemMap);
 		this._list.off('change', this._onListChange, this);
 	}
 
@@ -127,7 +127,7 @@ export default class RtRepeat extends Component {
 		}
 
 		if (oldItemMap.size) {
-			this._clearWithItemMap(oldItemMap);
+			this._clearByItemMap(oldItemMap);
 		} else if (!changed) {
 			return;
 		}
@@ -235,12 +235,12 @@ export default class RtRepeat extends Component {
 		return true;
 	}
 
-	_clearWithItemMap(itemMap: TRtRepeatItemMap) {
-		itemMap.forEach(this._clearWithItems, this);
+	_clearByItemMap(itemMap: TRtRepeatItemMap) {
+		itemMap.forEach(this._clearByItems, this);
 		itemMap.clear();
 	}
 
-	_clearWithItems(items: TRtRepeatItemList) {
+	_clearByItems(items: TRtRepeatItemList) {
 		for (let i = items.length; i;) {
 			let item = items[--i];
 			let bindings = item.bindings;

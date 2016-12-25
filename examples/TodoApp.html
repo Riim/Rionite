@@ -17,88 +17,34 @@ todo-view {
 </head>
 <body>
 
-<todo-app></todo-app>
+<test-card id="test1">123</test-card>
 
 <script src="../node_modules/cellx/dist/cellx.js"></script>
 <script src="../node_modules/cellx-indexed-collections/dist/cellx-indexed-collections.js"></script>
 <script src="../dist/rionite.polyfills.js"></script>
 <script>
 
-var Todo = cellx.EventEmitter.extend({
-	constructor: function Todo(text, done) {
+var TestCard = Rionite.Component.extend('test-card', {
+	Static: {
+		template: '1 <test-card-inner id="test1_inner"></test-card-inner> 1'
+	},
+
+	initialize() {
 		cellx.define(this, {
-			text: text,
-			done: !!done
+			value: 1
 		});
 	}
 });
 
-var todos = new cellxIndexedCollections.IndexedList([
-	new Todo('Primum', true),
-	new Todo('Secundo'),
-	new Todo('Tertium')
-]);
-
-class TodoView extends Rionite.Component {
-	initialize() {
-		this.todo = todos.get(this.props['todoId'], 'id');
-	}
-
-	onCbDoneChange(evt) {
-		this.todo.done = evt.target.checked;
-	}
-
-	onBtnRemoveClick() {
-		todos.remove(this.todo);
-	}
-}
-
-TodoView.elementIs = 'todo-view';
-
-TodoView.props = {
-	todoId: { type: String, required: true, readonly: true }
-};
-
-TodoView.template = `
-	<input class="todo-view__cb-done" type="checkbox" checked="{todo.done}" rt-change="onCbDoneChange">
-	<span class="todo-view__text">{todo.text}</span>
-	<button rt-click="onBtnRemoveClick">remove</button>
-`;
-
-Rionite.Component.register(TodoView);
-
-Rionite.Component.extend('todo-app', {
+var TestCardInner = Rionite.Component.extend('test-card-inner', {
 	Static: {
-		template: `
-			<input class="todo-app__tf-new-todo">
-			<button rt-click="onBtnAddClick">Add #{nextNumber}</button>
-			<div>all: {todos.length} done: {doneTodos.length}</div>
-			<template is="rt-repeat" for="todo of todos">
-				<todo-view todo-id="{todo.id}"></todo-view>
-			</template>
-		`
+		template: '2 [<rt-content>{value}</rt-content>] 2'
 	},
 
 	initialize() {
 		cellx.define(this, {
-			todos: todos,
-
-			doneTodos: function() {
-				return this.todos.filter(function(todo) {
-					return todo.done;
-				});
-			},
-
-			nextNumber: function() {
-				return this.todos.length + 1;
-			}
+			value: 1
 		});
-	},
-
-	onBtnAddClick() {
-		var tfNewTodo = this.$('tf-new-todo');
-		todos.add(new Todo(tfNewTodo.value));
-		tfNewTodo.value = '';
 	}
 });
 

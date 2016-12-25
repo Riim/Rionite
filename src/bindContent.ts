@@ -2,6 +2,7 @@ import { Cell } from 'cellx';
 import { IComponentElement, default as Component } from './Component';
 import ContentParser from './ContentParser';
 import compileContent from './compileContent';
+import { IFreezableCell } from './componentBinding';
 import setAttribute from './Utils/setAttribute';
 
 let ContentNodeType = ContentParser.ContentNodeType;
@@ -12,12 +13,12 @@ export default function bindContent(
 	content: Node,
 	ownerComponent: Component,
 	context?: Object
-): { bindings: Array<Cell<any>> | null; childComponents: Array<Component> | null } {
+): { bindings: Array<IFreezableCell> | null; childComponents: Array<Component> | null } {
 	if (!context) {
 		context = ownerComponent;
 	}
 
-	let bindings: Array<Cell<any>> | undefined;
+	let bindings: Array<IFreezableCell> | undefined;
 	let childComponents: Array<Component> | undefined;
 
 	function bind_(content: Node) {
@@ -49,7 +50,7 @@ export default function bindContent(
 
 								setAttribute(child as HTMLElement, name, cell.get());
 
-								(bindings || (bindings = [])).push(cell);
+								(bindings || (bindings = [])).push(cell as IFreezableCell);
 							}
 						}
 					}
@@ -88,7 +89,7 @@ export default function bindContent(
 
 							child.textContent = cell.get();
 
-							(bindings || (bindings = [])).push(cell);
+							(bindings || (bindings = [])).push(cell as IFreezableCell);
 						}
 					}
 

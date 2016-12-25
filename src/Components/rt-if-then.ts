@@ -34,7 +34,7 @@ export default class RtIfThen extends Component {
 		if (!this.initialized) {
 			let props = this.props;
 
-			props.content = document.importNode((this.element as any).content, true) as DocumentFragment;
+			props._content = document.importNode((this.element as any).content, true) as DocumentFragment;
 
 			let if_ = (props['if'] || '').trim();
 
@@ -82,7 +82,7 @@ export default class RtIfThen extends Component {
 
 	_render(changed: boolean) {
 		if (this._elseMode ? !this._if.get() : this._if.get()) {
-			let content = (this.props.content as DocumentFragment).cloneNode(true);
+			let content = (this.props._content as DocumentFragment).cloneNode(true);
 
 			let { bindings, childComponents } = bindContent(
 				content,
@@ -117,6 +117,18 @@ export default class RtIfThen extends Component {
 			nextTick(() => {
 				this.emit('change');
 			});
+		}
+	}
+
+	_destroyBindings() {
+		let bindings = this._bindings;
+
+		if (bindings) {
+			for (let i = bindings.length; i;) {
+				bindings[--i].off();
+			}
+
+			this._bindings = null;
 		}
 	}
 }

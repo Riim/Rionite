@@ -69,7 +69,7 @@ var RtRepeat = (function (_super) {
         this._render(false);
     };
     RtRepeat.prototype._detachElement = function () {
-        this._clearWithItemMap(this._itemMap);
+        this._clearByItemMap(this._itemMap);
         this._list.off('change', this._onListChange, this);
     };
     RtRepeat.prototype._onListChange = function () {
@@ -88,7 +88,7 @@ var RtRepeat = (function (_super) {
             changed = list.reduce(function (changed, item, index) { return _this._renderItem(item, index) || changed; }, changed);
         }
         if (oldItemMap.size) {
-            this._clearWithItemMap(oldItemMap);
+            this._clearByItemMap(oldItemMap);
         }
         else if (!changed) {
             return;
@@ -180,11 +180,11 @@ var RtRepeat = (function (_super) {
         return true;
         var _a;
     };
-    RtRepeat.prototype._clearWithItemMap = function (itemMap) {
-        itemMap.forEach(this._clearWithItems, this);
+    RtRepeat.prototype._clearByItemMap = function (itemMap) {
+        itemMap.forEach(this._clearByItems, this);
         itemMap.clear();
     };
-    RtRepeat.prototype._clearWithItems = function (items) {
+    RtRepeat.prototype._clearByItems = function (items) {
         for (var i = items.length; i;) {
             var item = items[--i];
             var bindings = item.bindings;

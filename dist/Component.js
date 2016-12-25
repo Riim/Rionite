@@ -8,9 +8,10 @@ var cellx_1 = require("cellx");
 var DisposableMixin_1 = require("./DisposableMixin");
 var registerComponent_1 = require("./registerComponent");
 var ElementAttributes_1 = require("./ElementAttributes");
-var setElementClasses_1 = require("./setElementClasses");
-var initAttributes_1 = require("./initAttributes");
+var initElementClasses_1 = require("./initElementClasses");
+var initElementAttributes_1 = require("./initElementAttributes");
 var bindContent_1 = require("./bindContent");
+var componentBinding_1 = require("./componentBinding");
 var attachChildComponentElements_1 = require("./attachChildComponentElements");
 var bindEvents_1 = require("./bindEvents");
 var eventTypes_1 = require("./eventTypes");
@@ -106,7 +107,7 @@ var Component = (function (_super) {
     Object.defineProperty(Component.prototype, "props", {
         get: function () {
             var props = Object.create(this.elementAttributes);
-            props.content = null;
+            props._content = null;
             props.context = null;
             Object.defineProperty(this, 'props', {
                 configurable: true,
@@ -141,47 +142,44 @@ var Component = (function (_super) {
             this.initialized = true;
         }
         var constr = this.constructor;
-        var rawContent = constr._rawContent;
-        var el = this.element;
         if (this.isReady) {
-            if (rawContent) {
-                for (var child = void 0; (child = el.firstChild);) {
-                    el.removeChild(child);
-                }
-            }
-        }
-        else {
-            setElementClasses_1.default(el, constr);
-            initAttributes_1.default(this, constr);
-            var template = constr.template;
-            if (template != null) {
-                if (!rawContent) {
-                    rawContent = constr._rawContent = htmlToFragment_1.default(typeof template == 'string' ? template : template.render(constr));
-                }
-                var inputContent = this.props.content = document.createDocumentFragment();
-                for (var child = void 0; (child = el.firstChild);) {
-                    inputContent.appendChild(child);
-                }
-            }
-        }
-        if (rawContent) {
-            var content = rawContent.cloneNode(true);
-            var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
-            this._bindings = bindings;
-            this.element.appendChild(content);
-            if (!Features_1.nativeCustomElements && childComponents) {
-                attachChildComponentElements_1.default(childComponents);
-            }
+            this._unfreezeBindings();
             if (constr.events) {
                 bindEvents_1.default(this, constr.events);
             }
         }
-        if (!this.isReady) {
-            if (!rawContent && constr.events) {
-                bindEvents_1.default(this, constr.events);
+        else {
+            var el = this.element;
+            initElementClasses_1.default(el, constr);
+            initElementAttributes_1.default(this, constr);
+            var template = constr.template;
+            if (template == null) {
+                if (constr.events) {
+                    bindEvents_1.default(this, constr.events);
+                }
             }
-            this.ready();
-            this.isReady = true;
+            else {
+                var inputContent = this.props._content = document.createDocumentFragment();
+                for (var child = void 0; (child = el.firstChild);) {
+                    inputContent.appendChild(child);
+                }
+                var rawContent = constr._rawContent;
+                if (!rawContent) {
+                    rawContent = constr._rawContent = htmlToFragment_1.default(typeof template == 'string' ? template : template.render(constr));
+                }
+                var content = rawContent.cloneNode(true);
+                var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
+                this._bindings = bindings;
+                this.element.appendChild(content);
+                if (!Features_1.nativeCustomElements && childComponents) {
+                    attachChildComponentElements_1.default(childComponents);
+                }
+                if (constr.events) {
+                    bindEvents_1.default(this, constr.events);
+                }
+                this.ready();
+                this.isReady = true;
+            }
         }
         this.elementAttached();
     };
@@ -190,16 +188,17 @@ var Component = (function (_super) {
         this.dispose();
     };
     Component.prototype.dispose = function () {
-        this._destroyBindings();
+        this._freezeBindings();
         return DisposableMixin_1.default.prototype.dispose.call(this);
     };
-    Component.prototype._destroyBindings = function () {
-        var bindings = this._bindings;
-        if (bindings) {
-            for (var i = bindings.length; i;) {
-                bindings[--i].off();
-            }
-            this._bindings = null;
+    Component.prototype._freezeBindings = function () {
+        if (this._bindings) {
+            componentBinding_1.freezeBindings(this._bindings);
+        }
+    };
+    Component.prototype._unfreezeBindings = function () {
+        if (this._bindings) {
+            componentBinding_1.unfreezeBindings(this._bindings);
         }
     };
     // Callbacks
@@ -262,7 +261,7 @@ exports.default = Component;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
 var ComponentProto = Component.prototype;
 Object.getOwnPropertyNames(DisposableMixinProto).forEach(function (name) {
-    if (name != 'constructor') {
+    if (!(name in ComponentProto)) {
         Object.defineProperty(ComponentProto, name, Object.getOwnPropertyDescriptor(DisposableMixinProto, name));
     }
 });

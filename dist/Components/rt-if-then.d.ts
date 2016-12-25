@@ -9,4 +9,5 @@ export default class RtIfThen extends Component {
     _detachElement(): void;
     _onIfChange(): void;
     _render(changed: boolean): void;
+    _destroyBindings(): void;
 }

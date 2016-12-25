@@ -24,8 +24,8 @@ export default function registerComponent(componentConstr: typeof Component) {
 	if (componentConstr.props !== parentComponentConstr.props) {
 		let props = componentConstr.props;
 
-		if (props && (props['content'] || props['context'])) {
-			throw new TypeError(`No need to declare property "${ props['content'] ? 'content' : 'context' }"`);
+		if (props && (props['_content'] || props['context'])) {
+			throw new TypeError(`No need to declare property "${ props['_content'] ? '_content' : 'context' }"`);
 		}
 
 		componentConstr.elementAttributes = props;

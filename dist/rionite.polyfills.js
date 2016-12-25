@@ -1539,7 +1539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 43);
+/******/ 	return __webpack_require__(__webpack_require__.s = 44);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1561,15 +1561,16 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var cellx_1 = __webpack_require__(0);
 var DisposableMixin_1 = __webpack_require__(15);
-var registerComponent_1 = __webpack_require__(41);
+var registerComponent_1 = __webpack_require__(43);
 var ElementAttributes_1 = __webpack_require__(16);
-var setElementClasses_1 = __webpack_require__(42);
-var initAttributes_1 = __webpack_require__(39);
+var initElementClasses_1 = __webpack_require__(41);
+var initElementAttributes_1 = __webpack_require__(40);
 var bindContent_1 = __webpack_require__(6);
+var componentBinding_1 = __webpack_require__(37);
 var attachChildComponentElements_1 = __webpack_require__(5);
 var bindEvents_1 = __webpack_require__(34);
-var eventTypes_1 = __webpack_require__(38);
-var onEvent_1 = __webpack_require__(40);
+var eventTypes_1 = __webpack_require__(39);
+var onEvent_1 = __webpack_require__(42);
 var camelize_1 = __webpack_require__(4);
 var getUID_1 = __webpack_require__(31);
 var htmlToFragment_1 = __webpack_require__(18);
@@ -1661,7 +1662,7 @@ var Component = (function (_super) {
     Object.defineProperty(Component.prototype, "props", {
         get: function () {
             var props = Object.create(this.elementAttributes);
-            props.content = null;
+            props._content = null;
             props.context = null;
             Object.defineProperty(this, 'props', {
                 configurable: true,
@@ -1696,47 +1697,44 @@ var Component = (function (_super) {
             this.initialized = true;
         }
         var constr = this.constructor;
-        var rawContent = constr._rawContent;
-        var el = this.element;
         if (this.isReady) {
-            if (rawContent) {
-                for (var child = void 0; (child = el.firstChild);) {
-                    el.removeChild(child);
-                }
-            }
-        }
-        else {
-            setElementClasses_1.default(el, constr);
-            initAttributes_1.default(this, constr);
-            var template = constr.template;
-            if (template != null) {
-                if (!rawContent) {
-                    rawContent = constr._rawContent = htmlToFragment_1.default(typeof template == 'string' ? template : template.render(constr));
-                }
-                var inputContent = this.props.content = document.createDocumentFragment();
-                for (var child = void 0; (child = el.firstChild);) {
-                    inputContent.appendChild(child);
-                }
-            }
-        }
-        if (rawContent) {
-            var content = rawContent.cloneNode(true);
-            var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
-            this._bindings = bindings;
-            this.element.appendChild(content);
-            if (!Features_1.nativeCustomElements && childComponents) {
-                attachChildComponentElements_1.default(childComponents);
-            }
+            this._unfreezeBindings();
             if (constr.events) {
                 bindEvents_1.default(this, constr.events);
             }
         }
-        if (!this.isReady) {
-            if (!rawContent && constr.events) {
-                bindEvents_1.default(this, constr.events);
+        else {
+            var el = this.element;
+            initElementClasses_1.default(el, constr);
+            initElementAttributes_1.default(this, constr);
+            var template = constr.template;
+            if (template == null) {
+                if (constr.events) {
+                    bindEvents_1.default(this, constr.events);
+                }
             }
-            this.ready();
-            this.isReady = true;
+            else {
+                var inputContent = this.props._content = document.createDocumentFragment();
+                for (var child = void 0; (child = el.firstChild);) {
+                    inputContent.appendChild(child);
+                }
+                var rawContent = constr._rawContent;
+                if (!rawContent) {
+                    rawContent = constr._rawContent = htmlToFragment_1.default(typeof template == 'string' ? template : template.render(constr));
+                }
+                var content = rawContent.cloneNode(true);
+                var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
+                this._bindings = bindings;
+                this.element.appendChild(content);
+                if (!Features_1.nativeCustomElements && childComponents) {
+                    attachChildComponentElements_1.default(childComponents);
+                }
+                if (constr.events) {
+                    bindEvents_1.default(this, constr.events);
+                }
+                this.ready();
+                this.isReady = true;
+            }
         }
         this.elementAttached();
     };
@@ -1745,16 +1743,17 @@ var Component = (function (_super) {
         this.dispose();
     };
     Component.prototype.dispose = function () {
-        this._destroyBindings();
+        this._freezeBindings();
         return DisposableMixin_1.default.prototype.dispose.call(this);
     };
-    Component.prototype._destroyBindings = function () {
-        var bindings = this._bindings;
-        if (bindings) {
-            for (var i = bindings.length; i;) {
-                bindings[--i].off();
-            }
-            this._bindings = null;
+    Component.prototype._freezeBindings = function () {
+        if (this._bindings) {
+            componentBinding_1.freezeBindings(this._bindings);
+        }
+    };
+    Component.prototype._unfreezeBindings = function () {
+        if (this._bindings) {
+            componentBinding_1.unfreezeBindings(this._bindings);
         }
     };
     // Callbacks
@@ -1817,7 +1816,7 @@ exports.default = Component;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
 var ComponentProto = Component.prototype;
 Object.getOwnPropertyNames(DisposableMixinProto).forEach(function (name) {
-    if (name != 'constructor') {
+    if (!(name in ComponentProto)) {
         Object.defineProperty(ComponentProto, name, Object.getOwnPropertyDescriptor(DisposableMixinProto, name));
     }
 });
@@ -2207,7 +2206,7 @@ var RtIfThen = (function (_super) {
     RtIfThen.prototype._attachElement = function () {
         if (!this.initialized) {
             var props = this.props;
-            props.content = document.importNode(this.element.content, true);
+            props._content = document.importNode(this.element.content, true);
             var if_ = (props['if'] || '').trim();
             if (!reKeypath.test(if_)) {
                 throw new SyntaxError("Invalid value of attribute \"if\" (" + if_ + ")");
@@ -2243,7 +2242,7 @@ var RtIfThen = (function (_super) {
     RtIfThen.prototype._render = function (changed) {
         var _this = this;
         if (this._elseMode ? !this._if.get() : this._if.get()) {
-            var content = this.props.content.cloneNode(true);
+            var content = this.props._content.cloneNode(true);
             var _a = bindContent_1.default(content, this.ownerComponent, this.props.context), bindings = _a.bindings, childComponents = _a.childComponents;
             this._nodes = slice.call(content.childNodes);
             this._bindings = bindings;
@@ -2267,6 +2266,15 @@ var RtIfThen = (function (_super) {
             nextTick(function () {
                 _this.emit('change');
             });
+        }
+    };
+    RtIfThen.prototype._destroyBindings = function () {
+        var bindings = this._bindings;
+        if (bindings) {
+            for (var i = bindings.length; i;) {
+                bindings[--i].off();
+            }
+            this._bindings = null;
         }
     };
     return RtIfThen;
@@ -3369,61 +3377,62 @@ var RtContent = (function (_super) {
         return _super.apply(this, arguments) || this;
     }
     RtContent.prototype._attachElement = function () {
-        var ownerComponent = this.ownerComponent;
-        var el = this.element;
-        var props = this.props;
         if (this.isReady) {
-            for (var child = void 0; (child = el.firstChild);) {
-                el.removeChild(child);
-            }
+            this._unfreezeBindings();
         }
         else {
-            var inputContent = props.content = document.createDocumentFragment();
-            for (var child = void 0; (child = el.firstChild);) {
-                inputContent.appendChild(child);
-            }
-            var ownerComponentInputContent = ownerComponent.props.content;
-            var selector = this.elementAttributes['select'];
-            if (selector) {
-                if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
-                    var templates = ownerComponentInputContent.querySelectorAll('template');
-                    for (var i = templates.length; i;) {
-                        templates[--i].content;
+            var ownerComponent = this.ownerComponent;
+            var ownerComponentInputContent = ownerComponent.props._content;
+            var content = void 0;
+            if (ownerComponentInputContent.firstChild) {
+                var selector = this.elementAttributes['select'];
+                if (selector) {
+                    if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
+                        var templates = ownerComponentInputContent.querySelectorAll('template');
+                        for (var i = templates.length; i;) {
+                            templates[--i].content;
+                        }
+                        ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
                     }
-                    ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
-                }
-                var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
-                var selectedElCount = selectedEls.length;
-                if (selectedElCount) {
-                    var rawContent = this._rawContent = document.createDocumentFragment();
-                    for (var i = 0; i < selectedElCount; i++) {
-                        rawContent.appendChild(selectedEls[i].cloneNode(true));
+                    var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+                    var selectedElCount = selectedEls.length;
+                    if (selectedElCount) {
+                        content = document.createDocumentFragment();
+                        for (var i = 0; i < selectedElCount; i++) {
+                            content.appendChild(selectedEls[i].cloneNode(true));
+                        }
                     }
                 }
                 else {
-                    this._rawContent = inputContent;
+                    content = ownerComponentInputContent;
                 }
             }
-            else {
-                this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
+            var el = this.element;
+            var props = this.props;
+            var getContext = props['getContext'];
+            var _a = content ?
+                bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
+                    ownerComponent[getContext](this, ownerComponent.props.context) :
+                    ownerComponent.props.context) :
+                bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _a.bindings, childComponents = _a.childComponents;
+            this._bindings = bindings;
+            if (content) {
+                el.appendChild(content);
+            }
+            if (!Features_1.nativeCustomElements && childComponents) {
+                attachChildComponentElements_1.default(childComponents);
             }
             this.isReady = true;
         }
-        var content = this._rawContent.cloneNode(true);
-        var getContext = props['getContext'];
-        var _a = this._rawContent == props.content ?
-            bindContent_1.default(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) :
-            bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
-                ownerComponent[getContext](this, ownerComponent.props.context) :
-                ownerComponent.props.context), bindings = _a.bindings, childComponents = _a.childComponents;
-        this._bindings = bindings;
-        el.appendChild(content);
-        if (!Features_1.nativeCustomElements && childComponents) {
-            attachChildComponentElements_1.default(childComponents);
-        }
     };
     RtContent.prototype._detachElement = function () {
-        this._destroyBindings();
+        this._freezeBindings();
+    };
+    RtContent.prototype._clearElement = function () {
+        var el = this.element;
+        for (var child = void 0; (child = el.firstChild);) {
+            el.removeChild(child);
+        }
     };
     return RtContent;
 }(Component_1.default));
@@ -3555,7 +3564,7 @@ var RtRepeat = (function (_super) {
         this._render(false);
     };
     RtRepeat.prototype._detachElement = function () {
-        this._clearWithItemMap(this._itemMap);
+        this._clearByItemMap(this._itemMap);
         this._list.off('change', this._onListChange, this);
     };
     RtRepeat.prototype._onListChange = function () {
@@ -3574,7 +3583,7 @@ var RtRepeat = (function (_super) {
             changed = list.reduce(function (changed, item, index) { return _this._renderItem(item, index) || changed; }, changed);
         }
         if (oldItemMap.size) {
-            this._clearWithItemMap(oldItemMap);
+            this._clearByItemMap(oldItemMap);
         }
         else if (!changed) {
             return;
@@ -3666,11 +3675,11 @@ var RtRepeat = (function (_super) {
         return true;
         var _a;
     };
-    RtRepeat.prototype._clearWithItemMap = function (itemMap) {
-        itemMap.forEach(this._clearWithItems, this);
+    RtRepeat.prototype._clearByItemMap = function (itemMap) {
+        itemMap.forEach(this._clearByItems, this);
         itemMap.clear();
     };
-    RtRepeat.prototype._clearWithItems = function (items) {
+    RtRepeat.prototype._clearByItems = function (items) {
         for (var i = items.length; i;) {
             var item = items[--i];
             var bindings = item.bindings;
@@ -3990,6 +3999,59 @@ exports.default = compileContent;
 "use strict";
 
 var cellx_1 = __webpack_require__(0);
+function freezeBinding(binding) {
+    binding._frozenState = {
+        changeEvents: binding.getEvents('change'),
+        value: binding._value
+    };
+    binding.off();
+}
+function unfreezeBinding(binding) {
+    var frozenState = binding._frozenState;
+    var changeEvents = frozenState.changeEvents;
+    binding._frozenState = null;
+    for (var _i = 0, changeEvents_1 = changeEvents; _i < changeEvents_1.length; _i++) {
+        var evt = changeEvents_1[_i];
+        binding.on('change', evt.listener, evt.context);
+    }
+    if (frozenState.value !== binding._value) {
+        binding._changeEvent = {
+            target: binding,
+            type: 'change',
+            oldValue: frozenState.value,
+            value: binding._value,
+            prev: null
+        };
+        binding._canCancelChange = true;
+        binding._addToRelease();
+    }
+}
+function freezeBindings(bindings) {
+    cellx_1.Cell.forceRelease();
+    for (var _i = 0, bindings_1 = bindings; _i < bindings_1.length; _i++) {
+        var binding = bindings_1[_i];
+        freezeBinding(binding);
+    }
+}
+exports.freezeBindings = freezeBindings;
+function unfreezeBindings(bindings) {
+    cellx_1.Cell.forceRelease();
+    for (var _i = 0, bindings_2 = bindings; _i < bindings_2.length; _i++) {
+        var binding = bindings_2[_i];
+        unfreezeBinding(binding);
+    }
+    cellx_1.Cell.forceRelease();
+}
+exports.unfreezeBindings = unfreezeBindings;
+
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var cellx_1 = __webpack_require__(0);
 var mixin = cellx_1.Utils.mixin;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = mixin(Object.create(null), {
@@ -4038,7 +4100,7 @@ exports.default = mixin(Object.create(null), {
 
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4061,13 +4123,13 @@ exports.default = [
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var camelize_1 = __webpack_require__(4);
-function initAttributes(component, constr) {
+function initElementAttributes(component, constr) {
     var elAttrsConfig = constr.elementAttributes;
     if (elAttrsConfig) {
         var attrs = component.elementAttributes;
@@ -4080,11 +4142,29 @@ function initAttributes(component, constr) {
     }
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = initAttributes;
+exports.default = initElementAttributes;
 
 
 /***/ },
-/* 40 */
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var Component_1 = __webpack_require__(1);
+function initElementClasses(el, constr) {
+    var c = constr;
+    do {
+        el.classList.add(c.elementIs);
+        c = Object.getPrototypeOf(c.prototype).constructor;
+    } while (c != Component_1.default);
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = initElementClasses;
+
+
+/***/ },
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4132,13 +4212,13 @@ exports.default = onEvent;
 
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var cellx_1 = __webpack_require__(0);
-var elementConstructorMap_1 = __webpack_require__(37);
+var elementConstructorMap_1 = __webpack_require__(38);
 var ElementProtoMixin_1 = __webpack_require__(30);
 var hyphenize_1 = __webpack_require__(10);
 var mixin = cellx_1.Utils.mixin;
@@ -4154,8 +4234,8 @@ function registerComponent(componentConstr) {
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
     if (componentConstr.props !== parentComponentConstr.props) {
         var props = componentConstr.props;
-        if (props && (props['content'] || props['context'])) {
-            throw new TypeError("No need to declare property \"" + (props['content'] ? 'content' : 'context') + "\"");
+        if (props && (props['_content'] || props['context'])) {
+            throw new TypeError("No need to declare property \"" + (props['_content'] ? '_content' : 'context') + "\"");
         }
         componentConstr.elementAttributes = props;
     }
@@ -4205,25 +4285,7 @@ exports.default = registerComponent;
 
 
 /***/ },
-/* 42 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var Component_1 = __webpack_require__(1);
-function setElementClasses(el, constr) {
-    var c = constr;
-    do {
-        el.classList.add(c.elementIs);
-        c = Object.getPrototypeOf(c.prototype).constructor;
-    } while (c != Component_1.default);
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = setElementClasses;
-
-
-/***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(25);
