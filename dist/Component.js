@@ -222,6 +222,15 @@ var Component = (function (_super) {
             componentBinding_1.unfreezeBindings(this._bindings);
         }
     };
+    Component.prototype._destroyBindings = function () {
+        var bindings = this._bindings;
+        if (bindings) {
+            for (var i = bindings.length; i;) {
+                bindings[--i].off();
+            }
+            this._bindings = null;
+        }
+    };
     // Callbacks
     Component.prototype.created = function () { };
     Component.prototype.initialize = function () { };

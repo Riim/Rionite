@@ -119,16 +119,4 @@ export default class RtIfThen extends Component {
 			});
 		}
 	}
-
-	_destroyBindings() {
-		let bindings = this._bindings;
-
-		if (bindings) {
-			for (let i = bindings.length; i;) {
-				bindings[--i].off();
-			}
-
-			this._bindings = null;
-		}
-	}
 }

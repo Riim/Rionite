@@ -69,6 +69,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     dispose(): Component;
     _freezeBindings(): void;
     _unfreezeBindings(): void;
+    _destroyBindings(): void;
     created(): void;
     initialize(): void;
     ready(): void;

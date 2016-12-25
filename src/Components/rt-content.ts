@@ -12,21 +12,34 @@ let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 
 	props: {
 		select: { type: String, readonly: true },
+		cloneContent: { default: false, readonly: true },
 		getContext: { type: String, readonly: true }
 	},
 
 	template: ''
 })
 export default class RtContent extends Component {
-	_attachElement() {
-		if (this.isReady) {
-			this._unfreezeBindings();
-		} else {
-			let ownerComponent = this.ownerComponent as Component;
-			let ownerComponentInputContent = ownerComponent.props._content as DocumentFragment;
-			let content: DocumentFragment | undefined;
+	_rawContent: DocumentFragment;
 
-			if (ownerComponentInputContent.firstChild) {
+	_attachElement() {
+		let props = this.props;
+
+		if (props['cloneContent']) {
+			let ownerComponent = this.ownerComponent as Component;
+			let el = this.element;
+
+			if (this.isReady) {
+				for (let child: Node | null; (child = el.firstChild);) {
+					el.removeChild(child);
+				}
+			} else {
+				let inputContent = props._content = document.createDocumentFragment();
+
+				for (let child: Node | null; (child = el.firstChild);) {
+					inputContent.appendChild(child);
+				}
+
+				let ownerComponentInputContent = ownerComponent.props._content as DocumentFragment;
 				let selector = this.elementAttributes['select'];
 
 				if (selector) {
@@ -44,54 +57,123 @@ export default class RtContent extends Component {
 					let selectedElCount = selectedEls.length;
 
 					if (selectedElCount) {
-						content = document.createDocumentFragment();
+						let rawContent = this._rawContent = document.createDocumentFragment();
 
 						for (let i = 0; i < selectedElCount; i++) {
-							content.appendChild(selectedEls[i].cloneNode(true));
+							rawContent.appendChild(selectedEls[i].cloneNode(true));
 						}
+					} else {
+						this._rawContent = inputContent;
 					}
 				} else {
-					content = ownerComponentInputContent;
+					this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
 				}
+
+				this.isReady = true;
 			}
 
-			let el = this.element;
-			let props = this.props;
+			let content = this._rawContent.cloneNode(true);
 			let getContext = props['getContext'];
 
-			let { bindings, childComponents } = content ?
+			let { bindings, childComponents } = this._rawContent == props._content ?
+				bindContent(
+					content,
+					ownerComponent,
+					getContext ? ownerComponent[getContext](this, props.context) : props.context
+				) :
 				bindContent(
 					content,
 					ownerComponent.ownerComponent as Component,
 					getContext ?
 						ownerComponent[getContext](this, ownerComponent.props.context) :
 						ownerComponent.props.context
-				) :
-				bindContent(
-					el,
-					ownerComponent,
-					getContext ? ownerComponent[getContext](this, props.context) : props.context
 				);
 
 			this._bindings = bindings;
 
-			if (content) {
-				for (let child: Node | null; (child = el.firstChild);) {
-					el.removeChild(child);
-				}
-
-				el.appendChild(content);
-			}
+			el.appendChild(content);
 
 			if (!nativeCustomElementsFeature && childComponents) {
 				attachChildComponentElements(childComponents);
 			}
+		} else {
+			if (this.isReady) {
+				this._unfreezeBindings();
+			} else {
+				let ownerComponent = this.ownerComponent as Component;
+				let ownerComponentInputContent = ownerComponent.props._content as DocumentFragment;
+				let content: DocumentFragment | undefined;
 
-			this.isReady = true;
+				if (ownerComponentInputContent.firstChild) {
+					let selector = this.elementAttributes['select'];
+
+					if (selector) {
+						if (!templateTagFeature && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
+							let templates = ownerComponentInputContent.querySelectorAll('template');
+
+							for (let i = templates.length; i;) {
+								templates[--i].content;
+							}
+
+							ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
+						}
+
+						let selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+						let selectedElCount = selectedEls.length;
+
+						if (selectedElCount) {
+							content = document.createDocumentFragment();
+
+							for (let i = 0; i < selectedElCount; i++) {
+								content.appendChild(selectedEls[i].cloneNode(true));
+							}
+						}
+					} else {
+						content = ownerComponentInputContent;
+					}
+				}
+
+				let el = this.element;
+				let getContext = props['getContext'];
+
+				let { bindings, childComponents } = content ?
+					bindContent(
+						content,
+						ownerComponent.ownerComponent as Component,
+						getContext ?
+							ownerComponent[getContext](this, ownerComponent.props.context) :
+							ownerComponent.props.context
+					) :
+					bindContent(
+						el,
+						ownerComponent,
+						getContext ? ownerComponent[getContext](this, props.context) : props.context
+					);
+
+				this._bindings = bindings;
+
+				if (content) {
+					for (let child: Node | null; (child = el.firstChild);) {
+						el.removeChild(child);
+					}
+
+					el.appendChild(content);
+				}
+
+				if (!nativeCustomElementsFeature && childComponents) {
+					attachChildComponentElements(childComponents);
+				}
+
+				this.isReady = true;
+			}
 		}
 	}
 
 	_detachElement() {
-		this._freezeBindings();
+		if (this.props['cloneContent']) {
+			this._destroyBindings();
+		} else {
+			this._freezeBindings();
+		}
 	}
 }

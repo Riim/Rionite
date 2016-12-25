@@ -93,15 +93,6 @@ var RtIfThen = (function (_super) {
             });
         }
     };
-    RtIfThen.prototype._destroyBindings = function () {
-        var bindings = this._bindings;
-        if (bindings) {
-            for (var i = bindings.length; i;) {
-                bindings[--i].off();
-            }
-            this._bindings = null;
-        }
-    };
     return RtIfThen;
 }(Component_1.default));
 RtIfThen = __decorate([

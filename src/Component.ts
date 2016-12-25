@@ -334,6 +334,18 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		}
 	}
 
+	_destroyBindings() {
+		let bindings = this._bindings;
+
+		if (bindings) {
+			for (let i = bindings.length; i;) {
+				bindings[--i].off();
+			}
+
+			this._bindings = null;
+		}
+	}
+
 	// Callbacks
 
 	created() {}
