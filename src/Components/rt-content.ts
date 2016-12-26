@@ -125,7 +125,7 @@ export default class RtContent extends Component {
 							content = document.createDocumentFragment();
 
 							for (let i = 0; i < selectedElCount; i++) {
-								content.appendChild(selectedEls[i].cloneNode(true));
+								content.appendChild(selectedEls[i]);
 							}
 						}
 					} else {

@@ -3475,7 +3475,7 @@ var RtContent = (function (_super) {
                         if (selectedElCount) {
                             content = document.createDocumentFragment();
                             for (var i = 0; i < selectedElCount; i++) {
-                                content.appendChild(selectedEls[i].cloneNode(true));
+                                content.appendChild(selectedEls[i]);
                             }
                         }
                     }
