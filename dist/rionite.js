@@ -2331,7 +2331,11 @@ var ElementProtoMixin = (_a = {
     _a.attributeChangedCallback = function (name, oldValue, value) {
         var component = this.rioniteComponent;
         if (component && component.isReady) {
-            component.elementAttributes['_' + name].set(value);
+            var attrs = component.elementAttributes;
+            var privateName = '_' + name;
+            if (attrs[privateName]) {
+                attrs[privateName].set(value);
+            }
         }
     },
     _a);

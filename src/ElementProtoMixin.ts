@@ -68,7 +68,12 @@ let ElementProtoMixin = {
 		let component = this.rioniteComponent as Component;
 
 		if (component && component.isReady) {
-			component.elementAttributes['_' + name].set(value);
+			let attrs = component.elementAttributes;
+			let privateName = '_' + name;
+
+			if (attrs[privateName]) {
+				attrs[privateName].set(value);
+			}
 		}
 	}
 };
