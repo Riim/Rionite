@@ -23,119 +23,61 @@ var RtContent = (function (_super) {
         return _super.apply(this, arguments) || this;
     }
     RtContent.prototype._attachElement = function () {
+        var ownerComponent = this.ownerComponent;
+        var el = this.element;
         var props = this.props;
-        if (props['cloneContent']) {
-            var ownerComponent = this.ownerComponent;
-            var el = this.element;
-            if (this.isReady) {
-                for (var child = void 0; (child = el.firstChild);) {
-                    el.removeChild(child);
-                }
+        if (this.isReady) {
+            for (var child = void 0; (child = el.firstChild);) {
+                el.removeChild(child);
             }
-            else {
-                var inputContent = props._content = document.createDocumentFragment();
-                for (var child = void 0; (child = el.firstChild);) {
-                    inputContent.appendChild(child);
+        }
+        else {
+            var inputContent = props._content = document.createDocumentFragment();
+            for (var child = void 0; (child = el.firstChild);) {
+                inputContent.appendChild(child);
+            }
+            var ownerComponentInputContent = ownerComponent.props._content;
+            var selector = this.elementAttributes['select'];
+            if (selector) {
+                if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
+                    var templates = ownerComponentInputContent.querySelectorAll('template');
+                    for (var i = templates.length; i;) {
+                        templates[--i].content;
+                    }
+                    ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
                 }
-                var ownerComponentInputContent = ownerComponent.props._content;
-                var selector = this.elementAttributes['select'];
-                if (selector) {
-                    if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
-                        var templates = ownerComponentInputContent.querySelectorAll('template');
-                        for (var i = templates.length; i;) {
-                            templates[--i].content;
-                        }
-                        ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
-                    }
-                    var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
-                    var selectedElCount = selectedEls.length;
-                    if (selectedElCount) {
-                        var rawContent = this._rawContent = document.createDocumentFragment();
-                        for (var i = 0; i < selectedElCount; i++) {
-                            rawContent.appendChild(selectedEls[i].cloneNode(true));
-                        }
-                    }
-                    else {
-                        this._rawContent = inputContent;
+                var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+                var selectedElCount = selectedEls.length;
+                if (selectedElCount) {
+                    var rawContent = this._rawContent = document.createDocumentFragment();
+                    for (var i = 0; i < selectedElCount; i++) {
+                        rawContent.appendChild(selectedEls[i].cloneNode(true));
                     }
                 }
                 else {
-                    this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
+                    this._rawContent = inputContent;
                 }
-                this.isReady = true;
-            }
-            var content = this._rawContent.cloneNode(true);
-            var getContext = props['getContext'];
-            var _a = this._rawContent == props._content ?
-                bindContent_1.default(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) :
-                bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
-                    ownerComponent[getContext](this, ownerComponent.props.context) :
-                    ownerComponent.props.context), bindings = _a.bindings, childComponents = _a.childComponents;
-            this._bindings = bindings;
-            el.appendChild(content);
-            if (!Features_1.nativeCustomElements && childComponents) {
-                attachChildComponentElements_1.default(childComponents);
-            }
-        }
-        else {
-            if (this.isReady) {
-                this._unfreezeBindings();
             }
             else {
-                var ownerComponent = this.ownerComponent;
-                var ownerComponentInputContent = ownerComponent.props._content;
-                var content = void 0;
-                if (ownerComponentInputContent.firstChild) {
-                    var selector = this.elementAttributes['select'];
-                    if (selector) {
-                        if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
-                            var templates = ownerComponentInputContent.querySelectorAll('template');
-                            for (var i = templates.length; i;) {
-                                templates[--i].content;
-                            }
-                            ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
-                        }
-                        var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
-                        var selectedElCount = selectedEls.length;
-                        if (selectedElCount) {
-                            content = document.createDocumentFragment();
-                            for (var i = 0; i < selectedElCount; i++) {
-                                content.appendChild(selectedEls[i]);
-                            }
-                        }
-                    }
-                    else {
-                        content = ownerComponentInputContent;
-                    }
-                }
-                var el = this.element;
-                var getContext = props['getContext'];
-                var _b = content ?
-                    bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
-                        ownerComponent[getContext](this, ownerComponent.props.context) :
-                        ownerComponent.props.context) :
-                    bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _b.bindings, childComponents = _b.childComponents;
-                this._bindings = bindings;
-                if (content) {
-                    for (var child = void 0; (child = el.firstChild);) {
-                        el.removeChild(child);
-                    }
-                    el.appendChild(content);
-                }
-                if (!Features_1.nativeCustomElements && childComponents) {
-                    attachChildComponentElements_1.default(childComponents);
-                }
-                this.isReady = true;
+                this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
             }
+            this.isReady = true;
+        }
+        var content = this._rawContent.cloneNode(true);
+        var getContext = props['getContext'];
+        var _a = this._rawContent == props._content ?
+            bindContent_1.default(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) :
+            bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
+                ownerComponent[getContext](this, ownerComponent.props.context) :
+                ownerComponent.props.context), bindings = _a.bindings, childComponents = _a.childComponents;
+        this._bindings = bindings;
+        el.appendChild(content);
+        if (!Features_1.nativeCustomElements && childComponents) {
+            attachChildComponentElements_1.default(childComponents);
         }
     };
     RtContent.prototype._detachElement = function () {
-        if (this.props['cloneContent']) {
-            this._destroyBindings();
-        }
-        else {
-            this._freezeBindings();
-        }
+        this._destroyBindings();
     };
     return RtContent;
 }(Component_1.default));
@@ -144,7 +86,6 @@ RtContent = __decorate([
         elementIs: 'rt-content',
         props: {
             select: { type: String, readonly: true },
-            cloneContent: { default: false, readonly: true },
             getContext: { type: String, readonly: true }
         },
         template: ''
