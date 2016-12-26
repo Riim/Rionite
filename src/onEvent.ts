@@ -28,8 +28,7 @@ export default function onEvent(evt: IEvent | Event) {
 		let component = (node as any).$c as Component | undefined;
 
 		if (component && targetEls) {
-			for (let i = 0, l = targetEls.length; i < l; i++) {
-				let targetEl = targetEls[i] as HTMLElement;
+			for (let targetEl of targetEls) {
 				let handler = component[targetEl.getAttribute(attrName) as string];
 
 				if (typeof handler == 'function') {

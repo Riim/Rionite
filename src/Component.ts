@@ -265,7 +265,11 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			let template = constr.template;
 
 			if (template == null) {
-				let childComponents = findChildComponentElements(el, this, this);
+				let childComponents = findChildComponentElements(
+					el,
+					this.ownerComponent as Component,
+					this.ownerComponent as Component
+				);
 
 				if (childComponents) {
 					attachChildComponentElements(childComponents);

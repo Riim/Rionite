@@ -171,7 +171,7 @@ var Component = (function (_super) {
             initElementAttributes_1.default(this, constr);
             var template = constr.template;
             if (template == null) {
-                var childComponents = findChildComponentElements(el, this, this);
+                var childComponents = findChildComponentElements(el, this.ownerComponent, this.ownerComponent);
                 if (childComponents) {
                     attachChildComponentElements_1.default(childComponents);
                 }

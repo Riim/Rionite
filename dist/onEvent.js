@@ -21,8 +21,8 @@ function onEvent(evt) {
         }
         var component = node.$c;
         if (component && targetEls) {
-            for (var i = 0, l = targetEls.length; i < l; i++) {
-                var targetEl = targetEls[i];
+            for (var _i = 0, targetEls_1 = targetEls; _i < targetEls_1.length; _i++) {
+                var targetEl = targetEls_1[_i];
                 var handler = component[targetEl.getAttribute(attrName)];
                 if (typeof handler == 'function') {
                     if (handler.call(component, evt, targetEl.$c || targetEl) === false) {
