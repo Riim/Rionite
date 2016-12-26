@@ -175,7 +175,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	_isComponentSilent: boolean;
 
-	constructor(el: HTMLElement | string | null | undefined, props?: { [name: string]: any }) {
+	constructor(el?: HTMLElement | string, props?: { [name: string]: any }) {
 		super();
 		DisposableMixin.call(this);
 
@@ -323,13 +323,13 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	}
 
 	_freezeBindings() {
-		if (this._bindings){
+		if (this._bindings) {
 			freezeBindings(this._bindings);
 		}
 	}
 
 	_unfreezeBindings() {
-		if (this._bindings){
+		if (this._bindings) {
 			unfreezeBindings(this._bindings);
 		}
 	}
