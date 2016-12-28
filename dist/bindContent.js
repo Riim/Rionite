@@ -21,7 +21,7 @@ function bindContent(content, ownerComponent, context) {
                         var value = attr.value;
                         if (reBinding.test(value)) {
                             var parsedValue = (new ContentParser_1.default(value)).parse();
-                            if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
+                            if (parsedValue.length > 1 || parsedValue[0].nodeType == ContentNodeType.BINDING) {
                                 var name_1 = attr.name;
                                 if (name_1.charAt(0) == '_') {
                                     name_1 = name_1.slice(1);
@@ -59,7 +59,7 @@ function bindContent(content, ownerComponent, context) {
                     var content_1 = child.textContent;
                     if (reBinding.test(content_1)) {
                         var parsedContent = (new ContentParser_1.default(content_1)).parse();
-                        if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
+                        if (parsedContent.length > 1 || parsedContent[0].nodeType == ContentNodeType.BINDING) {
                             var cell = new cellx_1.Cell(compileContent_1.default(parsedContent, content_1), {
                                 owner: context,
                                 onChange: function (evt) {

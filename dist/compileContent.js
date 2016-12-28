@@ -10,14 +10,14 @@ function compileContent(parsedContent, content) {
     if (cache[content]) {
         return cache[content];
     }
-    if (parsedContent.length == 1 && parsedContent[0].type == ContentNodeType.BINDING) {
+    if (parsedContent.length == 1 && parsedContent[0].nodeType == ContentNodeType.BINDING) {
         return (cache[content] = compileBinding_1.default(parsedContent[0]));
     }
     var usesFormatters = false;
     var jsExprParts = [];
     for (var _i = 0, parsedContent_1 = parsedContent; _i < parsedContent_1.length; _i++) {
         var node = parsedContent_1[_i];
-        if (node.type == ContentNodeType.TEXT) {
+        if (node.nodeType == ContentNodeType.TEXT) {
             jsExprParts.push("'" + escapeString_1.default(node.value) + "'");
         }
         else {

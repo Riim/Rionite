@@ -39,33 +39,31 @@ var todos = new cellxIndexedCollections.IndexedList([
 	new Todo('Tertium')
 ]);
 
-class TodoView extends Rionite.Component {
+var TodoView = Rionite.Component.extend('todo-view', {
+	Static: {
+		props: {
+			todoId: { type: String, required: true, readonly: true }
+		},
+
+		template: `
+			<input class="todo-view__cb-done" type="checkbox" checked="{todo.done}" rt-change="onCbDoneChange">
+			<span class="todo-view__text">{todo.text}</span>
+			<button rt-click="onBtnRemoveClick">remove</button>
+		`
+	},
+
 	initialize() {
 		this.todo = todos.get(this.props['todoId'], 'id');
-	}
+	},
 
 	onCbDoneChange(evt) {
 		this.todo.done = evt.target.checked;
-	}
+	},
 
 	onBtnRemoveClick() {
 		todos.remove(this.todo);
 	}
-}
-
-TodoView.elementIs = 'todo-view';
-
-TodoView.props = {
-	todoId: { type: String, required: true, readonly: true }
-};
-
-TodoView.template = `
-	<input class="todo-view__cb-done" type="checkbox" checked="{todo.done}" rt-change="onCbDoneChange">
-	<span class="todo-view__text">{todo.text}</span>
-	<button rt-click="onBtnRemoveClick">remove</button>
-`;
-
-Rionite.Component.register(TodoView);
+});
 
 Rionite.Component.extend('todo-app', {
 	Static: {

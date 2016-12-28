@@ -1,4 +1,4 @@
-import { IContentText, IContentBinding, TContent, default as ContentParser } from './ContentParser';
+import { IContentTextNode, IContentBinding, TContent, default as ContentParser } from './ContentParser';
 import bindingToJSExpression from './bindingToJSExpression';
 import compileBinding from './compileBinding';
 import formatters from './formatters';
@@ -13,7 +13,7 @@ export default function compileContent(parsedContent: TContent, content: string)
 		return cache[content];
 	}
 
-	if (parsedContent.length == 1 && parsedContent[0].type == ContentNodeType.BINDING) {
+	if (parsedContent.length == 1 && parsedContent[0].nodeType == ContentNodeType.BINDING) {
 		return (cache[content] = compileBinding(parsedContent[0] as IContentBinding));
 	}
 
@@ -21,8 +21,8 @@ export default function compileContent(parsedContent: TContent, content: string)
 	let jsExprParts: Array<string> = [];
 
 	for (let node of parsedContent) {
-		if (node.type == ContentNodeType.TEXT) {
-			jsExprParts.push(`'${ escapeString((node as IContentText).value) }'`);
+		if (node.nodeType == ContentNodeType.TEXT) {
+			jsExprParts.push(`'${ escapeString((node as IContentTextNode).value) }'`);
 		} else {
 			let bindingJSExpr = bindingToJSExpression(node as IContentBinding);
 

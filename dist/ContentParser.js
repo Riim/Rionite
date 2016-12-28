@@ -2,19 +2,21 @@
 var keypathToJSExpression_1 = require("./keypathToJSExpression");
 var namePattern_1 = require("./namePattern");
 var keypathPattern_1 = require("./keypathPattern");
+var ContentNodeType;
+(function (ContentNodeType) {
+    ContentNodeType[ContentNodeType["TEXT"] = 1] = "TEXT";
+    ContentNodeType[ContentNodeType["BINDING"] = 2] = "BINDING";
+    ContentNodeType[ContentNodeType["BINDING_KEYPATH"] = 3] = "BINDING_KEYPATH";
+    ContentNodeType[ContentNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
+    ContentNodeType[ContentNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
+})(ContentNodeType = exports.ContentNodeType || (exports.ContentNodeType = {}));
+;
 var reNameOrNothing = RegExp(namePattern_1.default + '|', 'g');
 var reKeypathOrNothing = RegExp(keypathPattern_1.default + '|', 'g');
 var reBooleanOrNothing = /false|true|/g;
 var reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 var reVacuumOrNothing = /null|undefined|void 0|/g;
 var NOT_VALUE_AND_NOT_KEYPATH = {};
-var ContentNodeType = {
-    TEXT: 0,
-    BINDING: 1,
-    BINDING_KEYPATH: 2,
-    BINDING_FORMATTER: 3,
-    BINDING_FORMATTER_ARGUMENTS: 4
-};
 var ContentParser = (function () {
     function ContentParser(content) {
         this.content = content;
@@ -46,12 +48,12 @@ var ContentParser = (function () {
         if (value) {
             var result = this.result;
             var resultLen = result.length;
-            if (resultLen && result[resultLen - 1].type == ContentNodeType.TEXT) {
+            if (resultLen && result[resultLen - 1].nodeType == ContentNodeType.TEXT) {
                 result[resultLen - 1].value = result[resultLen - 1].raw += value;
             }
             else {
                 result.push({
-                    type: ContentNodeType.TEXT,
+                    nodeType: ContentNodeType.TEXT,
                     at: this.at,
                     raw: value,
                     value: value
@@ -60,7 +62,7 @@ var ContentParser = (function () {
         }
     };
     ContentParser.prototype.readBinding = function () {
-        var bindingAt = this.at;
+        var at = this.at;
         this.next('{');
         this.skipWhitespaces();
         var keypath = this.readBindingKeypath();
@@ -72,16 +74,16 @@ var ContentParser = (function () {
             if (this.chr == '}') {
                 this.next();
                 return {
-                    type: ContentNodeType.BINDING,
-                    at: bindingAt,
-                    raw: this.content.slice(bindingAt, this.at),
+                    nodeType: ContentNodeType.BINDING,
+                    at: at,
+                    raw: this.content.slice(at, this.at),
                     keypath: keypath,
                     formatters: formatters
                 };
             }
         }
-        this.at = bindingAt;
-        this.chr = this.content.charAt(bindingAt);
+        this.at = at;
+        this.chr = this.content.charAt(at);
         return null;
     };
     ContentParser.prototype.readBindingKeypath = function () {
@@ -89,19 +91,19 @@ var ContentParser = (function () {
         reKeypathOrNothing.lastIndex = this.at;
         var keypath = reKeypathOrNothing.exec(content)[0];
         if (keypath) {
-            var keypathAt = this.at;
+            var at = this.at;
             this.chr = content.charAt((this.at += keypath.length));
             return {
-                type: ContentNodeType.BINDING_KEYPATH,
-                at: keypathAt,
-                raw: content.slice(keypathAt, this.at),
+                nodeType: ContentNodeType.BINDING_KEYPATH,
+                at: at,
+                raw: content.slice(at, this.at),
                 value: keypath
             };
         }
         return null;
     };
     ContentParser.prototype.readFormatter = function () {
-        var formatterAt = this.at;
+        var at = this.at;
         this.next('|');
         this.skipWhitespaces();
         var content = this.content;
@@ -112,21 +114,21 @@ var ContentParser = (function () {
                 this.readFormatterArguments() :
                 null;
             return {
-                type: ContentNodeType.BINDING_FORMATTER,
-                at: formatterAt,
-                raw: content.slice(formatterAt, this.at),
+                nodeType: ContentNodeType.BINDING_FORMATTER,
+                at: at,
+                raw: content.slice(at, this.at),
                 name: name,
                 arguments: args
             };
         }
-        this.at = formatterAt;
-        this.chr = content.charAt(formatterAt);
+        this.at = at;
+        this.chr = content.charAt(at);
         return null;
     };
     ContentParser.prototype.readFormatterArguments = function () {
-        var formatterArgumentsAt = this.at;
-        var args = [];
+        var at = this.at;
         this.next('(');
+        var args = [];
         if (this.skipWhitespaces() != ')') {
             for (;;) {
                 var arg = this.readValueOrValueKeypath();
@@ -141,16 +143,16 @@ var ContentParser = (function () {
                         break;
                     }
                 }
-                this.at = formatterArgumentsAt;
-                this.chr = this.content.charAt(formatterArgumentsAt);
+                this.at = at;
+                this.chr = this.content.charAt(at);
                 return null;
             }
         }
         this.next();
         return {
-            type: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
-            at: formatterArgumentsAt,
-            raw: this.content.slice(formatterArgumentsAt, this.at),
+            nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
+            at: at,
+            raw: this.content.slice(at, this.at),
             value: args
         };
     };
@@ -182,7 +184,7 @@ var ContentParser = (function () {
         return NOT_VALUE_AND_NOT_KEYPATH;
     };
     ContentParser.prototype.readObject = function () {
-        var objectAt = this.at;
+        var at = this.at;
         this.next('{');
         var obj = '{';
         while (this.skipWhitespaces() != '}') {
@@ -203,8 +205,8 @@ var ContentParser = (function () {
                     }
                 }
             }
-            this.at = objectAt;
-            this.chr = this.content.charAt(objectAt);
+            this.at = at;
+            this.chr = this.content.charAt(at);
             return NOT_VALUE_AND_NOT_KEYPATH;
         }
         this.next();
@@ -220,7 +222,7 @@ var ContentParser = (function () {
         return null;
     };
     ContentParser.prototype.readArray = function () {
-        var arrayAt = this.at;
+        var at = this.at;
         this.next('[');
         var arr = '[';
         while (this.skipWhitespaces() != ']') {
@@ -231,8 +233,8 @@ var ContentParser = (function () {
             else {
                 var v = this.readValueOrValueKeypath();
                 if (v === NOT_VALUE_AND_NOT_KEYPATH) {
-                    this.at = arrayAt;
-                    this.chr = this.content.charAt(arrayAt);
+                    this.at = at;
+                    this.chr = this.content.charAt(at);
                     return NOT_VALUE_AND_NOT_KEYPATH;
                 }
                 else {
@@ -270,13 +272,13 @@ var ContentParser = (function () {
                 content: this.content
             };
         }
-        var stringAt = this.at;
-        var quote = this.chr;
+        var at = this.at;
+        var quoteChar = this.chr;
         var str = '';
         while (this.next()) {
-            if (this.chr == quote) {
+            if (this.chr == quoteChar) {
                 this.next();
-                return quote + str + quote;
+                return quoteChar + str + quoteChar;
             }
             if (this.chr == '\\') {
                 str += this.chr + this.next();
@@ -288,8 +290,8 @@ var ContentParser = (function () {
                 str += this.chr;
             }
         }
-        this.at = stringAt;
-        this.chr = this.content.charAt(stringAt);
+        this.at = at;
+        this.chr = this.content.charAt(at);
         return NOT_VALUE_AND_NOT_KEYPATH;
     };
     ContentParser.prototype.readVacuum = function () {

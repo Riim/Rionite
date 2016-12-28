@@ -34,7 +34,7 @@ export default function bindContent(
 						if (reBinding.test(value)) {
 							let parsedValue = (new ContentParser(value)).parse();
 
-							if (parsedValue.length > 1 || parsedValue[0].type == ContentNodeType.BINDING) {
+							if (parsedValue.length > 1 || parsedValue[0].nodeType == ContentNodeType.BINDING) {
 								let name = attr.name;
 
 								if (name.charAt(0) == '_') {
@@ -79,7 +79,7 @@ export default function bindContent(
 					if (reBinding.test(content)) {
 						let parsedContent = (new ContentParser(content)).parse();
 
-						if (parsedContent.length > 1 || parsedContent[0].type == ContentNodeType.BINDING) {
+						if (parsedContent.length > 1 || parsedContent[0].nodeType == ContentNodeType.BINDING) {
 							let cell = new Cell<any>(compileContent(parsedContent, content), {
 								owner: context,
 								onChange(evt) {

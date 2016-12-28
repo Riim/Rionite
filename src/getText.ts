@@ -9,8 +9,8 @@ export interface ILocaleSettings {
 
 export interface ILocalizationTexts {
 	[context: string]: {
-		[key: string]: string | Array<string>
-	}
+		[key: string]: string | Array<string>;
+	};
 }
 
 export interface IGetTextConfig {

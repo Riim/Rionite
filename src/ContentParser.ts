@@ -2,44 +2,48 @@ import keypathToJSExpression from './keypathToJSExpression';
 import namePattern from './namePattern';
 import keypathPattern from './keypathPattern';
 
-export interface IContentText {
-	type: number,
-	at: number,
-	raw: string,
-	value: string
+export enum ContentNodeType {
+	TEXT = 1,
+	BINDING,
+	BINDING_KEYPATH,
+	BINDING_FORMATTER,
+	BINDING_FORMATTER_ARGUMENTS
+};
+
+export interface IContentNode {
+	nodeType: ContentNodeType;
+	at: number;
+	raw: string;
 }
 
-export interface IContentBindingKeypath {
-	type: number,
-	at: number,
-	raw: string,
-	value: string
+export interface IContentTextNode extends IContentNode {
+	nodeType: ContentNodeType.TEXT;
+	value: string;
 }
 
-export interface IContentBindingFormatterArguments {
-	type: number,
-	at: number,
-	raw: string,
-	value: Array<string>
+export interface IContentBindingKeypath extends IContentNode {
+	nodeType: ContentNodeType.BINDING_KEYPATH;
+	value: string;
 }
 
-export interface IContentBindingFormatter {
-	type: number,
-	at: number,
-	raw: string,
-	name: string,
-	arguments: IContentBindingFormatterArguments | null
+export interface IContentBindingFormatterArguments extends IContentNode {
+	nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS;
+	value: Array<string>;
 }
 
-export interface IContentBinding {
-	type: number,
-	at: number,
-	raw: string,
-	keypath: IContentBindingKeypath,
-	formatters: Array<IContentBindingFormatter>
+export interface IContentBindingFormatter extends IContentNode {
+	nodeType: ContentNodeType.BINDING_FORMATTER;
+	name: string;
+	arguments: IContentBindingFormatterArguments | null;
 }
 
-export type TContent = Array<IContentText | IContentBinding>;
+export interface IContentBinding extends IContentNode {
+	nodeType: ContentNodeType.BINDING;
+	keypath: IContentBindingKeypath;
+	formatters: Array<IContentBindingFormatter>;
+}
+
+export type TContent = Array<IContentTextNode | IContentBinding>;
 
 let reNameOrNothing = RegExp(namePattern + '|', 'g');
 let reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
@@ -49,14 +53,6 @@ let reNumberOrNothing =
 let reVacuumOrNothing = /null|undefined|void 0|/g;
 
 let NOT_VALUE_AND_NOT_KEYPATH = {};
-
-let ContentNodeType = {
-	TEXT: 0,
-	BINDING: 1,
-	BINDING_KEYPATH: 2,
-	BINDING_FORMATTER: 3,
-	BINDING_FORMATTER_ARGUMENTS: 4
-};
 
 export default class ContentParser {
 	static ContentNodeType = ContentNodeType;
@@ -107,11 +103,11 @@ export default class ContentParser {
 			let result = this.result;
 			let resultLen = result.length;
 
-			if (resultLen && result[resultLen - 1].type == ContentNodeType.TEXT) {
-				(result[resultLen - 1] as IContentText).value = result[resultLen - 1].raw += value;
+			if (resultLen && result[resultLen - 1].nodeType == ContentNodeType.TEXT) {
+				(result[resultLen - 1] as IContentTextNode).value = result[resultLen - 1].raw += value;
 			} else {
 				result.push({
-					type: ContentNodeType.TEXT,
+					nodeType: ContentNodeType.TEXT,
 					at: this.at,
 					raw: value,
 					value
@@ -121,7 +117,7 @@ export default class ContentParser {
 	}
 
 	readBinding(): IContentBinding | null {
-		let bindingAt = this.at;
+		let at = this.at;
 
 		this.next('{');
 		this.skipWhitespaces();
@@ -142,17 +138,17 @@ export default class ContentParser {
 				this.next();
 
 				return {
-					type: ContentNodeType.BINDING,
-					at: bindingAt,
-					raw: this.content.slice(bindingAt, this.at),
+					nodeType: ContentNodeType.BINDING,
+					at,
+					raw: this.content.slice(at, this.at),
 					keypath,
 					formatters
 				};
 			}
 		}
 
-		this.at = bindingAt;
-		this.chr = this.content.charAt(bindingAt);
+		this.at = at;
+		this.chr = this.content.charAt(at);
 
 		return null;
 	}
@@ -164,14 +160,14 @@ export default class ContentParser {
 		let keypath = (reKeypathOrNothing.exec(content) as RegExpExecArray)[0];
 
 		if (keypath) {
-			let keypathAt = this.at;
+			let at = this.at;
 
 			this.chr = content.charAt((this.at += keypath.length));
 
 			return {
-				type: ContentNodeType.BINDING_KEYPATH,
-				at: keypathAt,
-				raw: content.slice(keypathAt, this.at),
+				nodeType: ContentNodeType.BINDING_KEYPATH,
+				at,
+				raw: content.slice(at, this.at),
 				value: keypath
 			};
 		}
@@ -180,7 +176,7 @@ export default class ContentParser {
 	}
 
 	readFormatter(): IContentBindingFormatter | null {
-		let formatterAt = this.at;
+		let at = this.at;
 
 		this.next('|');
 		this.skipWhitespaces();
@@ -196,25 +192,26 @@ export default class ContentParser {
 				null;
 
 			return {
-				type: ContentNodeType.BINDING_FORMATTER,
-				at: formatterAt,
-				raw: content.slice(formatterAt, this.at),
+				nodeType: ContentNodeType.BINDING_FORMATTER,
+				at,
+				raw: content.slice(at, this.at),
 				name,
 				arguments: args
 			};
 		}
 
-		this.at = formatterAt;
-		this.chr = content.charAt(formatterAt);
+		this.at = at;
+		this.chr = content.charAt(at);
 
 		return null;
 	}
 
 	readFormatterArguments(): IContentBindingFormatterArguments | null {
-		let formatterArgumentsAt = this.at;
-		let args: Array<string> = [];
+		let at = this.at;
 
 		this.next('(');
+
+		let args: Array<string> = [];
 
 		if (this.skipWhitespaces() != ')') {
 			for (;;) {
@@ -234,8 +231,8 @@ export default class ContentParser {
 					}
 				}
 
-				this.at = formatterArgumentsAt;
-				this.chr = this.content.charAt(formatterArgumentsAt);
+				this.at = at;
+				this.chr = this.content.charAt(at);
 
 				return null;
 			}
@@ -244,9 +241,9 @@ export default class ContentParser {
 		this.next();
 
 		return {
-			type: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
-			at: formatterArgumentsAt,
-			raw: this.content.slice(formatterArgumentsAt, this.at),
+			nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
+			at,
+			raw: this.content.slice(at, this.at),
 			value: args
 		};
 	}
@@ -284,7 +281,7 @@ export default class ContentParser {
 	}
 
 	readObject(): string | Object {
-		let objectAt = this.at;
+		let at = this.at;
 
 		this.next('{');
 
@@ -311,8 +308,8 @@ export default class ContentParser {
 				}
 			}
 
-			this.at = objectAt;
-			this.chr = this.content.charAt(objectAt);
+			this.at = at;
+			this.chr = this.content.charAt(at);
 
 			return NOT_VALUE_AND_NOT_KEYPATH;
 		}
@@ -335,7 +332,7 @@ export default class ContentParser {
 	}
 
 	readArray(): string | Object {
-		let arrayAt = this.at;
+		let at = this.at;
 
 		this.next('[');
 
@@ -349,8 +346,8 @@ export default class ContentParser {
 				let v = this.readValueOrValueKeypath();
 
 				if (v === NOT_VALUE_AND_NOT_KEYPATH) {
-					this.at = arrayAt;
-					this.chr = this.content.charAt(arrayAt);
+					this.at = at;
+					this.chr = this.content.charAt(at);
 
 					return NOT_VALUE_AND_NOT_KEYPATH;
 				} else {
@@ -398,15 +395,15 @@ export default class ContentParser {
 			};
 		}
 
-		let stringAt = this.at;
+		let at = this.at;
 
-		let quote = this.chr;
+		let quoteChar = this.chr;
 		let str = '';
 
 		while (this.next()) {
-			if (this.chr == quote) {
+			if (this.chr == quoteChar) {
 				this.next();
-				return quote + str + quote;
+				return quoteChar + str + quoteChar;
 			}
 
 			if ((this.chr as string) == '\\') {
@@ -420,8 +417,8 @@ export default class ContentParser {
 			}
 		}
 
-		this.at = stringAt;
-		this.chr = this.content.charAt(stringAt);
+		this.at = at;
+		this.chr = this.content.charAt(at);
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
