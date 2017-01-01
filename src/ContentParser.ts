@@ -78,27 +78,27 @@ export default class ContentParser {
 		let result: TContent = this.result = [];
 
 		for (let index: number; (index = content.indexOf('{', this.at)) > -1;) {
-			this.pushText(content.slice(this.at, index));
+			this._pushText(content.slice(this.at, index));
 
 			this.at = index;
 			this.chr = content.charAt(index);
 
-			let binding = this.readBinding();
+			let binding = this._readBinding();
 
 			if (binding) {
 				result.push(binding);
 			} else {
-				this.pushText(this.chr);
-				this.next('{');
+				this._pushText(this.chr);
+				this._next('{');
 			}
 		}
 
-		this.pushText(content.slice(this.at));
+		this._pushText(content.slice(this.at));
 
 		return result;
 	}
 
-	pushText(value: string) {
+	_pushText(value: string) {
 		if (value) {
 			let result = this.result;
 			let resultLen = result.length;
@@ -108,34 +108,34 @@ export default class ContentParser {
 			} else {
 				result.push({
 					nodeType: ContentNodeType.TEXT,
+					value,
 					at: this.at,
-					raw: value,
-					value
+					raw: value
 				});
 			}
 		}
 	}
 
-	readBinding(): IContentBinding | null {
+	_readBinding(): IContentBinding | null {
 		let at = this.at;
 
-		this.next('{');
-		this.skipWhitespaces();
+		this._next('{');
+		this._skipWhitespaces();
 
-		let keypath = this.readBindingKeypath();
+		let keypath = this._readBindingKeypath();
 
 		if (keypath) {
 			let formatters: Array<IContentBindingFormatter> = [];
 
 			for (
 				let formatter: IContentBindingFormatter | null;
-				this.skipWhitespaces() == '|' && (formatter = this.readFormatter());
+				this._skipWhitespaces() == '|' && (formatter = this._readFormatter());
 			) {
 				formatters.push(formatter);
 			}
 
 			if (this.chr == '}') {
-				this.next();
+				this._next();
 
 				return {
 					nodeType: ContentNodeType.BINDING,
@@ -153,7 +153,7 @@ export default class ContentParser {
 		return null;
 	}
 
-	readBindingKeypath(): IContentBindingKeypath | null {
+	_readBindingKeypath(): IContentBindingKeypath | null {
 		let content = this.content;
 
 		reKeypathOrNothing.lastIndex = this.at;
@@ -175,55 +175,50 @@ export default class ContentParser {
 		return null;
 	}
 
-	readFormatter(): IContentBindingFormatter | null {
+	_readFormatter(): IContentBindingFormatter | null {
 		let at = this.at;
 
-		this.next('|');
-		this.skipWhitespaces();
+		this._next('|');
+		this._skipWhitespaces();
 
-		let content = this.content;
-
-		reNameOrNothing.lastIndex = this.at;
-		let name = (reNameOrNothing.exec(content) as RegExpExecArray)[0];
+		let name = this._readName();
 
 		if (name) {
-			let args = (this.chr = content.charAt((this.at += name.length))) == '(' ?
-				this.readFormatterArguments() :
-				null;
+			let args = this.chr == '(' ? this._readFormatterArguments() : null;
 
 			return {
 				nodeType: ContentNodeType.BINDING_FORMATTER,
 				at,
-				raw: content.slice(at, this.at),
+				raw: this.content.slice(at, this.at),
 				name,
 				arguments: args
 			};
 		}
 
 		this.at = at;
-		this.chr = content.charAt(at);
+		this.chr = this.content.charAt(at);
 
 		return null;
 	}
 
-	readFormatterArguments(): IContentBindingFormatterArguments | null {
+	_readFormatterArguments(): IContentBindingFormatterArguments | null {
 		let at = this.at;
 
-		this.next('(');
+		this._next('(');
 
 		let args: Array<string> = [];
 
-		if (this.skipWhitespaces() != ')') {
+		if (this._skipWhitespaces() != ')') {
 			for (;;) {
-				let arg = this.readValueOrValueKeypath();
+				let arg = this._readValueOrValueKeypath();
 
 				if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
-					if (this.skipWhitespaces() == ',' || this.chr == ')') {
+					if (this._skipWhitespaces() == ',' || this.chr == ')') {
 						args.push(arg as string);
 
 						if (this.chr == ',') {
-							this.next();
-							this.skipWhitespaces();
+							this._next();
+							this._skipWhitespaces();
 							continue;
 						}
 
@@ -238,7 +233,7 @@ export default class ContentParser {
 			}
 		}
 
-		this.next();
+		this._next();
 
 		return {
 			nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
@@ -248,22 +243,22 @@ export default class ContentParser {
 		};
 	}
 
-	readValueOrValueKeypath(): string | Object {
-		let value = this.readValue();
-		return value === NOT_VALUE_AND_NOT_KEYPATH ? this.readValueKeypath() : value;
+	_readValueOrValueKeypath(): string | Object {
+		let value = this._readValue();
+		return value === NOT_VALUE_AND_NOT_KEYPATH ? this._readValueKeypath() : value;
 	}
 
-	readValue(): string | Object {
+	_readValue(): string | Object {
 		switch (this.chr) {
 			case '{': {
-				return this.readObject();
+				return this._readObject();
 			}
 			case '[': {
-				return this.readArray();
+				return this._readArray();
 			}
 			case "'":
 			case '"': {
-				return this.readString();
+				return this._readString();
 			}
 		}
 
@@ -280,26 +275,26 @@ export default class ContentParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	readObject(): string | Object {
+	_readObject(): string | Object {
 		let at = this.at;
 
-		this.next('{');
+		this._next('{');
 
 		let obj = '{';
 
-		while (this.skipWhitespaces() != '}') {
-			let key = this.chr == "'" || this.chr == '"' ? this.readString() : this.readObjectKey();
+		while (this._skipWhitespaces() != '}') {
+			let key = this.chr == "'" || this.chr == '"' ? this._readString() : this._readObjectKey();
 
-			if (key !== NOT_VALUE_AND_NOT_KEYPATH && key !== null && this.skipWhitespaces() == ':') {
-				this.next();
-				this.skipWhitespaces();
+			if (key !== NOT_VALUE_AND_NOT_KEYPATH && key !== null && this._skipWhitespaces() == ':') {
+				this._next();
+				this._skipWhitespaces();
 
-				let v = this.readValueOrValueKeypath();
+				let v = this._readValueOrValueKeypath();
 
 				if (v !== NOT_VALUE_AND_NOT_KEYPATH) {
-					if (this.skipWhitespaces() == ',') {
+					if (this._skipWhitespaces() == ',') {
 						obj += key + ':' + v + ',';
-						this.next();
+						this._next();
 						continue;
 					} else if (this.chr == '}') {
 						obj += key + ':' + v + '}';
@@ -314,36 +309,28 @@ export default class ContentParser {
 			return NOT_VALUE_AND_NOT_KEYPATH;
 		}
 
-		this.next();
+		this._next();
 
 		return obj;
 	}
 
-	readObjectKey(): string | null {
-		reNameOrNothing.lastIndex = this.at;
-		let key = (reNameOrNothing.exec(this.content) as RegExpExecArray)[0];
-
-		if (key) {
-			this.chr = this.content.charAt((this.at += key.length));
-			return key;
-		}
-
-		return null;
+	_readObjectKey(): string | null {
+		return this._readName();
 	}
 
-	readArray(): string | Object {
+	_readArray(): string | Object {
 		let at = this.at;
 
-		this.next('[');
+		this._next('[');
 
 		let arr = '[';
 
-		while (this.skipWhitespaces() != ']') {
+		while (this._skipWhitespaces() != ']') {
 			if (this.chr == ',') {
 				arr += ',';
-				this.next();
+				this._next();
 			} else {
-				let v = this.readValueOrValueKeypath();
+				let v = this._readValueOrValueKeypath();
 
 				if (v === NOT_VALUE_AND_NOT_KEYPATH) {
 					this.at = at;
@@ -356,12 +343,12 @@ export default class ContentParser {
 			}
 		}
 
-		this.next();
+		this._next();
 
 		return arr + ']';
 	}
 
-	readBoolean(): string | Object {
+	_readBoolean(): string | Object {
 		reBooleanOrNothing.lastIndex = this.at;
 		let bool = (reBooleanOrNothing.exec(this.content) as RegExpExecArray)[0];
 
@@ -373,7 +360,7 @@ export default class ContentParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	readNumber(): string | Object {
+	_readNumber(): string | Object {
 		reNumberOrNothing.lastIndex = this.at;
 		let num = (reNumberOrNothing.exec(this.content) as RegExpExecArray)[0];
 
@@ -385,35 +372,35 @@ export default class ContentParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	readString(): string | Object {
-		if (this.chr != "'" && this.chr != '"') {
+	_readString(): string | Object {
+		let quoteChar = this.chr;
+
+		if (quoteChar != "'" && quoteChar != '"') {
 			throw {
 				name: 'SyntaxError',
-				message: `Expected "'" or '"' instead of "${ this.chr }"`,
+				message: `Expected "'" instead of "${ this.chr }"`,
 				at: this.at,
 				content: this.content
 			};
 		}
 
 		let at = this.at;
-
-		let quoteChar = this.chr;
 		let str = '';
 
-		while (this.next()) {
-			if (this.chr == quoteChar) {
-				this.next();
+		for (let next; (next = this._next());) {
+			if (next == quoteChar) {
+				this._next();
 				return quoteChar + str + quoteChar;
 			}
 
-			if ((this.chr as string) == '\\') {
-				str += this.chr + this.next();
+			if (next == '\\') {
+				str += next + this._next();
 			} else {
-				if ((this.chr as string) == '\r' || (this.chr as string) == '\n') {
+				if (next == '\r' || next == '\n') {
 					break;
 				}
 
-				str += this.chr;
+				str += next;
 			}
 		}
 
@@ -423,7 +410,7 @@ export default class ContentParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	readVacuum(): string | Object {
+	_readVacuum(): string | Object {
 		reVacuumOrNothing.lastIndex = this.at;
 		let vacuum = (reVacuumOrNothing.exec(this.content) as RegExpExecArray)[0];
 
@@ -435,7 +422,7 @@ export default class ContentParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	readValueKeypath(): string | Object {
+	_readValueKeypath(): string | Object {
 		reKeypathOrNothing.lastIndex = this.at;
 		let keypath = (reKeypathOrNothing.exec(this.content) as RegExpExecArray)[0];
 
@@ -447,26 +434,38 @@ export default class ContentParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	next(c?: string): string {
-		if (c && c != this.chr) {
+	_readName(): string | null {
+		reNameOrNothing.lastIndex = this.at;
+		let name = (reNameOrNothing.exec(this.content) as RegExpExecArray)[0];
+
+		if (name) {
+			this.chr = this.content.charAt((this.at += name.length));
+			return name;
+		}
+
+		return null;
+	}
+
+	_skipWhitespaces(): string {
+		let chr = this.chr;
+
+		while (chr && chr <= ' ') {
+			chr = this._next();
+		}
+
+		return chr;
+	}
+
+	_next(current?: string): string {
+		if (current && current != this.chr) {
 			throw {
 				name: 'SyntaxError',
-				message: `Expected "${ c }" instead of "${ this.chr }"`,
+				message: `Expected "${ current }" instead of "${ this.chr }"`,
 				at: this.at,
 				content: this.content
 			};
 		}
 
 		return (this.chr = this.content.charAt(++this.at));
-	}
-
-	skipWhitespaces(): string {
-		let chr = this.chr;
-
-		while (chr && chr <= ' ') {
-			chr = this.next();
-		}
-
-		return chr;
 	}
 }
