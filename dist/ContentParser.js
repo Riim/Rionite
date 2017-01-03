@@ -169,7 +169,7 @@ var ContentParser = (function () {
                 return this._readString();
             }
         }
-        var readers = ['readBoolean', 'readNumber', 'readVacuum'];
+        var readers = ['_readBoolean', '_readNumber', '_readVacuum'];
         for (var _i = 0, readers_1 = readers; _i < readers_1.length; _i++) {
             var reader = readers_1[_i];
             var value = this[reader]();

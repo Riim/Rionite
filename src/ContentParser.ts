@@ -262,7 +262,7 @@ export default class ContentParser {
 			}
 		}
 
-		let readers = ['readBoolean', 'readNumber', 'readVacuum'];
+		let readers = ['_readBoolean', '_readNumber', '_readVacuum'];
 
 		for (let reader of readers) {
 			let value = this[reader]();
