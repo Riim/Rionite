@@ -50,8 +50,8 @@ export default class ComponentTemplate {
 	_renderer: IComponentTemplateRenderer;
 	_blockMap: IComponentTemplateBlockMap;
 
-	constructor(tmpl: string, parent?: ComponentTemplate) {
-		this.parent = parent || null;
+	constructor(tmpl: string, parent: ComponentTemplate | null = null) {
+		this.parent = parent;
 
 		let currentBlock: IComponentTemplateBlockDescription = { name: null, source: [] };
 
@@ -65,7 +65,7 @@ export default class ComponentTemplate {
 				let blockName = splittedTemplate[i];
 
 				if (blockName) {
-					currentBlock.source.push(`this.${ blockName }.call(this, data)`);
+					currentBlock.source.push(`this.${ blockName }(data)`);
 
 					currentBlock = { name: blockName, source: [] };
 					blocks.push((blockMap[blockName] = currentBlock));
@@ -110,7 +110,7 @@ export default class ComponentTemplate {
 			this[name] = function(this: IComponentTemplateBlockMap, data: Object): string {
 				return inner.call(this, parentBlock, data, escapeHTML);
 			};
-		}, (this._blockMap = Object.create(parent ? parent._blockMap : null) as IComponentTemplateBlockMap));
+		}, (this._blockMap = Object.create(parent && parent._blockMap) as IComponentTemplateBlockMap));
 	}
 
 	extend(tmpl: string): ComponentTemplate {

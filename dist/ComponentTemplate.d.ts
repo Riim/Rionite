@@ -11,7 +11,7 @@ export default class ComponentTemplate {
     parent: ComponentTemplate | null;
     _renderer: IComponentTemplateRenderer;
     _blockMap: IComponentTemplateBlockMap;
-    constructor(tmpl: string, parent?: ComponentTemplate);
+    constructor(tmpl: string, parent?: ComponentTemplate | null);
     extend(tmpl: string): ComponentTemplate;
     render(data?: Object): string;
 }

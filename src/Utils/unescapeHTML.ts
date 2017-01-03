@@ -1,11 +1,11 @@
 let reEscapableEntities = /&(?:amp|lt|gt|quot);/g;
-let entityToCharMap = Object.create(null);
+let escapedToCharMap = Object.create(null);
 
-entityToCharMap['&amp;'] = '&';
-entityToCharMap['&lt;'] = '<';
-entityToCharMap['&gt;'] = '>';
-entityToCharMap['&quot;'] = '"';
+escapedToCharMap['&amp;'] = '&';
+escapedToCharMap['&lt;'] = '<';
+escapedToCharMap['&gt;'] = '>';
+escapedToCharMap['&quot;'] = '"';
 
 export default function unescapeHTML(str: string): string {
-	return reEscapableEntities.test(str) ? str.replace(reEscapableEntities, entity => entityToCharMap[entity]) : str;
+	return reEscapableEntities.test(str) ? str.replace(reEscapableEntities, entity => escapedToCharMap[entity]) : str;
 }

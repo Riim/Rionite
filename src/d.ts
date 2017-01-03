@@ -8,6 +8,7 @@ let d = {
 		props?: { [name: string]: any } | null,
 		i18n?: { [key: string]: any },
 		template?: string | IComponentTemplate | null,
+		bemlTemplate?: string | null,
 		events?: IComponentEvents<T> | null
 	}) {
 		return function(componentConstr: typeof Component) {
@@ -33,6 +34,9 @@ let d = {
 
 			if (config.template !== undefined) {
 				componentConstr.template = config.template;
+			}
+			if (config.bemlTemplate !== undefined) {
+				componentConstr.bemlTemplate = config.bemlTemplate;
 			}
 
 			if (config.events !== undefined) {

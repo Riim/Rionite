@@ -10,7 +10,8 @@ var re = RegExp('\\{\\{(?:' +
     ')\\}\\}');
 var ComponentTemplate = (function () {
     function ComponentTemplate(tmpl, parent) {
-        this.parent = parent || null;
+        if (parent === void 0) { parent = null; }
+        this.parent = parent;
         var currentBlock = { name: null, source: [] };
         var blocks = [currentBlock];
         var blockMap = {};
@@ -19,7 +20,7 @@ var ComponentTemplate = (function () {
             if (i % 6) {
                 var blockName = splittedTemplate[i];
                 if (blockName) {
-                    currentBlock.source.push("this." + blockName + ".call(this, data)");
+                    currentBlock.source.push("this." + blockName + "(data)");
                     currentBlock = { name: blockName, source: [] };
                     blocks.push((blockMap[blockName] = currentBlock));
                 }
@@ -55,7 +56,7 @@ var ComponentTemplate = (function () {
             this[name] = function (data) {
                 return inner.call(this, parentBlock, data, escapeHTML_1.default);
             };
-        }, (this._blockMap = Object.create(parent ? parent._blockMap : null)));
+        }, (this._blockMap = Object.create(parent && parent._blockMap)));
     }
     ComponentTemplate.prototype.extend = function (tmpl) {
         return new ComponentTemplate(tmpl, this);

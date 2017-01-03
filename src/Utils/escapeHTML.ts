@@ -1,11 +1,11 @@
 let reEscapableChars = /[&<>"]/g;
-let charToEntityMap = Object.create(null);
+let charToEscapedMap = Object.create(null);
 
-charToEntityMap['&'] = '&amp;';
-charToEntityMap['<'] = '&lt;';
-charToEntityMap['>'] = '&gt;';
-charToEntityMap['"'] = '&quot;';
+charToEscapedMap['&'] = '&amp;';
+charToEscapedMap['<'] = '&lt;';
+charToEscapedMap['>'] = '&gt;';
+charToEscapedMap['"'] = '&quot;';
 
 export default function escapeHTML(str: string): string {
-	return reEscapableChars.test(str) ? str.replace(reEscapableChars, chr => charToEntityMap[chr]) : str;
+	return reEscapableChars.test(str) ? str.replace(reEscapableChars, chr => charToEscapedMap[chr]) : str;
 }

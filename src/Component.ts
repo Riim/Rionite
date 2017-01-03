@@ -100,6 +100,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static i18n: { [key: string]: any };
 
 	static template: string | IComponentTemplate | null;
+	static bemlTemplate: string | null;
 
 	static _rawContent: DocumentFragment;
 

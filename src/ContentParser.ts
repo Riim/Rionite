@@ -139,10 +139,10 @@ export default class ContentParser {
 
 				return {
 					nodeType: ContentNodeType.BINDING,
-					at,
-					raw: this.content.slice(at, this.at),
 					keypath,
-					formatters
+					formatters,
+					at,
+					raw: this.content.slice(at, this.at)
 				};
 			}
 		}
@@ -166,9 +166,9 @@ export default class ContentParser {
 
 			return {
 				nodeType: ContentNodeType.BINDING_KEYPATH,
+				value: keypath,
 				at,
-				raw: content.slice(at, this.at),
-				value: keypath
+				raw: content.slice(at, this.at)
 			};
 		}
 
@@ -188,10 +188,10 @@ export default class ContentParser {
 
 			return {
 				nodeType: ContentNodeType.BINDING_FORMATTER,
-				at,
-				raw: this.content.slice(at, this.at),
 				name,
-				arguments: args
+				arguments: args,
+				at,
+				raw: this.content.slice(at, this.at)
 			};
 		}
 
@@ -237,9 +237,9 @@ export default class ContentParser {
 
 		return {
 			nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
+			value: args,
 			at,
-			raw: this.content.slice(at, this.at),
-			value: args
+			raw: this.content.slice(at, this.at)
 		};
 	}
 

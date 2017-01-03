@@ -75,10 +75,10 @@ var ContentParser = (function () {
                 this._next();
                 return {
                     nodeType: ContentNodeType.BINDING,
-                    at: at,
-                    raw: this.content.slice(at, this.at),
                     keypath: keypath,
-                    formatters: formatters
+                    formatters: formatters,
+                    at: at,
+                    raw: this.content.slice(at, this.at)
                 };
             }
         }
@@ -95,9 +95,9 @@ var ContentParser = (function () {
             this.chr = content.charAt((this.at += keypath.length));
             return {
                 nodeType: ContentNodeType.BINDING_KEYPATH,
+                value: keypath,
                 at: at,
-                raw: content.slice(at, this.at),
-                value: keypath
+                raw: content.slice(at, this.at)
             };
         }
         return null;
@@ -111,10 +111,10 @@ var ContentParser = (function () {
             var args = this.chr == '(' ? this._readFormatterArguments() : null;
             return {
                 nodeType: ContentNodeType.BINDING_FORMATTER,
-                at: at,
-                raw: this.content.slice(at, this.at),
                 name: name,
-                arguments: args
+                arguments: args,
+                at: at,
+                raw: this.content.slice(at, this.at)
             };
         }
         this.at = at;
@@ -147,9 +147,9 @@ var ContentParser = (function () {
         this._next();
         return {
             nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
+            value: args,
             at: at,
-            raw: this.content.slice(at, this.at),
-            value: args
+            raw: this.content.slice(at, this.at)
         };
     };
     ContentParser.prototype._readValueOrValueKeypath = function () {

@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 44);
+/******/ 	return __webpack_require__(__webpack_require__.s = 53);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -95,18 +95,18 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var cellx_1 = __webpack_require__(0);
 var DisposableMixin_1 = __webpack_require__(15);
-var registerComponent_1 = __webpack_require__(43);
+var registerComponent_1 = __webpack_require__(45);
 var ElementAttributes_1 = __webpack_require__(16);
-var initElementClasses_1 = __webpack_require__(41);
-var initElementAttributes_1 = __webpack_require__(40);
+var initElementClasses_1 = __webpack_require__(43);
+var initElementAttributes_1 = __webpack_require__(42);
 var bindContent_1 = __webpack_require__(6);
-var componentBinding_1 = __webpack_require__(37);
+var componentBinding_1 = __webpack_require__(39);
 var attachChildComponentElements_1 = __webpack_require__(5);
-var bindEvents_1 = __webpack_require__(34);
-var eventTypes_1 = __webpack_require__(39);
-var onEvent_1 = __webpack_require__(42);
+var bindEvents_1 = __webpack_require__(36);
+var eventTypes_1 = __webpack_require__(41);
+var onEvent_1 = __webpack_require__(44);
 var camelize_1 = __webpack_require__(4);
-var getUID_1 = __webpack_require__(31);
+var getUID_1 = __webpack_require__(33);
 var htmlToFragment_1 = __webpack_require__(18);
 var Features_1 = __webpack_require__(3);
 var Map = cellx_1.JS.Map;
@@ -427,6 +427,9 @@ var d = {
             if (config.template !== undefined) {
                 componentConstr.template = config.template;
             }
+            if (config.bemlTemplate !== undefined) {
+                componentConstr.bemlTemplate = config.bemlTemplate;
+            }
             if (config.events !== undefined) {
                 componentConstr.events = config.events;
             }
@@ -497,8 +500,8 @@ exports.default = attachChildComponentElements;
 
 var cellx_1 = __webpack_require__(0);
 var ContentParser_1 = __webpack_require__(14);
-var compileContent_1 = __webpack_require__(36);
-var setAttribute_1 = __webpack_require__(32);
+var compileContent_1 = __webpack_require__(38);
+var setAttribute_1 = __webpack_require__(34);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var reBinding = /{[^}]+}/;
 function bindContent(content, ownerComponent, context) {
@@ -601,13 +604,13 @@ exports.default = '[$_a-zA-Z][$\\w]*';
 "use strict";
 
 var reEscapableChars = /[&<>"]/g;
-var charToEntityMap = Object.create(null);
-charToEntityMap['&'] = '&amp;';
-charToEntityMap['<'] = '&lt;';
-charToEntityMap['>'] = '&gt;';
-charToEntityMap['"'] = '&quot;';
+var charToEscapedMap = Object.create(null);
+charToEscapedMap['&'] = '&amp;';
+charToEscapedMap['<'] = '&lt;';
+charToEscapedMap['>'] = '&gt;';
+charToEscapedMap['"'] = '&quot;';
 function escapeHTML(str) {
-    return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) { return charToEntityMap[chr]; }) : str;
+    return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) { return charToEscapedMap[chr]; }) : str;
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = escapeHTML;
@@ -620,13 +623,13 @@ exports.default = escapeHTML;
 "use strict";
 
 var reEscapableChars = /[\\'\r\n]/g;
-var charToSpecialMap = Object.create(null);
-charToSpecialMap['\\'] = '\\\\';
-charToSpecialMap['\''] = '\\\'';
-charToSpecialMap['\r'] = '\\r';
-charToSpecialMap['\n'] = '\\n';
+var charToEscapedMap = Object.create(null);
+charToEscapedMap['\\'] = '\\\\';
+charToEscapedMap['\''] = '\\\'';
+charToEscapedMap['\r'] = '\\r';
+charToEscapedMap['\n'] = '\\n';
 function escapeString(str) {
-    return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) { return charToSpecialMap[chr]; }) : str;
+    return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) { return charToEscapedMap[chr]; }) : str;
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = escapeString;
@@ -929,10 +932,10 @@ var ContentParser = (function () {
                 this._next();
                 return {
                     nodeType: ContentNodeType.BINDING,
-                    at: at,
-                    raw: this.content.slice(at, this.at),
                     keypath: keypath,
-                    formatters: formatters
+                    formatters: formatters,
+                    at: at,
+                    raw: this.content.slice(at, this.at)
                 };
             }
         }
@@ -949,9 +952,9 @@ var ContentParser = (function () {
             this.chr = content.charAt((this.at += keypath.length));
             return {
                 nodeType: ContentNodeType.BINDING_KEYPATH,
+                value: keypath,
                 at: at,
-                raw: content.slice(at, this.at),
-                value: keypath
+                raw: content.slice(at, this.at)
             };
         }
         return null;
@@ -965,10 +968,10 @@ var ContentParser = (function () {
             var args = this.chr == '(' ? this._readFormatterArguments() : null;
             return {
                 nodeType: ContentNodeType.BINDING_FORMATTER,
-                at: at,
-                raw: this.content.slice(at, this.at),
                 name: name,
-                arguments: args
+                arguments: args,
+                at: at,
+                raw: this.content.slice(at, this.at)
             };
         }
         this.at = at;
@@ -1001,9 +1004,9 @@ var ContentParser = (function () {
         this._next();
         return {
             nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
+            value: args,
             at: at,
-            raw: this.content.slice(at, this.at),
-            value: args
+            raw: this.content.slice(at, this.at)
         };
     };
     ContentParser.prototype._readValueOrValueKeypath = function () {
@@ -1371,7 +1374,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var cellx_1 = __webpack_require__(0);
-var attributeTypeHandlerMap_1 = __webpack_require__(33);
+var attributeTypeHandlerMap_1 = __webpack_require__(35);
 var camelize_1 = __webpack_require__(4);
 var hyphenize_1 = __webpack_require__(10);
 var Map = cellx_1.JS.Map;
@@ -1587,13 +1590,13 @@ exports.default = isRegExp;
 "use strict";
 
 var reEscapableEntities = /&(?:amp|lt|gt|quot);/g;
-var entityToCharMap = Object.create(null);
-entityToCharMap['&amp;'] = '&';
-entityToCharMap['&lt;'] = '<';
-entityToCharMap['&gt;'] = '>';
-entityToCharMap['&quot;'] = '"';
+var escapedToCharMap = Object.create(null);
+escapedToCharMap['&amp;'] = '&';
+escapedToCharMap['&lt;'] = '<';
+escapedToCharMap['&gt;'] = '>';
+escapedToCharMap['&quot;'] = '"';
 function unescapeHTML(str) {
-    return reEscapableEntities.test(str) ? str.replace(reEscapableEntities, function (entity) { return entityToCharMap[entity]; }) : str;
+    return reEscapableEntities.test(str) ? str.replace(reEscapableEntities, function (entity) { return escapedToCharMap[entity]; }) : str;
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = unescapeHTML;
@@ -1781,6 +1784,372 @@ exports.default = keypathToJSExpression;
 
 "use strict";
 
+var NodeType;
+(function (NodeType) {
+    NodeType[NodeType["BLOCK"] = 1] = "BLOCK";
+    NodeType[NodeType["ELEMENT"] = 2] = "ELEMENT";
+    NodeType[NodeType["TEXT"] = 3] = "TEXT";
+    NodeType[NodeType["COMMENT"] = 4] = "COMMENT";
+    NodeType[NodeType["SUPER_CALL"] = 5] = "SUPER_CALL";
+})(NodeType = exports.NodeType || (exports.NodeType = {}));
+var namePattern = '[a-zA-Z][\\-_0-9a-zA-Z]*';
+var reNameOrNothing = RegExp(namePattern + '|', 'g');
+var superCallStatement = 'super!';
+var Parser = (function () {
+    function Parser(beml) {
+        this.beml = beml;
+    }
+    Parser.prototype.parse = function () {
+        this.at = 0;
+        this.chr = this.beml.charAt(0);
+        var content;
+        while (this._skipWhitespaces() == '/') {
+            (content || (content = [])).push(this._readComment());
+        }
+        var decl = this._readBlockDeclaration();
+        return {
+            nodeType: NodeType.BLOCK,
+            declaration: decl,
+            name: decl.blockName,
+            content: content ? content.concat(this._readContent(false)) : this._readContent(false),
+            at: 0,
+            raw: this.beml,
+        };
+    };
+    Parser.prototype._readBlockDeclaration = function () {
+        var at = this.at;
+        this._next('#');
+        var blockName = this._readName();
+        if (!blockName) {
+            throw {
+                name: 'SyntaxError',
+                message: 'Invalid block declaration',
+                at: at,
+                beml: this.beml
+            };
+        }
+        return {
+            blockName: blockName,
+            at: at,
+            raw: '#' + blockName
+        };
+    };
+    Parser.prototype._readContent = function (brackets) {
+        if (brackets) {
+            this._next('{');
+        }
+        var content = [];
+        for (;;) {
+            switch (this._skipWhitespaces()) {
+                case "'":
+                case '"':
+                case '`': {
+                    content.push(this._readTextNode());
+                    break;
+                }
+                case '/': {
+                    content.push(this._readComment());
+                    break;
+                }
+                case '': {
+                    if (brackets) {
+                        throw {
+                            name: 'SyntaxError',
+                            message: 'Missing "}" in compound statement',
+                            at: this.at,
+                            beml: this.beml
+                        };
+                    }
+                    return content;
+                }
+                default: {
+                    if (brackets) {
+                        if (this.chr == '}') {
+                            this._next();
+                            return content;
+                        }
+                        var at = this.at;
+                        if (this.beml.slice(at, at + superCallStatement.length) == superCallStatement) {
+                            this.chr = this.beml.charAt((this.at = at + superCallStatement.length));
+                            content.push({
+                                nodeType: NodeType.SUPER_CALL,
+                                at: at,
+                                raw: 'super!'
+                            });
+                            break;
+                        }
+                    }
+                    content.push(this._readElement());
+                    break;
+                }
+            }
+        }
+    };
+    Parser.prototype._readElement = function () {
+        var at = this.at;
+        var tagName = this._readName();
+        if (!tagName) {
+            throw {
+                name: 'SyntaxError',
+                message: 'Expected tag name',
+                at: at,
+                beml: this.beml
+            };
+        }
+        var elName = this._skipWhitespaces() == '/' ? (this._next(), this._readName()) : null;
+        if (elName) {
+            this._skipWhitespaces();
+        }
+        var attrs = this.chr == '(' ? this._readAttributes() : null;
+        if (attrs) {
+            this._skipWhitespaces();
+        }
+        var content = this.chr == '{' ? this._readContent(true) : null;
+        return {
+            nodeType: NodeType.ELEMENT,
+            tagName: tagName,
+            name: elName,
+            attributes: attrs,
+            content: content,
+            at: at,
+            raw: this.beml.slice(at, this.at).trim(),
+        };
+    };
+    Parser.prototype._readAttributes = function () {
+        var at = this.at;
+        this._next('(');
+        if (this._skipWhitespaces() == ')') {
+            this._next();
+            return {
+                list: [],
+                at: at,
+                raw: this.beml.slice(at, this.at)
+            };
+        }
+        var list = [];
+        for (;;) {
+            var name_1 = this._readName();
+            if (!name_1) {
+                throw {
+                    name: 'SyntaxError',
+                    message: 'Invalid attribute name',
+                    at: this.at,
+                    beml: this.beml
+                };
+            }
+            if (this._skipWhitespaces() == '=') {
+                this._next();
+                var next = this._skipWhitespaces();
+                if (next == "'" || next == '"' || next == '`') {
+                    list.push({ name: name_1, value: this._readString().value });
+                }
+                else {
+                    var value = '';
+                    for (;;) {
+                        if (!next) {
+                            throw {
+                                name: 'SyntaxError',
+                                message: 'Invalid attribute',
+                                at: this.at,
+                                beml: this.beml
+                            };
+                        }
+                        if (next == '\r' || next == '\n' || next == ',' || next == ')') {
+                            list.push({ name: name_1, value: value.trim() });
+                            break;
+                        }
+                        value += next;
+                        next = this._next();
+                    }
+                }
+                this._skipWhitespaces();
+            }
+            else {
+                list.push({ name: name_1, value: '' });
+            }
+            if (this.chr == ')') {
+                this._next();
+                break;
+            }
+            else if (this.chr == ',') {
+                this._next();
+                this._skipWhitespaces();
+            }
+            else {
+                throw {
+                    name: 'SyntaxError',
+                    message: 'Invalid attributes',
+                    at: this.at,
+                    beml: this.beml
+                };
+            }
+        }
+        return {
+            list: list,
+            at: at,
+            raw: this.beml.slice(at, this.at)
+        };
+    };
+    Parser.prototype._readTextNode = function () {
+        var at = this.at;
+        return {
+            nodeType: NodeType.TEXT,
+            value: this._readString().value,
+            at: at,
+            raw: this.beml.slice(at, this.at)
+        };
+    };
+    Parser.prototype._readString = function () {
+        var quoteChar = this.chr;
+        if (quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
+            throw {
+                name: 'SyntaxError',
+                message: "Expected \"'\" instead of \"" + this.chr + "\"",
+                at: this.at,
+                beml: this.beml
+            };
+        }
+        var str = '';
+        for (var next = void 0; (next = this._next());) {
+            if (next == quoteChar) {
+                this._next();
+                return { value: str };
+            }
+            if (next == '\\') {
+                str += next + this._next();
+            }
+            else {
+                if (quoteChar != '`' && (next == '\r' || next == '\n')) {
+                    break;
+                }
+                str += next;
+            }
+        }
+        throw {
+            name: 'SyntaxError',
+            message: 'Invalid string',
+            at: this.at,
+            beml: this.beml
+        };
+    };
+    Parser.prototype._readComment = function () {
+        var at = this.at;
+        var value = '';
+        var multiline;
+        switch (this._next('/')) {
+            case '/': {
+                for (var next = void 0; (next = this._next()) && next != '\r' && next != '\n';) {
+                    value += next;
+                }
+                multiline = false;
+                break;
+            }
+            case '*': {
+                var stop = false;
+                do {
+                    switch (this._next()) {
+                        case '*': {
+                            if (this._next() == '/') {
+                                this._next();
+                                stop = true;
+                            }
+                            else {
+                                value += '*' + this.chr;
+                            }
+                            break;
+                        }
+                        case '': {
+                            throw {
+                                name: 'SyntaxError',
+                                message: 'Missing "*/" in compound statement',
+                                at: this.at,
+                                beml: this.beml
+                            };
+                        }
+                        default: {
+                            value += this.chr;
+                        }
+                    }
+                } while (!stop);
+                multiline = true;
+                break;
+            }
+            default: {
+                throw {
+                    name: 'SyntaxError',
+                    message: "Expected \"/\" instead of \"" + this.chr + "\"",
+                    at: this.at,
+                    beml: this.beml
+                };
+            }
+        }
+        return {
+            nodeType: NodeType.COMMENT,
+            value: value,
+            multiline: multiline,
+            at: at,
+            raw: this.beml.slice(at, this.at)
+        };
+    };
+    Parser.prototype._readName = function () {
+        reNameOrNothing.lastIndex = this.at;
+        var name = reNameOrNothing.exec(this.beml)[0];
+        if (name) {
+            this.chr = this.beml.charAt((this.at += name.length));
+            return name;
+        }
+        return null;
+    };
+    Parser.prototype._skipWhitespaces = function () {
+        var chr = this.chr;
+        while (chr && chr <= ' ') {
+            chr = this._next();
+        }
+        return chr;
+    };
+    Parser.prototype._next = function (current) {
+        if (current && current != this.chr) {
+            throw {
+                name: 'SyntaxError',
+                message: "Expected \"" + current + "\" instead of \"" + this.chr + "\"",
+                at: this.at,
+                beml: this.beml
+            };
+        }
+        return (this.chr = this.beml.charAt(++this.at));
+    };
+    return Parser;
+}());
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = Parser;
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var reEscapableChars = /[\\'"\r\n]/g;
+var charToEscapedMap = Object.create(null);
+charToEscapedMap['\\'] = '\\\\';
+charToEscapedMap['\''] = '\\\'';
+charToEscapedMap['"'] = '\\"';
+charToEscapedMap['\r'] = '\\r';
+charToEscapedMap['\n'] = '\\n';
+function escapeString(str) {
+    return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) { return charToEscapedMap[chr]; }) : str;
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = escapeString;
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var DisposableMixin_1 = __webpack_require__(15);
 exports.DisposableMixin = DisposableMixin_1.default;
 var formatters_1 = __webpack_require__(11);
@@ -1791,13 +2160,13 @@ var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
 var d_1 = __webpack_require__(2);
 exports.d = d_1.default;
-var rt_content_1 = __webpack_require__(27);
+var rt_content_1 = __webpack_require__(29);
 var rt_if_then_1 = __webpack_require__(13);
-var rt_if_else_1 = __webpack_require__(28);
-var rt_repeat_1 = __webpack_require__(29);
+var rt_if_else_1 = __webpack_require__(30);
+var rt_repeat_1 = __webpack_require__(31);
 var ElementAttributes_1 = __webpack_require__(16);
 exports.ElementAttributes = ElementAttributes_1.default;
-var ComponentTemplate_1 = __webpack_require__(26);
+var ComponentTemplate_1 = __webpack_require__(28);
 exports.ComponentTemplate = ComponentTemplate_1.default;
 var camelize_1 = __webpack_require__(4);
 var hyphenize_1 = __webpack_require__(10);
@@ -1828,7 +2197,7 @@ exports.Utils = Utils;
 
 
 /***/ },
-/* 26 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1844,7 +2213,8 @@ var re = RegExp('\\{\\{(?:' +
     ')\\}\\}');
 var ComponentTemplate = (function () {
     function ComponentTemplate(tmpl, parent) {
-        this.parent = parent || null;
+        if (parent === void 0) { parent = null; }
+        this.parent = parent;
         var currentBlock = { name: null, source: [] };
         var blocks = [currentBlock];
         var blockMap = {};
@@ -1853,7 +2223,7 @@ var ComponentTemplate = (function () {
             if (i % 6) {
                 var blockName = splittedTemplate[i];
                 if (blockName) {
-                    currentBlock.source.push("this." + blockName + ".call(this, data)");
+                    currentBlock.source.push("this." + blockName + "(data)");
                     currentBlock = { name: blockName, source: [] };
                     blocks.push((blockMap[blockName] = currentBlock));
                 }
@@ -1889,7 +2259,7 @@ var ComponentTemplate = (function () {
             this[name] = function (data) {
                 return inner.call(this, parentBlock, data, escapeHTML_1.default);
             };
-        }, (this._blockMap = Object.create(parent ? parent._blockMap : null)));
+        }, (this._blockMap = Object.create(parent && parent._blockMap)));
     }
     ComponentTemplate.prototype.extend = function (tmpl) {
         return new ComponentTemplate(tmpl, this);
@@ -1904,7 +2274,7 @@ exports.default = ComponentTemplate;
 
 
 /***/ },
-/* 27 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2006,7 +2376,7 @@ exports.default = RtContent;
 
 
 /***/ },
-/* 28 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2044,7 +2414,7 @@ exports.default = RtIfElse;
 
 
 /***/ },
-/* 29 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2271,7 +2641,7 @@ exports.default = RtRepeat;
 
 
 /***/ },
-/* 30 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2346,7 +2716,7 @@ var _a;
 
 
 /***/ },
-/* 31 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2371,7 +2741,7 @@ exports.default = getUID;
 
 
 /***/ },
-/* 32 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2389,7 +2759,7 @@ exports.default = setAttribute;
 
 
 /***/ },
-/* 33 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2445,7 +2815,7 @@ exports.default = new Map([
 
 
 /***/ },
-/* 34 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2476,7 +2846,7 @@ exports.default = bindEvents;
 
 
 /***/ },
-/* 35 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2504,14 +2874,14 @@ exports.default = compileBinding;
 
 
 /***/ },
-/* 36 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var ContentParser_1 = __webpack_require__(14);
 var bindingToJSExpression_1 = __webpack_require__(21);
-var compileBinding_1 = __webpack_require__(35);
+var compileBinding_1 = __webpack_require__(37);
 var formatters_1 = __webpack_require__(11);
 var escapeString_1 = __webpack_require__(9);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
@@ -2552,7 +2922,7 @@ exports.default = compileContent;
 
 
 /***/ },
-/* 37 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2605,7 +2975,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ },
-/* 38 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2659,7 +3029,7 @@ exports.default = mixin(Object.create(null), {
 
 
 /***/ },
-/* 39 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2682,7 +3052,7 @@ exports.default = [
 
 
 /***/ },
-/* 40 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2705,7 +3075,7 @@ exports.default = initElementAttributes;
 
 
 /***/ },
-/* 41 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2723,7 +3093,7 @@ exports.default = initElementClasses;
 
 
 /***/ },
-/* 42 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2771,17 +3141,24 @@ exports.default = onEvent;
 
 
 /***/ },
-/* 43 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var cellx_1 = __webpack_require__(0);
-var elementConstructorMap_1 = __webpack_require__(38);
-var ElementProtoMixin_1 = __webpack_require__(30);
+var beml_1 = __webpack_require__(47);
+var elementConstructorMap_1 = __webpack_require__(40);
+var ElementProtoMixin_1 = __webpack_require__(32);
 var hyphenize_1 = __webpack_require__(10);
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
+function initMarkupBlockNames(componentConstr, parentComponentConstr, elIs) {
+    componentConstr._markupBlockNames = [elIs];
+    if (parentComponentConstr._markupBlockNames) {
+        push.apply(componentConstr._markupBlockNames, parentComponentConstr._markupBlockNames);
+    }
+}
 function registerComponent(componentConstr) {
     if (componentConstr._registeredComponent === componentConstr) {
         throw new TypeError('Component already registered');
@@ -2790,18 +3167,30 @@ function registerComponent(componentConstr) {
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
-    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
-    if (componentConstr.props !== parentComponentConstr.props) {
-        var props = componentConstr.props;
+    var props = componentConstr.props;
+    if (props !== undefined) {
         if (props && (props['_content'] || props['context'])) {
             throw new TypeError("No need to declare property \"" + (props['_content'] ? '_content' : 'context') + "\"");
         }
         componentConstr.elementAttributes = props;
     }
-    if (componentConstr.template !== parentComponentConstr.template && componentConstr.template) {
-        componentConstr._markupBlockNames = [elIs];
-        if (parentComponentConstr._markupBlockNames) {
-            push.apply(componentConstr._markupBlockNames, parentComponentConstr._markupBlockNames);
+    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
+    var bemlTemplate = componentConstr.bemlTemplate;
+    if (bemlTemplate !== undefined) {
+        if (bemlTemplate) {
+            componentConstr.template = componentConstr.template instanceof beml_1.Template ?
+                componentConstr.template.extend('#' + elIs + ' ' + bemlTemplate) :
+                new beml_1.Template('#' + elIs + ' ' + bemlTemplate);
+            initMarkupBlockNames(componentConstr, parentComponentConstr, elIs);
+        }
+        else {
+            componentConstr.template = bemlTemplate;
+        }
+    }
+    else {
+        var template = componentConstr.template;
+        if (template && template !== parentComponentConstr.template) {
+            initMarkupBlockNames(componentConstr, parentComponentConstr, elIs);
         }
     }
     componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames || null);
@@ -2844,10 +3233,238 @@ exports.default = registerComponent;
 
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(25);
+"use strict";
+
+var escape_string_1 = __webpack_require__(26);
+var Parser_1 = __webpack_require__(25);
+var selfClosingTags_1 = __webpack_require__(49);
+var renderAttributes_1 = __webpack_require__(48);
+var elDelimiter = '__';
+var Template = (function () {
+    function Template(beml, parent) {
+        if (parent === void 0) { parent = null; }
+        var block = new Parser_1.default(beml).parse();
+        var blockName = block.name;
+        this.parent = parent;
+        this._blockName = blockName;
+        this._blockElementClassTemplate = parent ?
+            [blockName + elDelimiter].concat(parent._blockElementClassTemplate) :
+            [blockName + elDelimiter, ''];
+        this._nodes = [(this._currentNode = { elementName: null, source: [], hasSuperCall: false })];
+        var nodeMap = this._nodeMap = {};
+        block.content.forEach(this._handleNode, this);
+        this._renderer = parent ?
+            parent._renderer :
+            Function("return [" + this._currentNode.source.join(', ') + "].join('');");
+        Object.keys(nodeMap).forEach(function (name) {
+            var node = nodeMap[name];
+            if (node.hasSuperCall) {
+                var inner_1 = Function('$super', "return " + node.source.join(' + ') + ";");
+                var parentElementRenderer_1 = parent && parent._elementRendererMap[name];
+                this[name] = function () { return inner_1.call(this, parentElementRenderer_1); };
+            }
+            else {
+                this[name] = Function("return " + node.source.join(' + ') + ";");
+            }
+        }, (this._elementRendererMap = Object.create(parent && parent._elementRendererMap)));
+    }
+    Template.compile = function (beml) {
+        return new Template(beml);
+    };
+    Template.prototype._handleNode = function (node) {
+        switch (node.nodeType) {
+            case Parser_1.NodeType.ELEMENT: {
+                var nodes = this._nodes;
+                var el = node;
+                var tagName = el.tagName;
+                var elName = el.name;
+                var content = el.content;
+                if (elName) {
+                    var currentNode = { elementName: elName, source: [], hasSuperCall: false };
+                    nodes.push((this._currentNode = currentNode));
+                    this._nodeMap[elName] = currentNode;
+                }
+                this._currentNode.source.push("'<" + tagName + renderAttributes_1.default(this._blockElementClassTemplate, el) + ">'");
+                var hasContent = content && content.length;
+                if (hasContent) {
+                    content.forEach(this._handleNode, this);
+                }
+                if (hasContent || !(tagName in selfClosingTags_1.default)) {
+                    this._currentNode.source.push("'</" + tagName + ">'");
+                }
+                if (elName) {
+                    nodes.pop();
+                    this._currentNode = nodes[nodes.length - 1];
+                    this._currentNode.source.push("this['" + elName + "']()");
+                }
+                break;
+            }
+            case Parser_1.NodeType.TEXT: {
+                this._currentNode.source.push("'" + escape_string_1.default(node.value) + "'");
+                break;
+            }
+            case Parser_1.NodeType.SUPER_CALL: {
+                this._currentNode.source.push("$super.call(this)");
+                this._currentNode.hasSuperCall = true;
+                break;
+            }
+        }
+    };
+    Template.prototype.extend = function (beml) {
+        return new Template(beml, this);
+    };
+    Template.prototype.render = function () {
+        return this._renderer.call(this._elementRendererMap);
+    };
+    return Template;
+}());
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = Template;
+
+
+/***/ },
+/* 47 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var Parser_1 = __webpack_require__(25);
+exports.Parser = Parser_1.default;
+var Template_1 = __webpack_require__(46);
+exports.Template = Template_1.default;
+
+
+/***/ },
+/* 48 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var escape_string_1 = __webpack_require__(26);
+var escape_html_1 = __webpack_require__(51);
+function renderAttributes(blockElementClassTemplate, el) {
+    var elName = el.name;
+    var attrs = el.attributes;
+    if (attrs && attrs.list.length) {
+        var f_1 = !elName;
+        var result = attrs.list.map(function (attr) {
+            var value = attr.value;
+            if (!f_1 && attr.name == 'class') {
+                f_1 = true;
+                value = blockElementClassTemplate.join(elName + ' ') + value;
+            }
+            return " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
+        });
+        return (f_1 ? '' : " class=\"" + blockElementClassTemplate.join(elName + ' ') + "\"") + result.join('');
+    }
+    return elName ? " class=\"" + blockElementClassTemplate.join(elName + ' ') + "\"" : '';
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = renderAttributes;
+
+
+/***/ },
+/* 49 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var selfClosingTags = {
+    __proto__: null,
+    area: 1,
+    base: 1,
+    basefont: 1,
+    br: 1,
+    col: 1,
+    command: 1,
+    embed: 1,
+    frame: 1,
+    hr: 1,
+    img: 1,
+    input: 1,
+    isindex: 1,
+    keygen: 1,
+    link: 1,
+    meta: 1,
+    param: 1,
+    source: 1,
+    track: 1,
+    wbr: 1,
+    // svg tags
+    circle: 1,
+    ellipse: 1,
+    line: 1,
+    path: 1,
+    polygone: 1,
+    polyline: 1,
+    rect: 1,
+    stop: 1,
+    use: 1
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = selfClosingTags;
+
+
+/***/ },
+/* 50 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var reEscapableChars = /[&<>"]/g;
+var charToEscapedMap = Object.create(null);
+charToEscapedMap['&'] = '&amp;';
+charToEscapedMap['<'] = '&lt;';
+charToEscapedMap['>'] = '&gt;';
+charToEscapedMap['"'] = '&quot;';
+function escapeHTML(str) {
+    return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) { return charToEscapedMap[chr]; }) : str;
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = escapeHTML;
+
+
+/***/ },
+/* 51 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var escapeHTML_1 = __webpack_require__(50);
+exports.escapeHTML = escapeHTML_1.default;
+var unescapeHTML_1 = __webpack_require__(52);
+exports.unescapeHTML = unescapeHTML_1.default;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = escapeHTML_1.default;
+
+
+/***/ },
+/* 52 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var reEscapableEntities = /&(?:amp|lt|gt|quot);/g;
+var escapedToCharMap = Object.create(null);
+escapedToCharMap['&amp;'] = '&';
+escapedToCharMap['&lt;'] = '<';
+escapedToCharMap['&gt;'] = '>';
+escapedToCharMap['&quot;'] = '"';
+function unescapeHTML(str) {
+    return reEscapableEntities.test(str) ? str.replace(reEscapableEntities, function (entity) { return escapedToCharMap[entity]; }) : str;
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = unescapeHTML;
+
+
+/***/ },
+/* 53 */
+/***/ function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(27);
 
 
 /***/ }

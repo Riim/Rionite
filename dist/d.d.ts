@@ -13,6 +13,7 @@ declare let d: {
             [key: string]: any;
         } | undefined;
         template?: string | IComponentTemplate | null | undefined;
+        bemlTemplate?: string | null | undefined;
         events?: IComponentEvents<T> | null | undefined;
     }) => (componentConstr: typeof Component) => void;
 };

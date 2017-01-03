@@ -1,11 +1,11 @@
 let reEscapableChars = /[\\'\r\n]/g;
-let charToSpecialMap = Object.create(null);
+let charToEscapedMap = Object.create(null);
 
-charToSpecialMap['\\'] = '\\\\';
-charToSpecialMap['\''] = '\\\'';
-charToSpecialMap['\r'] = '\\r';
-charToSpecialMap['\n'] = '\\n';
+charToEscapedMap['\\'] = '\\\\';
+charToEscapedMap['\''] = '\\\'';
+charToEscapedMap['\r'] = '\\r';
+charToEscapedMap['\n'] = '\\n';
 
 export default function escapeString(str: string): string {
-	return reEscapableChars.test(str) ? str.replace(reEscapableChars, chr => charToSpecialMap[chr]) : str;
+	return reEscapableChars.test(str) ? str.replace(reEscapableChars, chr => charToEscapedMap[chr]) : str;
 }

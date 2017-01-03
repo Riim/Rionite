@@ -1,10 +1,17 @@
 "use strict";
 var cellx_1 = require("cellx");
+var beml_1 = require("@riim/beml");
 var elementConstructorMap_1 = require("./elementConstructorMap");
 var ElementProtoMixin_1 = require("./ElementProtoMixin");
 var hyphenize_1 = require("./Utils/hyphenize");
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
+function initMarkupBlockNames(componentConstr, parentComponentConstr, elIs) {
+    componentConstr._markupBlockNames = [elIs];
+    if (parentComponentConstr._markupBlockNames) {
+        push.apply(componentConstr._markupBlockNames, parentComponentConstr._markupBlockNames);
+    }
+}
 function registerComponent(componentConstr) {
     if (componentConstr._registeredComponent === componentConstr) {
         throw new TypeError('Component already registered');
@@ -13,18 +20,30 @@ function registerComponent(componentConstr) {
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
-    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
-    if (componentConstr.props !== parentComponentConstr.props) {
-        var props = componentConstr.props;
+    var props = componentConstr.props;
+    if (props !== undefined) {
         if (props && (props['_content'] || props['context'])) {
             throw new TypeError("No need to declare property \"" + (props['_content'] ? '_content' : 'context') + "\"");
         }
         componentConstr.elementAttributes = props;
     }
-    if (componentConstr.template !== parentComponentConstr.template && componentConstr.template) {
-        componentConstr._markupBlockNames = [elIs];
-        if (parentComponentConstr._markupBlockNames) {
-            push.apply(componentConstr._markupBlockNames, parentComponentConstr._markupBlockNames);
+    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
+    var bemlTemplate = componentConstr.bemlTemplate;
+    if (bemlTemplate !== undefined) {
+        if (bemlTemplate) {
+            componentConstr.template = componentConstr.template instanceof beml_1.Template ?
+                componentConstr.template.extend('#' + elIs + ' ' + bemlTemplate) :
+                new beml_1.Template('#' + elIs + ' ' + bemlTemplate);
+            initMarkupBlockNames(componentConstr, parentComponentConstr, elIs);
+        }
+        else {
+            componentConstr.template = bemlTemplate;
+        }
+    }
+    else {
+        var template = componentConstr.template;
+        if (template && template !== parentComponentConstr.template) {
+            initMarkupBlockNames(componentConstr, parentComponentConstr, elIs);
         }
     }
     componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames || null);

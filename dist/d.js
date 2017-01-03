@@ -21,6 +21,9 @@ var d = {
             if (config.template !== undefined) {
                 componentConstr.template = config.template;
             }
+            if (config.bemlTemplate !== undefined) {
+                componentConstr.bemlTemplate = config.bemlTemplate;
+            }
             if (config.events !== undefined) {
                 componentConstr.events = config.events;
             }
