@@ -1,6 +1,6 @@
+import escapeString from 'escape-string';
+import escapeHTML from '@riim/escape-html';
 import namePattern from './namePattern';
-import escapeString from './Utils/escapeString';
-import escapeHTML from './Utils/escapeHTML';
 
 let keypathPattern = '(?:' + namePattern + '|\\[\\d+\\])(?:\\.' + namePattern + '|\\[\\d+\\])*';
 let re = RegExp(

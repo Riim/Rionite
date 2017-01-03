@@ -1,4 +1,5 @@
 import { IEvent, EventEmitter, JS, Utils } from 'cellx';
+import htmlToFragment from 'html-to-fragment';
 import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
 import ElementAttributes from './ElementAttributes';
@@ -12,7 +13,6 @@ import eventTypes from './eventTypes';
 import onEvent from './onEvent';
 import camelize from './Utils/camelize';
 import getUID from './Utils/getUID';
-import htmlToFragment from './Utils/htmlToFragment';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
 
 let Map = JS.Map;

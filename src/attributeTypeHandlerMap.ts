@@ -1,7 +1,6 @@
 import { JS } from 'cellx';
+import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import isRegExp from './Utils/isRegExp';
-import escapeHTML from './Utils/escapeHTML';
-import unescapeHTML from './Utils/unescapeHTML';
 
 let Map = JS.Map;
 

@@ -1,8 +1,7 @@
 "use strict";
 var cellx_1 = require("cellx");
+var escape_html_1 = require("@riim/escape-html");
 var isRegExp_1 = require("./Utils/isRegExp");
-var escapeHTML_1 = require("./Utils/escapeHTML");
-var unescapeHTML_1 = require("./Utils/unescapeHTML");
 var Map = cellx_1.JS.Map;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = new Map([
@@ -37,13 +36,13 @@ exports.default = new Map([
                 return value !== undefined ? String(value) : null;
             }]],
     [Object, [function (value) {
-                return value !== null ? Object(Function("return " + unescapeHTML_1.default(value) + ";")()) : undefined;
+                return value !== null ? Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) : undefined;
             }, function (value) {
-                return value != null ? escapeHTML_1.default(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
+                return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
             }]],
     ['object', [function (value, defaultValue) {
-                return value !== null ? Object(Function("return " + unescapeHTML_1.default(value) + ";")()) : defaultValue;
+                return value !== null ? Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) : defaultValue;
             }, function (value) {
-                return value != null ? escapeHTML_1.default(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
+                return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
             }]]
 ]);

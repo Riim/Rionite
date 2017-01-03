@@ -5,6 +5,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var cellx_1 = require("cellx");
+var html_to_fragment_1 = require("html-to-fragment");
 var DisposableMixin_1 = require("./DisposableMixin");
 var registerComponent_1 = require("./registerComponent");
 var ElementAttributes_1 = require("./ElementAttributes");
@@ -18,7 +19,6 @@ var eventTypes_1 = require("./eventTypes");
 var onEvent_1 = require("./onEvent");
 var camelize_1 = require("./Utils/camelize");
 var getUID_1 = require("./Utils/getUID");
-var htmlToFragment_1 = require("./Utils/htmlToFragment");
 var Features_1 = require("./Features");
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
@@ -186,7 +186,7 @@ var Component = (function (_super) {
                 }
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
-                    rawContent = constr._rawContent = htmlToFragment_1.default(typeof template == 'string' ? template : template.render(constr));
+                    rawContent = constr._rawContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));
                 }
                 var content = rawContent.cloneNode(true);
                 var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;

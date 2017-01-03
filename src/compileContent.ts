@@ -1,8 +1,8 @@
+import escapeString from 'escape-string';
 import { IContentTextNode, IContentBinding, TContent, default as ContentParser } from './ContentParser';
 import bindingToJSExpression from './bindingToJSExpression';
 import compileBinding from './compileBinding';
 import formatters from './formatters';
-import escapeString from './Utils/escapeString';
 
 let ContentNodeType = ContentParser.ContentNodeType;
 

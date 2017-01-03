@@ -1,9 +1,9 @@
 "use strict";
+var escape_string_1 = require("escape-string");
 var ContentParser_1 = require("./ContentParser");
 var bindingToJSExpression_1 = require("./bindingToJSExpression");
 var compileBinding_1 = require("./compileBinding");
 var formatters_1 = require("./formatters");
-var escapeString_1 = require("./Utils/escapeString");
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var cache = Object.create(null);
 function compileContent(parsedContent, content) {
@@ -18,7 +18,7 @@ function compileContent(parsedContent, content) {
     for (var _i = 0, parsedContent_1 = parsedContent; _i < parsedContent_1.length; _i++) {
         var node = parsedContent_1[_i];
         if (node.nodeType == ContentNodeType.TEXT) {
-            jsExprParts.push("'" + escapeString_1.default(node.value) + "'");
+            jsExprParts.push("'" + escape_string_1.default(node.value) + "'");
         }
         else {
             var bindingJSExpr = bindingToJSExpression_1.default(node);

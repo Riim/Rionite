@@ -1,7 +1,7 @@
 "use strict";
+var escape_string_1 = require("escape-string");
+var escape_html_1 = require("@riim/escape-html");
 var namePattern_1 = require("./namePattern");
-var escapeString_1 = require("./Utils/escapeString");
-var escapeHTML_1 = require("./Utils/escapeHTML");
 var keypathPattern = '(?:' + namePattern_1.default + '|\\[\\d+\\])(?:\\.' + namePattern_1.default + '|\\[\\d+\\])*';
 var re = RegExp('\\{\\{(?:' +
     '\\s*(?:' +
@@ -44,7 +44,7 @@ var ComponentTemplate = (function () {
             else {
                 var text = splittedTemplate[i];
                 if (text) {
-                    currentBlock.source.push("'" + escapeString_1.default(text) + "'");
+                    currentBlock.source.push("'" + escape_string_1.default(text) + "'");
                 }
                 i++;
             }
@@ -54,7 +54,7 @@ var ComponentTemplate = (function () {
             var parentBlock = parent && parent._blockMap[name];
             var inner = Function('$super', 'data', 'escape', "return [" + blockMap[name].source.join(', ') + "].join('');");
             this[name] = function (data) {
-                return inner.call(this, parentBlock, data, escapeHTML_1.default);
+                return inner.call(this, parentBlock, data, escape_html_1.default);
             };
         }, (this._blockMap = Object.create(parent && parent._blockMap)));
     }
@@ -62,7 +62,7 @@ var ComponentTemplate = (function () {
         return new ComponentTemplate(tmpl, this);
     };
     ComponentTemplate.prototype.render = function (data) {
-        return this._renderer.call(this._blockMap, data || {}, escapeHTML_1.default);
+        return this._renderer.call(this._blockMap, data || {}, escape_html_1.default);
     };
     return ComponentTemplate;
 }());

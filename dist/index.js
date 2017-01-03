@@ -1,4 +1,7 @@
 "use strict";
+var escape_string_1 = require("escape-string");
+var escape_html_1 = require("@riim/escape-html");
+var html_to_fragment_1 = require("html-to-fragment");
 var DisposableMixin_1 = require("./DisposableMixin");
 exports.DisposableMixin = DisposableMixin_1.default;
 var formatters_1 = require("./formatters");
@@ -19,12 +22,8 @@ var ComponentTemplate_1 = require("./ComponentTemplate");
 exports.ComponentTemplate = ComponentTemplate_1.default;
 var camelize_1 = require("./Utils/camelize");
 var hyphenize_1 = require("./Utils/hyphenize");
-var escapeString_1 = require("./Utils/escapeString");
-var escapeHTML_1 = require("./Utils/escapeHTML");
-var unescapeHTML_1 = require("./Utils/unescapeHTML");
 var isRegExp_1 = require("./Utils/isRegExp");
 var defer_1 = require("./Utils/defer");
-var htmlToFragment_1 = require("./Utils/htmlToFragment");
 var Components = {
     RtContent: rt_content_1.default,
     RtIfThen: rt_if_then_1.default,
@@ -35,11 +34,11 @@ exports.Components = Components;
 var Utils = {
     camelize: camelize_1.default,
     hyphenize: hyphenize_1.default,
-    escapeString: escapeString_1.default,
-    escapeHTML: escapeHTML_1.default,
-    unescapeHTML: unescapeHTML_1.default,
+    escapeString: escape_string_1.default,
+    escapeHTML: escape_html_1.escapeHTML,
+    unescapeHTML: escape_html_1.unescapeHTML,
     isRegExp: isRegExp_1.default,
     defer: defer_1.default,
-    htmlToFragment: htmlToFragment_1.default
+    htmlToFragment: html_to_fragment_1.default
 };
 exports.Utils = Utils;

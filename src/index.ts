@@ -1,3 +1,6 @@
+import escapeString from 'escape-string';
+import { escapeHTML, unescapeHTML } from '@riim/escape-html';
+import htmlToFragment from 'html-to-fragment';
 import {
 	IDisposable,
 	IDisposableListening,
@@ -38,12 +41,8 @@ import {
 } from './ComponentTemplate';
 import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
-import escapeString from './Utils/escapeString';
-import escapeHTML from './Utils/escapeHTML';
-import unescapeHTML from './Utils/unescapeHTML';
 import isRegExp from './Utils/isRegExp';
 import defer from './Utils/defer';
-import htmlToFragment from './Utils/htmlToFragment';
 
 let Components = {
 	RtContent,
