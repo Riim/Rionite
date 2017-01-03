@@ -3202,8 +3202,10 @@ var NodeType;
     NodeType[NodeType["COMMENT"] = 4] = "COMMENT";
     NodeType[NodeType["SUPER_CALL"] = 5] = "SUPER_CALL";
 })(NodeType = exports.NodeType || (exports.NodeType = {}));
-var namePattern = '[a-zA-Z][\\-_0-9a-zA-Z]*';
-var reNameOrNothing = RegExp(namePattern + '|', 'g');
+var reBlockNameOrNothing = /[a-zA-Z][\-\w]*|/g;
+var reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[_a-zA-Z][\-\w]*)?|/g;
+var reElementNameOrNothing = /[a-zA-Z][\-\w]*|/g;
+var reAttributeNameOrNothing = /[_a-zA-Z][\-\w]*(?::[_a-zA-Z][\-\w]*)?|/g;
 var superCallStatement = 'super!';
 var Parser = (function () {
     function Parser(beml) {
@@ -3229,7 +3231,7 @@ var Parser = (function () {
     Parser.prototype._readBlockDeclaration = function () {
         var at = this.at;
         this._next('#');
-        var blockName = this._readName();
+        var blockName = this._readName(reBlockNameOrNothing);
         if (!blockName) {
             throw {
                 name: 'SyntaxError',
@@ -3297,7 +3299,7 @@ var Parser = (function () {
     };
     Parser.prototype._readElement = function () {
         var at = this.at;
-        var tagName = this._readName();
+        var tagName = this._readName(reTagNameOrNothing);
         if (!tagName) {
             throw {
                 name: 'SyntaxError',
@@ -3306,7 +3308,7 @@ var Parser = (function () {
                 beml: this.beml
             };
         }
-        var elName = this._skipWhitespaces() == '/' ? (this._next(), this._readName()) : null;
+        var elName = this._skipWhitespaces() == '/' ? (this._next(), this._readName(reElementNameOrNothing)) : null;
         if (elName) {
             this._skipWhitespaces();
         }
@@ -3338,7 +3340,7 @@ var Parser = (function () {
         }
         var list = [];
         for (;;) {
-            var name_1 = this._readName();
+            var name_1 = this._readName(reAttributeNameOrNothing);
             if (!name_1) {
                 throw {
                     name: 'SyntaxError',
@@ -3501,7 +3503,7 @@ var Parser = (function () {
             raw: this.beml.slice(at, this.at)
         };
     };
-    Parser.prototype._readName = function () {
+    Parser.prototype._readName = function (reNameOrNothing) {
         reNameOrNothing.lastIndex = this.at;
         var name = reNameOrNothing.exec(this.beml)[0];
         if (name) {
