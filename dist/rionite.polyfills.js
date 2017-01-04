@@ -3207,6 +3207,9 @@ var reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[_a-zA-Z][\-\w]*)?|/g;
 var reElementNameOrNothing = /[a-zA-Z][\-\w]*|/g;
 var reAttributeNameOrNothing = /[_a-zA-Z][\-\w]*(?::[_a-zA-Z][\-\w]*)?|/g;
 var superCallStatement = 'super!';
+function normalizeMultilineText(text) {
+    return text.trim().replace(/\s*(?:\r\n?|\n)/g, '\n').replace(/\n\s+/g, '\n');
+}
 var Parser = (function () {
     function Parser(beml) {
         this.beml = beml;
@@ -3353,7 +3356,11 @@ var Parser = (function () {
                 this._next();
                 var next = this._skipWhitespaces();
                 if (next == "'" || next == '"' || next == '`') {
-                    list.push({ name: name_1, value: this._readString().value });
+                    var str = this._readString();
+                    list.push({
+                        name: name_1,
+                        value: str.multiline ? normalizeMultilineText(str.value) : str.value
+                    });
                 }
                 else {
                     var value = '';
@@ -3404,9 +3411,10 @@ var Parser = (function () {
     };
     Parser.prototype._readTextNode = function () {
         var at = this.at;
+        var str = this._readString();
         return {
             nodeType: NodeType.TEXT,
-            value: this._readString().value,
+            value: str.multiline ? normalizeMultilineText(str.value) : str.value,
             at: at,
             raw: this.beml.slice(at, this.at)
         };
@@ -3425,7 +3433,10 @@ var Parser = (function () {
         for (var next = void 0; (next = this._next());) {
             if (next == quoteChar) {
                 this._next();
-                return { value: str };
+                return {
+                    value: str,
+                    multiline: quoteChar == '`'
+                };
             }
             if (next == '\\') {
                 str += next + this._next();
