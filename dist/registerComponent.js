@@ -39,6 +39,7 @@ function registerComponent(componentConstr) {
         else {
             componentConstr.template = bemlTemplate;
         }
+        componentConstr._rawContent = undefined;
     }
     else {
         var template = componentConstr.template;

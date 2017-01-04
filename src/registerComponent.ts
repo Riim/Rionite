@@ -56,6 +56,8 @@ export default function registerComponent(componentConstr: typeof Component) {
 		} else {
 			componentConstr.template = bemlTemplate;
 		}
+
+		componentConstr._rawContent = undefined;
 	} else {
 		let template = componentConstr.template;
 
