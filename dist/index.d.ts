@@ -1,7 +1,8 @@
+import beml from '@riim/beml';
 import { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, default as DisposableMixin } from './DisposableMixin';
 import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
-import { IComponentElement, IComponentProperties, IComponentTemplate, IComponentAssetClassNames, IComponentEvents, default as Component } from './Component';
+import { IComponentElement, IComponentProperties, IComponentTemplate, IComponentElementClassNameMap, IComponentEvents, default as Component } from './Component';
 import d from './d';
 import RtContent from './Components/rt-content';
 import { TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
@@ -25,4 +26,4 @@ declare let Utils: {
     defer: (cb: () => void, context?: any) => void;
     htmlToFragment: (html: string) => DocumentFragment;
 };
-export { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IComponentElement, IComponentProperties, IComponentTemplate, IComponentAssetClassNames, IComponentEvents, Component, d, TRtIfThenIfCell, TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, ElementAttributes, IComponentTemplateBlock, IComponentTemplateRenderer, IComponentTemplateBlockMap, ComponentTemplate, Utils };
+export { beml, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IComponentElement, IComponentProperties, IComponentTemplate, IComponentElementClassNameMap, IComponentEvents, Component, d, TRtIfThenIfCell, TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, ElementAttributes, IComponentTemplateBlock, IComponentTemplateRenderer, IComponentTemplateBlockMap, ComponentTemplate, Utils };

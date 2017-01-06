@@ -14,11 +14,11 @@ export interface IComponentProperties extends ElementAttributes {
 export interface IComponentTemplate {
     render: (data: Object) => string;
 }
-export interface IComponentAssetClassNames {
-    [assetName: string]: string;
+export interface IComponentElementClassNameMap {
+    [elName: string]: string;
 }
 export interface IComponentEvents<T> {
-    [assetName: string]: {
+    [elName: string]: {
         [eventName: string]: (this: T, evt: IEvent | Event, target: HTMLElement) => boolean | void;
     };
 }
@@ -40,8 +40,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
     static template: string | IComponentTemplate | null;
     static bemlTemplate: string | null;
     static _rawContent: DocumentFragment | undefined;
-    static _markupBlockNames: Array<string>;
-    static _assetClassNames: IComponentAssetClassNames;
+    static _blockNames: Array<string>;
+    static _elementClassNameMap: IComponentElementClassNameMap;
     static events: IComponentEvents<Component> | null;
     _disposables: any;
     listenTo: any;
@@ -56,7 +56,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     readonly elementAttributes: ElementAttributes;
     readonly props: IComponentProperties;
     _bindings: Array<IFreezableCell> | null;
-    _assets: Map<string, NodeListOf<HTMLElement>>;
+    _elementListMap: Map<string, NodeListOf<HTMLElement>>;
     isElementAttached: boolean;
     initialized: boolean;
     isReady: boolean;
@@ -80,5 +80,5 @@ export default class Component extends EventEmitter implements DisposableMixin {
     elementAttributeChanged(name: string, oldValue: any, value: any): void;
     $(name: string, container?: Component | HTMLElement): Component | HTMLElement | null;
     $$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement>;
-    _getAssetList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined;
+    _getElementList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined;
 }

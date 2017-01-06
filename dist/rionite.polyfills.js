@@ -1560,20 +1560,20 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var cellx_1 = __webpack_require__(0);
-var html_to_fragment_1 = __webpack_require__(24);
+var html_to_fragment_1 = __webpack_require__(25);
 var DisposableMixin_1 = __webpack_require__(15);
-var registerComponent_1 = __webpack_require__(43);
+var registerComponent_1 = __webpack_require__(44);
 var ElementAttributes_1 = __webpack_require__(16);
-var initElementClasses_1 = __webpack_require__(41);
-var initElementAttributes_1 = __webpack_require__(40);
+var initElementClasses_1 = __webpack_require__(42);
+var initElementAttributes_1 = __webpack_require__(41);
 var bindContent_1 = __webpack_require__(7);
-var componentBinding_1 = __webpack_require__(37);
+var componentBinding_1 = __webpack_require__(38);
 var attachChildComponentElements_1 = __webpack_require__(6);
-var bindEvents_1 = __webpack_require__(34);
-var eventTypes_1 = __webpack_require__(39);
-var onEvent_1 = __webpack_require__(42);
+var bindEvents_1 = __webpack_require__(35);
+var eventTypes_1 = __webpack_require__(40);
+var onEvent_1 = __webpack_require__(43);
 var camelize_1 = __webpack_require__(5);
-var getUID_1 = __webpack_require__(31);
+var getUID_1 = __webpack_require__(32);
 var Features_1 = __webpack_require__(4);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
@@ -1796,47 +1796,47 @@ var Component = (function (_super) {
     Component.prototype.elementAttributeChanged = function (name, oldValue, value) { };
     // Utils
     Component.prototype.$ = function (name, container) {
-        var assetList = this._getAssetList(name, container);
-        return assetList && assetList.length ? assetList[0].$c || assetList[0] : null;
+        var elList = this._getElementList(name, container);
+        return elList && elList.length ? elList[0].$c || elList[0] : null;
     };
     Component.prototype.$$ = function (name, container) {
-        var assetList = this._getAssetList(name, container);
-        return assetList ? map.call(assetList, function (el) { return el.$c || el; }) : [];
+        var elList = this._getElementList(name, container);
+        return elList ? map.call(elList, function (el) { return el.$c || el; }) : [];
     };
-    Component.prototype._getAssetList = function (name, container) {
-        var assets = this._assets || (this._assets = new Map());
+    Component.prototype._getElementList = function (name, container) {
+        var elListMap = this._elementListMap || (this._elementListMap = new Map());
         var containerEl = container ?
             (container instanceof Component ? container.element : container) :
             this.element;
         var key = container ? getUID_1.default(containerEl) + '/' + name : name;
-        var assetList = assets.get(key);
-        if (!assetList) {
+        var elList = elListMap.get(key);
+        if (!elList) {
             var constr = this.constructor;
-            var className = constr._assetClassNames[name];
+            var className = constr._elementClassNameMap[name];
             if (className) {
-                assetList = containerEl.getElementsByClassName(className);
-                assets.set(key, assetList);
+                elList = containerEl.getElementsByClassName(className);
+                elListMap.set(key, elList);
             }
             else {
-                var markupBlockNames = constr._markupBlockNames;
-                if (!markupBlockNames) {
+                var blockNames = constr._blockNames;
+                if (!blockNames) {
                     throw new TypeError('Component must have a template');
                 }
-                for (var i = markupBlockNames.length; i;) {
-                    className = markupBlockNames[--i] + '__' + name;
-                    assetList = containerEl.getElementsByClassName(className);
-                    if (assetList.length) {
-                        constr._assetClassNames[name] = className;
-                        assets.set(key, assetList);
+                for (var i = blockNames.length; i;) {
+                    className = blockNames[--i] + '__' + name;
+                    elList = containerEl.getElementsByClassName(className);
+                    if (elList.length) {
+                        constr._elementClassNameMap[name] = className;
+                        elListMap.set(key, elList);
                         break;
                     }
                 }
-                if (!assetList.length) {
+                if (!elList.length) {
                     return;
                 }
             }
         }
-        return assetList;
+        return elList;
     };
     return Component;
 }(cellx_1.EventEmitter));
@@ -1986,8 +1986,8 @@ exports.default = attachChildComponentElements;
 
 var cellx_1 = __webpack_require__(0);
 var ContentParser_1 = __webpack_require__(14);
-var compileContent_1 = __webpack_require__(36);
-var setAttribute_1 = __webpack_require__(32);
+var compileContent_1 = __webpack_require__(37);
+var setAttribute_1 = __webpack_require__(33);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var reBinding = /{[^}]+}/;
 function bindContent(content, ownerComponent, context) {
@@ -2836,7 +2836,7 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var cellx_1 = __webpack_require__(0);
-var attributeTypeHandlerMap_1 = __webpack_require__(33);
+var attributeTypeHandlerMap_1 = __webpack_require__(34);
 var camelize_1 = __webpack_require__(5);
 var hyphenize_1 = __webpack_require__(10);
 var Map = cellx_1.JS.Map;
@@ -3221,11 +3221,11 @@ var Parser = (function () {
         while (this._skipWhitespaces() == '/') {
             (content || (content = [])).push(this._readComment());
         }
-        var decl = this._readBlockDeclaration();
+        var decl = this.chr == '#' ? this._readBlockDeclaration() : null;
         return {
             nodeType: NodeType.BLOCK,
             declaration: decl,
-            name: decl.blockName,
+            name: decl ? decl.blockName : undefined,
             content: content ? content.concat(this._readContent(false)) : this._readContent(false),
             at: 0,
             raw: this.beml,
@@ -3553,6 +3553,18 @@ exports.default = Parser;
 
 "use strict";
 
+var Parser_1 = __webpack_require__(23);
+exports.Parser = Parser_1.default;
+var Template_1 = __webpack_require__(45);
+exports.Template = Template_1.default;
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var range = document.createRange();
 var htmlToFragment;
 if (range.createContextualFragment) {
@@ -3581,14 +3593,16 @@ exports.default = htmlToFragment;
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
+var beml_1 = __webpack_require__(24);
+exports.beml = beml_1.default;
 var escape_string_1 = __webpack_require__(3);
 var escape_html_1 = __webpack_require__(9);
-var html_to_fragment_1 = __webpack_require__(24);
+var html_to_fragment_1 = __webpack_require__(25);
 var DisposableMixin_1 = __webpack_require__(15);
 exports.DisposableMixin = DisposableMixin_1.default;
 var formatters_1 = __webpack_require__(11);
@@ -3599,13 +3613,13 @@ var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
 var d_1 = __webpack_require__(2);
 exports.d = d_1.default;
-var rt_content_1 = __webpack_require__(27);
+var rt_content_1 = __webpack_require__(28);
 var rt_if_then_1 = __webpack_require__(13);
-var rt_if_else_1 = __webpack_require__(28);
-var rt_repeat_1 = __webpack_require__(29);
+var rt_if_else_1 = __webpack_require__(29);
+var rt_repeat_1 = __webpack_require__(30);
 var ElementAttributes_1 = __webpack_require__(16);
 exports.ElementAttributes = ElementAttributes_1.default;
-var ComponentTemplate_1 = __webpack_require__(26);
+var ComponentTemplate_1 = __webpack_require__(27);
 exports.ComponentTemplate = ComponentTemplate_1.default;
 var camelize_1 = __webpack_require__(5);
 var hyphenize_1 = __webpack_require__(10);
@@ -3632,7 +3646,7 @@ exports.Utils = Utils;
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3709,7 +3723,7 @@ exports.default = ComponentTemplate;
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3811,7 +3825,7 @@ exports.default = RtContent;
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3849,7 +3863,7 @@ exports.default = RtIfElse;
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4076,7 +4090,7 @@ exports.default = RtRepeat;
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4151,7 +4165,7 @@ var _a;
 
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4176,7 +4190,7 @@ exports.default = getUID;
 
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4194,7 +4208,7 @@ exports.default = setAttribute;
 
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4249,27 +4263,27 @@ exports.default = new Map([
 
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
 function bindEvents(component, events) {
-    for (var assetName in events) {
+    for (var elName in events) {
         var asset = void 0;
-        if (assetName == ':component') {
+        if (elName == ':component') {
             asset = component;
         }
-        else if (assetName == ':element') {
+        else if (elName == ':element') {
             asset = component.element;
         }
         else {
-            asset = component.$(assetName);
+            asset = component.$(elName);
             if (!asset) {
                 continue;
             }
         }
-        var assetEvents = events[assetName];
+        var assetEvents = events[elName];
         for (var evtName in assetEvents) {
             component.listenTo(asset, evtName, assetEvents[evtName]);
         }
@@ -4280,7 +4294,7 @@ exports.default = bindEvents;
 
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4308,7 +4322,7 @@ exports.default = compileBinding;
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4316,7 +4330,7 @@ exports.default = compileBinding;
 var escape_string_1 = __webpack_require__(3);
 var ContentParser_1 = __webpack_require__(14);
 var bindingToJSExpression_1 = __webpack_require__(19);
-var compileBinding_1 = __webpack_require__(35);
+var compileBinding_1 = __webpack_require__(36);
 var formatters_1 = __webpack_require__(11);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var cache = Object.create(null);
@@ -4356,7 +4370,7 @@ exports.default = compileContent;
 
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4409,7 +4423,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4463,7 +4477,7 @@ exports.default = mixin(Object.create(null), {
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4486,7 +4500,7 @@ exports.default = [
 
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4509,7 +4523,7 @@ exports.default = initElementAttributes;
 
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4527,7 +4541,7 @@ exports.default = initElementClasses;
 
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4575,22 +4589,22 @@ exports.default = onEvent;
 
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var cellx_1 = __webpack_require__(0);
-var beml_1 = __webpack_require__(45);
-var elementConstructorMap_1 = __webpack_require__(38);
-var ElementProtoMixin_1 = __webpack_require__(30);
+var beml_1 = __webpack_require__(24);
+var elementConstructorMap_1 = __webpack_require__(39);
+var ElementProtoMixin_1 = __webpack_require__(31);
 var hyphenize_1 = __webpack_require__(10);
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
-function initMarkupBlockNames(componentConstr, parentComponentConstr, elIs) {
-    componentConstr._markupBlockNames = [elIs];
-    if (parentComponentConstr._markupBlockNames) {
-        push.apply(componentConstr._markupBlockNames, parentComponentConstr._markupBlockNames);
+function initBlockNames(componentConstr, parentComponentConstr, elIs) {
+    componentConstr._blockNames = [elIs];
+    if (parentComponentConstr._blockNames) {
+        push.apply(componentConstr._blockNames, parentComponentConstr._blockNames);
     }
 }
 function registerComponent(componentConstr) {
@@ -4611,24 +4625,33 @@ function registerComponent(componentConstr) {
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
     var bemlTemplate = componentConstr.bemlTemplate;
     if (bemlTemplate !== undefined) {
-        if (bemlTemplate) {
-            componentConstr.template = componentConstr.template instanceof beml_1.Template ?
-                componentConstr.template.extend('#' + elIs + ' ' + bemlTemplate) :
-                new beml_1.Template('#' + elIs + ' ' + bemlTemplate);
-            initMarkupBlockNames(componentConstr, parentComponentConstr, elIs);
+        if (bemlTemplate !== null) {
+            if (parentComponentConstr.template instanceof beml_1.Template) {
+                if (bemlTemplate === parentComponentConstr.bemlTemplate) {
+                    componentConstr.template = parentComponentConstr.template.extend(undefined, { blockName: elIs });
+                }
+                else {
+                    componentConstr.template = parentComponentConstr.template.extend(bemlTemplate, { blockName: elIs });
+                    initBlockNames(componentConstr, parentComponentConstr, elIs);
+                }
+            }
+            else {
+                componentConstr.template = new beml_1.Template(bemlTemplate, { blockName: elIs });
+                initBlockNames(componentConstr, parentComponentConstr, elIs);
+            }
         }
         else {
-            componentConstr.template = bemlTemplate;
+            componentConstr.template = null;
         }
-        componentConstr._rawContent = undefined;
     }
     else {
         var template = componentConstr.template;
         if (template && template !== parentComponentConstr.template) {
-            initMarkupBlockNames(componentConstr, parentComponentConstr, elIs);
+            initBlockNames(componentConstr, parentComponentConstr, elIs);
         }
     }
-    componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames || null);
+    componentConstr._rawContent = undefined;
+    componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
     var elExtends = componentConstr.elementExtends;
     var parentElConstr = elExtends ?
         elementConstructorMap_1.default[elExtends] ||
@@ -4668,7 +4691,7 @@ exports.default = registerComponent;
 
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4679,36 +4702,48 @@ var selfClosingTags_1 = __webpack_require__(47);
 var renderAttributes_1 = __webpack_require__(46);
 var elDelimiter = '__';
 var Template = (function () {
-    function Template(beml, parent) {
-        if (parent === void 0) { parent = null; }
-        var block = new Parser_1.default(beml).parse();
-        var blockName = block.name;
-        this.parent = parent;
-        this._blockName = blockName;
-        this._blockElementClassTemplate = parent ?
-            [blockName + elDelimiter].concat(parent._blockElementClassTemplate) :
-            [blockName + elDelimiter, ''];
-        this._nodes = [(this._currentNode = { elementName: null, source: [], hasSuperCall: false })];
-        var nodeMap = this._nodeMap = {};
-        block.content.forEach(this._handleNode, this);
-        this._renderer = parent ?
-            parent._renderer :
-            Function("return [" + this._currentNode.source.join(', ') + "].join('');");
-        Object.keys(nodeMap).forEach(function (name) {
-            var node = nodeMap[name];
-            if (node.hasSuperCall) {
-                var inner_1 = Function('$super', "return " + node.source.join(' + ') + ";");
-                var parentElementRenderer_1 = parent && parent._elementRendererMap[name];
-                this[name] = function () { return inner_1.call(this, parentElementRenderer_1); };
+    function Template(beml, opts) {
+        var parent = this.parent = opts && opts.parent || null;
+        if (beml !== undefined) {
+            var block = new Parser_1.default(beml).parse();
+            var blockName = opts && opts.blockName || block.name;
+            if (!blockName) {
+                throw new TypeError('blockName is required');
             }
-            else {
-                this[name] = Function("return " + node.source.join(' + ') + ";");
+            this._elementClassesTemplate = parent ?
+                [blockName + elDelimiter].concat(parent._elementClassesTemplate) :
+                [blockName + elDelimiter, ''];
+            this._nodes = [(this._currentNode = { elementName: null, source: [], hasSuperCall: false })];
+            var nodeMap_1 = this._nodeMap = {};
+            block.content.forEach(this._handleNode, this);
+            this._renderer = parent ?
+                parent._renderer :
+                Function("return [" + this._currentNode.source.join(', ') + "].join('');");
+            Object.keys(nodeMap_1).forEach(function (name) {
+                var node = nodeMap_1[name];
+                if (node.hasSuperCall) {
+                    var inner_1 = Function('$super', "return " + node.source.join(' + ') + ";");
+                    var parentElementRenderer_1 = parent && parent._elementRendererMap[name];
+                    this[name] = function () { return inner_1.call(this, parentElementRenderer_1); };
+                }
+                else {
+                    this[name] = Function("return " + node.source.join(' + ') + ";");
+                }
+            }, (this._elementRendererMap = Object.create(parent && parent._elementRendererMap)));
+        }
+        else {
+            var blockName = opts && opts.blockName;
+            if (!blockName) {
+                throw new TypeError('blockName is required');
             }
-        }, (this._elementRendererMap = Object.create(parent && parent._elementRendererMap)));
+            if (!parent) {
+                throw new TypeError('parent is required if beml is not defined');
+            }
+            this._elementClassesTemplate = [blockName + elDelimiter].concat(parent._elementClassesTemplate);
+            this._renderer = parent._renderer;
+            this._elementRendererMap = parent._elementRendererMap;
+        }
     }
-    Template.compile = function (beml) {
-        return new Template(beml);
-    };
     Template.prototype._handleNode = function (node) {
         switch (node.nodeType) {
             case Parser_1.NodeType.ELEMENT: {
@@ -4722,7 +4757,7 @@ var Template = (function () {
                     nodes.push((this._currentNode = currentNode));
                     this._nodeMap[elName] = currentNode;
                 }
-                this._currentNode.source.push("'<" + tagName + renderAttributes_1.default(this._blockElementClassTemplate, el) + ">'");
+                this._currentNode.source.push("'<" + tagName + renderAttributes_1.default(this._elementClassesTemplate, el) + ">'");
                 var hasContent = content && content.length;
                 if (hasContent) {
                     content.forEach(this._handleNode, this);
@@ -4748,8 +4783,8 @@ var Template = (function () {
             }
         }
     };
-    Template.prototype.extend = function (beml) {
-        return new Template(beml, this);
+    Template.prototype.extend = function (beml, opts) {
+        return new Template(beml, { __proto__: opts || null, parent: this });
     };
     Template.prototype.render = function () {
         return this._renderer.call(this._elementRendererMap);
@@ -4761,18 +4796,6 @@ exports.default = Template;
 
 
 /***/ },
-/* 45 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var Parser_1 = __webpack_require__(23);
-exports.Parser = Parser_1.default;
-var Template_1 = __webpack_require__(44);
-exports.Template = Template_1.default;
-
-
-/***/ },
 /* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -4780,7 +4803,7 @@ exports.Template = Template_1.default;
 
 var escape_string_1 = __webpack_require__(3);
 var escape_html_1 = __webpack_require__(9);
-function renderAttributes(blockElementClassTemplate, el) {
+function renderAttributes(elementClassesTemplate, el) {
     var elName = el.name;
     var attrs = el.attributes;
     if (attrs && attrs.list.length) {
@@ -4789,13 +4812,13 @@ function renderAttributes(blockElementClassTemplate, el) {
             var value = attr.value;
             if (!f_1 && attr.name == 'class') {
                 f_1 = true;
-                value = blockElementClassTemplate.join(elName + ' ') + value;
+                value = elementClassesTemplate.join(elName + ' ') + value;
             }
             return " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
         });
-        return (f_1 ? '' : " class=\"" + blockElementClassTemplate.join(elName + ' ') + "\"") + result.join('');
+        return (f_1 ? '' : " class=\"" + elementClassesTemplate.join(elName + ' ') + "\"") + result.join('');
     }
-    return elName ? " class=\"" + blockElementClassTemplate.join(elName + ' ') + "\"" : '';
+    return elName ? " class=\"" + elementClassesTemplate.join(elName + ' ') + "\"" : '';
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = renderAttributes;
@@ -4885,7 +4908,7 @@ exports.default = unescapeHTML;
 /* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(25);
+module.exports = __webpack_require__(26);
 
 
 /***/ }

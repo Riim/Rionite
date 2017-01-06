@@ -241,47 +241,47 @@ var Component = (function (_super) {
     Component.prototype.elementAttributeChanged = function (name, oldValue, value) { };
     // Utils
     Component.prototype.$ = function (name, container) {
-        var assetList = this._getAssetList(name, container);
-        return assetList && assetList.length ? assetList[0].$c || assetList[0] : null;
+        var elList = this._getElementList(name, container);
+        return elList && elList.length ? elList[0].$c || elList[0] : null;
     };
     Component.prototype.$$ = function (name, container) {
-        var assetList = this._getAssetList(name, container);
-        return assetList ? map.call(assetList, function (el) { return el.$c || el; }) : [];
+        var elList = this._getElementList(name, container);
+        return elList ? map.call(elList, function (el) { return el.$c || el; }) : [];
     };
-    Component.prototype._getAssetList = function (name, container) {
-        var assets = this._assets || (this._assets = new Map());
+    Component.prototype._getElementList = function (name, container) {
+        var elListMap = this._elementListMap || (this._elementListMap = new Map());
         var containerEl = container ?
             (container instanceof Component ? container.element : container) :
             this.element;
         var key = container ? getUID_1.default(containerEl) + '/' + name : name;
-        var assetList = assets.get(key);
-        if (!assetList) {
+        var elList = elListMap.get(key);
+        if (!elList) {
             var constr = this.constructor;
-            var className = constr._assetClassNames[name];
+            var className = constr._elementClassNameMap[name];
             if (className) {
-                assetList = containerEl.getElementsByClassName(className);
-                assets.set(key, assetList);
+                elList = containerEl.getElementsByClassName(className);
+                elListMap.set(key, elList);
             }
             else {
-                var markupBlockNames = constr._markupBlockNames;
-                if (!markupBlockNames) {
+                var blockNames = constr._blockNames;
+                if (!blockNames) {
                     throw new TypeError('Component must have a template');
                 }
-                for (var i = markupBlockNames.length; i;) {
-                    className = markupBlockNames[--i] + '__' + name;
-                    assetList = containerEl.getElementsByClassName(className);
-                    if (assetList.length) {
-                        constr._assetClassNames[name] = className;
-                        assets.set(key, assetList);
+                for (var i = blockNames.length; i;) {
+                    className = blockNames[--i] + '__' + name;
+                    elList = containerEl.getElementsByClassName(className);
+                    if (elList.length) {
+                        constr._elementClassNameMap[name] = className;
+                        elListMap.set(key, elList);
                         break;
                     }
                 }
-                if (!assetList.length) {
+                if (!elList.length) {
                     return;
                 }
             }
         }
-        return assetList;
+        return elList;
     };
     return Component;
 }(cellx_1.EventEmitter));

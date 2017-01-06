@@ -9,15 +9,11 @@ let mixin = Utils.mixin;
 
 let push = Array.prototype.push;
 
-function initMarkupBlockNames(
-	componentConstr: typeof Component,
-	parentComponentConstr: typeof Component,
-	elIs: string
-) {
-	componentConstr._markupBlockNames = [elIs];
+function initBlockNames(componentConstr: typeof Component, parentComponentConstr: typeof Component, elIs: string) {
+	componentConstr._blockNames = [elIs];
 
-	if (parentComponentConstr._markupBlockNames) {
-		push.apply(componentConstr._markupBlockNames, parentComponentConstr._markupBlockNames);
+	if (parentComponentConstr._blockNames) {
+		push.apply(componentConstr._blockNames, parentComponentConstr._blockNames);
 	}
 }
 
@@ -47,26 +43,32 @@ export default function registerComponent(componentConstr: typeof Component) {
 	let bemlTemplate = componentConstr.bemlTemplate;
 
 	if (bemlTemplate !== undefined) {
-		if (bemlTemplate) {
-			componentConstr.template = componentConstr.template instanceof BemlTemplate ?
-				componentConstr.template.extend('#' + elIs + ' ' + bemlTemplate) :
-				new BemlTemplate('#' + elIs + ' ' + bemlTemplate);
-
-			initMarkupBlockNames(componentConstr, parentComponentConstr, elIs);
+		if (bemlTemplate !== null) {
+			if (parentComponentConstr.template instanceof BemlTemplate) {
+				if (bemlTemplate === parentComponentConstr.bemlTemplate) {
+					componentConstr.template = parentComponentConstr.template.extend(undefined, { blockName: elIs });
+				} else {
+					componentConstr.template = parentComponentConstr.template.extend(bemlTemplate, { blockName: elIs });
+					initBlockNames(componentConstr, parentComponentConstr, elIs);
+				}
+			} else {
+				componentConstr.template = new BemlTemplate(bemlTemplate, { blockName: elIs });
+				initBlockNames(componentConstr, parentComponentConstr, elIs);
+			}
 		} else {
-			componentConstr.template = bemlTemplate;
+			componentConstr.template = null;
 		}
-
-		componentConstr._rawContent = undefined;
 	} else {
 		let template = componentConstr.template;
 
 		if (template && template !== parentComponentConstr.template) {
-			initMarkupBlockNames(componentConstr, parentComponentConstr, elIs);
+			initBlockNames(componentConstr, parentComponentConstr, elIs);
 		}
 	}
 
-	componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames || null);
+	componentConstr._rawContent = undefined;
+
+	componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
 
 	let elExtends = componentConstr.elementExtends;
 

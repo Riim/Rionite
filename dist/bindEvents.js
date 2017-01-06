@@ -1,20 +1,20 @@
 "use strict";
 function bindEvents(component, events) {
-    for (var assetName in events) {
+    for (var elName in events) {
         var asset = void 0;
-        if (assetName == ':component') {
+        if (elName == ':component') {
             asset = component;
         }
-        else if (assetName == ':element') {
+        else if (elName == ':element') {
             asset = component.element;
         }
         else {
-            asset = component.$(assetName);
+            asset = component.$(elName);
             if (!asset) {
                 continue;
             }
         }
-        var assetEvents = events[assetName];
+        var assetEvents = events[elName];
         for (var evtName in assetEvents) {
             component.listenTo(asset, evtName, assetEvents[evtName]);
         }

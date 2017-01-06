@@ -6,10 +6,10 @@ var ElementProtoMixin_1 = require("./ElementProtoMixin");
 var hyphenize_1 = require("./Utils/hyphenize");
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
-function initMarkupBlockNames(componentConstr, parentComponentConstr, elIs) {
-    componentConstr._markupBlockNames = [elIs];
-    if (parentComponentConstr._markupBlockNames) {
-        push.apply(componentConstr._markupBlockNames, parentComponentConstr._markupBlockNames);
+function initBlockNames(componentConstr, parentComponentConstr, elIs) {
+    componentConstr._blockNames = [elIs];
+    if (parentComponentConstr._blockNames) {
+        push.apply(componentConstr._blockNames, parentComponentConstr._blockNames);
     }
 }
 function registerComponent(componentConstr) {
@@ -30,24 +30,33 @@ function registerComponent(componentConstr) {
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
     var bemlTemplate = componentConstr.bemlTemplate;
     if (bemlTemplate !== undefined) {
-        if (bemlTemplate) {
-            componentConstr.template = componentConstr.template instanceof beml_1.Template ?
-                componentConstr.template.extend('#' + elIs + ' ' + bemlTemplate) :
-                new beml_1.Template('#' + elIs + ' ' + bemlTemplate);
-            initMarkupBlockNames(componentConstr, parentComponentConstr, elIs);
+        if (bemlTemplate !== null) {
+            if (parentComponentConstr.template instanceof beml_1.Template) {
+                if (bemlTemplate === parentComponentConstr.bemlTemplate) {
+                    componentConstr.template = parentComponentConstr.template.extend(undefined, { blockName: elIs });
+                }
+                else {
+                    componentConstr.template = parentComponentConstr.template.extend(bemlTemplate, { blockName: elIs });
+                    initBlockNames(componentConstr, parentComponentConstr, elIs);
+                }
+            }
+            else {
+                componentConstr.template = new beml_1.Template(bemlTemplate, { blockName: elIs });
+                initBlockNames(componentConstr, parentComponentConstr, elIs);
+            }
         }
         else {
-            componentConstr.template = bemlTemplate;
+            componentConstr.template = null;
         }
-        componentConstr._rawContent = undefined;
     }
     else {
         var template = componentConstr.template;
         if (template && template !== parentComponentConstr.template) {
-            initMarkupBlockNames(componentConstr, parentComponentConstr, elIs);
+            initBlockNames(componentConstr, parentComponentConstr, elIs);
         }
     }
-    componentConstr._assetClassNames = Object.create(parentComponentConstr._assetClassNames || null);
+    componentConstr._rawContent = undefined;
+    componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
     var elExtends = componentConstr.elementExtends;
     var parentElConstr = elExtends ?
         elementConstructorMap_1.default[elExtends] ||

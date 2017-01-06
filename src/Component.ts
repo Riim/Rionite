@@ -34,12 +34,12 @@ export interface IComponentTemplate {
 	render: (data: Object) => string;
 }
 
-export interface IComponentAssetClassNames {
-	[assetName: string]: string;
+export interface IComponentElementClassNameMap {
+	[elName: string]: string;
 }
 
 export interface IComponentEvents<T> {
-	[assetName: string]: {
+	[elName: string]: {
 		[eventName: string]: (this: T, evt: IEvent | Event, target: HTMLElement) => boolean | void;
 	};
 }
@@ -104,8 +104,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	static _rawContent: DocumentFragment | undefined;
 
-	static _markupBlockNames: Array<string>;
-	static _assetClassNames: IComponentAssetClassNames;
+	static _blockNames: Array<string>;
+	static _elementClassNameMap: IComponentElementClassNameMap;
 
 	static events: IComponentEvents<Component> | null;
 
@@ -167,7 +167,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	_bindings: Array<IFreezableCell> | null;
 
-	_assets: Map<string, NodeListOf<HTMLElement>>;
+	_elementListMap: Map<string, NodeListOf<HTMLElement>>;
 
 	isElementAttached = false;
 
@@ -364,56 +364,56 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	// Utils
 
 	$(name: string, container?: Component | HTMLElement): Component | HTMLElement | null {
-		let assetList = this._getAssetList(name, container);
-		return assetList && assetList.length ? (assetList[0] as IComponentElement).$c || assetList[0] : null;
+		let elList = this._getElementList(name, container);
+		return elList && elList.length ? (elList[0] as IComponentElement).$c || elList[0] : null;
 	}
 
 	$$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement> {
-		let assetList = this._getAssetList(name, container);
-		return assetList ? map.call(assetList, (el: IComponentElement) => el.$c || el) : [];
+		let elList = this._getElementList(name, container);
+		return elList ? map.call(elList, (el: IComponentElement) => el.$c || el) : [];
 	}
 
-	_getAssetList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined {
-		let assets = this._assets || (this._assets = new Map<string, NodeListOf<HTMLElement>>());
+	_getElementList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined {
+		let elListMap = this._elementListMap || (this._elementListMap = new Map<string, NodeListOf<HTMLElement>>());
 		let containerEl: HTMLElement = container ?
 			(container instanceof Component ? container.element : container) :
 			this.element;
 		let key = container ? getUID(containerEl) + '/' + name : name;
-		let assetList = assets.get(key);
+		let elList = elListMap.get(key);
 
-		if (!assetList) {
+		if (!elList) {
 			let constr = this.constructor as typeof Component;
-			let className = constr._assetClassNames[name];
+			let className = constr._elementClassNameMap[name];
 
 			if (className) {
-				assetList = containerEl.getElementsByClassName(className) as NodeListOf<HTMLElement>;
-				assets.set(key, assetList);
+				elList = containerEl.getElementsByClassName(className) as NodeListOf<HTMLElement>;
+				elListMap.set(key, elList);
 			} else {
-				let markupBlockNames = constr._markupBlockNames;
+				let blockNames = constr._blockNames;
 
-				if (!markupBlockNames) {
+				if (!blockNames) {
 					throw new TypeError('Component must have a template');
 				}
 
-				for (let i = markupBlockNames.length; i;) {
-					className = markupBlockNames[--i] + '__' + name;
+				for (let i = blockNames.length; i;) {
+					className = blockNames[--i] + '__' + name;
 
-					assetList = containerEl.getElementsByClassName(className) as NodeListOf<HTMLElement>;
+					elList = containerEl.getElementsByClassName(className) as NodeListOf<HTMLElement>;
 
-					if (assetList.length) {
-						constr._assetClassNames[name] = className;
-						assets.set(key, assetList);
+					if (elList.length) {
+						constr._elementClassNameMap[name] = className;
+						elListMap.set(key, elList);
 						break;
 					}
 				}
 
-				if (!assetList.length) {
+				if (!elList.length) {
 					return;
 				}
 			}
 		}
 
-		return assetList;
+		return elList;
 	}
 }
 

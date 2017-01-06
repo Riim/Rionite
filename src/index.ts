@@ -1,3 +1,4 @@
+import beml from '@riim/beml';
 import escapeString from 'escape-string';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import htmlToFragment from 'html-to-fragment';
@@ -17,7 +18,7 @@ import {
 	IComponentElement,
 	IComponentProperties,
 	IComponentTemplate,
-	IComponentAssetClassNames,
+	IComponentElementClassNameMap,
 	IComponentEvents,
 	default as Component
 } from './Component';
@@ -63,6 +64,7 @@ let Utils = {
 };
 
 export {
+	beml,
 	IDisposable,
 	IDisposableListening,
 	IDisposableTimeout,
@@ -83,7 +85,7 @@ export {
 	IComponentElement,
 	IComponentProperties,
 	IComponentTemplate,
-	IComponentAssetClassNames,
+	IComponentElementClassNameMap,
 	IComponentEvents,
 	Component,
 
