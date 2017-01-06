@@ -61,7 +61,7 @@ var Component = (function (_super) {
         if (constr._registeredComponent !== constr) {
             throw new TypeError('Component must be registered');
         }
-        if (el == null) {
+        if (el === undefined) {
             el = document.createElement(constr.elementIs);
         }
         else if (typeof el == 'string') {

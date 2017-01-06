@@ -1,4 +1,5 @@
 import { IEvent, EventEmitter, JS, Utils } from 'cellx';
+import { Template as BemlTemplate } from '@riim/beml';
 import htmlToFragment from 'html-to-fragment';
 import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
@@ -100,7 +101,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static i18n: { [key: string]: any };
 
 	static template: string | IComponentTemplate | null;
-	static bemlTemplate: string | null;
+	static bemlTemplate: string | BemlTemplate | null;
 
 	static _rawContent: DocumentFragment | undefined;
 
@@ -186,7 +187,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			throw new TypeError('Component must be registered');
 		}
 
-		if (el == null) {
+		if (el === undefined) {
 			el = document.createElement(constr.elementIs);
 		} else if (typeof el == 'string') {
 			let elIs = constr.elementIs;
