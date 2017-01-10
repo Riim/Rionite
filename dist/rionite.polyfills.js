@@ -3599,7 +3599,8 @@ exports.default = htmlToFragment;
 "use strict";
 
 var beml_1 = __webpack_require__(24);
-exports.beml = beml_1.default;
+exports.BemlParser = beml_1.Parser;
+exports.BemlTemplate = beml_1.Template;
 var escape_string_1 = __webpack_require__(3);
 var escape_html_1 = __webpack_require__(9);
 var html_to_fragment_1 = __webpack_require__(25);

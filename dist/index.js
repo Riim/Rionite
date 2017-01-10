@@ -1,6 +1,7 @@
 "use strict";
 var beml_1 = require("@riim/beml");
-exports.beml = beml_1.default;
+exports.BemlParser = beml_1.Parser;
+exports.BemlTemplate = beml_1.Template;
 var escape_string_1 = require("escape-string");
 var escape_html_1 = require("@riim/escape-html");
 var html_to_fragment_1 = require("html-to-fragment");

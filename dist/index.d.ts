@@ -1,4 +1,4 @@
-import beml from '@riim/beml';
+import { Parser as BemlParser, Template as BemlTemplate } from '@riim/beml';
 import { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, default as DisposableMixin } from './DisposableMixin';
 import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
@@ -26,4 +26,4 @@ declare let Utils: {
     defer: (cb: () => void, context?: any) => void;
     htmlToFragment: (html: string) => DocumentFragment;
 };
-export { beml, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IComponentElement, IComponentProperties, IComponentTemplate, IComponentElementClassNameMap, IComponentEvents, Component, d, TRtIfThenIfCell, TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, ElementAttributes, IComponentTemplateBlock, IComponentTemplateRenderer, IComponentTemplateBlockMap, ComponentTemplate, Utils };
+export { BemlParser, BemlTemplate, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IComponentElement, IComponentProperties, IComponentTemplate, IComponentElementClassNameMap, IComponentEvents, Component, d, TRtIfThenIfCell, TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, ElementAttributes, IComponentTemplateBlock, IComponentTemplateRenderer, IComponentTemplateBlockMap, ComponentTemplate, Utils };

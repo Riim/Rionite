@@ -1,4 +1,4 @@
-import beml from '@riim/beml';
+import { Parser as BemlParser, Template as BemlTemplate } from '@riim/beml';
 import escapeString from 'escape-string';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import htmlToFragment from 'html-to-fragment';
@@ -64,7 +64,8 @@ let Utils = {
 };
 
 export {
-	beml,
+	BemlParser,
+	BemlTemplate,
 	IDisposable,
 	IDisposableListening,
 	IDisposableTimeout,
