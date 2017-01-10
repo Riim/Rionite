@@ -12,10 +12,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var cellx_1 = require("cellx");
 var Component_1 = require("../Component");
-var d_1 = require("../d");
+var ElementProtoMixin_1 = require("../ElementProtoMixin");
 var bindContent_1 = require("../bindContent");
 var attachChildComponentElements_1 = require("../attachChildComponentElements");
 var Features_1 = require("../Features");
+var d_1 = require("../d");
 var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
 var RtContent = (function (_super) {
     __extends(RtContent, _super);
@@ -46,9 +47,11 @@ var RtContent = (function (_super) {
                         var selectedElCount = selectedEls.length;
                         if (selectedElCount) {
                             content = document.createDocumentFragment();
+                            ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
                             for (var i = 0; i < selectedElCount; i++) {
                                 content.appendChild(selectedEls[i]);
                             }
+                            ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
                         }
                     }
                     else {
@@ -84,10 +87,12 @@ var RtContent = (function (_super) {
                 }
             }
             else {
-                var inputContent = props._content = document.createDocumentFragment();
+                var content_1 = props._content = document.createDocumentFragment();
+                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
                 for (var child = void 0; (child = el.firstChild);) {
-                    inputContent.appendChild(child);
+                    content_1.appendChild(child);
                 }
+                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
                 var ownerComponentInputContent = ownerComponent.props._content;
                 var selector = this.elementAttributes['select'];
                 if (selector) {
@@ -102,16 +107,18 @@ var RtContent = (function (_super) {
                     var selectedElCount = selectedEls.length;
                     if (selectedElCount) {
                         var rawContent = this._rawContent = document.createDocumentFragment();
+                        ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
                         for (var i = 0; i < selectedElCount; i++) {
                             rawContent.appendChild(selectedEls[i].cloneNode(true));
                         }
+                        ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
                     }
                     else {
-                        this._rawContent = inputContent;
+                        this._rawContent = content_1;
                     }
                 }
                 else {
-                    this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
+                    this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : content_1;
                 }
                 this.isReady = true;
             }

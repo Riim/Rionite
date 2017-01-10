@@ -3,13 +3,13 @@ import { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInter
 import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
 import { IComponentElement, IComponentProperties, IComponentTemplate, IComponentElementClassNameMap, IComponentEvents, default as Component } from './Component';
-import d from './d';
 import RtContent from './Components/rt-content';
 import { TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
 import RtIfElse from './Components/rt-if-else';
 import { TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, default as RtRepeat } from './Components/rt-repeat';
 import ElementAttributes from './ElementAttributes';
 import { IComponentTemplateBlock, IComponentTemplateRenderer, IComponentTemplateBlockMap, default as ComponentTemplate } from './ComponentTemplate';
+import d from './d';
 declare let Components: {
     RtContent: typeof RtContent;
     RtIfThen: typeof RtIfThen;
@@ -26,4 +26,4 @@ declare let Utils: {
     defer: (cb: () => void, context?: any) => void;
     htmlToFragment: (html: string) => DocumentFragment;
 };
-export { BemlParser, BemlTemplate, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IComponentElement, IComponentProperties, IComponentTemplate, IComponentElementClassNameMap, IComponentEvents, Component, d, TRtIfThenIfCell, TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, ElementAttributes, IComponentTemplateBlock, IComponentTemplateRenderer, IComponentTemplateBlockMap, ComponentTemplate, Utils };
+export { BemlParser, BemlTemplate, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IComponentElement, IComponentProperties, IComponentTemplate, IComponentElementClassNameMap, IComponentEvents, Component, TRtIfThenIfCell, TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, ElementAttributes, IComponentTemplateBlock, IComponentTemplateRenderer, IComponentTemplateBlockMap, ComponentTemplate, d, Utils };

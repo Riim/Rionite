@@ -3,6 +3,7 @@ import { Template as BemlTemplate } from '@riim/beml';
 import htmlToFragment from 'html-to-fragment';
 import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
+import { ElementsController } from './ElementProtoMixin';
 import ElementAttributes from './ElementAttributes';
 import initElementClasses from './initElementClasses';
 import initElementAttributes from './initElementAttributes';
@@ -283,9 +284,11 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			} else {
 				let inputContent = this.props._content = document.createDocumentFragment();
 
+				ElementsController.skipConnectedDisconnectedCallbacks = true;
 				for (let child: Node | null; (child = el.firstChild);) {
 					inputContent.appendChild(child);
 				}
+				ElementsController.skipConnectedDisconnectedCallbacks = false;
 
 				let rawContent = constr._rawContent;
 

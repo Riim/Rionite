@@ -22,7 +22,6 @@ import {
 	IComponentEvents,
 	default as Component
 } from './Component';
-import d from './d';
 import RtContent from './Components/rt-content';
 import { TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
 import RtIfElse from './Components/rt-if-else';
@@ -40,6 +39,7 @@ import {
 	IComponentTemplateBlockMap,
 	default as ComponentTemplate
 } from './ComponentTemplate';
+import d from './d';
 import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
 import isRegExp from './Utils/isRegExp';
@@ -90,8 +90,6 @@ export {
 	IComponentEvents,
 	Component,
 
-	d,
-
 	TRtIfThenIfCell,
 	TRtRepeatListCell,
 	TRtRepeatItem,
@@ -105,6 +103,8 @@ export {
 	IComponentTemplateRenderer,
 	IComponentTemplateBlockMap,
 	ComponentTemplate,
+
+	d,
 
 	Utils
 };

@@ -12,13 +12,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var cellx_1 = require("cellx");
 var Component_1 = require("../Component");
-var d_1 = require("../d");
 var compileKeypath_1 = require("../compileKeypath");
 var bindContent_1 = require("../bindContent");
 var attachChildComponentElements_1 = require("../attachChildComponentElements");
 var namePattern_1 = require("../namePattern");
 var keypathPattern_1 = require("../keypathPattern");
 var Features_1 = require("../Features");
+var d_1 = require("../d");
 var Map = cellx_1.JS.Map;
 var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;

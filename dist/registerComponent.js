@@ -22,7 +22,7 @@ function registerComponent(componentConstr) {
     }
     var props = componentConstr.props;
     if (props !== undefined) {
-        if (props && (props['_content'] || props['context'])) {
+        if (props && (props['content'] || props['_content'] || props['context'])) {
             throw new TypeError("No need to declare property \"" + (props['_content'] ? '_content' : 'context') + "\"");
         }
         componentConstr.elementAttributes = props;

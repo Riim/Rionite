@@ -1,12 +1,12 @@
 import { ObservableList, Cell, JS, Utils } from 'cellx';
 import Component from '../Component';
-import d from '../d';
 import compileKeypath from '../compileKeypath';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import namePattern from '../namePattern';
 import keypathPattern from '../keypathPattern';
 import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
+import d from '../d';
 
 let Map = JS.Map;
 let nextTick = Utils.nextTick;

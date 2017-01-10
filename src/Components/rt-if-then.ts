@@ -1,11 +1,11 @@
 import { Cell, Utils } from 'cellx';
 import Component from '../Component';
-import d from '../d';
 import compileKeypath from '../compileKeypath';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import keypathPattern from '../keypathPattern';
 import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
+import d from '../d';
 
 let nextTick = Utils.nextTick;
 

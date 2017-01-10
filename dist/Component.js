@@ -8,6 +8,7 @@ var cellx_1 = require("cellx");
 var html_to_fragment_1 = require("html-to-fragment");
 var DisposableMixin_1 = require("./DisposableMixin");
 var registerComponent_1 = require("./registerComponent");
+var ElementProtoMixin_1 = require("./ElementProtoMixin");
 var ElementAttributes_1 = require("./ElementAttributes");
 var initElementClasses_1 = require("./initElementClasses");
 var initElementAttributes_1 = require("./initElementAttributes");
@@ -181,9 +182,11 @@ var Component = (function (_super) {
             }
             else {
                 var inputContent = this.props._content = document.createDocumentFragment();
+                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
                 for (var child = void 0; (child = el.firstChild);) {
                     inputContent.appendChild(child);
                 }
+                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
                     rawContent = constr._rawContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));

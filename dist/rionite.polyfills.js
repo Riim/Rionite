@@ -1560,10 +1560,11 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var cellx_1 = __webpack_require__(0);
-var html_to_fragment_1 = __webpack_require__(25);
-var DisposableMixin_1 = __webpack_require__(15);
+var html_to_fragment_1 = __webpack_require__(26);
+var DisposableMixin_1 = __webpack_require__(16);
 var registerComponent_1 = __webpack_require__(44);
-var ElementAttributes_1 = __webpack_require__(16);
+var ElementProtoMixin_1 = __webpack_require__(10);
+var ElementAttributes_1 = __webpack_require__(17);
 var initElementClasses_1 = __webpack_require__(42);
 var initElementAttributes_1 = __webpack_require__(41);
 var bindContent_1 = __webpack_require__(7);
@@ -1736,9 +1737,11 @@ var Component = (function (_super) {
             }
             else {
                 var inputContent = this.props._content = document.createDocumentFragment();
+                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
                 for (var child = void 0; (child = el.firstChild);) {
                     inputContent.appendChild(child);
                 }
+                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
                     rawContent = constr._rawContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));
@@ -1985,7 +1988,7 @@ exports.default = attachChildComponentElements;
 "use strict";
 
 var cellx_1 = __webpack_require__(0);
-var ContentParser_1 = __webpack_require__(14);
+var ContentParser_1 = __webpack_require__(15);
 var compileContent_1 = __webpack_require__(37);
 var setAttribute_1 = __webpack_require__(33);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
@@ -2103,6 +2106,90 @@ exports.default = escapeHTML_1.default;
 
 "use strict";
 
+var cellx_1 = __webpack_require__(0);
+var defer_1 = __webpack_require__(18);
+var Symbol = cellx_1.JS.Symbol;
+var KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
+exports.ElementsController = {
+    skipConnectedDisconnectedCallbacks: false
+};
+var ElementProtoMixin = (_a = {
+        rioniteComponent: null,
+        get $c() {
+            return new this._rioniteComponentConstructor(this);
+        }
+    },
+    _a[KEY_ATTACHED] = false,
+    _a.connectedCallback = function () {
+        this[KEY_ATTACHED] = true;
+        if (exports.ElementsController.skipConnectedDisconnectedCallbacks) {
+            return;
+        }
+        var component = this.rioniteComponent;
+        if (component) {
+            if (component.isElementAttached) {
+                if (component._parentComponent === null) {
+                    component._parentComponent = undefined;
+                    component.elementMoved();
+                }
+            }
+            else {
+                component._parentComponent = undefined;
+                component.isElementAttached = true;
+                component._attachElement();
+            }
+        }
+        else {
+            defer_1.default(function () {
+                if (this[KEY_ATTACHED]) {
+                    var component_1 = this.$c;
+                    component_1._parentComponent = undefined;
+                    if (!component_1.parentComponent) {
+                        component_1.isElementAttached = true;
+                        component_1._attachElement();
+                    }
+                }
+            }, this);
+        }
+    },
+    _a.disconnectedCallback = function () {
+        this[KEY_ATTACHED] = false;
+        if (exports.ElementsController.skipConnectedDisconnectedCallbacks) {
+            return;
+        }
+        var component = this.rioniteComponent;
+        if (component && component.isElementAttached) {
+            component._parentComponent = null;
+            defer_1.default(function () {
+                if (component._parentComponent === null && component.isElementAttached) {
+                    component.isElementAttached = false;
+                    component._detachElement();
+                }
+            });
+        }
+    },
+    _a.attributeChangedCallback = function (name, oldValue, value) {
+        var component = this.rioniteComponent;
+        if (component && component.isReady) {
+            var attrs = component.elementAttributes;
+            var privateName = '_' + name;
+            if (attrs[privateName]) {
+                attrs[privateName].set(value);
+            }
+        }
+    },
+    _a);
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = ElementProtoMixin;
+var _a;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var reHump = /-?([A-Z])([^A-Z])/g;
 var reLongHump = /-?([A-Z]+)/g;
 var reMinus = /^-/;
@@ -2119,12 +2206,12 @@ exports.default = hyphenize;
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var getText_1 = __webpack_require__(21);
+var getText_1 = __webpack_require__(22);
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = {
     or: function or(value, arg) {
@@ -2187,7 +2274,7 @@ exports.default = {
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2198,7 +2285,7 @@ exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\.(?:" + namePatter
 
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2216,12 +2303,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var d_1 = __webpack_require__(2);
-var compileKeypath_1 = __webpack_require__(20);
+var compileKeypath_1 = __webpack_require__(21);
 var bindContent_1 = __webpack_require__(7);
 var attachChildComponentElements_1 = __webpack_require__(6);
-var keypathPattern_1 = __webpack_require__(12);
+var keypathPattern_1 = __webpack_require__(13);
 var Features_1 = __webpack_require__(4);
+var d_1 = __webpack_require__(2);
 var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
 var reKeypath = RegExp("^" + keypathPattern_1.default + "$");
@@ -2313,14 +2400,14 @@ exports.default = RtIfThen;
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var keypathToJSExpression_1 = __webpack_require__(22);
+var keypathToJSExpression_1 = __webpack_require__(23);
 var namePattern_1 = __webpack_require__(8);
-var keypathPattern_1 = __webpack_require__(12);
+var keypathPattern_1 = __webpack_require__(13);
 var ContentNodeType;
 (function (ContentNodeType) {
     ContentNodeType[ContentNodeType["TEXT"] = 1] = "TEXT";
@@ -2656,7 +2743,7 @@ exports.default = ContentParser;
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2825,7 +2912,7 @@ exports.default = DisposableMixin;
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2838,7 +2925,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var cellx_1 = __webpack_require__(0);
 var attributeTypeHandlerMap_1 = __webpack_require__(34);
 var camelize_1 = __webpack_require__(5);
-var hyphenize_1 = __webpack_require__(10);
+var hyphenize_1 = __webpack_require__(11);
 var Map = cellx_1.JS.Map;
 var typeMap = new Map([
     [Boolean, 'boolean'],
@@ -2965,7 +3052,7 @@ exports.default = ElementAttributes;
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2999,7 +3086,7 @@ exports.default = defer;
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3013,7 +3100,7 @@ exports.default = isRegExp;
 
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3057,12 +3144,12 @@ exports.default = bindingToJSExpression;
 
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var keypathToJSExpression_1 = __webpack_require__(22);
+var keypathToJSExpression_1 = __webpack_require__(23);
 var cache = Object.create(null);
 function compileKeypath(keypath) {
     return cache[keypath] || (cache[keypath] = Function("var temp; return " + keypathToJSExpression_1.default(keypath) + ";"));
@@ -3072,7 +3159,7 @@ exports.default = compileKeypath;
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3162,7 +3249,7 @@ configure({
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3189,7 +3276,7 @@ exports.default = keypathToJSExpression;
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3548,19 +3635,19 @@ exports.default = Parser;
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Parser_1 = __webpack_require__(23);
+var Parser_1 = __webpack_require__(24);
 exports.Parser = Parser_1.default;
 var Template_1 = __webpack_require__(45);
 exports.Template = Template_1.default;
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3593,39 +3680,39 @@ exports.default = htmlToFragment;
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var beml_1 = __webpack_require__(24);
+var beml_1 = __webpack_require__(25);
 exports.BemlParser = beml_1.Parser;
 exports.BemlTemplate = beml_1.Template;
 var escape_string_1 = __webpack_require__(3);
 var escape_html_1 = __webpack_require__(9);
-var html_to_fragment_1 = __webpack_require__(25);
-var DisposableMixin_1 = __webpack_require__(15);
+var html_to_fragment_1 = __webpack_require__(26);
+var DisposableMixin_1 = __webpack_require__(16);
 exports.DisposableMixin = DisposableMixin_1.default;
-var formatters_1 = __webpack_require__(11);
+var formatters_1 = __webpack_require__(12);
 exports.formatters = formatters_1.default;
-var getText_1 = __webpack_require__(21);
+var getText_1 = __webpack_require__(22);
 exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
+var rt_content_1 = __webpack_require__(29);
+var rt_if_then_1 = __webpack_require__(14);
+var rt_if_else_1 = __webpack_require__(30);
+var rt_repeat_1 = __webpack_require__(31);
+var ElementAttributes_1 = __webpack_require__(17);
+exports.ElementAttributes = ElementAttributes_1.default;
+var ComponentTemplate_1 = __webpack_require__(28);
+exports.ComponentTemplate = ComponentTemplate_1.default;
 var d_1 = __webpack_require__(2);
 exports.d = d_1.default;
-var rt_content_1 = __webpack_require__(28);
-var rt_if_then_1 = __webpack_require__(13);
-var rt_if_else_1 = __webpack_require__(29);
-var rt_repeat_1 = __webpack_require__(30);
-var ElementAttributes_1 = __webpack_require__(16);
-exports.ElementAttributes = ElementAttributes_1.default;
-var ComponentTemplate_1 = __webpack_require__(27);
-exports.ComponentTemplate = ComponentTemplate_1.default;
 var camelize_1 = __webpack_require__(5);
-var hyphenize_1 = __webpack_require__(10);
-var isRegExp_1 = __webpack_require__(18);
-var defer_1 = __webpack_require__(17);
+var hyphenize_1 = __webpack_require__(11);
+var isRegExp_1 = __webpack_require__(19);
+var defer_1 = __webpack_require__(18);
 var Components = {
     RtContent: rt_content_1.default,
     RtIfThen: rt_if_then_1.default,
@@ -3647,7 +3734,7 @@ exports.Utils = Utils;
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3724,7 +3811,7 @@ exports.default = ComponentTemplate;
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3742,10 +3829,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var d_1 = __webpack_require__(2);
+var ElementProtoMixin_1 = __webpack_require__(10);
 var bindContent_1 = __webpack_require__(7);
 var attachChildComponentElements_1 = __webpack_require__(6);
 var Features_1 = __webpack_require__(4);
+var d_1 = __webpack_require__(2);
 var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
 var RtContent = (function (_super) {
     __extends(RtContent, _super);
@@ -3776,9 +3864,11 @@ var RtContent = (function (_super) {
                         var selectedElCount = selectedEls.length;
                         if (selectedElCount) {
                             content = document.createDocumentFragment();
+                            ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
                             for (var i = 0; i < selectedElCount; i++) {
                                 content.appendChild(selectedEls[i]);
                             }
+                            ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
                         }
                     }
                     else {
@@ -3814,10 +3904,12 @@ var RtContent = (function (_super) {
                 }
             }
             else {
-                var inputContent = props._content = document.createDocumentFragment();
+                var content_1 = props._content = document.createDocumentFragment();
+                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
                 for (var child = void 0; (child = el.firstChild);) {
-                    inputContent.appendChild(child);
+                    content_1.appendChild(child);
                 }
+                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
                 var ownerComponentInputContent = ownerComponent.props._content;
                 var selector = this.elementAttributes['select'];
                 if (selector) {
@@ -3832,16 +3924,18 @@ var RtContent = (function (_super) {
                     var selectedElCount = selectedEls.length;
                     if (selectedElCount) {
                         var rawContent = this._rawContent = document.createDocumentFragment();
+                        ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
                         for (var i = 0; i < selectedElCount; i++) {
                             rawContent.appendChild(selectedEls[i].cloneNode(true));
                         }
+                        ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
                     }
                     else {
-                        this._rawContent = inputContent;
+                        this._rawContent = content_1;
                     }
                 }
                 else {
-                    this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
+                    this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : content_1;
                 }
                 this.isReady = true;
             }
@@ -3885,7 +3979,7 @@ exports.default = RtContent;
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3902,7 +3996,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 var d_1 = __webpack_require__(2);
-var rt_if_then_1 = __webpack_require__(13);
+var rt_if_then_1 = __webpack_require__(14);
 var RtIfElse = (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
@@ -3923,7 +4017,7 @@ exports.default = RtIfElse;
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3941,13 +4035,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var d_1 = __webpack_require__(2);
-var compileKeypath_1 = __webpack_require__(20);
+var compileKeypath_1 = __webpack_require__(21);
 var bindContent_1 = __webpack_require__(7);
 var attachChildComponentElements_1 = __webpack_require__(6);
 var namePattern_1 = __webpack_require__(8);
-var keypathPattern_1 = __webpack_require__(12);
+var keypathPattern_1 = __webpack_require__(13);
 var Features_1 = __webpack_require__(4);
+var d_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
@@ -4150,81 +4244,6 @@ exports.default = RtRepeat;
 
 
 /***/ },
-/* 31 */
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var cellx_1 = __webpack_require__(0);
-var defer_1 = __webpack_require__(17);
-var Symbol = cellx_1.JS.Symbol;
-var KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
-var ElementProtoMixin = (_a = {
-        rioniteComponent: null,
-        get $c() {
-            return new this._rioniteComponentConstructor(this);
-        }
-    },
-    _a[KEY_ATTACHED] = false,
-    _a.connectedCallback = function () {
-        this[KEY_ATTACHED] = true;
-        var component = this.rioniteComponent;
-        if (component) {
-            if (component.isElementAttached) {
-                if (component._parentComponent === null) {
-                    component._parentComponent = undefined;
-                    component.elementMoved();
-                }
-            }
-            else {
-                component._parentComponent = undefined;
-                component.isElementAttached = true;
-                component._attachElement();
-            }
-        }
-        else {
-            defer_1.default(function () {
-                if (this[KEY_ATTACHED]) {
-                    var component_1 = this.$c;
-                    component_1._parentComponent = undefined;
-                    if (!component_1.parentComponent) {
-                        component_1.isElementAttached = true;
-                        component_1._attachElement();
-                    }
-                }
-            }, this);
-        }
-    },
-    _a.disconnectedCallback = function () {
-        this[KEY_ATTACHED] = false;
-        var component = this.rioniteComponent;
-        if (component && component.isElementAttached) {
-            component._parentComponent = null;
-            defer_1.default(function () {
-                if (component._parentComponent === null && component.isElementAttached) {
-                    component.isElementAttached = false;
-                    component._detachElement();
-                }
-            });
-        }
-    },
-    _a.attributeChangedCallback = function (name, oldValue, value) {
-        var component = this.rioniteComponent;
-        if (component && component.isReady) {
-            var attrs = component.elementAttributes;
-            var privateName = '_' + name;
-            if (attrs[privateName]) {
-                attrs[privateName].set(value);
-            }
-        }
-    },
-    _a);
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = ElementProtoMixin;
-var _a;
-
-
-/***/ },
 /* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -4275,7 +4294,7 @@ exports.default = setAttribute;
 
 var cellx_1 = __webpack_require__(0);
 var escape_html_1 = __webpack_require__(9);
-var isRegExp_1 = __webpack_require__(18);
+var isRegExp_1 = __webpack_require__(19);
 var Map = cellx_1.JS.Map;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = new Map([
@@ -4359,8 +4378,8 @@ exports.default = bindEvents;
 
 "use strict";
 
-var bindingToJSExpression_1 = __webpack_require__(19);
-var formatters_1 = __webpack_require__(11);
+var bindingToJSExpression_1 = __webpack_require__(20);
+var formatters_1 = __webpack_require__(12);
 var cache = Object.create(null);
 function compileBinding(binding) {
     var bindingRaw = binding.raw;
@@ -4388,10 +4407,10 @@ exports.default = compileBinding;
 "use strict";
 
 var escape_string_1 = __webpack_require__(3);
-var ContentParser_1 = __webpack_require__(14);
-var bindingToJSExpression_1 = __webpack_require__(19);
+var ContentParser_1 = __webpack_require__(15);
+var bindingToJSExpression_1 = __webpack_require__(20);
 var compileBinding_1 = __webpack_require__(36);
-var formatters_1 = __webpack_require__(11);
+var formatters_1 = __webpack_require__(12);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var cache = Object.create(null);
 function compileContent(parsedContent, content) {
@@ -4655,10 +4674,10 @@ exports.default = onEvent;
 "use strict";
 
 var cellx_1 = __webpack_require__(0);
-var beml_1 = __webpack_require__(24);
+var beml_1 = __webpack_require__(25);
 var elementConstructorMap_1 = __webpack_require__(39);
-var ElementProtoMixin_1 = __webpack_require__(31);
-var hyphenize_1 = __webpack_require__(10);
+var ElementProtoMixin_1 = __webpack_require__(10);
+var hyphenize_1 = __webpack_require__(11);
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
 function initBlockNames(componentConstr, parentComponentConstr, elIs) {
@@ -4677,7 +4696,7 @@ function registerComponent(componentConstr) {
     }
     var props = componentConstr.props;
     if (props !== undefined) {
-        if (props && (props['_content'] || props['context'])) {
+        if (props && (props['content'] || props['_content'] || props['context'])) {
             throw new TypeError("No need to declare property \"" + (props['_content'] ? '_content' : 'context') + "\"");
         }
         componentConstr.elementAttributes = props;
@@ -4758,7 +4777,7 @@ exports.default = registerComponent;
 "use strict";
 
 var escape_string_1 = __webpack_require__(3);
-var Parser_1 = __webpack_require__(23);
+var Parser_1 = __webpack_require__(24);
 var selfClosingTags_1 = __webpack_require__(47);
 var renderAttributes_1 = __webpack_require__(46);
 var elDelimiter = '__';
@@ -4968,7 +4987,7 @@ exports.default = unescapeHTML;
 /* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(26);
+module.exports = __webpack_require__(27);
 
 
 /***/ }

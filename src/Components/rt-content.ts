@@ -1,9 +1,10 @@
 import { JS } from 'cellx';
 import Component from '../Component';
-import d from '../d';
+import { ElementsController } from '../ElementProtoMixin';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
+import d from '../d';
 
 let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 
@@ -52,9 +53,11 @@ export default class RtContent extends Component {
 						if (selectedElCount) {
 							content = document.createDocumentFragment();
 
+							ElementsController.skipConnectedDisconnectedCallbacks = true;
 							for (let i = 0; i < selectedElCount; i++) {
 								content.appendChild(selectedEls[i]);
 							}
+							ElementsController.skipConnectedDisconnectedCallbacks = false;
 						}
 					} else {
 						content = ownerComponentInputContent;
@@ -103,11 +106,13 @@ export default class RtContent extends Component {
 					el.removeChild(child);
 				}
 			} else {
-				let inputContent = props._content = document.createDocumentFragment();
+				let content = props._content = document.createDocumentFragment();
 
+				ElementsController.skipConnectedDisconnectedCallbacks = true;
 				for (let child: Node | null; (child = el.firstChild);) {
-					inputContent.appendChild(child);
+					content.appendChild(child);
 				}
+				ElementsController.skipConnectedDisconnectedCallbacks = false;
 
 				let ownerComponentInputContent = ownerComponent.props._content as DocumentFragment;
 				let selector = this.elementAttributes['select'];
@@ -129,14 +134,16 @@ export default class RtContent extends Component {
 					if (selectedElCount) {
 						let rawContent = this._rawContent = document.createDocumentFragment();
 
+						ElementsController.skipConnectedDisconnectedCallbacks = true;
 						for (let i = 0; i < selectedElCount; i++) {
 							rawContent.appendChild(selectedEls[i].cloneNode(true));
 						}
+						ElementsController.skipConnectedDisconnectedCallbacks = false;
 					} else {
-						this._rawContent = inputContent;
+						this._rawContent = content;
 					}
 				} else {
-					this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : inputContent;
+					this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : content;
 				}
 
 				this.isReady = true;

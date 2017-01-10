@@ -6,6 +6,10 @@ let Symbol = JS.Symbol;
 
 let KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
 
+export let ElementsController = {
+	skipConnectedDisconnectedCallbacks: false
+};
+
 let ElementProtoMixin = {
 	rioniteComponent: null,
 
@@ -17,6 +21,10 @@ let ElementProtoMixin = {
 
 	connectedCallback() {
 		this[KEY_ATTACHED] = true;
+
+		if (ElementsController.skipConnectedDisconnectedCallbacks) {
+			return;
+		}
 
 		let component = this.rioniteComponent as Component;
 
@@ -49,6 +57,10 @@ let ElementProtoMixin = {
 
 	disconnectedCallback() {
 		this[KEY_ATTACHED] = false;
+
+		if (ElementsController.skipConnectedDisconnectedCallbacks) {
+			return;
+		}
 
 		let component = this.rioniteComponent as Component;
 
