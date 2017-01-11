@@ -284,11 +284,11 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			} else {
 				let inputContent = this.props._content = document.createDocumentFragment();
 
-				ElementsController.skipConnectedDisconnectedCallbacks = true;
+				ElementsController.skipConnectionStatusCallbacks = true;
 				for (let child: Node | null; (child = el.firstChild);) {
 					inputContent.appendChild(child);
 				}
-				ElementsController.skipConnectedDisconnectedCallbacks = false;
+				ElementsController.skipConnectionStatusCallbacks = false;
 
 				let rawContent = constr._rawContent;
 

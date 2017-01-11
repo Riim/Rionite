@@ -1737,11 +1737,11 @@ var Component = (function (_super) {
             }
             else {
                 var inputContent = this.props._content = document.createDocumentFragment();
-                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
+                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                 for (var child = void 0; (child = el.firstChild);) {
                     inputContent.appendChild(child);
                 }
-                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
+                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
                     rawContent = constr._rawContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));
@@ -2125,7 +2125,7 @@ var defer_1 = __webpack_require__(18);
 var Symbol = cellx_1.JS.Symbol;
 var KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
 exports.ElementsController = {
-    skipConnectedDisconnectedCallbacks: false
+    skipConnectionStatusCallbacks: false
 };
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
@@ -2136,7 +2136,7 @@ var ElementProtoMixin = (_a = {
     _a[KEY_ATTACHED] = false,
     _a.connectedCallback = function () {
         this[KEY_ATTACHED] = true;
-        if (exports.ElementsController.skipConnectedDisconnectedCallbacks) {
+        if (exports.ElementsController.skipConnectionStatusCallbacks) {
             return;
         }
         var component = this.rioniteComponent;
@@ -2168,7 +2168,7 @@ var ElementProtoMixin = (_a = {
     },
     _a.disconnectedCallback = function () {
         this[KEY_ATTACHED] = false;
-        if (exports.ElementsController.skipConnectedDisconnectedCallbacks) {
+        if (exports.ElementsController.skipConnectionStatusCallbacks) {
             return;
         }
         var component = this.rioniteComponent;
@@ -3878,11 +3878,11 @@ var RtContent = (function (_super) {
                         var selectedElCount = selectedEls.length;
                         if (selectedElCount) {
                             content = document.createDocumentFragment();
-                            ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
+                            ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                             for (var i = 0; i < selectedElCount; i++) {
                                 content.appendChild(selectedEls[i]);
                             }
-                            ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
+                            ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                         }
                     }
                     else {
@@ -3903,7 +3903,7 @@ var RtContent = (function (_super) {
                     }
                     el.appendChild(content);
                 }
-                if (!Features_1.nativeCustomElements && childComponents) {
+                if ((!content || !Features_1.nativeCustomElements) && childComponents) {
                     attachChildComponentElements_1.default(childComponents);
                 }
                 this.isReady = true;
@@ -3919,11 +3919,11 @@ var RtContent = (function (_super) {
             }
             else {
                 var content_1 = props._content = document.createDocumentFragment();
-                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
+                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                 for (var child = void 0; (child = el.firstChild);) {
                     content_1.appendChild(child);
                 }
-                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
+                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                 var ownerComponentInputContent = ownerComponent.props._content;
                 var selector = this.elementAttributes['select'];
                 if (selector) {
@@ -3938,11 +3938,11 @@ var RtContent = (function (_super) {
                     var selectedElCount = selectedEls.length;
                     if (selectedElCount) {
                         var rawContent = this._rawContent = document.createDocumentFragment();
-                        ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
+                        ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                         for (var i = 0; i < selectedElCount; i++) {
                             rawContent.appendChild(selectedEls[i].cloneNode(true));
                         }
-                        ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
+                        ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                     }
                     else {
                         this._rawContent = content_1;

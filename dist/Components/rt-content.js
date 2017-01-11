@@ -47,11 +47,11 @@ var RtContent = (function (_super) {
                         var selectedElCount = selectedEls.length;
                         if (selectedElCount) {
                             content = document.createDocumentFragment();
-                            ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
+                            ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                             for (var i = 0; i < selectedElCount; i++) {
                                 content.appendChild(selectedEls[i]);
                             }
-                            ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
+                            ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                         }
                     }
                     else {
@@ -72,7 +72,7 @@ var RtContent = (function (_super) {
                     }
                     el.appendChild(content);
                 }
-                if (!Features_1.nativeCustomElements && childComponents) {
+                if ((!content || !Features_1.nativeCustomElements) && childComponents) {
                     attachChildComponentElements_1.default(childComponents);
                 }
                 this.isReady = true;
@@ -88,11 +88,11 @@ var RtContent = (function (_super) {
             }
             else {
                 var content_1 = props._content = document.createDocumentFragment();
-                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
+                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                 for (var child = void 0; (child = el.firstChild);) {
                     content_1.appendChild(child);
                 }
-                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
+                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                 var ownerComponentInputContent = ownerComponent.props._content;
                 var selector = this.elementAttributes['select'];
                 if (selector) {
@@ -107,11 +107,11 @@ var RtContent = (function (_super) {
                     var selectedElCount = selectedEls.length;
                     if (selectedElCount) {
                         var rawContent = this._rawContent = document.createDocumentFragment();
-                        ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
+                        ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                         for (var i = 0; i < selectedElCount; i++) {
                             rawContent.appendChild(selectedEls[i].cloneNode(true));
                         }
-                        ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
+                        ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                     }
                     else {
                         this._rawContent = content_1;

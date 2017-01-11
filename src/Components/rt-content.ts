@@ -53,11 +53,11 @@ export default class RtContent extends Component {
 						if (selectedElCount) {
 							content = document.createDocumentFragment();
 
-							ElementsController.skipConnectedDisconnectedCallbacks = true;
+							ElementsController.skipConnectionStatusCallbacks = true;
 							for (let i = 0; i < selectedElCount; i++) {
 								content.appendChild(selectedEls[i]);
 							}
-							ElementsController.skipConnectedDisconnectedCallbacks = false;
+							ElementsController.skipConnectionStatusCallbacks = false;
 						}
 					} else {
 						content = ownerComponentInputContent;
@@ -91,7 +91,7 @@ export default class RtContent extends Component {
 					el.appendChild(content);
 				}
 
-				if (!nativeCustomElementsFeature && childComponents) {
+				if ((!content || !nativeCustomElementsFeature) && childComponents) {
 					attachChildComponentElements(childComponents);
 				}
 
@@ -108,11 +108,11 @@ export default class RtContent extends Component {
 			} else {
 				let content = props._content = document.createDocumentFragment();
 
-				ElementsController.skipConnectedDisconnectedCallbacks = true;
+				ElementsController.skipConnectionStatusCallbacks = true;
 				for (let child: Node | null; (child = el.firstChild);) {
 					content.appendChild(child);
 				}
-				ElementsController.skipConnectedDisconnectedCallbacks = false;
+				ElementsController.skipConnectionStatusCallbacks = false;
 
 				let ownerComponentInputContent = ownerComponent.props._content as DocumentFragment;
 				let selector = this.elementAttributes['select'];
@@ -134,11 +134,11 @@ export default class RtContent extends Component {
 					if (selectedElCount) {
 						let rawContent = this._rawContent = document.createDocumentFragment();
 
-						ElementsController.skipConnectedDisconnectedCallbacks = true;
+						ElementsController.skipConnectionStatusCallbacks = true;
 						for (let i = 0; i < selectedElCount; i++) {
 							rawContent.appendChild(selectedEls[i].cloneNode(true));
 						}
-						ElementsController.skipConnectedDisconnectedCallbacks = false;
+						ElementsController.skipConnectionStatusCallbacks = false;
 					} else {
 						this._rawContent = content;
 					}

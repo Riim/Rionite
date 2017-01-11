@@ -4,7 +4,7 @@ var defer_1 = require("./Utils/defer");
 var Symbol = cellx_1.JS.Symbol;
 var KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
 exports.ElementsController = {
-    skipConnectedDisconnectedCallbacks: false
+    skipConnectionStatusCallbacks: false
 };
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
@@ -15,7 +15,7 @@ var ElementProtoMixin = (_a = {
     _a[KEY_ATTACHED] = false,
     _a.connectedCallback = function () {
         this[KEY_ATTACHED] = true;
-        if (exports.ElementsController.skipConnectedDisconnectedCallbacks) {
+        if (exports.ElementsController.skipConnectionStatusCallbacks) {
             return;
         }
         var component = this.rioniteComponent;
@@ -47,7 +47,7 @@ var ElementProtoMixin = (_a = {
     },
     _a.disconnectedCallback = function () {
         this[KEY_ATTACHED] = false;
-        if (exports.ElementsController.skipConnectedDisconnectedCallbacks) {
+        if (exports.ElementsController.skipConnectionStatusCallbacks) {
             return;
         }
         var component = this.rioniteComponent;

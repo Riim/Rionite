@@ -182,11 +182,11 @@ var Component = (function (_super) {
             }
             else {
                 var inputContent = this.props._content = document.createDocumentFragment();
-                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = true;
+                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                 for (var child = void 0; (child = el.firstChild);) {
                     inputContent.appendChild(child);
                 }
-                ElementProtoMixin_1.ElementsController.skipConnectedDisconnectedCallbacks = false;
+                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
                     rawContent = constr._rawContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));

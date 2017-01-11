@@ -1,6 +1,6 @@
 import Component from './Component';
 export declare let ElementsController: {
-    skipConnectedDisconnectedCallbacks: boolean;
+    skipConnectionStatusCallbacks: boolean;
 };
 declare let ElementProtoMixin: {
     [x: string]: boolean | Component | ((name: string, oldValue: string | null, value: string | null) => void) | null;
