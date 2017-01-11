@@ -1,8 +1,22 @@
 "use strict";
-var div = document.createElement('div');
-div.innerHTML = '<template>1</template>';
-var template = div.firstChild;
-exports.templateTag = !template.firstChild;
-var CustomElementRegistry = window.CustomElementRegistry;
-exports.nativeCustomElements = !!CustomElementRegistry &&
-    Object.prototype.toString.call(CustomElementRegistry).indexOf('[native code]') > -1;
+var dummyEl = document.createElement('div');
+dummyEl.innerHTML = '<template>1</template>';
+exports.templateTag = !dummyEl.firstChild.firstChild;
+var nativeCustomElementsFeature = false;
+function TestNativeCustomElementsFeatureElement(self) {
+    return HTMLElement.call(this, self);
+}
+Object.defineProperty(TestNativeCustomElementsFeatureElement, 'observedAttributes', {
+    get: function () {
+        return ['test'];
+    }
+});
+TestNativeCustomElementsFeatureElement.prototype = Object.create(HTMLElement.prototype);
+TestNativeCustomElementsFeatureElement.prototype.constructor = TestNativeCustomElementsFeatureElement;
+TestNativeCustomElementsFeatureElement.prototype.attributeChangedCallback = function () {
+    nativeCustomElementsFeature = true;
+};
+window.customElements.define('test-native-custom-elements-feature-element', TestNativeCustomElementsFeatureElement);
+var testNCEFEl = document.createElement('test-native-custom-elements-feature-element');
+testNCEFEl.setAttribute('test', '');
+exports.nativeCustomElements = nativeCustomElementsFeature;

@@ -1,11 +1,30 @@
-let div = document.createElement('div');
-div.innerHTML = '<template>1</template>';
+let dummyEl = document.createElement('div');
 
-let template = div.firstChild as HTMLElement;
+dummyEl.innerHTML = '<template>1</template>';
+export let templateTag = !(dummyEl.firstChild as HTMLElement).firstChild;
 
-export let templateTag = !template.firstChild;
+let nativeCustomElementsFeature = false;
 
-let CustomElementRegistry = (window as any).CustomElementRegistry;
+function TestNativeCustomElementsFeatureElement(self: any) {
+	return HTMLElement.call(this, self);
+}
+Object.defineProperty(TestNativeCustomElementsFeatureElement, 'observedAttributes', {
+	get() {
+		return ['test'];
+	}
+});
+TestNativeCustomElementsFeatureElement.prototype = Object.create(HTMLElement.prototype);
+TestNativeCustomElementsFeatureElement.prototype.constructor = TestNativeCustomElementsFeatureElement;
+TestNativeCustomElementsFeatureElement.prototype.attributeChangedCallback = function() {
+	nativeCustomElementsFeature = true;
+};
 
-export let nativeCustomElements = !!CustomElementRegistry &&
-	Object.prototype.toString.call(CustomElementRegistry).indexOf('[native code]') > -1;
+(window as any).customElements.define(
+	'test-native-custom-elements-feature-element',
+	TestNativeCustomElementsFeatureElement
+);
+
+let testNCEFEl = document.createElement('test-native-custom-elements-feature-element');
+testNCEFEl.setAttribute('test', '');
+
+export let nativeCustomElements = nativeCustomElementsFeature;
