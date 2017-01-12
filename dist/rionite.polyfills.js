@@ -1948,8 +1948,9 @@ Object.defineProperty(TestNativeCustomElementsFeatureElement, 'observedAttribute
         return ['test'];
     }
 });
-TestNativeCustomElementsFeatureElement.prototype = Object.create(HTMLElement.prototype);
-TestNativeCustomElementsFeatureElement.prototype.constructor = TestNativeCustomElementsFeatureElement;
+TestNativeCustomElementsFeatureElement.prototype = Object.create(HTMLElement.prototype, {
+    constructor: { value: TestNativeCustomElementsFeatureElement }
+});
 TestNativeCustomElementsFeatureElement.prototype.attributeChangedCallback = function () {
     nativeCustomElementsFeature = true;
 };
