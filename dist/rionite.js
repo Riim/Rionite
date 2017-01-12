@@ -474,23 +474,23 @@ var dummyEl = document.createElement('div');
 dummyEl.innerHTML = '<template>1</template>';
 exports.templateTag = !dummyEl.firstChild.firstChild;
 var nativeCustomElementsFeature = false;
-function TestNativeCustomElementsFeatureElement(self) {
+function TestNativeCustomElementsFeature(self) {
     return HTMLElement.call(this, self);
 }
-Object.defineProperty(TestNativeCustomElementsFeatureElement, 'observedAttributes', {
+Object.defineProperty(TestNativeCustomElementsFeature, 'observedAttributes', {
     get: function () {
         return ['test'];
     }
 });
-TestNativeCustomElementsFeatureElement.prototype = Object.create(HTMLElement.prototype, {
-    constructor: { value: TestNativeCustomElementsFeatureElement }
+TestNativeCustomElementsFeature.prototype = Object.create(HTMLElement.prototype, {
+    constructor: { value: TestNativeCustomElementsFeature }
 });
-TestNativeCustomElementsFeatureElement.prototype.attributeChangedCallback = function () {
+TestNativeCustomElementsFeature.prototype.attributeChangedCallback = function () {
     nativeCustomElementsFeature = true;
 };
-window.customElements.define('test-native-custom-elements-feature-element', TestNativeCustomElementsFeatureElement);
-var testNCEFEl = document.createElement('test-native-custom-elements-feature-element');
-testNCEFEl.setAttribute('test', '');
+window.customElements.define('test-native-custom-elements-feature', TestNativeCustomElementsFeature);
+var testNCEF = document.createElement('test-native-custom-elements-feature');
+testNCEF.setAttribute('test', '');
 exports.nativeCustomElements = nativeCustomElementsFeature;
 
 

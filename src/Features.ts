@@ -5,27 +5,24 @@ export let templateTag = !(dummyEl.firstChild as HTMLElement).firstChild;
 
 let nativeCustomElementsFeature = false;
 
-function TestNativeCustomElementsFeatureElement(self: any) {
+function TestNativeCustomElementsFeature(self: any) {
 	return HTMLElement.call(this, self);
 }
-Object.defineProperty(TestNativeCustomElementsFeatureElement, 'observedAttributes', {
+Object.defineProperty(TestNativeCustomElementsFeature, 'observedAttributes', {
 	get() {
 		return ['test'];
 	}
 });
-TestNativeCustomElementsFeatureElement.prototype = Object.create(HTMLElement.prototype, {
-	constructor: { value: TestNativeCustomElementsFeatureElement }
+TestNativeCustomElementsFeature.prototype = Object.create(HTMLElement.prototype, {
+	constructor: { value: TestNativeCustomElementsFeature }
 });
-TestNativeCustomElementsFeatureElement.prototype.attributeChangedCallback = function() {
+TestNativeCustomElementsFeature.prototype.attributeChangedCallback = function() {
 	nativeCustomElementsFeature = true;
 };
 
-(window as any).customElements.define(
-	'test-native-custom-elements-feature-element',
-	TestNativeCustomElementsFeatureElement
-);
+(window as any).customElements.define('test-native-custom-elements-feature', TestNativeCustomElementsFeature);
 
-let testNCEFEl = document.createElement('test-native-custom-elements-feature-element');
-testNCEFEl.setAttribute('test', '');
+let testNCEF = document.createElement('test-native-custom-elements-feature');
+testNCEF.setAttribute('test', '');
 
 export let nativeCustomElements = nativeCustomElementsFeature;
