@@ -21,7 +21,7 @@ var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
 var RtContent = (function (_super) {
     __extends(RtContent, _super);
     function RtContent() {
-        return _super.apply(this, arguments) || this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     RtContent.prototype._attachElement = function () {
         var props = this.props;

@@ -520,6 +520,7 @@ function attachChildComponentElements(childComponents) {
     for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
         var childComponent = childComponents_1[_i];
         if (!childComponent.isElementAttached) {
+            childComponent._parentComponent = undefined;
             childComponent.isElementAttached = true;
             childComponent._attachElement();
         }
@@ -863,7 +864,7 @@ var reKeypath = RegExp("^" + keypathPattern_1.default + "$");
 var RtIfThen = (function (_super) {
     __extends(RtIfThen, _super);
     function RtIfThen() {
-        var _this = _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._elseMode = false;
         return _this;
     }
@@ -2386,7 +2387,7 @@ var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
 var RtContent = (function (_super) {
     __extends(RtContent, _super);
     function RtContent() {
-        return _super.apply(this, arguments) || this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     RtContent.prototype._attachElement = function () {
         var props = this.props;
@@ -2548,7 +2549,7 @@ var rt_if_then_1 = __webpack_require__(14);
 var RtIfElse = (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
-        var _this = _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._elseMode = true;
         return _this;
     }
@@ -2597,7 +2598,7 @@ var reForAttributeValue = RegExp("^\\s*(" + namePattern_1.default + ")\\s+of\\s+
 var RtRepeat = (function (_super) {
     __extends(RtRepeat, _super);
     function RtRepeat() {
-        return _super.apply(this, arguments) || this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     RtRepeat.prototype._attachElement = function () {
         if (!this.initialized) {

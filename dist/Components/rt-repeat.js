@@ -26,7 +26,7 @@ var reForAttributeValue = RegExp("^\\s*(" + namePattern_1.default + ")\\s+of\\s+
 var RtRepeat = (function (_super) {
     __extends(RtRepeat, _super);
     function RtRepeat() {
-        return _super.apply(this, arguments) || this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     RtRepeat.prototype._attachElement = function () {
         if (!this.initialized) {

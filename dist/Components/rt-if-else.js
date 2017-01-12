@@ -15,7 +15,7 @@ var rt_if_then_1 = require("./rt-if-then");
 var RtIfElse = (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
-        var _this = _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._elseMode = true;
         return _this;
     }

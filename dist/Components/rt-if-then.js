@@ -24,7 +24,7 @@ var reKeypath = RegExp("^" + keypathPattern_1.default + "$");
 var RtIfThen = (function (_super) {
     __extends(RtIfThen, _super);
     function RtIfThen() {
-        var _this = _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._elseMode = false;
         return _this;
     }
