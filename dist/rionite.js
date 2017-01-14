@@ -1841,7 +1841,7 @@ var NodeType;
 })(NodeType = exports.NodeType || (exports.NodeType = {}));
 var reBlockNameOrNothing = /[a-zA-Z][\-\w]*|/g;
 var reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[_a-zA-Z][\-\w]*)?|/g;
-var reElementNameOrNothing = /[a-zA-Z][\-\w]*|/g;
+var reElementNameOrNothing = /[_a-zA-Z][\-\w]*|/g;
 var reAttributeNameOrNothing = /[_a-zA-Z][\-\w]*(?::[_a-zA-Z][\-\w]*)?|/g;
 var superCallStatement = 'super!';
 function normalizeMultilineText(text) {
@@ -3436,18 +3436,18 @@ function renderAttributes(elementClassesTemplate, el) {
     var elName = el.name;
     var attrs = el.attributes;
     if (attrs && attrs.list.length) {
-        var f_1 = !elName;
+        var f_1 = !elName || elName.charAt(0) == '_';
         var result = attrs.list.map(function (attr) {
             var value = attr.value;
             if (!f_1 && attr.name == 'class') {
                 f_1 = true;
-                value = elementClassesTemplate.join(elName + ' ') + value;
+                value = elementClassesTemplate.join(elName + ' ').trim() + value;
             }
             return " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
         });
-        return (f_1 ? '' : " class=\"" + elementClassesTemplate.join(elName + ' ') + "\"") + result.join('');
+        return (f_1 ? '' : " class=\"" + elementClassesTemplate.join(elName + ' ').trim() + "\"") + result.join('');
     }
-    return elName ? " class=\"" + elementClassesTemplate.join(elName + ' ') + "\"" : '';
+    return elName && elName.charAt(0) != '_' ? " class=\"" + elementClassesTemplate.join(elName + ' ').trim() + "\"" : '';
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = renderAttributes;
