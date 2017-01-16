@@ -3390,12 +3390,12 @@ var Template = (function () {
             if (node.source) {
                 this[name] = Function("return " + node.source.join(' + ') + ";");
                 if (node.containsSuperCall) {
-                    var inner_1 = Function('$super', "return " + node.innerSource.join(' + ') + ";");
+                    var inner_1 = Function('$super', "return " + (node.innerSource.join(' + ') || "''") + ";");
                     var parentElementRendererMap_1 = parent && parent._elementRendererMap;
                     this[name + '@content'] = function () { return inner_1.call(this, parentElementRendererMap_1); };
                 }
                 else {
-                    this[name + '@content'] = Function("return " + node.innerSource.join(' + ') + ";");
+                    this[name + '@content'] = Function("return " + (node.innerSource.join(' + ') || "''") + ";");
                 }
             }
         }, (this._elementRendererMap = Object.create(parent && parent._elementRendererMap)));
@@ -3448,23 +3448,22 @@ var Template = (function () {
                                 attrList[name_1] = index;
                             }
                         }
-                        var attrListZ = void 0;
                         if (elName.charAt(0) != '_') {
                             var hasAttrClass = hasOwn.call(attrList, 'class');
-                            attrListZ = { __proto__: attrList, length: attrCount + +!hasAttrClass };
+                            attrList = { __proto__: attrList, length: attrCount + +!hasAttrClass };
                             if (hasAttrClass) {
-                                attrListZ[attrList['class']] = ' class="' +
+                                attrList[attrList['class']] = ' class="' +
                                     this._elementClassesTemplate.join(elName + ' ') +
                                     attrList[attrList['class']].slice(8);
                             }
                             else {
-                                attrListZ[attrCount] = " class=\"" + this._elementClassesTemplate.join(elName + ' ').slice(0, -1) + "\"";
+                                attrList[attrCount] = " class=\"" + this._elementClassesTemplate.join(elName + ' ').slice(0, -1) + "\"";
                             }
                         }
                         else {
-                            attrListZ = attrList;
+                            attrList = { __proto__: attrList, length: attrCount };
                         }
-                        renderredAttrs = join.call(attrListZ, '');
+                        renderredAttrs = join.call(attrList, '');
                     }
                     else {
                         renderredAttrs = elName.charAt(0) != '_' ?
