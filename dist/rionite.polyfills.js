@@ -1539,7 +1539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 50);
+/******/ 	return __webpack_require__(__webpack_require__.s = 49);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1567,15 +1567,15 @@ var ElementProtoMixin_1 = __webpack_require__(10);
 var ElementAttributes_1 = __webpack_require__(17);
 var initElementClasses_1 = __webpack_require__(42);
 var initElementAttributes_1 = __webpack_require__(41);
-var bindContent_1 = __webpack_require__(7);
+var bindContent_1 = __webpack_require__(6);
 var componentBinding_1 = __webpack_require__(38);
-var attachChildComponentElements_1 = __webpack_require__(6);
+var attachChildComponentElements_1 = __webpack_require__(5);
 var bindEvents_1 = __webpack_require__(35);
 var eventTypes_1 = __webpack_require__(40);
 var onEvent_1 = __webpack_require__(43);
-var camelize_1 = __webpack_require__(5);
+var camelize_1 = __webpack_require__(4);
 var getUID_1 = __webpack_require__(32);
-var Features_1 = __webpack_require__(4);
+var Features_1 = __webpack_require__(3);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
@@ -1916,26 +1916,6 @@ exports.default = d;
 
 "use strict";
 
-var reEscapableChars = /[\\'"\r\n]/g;
-var charToEscapedMap = Object.create(null);
-charToEscapedMap['\\'] = '\\\\';
-charToEscapedMap['\''] = '\\\'';
-charToEscapedMap['"'] = '\\"';
-charToEscapedMap['\r'] = '\\r';
-charToEscapedMap['\n'] = '\\n';
-function escapeString(str) {
-    return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) { return charToEscapedMap[chr]; }) : str;
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = escapeString;
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 var dummyEl = document.createElement('div');
 dummyEl.innerHTML = '<template>1</template>';
 exports.templateTag = !dummyEl.firstChild.firstChild;
@@ -1961,7 +1941,7 @@ exports.nativeCustomElements = nativeCustomElementsFeature;
 
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1978,7 +1958,7 @@ exports.default = camelize;
 
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1998,7 +1978,7 @@ exports.default = attachChildComponentElements;
 
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2093,7 +2073,7 @@ exports.default = bindContent;
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2103,17 +2083,37 @@ exports.default = '[$_a-zA-Z][$\\w]*';
 
 
 /***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var escapeHTML_1 = __webpack_require__(47);
+exports.escapeHTML = escapeHTML_1.default;
+var unescapeHTML_1 = __webpack_require__(48);
+exports.unescapeHTML = unescapeHTML_1.default;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = escapeHTML_1.default;
+
+
+/***/ }),
 /* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var escapeHTML_1 = __webpack_require__(48);
-exports.escapeHTML = escapeHTML_1.default;
-var unescapeHTML_1 = __webpack_require__(49);
-exports.unescapeHTML = unescapeHTML_1.default;
+var reEscapableChars = /[\\'"\r\n]/g;
+var charToEscapedMap = Object.create(null);
+charToEscapedMap['\\'] = '\\\\';
+charToEscapedMap['\''] = '\\\'';
+charToEscapedMap['"'] = '\\"';
+charToEscapedMap['\r'] = '\\r';
+charToEscapedMap['\n'] = '\\n';
+function escapeString(str) {
+    return reEscapableChars.test(str) ? str.replace(reEscapableChars, function (chr) { return charToEscapedMap[chr]; }) : str;
+}
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = escapeHTML_1.default;
+exports.default = escapeString;
 
 
 /***/ }),
@@ -2295,7 +2295,7 @@ exports.default = {
 
 "use strict";
 
-var namePattern_1 = __webpack_require__(8);
+var namePattern_1 = __webpack_require__(7);
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\.(?:" + namePattern_1.default + "|\\d+))*";
 
@@ -2320,10 +2320,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var compileKeypath_1 = __webpack_require__(21);
-var bindContent_1 = __webpack_require__(7);
-var attachChildComponentElements_1 = __webpack_require__(6);
+var bindContent_1 = __webpack_require__(6);
+var attachChildComponentElements_1 = __webpack_require__(5);
 var keypathPattern_1 = __webpack_require__(13);
-var Features_1 = __webpack_require__(4);
+var Features_1 = __webpack_require__(3);
 var d_1 = __webpack_require__(2);
 var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
@@ -2422,7 +2422,7 @@ exports.default = RtIfThen;
 "use strict";
 
 var keypathToJSExpression_1 = __webpack_require__(23);
-var namePattern_1 = __webpack_require__(8);
+var namePattern_1 = __webpack_require__(7);
 var keypathPattern_1 = __webpack_require__(13);
 var ContentNodeType;
 (function (ContentNodeType) {
@@ -2940,7 +2940,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var cellx_1 = __webpack_require__(0);
 var attributeTypeHandlerMap_1 = __webpack_require__(34);
-var camelize_1 = __webpack_require__(5);
+var camelize_1 = __webpack_require__(4);
 var hyphenize_1 = __webpack_require__(11);
 var Map = cellx_1.JS.Map;
 var typeMap = new Map([
@@ -3309,7 +3309,7 @@ var reBlockNameOrNothing = /[a-zA-Z][\-\w]*|/g;
 var reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[_a-zA-Z][\-\w]*)?|/g;
 var reElementNameOrNothing = /[_a-zA-Z][\-\w]*|/g;
 var reAttributeNameOrNothing = /[_a-zA-Z][\-\w]*(?::[_a-zA-Z][\-\w]*)?|/g;
-var superCallStatement = 'super!';
+var reSuperCallOrNothing = /super(?:\.([_a-zA-Z][\-\w]*))?!|/g;
 function normalizeMultilineText(text) {
     return text.trim().replace(/\s*(?:\r\n?|\n)/g, '\n').replace(/\n\s+/g, '\n');
 }
@@ -3327,6 +3327,7 @@ var Parser = (function () {
         var decl = this.chr == '#' ? this._readBlockDeclaration() : null;
         return {
             nodeType: NodeType.BLOCK,
+            nodeName: '#root',
             declaration: decl,
             name: decl ? decl.blockName : undefined,
             content: content ? content.concat(this._readContent(false)) : this._readContent(false),
@@ -3352,8 +3353,8 @@ var Parser = (function () {
             raw: '#' + blockName
         };
     };
-    Parser.prototype._readContent = function (brackets) {
-        if (brackets) {
+    Parser.prototype._readContent = function (withBrackets) {
+        if (withBrackets) {
             this._next('{');
         }
         var content = [];
@@ -3370,7 +3371,7 @@ var Parser = (function () {
                     break;
                 }
                 case '': {
-                    if (brackets) {
+                    if (withBrackets) {
                         throw {
                             name: 'SyntaxError',
                             message: 'Missing "}" in compound statement',
@@ -3381,18 +3382,22 @@ var Parser = (function () {
                     return content;
                 }
                 default: {
-                    if (brackets) {
+                    if (withBrackets) {
                         if (this.chr == '}') {
                             this._next();
                             return content;
                         }
                         var at = this.at;
-                        if (this.beml.slice(at, at + superCallStatement.length) == superCallStatement) {
-                            this.chr = this.beml.charAt((this.at = at + superCallStatement.length));
+                        reSuperCallOrNothing.lastIndex = at;
+                        var superCallMatch = reSuperCallOrNothing.exec(this.beml);
+                        var superCallRaw = superCallMatch[0];
+                        if (superCallRaw) {
+                            this.chr = this.beml.charAt((this.at = at + superCallRaw.length));
                             content.push({
                                 nodeType: NodeType.SUPER_CALL,
+                                elementName: superCallMatch[1] || null,
                                 at: at,
-                                raw: 'super!'
+                                raw: superCallRaw
                             });
                             break;
                         }
@@ -3425,6 +3430,7 @@ var Parser = (function () {
         var content = this.chr == '{' ? this._readContent(true) : null;
         return {
             nodeType: NodeType.ELEMENT,
+            nodeName: elName,
             tagName: tagName,
             name: elName,
             attributes: attrs,
@@ -3439,55 +3445,62 @@ var Parser = (function () {
         if (this._skipWhitespaces() == ')') {
             this._next();
             return {
+                superCall: null,
                 list: [],
                 at: at,
                 raw: this.beml.slice(at, this.at)
             };
         }
+        var superCall;
         var list = [];
         for (;;) {
-            var name_1 = this._readName(reAttributeNameOrNothing);
-            if (!name_1) {
-                throw {
-                    name: 'SyntaxError',
-                    message: 'Invalid attribute name',
-                    at: this.at,
-                    beml: this.beml
-                };
-            }
-            if (this._skipWhitespaces() == '=') {
-                this._next();
-                var next = this._skipWhitespaces();
-                if (next == "'" || next == '"' || next == '`') {
-                    var str = this._readString();
-                    list.push({
-                        name: name_1,
-                        value: str.multiline ? normalizeMultilineText(str.value) : str.value
-                    });
-                }
-                else {
-                    var value = '';
-                    for (;;) {
-                        if (!next) {
-                            throw {
-                                name: 'SyntaxError',
-                                message: 'Invalid attribute',
-                                at: this.at,
-                                beml: this.beml
-                            };
-                        }
-                        if (next == '\r' || next == '\n' || next == ',' || next == ')') {
-                            list.push({ name: name_1, value: value.trim() });
-                            break;
-                        }
-                        value += next;
-                        next = this._next();
-                    }
-                }
+            if (!superCall && this.chr == 's' && (superCall = this._readSuperCall())) {
                 this._skipWhitespaces();
             }
             else {
-                list.push({ name: name_1, value: '' });
+                var name_1 = this._readName(reAttributeNameOrNothing);
+                if (!name_1) {
+                    throw {
+                        name: 'SyntaxError',
+                        message: 'Invalid attribute name',
+                        at: this.at,
+                        beml: this.beml
+                    };
+                }
+                if (this._skipWhitespaces() == '=') {
+                    this._next();
+                    var next = this._skipWhitespaces();
+                    if (next == "'" || next == '"' || next == '`') {
+                        var str = this._readString();
+                        list.push({
+                            name: name_1,
+                            value: str.multiline ? normalizeMultilineText(str.value) : str.value
+                        });
+                    }
+                    else {
+                        var value = '';
+                        for (;;) {
+                            if (!next) {
+                                throw {
+                                    name: 'SyntaxError',
+                                    message: 'Invalid attribute',
+                                    at: this.at,
+                                    beml: this.beml
+                                };
+                            }
+                            if (next == '\r' || next == '\n' || next == ',' || next == ')') {
+                                list.push({ name: name_1, value: value.trim() });
+                                break;
+                            }
+                            value += next;
+                            next = this._next();
+                        }
+                    }
+                    this._skipWhitespaces();
+                }
+                else {
+                    list.push({ name: name_1, value: '' });
+                }
             }
             if (this.chr == ')') {
                 this._next();
@@ -3507,10 +3520,27 @@ var Parser = (function () {
             }
         }
         return {
+            superCall: superCall || null,
             list: list,
             at: at,
             raw: this.beml.slice(at, this.at)
         };
+    };
+    Parser.prototype._readSuperCall = function () {
+        var at = this.at;
+        reSuperCallOrNothing.lastIndex = at;
+        var superCallMatch = reSuperCallOrNothing.exec(this.beml);
+        var superCallRaw = superCallMatch[0];
+        if (superCallRaw) {
+            this.chr = this.beml.charAt((this.at = at + superCallRaw.length));
+            return {
+                nodeType: NodeType.SUPER_CALL,
+                elementName: superCallMatch[1] || null,
+                at: at,
+                raw: superCallRaw
+            };
+        }
+        return null;
     };
     Parser.prototype._readTextNode = function () {
         var at = this.at;
@@ -3704,8 +3734,8 @@ exports.default = htmlToFragment;
 var beml_1 = __webpack_require__(25);
 exports.BemlParser = beml_1.Parser;
 exports.BemlTemplate = beml_1.Template;
-var escape_string_1 = __webpack_require__(3);
-var escape_html_1 = __webpack_require__(9);
+var escape_string_1 = __webpack_require__(9);
+var escape_html_1 = __webpack_require__(8);
 var html_to_fragment_1 = __webpack_require__(26);
 var DisposableMixin_1 = __webpack_require__(16);
 exports.DisposableMixin = DisposableMixin_1.default;
@@ -3725,7 +3755,7 @@ var ComponentTemplate_1 = __webpack_require__(28);
 exports.ComponentTemplate = ComponentTemplate_1.default;
 var d_1 = __webpack_require__(2);
 exports.d = d_1.default;
-var camelize_1 = __webpack_require__(5);
+var camelize_1 = __webpack_require__(4);
 var hyphenize_1 = __webpack_require__(11);
 var isRegExp_1 = __webpack_require__(19);
 var defer_1 = __webpack_require__(18);
@@ -3755,9 +3785,9 @@ exports.Utils = Utils;
 
 "use strict";
 
-var escape_string_1 = __webpack_require__(3);
-var escape_html_1 = __webpack_require__(9);
-var namePattern_1 = __webpack_require__(8);
+var escape_string_1 = __webpack_require__(9);
+var escape_html_1 = __webpack_require__(8);
+var namePattern_1 = __webpack_require__(7);
 var keypathPattern = '(?:' + namePattern_1.default + '|\\[\\d+\\])(?:\\.' + namePattern_1.default + '|\\[\\d+\\])*';
 var re = RegExp('\\{\\{(?:' +
     '\\s*(?:' +
@@ -3846,9 +3876,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var ElementProtoMixin_1 = __webpack_require__(10);
-var bindContent_1 = __webpack_require__(7);
-var attachChildComponentElements_1 = __webpack_require__(6);
-var Features_1 = __webpack_require__(4);
+var bindContent_1 = __webpack_require__(6);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var Features_1 = __webpack_require__(3);
 var d_1 = __webpack_require__(2);
 var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
 var RtContent = (function (_super) {
@@ -4052,11 +4082,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var compileKeypath_1 = __webpack_require__(21);
-var bindContent_1 = __webpack_require__(7);
-var attachChildComponentElements_1 = __webpack_require__(6);
-var namePattern_1 = __webpack_require__(8);
+var bindContent_1 = __webpack_require__(6);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var namePattern_1 = __webpack_require__(7);
 var keypathPattern_1 = __webpack_require__(13);
-var Features_1 = __webpack_require__(4);
+var Features_1 = __webpack_require__(3);
 var d_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var nextTick = cellx_1.Utils.nextTick;
@@ -4309,7 +4339,7 @@ exports.default = setAttribute;
 "use strict";
 
 var cellx_1 = __webpack_require__(0);
-var escape_html_1 = __webpack_require__(9);
+var escape_html_1 = __webpack_require__(8);
 var isRegExp_1 = __webpack_require__(19);
 var Map = cellx_1.JS.Map;
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -4422,7 +4452,7 @@ exports.default = compileBinding;
 
 "use strict";
 
-var escape_string_1 = __webpack_require__(3);
+var escape_string_1 = __webpack_require__(9);
 var ContentParser_1 = __webpack_require__(15);
 var bindingToJSExpression_1 = __webpack_require__(20);
 var compileBinding_1 = __webpack_require__(36);
@@ -4600,7 +4630,7 @@ exports.default = [
 
 "use strict";
 
-var camelize_1 = __webpack_require__(5);
+var camelize_1 = __webpack_require__(4);
 function initElementAttributes(component, constr) {
     var elAttrsConfig = constr.elementAttributes;
     if (elAttrsConfig) {
@@ -4792,10 +4822,12 @@ exports.default = registerComponent;
 
 "use strict";
 
-var escape_string_1 = __webpack_require__(3);
+var escape_string_1 = __webpack_require__(9);
+var escape_html_1 = __webpack_require__(8);
 var Parser_1 = __webpack_require__(24);
-var selfClosingTags_1 = __webpack_require__(47);
-var renderAttributes_1 = __webpack_require__(46);
+var selfClosingTags_1 = __webpack_require__(46);
+var hasOwn = Object.prototype.hasOwnProperty;
+var join = Array.prototype.join;
 var elDelimiter = '__';
 var Template = (function () {
     function Template(beml, opts) {
@@ -4808,61 +4840,134 @@ var Template = (function () {
         this._elementClassesTemplate = parent ?
             [blockName + elDelimiter].concat(parent._elementClassesTemplate) :
             [blockName + elDelimiter, ''];
-        this._nodes = [(this._currentNode = { elementName: null, source: null, innerSource: [], hasSuperCall: false })];
-        var nodeMap = this._nodeMap = {};
-        block.content.forEach(this._handleNode, this);
+        var rootNode = { elementName: null, source: null, innerSource: [], containsSuperCall: false };
+        this._currentNode = rootNode;
+        this._nodes = [rootNode];
+        var nodeMap = this._nodeMap = { '#root': rootNode };
+        for (var _i = 0, _a = block.content; _i < _a.length; _i++) {
+            var node = _a[_i];
+            this._handleNode(node, '#root');
+        }
         this._renderer = parent ?
             parent._renderer :
             Function("return " + this._currentNode.innerSource.join(' + ') + ";");
         Object.keys(nodeMap).forEach(function (name) {
             var node = nodeMap[name];
-            this[name] = Function("return " + node.source.join(' + ') + ";");
-            if (node.hasSuperCall) {
-                var inner_1 = Function('$super', "return " + node.innerSource.join(' + ') + ";");
-                var parentElementRenderer_1 = parent && parent._elementRendererMap[name + '@inner'];
-                this[name + '@inner'] = function () { return inner_1.call(this, parentElementRenderer_1); };
-            }
-            else {
-                this[name + '@inner'] = Function("return " + node.innerSource.join(' + ') + ";");
+            if (node.source) {
+                this[name] = Function("return " + node.source.join(' + ') + ";");
+                if (node.containsSuperCall) {
+                    var inner_1 = Function('$super', "return " + node.innerSource.join(' + ') + ";");
+                    var parentElementRendererMap_1 = parent && parent._elementRendererMap;
+                    this[name + '@content'] = function () { return inner_1.call(this, parentElementRendererMap_1); };
+                }
+                else {
+                    this[name + '@content'] = Function("return " + node.innerSource.join(' + ') + ";");
+                }
             }
         }, (this._elementRendererMap = Object.create(parent && parent._elementRendererMap)));
     }
-    Template.prototype._handleNode = function (node) {
+    Template.prototype._handleNode = function (node, parentNodeName) {
         switch (node.nodeType) {
             case Parser_1.NodeType.ELEMENT: {
+                var parent_1 = this.parent;
                 var nodes = this._nodes;
                 var el = node;
                 var tagName = el.tagName;
                 var elName = el.name;
+                var elAttrs = el.attributes;
                 var content = el.content;
-                var hasContent = content && content.length;
                 if (elName) {
+                    var attrListMap = this._attributeListMap ||
+                        (this._attributeListMap = Object.create(parent_1 && parent_1._attributeListMap || null));
+                    var attrCountMap = this._attributeCountMap ||
+                        (this._attributeCountMap = Object.create(parent_1 && parent_1._attributeCountMap || null));
+                    var renderredAttrs = void 0;
+                    if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
+                        var superCall = elAttrs.superCall;
+                        var attrList = void 0;
+                        var attrCount = void 0;
+                        if (superCall) {
+                            if (!parent_1) {
+                                throw new TypeError("Required parent template for \"" + superCall.raw + "\"");
+                            }
+                            attrList = attrListMap[elName] =
+                                Object.create(parent_1._attributeListMap[superCall.elementName || elName] || null);
+                            attrCount = attrCountMap[elName] =
+                                parent_1._attributeCountMap[superCall.elementName || elName] || 0;
+                        }
+                        else {
+                            attrList = attrListMap[elName] = {};
+                            attrCount = attrCountMap[elName] = 0;
+                        }
+                        for (var _i = 0, _a = elAttrs.list; _i < _a.length; _i++) {
+                            var attr = _a[_i];
+                            var name_1 = attr.name;
+                            var value = attr.value;
+                            var index = attrList[name_1];
+                            if (index === undefined) {
+                                attrList[attrCount] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
+                                attrList[name_1] = attrCount++;
+                                attrCountMap[elName] = attrCount;
+                            }
+                            else {
+                                attrList[index] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
+                                attrList[name_1] = index;
+                            }
+                        }
+                        var attrListZ = void 0;
+                        if (elName.charAt(0) != '_') {
+                            var hasAttrClass = hasOwn.call(attrList, 'class');
+                            attrListZ = { __proto__: attrList, length: attrCount + +!hasAttrClass };
+                            if (hasAttrClass) {
+                                attrListZ[attrList['class']] = ' class="' +
+                                    this._elementClassesTemplate.join(elName + ' ') +
+                                    attrList[attrList['class']].slice(8);
+                            }
+                            else {
+                                attrListZ[attrCount] = " class=\"" + this._elementClassesTemplate.join(elName + ' ').slice(0, -1) + "\"";
+                            }
+                        }
+                        else {
+                            attrListZ = attrList;
+                        }
+                        renderredAttrs = join.call(attrListZ, '');
+                    }
+                    else {
+                        renderredAttrs = elName.charAt(0) != '_' ?
+                            " class=\"" + this._elementClassesTemplate.join(elName + ' ').slice(0, -1) + "\"" :
+                            '';
+                    }
                     var currentNode = {
                         elementName: elName,
                         source: [
-                            "'<" + tagName + renderAttributes_1.default(this._elementClassesTemplate, el) + ">'",
-                            hasContent ?
-                                "this['" + elName + "@inner']() + '</" + tagName + ">'" :
-                                (tagName in selfClosingTags_1.default ? "''" : "'</" + tagName + ">'")
+                            "'<" + tagName + renderredAttrs + ">'",
+                            content && content.length ?
+                                "this['" + elName + "@content']() + '</" + tagName + ">'" :
+                                (!content && tagName in selfClosingTags_1.default ? "''" : "'</" + tagName + ">'")
                         ],
                         innerSource: [],
-                        hasSuperCall: false
+                        containsSuperCall: false
                     };
                     nodes.push((this._currentNode = currentNode));
                     this._nodeMap[elName] = currentNode;
                 }
                 else {
-                    this._currentNode.innerSource.push("'<" + tagName + renderAttributes_1.default(this._elementClassesTemplate, el) + ">'");
+                    this._currentNode.innerSource.push("'<" + tagName + (elAttrs ?
+                        elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') :
+                        '') + ">'");
                 }
-                if (hasContent) {
-                    content.forEach(this._handleNode, this);
+                if (content) {
+                    for (var _b = 0, content_1 = content; _b < content_1.length; _b++) {
+                        var contentNode = content_1[_b];
+                        this._handleNode(contentNode, elName || parentNodeName);
+                    }
                 }
                 if (elName) {
                     nodes.pop();
                     this._currentNode = nodes[nodes.length - 1];
                     this._currentNode.innerSource.push("this['" + elName + "']()");
                 }
-                else if (hasContent || !(tagName in selfClosingTags_1.default)) {
+                else if (content || !(tagName in selfClosingTags_1.default)) {
                     this._currentNode.innerSource.push("'</" + tagName + ">'");
                 }
                 break;
@@ -4872,8 +4977,8 @@ var Template = (function () {
                 break;
             }
             case Parser_1.NodeType.SUPER_CALL: {
-                this._currentNode.innerSource.push("$super.call(this)");
-                this._currentNode.hasSuperCall = true;
+                this._currentNode.innerSource.push("$super['" + (node.elementName || parentNodeName) + "@content'].call(this)");
+                this._currentNode.containsSuperCall = true;
                 break;
             }
         }
@@ -4892,35 +4997,6 @@ exports.default = Template;
 
 /***/ }),
 /* 46 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var escape_string_1 = __webpack_require__(3);
-var escape_html_1 = __webpack_require__(9);
-function renderAttributes(elementClassesTemplate, el) {
-    var elName = el.name;
-    var attrs = el.attributes;
-    if (attrs && attrs.list.length) {
-        var f_1 = !elName || elName.charAt(0) == '_';
-        var result = attrs.list.map(function (attr) {
-            var value = attr.value;
-            if (!f_1 && attr.name == 'class') {
-                f_1 = true;
-                value = elementClassesTemplate.join(elName + ' ').trim() + value;
-            }
-            return " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
-        });
-        return (f_1 ? '' : " class=\"" + elementClassesTemplate.join(elName + ' ').trim() + "\"") + result.join('');
-    }
-    return elName && elName.charAt(0) != '_' ? " class=\"" + elementClassesTemplate.join(elName + ' ').trim() + "\"" : '';
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = renderAttributes;
-
-
-/***/ }),
-/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4962,7 +5038,7 @@ exports.default = selfClosingTags;
 
 
 /***/ }),
-/* 48 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4981,7 +5057,7 @@ exports.default = escapeHTML;
 
 
 /***/ }),
-/* 49 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5000,7 +5076,7 @@ exports.default = unescapeHTML;
 
 
 /***/ }),
-/* 50 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(27);
