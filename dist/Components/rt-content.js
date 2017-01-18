@@ -31,10 +31,10 @@ var RtContent = (function (_super) {
             }
             else {
                 var ownerComponent = this.ownerComponent;
-                var ownerComponentInputContent = ownerComponent.props._content;
+                var ownerComponentInputContent = ownerComponent.props.content;
                 var content = void 0;
                 if (ownerComponentInputContent.firstChild) {
-                    var selector = this.elementAttributes['select'];
+                    var selector = this.props['select'];
                     if (selector) {
                         if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
                             var templates = ownerComponentInputContent.querySelectorAll('template');
@@ -87,14 +87,14 @@ var RtContent = (function (_super) {
                 }
             }
             else {
-                var content_1 = props._content = document.createDocumentFragment();
+                var content_1 = props.content = document.createDocumentFragment();
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                 for (var child = void 0; (child = el.firstChild);) {
                     content_1.appendChild(child);
                 }
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
-                var ownerComponentInputContent = ownerComponent.props._content;
-                var selector = this.elementAttributes['select'];
+                var ownerComponentInputContent = ownerComponent.props.content;
+                var selector = this.props['select'];
                 if (selector) {
                     if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
                         var templates = ownerComponentInputContent.querySelectorAll('template');
@@ -124,7 +124,7 @@ var RtContent = (function (_super) {
             }
             var content = this._rawContent.cloneNode(true);
             var getContext = props['getContext'];
-            var _b = this._rawContent == props._content ?
+            var _b = this._rawContent == props.content ?
                 bindContent_1.default(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) :
                 bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
                     ownerComponent[getContext](this, ownerComponent.props.context) :

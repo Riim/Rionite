@@ -3,9 +3,6 @@ declare let d: {
     Component: <T extends Component>(config: {
         elementIs?: string | undefined;
         elementExtends?: string | undefined;
-        elementAttributes?: {
-            [name: string]: any;
-        } | null | undefined;
         props?: {
             [name: string]: any;
         } | null | undefined;

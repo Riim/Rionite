@@ -21,11 +21,8 @@ function registerComponent(componentConstr) {
         throw new TypeError('Static property "elementIs" is required');
     }
     var props = componentConstr.props;
-    if (props !== undefined) {
-        if (props && (props['content'] || props['_content'] || props['context'])) {
-            throw new TypeError("No need to declare property \"" + (props['_content'] ? '_content' : 'context') + "\"");
-        }
-        componentConstr.elementAttributes = props;
+    if (props && (props['content'] || props['context'])) {
+        throw new TypeError("No need to declare property \"" + (props['content'] ? 'content' : 'context') + "\"");
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
     var bemlTemplate = componentConstr.bemlTemplate;
@@ -71,12 +68,12 @@ function registerComponent(componentConstr) {
         configurable: true,
         enumerable: true,
         get: function () {
-            var elAttrsConfig = componentConstr.elementAttributes;
-            if (!elAttrsConfig) {
+            var props = componentConstr.props;
+            if (!props) {
                 return [];
             }
             var observedAttrs = [];
-            for (var name_1 in elAttrsConfig) {
+            for (var name_1 in props) {
                 observedAttrs.push(hyphenize_1.default(name_1));
             }
             return observedAttrs;

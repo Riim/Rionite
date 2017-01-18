@@ -2,15 +2,11 @@ import { IEvent, EventEmitter } from 'cellx';
 import { Template as BemlTemplate } from '@riim/beml';
 import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
-import ElementAttributes from './ElementAttributes';
+import { IComponentProperties } from './ComponentProperties';
 import { IFreezableCell } from './componentBinding';
 export interface IComponentElement extends HTMLElement {
     rioniteComponent: Component | null;
     $c: Component;
-}
-export interface IComponentProperties extends ElementAttributes {
-    _content: DocumentFragment | null;
-    context: Object | null;
 }
 export interface IComponentTemplate {
     render: (data: Object) => string;
@@ -29,9 +25,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
     static register: typeof registerComponent;
     static elementIs: string;
     static elementExtends: string;
-    static elementAttributes: {
-        [name: string]: any;
-    } | null;
     static props: {
         [name: string]: any;
     } | null;
@@ -54,7 +47,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
     _parentComponent: Component | null | undefined;
     readonly parentComponent: Component | null;
     element: IComponentElement;
-    readonly elementAttributes: ElementAttributes;
     readonly props: IComponentProperties;
     _bindings: Array<IFreezableCell> | null;
     _elementListMap: Map<string, NodeListOf<HTMLElement>>;

@@ -16,7 +16,6 @@ import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
 import {
 	IComponentElement,
-	IComponentProperties,
 	IComponentTemplate,
 	IComponentElementClassNameMap,
 	IComponentEvents,
@@ -32,7 +31,7 @@ import {
 	TRtRepeatItemMap,
 	default as RtRepeat
 } from './Components/rt-repeat';
-import ElementAttributes from './ElementAttributes';
+import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
 import {
 	IComponentTemplateBlock,
 	IComponentTemplateRenderer,
@@ -84,7 +83,6 @@ export {
 	getText,
 
 	IComponentElement,
-	IComponentProperties,
 	IComponentTemplate,
 	IComponentElementClassNameMap,
 	IComponentEvents,
@@ -97,7 +95,8 @@ export {
 	TRtRepeatItemMap,
 	Components,
 
-	ElementAttributes,
+	IComponentProperties,
+	ComponentProperties,
 
 	IComponentTemplateBlock,
 	IComponentTemplateRenderer,

@@ -31,7 +31,7 @@ var RtIfThen = (function (_super) {
     RtIfThen.prototype._attachElement = function () {
         if (!this.initialized) {
             var props = this.props;
-            props._content = document.importNode(this.element.content, true);
+            props.content = document.importNode(this.element.content, true);
             var if_ = (props['if'] || '').trim();
             if (!reKeypath.test(if_)) {
                 throw new SyntaxError("Invalid value of attribute \"if\" (" + if_ + ")");
@@ -67,7 +67,7 @@ var RtIfThen = (function (_super) {
     RtIfThen.prototype._render = function (changed) {
         var _this = this;
         if (this._elseMode ? !this._if.get() : this._if.get()) {
-            var content = this.props._content.cloneNode(true);
+            var content = this.props.content.cloneNode(true);
             var _a = bindContent_1.default(content, this.ownerComponent, this.props.context), bindings = _a.bindings, childComponents = _a.childComponents;
             this._nodes = slice.call(content.childNodes);
             this._bindings = bindings;

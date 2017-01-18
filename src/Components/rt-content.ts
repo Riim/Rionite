@@ -30,11 +30,11 @@ export default class RtContent extends Component {
 				this._unfreezeBindings();
 			} else {
 				let ownerComponent = this.ownerComponent as Component;
-				let ownerComponentInputContent = ownerComponent.props._content as DocumentFragment;
+				let ownerComponentInputContent = ownerComponent.props.content as DocumentFragment;
 				let content: DocumentFragment | undefined;
 
 				if (ownerComponentInputContent.firstChild) {
-					let selector = this.elementAttributes['select'];
+					let selector = this.props['select'];
 
 					if (selector) {
 						if (!templateTagFeature && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
@@ -106,7 +106,7 @@ export default class RtContent extends Component {
 					el.removeChild(child);
 				}
 			} else {
-				let content = props._content = document.createDocumentFragment();
+				let content = props.content = document.createDocumentFragment();
 
 				ElementsController.skipConnectionStatusCallbacks = true;
 				for (let child: Node | null; (child = el.firstChild);) {
@@ -114,8 +114,8 @@ export default class RtContent extends Component {
 				}
 				ElementsController.skipConnectionStatusCallbacks = false;
 
-				let ownerComponentInputContent = ownerComponent.props._content as DocumentFragment;
-				let selector = this.elementAttributes['select'];
+				let ownerComponentInputContent = ownerComponent.props.content as DocumentFragment;
+				let selector = this.props['select'];
 
 				if (selector) {
 					if (!templateTagFeature && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
@@ -152,7 +152,7 @@ export default class RtContent extends Component {
 			let content = this._rawContent.cloneNode(true);
 			let getContext = props['getContext'];
 
-			let { bindings, childComponents } = this._rawContent == props._content ?
+			let { bindings, childComponents } = this._rawContent == props.content ?
 				bindContent(
 					content,
 					ownerComponent,

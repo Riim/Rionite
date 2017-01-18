@@ -4,7 +4,6 @@ let d = {
 	Component: function Component_<T extends Component>(config: {
 		elementIs?: string,
 		elementExtends?: string,
-		elementAttributes?: { [name: string]: any } | null,
 		props?: { [name: string]: any } | null,
 		i18n?: { [key: string]: any },
 		template?: string | IComponentTemplate | null,
@@ -18,10 +17,6 @@ let d = {
 
 			if (config.elementExtends) {
 				componentConstr.elementExtends = config.elementExtends;
-			}
-
-			if (config.elementAttributes !== undefined) {
-				componentConstr.elementAttributes = config.elementAttributes;
 			}
 
 			if (config.props !== undefined) {

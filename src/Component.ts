@@ -4,7 +4,7 @@ import htmlToFragment from 'html-to-fragment';
 import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
 import { ElementsController } from './ElementProtoMixin';
-import ElementAttributes from './ElementAttributes';
+import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
 import initElementClasses from './initElementClasses';
 import initElementAttributes from './initElementAttributes';
 import bindContent from './bindContent';
@@ -25,11 +25,6 @@ let map = Array.prototype.map;
 export interface IComponentElement extends HTMLElement {
 	rioniteComponent: Component | null;
 	$c: Component;
-}
-
-export interface IComponentProperties extends ElementAttributes {
-	_content: DocumentFragment | null;
-	context: Object | null;
 }
 
 export interface IComponentTemplate {
@@ -96,7 +91,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static elementIs: string;
 	static elementExtends: string;
 
-	static elementAttributes: { [name: string]: any } | null;
 	static props: { [name: string]: any } | null;
 
 	static i18n: { [key: string]: any };
@@ -138,24 +132,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	element: IComponentElement;
 
-	get elementAttributes(): ElementAttributes {
-		let attrs = new ElementAttributes(this.element);
-
-		Object.defineProperty(this, 'elementAttributes', {
-			configurable: true,
-			enumerable: true,
-			writable: true,
-			value: attrs
-		});
-
-		return attrs;
-	}
-
 	get props(): IComponentProperties {
-		let props = Object.create(this.elementAttributes) as IComponentProperties;
-
-		props._content = null;
-		props.context = null;
+		let props = ComponentProperties.create(this.element);
 
 		Object.defineProperty(this, 'props', {
 			configurable: true,
@@ -282,7 +260,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 					bindEvents(this, constr.events);
 				}
 			} else {
-				let inputContent = this.props._content = document.createDocumentFragment();
+				let inputContent = this.props.content = document.createDocumentFragment();
 
 				ElementsController.skipConnectionStatusCallbacks = true;
 				for (let child: Node | null; (child = el.firstChild);) {

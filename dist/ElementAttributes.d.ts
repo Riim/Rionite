@@ -1,4 +1,7 @@
-import { EventEmitter } from 'cellx';
-export default class ElementAttributes extends EventEmitter {
-    constructor(el: HTMLElement);
+export interface IElementAttributes {
+    [name: string]: any;
 }
+declare let ElementAttributes: {
+    create(el: HTMLElement): IElementAttributes;
+};
+export default ElementAttributes;

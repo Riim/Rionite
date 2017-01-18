@@ -9,9 +9,6 @@ var d = {
             if (config.elementExtends) {
                 componentConstr.elementExtends = config.elementExtends;
             }
-            if (config.elementAttributes !== undefined) {
-                componentConstr.elementAttributes = config.elementAttributes;
-            }
             if (config.props !== undefined) {
                 componentConstr.props = config.props;
             }

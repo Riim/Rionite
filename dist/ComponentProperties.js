@@ -12,38 +12,38 @@ var typeMap = new Map([
     [String, 'string'],
     ['string', 'string']
 ]);
-var ElementAttributes = {
+var ComponentProperties = {
     create: function (el) {
         var component = el.$c;
-        var elAttrsConfig = component.constructor.elementAttributes;
-        if (!elAttrsConfig) {
-            return {};
+        var propsConfig = component.constructor.props;
+        var props = { content: null, context: null };
+        if (!propsConfig) {
+            return props;
         }
-        var attrs = {};
         var _loop_1 = function (name_1) {
-            var elAttrConfig = elAttrsConfig[name_1];
-            var type = typeof elAttrConfig;
+            var propConfig = propsConfig[name_1];
+            var type = typeof propConfig;
             var defaultValue;
             var required = void 0;
             var readonly = void 0;
             if (type == 'function') {
-                type = elAttrConfig;
+                type = propConfig;
                 required = readonly = false;
             }
-            else if (type == 'object' && (elAttrConfig.type !== undefined || elAttrConfig.default !== undefined)) {
-                type = elAttrConfig.type;
-                defaultValue = elAttrConfig.default;
+            else if (type == 'object' && (propConfig.type !== undefined || propConfig.default !== undefined)) {
+                type = propConfig.type;
+                defaultValue = propConfig.default;
                 if (type === undefined) {
                     type = typeof defaultValue;
                 }
                 else if (defaultValue !== undefined && typeMap.get(type) !== typeof defaultValue) {
                     throw new TypeError('Specified type does not match type of defaultValue');
                 }
-                required = elAttrConfig.required;
-                readonly = elAttrConfig.readonly;
+                required = propConfig.required;
+                readonly = propConfig.readonly;
             }
             else {
-                defaultValue = elAttrConfig;
+                defaultValue = propConfig;
                 required = readonly = false;
             }
             var handlers = attributeTypeHandlerMap_1.default.get(type);
@@ -75,7 +75,7 @@ var ElementAttributes = {
                 var oldValue_1;
                 var value_2;
                 var isReady_1;
-                var rawValue_1 = attrs['_' + camelizedName] = attrs['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
+                var rawValue_1 = props['_' + camelizedName] = props['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
                     merge: function (v, ov) {
                         if (v !== ov) {
                             oldValue_1 = value_2;
@@ -111,16 +111,16 @@ var ElementAttributes = {
                     }
                 };
             }
-            Object.defineProperty(attrs, camelizedName, descriptor);
+            Object.defineProperty(props, camelizedName, descriptor);
             if (hyphenizedName != camelizedName) {
-                Object.defineProperty(attrs, hyphenizedName, descriptor);
+                Object.defineProperty(props, hyphenizedName, descriptor);
             }
         };
-        for (var name_1 in elAttrsConfig) {
+        for (var name_1 in propsConfig) {
             _loop_1(name_1);
         }
-        return attrs;
+        return props;
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = ElementAttributes;
+exports.default = ComponentProperties;

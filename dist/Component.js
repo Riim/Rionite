@@ -9,7 +9,7 @@ var html_to_fragment_1 = require("html-to-fragment");
 var DisposableMixin_1 = require("./DisposableMixin");
 var registerComponent_1 = require("./registerComponent");
 var ElementProtoMixin_1 = require("./ElementProtoMixin");
-var ElementAttributes_1 = require("./ElementAttributes");
+var ComponentProperties_1 = require("./ComponentProperties");
 var initElementClasses_1 = require("./initElementClasses");
 var initElementAttributes_1 = require("./initElementAttributes");
 var bindContent_1 = require("./bindContent");
@@ -108,25 +108,9 @@ var Component = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(Component.prototype, "elementAttributes", {
-        get: function () {
-            var attrs = new ElementAttributes_1.default(this.element);
-            Object.defineProperty(this, 'elementAttributes', {
-                configurable: true,
-                enumerable: true,
-                writable: true,
-                value: attrs
-            });
-            return attrs;
-        },
-        enumerable: true,
-        configurable: true
-    });
     Object.defineProperty(Component.prototype, "props", {
         get: function () {
-            var props = Object.create(this.elementAttributes);
-            props._content = null;
-            props.context = null;
+            var props = ComponentProperties_1.default.create(this.element);
             Object.defineProperty(this, 'props', {
                 configurable: true,
                 enumerable: true,
@@ -181,7 +165,7 @@ var Component = (function (_super) {
                 }
             }
             else {
-                var inputContent = this.props._content = document.createDocumentFragment();
+                var inputContent = this.props.content = document.createDocumentFragment();
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                 for (var child = void 0; (child = el.firstChild);) {
                     inputContent.appendChild(child);

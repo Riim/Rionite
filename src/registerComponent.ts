@@ -30,12 +30,8 @@ export default function registerComponent(componentConstr: typeof Component) {
 
 	let props = componentConstr.props;
 
-	if (props !== undefined) {
-		if (props && (props['content'] || props['_content'] || props['context'])) {
-			throw new TypeError(`No need to declare property "${ props['_content'] ? '_content' : 'context' }"`);
-		}
-
-		componentConstr.elementAttributes = props;
+	if (props && (props['content'] || props['context'])) {
+		throw new TypeError(`No need to declare property "${ props['content'] ? 'content' : 'context' }"`);
 	}
 
 	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor as typeof Component;
@@ -89,15 +85,15 @@ export default function registerComponent(componentConstr: typeof Component) {
 		enumerable: true,
 
 		get() {
-			let elAttrsConfig = componentConstr.elementAttributes;
+			let props = componentConstr.props;
 
-			if (!elAttrsConfig) {
+			if (!props) {
 				return [];
 			}
 
 			let observedAttrs: Array<string> = [];
 
-			for (let name in elAttrsConfig) {
+			for (let name in props) {
 				observedAttrs.push(hyphenize(name));
 			}
 

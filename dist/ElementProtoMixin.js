@@ -64,10 +64,10 @@ var ElementProtoMixin = (_a = {
     _a.attributeChangedCallback = function (name, oldValue, value) {
         var component = this.rioniteComponent;
         if (component && component.isReady) {
-            var attrs = component.elementAttributes;
+            var props = component.props;
             var privateName = '_' + name;
-            if (attrs[privateName]) {
-                attrs[privateName].set(value);
+            if (props[privateName]) {
+                props[privateName].set(value);
             }
         }
     },
