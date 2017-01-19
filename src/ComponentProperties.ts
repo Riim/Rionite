@@ -1,5 +1,5 @@
 import { Cell, JS } from 'cellx';
-import Component from './Component';
+import { IComponentElement, default as Component } from './Component';
 import attributeTypeHandlerMap from './attributeTypeHandlerMap';
 import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
@@ -21,134 +21,134 @@ export interface IComponentProperties {
 	[name: string]: any;
 }
 
-let ComponentProperties = {
-	create(el: HTMLElement): IComponentProperties {
-		let component = (el as any).$c as Component;
-		let propsConfig = (component.constructor as typeof Component).props;
-		let props = { content: null, context: null };
+function initProperty(props: IComponentProperties, name: string, el: IComponentElement) {
+	let component = el.$c;
+	let propConfig = (component.constructor as any).props[name];
+	let type = typeof propConfig;
+	let defaultValue: any;
+	let required: boolean;
+	let readonly: boolean;
 
-		if (!propsConfig) {
-			return props;
+	if (type == 'function') {
+		type = propConfig;
+		required = readonly = false;
+	} else if (type == 'object' && (propConfig.type !== undefined || propConfig.default !== undefined)) {
+		type = propConfig.type;
+		defaultValue = propConfig.default;
+
+		if (type === undefined) {
+			type = typeof defaultValue;
+		} else if (defaultValue !== undefined && typeMap.get(type) !== typeof defaultValue) {
+			throw new TypeError('Specified type does not match type of defaultValue');
 		}
 
-		for (let name in propsConfig) {
-			let propConfig = propsConfig[name];
-			let type = typeof propConfig;
-			let defaultValue: any;
-			let required: boolean;
-			let readonly: boolean;
+		required = propConfig.required;
+		readonly = propConfig.readonly;
+	} else {
+		defaultValue = propConfig;
+		required = readonly = false;
+	}
 
-			if (type == 'function') {
-				type = propConfig;
-				required = readonly = false;
-			} else if (
-				type == 'object' && (propConfig.type !== undefined || propConfig.default !== undefined)
-			) {
-				type = propConfig.type;
-				defaultValue = propConfig.default;
+	let handlers = attributeTypeHandlerMap.get(type);
 
-				if (type === undefined) {
-					type = typeof defaultValue;
-				} else if (defaultValue !== undefined && typeMap.get(type) !== typeof defaultValue) {
-					throw new TypeError('Specified type does not match type of defaultValue');
+	if (!handlers) {
+		throw new TypeError('Unsupported attribute type');
+	}
+
+	let camelizedName = camelize(name);
+	let hyphenizedName = hyphenize(name);
+
+	if (required && !el.hasAttribute(hyphenizedName)) {
+		throw new TypeError(`Property "${ name }" is required`);
+	}
+
+	let descriptor: Object;
+
+	if (readonly) {
+		let value = handlers[0](el.getAttribute(hyphenizedName), defaultValue);
+
+		descriptor = {
+			configurable: true,
+			enumerable: true,
+
+			get() {
+				return value;
+			},
+
+			set(v: any) {
+				if (v !== value) {
+					throw new TypeError(`Property "${ name }" is readonly`);
+				}
+			}
+		};
+	} else {
+		let oldValue: any;
+		let value: any;
+		let isReady: boolean;
+
+		let rawValue = props['_' + camelizedName] = props['_' + hyphenizedName] = new Cell(
+			el.getAttribute(hyphenizedName),
+			{
+				merge(v, ov) {
+					if (v !== ov) {
+						oldValue = value;
+						value = handlers[0](v, defaultValue);
+					}
+
+					isReady = component.isReady;
+
+					return v;
+				},
+
+				onChange(evt) {
+					evt['oldValue'] = oldValue;
+					evt['value'] = value;
+
+					if (isReady) {
+						component.elementAttributeChanged(hyphenizedName, oldValue, value);
+					}
+				}
+			}
+		);
+
+		descriptor = {
+			configurable: true,
+			enumerable: true,
+
+			get() {
+				rawValue.get();
+				return value;
+			},
+
+			set(v: any) {
+				v = handlers[1](v, defaultValue);
+
+				if (v === null) {
+					el.removeAttribute(hyphenizedName);
+				} else {
+					el.setAttribute(hyphenizedName, v);
 				}
 
-				required = propConfig.required;
-				readonly = propConfig.readonly;
-			} else {
-				defaultValue = propConfig;
-				required = readonly = false;
+				rawValue.set(v);
 			}
+		};
+	}
 
-			let handlers = attributeTypeHandlerMap.get(type);
+	Object.defineProperty(props, camelizedName, descriptor);
 
-			if (!handlers) {
-				throw new TypeError('Unsupported attribute type');
-			}
+	if (hyphenizedName != camelizedName) {
+		Object.defineProperty(props, hyphenizedName, descriptor);
+	}
+}
 
-			let camelizedName = camelize(name);
-			let hyphenizedName = hyphenize(name);
+let ComponentProperties = {
+	create(el: IComponentElement): IComponentProperties {
+		let propsConfig = (el.$c.constructor as typeof Component).props;
+		let props = { content: null, context: null };
 
-			if (required && !el.hasAttribute(hyphenizedName)) {
-				throw new TypeError(`Property "${ name }" is required`);
-			}
-
-			let descriptor: Object;
-
-			if (readonly) {
-				let value = handlers[0](el.getAttribute(hyphenizedName), defaultValue);
-
-				descriptor = {
-					configurable: true,
-					enumerable: true,
-
-					get() {
-						return value;
-					},
-
-					set(v: any) {
-						if (v !== value) {
-							throw new TypeError(`Property "${ name }" is readonly`);
-						}
-					}
-				};
-			} else {
-				let oldValue: any;
-				let value: any;
-				let isReady: boolean;
-
-				let rawValue = props['_' + camelizedName] = props['_' + hyphenizedName] = new Cell(
-					el.getAttribute(hyphenizedName),
-					{
-						merge(v, ov) {
-							if (v !== ov) {
-								oldValue = value;
-								value = handlers[0](v, defaultValue);
-							}
-
-							isReady = component.isReady;
-
-							return v;
-						},
-
-						onChange(evt) {
-							evt['oldValue'] = oldValue;
-							evt['value'] = value;
-
-							if (isReady) {
-								component.elementAttributeChanged(hyphenizedName, oldValue, value);
-							}
-						}
-					}
-				);
-
-				descriptor = {
-					configurable: true,
-					enumerable: true,
-
-					get() {
-						rawValue.get();
-						return value;
-					},
-
-					set(v: any) {
-						v = handlers[1](v, defaultValue);
-
-						if (v === null) {
-							el.removeAttribute(hyphenizedName);
-						} else {
-							el.setAttribute(hyphenizedName, v);
-						}
-
-						rawValue.set(v);
-					}
-				};
-			}
-
-			Object.defineProperty(props, camelizedName, descriptor);
-
-			if (hyphenizedName != camelizedName) {
-				Object.defineProperty(props, hyphenizedName, descriptor);
+		if (propsConfig) {
+			for (let name in propsConfig) {
+				initProperty(props, name, el);
 			}
 		}
 
