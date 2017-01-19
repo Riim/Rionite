@@ -32,12 +32,6 @@ import {
 	default as RtRepeat
 } from './Components/rt-repeat';
 import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
-import {
-	IComponentTemplateBlock,
-	IComponentTemplateRenderer,
-	IComponentTemplateBlockMap,
-	default as ComponentTemplate
-} from './ComponentTemplate';
 import d from './d';
 import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
@@ -97,11 +91,6 @@ export {
 
 	IComponentProperties,
 	ComponentProperties,
-
-	IComponentTemplateBlock,
-	IComponentTemplateRenderer,
-	IComponentTemplateBlockMap,
-	ComponentTemplate,
 
 	d,
 
