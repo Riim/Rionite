@@ -64,6 +64,8 @@ export default function registerComponent(componentConstr: typeof Component) {
 		initBlockNames(componentConstr, parentComponentConstr, elIs);
 	}
 
+	componentConstr._blockNamesString = elIs + ' ' + parentComponentConstr._blockNamesString;
+
 	componentConstr._rawContent = undefined;
 
 	componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);

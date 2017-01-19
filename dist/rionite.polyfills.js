@@ -1539,7 +1539,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 49);
+/******/ 	return __webpack_require__(__webpack_require__.s = 48);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1562,17 +1562,16 @@ var __extends = (this && this.__extends) || function (d, b) {
 var cellx_1 = __webpack_require__(0);
 var html_to_fragment_1 = __webpack_require__(26);
 var DisposableMixin_1 = __webpack_require__(17);
-var registerComponent_1 = __webpack_require__(44);
+var registerComponent_1 = __webpack_require__(43);
 var ElementProtoMixin_1 = __webpack_require__(10);
 var ComponentProperties_1 = __webpack_require__(14);
-var initElementClasses_1 = __webpack_require__(42);
 var initElementAttributes_1 = __webpack_require__(41);
 var bindContent_1 = __webpack_require__(6);
 var componentBinding_1 = __webpack_require__(38);
 var attachChildComponentElements_1 = __webpack_require__(5);
 var bindEvents_1 = __webpack_require__(35);
 var eventTypes_1 = __webpack_require__(40);
-var onEvent_1 = __webpack_require__(43);
+var onEvent_1 = __webpack_require__(42);
 var camelize_1 = __webpack_require__(4);
 var getUID_1 = __webpack_require__(32);
 var Features_1 = __webpack_require__(3);
@@ -1707,7 +1706,7 @@ var Component = (function (_super) {
         }
         else {
             var el = this.element;
-            initElementClasses_1.default(el, constr);
+            el.className = constr._blockNamesString + el.className;
             initElementAttributes_1.default(this, constr);
             var template = constr.template;
             if (template == null) {
@@ -1828,6 +1827,7 @@ var Component = (function (_super) {
     return Component;
 }(cellx_1.EventEmitter));
 Component.register = registerComponent_1.default;
+Component._blockNamesString = '';
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Component;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
@@ -2069,9 +2069,9 @@ exports.default = '[$_a-zA-Z][$\\w]*';
 
 "use strict";
 
-var escapeHTML_1 = __webpack_require__(47);
+var escapeHTML_1 = __webpack_require__(46);
 exports.escapeHTML = escapeHTML_1.default;
-var unescapeHTML_1 = __webpack_require__(48);
+var unescapeHTML_1 = __webpack_require__(47);
 exports.unescapeHTML = unescapeHTML_1.default;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = escapeHTML_1.default;
@@ -3662,7 +3662,7 @@ exports.default = Parser;
 
 var Parser_1 = __webpack_require__(24);
 exports.Parser = Parser_1.default;
-var Template_1 = __webpack_require__(45);
+var Template_1 = __webpack_require__(44);
 exports.Template = Template_1.default;
 
 
@@ -4627,24 +4627,6 @@ exports.default = initElementAttributes;
 
 "use strict";
 
-var Component_1 = __webpack_require__(1);
-function initElementClasses(el, constr) {
-    var c = constr;
-    do {
-        el.classList.add(c.elementIs);
-        c = Object.getPrototypeOf(c.prototype).constructor;
-    } while (c != Component_1.default);
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = initElementClasses;
-
-
-/***/ }),
-/* 43 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 function onEvent(evt) {
     var node;
     var attrName;
@@ -4688,7 +4670,7 @@ exports.default = onEvent;
 
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4747,6 +4729,7 @@ function registerComponent(componentConstr) {
         }
         initBlockNames(componentConstr, parentComponentConstr, elIs);
     }
+    componentConstr._blockNamesString = elIs + ' ' + parentComponentConstr._blockNamesString;
     componentConstr._rawContent = undefined;
     componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
     var elExtends = componentConstr.elementExtends;
@@ -4788,7 +4771,7 @@ exports.default = registerComponent;
 
 
 /***/ }),
-/* 45 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4796,7 +4779,7 @@ exports.default = registerComponent;
 var escape_string_1 = __webpack_require__(9);
 var escape_html_1 = __webpack_require__(8);
 var Parser_1 = __webpack_require__(24);
-var selfClosingTags_1 = __webpack_require__(46);
+var selfClosingTags_1 = __webpack_require__(45);
 var hasOwn = Object.prototype.hasOwnProperty;
 var join = Array.prototype.join;
 var elDelimiter = '__';
@@ -4966,7 +4949,7 @@ exports.default = Template;
 
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5008,7 +4991,7 @@ exports.default = selfClosingTags;
 
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5027,7 +5010,7 @@ exports.default = escapeHTML;
 
 
 /***/ }),
-/* 48 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5046,7 +5029,7 @@ exports.default = unescapeHTML;
 
 
 /***/ }),
-/* 49 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(27);

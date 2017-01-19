@@ -5,7 +5,6 @@ import DisposableMixin from './DisposableMixin';
 import registerComponent from './registerComponent';
 import { ElementsController } from './ElementProtoMixin';
 import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
-import initElementClasses from './initElementClasses';
 import initElementAttributes from './initElementAttributes';
 import bindContent from './bindContent';
 import { IFreezableCell, freezeBindings, unfreezeBindings } from './componentBinding';
@@ -97,6 +96,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	static template: string | IComponentTemplate | null;
 	static bemlTemplate: string | BemlTemplate | null;
+
+	static _blockNamesString: string = '';
 
 	static _rawContent: DocumentFragment | undefined;
 
@@ -240,7 +241,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		} else {
 			let el = this.element;
 
-			initElementClasses(el, constr);
+			el.className = constr._blockNamesString + el.className;
+
 			initElementAttributes(this, constr);
 
 			let template = constr.template;

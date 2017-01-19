@@ -10,7 +10,6 @@ var DisposableMixin_1 = require("./DisposableMixin");
 var registerComponent_1 = require("./registerComponent");
 var ElementProtoMixin_1 = require("./ElementProtoMixin");
 var ComponentProperties_1 = require("./ComponentProperties");
-var initElementClasses_1 = require("./initElementClasses");
 var initElementAttributes_1 = require("./initElementAttributes");
 var bindContent_1 = require("./bindContent");
 var componentBinding_1 = require("./componentBinding");
@@ -152,7 +151,7 @@ var Component = (function (_super) {
         }
         else {
             var el = this.element;
-            initElementClasses_1.default(el, constr);
+            el.className = constr._blockNamesString + el.className;
             initElementAttributes_1.default(this, constr);
             var template = constr.template;
             if (template == null) {
@@ -273,6 +272,7 @@ var Component = (function (_super) {
     return Component;
 }(cellx_1.EventEmitter));
 Component.register = registerComponent_1.default;
+Component._blockNamesString = '';
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Component;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
