@@ -71,7 +71,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     elementAttached(): void;
     elementDetached(): void;
     elementMoved(): void;
-    elementAttributeChanged(name: string, oldValue: any, value: any): void;
+    propertyChanged(name: string, oldValue: any, value: any): void;
     $(name: string, container?: Component | HTMLElement): Component | HTMLElement | null;
     $$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement>;
     _getElementList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined;

@@ -46,7 +46,7 @@ var ready;
 var elementAttached;
 var elementDetached;
 var elementMoved;
-var elementAttributeChanged;
+var propertyChanged;
 var Component = (function (_super) {
     __extends(Component, _super);
     function Component(el, props) {
@@ -224,7 +224,7 @@ var Component = (function (_super) {
     Component.prototype.elementAttached = function () { };
     Component.prototype.elementDetached = function () { };
     Component.prototype.elementMoved = function () { };
-    Component.prototype.elementAttributeChanged = function (name, oldValue, value) { };
+    Component.prototype.propertyChanged = function (name, oldValue, value) { };
     // Utils
     Component.prototype.$ = function (name, container) {
         var elList = this._getElementList(name, container);
@@ -288,7 +288,7 @@ ready = ComponentProto.ready;
 elementAttached = ComponentProto.elementAttached;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;
-elementAttributeChanged = ComponentProto.elementAttributeChanged;
+propertyChanged = ComponentProto.propertyChanged;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
     eventTypes_1.default.forEach(function (type) {

@@ -84,18 +84,23 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 	} else {
 		let oldValue: any;
 		let value: any;
-		let isReady: boolean;
+		let needHandling = false;
 
-		let rawValue = props['_' + camelizedName] = props['_' + hyphenizedName] = new Cell(
+		let rawValue = props['_' + camelizedName] = new Cell(
 			el.getAttribute(hyphenizedName),
 			{
 				merge(v, ov) {
 					if (v !== ov) {
-						oldValue = value;
-						value = handlers[0](v, defaultValue);
-					}
+						let newValue = handlers[0](v, defaultValue);
 
-					isReady = component.isReady;
+						if (newValue === value) {
+							return ov;
+						}
+
+						oldValue = value;
+						value = newValue;
+						needHandling = component.isReady;
+					}
 
 					return v;
 				},
@@ -104,8 +109,9 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 					evt['oldValue'] = oldValue;
 					evt['value'] = value;
 
-					if (isReady) {
-						component.elementAttributeChanged(hyphenizedName, oldValue, value);
+					if (needHandling) {
+						needHandling = false;
+						component.propertyChanged(camelizedName, value, oldValue);
 					}
 				}
 			}

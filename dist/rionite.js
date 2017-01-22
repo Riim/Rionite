@@ -135,7 +135,7 @@ var ready;
 var elementAttached;
 var elementDetached;
 var elementMoved;
-var elementAttributeChanged;
+var propertyChanged;
 var Component = (function (_super) {
     __extends(Component, _super);
     function Component(el, props) {
@@ -313,7 +313,7 @@ var Component = (function (_super) {
     Component.prototype.elementAttached = function () { };
     Component.prototype.elementDetached = function () { };
     Component.prototype.elementMoved = function () { };
-    Component.prototype.elementAttributeChanged = function (name, oldValue, value) { };
+    Component.prototype.propertyChanged = function (name, oldValue, value) { };
     // Utils
     Component.prototype.$ = function (name, container) {
         var elList = this._getElementList(name, container);
@@ -377,7 +377,7 @@ ready = ComponentProto.ready;
 elementAttached = ComponentProto.elementAttached;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;
-elementAttributeChanged = ComponentProto.elementAttributeChanged;
+propertyChanged = ComponentProto.propertyChanged;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
     eventTypes_1.default.forEach(function (type) {
@@ -889,21 +889,26 @@ function initProperty(props, name, el) {
     else {
         var oldValue_1;
         var value_2;
-        var isReady_1;
-        var rawValue_1 = props['_' + camelizedName] = props['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
+        var needHandling_1 = false;
+        var rawValue_1 = props['_' + camelizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
             merge: function (v, ov) {
                 if (v !== ov) {
+                    var newValue = handlers[0](v, defaultValue);
+                    if (newValue === value_2) {
+                        return ov;
+                    }
                     oldValue_1 = value_2;
-                    value_2 = handlers[0](v, defaultValue);
+                    value_2 = newValue;
+                    needHandling_1 = component.isReady;
                 }
-                isReady_1 = component.isReady;
                 return v;
             },
             onChange: function (evt) {
                 evt['oldValue'] = oldValue_1;
                 evt['value'] = value_2;
-                if (isReady_1) {
-                    component.elementAttributeChanged(hyphenizedName, oldValue_1, value_2);
+                if (needHandling_1) {
+                    needHandling_1 = false;
+                    component.propertyChanged(camelizedName, value_2, oldValue_1);
                 }
             }
         });
@@ -2772,46 +2777,70 @@ var isRegExp_1 = __webpack_require__(19);
 var Map = cellx_1.JS.Map;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = new Map([
-    [Boolean, [function (value) {
-                return value !== null ? value != 'no' : false;
-            }, function (value) {
+    [Boolean, [
+            function (value) {
+                return value !== null && value != 'no';
+            },
+            function (value) {
                 return value ? '' : null;
-            }]],
-    ['boolean', [function (value, defaultValue) {
+            }
+        ]],
+    ['boolean', [
+            function (value, defaultValue) {
                 return value !== null ? value != 'no' : defaultValue;
-            }, function (value, defaultValue) {
+            },
+            function (value, defaultValue) {
                 return value ? '' : (defaultValue ? 'no' : null);
-            }]],
-    [Number, [function (value) {
-                return value !== null ? +value : undefined;
-            }, function (value) {
-                return value !== undefined ? String(+value) : null;
-            }]],
-    ['number', [function (value, defaultValue) {
+            }
+        ]],
+    [Number, [
+            function (value) {
+                return value !== null ? +value : null;
+            },
+            function (value) {
+                return value != null ? String(+value) : null;
+            }
+        ]],
+    ['number', [
+            function (value, defaultValue) {
                 return value !== null ? +value : defaultValue;
-            }, function (value) {
-                return value !== undefined ? String(+value) : null;
-            }]],
-    [String, [function (value) {
-                return value !== null ? value : undefined;
-            }, function (value) {
-                return value !== undefined ? String(value) : null;
-            }]],
-    ['string', [function (value, defaultValue) {
+            },
+            function (value) {
+                return value != null ? String(+value) : null;
+            }
+        ]],
+    [String, [
+            function (value) {
+                return value !== null ? value : null;
+            },
+            function (value) {
+                return value != null ? String(value) : null;
+            }
+        ]],
+    ['string', [
+            function (value, defaultValue) {
                 return value !== null ? value : defaultValue;
-            }, function (value) {
-                return value !== undefined ? String(value) : null;
-            }]],
-    [Object, [function (value) {
-                return value !== null ? Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) : undefined;
-            }, function (value) {
+            },
+            function (value) {
+                return value != null ? String(value) : null;
+            }
+        ]],
+    [Object, [
+            function (value) {
+                return value !== null ? Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) : null;
+            },
+            function (value) {
                 return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
-            }]],
-    ['object', [function (value, defaultValue) {
+            }
+        ]],
+    ['object', [
+            function (value, defaultValue) {
                 return value !== null ? Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) : defaultValue;
-            }, function (value) {
+            },
+            function (value) {
                 return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
-            }]]
+            }
+        ]]
 ]);
 
 

@@ -67,21 +67,26 @@ function initProperty(props, name, el) {
     else {
         var oldValue_1;
         var value_2;
-        var isReady_1;
-        var rawValue_1 = props['_' + camelizedName] = props['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
+        var needHandling_1 = false;
+        var rawValue_1 = props['_' + camelizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
             merge: function (v, ov) {
                 if (v !== ov) {
+                    var newValue = handlers[0](v, defaultValue);
+                    if (newValue === value_2) {
+                        return ov;
+                    }
                     oldValue_1 = value_2;
-                    value_2 = handlers[0](v, defaultValue);
+                    value_2 = newValue;
+                    needHandling_1 = component.isReady;
                 }
-                isReady_1 = component.isReady;
                 return v;
             },
             onChange: function (evt) {
                 evt['oldValue'] = oldValue_1;
                 evt['value'] = value_2;
-                if (isReady_1) {
-                    component.elementAttributeChanged(hyphenizedName, oldValue_1, value_2);
+                if (needHandling_1) {
+                    needHandling_1 = false;
+                    component.propertyChanged(camelizedName, value_2, oldValue_1);
                 }
             }
         });

@@ -75,7 +75,7 @@ let ready: any;
 let elementAttached: any;
 let elementDetached: any;
 let elementMoved: any;
-let elementAttributeChanged: any;
+let propertyChanged: any;
 
 export default class Component extends EventEmitter implements DisposableMixin {
 	static extend(elIs: string, description: any): typeof Component {
@@ -343,7 +343,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	elementAttached() {}
 	elementDetached() {}
 	elementMoved() {}
-	elementAttributeChanged(name: string, oldValue: any, value: any) {}
+	propertyChanged(name: string, oldValue: any, value: any) {}
 
 	// Utils
 
@@ -416,7 +416,7 @@ ready = ComponentProto.ready;
 elementAttached = ComponentProto.elementAttached;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;
-elementAttributeChanged = ComponentProto.elementAttributeChanged;
+propertyChanged = ComponentProto.propertyChanged;
 
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
