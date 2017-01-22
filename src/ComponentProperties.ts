@@ -1,19 +1,9 @@
-import { Cell, JS } from 'cellx';
+import { Cell } from 'cellx';
 import { IComponentElement, default as Component } from './Component';
-import attributeTypeHandlerMap from './attributeTypeHandlerMap';
+import componentPropertyTypeMap from './componentPropertyTypeMap';
+import componentPropertyTypeHandlersMap from './componentPropertyTypeHandlersMap';
 import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
-
-let Map = JS.Map;
-
-let typeMap = new Map<any, string>([
-	[Boolean, 'boolean'],
-	['boolean', 'boolean'],
-	[Number, 'number'],
-	['number', 'number'],
-	[String, 'string'],
-	['string', 'string']
-]);
 
 export interface IComponentProperties {
 	content: any;
@@ -23,7 +13,7 @@ export interface IComponentProperties {
 
 function initProperty(props: IComponentProperties, name: string, el: IComponentElement) {
 	let component = el.$c;
-	let propConfig = (component.constructor as any).props[name];
+	let propConfig = ((component.constructor as typeof Component).props as { [name: string]: any })[name];
 	let type = typeof propConfig;
 	let defaultValue: any;
 	let required: boolean;
@@ -38,7 +28,7 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 
 		if (type === undefined) {
 			type = typeof defaultValue;
-		} else if (defaultValue !== undefined && typeMap.get(type) !== typeof defaultValue) {
+		} else if (defaultValue !== undefined && componentPropertyTypeMap.get(type) !== typeof defaultValue) {
 			throw new TypeError('Specified type does not match type of defaultValue');
 		}
 
@@ -49,7 +39,7 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 		required = readonly = false;
 	}
 
-	let handlers = attributeTypeHandlerMap.get(type);
+	let handlers = componentPropertyTypeHandlersMap.get(type);
 
 	if (!handlers) {
 		throw new TypeError('Unsupported attribute type');
@@ -108,8 +98,14 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 				onChange() {
 					if (needHandling) {
 						needHandling = false;
+
 						component.propertyChanged(camelizedName, value, oldValue);
-						component.emit('change-property-' + hyphenizedName);
+
+						component.emit({
+							type: `property-${ hyphenizedName }-change`,
+							oldValue: oldValue,
+							value: value
+						});
 					}
 				}
 			}

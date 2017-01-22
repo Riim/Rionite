@@ -2,9 +2,8 @@
 var cellx_1 = require("cellx");
 var escape_html_1 = require("@riim/escape-html");
 var isRegExp_1 = require("./Utils/isRegExp");
-var Map = cellx_1.JS.Map;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = new Map([
+exports.default = new cellx_1.JS.Map([
     [Boolean, [
             function (value) {
                 return value !== null && value != 'no';

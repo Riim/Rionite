@@ -1,17 +1,9 @@
 "use strict";
 var cellx_1 = require("cellx");
-var attributeTypeHandlerMap_1 = require("./attributeTypeHandlerMap");
+var componentPropertyTypeMap_1 = require("./componentPropertyTypeMap");
+var componentPropertyTypeHandlersMap_1 = require("./componentPropertyTypeHandlersMap");
 var camelize_1 = require("./Utils/camelize");
 var hyphenize_1 = require("./Utils/hyphenize");
-var Map = cellx_1.JS.Map;
-var typeMap = new Map([
-    [Boolean, 'boolean'],
-    ['boolean', 'boolean'],
-    [Number, 'number'],
-    ['number', 'number'],
-    [String, 'string'],
-    ['string', 'string']
-]);
 function initProperty(props, name, el) {
     var component = el.$c;
     var propConfig = component.constructor.props[name];
@@ -29,7 +21,7 @@ function initProperty(props, name, el) {
         if (type === undefined) {
             type = typeof defaultValue;
         }
-        else if (defaultValue !== undefined && typeMap.get(type) !== typeof defaultValue) {
+        else if (defaultValue !== undefined && componentPropertyTypeMap_1.default.get(type) !== typeof defaultValue) {
             throw new TypeError('Specified type does not match type of defaultValue');
         }
         required = propConfig.required;
@@ -39,7 +31,7 @@ function initProperty(props, name, el) {
         defaultValue = propConfig;
         required = readonly = false;
     }
-    var handlers = attributeTypeHandlerMap_1.default.get(type);
+    var handlers = componentPropertyTypeHandlersMap_1.default.get(type);
     if (!handlers) {
         throw new TypeError('Unsupported attribute type');
     }
@@ -85,7 +77,11 @@ function initProperty(props, name, el) {
                 if (needHandling_1) {
                     needHandling_1 = false;
                     component.propertyChanged(camelizedName, value_2, oldValue_1);
-                    component.emit('change-property-' + hyphenizedName);
+                    component.emit({
+                        type: "property-" + hyphenizedName + "-change",
+                        oldValue: oldValue_1,
+                        value: value_2
+                    });
                 }
             }
         });

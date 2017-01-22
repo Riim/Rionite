@@ -2,9 +2,7 @@ import { JS } from 'cellx';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import isRegExp from './Utils/isRegExp';
 
-let Map = JS.Map;
-
-export default new Map<any, [
+export default new JS.Map<any, [
 	(value: string | null, defaultValue?: any) => any,
 	(value: any, defaultValue?: any) => string | null
 ]>([

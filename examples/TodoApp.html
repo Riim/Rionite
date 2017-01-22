@@ -26,6 +26,8 @@ todo-view {
 
 var Todo = cellx.EventEmitter.extend({
 	constructor: function Todo(text, done) {
+		cellx.EventEmitter.call(this);
+
 		cellx.define(this, {
 			text: text,
 			done: !!done

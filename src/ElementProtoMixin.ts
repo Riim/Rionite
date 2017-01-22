@@ -1,6 +1,7 @@
 import { JS } from 'cellx';
 import Component from './Component';
 import defer from './Utils/defer';
+import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
 
 let Symbol = JS.Symbol;
 
@@ -85,6 +86,8 @@ let ElementProtoMixin = {
 
 			if (props[privateName]) {
 				props[privateName].set(value);
+			} else if (nativeCustomElementsFeature) {
+				throw new TypeError(`Cannot write to readonly property "${ privateName.slice(1) }"`);
 			}
 		}
 	}

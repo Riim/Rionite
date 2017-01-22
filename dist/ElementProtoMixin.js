@@ -1,6 +1,7 @@
 "use strict";
 var cellx_1 = require("cellx");
 var defer_1 = require("./Utils/defer");
+var Features_1 = require("./Features");
 var Symbol = cellx_1.JS.Symbol;
 var KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
 exports.ElementsController = {
@@ -68,6 +69,9 @@ var ElementProtoMixin = (_a = {
             var privateName = '_' + name;
             if (props[privateName]) {
                 props[privateName].set(value);
+            }
+            else if (Features_1.nativeCustomElements) {
+                throw new TypeError("Cannot write to readonly property \"" + privateName.slice(1) + "\"");
             }
         }
     },
