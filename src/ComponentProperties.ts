@@ -105,13 +105,11 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 					return v;
 				},
 
-				onChange(evt) {
-					evt['oldValue'] = oldValue;
-					evt['value'] = value;
-
+				onChange() {
 					if (needHandling) {
 						needHandling = false;
 						component.propertyChanged(camelizedName, value, oldValue);
+						component.emit('change-property-' + hyphenizedName);
 					}
 				}
 			}

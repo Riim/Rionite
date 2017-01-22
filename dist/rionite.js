@@ -903,12 +903,11 @@ function initProperty(props, name, el) {
                 }
                 return v;
             },
-            onChange: function (evt) {
-                evt['oldValue'] = oldValue_1;
-                evt['value'] = value_2;
+            onChange: function () {
                 if (needHandling_1) {
                     needHandling_1 = false;
                     component.propertyChanged(camelizedName, value_2, oldValue_1);
+                    component.emit('change-property-' + hyphenizedName);
                 }
             }
         });
@@ -2787,7 +2786,7 @@ exports.default = new Map([
         ]],
     ['boolean', [
             function (value, defaultValue) {
-                return value !== null ? value != 'no' : defaultValue;
+                return value !== null ? value != 'no' : !!defaultValue;
             },
             function (value, defaultValue) {
                 return value ? '' : (defaultValue ? 'no' : null);
@@ -2803,7 +2802,7 @@ exports.default = new Map([
         ]],
     ['number', [
             function (value, defaultValue) {
-                return value !== null ? +value : defaultValue;
+                return value !== null ? +value : (defaultValue !== undefined ? defaultValue : null);
             },
             function (value) {
                 return value != null ? String(+value) : null;
@@ -2819,7 +2818,7 @@ exports.default = new Map([
         ]],
     ['string', [
             function (value, defaultValue) {
-                return value !== null ? value : defaultValue;
+                return value !== null ? value : (defaultValue !== undefined ? defaultValue : null);
             },
             function (value) {
                 return value != null ? String(value) : null;
@@ -2835,7 +2834,9 @@ exports.default = new Map([
         ]],
     ['object', [
             function (value, defaultValue) {
-                return value !== null ? Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) : defaultValue;
+                return value !== null ?
+                    Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) :
+                    (defaultValue !== undefined ? defaultValue : null);
             },
             function (value) {
                 return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
@@ -3093,7 +3094,8 @@ function initElementAttributes(component, constr) {
     if (propsConfig) {
         var props = component.props;
         for (var name_1 in propsConfig) {
-            if (typeof propsConfig[name_1] != 'function') {
+            var type = typeof propsConfig[name_1];
+            if (type != 'function' && (type != 'object' || propsConfig[name_1].default !== undefined)) {
                 var camelizedName = camelize_1.default(name_1);
                 props[camelizedName] = props[camelizedName];
             }

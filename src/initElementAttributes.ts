@@ -8,7 +8,9 @@ export default function initElementAttributes(component: Component, constr: type
 		let props = component.props;
 
 		for (let name in propsConfig) {
-			if (typeof propsConfig[name] != 'function') {
+			let type = typeof propsConfig[name];
+
+			if (type != 'function' && (type != 'object' || propsConfig[name].default !== undefined)) {
 				let camelizedName = camelize(name);
 				props[camelizedName] = props[camelizedName];
 			}

@@ -81,12 +81,11 @@ function initProperty(props, name, el) {
                 }
                 return v;
             },
-            onChange: function (evt) {
-                evt['oldValue'] = oldValue_1;
-                evt['value'] = value_2;
+            onChange: function () {
                 if (needHandling_1) {
                     needHandling_1 = false;
                     component.propertyChanged(camelizedName, value_2, oldValue_1);
+                    component.emit('change-property-' + hyphenizedName);
                 }
             }
         });

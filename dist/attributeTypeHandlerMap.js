@@ -15,7 +15,7 @@ exports.default = new Map([
         ]],
     ['boolean', [
             function (value, defaultValue) {
-                return value !== null ? value != 'no' : defaultValue;
+                return value !== null ? value != 'no' : !!defaultValue;
             },
             function (value, defaultValue) {
                 return value ? '' : (defaultValue ? 'no' : null);
@@ -31,7 +31,7 @@ exports.default = new Map([
         ]],
     ['number', [
             function (value, defaultValue) {
-                return value !== null ? +value : defaultValue;
+                return value !== null ? +value : (defaultValue !== undefined ? defaultValue : null);
             },
             function (value) {
                 return value != null ? String(+value) : null;
@@ -47,7 +47,7 @@ exports.default = new Map([
         ]],
     ['string', [
             function (value, defaultValue) {
-                return value !== null ? value : defaultValue;
+                return value !== null ? value : (defaultValue !== undefined ? defaultValue : null);
             },
             function (value) {
                 return value != null ? String(value) : null;
@@ -63,7 +63,9 @@ exports.default = new Map([
         ]],
     ['object', [
             function (value, defaultValue) {
-                return value !== null ? Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) : defaultValue;
+                return value !== null ?
+                    Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) :
+                    (defaultValue !== undefined ? defaultValue : null);
             },
             function (value) {
                 return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;

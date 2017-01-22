@@ -18,10 +18,10 @@ export default new Map<any, [
 	]],
 
 	['boolean', [
-		(value: string | null, defaultValue: boolean): boolean => {
-			return value !== null ? value != 'no' : defaultValue;
+		(value: string | null, defaultValue: boolean | undefined): boolean => {
+			return value !== null ? value != 'no' : !!defaultValue;
 		},
-		(value: any, defaultValue: boolean): string | null => {
+		(value: any, defaultValue: boolean | undefined): string | null => {
 			return value ? '' : (defaultValue ? 'no' : null);
 		}
 	]],
@@ -36,8 +36,8 @@ export default new Map<any, [
 	]],
 
 	['number', [
-		(value: string | null, defaultValue: number): number => {
-			return value !== null ? +value : defaultValue;
+		(value: string | null, defaultValue: number | undefined): number | null => {
+			return value !== null ? +value : (defaultValue !== undefined ? defaultValue : null);
 		},
 		(value: any): string | null => {
 			return value != null ? String(+value) : null;
@@ -54,8 +54,8 @@ export default new Map<any, [
 	]],
 
 	['string', [
-		(value: string | null, defaultValue: string): string => {
-			return value !== null ? value : defaultValue;
+		(value: string | null, defaultValue: string | undefined): string | null => {
+			return value !== null ? value : (defaultValue !== undefined ? defaultValue : null);
 		},
 		(value: any): string | null => {
 			return value != null ? String(value) : null;
@@ -72,8 +72,10 @@ export default new Map<any, [
 	]],
 
 	['object', [
-		(value: string | null, defaultValue: Object): Object => {
-			return value !== null ? Object(Function(`return ${ unescapeHTML(value) };`)()) : defaultValue;
+		(value: string | null, defaultValue: Object | undefined): Object => {
+			return value !== null ?
+				Object(Function(`return ${ unescapeHTML(value) };`)()) :
+				(defaultValue !== undefined ? defaultValue : null);
 		},
 		(value: any): string | null => {
 			return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;

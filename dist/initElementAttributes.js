@@ -5,7 +5,8 @@ function initElementAttributes(component, constr) {
     if (propsConfig) {
         var props = component.props;
         for (var name_1 in propsConfig) {
-            if (typeof propsConfig[name_1] != 'function') {
+            var type = typeof propsConfig[name_1];
+            if (type != 'function' && (type != 'object' || propsConfig[name_1].default !== undefined)) {
                 var camelizedName = camelize_1.default(name_1);
                 props[camelizedName] = props[camelizedName];
             }
