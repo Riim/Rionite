@@ -28,7 +28,7 @@ export type TListeningTarget = EventEmitter | EventTarget | Array<EventEmitter |
 	HTMLCollection;
 
 export interface IListener {
-	(evt: IEvent | Event): boolean | undefined;
+	(evt: IEvent | Event): boolean | void;
 }
 
 export default class DisposableMixin implements IDisposable {

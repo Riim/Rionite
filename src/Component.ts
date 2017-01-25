@@ -36,7 +36,7 @@ export interface IComponentElementClassNameMap {
 
 export interface IComponentEvents<T> {
 	[elName: string]: {
-		[eventName: string]: (this: T, evt: IEvent | Event, target: HTMLElement) => boolean | void;
+		[eventName: string]: (this: T, evt: IEvent | Event) => boolean | void;
 	};
 }
 
@@ -106,12 +106,12 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	static events: IComponentEvents<Component> | null;
 
-	_disposables: any;
-	listenTo: any;
-	_listenTo: any;
-	setTimeout: any;
-	setInterval: any;
-	registerCallback: any;
+	_disposables: typeof DisposableMixin.prototype._disposables;
+	listenTo: typeof DisposableMixin.prototype.listenTo;
+	_listenTo: typeof DisposableMixin.prototype._listenTo;
+	setTimeout: typeof DisposableMixin.prototype.setTimeout;
+	setInterval: typeof DisposableMixin.prototype.setInterval;
+	registerCallback: typeof DisposableMixin.prototype.registerCallback;
 
 	ownerComponent: Component | null = null;
 
