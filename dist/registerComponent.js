@@ -80,14 +80,15 @@ function registerComponent(componentConstr) {
             return observedAttrs;
         }
     });
+    elConstr['_rioniteComponentConstructor'] = componentConstr;
     mixin(elProto, ElementProtoMixin_1.default);
     Object.defineProperty(elProto, 'constructor', {
         configurable: true,
         writable: true,
         value: elConstr
     });
-    elProto._rioniteComponentConstructor = componentConstr;
-    elementConstructorMap_1.default[elIs] = window.customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
+    elementConstructorMap_1.default[elIs] = elConstr;
+    window.customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
     return (componentConstr._registeredComponent = componentConstr);
 }
 Object.defineProperty(exports, "__esModule", { value: true });

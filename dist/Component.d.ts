@@ -1,6 +1,6 @@
 import { IEvent, EventEmitter } from 'cellx';
 import { Template as BemlTemplate } from '@riim/beml';
-import DisposableMixin from './DisposableMixin';
+import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
 import registerComponent from './registerComponent';
 import { IComponentProperties } from './ComponentProperties';
 import { IFreezableCell } from './componentBinding';
@@ -39,11 +39,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
     static _elementClassNameMap: IComponentElementClassNameMap;
     static events: IComponentEvents<Component> | null;
     _disposables: typeof DisposableMixin.prototype._disposables;
-    listenTo: typeof DisposableMixin.prototype.listenTo;
-    _listenTo: typeof DisposableMixin.prototype._listenTo;
-    setTimeout: typeof DisposableMixin.prototype.setTimeout;
-    setInterval: typeof DisposableMixin.prototype.setInterval;
-    registerCallback: typeof DisposableMixin.prototype.registerCallback;
     ownerComponent: Component | null;
     _parentComponent: Component | null | undefined;
     readonly parentComponent: Component | null;
@@ -54,11 +49,16 @@ export default class Component extends EventEmitter implements DisposableMixin {
     isElementAttached: boolean;
     initialized: boolean;
     isReady: boolean;
-    _isComponentSilent: boolean;
+    _silent: boolean;
     constructor(el?: HTMLElement | string, props?: {
         [name: string]: any;
     });
     _handleEvent(evt: IEvent): void;
+    listenTo: typeof DisposableMixin.prototype.listenTo;
+    _listenTo(target: EventEmitter | EventTarget, type: string, listener: IListener, context: any): IDisposableListening;
+    setTimeout: typeof DisposableMixin.prototype.setTimeout;
+    setInterval: typeof DisposableMixin.prototype.setInterval;
+    registerCallback: typeof DisposableMixin.prototype.registerCallback;
     _attachElement(): void;
     _detachElement(): void;
     dispose(): Component;

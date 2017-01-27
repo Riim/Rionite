@@ -10,7 +10,7 @@ exports.ElementsController = {
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
         get $c() {
-            return new this._rioniteComponentConstructor(this);
+            return new this.constructor._rioniteComponentConstructor(this);
         }
     },
     _a[KEY_ATTACHED] = false,

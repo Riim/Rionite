@@ -15,7 +15,7 @@ let ElementProtoMixin = {
 	rioniteComponent: null,
 
 	get $c(): Component {
-		return new this._rioniteComponentConstructor(this);
+		return new this.constructor._rioniteComponentConstructor(this);
 	},
 
 	[KEY_ATTACHED]: false,

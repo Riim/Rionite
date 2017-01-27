@@ -7,6 +7,7 @@ var __extends = (this && this.__extends) || function (d, b) {
 var cellx_1 = require("cellx");
 var html_to_fragment_1 = require("html-to-fragment");
 var DisposableMixin_1 = require("./DisposableMixin");
+var elementConstructorMap_1 = require("./elementConstructorMap");
 var registerComponent_1 = require("./registerComponent");
 var ElementProtoMixin_1 = require("./ElementProtoMixin");
 var ComponentProperties_1 = require("./ComponentProperties");
@@ -123,9 +124,9 @@ var Component = (function (_super) {
     });
     Component.prototype._handleEvent = function (evt) {
         _super.prototype._handleEvent.call(this, evt);
-        var silent = this._isComponentSilent;
+        var silent = this._silent;
         if (silent === undefined) {
-            silent = this._isComponentSilent = this.element.hasAttribute('rt-silent');
+            silent = this._silent = this.element.hasAttribute('rt-silent');
         }
         if (!silent && evt.bubbles !== false && !evt.isPropagationStopped) {
             var parentComponent = this.parentComponent;
@@ -136,6 +137,37 @@ var Component = (function (_super) {
                 onEvent_1.default(evt);
             }
         }
+    };
+    Component.prototype._listenTo = function (target, type, listener, context) {
+        if (target instanceof Component) {
+            var index = void 0;
+            if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
+                var targetName = type.slice(1, index);
+                if (targetName != '*') {
+                    var targetElConstr = elementConstructorMap_1.default[targetName];
+                    if (!targetElConstr) {
+                        throw new TypeError("Component \"" + targetName + "\" is not defined");
+                    }
+                    var targetConstr_1 = targetElConstr._rioniteComponentConstructor;
+                    var inner_1 = listener;
+                    listener = function (evt) {
+                        if (evt.target instanceof targetConstr_1) {
+                            return inner_1.call(this, evt);
+                        }
+                    };
+                }
+                type = type.slice(index + 1);
+            }
+            else {
+                var inner_2 = listener;
+                listener = function (evt) {
+                    if (evt.target == target) {
+                        return inner_2.call(this, evt);
+                    }
+                };
+            }
+        }
+        return DisposableMixin_1.default.prototype._listenTo.call(this, target, type, listener, context);
     };
     Component.prototype._attachElement = function () {
         if (!this.initialized) {

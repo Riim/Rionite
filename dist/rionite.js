@@ -94,20 +94,21 @@ var __extends = (this && this.__extends) || function (d, b) {
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var cellx_1 = __webpack_require__(0);
-var html_to_fragment_1 = __webpack_require__(26);
+var html_to_fragment_1 = __webpack_require__(27);
 var DisposableMixin_1 = __webpack_require__(17);
+var elementConstructorMap_1 = __webpack_require__(22);
 var registerComponent_1 = __webpack_require__(43);
 var ElementProtoMixin_1 = __webpack_require__(7);
 var ComponentProperties_1 = __webpack_require__(14);
 var initElementAttributes_1 = __webpack_require__(41);
 var bindContent_1 = __webpack_require__(6);
-var componentBinding_1 = __webpack_require__(36);
+var componentBinding_1 = __webpack_require__(37);
 var attachChildComponentElements_1 = __webpack_require__(5);
-var bindEvents_1 = __webpack_require__(33);
+var bindEvents_1 = __webpack_require__(34);
 var eventTypes_1 = __webpack_require__(40);
 var onEvent_1 = __webpack_require__(42);
 var camelize_1 = __webpack_require__(4);
-var getUID_1 = __webpack_require__(31);
+var getUID_1 = __webpack_require__(32);
 var Features_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
@@ -212,9 +213,9 @@ var Component = (function (_super) {
     });
     Component.prototype._handleEvent = function (evt) {
         _super.prototype._handleEvent.call(this, evt);
-        var silent = this._isComponentSilent;
+        var silent = this._silent;
         if (silent === undefined) {
-            silent = this._isComponentSilent = this.element.hasAttribute('rt-silent');
+            silent = this._silent = this.element.hasAttribute('rt-silent');
         }
         if (!silent && evt.bubbles !== false && !evt.isPropagationStopped) {
             var parentComponent = this.parentComponent;
@@ -225,6 +226,37 @@ var Component = (function (_super) {
                 onEvent_1.default(evt);
             }
         }
+    };
+    Component.prototype._listenTo = function (target, type, listener, context) {
+        if (target instanceof Component) {
+            var index = void 0;
+            if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
+                var targetName = type.slice(1, index);
+                if (targetName != '*') {
+                    var targetElConstr = elementConstructorMap_1.default[targetName];
+                    if (!targetElConstr) {
+                        throw new TypeError("Component \"" + targetName + "\" is not defined");
+                    }
+                    var targetConstr_1 = targetElConstr._rioniteComponentConstructor;
+                    var inner_1 = listener;
+                    listener = function (evt) {
+                        if (evt.target instanceof targetConstr_1) {
+                            return inner_1.call(this, evt);
+                        }
+                    };
+                }
+                type = type.slice(index + 1);
+            }
+            else {
+                var inner_2 = listener;
+                listener = function (evt) {
+                    if (evt.target == target) {
+                        return inner_2.call(this, evt);
+                    }
+                };
+            }
+        }
+        return DisposableMixin_1.default.prototype._listenTo.call(this, target, type, listener, context);
     };
     Component.prototype._attachElement = function () {
         if (!this.initialized) {
@@ -500,8 +532,8 @@ exports.default = attachChildComponentElements;
 
 var cellx_1 = __webpack_require__(0);
 var ContentParser_1 = __webpack_require__(16);
-var compileContent_1 = __webpack_require__(35);
-var setAttribute_1 = __webpack_require__(32);
+var compileContent_1 = __webpack_require__(36);
+var setAttribute_1 = __webpack_require__(33);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var reBinding = /{[^}]+}/;
 function bindContent(content, ownerComponent, context) {
@@ -604,7 +636,7 @@ exports.ElementsController = {
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
         get $c() {
-            return new this._rioniteComponentConstructor(this);
+            return new this.constructor._rioniteComponentConstructor(this);
         }
     },
     _a[KEY_ATTACHED] = false,
@@ -702,7 +734,7 @@ exports.default = hyphenize;
 
 "use strict";
 
-var getText_1 = __webpack_require__(22);
+var getText_1 = __webpack_require__(23);
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = {
     or: function or(value, arg) {
@@ -826,8 +858,8 @@ exports.default = escapeString;
 "use strict";
 
 var cellx_1 = __webpack_require__(0);
-var componentPropertyTypeMap_1 = __webpack_require__(38);
-var componentPropertyTypeHandlersMap_1 = __webpack_require__(37);
+var componentPropertyTypeMap_1 = __webpack_require__(39);
+var componentPropertyTypeHandlersMap_1 = __webpack_require__(38);
 var camelize_1 = __webpack_require__(4);
 var hyphenize_1 = __webpack_require__(8);
 function initProperty(props, name, el) {
@@ -1072,7 +1104,7 @@ exports.default = RtIfThen;
 
 "use strict";
 
-var keypathToJSExpression_1 = __webpack_require__(23);
+var keypathToJSExpression_1 = __webpack_require__(24);
 var namePattern_1 = __webpack_require__(11);
 var keypathPattern_1 = __webpack_require__(10);
 var ContentNodeType;
@@ -1676,7 +1708,7 @@ exports.default = bindingToJSExpression;
 
 "use strict";
 
-var keypathToJSExpression_1 = __webpack_require__(23);
+var keypathToJSExpression_1 = __webpack_require__(24);
 var cache = Object.create(null);
 function compileKeypath(keypath) {
     return cache[keypath] || (cache[keypath] = Function("var temp; return " + keypathToJSExpression_1.default(keypath) + ";"));
@@ -1687,6 +1719,60 @@ exports.default = compileKeypath;
 
 /***/ }),
 /* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var cellx_1 = __webpack_require__(0);
+var mixin = cellx_1.Utils.mixin;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = mixin(Object.create(null), {
+    a: window.HTMLAnchorElement,
+    blockquote: window.HTMLQuoteElement,
+    br: window.HTMLBRElement,
+    caption: window.HTMLTableCaptionElement,
+    col: window.HTMLTableColElement,
+    colgroup: window.HTMLTableColElement,
+    datalist: window.HTMLDataListElement,
+    del: window.HTMLModElement,
+    dir: window.HTMLDirectoryElement,
+    dl: window.HTMLDListElement,
+    document: window.HTMLDocument,
+    element: Element,
+    fieldset: window.HTMLFieldSetElement,
+    frameset: window.HTMLFrameSetElement,
+    h1: window.HTMLHeadingElement,
+    h2: window.HTMLHeadingElement,
+    h3: window.HTMLHeadingElement,
+    h4: window.HTMLHeadingElement,
+    h5: window.HTMLHeadingElement,
+    h6: window.HTMLHeadingElement,
+    hr: window.HTMLHRElement,
+    iframe: window.HTMLIFrameElement,
+    img: window.HTMLImageElement,
+    ins: window.HTMLModElement,
+    li: window.HTMLLIElement,
+    menuitem: window.HTMLMenuItemElement,
+    ol: window.HTMLOListElement,
+    optgroup: window.HTMLOptGroupElement,
+    p: window.HTMLParagraphElement,
+    q: window.HTMLQuoteElement,
+    tbody: window.HTMLTableSectionElement,
+    td: window.HTMLTableCellElement,
+    template: window.HTMLTemplateElement || HTMLElement,
+    textarea: window.HTMLTextAreaElement,
+    tfoot: window.HTMLTableSectionElement,
+    th: window.HTMLTableCellElement,
+    thead: window.HTMLTableSectionElement,
+    tr: window.HTMLTableRowElement,
+    ul: window.HTMLUListElement,
+    vhgroupv: window.HTMLUnknownElement,
+    vkeygen: window.HTMLUnknownElement
+});
+
+
+/***/ }),
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1776,7 +1862,7 @@ configure({
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1803,7 +1889,7 @@ exports.default = keypathToJSExpression;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2192,19 +2278,19 @@ exports.default = Parser;
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var Parser_1 = __webpack_require__(24);
+var Parser_1 = __webpack_require__(25);
 exports.Parser = Parser_1.default;
 var Template_1 = __webpack_require__(44);
 exports.Template = Template_1.default;
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2237,29 +2323,29 @@ exports.default = htmlToFragment;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var beml_1 = __webpack_require__(25);
+var beml_1 = __webpack_require__(26);
 exports.BemlParser = beml_1.Parser;
 exports.BemlTemplate = beml_1.Template;
 var escape_string_1 = __webpack_require__(13);
 var escape_html_1 = __webpack_require__(12);
-var html_to_fragment_1 = __webpack_require__(26);
+var html_to_fragment_1 = __webpack_require__(27);
 var DisposableMixin_1 = __webpack_require__(17);
 exports.DisposableMixin = DisposableMixin_1.default;
 var formatters_1 = __webpack_require__(9);
 exports.formatters = formatters_1.default;
-var getText_1 = __webpack_require__(22);
+var getText_1 = __webpack_require__(23);
 exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
-var rt_content_1 = __webpack_require__(28);
+var rt_content_1 = __webpack_require__(29);
 var rt_if_then_1 = __webpack_require__(15);
-var rt_if_else_1 = __webpack_require__(29);
-var rt_repeat_1 = __webpack_require__(30);
+var rt_if_else_1 = __webpack_require__(30);
+var rt_repeat_1 = __webpack_require__(31);
 var ComponentProperties_1 = __webpack_require__(14);
 exports.ComponentProperties = ComponentProperties_1.default;
 var d_1 = __webpack_require__(3);
@@ -2289,7 +2375,7 @@ exports.Utils = Utils;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2457,7 +2543,7 @@ exports.default = RtContent;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2495,7 +2581,7 @@ exports.default = RtIfElse;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2722,7 +2808,7 @@ exports.default = RtRepeat;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2747,7 +2833,7 @@ exports.default = getUID;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2765,7 +2851,7 @@ exports.default = setAttribute;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2796,7 +2882,7 @@ exports.default = bindEvents;
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2824,7 +2910,7 @@ exports.default = compileBinding;
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2832,7 +2918,7 @@ exports.default = compileBinding;
 var escape_string_1 = __webpack_require__(13);
 var ContentParser_1 = __webpack_require__(16);
 var bindingToJSExpression_1 = __webpack_require__(20);
-var compileBinding_1 = __webpack_require__(34);
+var compileBinding_1 = __webpack_require__(35);
 var formatters_1 = __webpack_require__(9);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var cache = Object.create(null);
@@ -2872,7 +2958,7 @@ exports.default = compileContent;
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2925,7 +3011,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3005,7 +3091,7 @@ exports.default = new cellx_1.JS.Map([
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3020,60 +3106,6 @@ exports.default = new cellx_1.JS.Map([
     [String, 'string'],
     ['string', 'string']
 ]);
-
-
-/***/ }),
-/* 39 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var cellx_1 = __webpack_require__(0);
-var mixin = cellx_1.Utils.mixin;
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = mixin(Object.create(null), {
-    a: window.HTMLAnchorElement,
-    blockquote: window.HTMLQuoteElement,
-    br: window.HTMLBRElement,
-    caption: window.HTMLTableCaptionElement,
-    col: window.HTMLTableColElement,
-    colgroup: window.HTMLTableColElement,
-    datalist: window.HTMLDataListElement,
-    del: window.HTMLModElement,
-    dir: window.HTMLDirectoryElement,
-    dl: window.HTMLDListElement,
-    document: window.HTMLDocument,
-    element: Element,
-    fieldset: window.HTMLFieldSetElement,
-    frameset: window.HTMLFrameSetElement,
-    h1: window.HTMLHeadingElement,
-    h2: window.HTMLHeadingElement,
-    h3: window.HTMLHeadingElement,
-    h4: window.HTMLHeadingElement,
-    h5: window.HTMLHeadingElement,
-    h6: window.HTMLHeadingElement,
-    hr: window.HTMLHRElement,
-    iframe: window.HTMLIFrameElement,
-    img: window.HTMLImageElement,
-    ins: window.HTMLModElement,
-    li: window.HTMLLIElement,
-    menuitem: window.HTMLMenuItemElement,
-    ol: window.HTMLOListElement,
-    optgroup: window.HTMLOptGroupElement,
-    p: window.HTMLParagraphElement,
-    q: window.HTMLQuoteElement,
-    tbody: window.HTMLTableSectionElement,
-    td: window.HTMLTableCellElement,
-    template: window.HTMLTemplateElement || HTMLElement,
-    textarea: window.HTMLTextAreaElement,
-    tfoot: window.HTMLTableSectionElement,
-    th: window.HTMLTableCellElement,
-    thead: window.HTMLTableSectionElement,
-    tr: window.HTMLTableRowElement,
-    ul: window.HTMLUListElement,
-    vhgroupv: window.HTMLUnknownElement,
-    vkeygen: window.HTMLUnknownElement
-});
 
 
 /***/ }),
@@ -3178,8 +3210,8 @@ exports.default = onEvent;
 "use strict";
 
 var cellx_1 = __webpack_require__(0);
-var beml_1 = __webpack_require__(25);
-var elementConstructorMap_1 = __webpack_require__(39);
+var beml_1 = __webpack_require__(26);
+var elementConstructorMap_1 = __webpack_require__(22);
 var ElementProtoMixin_1 = __webpack_require__(7);
 var hyphenize_1 = __webpack_require__(8);
 var mixin = cellx_1.Utils.mixin;
@@ -3258,14 +3290,15 @@ function registerComponent(componentConstr) {
             return observedAttrs;
         }
     });
+    elConstr['_rioniteComponentConstructor'] = componentConstr;
     mixin(elProto, ElementProtoMixin_1.default);
     Object.defineProperty(elProto, 'constructor', {
         configurable: true,
         writable: true,
         value: elConstr
     });
-    elProto._rioniteComponentConstructor = componentConstr;
-    elementConstructorMap_1.default[elIs] = window.customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
+    elementConstructorMap_1.default[elIs] = elConstr;
+    window.customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
     return (componentConstr._registeredComponent = componentConstr);
 }
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -3280,7 +3313,7 @@ exports.default = registerComponent;
 
 var escape_string_1 = __webpack_require__(13);
 var escape_html_1 = __webpack_require__(12);
-var Parser_1 = __webpack_require__(24);
+var Parser_1 = __webpack_require__(25);
 var selfClosingTags_1 = __webpack_require__(45);
 var hasOwn = Object.prototype.hasOwnProperty;
 var join = Array.prototype.join;
@@ -3534,7 +3567,7 @@ exports.default = unescapeHTML;
 /* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(27);
+module.exports = __webpack_require__(28);
 
 
 /***/ })

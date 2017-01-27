@@ -1,7 +1,8 @@
 import { IEvent, EventEmitter, JS, Utils } from 'cellx';
 import { Template as BemlTemplate } from '@riim/beml';
 import htmlToFragment from 'html-to-fragment';
-import DisposableMixin from './DisposableMixin';
+import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
+import elementConstructorMap from './elementConstructorMap';
 import registerComponent from './registerComponent';
 import { ElementsController } from './ElementProtoMixin';
 import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
@@ -107,11 +108,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static events: IComponentEvents<Component> | null;
 
 	_disposables: typeof DisposableMixin.prototype._disposables;
-	listenTo: typeof DisposableMixin.prototype.listenTo;
-	_listenTo: typeof DisposableMixin.prototype._listenTo;
-	setTimeout: typeof DisposableMixin.prototype.setTimeout;
-	setInterval: typeof DisposableMixin.prototype.setInterval;
-	registerCallback: typeof DisposableMixin.prototype.registerCallback;
 
 	ownerComponent: Component | null = null;
 
@@ -155,7 +151,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	initialized = false;
 	isReady = false;
 
-	_isComponentSilent: boolean;
+	_silent: boolean;
 
 	constructor(el?: HTMLElement | string, props?: { [name: string]: any }) {
 		super();
@@ -207,10 +203,10 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	_handleEvent(evt: IEvent) {
 		super._handleEvent(evt);
 
-		let silent = this._isComponentSilent;
+		let silent = this._silent;
 
 		if (silent === undefined) {
-			silent = this._isComponentSilent = this.element.hasAttribute('rt-silent');
+			silent = this._silent = this.element.hasAttribute('rt-silent');
 		}
 
 		if (!silent && evt.bubbles !== false && !evt.isPropagationStopped) {
@@ -223,6 +219,56 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			}
 		}
 	}
+
+	listenTo: typeof DisposableMixin.prototype.listenTo;
+
+	_listenTo(
+		target: EventEmitter | EventTarget,
+		type: string,
+		listener: IListener,
+		context: any
+	): IDisposableListening {
+		if (target instanceof Component) {
+			let index: number;
+
+			if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
+				let targetName = type.slice(1, index);
+
+				if (targetName != '*') {
+					let targetElConstr = elementConstructorMap[targetName];
+
+					if (!targetElConstr) {
+						throw new TypeError(`Component "${ targetName }" is not defined`);
+					}
+
+					let targetConstr = targetElConstr._rioniteComponentConstructor;
+					let inner = listener;
+
+					listener = function(evt) {
+						if (evt.target instanceof targetConstr) {
+							return inner.call(this, evt);
+						}
+					};
+				}
+
+				type = type.slice(index + 1);
+			} else {
+				let inner = listener;
+
+				listener = function(evt) {
+					if (evt.target == target) {
+						return inner.call(this, evt);
+					}
+				};
+			}
+		}
+
+		return DisposableMixin.prototype._listenTo.call(this, target, type, listener, context);
+	}
+
+	setTimeout: typeof DisposableMixin.prototype.setTimeout;
+	setInterval: typeof DisposableMixin.prototype.setInterval;
+	registerCallback: typeof DisposableMixin.prototype.registerCallback;
 
 	_attachElement() {
 		if (!this.initialized) {

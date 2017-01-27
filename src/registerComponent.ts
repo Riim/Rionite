@@ -103,6 +103,8 @@ export default function registerComponent(componentConstr: typeof Component) {
 		}
 	});
 
+	elConstr['_rioniteComponentConstructor'] = componentConstr;
+
 	mixin(elProto, ElementProtoMixin);
 
 	Object.defineProperty(elProto, 'constructor', {
@@ -111,13 +113,9 @@ export default function registerComponent(componentConstr: typeof Component) {
 		value: elConstr
 	});
 
-	elProto._rioniteComponentConstructor = componentConstr;
+	elementConstructorMap[elIs] = elConstr;
 
-	elementConstructorMap[elIs] = (window as any).customElements.define(
-		elIs,
-		elConstr,
-		elExtends ? { extends: elExtends } : null
-	);
+	(window as any).customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
 
 	return (componentConstr._registeredComponent = componentConstr);
 }
