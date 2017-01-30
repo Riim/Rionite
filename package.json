@@ -1,11 +1,11 @@
 {
   "name": "rionite",
-  "version": "0.20.4",
+  "version": "0.20.5",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "./node_modules/.bin/tsc && ./node_modules/.bin/webpack && ./node_modules/.bin/gulp",
+    "build": "node_modules/.bin/tsc && node_modules/.bin/webpack && node_modules/.bin/gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

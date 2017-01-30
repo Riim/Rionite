@@ -3872,60 +3872,7 @@ var RtContent = (function (_super) {
     }
     RtContent.prototype._attachElement = function () {
         var props = this.props;
-        if (props['noClone']) {
-            if (this.isReady) {
-                this._unfreezeBindings();
-            }
-            else {
-                var ownerComponent = this.ownerComponent;
-                var ownerComponentInputContent = ownerComponent.props.content;
-                var content = void 0;
-                if (ownerComponentInputContent.firstChild) {
-                    var selector = this.props['select'];
-                    if (selector) {
-                        if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
-                            var templates = ownerComponentInputContent.querySelectorAll('template');
-                            for (var i = templates.length; i;) {
-                                templates[--i].content;
-                            }
-                            ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
-                        }
-                        var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
-                        var selectedElCount = selectedEls.length;
-                        if (selectedElCount) {
-                            content = document.createDocumentFragment();
-                            ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
-                            for (var i = 0; i < selectedElCount; i++) {
-                                content.appendChild(selectedEls[i]);
-                            }
-                            ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
-                        }
-                    }
-                    else {
-                        content = ownerComponentInputContent;
-                    }
-                }
-                var el = this.element;
-                var getContext = props['getContext'];
-                var _a = content ?
-                    bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
-                        ownerComponent[getContext](this, ownerComponent.props.context) :
-                        ownerComponent.props.context) :
-                    bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _a.bindings, childComponents = _a.childComponents;
-                this._bindings = bindings;
-                if (content) {
-                    for (var child = void 0; (child = el.firstChild);) {
-                        el.removeChild(child);
-                    }
-                    el.appendChild(content);
-                }
-                if ((!content || !Features_1.nativeCustomElements) && childComponents) {
-                    attachChildComponentElements_1.default(childComponents);
-                }
-                this.isReady = true;
-            }
-        }
-        else {
+        if (props['cloning']) {
             var ownerComponent = this.ownerComponent;
             var el = this.element;
             if (this.isReady) {
@@ -3971,24 +3918,77 @@ var RtContent = (function (_super) {
             }
             var content = this._rawContent.cloneNode(true);
             var getContext = props['getContext'];
-            var _b = this._rawContent == props.content ?
+            var _a = this._rawContent == props.content ?
                 bindContent_1.default(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) :
                 bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
                     ownerComponent[getContext](this, ownerComponent.props.context) :
-                    ownerComponent.props.context), bindings = _b.bindings, childComponents = _b.childComponents;
+                    ownerComponent.props.context), bindings = _a.bindings, childComponents = _a.childComponents;
             this._bindings = bindings;
             el.appendChild(content);
             if (!Features_1.nativeCustomElements && childComponents) {
                 attachChildComponentElements_1.default(childComponents);
             }
         }
+        else {
+            if (this.isReady) {
+                this._unfreezeBindings();
+            }
+            else {
+                var ownerComponent = this.ownerComponent;
+                var ownerComponentInputContent = ownerComponent.props.content;
+                var content = void 0;
+                if (ownerComponentInputContent.firstChild) {
+                    var selector = this.props['select'];
+                    if (selector) {
+                        if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
+                            var templates = ownerComponentInputContent.querySelectorAll('template');
+                            for (var i = templates.length; i;) {
+                                templates[--i].content;
+                            }
+                            ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
+                        }
+                        var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+                        var selectedElCount = selectedEls.length;
+                        if (selectedElCount) {
+                            content = document.createDocumentFragment();
+                            ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
+                            for (var i = 0; i < selectedElCount; i++) {
+                                content.appendChild(selectedEls[i]);
+                            }
+                            ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
+                        }
+                    }
+                    else {
+                        content = ownerComponentInputContent;
+                    }
+                }
+                var el = this.element;
+                var getContext = props['getContext'];
+                var _b = content ?
+                    bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
+                        ownerComponent[getContext](this, ownerComponent.props.context) :
+                        ownerComponent.props.context) :
+                    bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _b.bindings, childComponents = _b.childComponents;
+                this._bindings = bindings;
+                if (content) {
+                    for (var child = void 0; (child = el.firstChild);) {
+                        el.removeChild(child);
+                    }
+                    el.appendChild(content);
+                }
+                if ((!content || !Features_1.nativeCustomElements) && childComponents) {
+                    attachChildComponentElements_1.default(childComponents);
+                }
+                this.isReady = true;
+            }
+        }
     };
     RtContent.prototype._detachElement = function () {
-        if (this.props['noClone']) {
-            this._freezeBindings();
+        if (this.props['cloning']) {
+            this._destroyBindings();
         }
         else {
-            this._destroyBindings();
+            this._freezeBindings();
         }
     };
     return RtContent;
@@ -3998,7 +3998,7 @@ RtContent = __decorate([
         elementIs: 'rt-content',
         props: {
             select: { type: String, readonly: true },
-            noClone: { default: false, readonly: true },
+            cloning: { default: true, readonly: true },
             getContext: { type: String, readonly: true }
         },
         template: ''
