@@ -60,7 +60,7 @@ function initProperty(props, name, el) {
         var oldValue_1;
         var value_2;
         var needHandling_1 = false;
-        var rawValue_1 = props['_' + camelizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
+        var rawValue_1 = props['_' + camelizedName] = props['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
             merge: function (v, ov) {
                 if (v !== ov) {
                     var newValue = handlers[0](v, defaultValue);

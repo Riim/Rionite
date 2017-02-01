@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<script src="../node_modules/lodash/lodash.js"></script>
+<script src="../node_modules/platform/platform.js"></script>
+<script src="../node_modules/benchmark/benchmark.js"></script>
+<script>
+
+function proto1(obj) {
+	return { __proto__: obj, prop2: 10 };
+}
+
+function objCreate1(obj) {
+	obj = Object.create(obj);
+	obj.prop2 = 10;
+	return obj;
+}
+
+function objCreate2(obj) {
+	return Object.create(obj, { prop2: { value: 10 } });
+}
+
+function assign1(obj) {
+	var o = { prop2: 10 };
+	Object.assign(o, obj);
+	return o;
+}
+
+function assign2(obj) {
+	var o = { prop2: 10 };
+	for (let name in obj) {
+		o[name] = obj[name];
+	}
+	return o;
+}
+
+let suite = new Benchmark.Suite();
+
+suite
+	.add('proto1', function() {
+		proto1({ prop1: 5 });
+	})
+	.add('objCreate1', function() {
+		objCreate1({ prop1: 5 });
+	})
+	.add('objCreate2', function() {
+		objCreate2({ prop1: 5 });
+	})
+	.add('assign1', function() {
+		assign1({ prop1: 5 });
+	})
+	.add('assign2', function() {
+		assign2({ prop1: 5 });
+	})
+	.on('cycle', function(evt) {
+		document.body.innerHTML += '<br>' + String(evt.target);
+	})
+	.run({ 'async': true });
+
+// proto1 x 502,710 ops/sec ±3.79% (52 runs sampled)
+// objCreate1 x 363,960 ops/sec ±3.45% (54 runs sampled)
+// objCreate2 x 302,283 ops/sec ±1.55% (58 runs sampled)
+// assign1 x 3,793,435 ops/sec ±1.01% (60 runs sampled)
+// assign2 x 3,642,266 ops/sec ±1.13% (57 runs sampled)
+
+</script>
+
+</body>
+</html>
