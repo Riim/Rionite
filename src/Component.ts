@@ -252,7 +252,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				}
 
 				type = type.slice(index + 1);
-			} else {
+			} else if (type.indexOf(':') == -1) {
 				let inner = listener;
 
 				listener = function(evt) {
