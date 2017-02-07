@@ -4806,7 +4806,6 @@ var escape_string_1 = __webpack_require__(13);
 var escape_html_1 = __webpack_require__(12);
 var Parser_1 = __webpack_require__(25);
 var selfClosingTags_1 = __webpack_require__(45);
-var hasOwn = Object.prototype.hasOwnProperty;
 var join = Array.prototype.join;
 var elDelimiter = '__';
 var Template = (function () {
@@ -4844,7 +4843,7 @@ var Template = (function () {
                     this[name + '@content'] = Function("return " + (node.innerSource.join(' + ') || "''") + ";");
                 }
             }
-        }, (this._elementRendererMap = Object.create(parent && parent._elementRendererMap)));
+        }, (this._elementRendererMap = { __proto__: parent && parent._elementRendererMap }));
     }
     Template.prototype._handleNode = function (node, parentNodeName) {
         switch (node.nodeType) {
@@ -4858,9 +4857,9 @@ var Template = (function () {
                 var content = el.content;
                 if (elName) {
                     var attrListMap = this._attributeListMap ||
-                        (this._attributeListMap = Object.create(parent_1 && parent_1._attributeListMap || null));
+                        (this._attributeListMap = { __proto__: parent_1 && parent_1._attributeListMap || null });
                     var attrCountMap = this._attributeCountMap ||
-                        (this._attributeCountMap = Object.create(parent_1 && parent_1._attributeCountMap || null));
+                        (this._attributeCountMap = { __proto__: parent_1 && parent_1._attributeCountMap || null });
                     var renderredAttrs = void 0;
                     if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
                         var superCall = elAttrs.superCall;
@@ -4895,7 +4894,7 @@ var Template = (function () {
                             }
                         }
                         if (elName.charAt(0) != '_') {
-                            var hasAttrClass = hasOwn.call(attrList, 'class');
+                            var hasAttrClass = 'class' in attrList;
                             attrList = { __proto__: attrList, length: attrCount + +!hasAttrClass };
                             if (hasAttrClass) {
                                 attrList[attrList['class']] = ' class="' +

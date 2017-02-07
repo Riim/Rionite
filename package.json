@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.20.7",
+  "version": "0.20.8",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -33,7 +33,7 @@
     "webpack": "^2.2.1"
   },
   "dependencies": {
-    "@riim/beml": "^0.2.15",
+    "@riim/beml": "^0.2.16",
     "@riim/escape-html": "^1.1.0",
     "cellx": "^1.6.92",
     "document-register-element": "^1.3.0",
