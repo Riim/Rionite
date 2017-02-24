@@ -1,7 +1,7 @@
 {
   "name": "rionite",
   "version": "0.20.10",
-  "description": "",
+  "description": "Rionite — реактивная обёртка над custom-elements",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
   "scripts": {
