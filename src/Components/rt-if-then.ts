@@ -30,7 +30,13 @@ export default class RtIfThen extends Component {
 
 	_nodes: Array<Node> | null;
 
+	_destroyed = false;
+
 	_attachElement() {
+		if (this._destroyed) {
+			throw new TypeError('Instance of RtIfThen was destroyed and can no longer be used');
+		}
+
 		if (!this.initialized) {
 			let props = this.props;
 
@@ -57,26 +63,14 @@ export default class RtIfThen extends Component {
 	}
 
 	_detachElement() {
-		this._destroyBindings();
-		this._if.off('change', this._onIfChange, this);
-
-		let nodes = this._nodes;
-
-		if (nodes) {
-			for (let i = nodes.length; i;) {
-				let node = nodes[--i];
-				let parentNode = node.parentNode;
-
-				if (parentNode) {
-					parentNode.removeChild(node);
-				}
-			}
-		}
+		this._destroy();
 	}
 
 	_onIfChange() {
 		if (this.element.parentNode) {
 			this._render(true);
+		} else {
+			this._destroy();
 		}
 	}
 
@@ -117,6 +111,30 @@ export default class RtIfThen extends Component {
 			nextTick(() => {
 				this.emit('change');
 			});
+		}
+	}
+
+	_destroy() {
+		if (this._destroyed) {
+			return;
+		}
+
+		this._destroyed = true;
+
+		this._destroyBindings();
+		this._if.off('change', this._onIfChange, this);
+
+		let nodes = this._nodes;
+
+		if (nodes) {
+			for (let i = nodes.length; i;) {
+				let node = nodes[--i];
+				let parentNode = node.parentNode;
+
+				if (parentNode) {
+					parentNode.removeChild(node);
+				}
+			}
 		}
 	}
 }

@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 function bindEvents(component, events) {
     for (var elName in events) {
         var asset = void 0;
@@ -20,5 +21,4 @@ function bindEvents(component, events) {
         }
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = bindEvents;

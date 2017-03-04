@@ -18,6 +18,7 @@ export default class RtRepeat extends Component {
     _rawItemContent: DocumentFragment;
     _context: Object;
     _lastNode: Node;
+    _destroyed: boolean;
     _attachElement(): void;
     _detachElement(): void;
     _onListChange(): void;
@@ -25,4 +26,5 @@ export default class RtRepeat extends Component {
     _renderItem(item: Object, index: number): boolean;
     _clearByItemMap(itemMap: TRtRepeatItemMap): void;
     _clearByItems(items: TRtRepeatItemList): void;
+    _destroy(): void;
 }

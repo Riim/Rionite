@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var keypathToJSExpression_1 = require("./keypathToJSExpression");
 var namePattern_1 = require("./namePattern");
 var keypathPattern_1 = require("./keypathPattern");
@@ -332,5 +333,4 @@ var ContentParser = (function () {
     return ContentParser;
 }());
 ContentParser.ContentNodeType = ContentNodeType;
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ContentParser;

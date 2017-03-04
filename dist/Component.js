@@ -9,6 +9,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var html_to_fragment_1 = require("html-to-fragment");
 var DisposableMixin_1 = require("./DisposableMixin");
@@ -310,7 +311,6 @@ var Component = (function (_super) {
 }(cellx_1.EventEmitter));
 Component.register = registerComponent_1.default;
 Component._blockNamesString = '';
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Component;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
 var ComponentProto = Component.prototype;

@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var beml_1 = require("@riim/beml");
 var elementConstructorMap_1 = require("./elementConstructorMap");
@@ -91,5 +92,4 @@ function registerComponent(componentConstr) {
     window.customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
     return (componentConstr._registeredComponent = componentConstr);
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = registerComponent;

@@ -15,6 +15,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var Component_1 = require("../Component");
 var compileKeypath_1 = require("../compileKeypath");
@@ -31,9 +32,14 @@ var reForAttributeValue = RegExp("^\\s*(" + namePattern_1.default + ")\\s+of\\s+
 var RtRepeat = (function (_super) {
     __extends(RtRepeat, _super);
     function RtRepeat() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this._destroyed = false;
+        return _this;
     }
     RtRepeat.prototype._attachElement = function () {
+        if (this._destroyed) {
+            throw new TypeError('Instance of RtRepeat was destroyed and can no longer be used');
+        }
         if (!this.initialized) {
             var props = this.props;
             var forAttrValue = props['for'].match(reForAttributeValue);
@@ -74,12 +80,14 @@ var RtRepeat = (function (_super) {
         this._render(false);
     };
     RtRepeat.prototype._detachElement = function () {
-        this._clearByItemMap(this._itemMap);
-        this._list.off('change', this._onListChange, this);
+        this._destroy();
     };
     RtRepeat.prototype._onListChange = function () {
         if (this.element.parentNode) {
             this._render(true);
+        }
+        else {
+            this._destroy();
         }
     };
     RtRepeat.prototype._render = function (c) {
@@ -208,6 +216,14 @@ var RtRepeat = (function (_super) {
             }
         }
     };
+    RtRepeat.prototype._destroy = function () {
+        if (this._destroyed) {
+            return;
+        }
+        this._destroyed = true;
+        this._clearByItemMap(this._itemMap);
+        this._list.off('change', this._onListChange, this);
+    };
     return RtRepeat;
 }(Component_1.default));
 RtRepeat = __decorate([
@@ -221,5 +237,4 @@ RtRepeat = __decorate([
         }
     })
 ], RtRepeat);
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RtRepeat;

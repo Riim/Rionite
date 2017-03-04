@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var componentPropertyTypeMap_1 = require("./componentPropertyTypeMap");
 var componentPropertyTypeHandlersMap_1 = require("./componentPropertyTypeHandlersMap");
@@ -121,5 +122,4 @@ var ComponentProperties = {
         return props;
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ComponentProperties;

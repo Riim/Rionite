@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var Component_1 = require("./Component");
 var d = {
     Component: function Component_(config) {
@@ -28,5 +29,4 @@ var d = {
         };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = d;

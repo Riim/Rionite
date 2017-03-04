@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var reHump = /-?([A-Z])([^A-Z])/g;
 var reLongHump = /-?([A-Z]+)/g;
 var reMinus = /^-/;
@@ -10,5 +11,4 @@ function hyphenize(str) {
         return '-' + chars.toLowerCase();
     }).replace(reMinus, ''));
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = hyphenize;

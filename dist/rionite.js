@@ -98,6 +98,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var html_to_fragment_1 = __webpack_require__(27);
 var DisposableMixin_1 = __webpack_require__(17);
@@ -399,7 +400,6 @@ var Component = (function (_super) {
 }(cellx_1.EventEmitter));
 Component.register = registerComponent_1.default;
 Component._blockNamesString = '';
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Component;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
 var ComponentProto = Component.prototype;
@@ -429,6 +429,7 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var dummyEl = document.createElement('div');
 dummyEl.innerHTML = '<template>1</template>';
 exports.templateTag = !dummyEl.firstChild.firstChild;
@@ -459,6 +460,7 @@ exports.nativeCustomElements = nativeCustomElementsFeature;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Component_1 = __webpack_require__(1);
 var d = {
     Component: function Component_(config) {
@@ -488,7 +490,6 @@ var d = {
         };
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = d;
 
 
@@ -498,6 +499,7 @@ exports.default = d;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var reHyphen = /[-_]+([a-z]|$)/g;
 var cache = Object.create(null);
 function camelize(str) {
@@ -505,7 +507,6 @@ function camelize(str) {
         return chr.toUpperCase();
     }));
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = camelize;
 
 
@@ -515,6 +516,7 @@ exports.default = camelize;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 function attachChildComponentElements(childComponents) {
     for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
         var childComponent = childComponents_1[_i];
@@ -525,7 +527,6 @@ function attachChildComponentElements(childComponents) {
         }
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = attachChildComponentElements;
 
 
@@ -535,6 +536,7 @@ exports.default = attachChildComponentElements;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var ContentParser_1 = __webpack_require__(16);
 var compileContent_1 = __webpack_require__(36);
@@ -620,7 +622,6 @@ function bindContent(content, ownerComponent, context) {
         childComponents: childComponents || null
     };
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = bindContent;
 
 
@@ -630,6 +631,7 @@ exports.default = bindContent;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var defer_1 = __webpack_require__(18);
 var Features_1 = __webpack_require__(2);
@@ -707,7 +709,6 @@ var ElementProtoMixin = (_a = {
         }
     },
     _a);
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ElementProtoMixin;
 var _a;
 
@@ -718,6 +719,7 @@ var _a;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var reHump = /-?([A-Z])([^A-Z])/g;
 var reLongHump = /-?([A-Z]+)/g;
 var reMinus = /^-/;
@@ -729,7 +731,6 @@ function hyphenize(str) {
         return '-' + chars.toLowerCase();
     }).replace(reMinus, ''));
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = hyphenize;
 
 
@@ -739,8 +740,8 @@ exports.default = hyphenize;
 
 "use strict";
 
-var getText_1 = __webpack_require__(23);
 Object.defineProperty(exports, "__esModule", { value: true });
+var getText_1 = __webpack_require__(23);
 exports.default = {
     or: function or(value, arg) {
         return value || arg;
@@ -807,8 +808,8 @@ exports.default = {
 
 "use strict";
 
-var namePattern_1 = __webpack_require__(11);
 Object.defineProperty(exports, "__esModule", { value: true });
+var namePattern_1 = __webpack_require__(11);
 exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\.(?:" + namePattern_1.default + "|\\d+))*";
 
 
@@ -862,6 +863,7 @@ exports.default = escapeString;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var componentPropertyTypeMap_1 = __webpack_require__(39);
 var componentPropertyTypeHandlersMap_1 = __webpack_require__(38);
@@ -984,7 +986,6 @@ var ComponentProperties = {
         return props;
     }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ComponentProperties;
 
 
@@ -1010,6 +1011,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var compileKeypath_1 = __webpack_require__(21);
@@ -1026,9 +1028,13 @@ var RtIfThen = (function (_super) {
     function RtIfThen() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._elseMode = false;
+        _this._destroyed = false;
         return _this;
     }
     RtIfThen.prototype._attachElement = function () {
+        if (this._destroyed) {
+            throw new TypeError('Instance of RtIfThen was destroyed and can no longer be used');
+        }
         if (!this.initialized) {
             var props = this.props;
             props.content = document.importNode(this.element.content, true);
@@ -1046,22 +1052,14 @@ var RtIfThen = (function (_super) {
         this._render(false);
     };
     RtIfThen.prototype._detachElement = function () {
-        this._destroyBindings();
-        this._if.off('change', this._onIfChange, this);
-        var nodes = this._nodes;
-        if (nodes) {
-            for (var i = nodes.length; i;) {
-                var node = nodes[--i];
-                var parentNode = node.parentNode;
-                if (parentNode) {
-                    parentNode.removeChild(node);
-                }
-            }
-        }
+        this._destroy();
     };
     RtIfThen.prototype._onIfChange = function () {
         if (this.element.parentNode) {
             this._render(true);
+        }
+        else {
+            this._destroy();
         }
     };
     RtIfThen.prototype._render = function (changed) {
@@ -1093,6 +1091,24 @@ var RtIfThen = (function (_super) {
             });
         }
     };
+    RtIfThen.prototype._destroy = function () {
+        if (this._destroyed) {
+            return;
+        }
+        this._destroyed = true;
+        this._destroyBindings();
+        this._if.off('change', this._onIfChange, this);
+        var nodes = this._nodes;
+        if (nodes) {
+            for (var i = nodes.length; i;) {
+                var node = nodes[--i];
+                var parentNode = node.parentNode;
+                if (parentNode) {
+                    parentNode.removeChild(node);
+                }
+            }
+        }
+    };
     return RtIfThen;
 }(Component_1.default));
 RtIfThen = __decorate([
@@ -1104,7 +1120,6 @@ RtIfThen = __decorate([
         }
     })
 ], RtIfThen);
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RtIfThen;
 
 
@@ -1114,6 +1129,7 @@ exports.default = RtIfThen;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var keypathToJSExpression_1 = __webpack_require__(24);
 var namePattern_1 = __webpack_require__(11);
 var keypathPattern_1 = __webpack_require__(10);
@@ -1447,7 +1463,6 @@ var ContentParser = (function () {
     return ContentParser;
 }());
 ContentParser.ContentNodeType = ContentNodeType;
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ContentParser;
 
 
@@ -1457,6 +1472,7 @@ exports.default = ContentParser;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var nextUID = cellx_1.Utils.nextUID;
 var DisposableMixin = (function () {
@@ -1616,7 +1632,6 @@ var DisposableMixin = (function () {
     };
     return DisposableMixin;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = DisposableMixin;
 
 
@@ -1626,6 +1641,7 @@ exports.default = DisposableMixin;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var queue;
 function run() {
@@ -1650,7 +1666,6 @@ function defer(cb, context) {
         setTimeout(run, 1);
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = defer;
 
 
@@ -1660,11 +1675,11 @@ exports.default = defer;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var toString = Object.prototype.toString;
 function isRegExp(value) {
     return toString.call(value) == '[object RegExp]';
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = isRegExp;
 
 
@@ -1674,6 +1689,7 @@ exports.default = isRegExp;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cache = Object.create(null);
 function formattersReducer(jsExpr, formatter) {
     var args = formatter.arguments;
@@ -1708,7 +1724,6 @@ function bindingToJSExpression(binding) {
         usesFormatters: usesFormatters
     });
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = bindingToJSExpression;
 
 
@@ -1718,12 +1733,12 @@ exports.default = bindingToJSExpression;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var keypathToJSExpression_1 = __webpack_require__(24);
 var cache = Object.create(null);
 function compileKeypath(keypath) {
     return cache[keypath] || (cache[keypath] = Function("var temp; return " + keypathToJSExpression_1.default(keypath) + ";"));
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = compileKeypath;
 
 
@@ -1733,9 +1748,9 @@ exports.default = compileKeypath;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var mixin = cellx_1.Utils.mixin;
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = mixin(Object.create(null), {
     a: window.HTMLAnchorElement,
     blockquote: window.HTMLQuoteElement,
@@ -1787,6 +1802,7 @@ exports.default = mixin(Object.create(null), {
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var hasOwn = Object.prototype.hasOwnProperty;
 var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
 var texts;
@@ -1860,7 +1876,6 @@ getText.t = t;
 getText.pt = pt;
 getText.nt = nt;
 getText.npt = npt;
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = getText;
 configure({
     localeSettings: {
@@ -1877,6 +1892,7 @@ configure({
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cache = Object.create(null);
 function keypathToJSExpression(keypath) {
     if (cache[keypath]) {
@@ -1894,7 +1910,6 @@ function keypathToJSExpression(keypath) {
     }
     return (cache[keypath] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && temp['" + keys[keyCount - 1] + "']");
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = keypathToJSExpression;
 
 
@@ -2354,6 +2369,7 @@ exports.default = htmlToFragment;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var beml_1 = __webpack_require__(26);
 exports.BemlParser = beml_1.Parser;
 exports.BemlTemplate = beml_1.Template;
@@ -2422,6 +2438,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var ElementProtoMixin_1 = __webpack_require__(7);
@@ -2569,7 +2586,6 @@ RtContent = __decorate([
         template: ''
     })
 ], RtContent);
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RtContent;
 
 
@@ -2595,6 +2611,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var d_1 = __webpack_require__(3);
 var rt_if_then_1 = __webpack_require__(15);
 var RtIfElse = (function (_super) {
@@ -2612,7 +2629,6 @@ RtIfElse = __decorate([
         elementExtends: 'template'
     })
 ], RtIfElse);
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RtIfElse;
 
 
@@ -2638,6 +2654,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var compileKeypath_1 = __webpack_require__(21);
@@ -2654,9 +2671,14 @@ var reForAttributeValue = RegExp("^\\s*(" + namePattern_1.default + ")\\s+of\\s+
 var RtRepeat = (function (_super) {
     __extends(RtRepeat, _super);
     function RtRepeat() {
-        return _super !== null && _super.apply(this, arguments) || this;
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this._destroyed = false;
+        return _this;
     }
     RtRepeat.prototype._attachElement = function () {
+        if (this._destroyed) {
+            throw new TypeError('Instance of RtRepeat was destroyed and can no longer be used');
+        }
         if (!this.initialized) {
             var props = this.props;
             var forAttrValue = props['for'].match(reForAttributeValue);
@@ -2697,12 +2719,14 @@ var RtRepeat = (function (_super) {
         this._render(false);
     };
     RtRepeat.prototype._detachElement = function () {
-        this._clearByItemMap(this._itemMap);
-        this._list.off('change', this._onListChange, this);
+        this._destroy();
     };
     RtRepeat.prototype._onListChange = function () {
         if (this.element.parentNode) {
             this._render(true);
+        }
+        else {
+            this._destroy();
         }
     };
     RtRepeat.prototype._render = function (c) {
@@ -2831,6 +2855,14 @@ var RtRepeat = (function (_super) {
             }
         }
     };
+    RtRepeat.prototype._destroy = function () {
+        if (this._destroyed) {
+            return;
+        }
+        this._destroyed = true;
+        this._clearByItemMap(this._itemMap);
+        this._list.off('change', this._onListChange, this);
+    };
     return RtRepeat;
 }(Component_1.default));
 RtRepeat = __decorate([
@@ -2844,7 +2876,6 @@ RtRepeat = __decorate([
         }
     })
 ], RtRepeat);
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RtRepeat;
 
 
@@ -2854,6 +2885,7 @@ exports.default = RtRepeat;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var nextUID = cellx_1.Utils.nextUID;
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -2869,7 +2901,6 @@ else {
         return hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : Object.defineProperty(obj, KEY_UID, {});
     };
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = getUID;
 
 
@@ -2879,6 +2910,7 @@ exports.default = getUID;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 function setAttribute(el, name, value) {
     if (value === false || value == null) {
         el.removeAttribute(name);
@@ -2887,7 +2919,6 @@ function setAttribute(el, name, value) {
         el.setAttribute(name, value === true ? '' : value);
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = setAttribute;
 
 
@@ -2897,6 +2928,7 @@ exports.default = setAttribute;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 function bindEvents(component, events) {
     for (var elName in events) {
         var asset = void 0;
@@ -2918,7 +2950,6 @@ function bindEvents(component, events) {
         }
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = bindEvents;
 
 
@@ -2928,6 +2959,7 @@ exports.default = bindEvents;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var bindingToJSExpression_1 = __webpack_require__(20);
 var formatters_1 = __webpack_require__(9);
 var cache = Object.create(null);
@@ -2946,7 +2978,6 @@ function compileBinding(binding) {
     }
     return (cache[bindingRaw] = Function(jsExpr));
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = compileBinding;
 
 
@@ -2956,6 +2987,7 @@ exports.default = compileBinding;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var escape_string_1 = __webpack_require__(13);
 var ContentParser_1 = __webpack_require__(16);
 var bindingToJSExpression_1 = __webpack_require__(20);
@@ -2994,7 +3026,6 @@ function compileContent(parsedContent, content) {
     }
     return (cache[content] = Function(jsExpr));
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = compileContent;
 
 
@@ -3004,6 +3035,7 @@ exports.default = compileContent;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 function freezeBinding(binding) {
     binding._frozenState = {
@@ -3057,10 +3089,10 @@ exports.unfreezeBindings = unfreezeBindings;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var escape_html_1 = __webpack_require__(12);
 var isRegExp_1 = __webpack_require__(19);
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = new cellx_1.JS.Map([
     [Boolean, [
             function (value) {
@@ -3137,8 +3169,8 @@ exports.default = new cellx_1.JS.Map([
 
 "use strict";
 
-var cellx_1 = __webpack_require__(0);
 Object.defineProperty(exports, "__esModule", { value: true });
+var cellx_1 = __webpack_require__(0);
 exports.default = new cellx_1.JS.Map([
     [Boolean, 'boolean'],
     ['boolean', 'boolean'],
@@ -3178,6 +3210,7 @@ exports.default = [
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var camelize_1 = __webpack_require__(4);
 function initElementAttributes(component, constr) {
     var propsConfig = constr.props;
@@ -3192,7 +3225,6 @@ function initElementAttributes(component, constr) {
         }
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = initElementAttributes;
 
 
@@ -3202,6 +3234,7 @@ exports.default = initElementAttributes;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 function onEvent(evt) {
     var node;
     var attrName;
@@ -3240,7 +3273,6 @@ function onEvent(evt) {
         }
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = onEvent;
 
 
@@ -3250,6 +3282,7 @@ exports.default = onEvent;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var beml_1 = __webpack_require__(26);
 var elementConstructorMap_1 = __webpack_require__(22);
@@ -3342,7 +3375,6 @@ function registerComponent(componentConstr) {
     window.customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
     return (componentConstr._registeredComponent = componentConstr);
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = registerComponent;
 
 

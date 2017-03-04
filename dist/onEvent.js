@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 function onEvent(evt) {
     var node;
     var attrName;
@@ -37,5 +38,4 @@ function onEvent(evt) {
         }
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = onEvent;

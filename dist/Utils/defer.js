@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var queue;
 function run() {
@@ -23,5 +24,4 @@ function defer(cb, context) {
         setTimeout(run, 1);
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = defer;

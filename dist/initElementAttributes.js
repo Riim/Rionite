@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var camelize_1 = require("./Utils/camelize");
 function initElementAttributes(component, constr) {
     var propsConfig = constr.props;
@@ -13,5 +14,4 @@ function initElementAttributes(component, constr) {
         }
     }
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = initElementAttributes;

@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var beml_1 = require("@riim/beml");
 exports.BemlParser = beml_1.Parser;
 exports.BemlTemplate = beml_1.Template;

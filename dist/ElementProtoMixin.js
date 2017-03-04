@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var defer_1 = require("./Utils/defer");
 var Features_1 = require("./Features");
@@ -76,6 +77,5 @@ var ElementProtoMixin = (_a = {
         }
     },
     _a);
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = ElementProtoMixin;
 var _a;

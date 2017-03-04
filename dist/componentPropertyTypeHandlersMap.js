@@ -1,8 +1,8 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var escape_html_1 = require("@riim/escape-html");
 var isRegExp_1 = require("./Utils/isRegExp");
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = new cellx_1.JS.Map([
     [Boolean, [
             function (value) {

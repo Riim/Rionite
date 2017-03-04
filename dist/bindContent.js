@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var ContentParser_1 = require("./ContentParser");
 var compileContent_1 = require("./compileContent");
@@ -84,5 +85,4 @@ function bindContent(content, ownerComponent, context) {
         childComponents: childComponents || null
     };
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = bindContent;

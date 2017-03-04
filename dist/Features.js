@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var dummyEl = document.createElement('div');
 dummyEl.innerHTML = '<template>1</template>';
 exports.templateTag = !dummyEl.firstChild.firstChild;

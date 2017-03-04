@@ -1,6 +1,6 @@
 "use strict";
-var getText_1 = require("./getText");
 Object.defineProperty(exports, "__esModule", { value: true });
+var getText_1 = require("./getText");
 exports.default = {
     or: function or(value, arg) {
         return value || arg;

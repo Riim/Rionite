@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var nextUID = cellx_1.Utils.nextUID;
 var DisposableMixin = (function () {
@@ -158,5 +159,4 @@ var DisposableMixin = (function () {
     };
     return DisposableMixin;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = DisposableMixin;

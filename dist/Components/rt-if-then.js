@@ -15,6 +15,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var Component_1 = require("../Component");
 var compileKeypath_1 = require("../compileKeypath");
@@ -31,9 +32,13 @@ var RtIfThen = (function (_super) {
     function RtIfThen() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._elseMode = false;
+        _this._destroyed = false;
         return _this;
     }
     RtIfThen.prototype._attachElement = function () {
+        if (this._destroyed) {
+            throw new TypeError('Instance of RtIfThen was destroyed and can no longer be used');
+        }
         if (!this.initialized) {
             var props = this.props;
             props.content = document.importNode(this.element.content, true);
@@ -51,22 +56,14 @@ var RtIfThen = (function (_super) {
         this._render(false);
     };
     RtIfThen.prototype._detachElement = function () {
-        this._destroyBindings();
-        this._if.off('change', this._onIfChange, this);
-        var nodes = this._nodes;
-        if (nodes) {
-            for (var i = nodes.length; i;) {
-                var node = nodes[--i];
-                var parentNode = node.parentNode;
-                if (parentNode) {
-                    parentNode.removeChild(node);
-                }
-            }
-        }
+        this._destroy();
     };
     RtIfThen.prototype._onIfChange = function () {
         if (this.element.parentNode) {
             this._render(true);
+        }
+        else {
+            this._destroy();
         }
     };
     RtIfThen.prototype._render = function (changed) {
@@ -98,6 +95,24 @@ var RtIfThen = (function (_super) {
             });
         }
     };
+    RtIfThen.prototype._destroy = function () {
+        if (this._destroyed) {
+            return;
+        }
+        this._destroyed = true;
+        this._destroyBindings();
+        this._if.off('change', this._onIfChange, this);
+        var nodes = this._nodes;
+        if (nodes) {
+            for (var i = nodes.length; i;) {
+                var node = nodes[--i];
+                var parentNode = node.parentNode;
+                if (parentNode) {
+                    parentNode.removeChild(node);
+                }
+            }
+        }
+    };
     return RtIfThen;
 }(Component_1.default));
 RtIfThen = __decorate([
@@ -109,5 +124,4 @@ RtIfThen = __decorate([
         }
     })
 ], RtIfThen);
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = RtIfThen;

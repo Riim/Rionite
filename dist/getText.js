@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var hasOwn = Object.prototype.hasOwnProperty;
 var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
 var texts;
@@ -72,7 +73,6 @@ getText.t = t;
 getText.pt = pt;
 getText.nt = nt;
 getText.npt = npt;
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = getText;
 configure({
     localeSettings: {

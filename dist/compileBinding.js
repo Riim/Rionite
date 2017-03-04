@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var bindingToJSExpression_1 = require("./bindingToJSExpression");
 var formatters_1 = require("./formatters");
 var cache = Object.create(null);
@@ -17,5 +18,4 @@ function compileBinding(binding) {
     }
     return (cache[bindingRaw] = Function(jsExpr));
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = compileBinding;

@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var escape_string_1 = require("escape-string");
 var ContentParser_1 = require("./ContentParser");
 var bindingToJSExpression_1 = require("./bindingToJSExpression");
@@ -37,5 +38,4 @@ function compileContent(parsedContent, content) {
     }
     return (cache[content] = Function(jsExpr));
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = compileContent;

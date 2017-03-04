@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var cache = Object.create(null);
 function formattersReducer(jsExpr, formatter) {
     var args = formatter.arguments;
@@ -33,5 +34,4 @@ function bindingToJSExpression(binding) {
         usesFormatters: usesFormatters
     });
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = bindingToJSExpression;

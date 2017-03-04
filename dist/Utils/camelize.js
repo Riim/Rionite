@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var reHyphen = /[-_]+([a-z]|$)/g;
 var cache = Object.create(null);
 function camelize(str) {
@@ -6,5 +7,4 @@ function camelize(str) {
         return chr.toUpperCase();
     }));
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = camelize;

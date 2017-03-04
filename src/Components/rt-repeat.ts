@@ -51,7 +51,13 @@ export default class RtRepeat extends Component {
 
 	_lastNode: Node;
 
+	_destroyed = false;
+
 	_attachElement() {
+		if (this._destroyed) {
+			throw new TypeError('Instance of RtRepeat was destroyed and can no longer be used');
+		}
+
 		if (!this.initialized) {
 			let props = this.props;
 			let forAttrValue = props['for'].match(reForAttributeValue);
@@ -104,13 +110,14 @@ export default class RtRepeat extends Component {
 	}
 
 	_detachElement() {
-		this._clearByItemMap(this._itemMap);
-		this._list.off('change', this._onListChange, this);
+		this._destroy();
 	}
 
 	_onListChange() {
 		if (this.element.parentNode) {
 			this._render(true);
+		} else {
+			this._destroy();
 		}
 	}
 
@@ -262,5 +269,16 @@ export default class RtRepeat extends Component {
 				}
 			}
 		}
+	}
+
+	_destroy() {
+		if (this._destroyed) {
+			return;
+		}
+
+		this._destroyed = true;
+
+		this._clearByItemMap(this._itemMap);
+		this._list.off('change', this._onListChange, this);
 	}
 }

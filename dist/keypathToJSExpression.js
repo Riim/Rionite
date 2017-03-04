@@ -1,4 +1,5 @@
 "use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 var cache = Object.create(null);
 function keypathToJSExpression(keypath) {
     if (cache[keypath]) {
@@ -16,5 +17,4 @@ function keypathToJSExpression(keypath) {
     }
     return (cache[keypath] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && temp['" + keys[keyCount - 1] + "']");
 }
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = keypathToJSExpression;
