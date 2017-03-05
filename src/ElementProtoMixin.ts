@@ -1,11 +1,11 @@
 import { JS } from 'cellx';
-import Component from './Component';
+import { IComponentElement, default as Component } from './Component';
 import defer from './Utils/defer';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
 
 let Symbol = JS.Symbol;
 
-let KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
+let KEY_CONNECTED = Symbol('Rionite.ElementProtoMixin.connected');
 
 export let ElementsController = {
 	skipConnectionStatusCallbacks: false
@@ -18,10 +18,10 @@ let ElementProtoMixin = {
 		return new this.constructor._rioniteComponentConstructor(this);
 	},
 
-	[KEY_ATTACHED]: false,
+	[KEY_CONNECTED]: false,
 
 	connectedCallback() {
-		this[KEY_ATTACHED] = true;
+		this[KEY_CONNECTED] = true;
 
 		if (ElementsController.skipConnectionStatusCallbacks) {
 			return;
@@ -30,26 +30,27 @@ let ElementProtoMixin = {
 		let component = this.rioniteComponent as Component;
 
 		if (component) {
-			if (component.isElementAttached) {
+			component.elementConnected();
+
+			if (component._attached) {
 				if (component._parentComponent === null) {
 					component._parentComponent = undefined;
 					component.elementMoved();
 				}
 			} else {
 				component._parentComponent = undefined;
-				component.isElementAttached = true;
-				component._attachElement();
+				component._attach();
 			}
 		} else {
-			defer(function() {
-				if (this[KEY_ATTACHED]) {
+			defer(function(this: IComponentElement) {
+				if (this[KEY_CONNECTED]) {
 					let component = this.$c;
 
 					component._parentComponent = undefined;
 
 					if (!component.parentComponent) {
-						component.isElementAttached = true;
-						component._attachElement();
+						component.elementConnected();
+						component._attach();
 					}
 				}
 			}, this);
@@ -57,7 +58,7 @@ let ElementProtoMixin = {
 	},
 
 	disconnectedCallback() {
-		this[KEY_ATTACHED] = false;
+		this[KEY_CONNECTED] = false;
 
 		if (ElementsController.skipConnectionStatusCallbacks) {
 			return;
@@ -65,13 +66,14 @@ let ElementProtoMixin = {
 
 		let component = this.rioniteComponent as Component;
 
-		if (component && component.isElementAttached) {
+		if (component && component._attached) {
 			component._parentComponent = null;
 
+			component.elementDisconnected();
+
 			defer(() => {
-				if (component._parentComponent === null && component.isElementAttached) {
-					component.isElementAttached = false;
-					component._detachElement();
+				if (component._parentComponent === null && component._attached) {
+					component._detach();
 				}
 			});
 		}

@@ -32,7 +32,7 @@ export default class RtIfThen extends Component {
 
 	_destroyed = false;
 
-	_attachElement() {
+	elementConnected() {
 		if (this._destroyed) {
 			throw new TypeError('Instance of RtIfThen was destroyed and can no longer be used');
 		}
@@ -62,16 +62,21 @@ export default class RtIfThen extends Component {
 		this._render(false);
 	}
 
-	_detachElement() {
+	elementDisconnected() {
 		this._destroy();
 	}
 
 	_onIfChange() {
 		if (this.element.parentNode) {
 			this._render(true);
-		} else {
-			this._destroy();
 		}
+	}
+
+	_attach() {
+		this._attached = true;
+	}
+	_detach() {
+		this._attached = false;
 	}
 
 	_render(changed: boolean) {

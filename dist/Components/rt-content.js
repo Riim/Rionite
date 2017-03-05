@@ -29,7 +29,8 @@ var RtContent = (function (_super) {
     function RtContent() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    RtContent.prototype._attachElement = function () {
+    RtContent.prototype._attach = function () {
+        this._attached = true;
         var props = this.props;
         if (props['cloning']) {
             var ownerComponent = this.ownerComponent;
@@ -142,7 +143,8 @@ var RtContent = (function (_super) {
             }
         }
     };
-    RtContent.prototype._detachElement = function () {
+    RtContent.prototype._detach = function () {
+        this._attached = false;
         if (this.props['cloning']) {
             this._destroyBindings();
         }

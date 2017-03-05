@@ -19,9 +19,11 @@ export default class RtRepeat extends Component {
     _context: Object;
     _lastNode: Node;
     _destroyed: boolean;
-    _attachElement(): void;
-    _detachElement(): void;
+    elementConnected(): void;
+    elementDisconnected(): void;
     _onListChange(): void;
+    _attach(): void;
+    _detach(): void;
     _render(c: boolean): void;
     _renderItem(item: Object, index: number): boolean;
     _clearByItemMap(itemMap: TRtRepeatItemMap): void;

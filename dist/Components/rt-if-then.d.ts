@@ -6,9 +6,11 @@ export default class RtIfThen extends Component {
     _if: TRtIfThenIfCell;
     _nodes: Array<Node> | null;
     _destroyed: boolean;
-    _attachElement(): void;
-    _detachElement(): void;
+    elementConnected(): void;
+    elementDisconnected(): void;
     _onIfChange(): void;
+    _attach(): void;
+    _detach(): void;
     _render(changed: boolean): void;
     _destroy(): void;
 }

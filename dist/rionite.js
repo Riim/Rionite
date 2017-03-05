@@ -139,6 +139,8 @@ function findChildComponentElements(node, ownerComponent, context, _childCompone
 var created;
 var initialize;
 var ready;
+var elementConnected;
+var elementDisconnected;
 var elementAttached;
 var elementDetached;
 var elementMoved;
@@ -149,7 +151,7 @@ var Component = (function (_super) {
         var _this = _super.call(this) || this;
         _this.ownerComponent = null;
         _this._parentComponent = null;
-        _this.isElementAttached = false;
+        _this._attached = false;
         _this.initialized = false;
         _this.isReady = false;
         DisposableMixin_1.default.call(_this);
@@ -264,7 +266,8 @@ var Component = (function (_super) {
         }
         return DisposableMixin_1.default.prototype._listenTo.call(this, target, type, listener, context);
     };
-    Component.prototype._attachElement = function () {
+    Component.prototype._attach = function () {
+        this._attached = true;
         if (!this.initialized) {
             this.initialize();
             this.initialized = true;
@@ -317,7 +320,8 @@ var Component = (function (_super) {
         }
         this.elementAttached();
     };
-    Component.prototype._detachElement = function () {
+    Component.prototype._detach = function () {
+        this._attached = false;
         this.elementDetached();
         this.dispose();
     };
@@ -348,6 +352,8 @@ var Component = (function (_super) {
     Component.prototype.created = function () { };
     Component.prototype.initialize = function () { };
     Component.prototype.ready = function () { };
+    Component.prototype.elementConnected = function () { };
+    Component.prototype.elementDisconnected = function () { };
     Component.prototype.elementAttached = function () { };
     Component.prototype.elementDetached = function () { };
     Component.prototype.elementMoved = function () { };
@@ -411,6 +417,8 @@ Object.getOwnPropertyNames(DisposableMixinProto).forEach(function (name) {
 created = ComponentProto.created;
 initialize = ComponentProto.initialize;
 ready = ComponentProto.ready;
+elementConnected = ComponentProto.elementConnected;
+elementDisconnected = ComponentProto.elementDisconnected;
 elementAttached = ComponentProto.elementAttached;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;
@@ -520,10 +528,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function attachChildComponentElements(childComponents) {
     for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
         var childComponent = childComponents_1[_i];
-        if (!childComponent.isElementAttached) {
+        if (!childComponent._attached) {
             childComponent._parentComponent = undefined;
-            childComponent.isElementAttached = true;
-            childComponent._attachElement();
+            childComponent.elementConnected();
+            childComponent._attach();
         }
     }
 }
@@ -636,7 +644,7 @@ var cellx_1 = __webpack_require__(0);
 var defer_1 = __webpack_require__(18);
 var Features_1 = __webpack_require__(2);
 var Symbol = cellx_1.JS.Symbol;
-var KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
+var KEY_CONNECTED = Symbol('Rionite.ElementProtoMixin.connected');
 exports.ElementsController = {
     skipConnectionStatusCallbacks: false
 };
@@ -646,15 +654,16 @@ var ElementProtoMixin = (_a = {
             return new this.constructor._rioniteComponentConstructor(this);
         }
     },
-    _a[KEY_ATTACHED] = false,
+    _a[KEY_CONNECTED] = false,
     _a.connectedCallback = function () {
-        this[KEY_ATTACHED] = true;
+        this[KEY_CONNECTED] = true;
         if (exports.ElementsController.skipConnectionStatusCallbacks) {
             return;
         }
         var component = this.rioniteComponent;
         if (component) {
-            if (component.isElementAttached) {
+            component.elementConnected();
+            if (component._attached) {
                 if (component._parentComponent === null) {
                     component._parentComponent = undefined;
                     component.elementMoved();
@@ -662,35 +671,34 @@ var ElementProtoMixin = (_a = {
             }
             else {
                 component._parentComponent = undefined;
-                component.isElementAttached = true;
-                component._attachElement();
+                component._attach();
             }
         }
         else {
             defer_1.default(function () {
-                if (this[KEY_ATTACHED]) {
+                if (this[KEY_CONNECTED]) {
                     var component_1 = this.$c;
                     component_1._parentComponent = undefined;
                     if (!component_1.parentComponent) {
-                        component_1.isElementAttached = true;
-                        component_1._attachElement();
+                        component_1.elementConnected();
+                        component_1._attach();
                     }
                 }
             }, this);
         }
     },
     _a.disconnectedCallback = function () {
-        this[KEY_ATTACHED] = false;
+        this[KEY_CONNECTED] = false;
         if (exports.ElementsController.skipConnectionStatusCallbacks) {
             return;
         }
         var component = this.rioniteComponent;
-        if (component && component.isElementAttached) {
+        if (component && component._attached) {
             component._parentComponent = null;
+            component.elementDisconnected();
             defer_1.default(function () {
-                if (component._parentComponent === null && component.isElementAttached) {
-                    component.isElementAttached = false;
-                    component._detachElement();
+                if (component._parentComponent === null && component._attached) {
+                    component._detach();
                 }
             });
         }
@@ -1031,7 +1039,7 @@ var RtIfThen = (function (_super) {
         _this._destroyed = false;
         return _this;
     }
-    RtIfThen.prototype._attachElement = function () {
+    RtIfThen.prototype.elementConnected = function () {
         if (this._destroyed) {
             throw new TypeError('Instance of RtIfThen was destroyed and can no longer be used');
         }
@@ -1051,16 +1059,19 @@ var RtIfThen = (function (_super) {
         this._if.on('change', this._onIfChange, this);
         this._render(false);
     };
-    RtIfThen.prototype._detachElement = function () {
+    RtIfThen.prototype.elementDisconnected = function () {
         this._destroy();
     };
     RtIfThen.prototype._onIfChange = function () {
         if (this.element.parentNode) {
             this._render(true);
         }
-        else {
-            this._destroy();
-        }
+    };
+    RtIfThen.prototype._attach = function () {
+        this._attached = true;
+    };
+    RtIfThen.prototype._detach = function () {
+        this._attached = false;
     };
     RtIfThen.prototype._render = function (changed) {
         var _this = this;
@@ -2452,7 +2463,8 @@ var RtContent = (function (_super) {
     function RtContent() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    RtContent.prototype._attachElement = function () {
+    RtContent.prototype._attach = function () {
+        this._attached = true;
         var props = this.props;
         if (props['cloning']) {
             var ownerComponent = this.ownerComponent;
@@ -2565,7 +2577,8 @@ var RtContent = (function (_super) {
             }
         }
     };
-    RtContent.prototype._detachElement = function () {
+    RtContent.prototype._detach = function () {
+        this._attached = false;
         if (this.props['cloning']) {
             this._destroyBindings();
         }
@@ -2675,7 +2688,7 @@ var RtRepeat = (function (_super) {
         _this._destroyed = false;
         return _this;
     }
-    RtRepeat.prototype._attachElement = function () {
+    RtRepeat.prototype.elementConnected = function () {
         if (this._destroyed) {
             throw new TypeError('Instance of RtRepeat was destroyed and can no longer be used');
         }
@@ -2718,16 +2731,19 @@ var RtRepeat = (function (_super) {
         this._list.on('change', this._onListChange, this);
         this._render(false);
     };
-    RtRepeat.prototype._detachElement = function () {
+    RtRepeat.prototype.elementDisconnected = function () {
         this._destroy();
     };
     RtRepeat.prototype._onListChange = function () {
         if (this.element.parentNode) {
             this._render(true);
         }
-        else {
-            this._destroy();
-        }
+    };
+    RtRepeat.prototype._attach = function () {
+        this._attached = true;
+    };
+    RtRepeat.prototype._detach = function () {
+        this._attached = false;
     };
     RtRepeat.prototype._render = function (c) {
         var _this = this;

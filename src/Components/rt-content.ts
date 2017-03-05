@@ -22,7 +22,9 @@ let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 export default class RtContent extends Component {
 	_rawContent: DocumentFragment;
 
-	_attachElement() {
+	_attach() {
+		this._attached = true;
+
 		let props = this.props;
 
 		if (props['cloning']) {
@@ -176,7 +178,9 @@ export default class RtContent extends Component {
 		}
 	}
 
-	_detachElement() {
+	_detach() {
+		this._attached = false;
+
 		if (this.props['cloning']) {
 			this._destroyBindings();
 		} else {

@@ -4,7 +4,7 @@ var cellx_1 = require("cellx");
 var defer_1 = require("./Utils/defer");
 var Features_1 = require("./Features");
 var Symbol = cellx_1.JS.Symbol;
-var KEY_ATTACHED = Symbol('Rionite.ElementProtoMixin.attached');
+var KEY_CONNECTED = Symbol('Rionite.ElementProtoMixin.connected');
 exports.ElementsController = {
     skipConnectionStatusCallbacks: false
 };
@@ -14,15 +14,16 @@ var ElementProtoMixin = (_a = {
             return new this.constructor._rioniteComponentConstructor(this);
         }
     },
-    _a[KEY_ATTACHED] = false,
+    _a[KEY_CONNECTED] = false,
     _a.connectedCallback = function () {
-        this[KEY_ATTACHED] = true;
+        this[KEY_CONNECTED] = true;
         if (exports.ElementsController.skipConnectionStatusCallbacks) {
             return;
         }
         var component = this.rioniteComponent;
         if (component) {
-            if (component.isElementAttached) {
+            component.elementConnected();
+            if (component._attached) {
                 if (component._parentComponent === null) {
                     component._parentComponent = undefined;
                     component.elementMoved();
@@ -30,35 +31,34 @@ var ElementProtoMixin = (_a = {
             }
             else {
                 component._parentComponent = undefined;
-                component.isElementAttached = true;
-                component._attachElement();
+                component._attach();
             }
         }
         else {
             defer_1.default(function () {
-                if (this[KEY_ATTACHED]) {
+                if (this[KEY_CONNECTED]) {
                     var component_1 = this.$c;
                     component_1._parentComponent = undefined;
                     if (!component_1.parentComponent) {
-                        component_1.isElementAttached = true;
-                        component_1._attachElement();
+                        component_1.elementConnected();
+                        component_1._attach();
                     }
                 }
             }, this);
         }
     },
     _a.disconnectedCallback = function () {
-        this[KEY_ATTACHED] = false;
+        this[KEY_CONNECTED] = false;
         if (exports.ElementsController.skipConnectionStatusCallbacks) {
             return;
         }
         var component = this.rioniteComponent;
-        if (component && component.isElementAttached) {
+        if (component && component._attached) {
             component._parentComponent = null;
+            component.elementDisconnected();
             defer_1.default(function () {
-                if (component._parentComponent === null && component.isElementAttached) {
-                    component.isElementAttached = false;
-                    component._detachElement();
+                if (component._parentComponent === null && component._attached) {
+                    component._detach();
                 }
             });
         }

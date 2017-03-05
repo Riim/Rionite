@@ -53,7 +53,7 @@ export default class RtRepeat extends Component {
 
 	_destroyed = false;
 
-	_attachElement() {
+	elementConnected() {
 		if (this._destroyed) {
 			throw new TypeError('Instance of RtRepeat was destroyed and can no longer be used');
 		}
@@ -109,16 +109,21 @@ export default class RtRepeat extends Component {
 		this._render(false);
 	}
 
-	_detachElement() {
+	elementDisconnected() {
 		this._destroy();
 	}
 
 	_onListChange() {
 		if (this.element.parentNode) {
 			this._render(true);
-		} else {
-			this._destroy();
 		}
+	}
+
+	_attach() {
+		this._attached = true;
+	}
+	_detach() {
+		this._attached = false;
 	}
 
 	_render(c: boolean) {

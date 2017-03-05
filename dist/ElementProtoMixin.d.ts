@@ -1,4 +1,4 @@
-import Component from './Component';
+import { default as Component } from './Component';
 export declare let ElementsController: {
     skipConnectionStatusCallbacks: boolean;
 };

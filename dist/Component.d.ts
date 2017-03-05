@@ -46,7 +46,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     readonly props: IComponentProperties;
     _bindings: Array<IFreezableCell> | null;
     _elementListMap: Map<string, NodeListOf<HTMLElement>>;
-    isElementAttached: boolean;
+    _attached: boolean;
     initialized: boolean;
     isReady: boolean;
     _silent: boolean;
@@ -59,8 +59,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
     setTimeout: typeof DisposableMixin.prototype.setTimeout;
     setInterval: typeof DisposableMixin.prototype.setInterval;
     registerCallback: typeof DisposableMixin.prototype.registerCallback;
-    _attachElement(): void;
-    _detachElement(): void;
+    _attach(): void;
+    _detach(): void;
     dispose(): Component;
     _freezeBindings(): void;
     _unfreezeBindings(): void;
@@ -68,6 +68,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
     created(): void;
     initialize(): void;
     ready(): void;
+    elementConnected(): void;
+    elementDisconnected(): void;
     elementAttached(): void;
     elementDetached(): void;
     elementMoved(): void;

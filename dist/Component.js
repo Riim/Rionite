@@ -50,6 +50,8 @@ function findChildComponentElements(node, ownerComponent, context, _childCompone
 var created;
 var initialize;
 var ready;
+var elementConnected;
+var elementDisconnected;
 var elementAttached;
 var elementDetached;
 var elementMoved;
@@ -60,7 +62,7 @@ var Component = (function (_super) {
         var _this = _super.call(this) || this;
         _this.ownerComponent = null;
         _this._parentComponent = null;
-        _this.isElementAttached = false;
+        _this._attached = false;
         _this.initialized = false;
         _this.isReady = false;
         DisposableMixin_1.default.call(_this);
@@ -175,7 +177,8 @@ var Component = (function (_super) {
         }
         return DisposableMixin_1.default.prototype._listenTo.call(this, target, type, listener, context);
     };
-    Component.prototype._attachElement = function () {
+    Component.prototype._attach = function () {
+        this._attached = true;
         if (!this.initialized) {
             this.initialize();
             this.initialized = true;
@@ -228,7 +231,8 @@ var Component = (function (_super) {
         }
         this.elementAttached();
     };
-    Component.prototype._detachElement = function () {
+    Component.prototype._detach = function () {
+        this._attached = false;
         this.elementDetached();
         this.dispose();
     };
@@ -259,6 +263,8 @@ var Component = (function (_super) {
     Component.prototype.created = function () { };
     Component.prototype.initialize = function () { };
     Component.prototype.ready = function () { };
+    Component.prototype.elementConnected = function () { };
+    Component.prototype.elementDisconnected = function () { };
     Component.prototype.elementAttached = function () { };
     Component.prototype.elementDetached = function () { };
     Component.prototype.elementMoved = function () { };
@@ -322,6 +328,8 @@ Object.getOwnPropertyNames(DisposableMixinProto).forEach(function (name) {
 created = ComponentProto.created;
 initialize = ComponentProto.initialize;
 ready = ComponentProto.ready;
+elementConnected = ComponentProto.elementConnected;
+elementDisconnected = ComponentProto.elementDisconnected;
 elementAttached = ComponentProto.elementAttached;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;

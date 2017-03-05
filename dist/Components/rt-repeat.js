@@ -36,7 +36,7 @@ var RtRepeat = (function (_super) {
         _this._destroyed = false;
         return _this;
     }
-    RtRepeat.prototype._attachElement = function () {
+    RtRepeat.prototype.elementConnected = function () {
         if (this._destroyed) {
             throw new TypeError('Instance of RtRepeat was destroyed and can no longer be used');
         }
@@ -79,16 +79,19 @@ var RtRepeat = (function (_super) {
         this._list.on('change', this._onListChange, this);
         this._render(false);
     };
-    RtRepeat.prototype._detachElement = function () {
+    RtRepeat.prototype.elementDisconnected = function () {
         this._destroy();
     };
     RtRepeat.prototype._onListChange = function () {
         if (this.element.parentNode) {
             this._render(true);
         }
-        else {
-            this._destroy();
-        }
+    };
+    RtRepeat.prototype._attach = function () {
+        this._attached = true;
+    };
+    RtRepeat.prototype._detach = function () {
+        this._attached = false;
     };
     RtRepeat.prototype._render = function (c) {
         var _this = this;

@@ -73,6 +73,8 @@ function findChildComponentElements(
 let created: any;
 let initialize: any;
 let ready: any;
+let elementConnected: any;
+let elementDisconnected: any;
 let elementAttached: any;
 let elementDetached: any;
 let elementMoved: any;
@@ -146,7 +148,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	_elementListMap: Map<string, NodeListOf<HTMLElement>>;
 
-	isElementAttached = false;
+	_attached = false;
 
 	initialized = false;
 	isReady = false;
@@ -270,7 +272,9 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	setInterval: typeof DisposableMixin.prototype.setInterval;
 	registerCallback: typeof DisposableMixin.prototype.registerCallback;
 
-	_attachElement() {
+	_attach() {
+		this._attached = true;
+
 		if (!this.initialized) {
 			this.initialize();
 			this.initialized = true;
@@ -347,7 +351,9 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		this.elementAttached();
 	}
 
-	_detachElement() {
+	_detach() {
+		this._attached = false;
+
 		this.elementDetached();
 		this.dispose();
 	}
@@ -386,6 +392,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	created() {}
 	initialize() {}
 	ready() {}
+	elementConnected() {}
+	elementDisconnected() {}
 	elementAttached() {}
 	elementDetached() {}
 	elementMoved() {}
@@ -459,6 +467,8 @@ Object.getOwnPropertyNames(DisposableMixinProto).forEach(name => {
 created = ComponentProto.created;
 initialize = ComponentProto.initialize;
 ready = ComponentProto.ready;
+elementConnected = ComponentProto.elementConnected;
+elementDisconnected = ComponentProto.elementDisconnected;
 elementAttached = ComponentProto.elementAttached;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;

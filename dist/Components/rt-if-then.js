@@ -35,7 +35,7 @@ var RtIfThen = (function (_super) {
         _this._destroyed = false;
         return _this;
     }
-    RtIfThen.prototype._attachElement = function () {
+    RtIfThen.prototype.elementConnected = function () {
         if (this._destroyed) {
             throw new TypeError('Instance of RtIfThen was destroyed and can no longer be used');
         }
@@ -55,16 +55,19 @@ var RtIfThen = (function (_super) {
         this._if.on('change', this._onIfChange, this);
         this._render(false);
     };
-    RtIfThen.prototype._detachElement = function () {
+    RtIfThen.prototype.elementDisconnected = function () {
         this._destroy();
     };
     RtIfThen.prototype._onIfChange = function () {
         if (this.element.parentNode) {
             this._render(true);
         }
-        else {
-            this._destroy();
-        }
+    };
+    RtIfThen.prototype._attach = function () {
+        this._attached = true;
+    };
+    RtIfThen.prototype._detach = function () {
+        this._attached = false;
     };
     RtIfThen.prototype._render = function (changed) {
         var _this = this;
