@@ -22,7 +22,8 @@ function initProperty(props, name, el) {
         if (type === undefined) {
             type = typeof defaultValue;
         }
-        else if (defaultValue !== undefined && componentPropertyTypeMap_1.default.get(type) !== typeof defaultValue) {
+        else if (defaultValue !== undefined && componentPropertyTypeMap_1.default.has(type) &&
+            componentPropertyTypeMap_1.default.get(type) != typeof defaultValue) {
             throw new TypeError('Specified type does not match type of defaultValue');
         }
         required = propConfig.required;
@@ -43,7 +44,7 @@ function initProperty(props, name, el) {
     }
     var descriptor;
     if (readonly) {
-        var value_1 = handlers[0](el.getAttribute(hyphenizedName), defaultValue);
+        var value_1 = handlers[0](el.getAttribute(hyphenizedName), defaultValue, component);
         descriptor = {
             configurable: true,
             enumerable: true,
@@ -64,7 +65,7 @@ function initProperty(props, name, el) {
         var rawValue_1 = props['_' + camelizedName] = props['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
             merge: function (v, ov) {
                 if (v !== ov) {
-                    var newValue = handlers[0](v, defaultValue);
+                    var newValue = handlers[0](v, defaultValue, component);
                     if (newValue === value_2) {
                         return ov;
                     }
@@ -94,7 +95,7 @@ function initProperty(props, name, el) {
                 return value_2;
             },
             set: function (v) {
-                v = handlers[1](v, defaultValue);
+                v = handlers[1](v, defaultValue, component);
                 if (v === null) {
                     el.removeAttribute(hyphenizedName);
                 }

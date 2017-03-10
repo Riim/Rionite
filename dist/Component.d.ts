@@ -44,6 +44,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     readonly parentComponent: Component | null;
     element: IComponentElement;
     readonly props: IComponentProperties;
+    _propertyValuesByReference: Map<string, any> | undefined;
     _bindings: Array<IFreezableCell> | null;
     _elementListMap: Map<string, NodeListOf<HTMLElement>>;
     _attached: boolean;

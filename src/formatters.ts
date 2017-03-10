@@ -1,4 +1,9 @@
+import { JS, Utils } from 'cellx';
 import getText from './getText';
+import Component from './Component';
+
+let Map = JS.Map;
+let nextUID = Utils.nextUID;
 
 export default {
 	or: function or(value: any, arg: any): any {
@@ -55,5 +60,11 @@ export default {
 
 	json: function json(value: any): string {
 		return JSON.stringify(value);
+	},
+
+	ref: function ref(this: Component, value: any): string {
+		let key = nextUID();
+		(this._propertyValuesByReference || (this._propertyValuesByReference = new Map<string, any>())).set(key, value);
+		return key;
 	}
 };

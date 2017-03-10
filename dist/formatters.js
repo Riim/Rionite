@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var cellx_1 = require("cellx");
 var getText_1 = require("./getText");
+var Map = cellx_1.JS.Map;
+var nextUID = cellx_1.Utils.nextUID;
 exports.default = {
     or: function or(value, arg) {
         return value || arg;
@@ -57,5 +60,10 @@ exports.default = {
     },
     json: function json(value) {
         return JSON.stringify(value);
+    },
+    ref: function ref(value) {
+        var key = nextUID();
+        (this._propertyValuesByReference || (this._propertyValuesByReference = new Map())).set(key, value);
+        return key;
     }
 };

@@ -2215,7 +2215,10 @@ exports.default = hyphenize;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var cellx_1 = __webpack_require__(0);
 var getText_1 = __webpack_require__(23);
+var Map = cellx_1.JS.Map;
+var nextUID = cellx_1.Utils.nextUID;
 exports.default = {
     or: function or(value, arg) {
         return value || arg;
@@ -2272,6 +2275,11 @@ exports.default = {
     },
     json: function json(value) {
         return JSON.stringify(value);
+    },
+    ref: function ref(value) {
+        var key = nextUID();
+        (this._propertyValuesByReference || (this._propertyValuesByReference = new Map())).set(key, value);
+        return key;
     }
 };
 
@@ -2360,7 +2368,8 @@ function initProperty(props, name, el) {
         if (type === undefined) {
             type = typeof defaultValue;
         }
-        else if (defaultValue !== undefined && componentPropertyTypeMap_1.default.get(type) !== typeof defaultValue) {
+        else if (defaultValue !== undefined && componentPropertyTypeMap_1.default.has(type) &&
+            componentPropertyTypeMap_1.default.get(type) != typeof defaultValue) {
             throw new TypeError('Specified type does not match type of defaultValue');
         }
         required = propConfig.required;
@@ -2381,7 +2390,7 @@ function initProperty(props, name, el) {
     }
     var descriptor;
     if (readonly) {
-        var value_1 = handlers[0](el.getAttribute(hyphenizedName), defaultValue);
+        var value_1 = handlers[0](el.getAttribute(hyphenizedName), defaultValue, component);
         descriptor = {
             configurable: true,
             enumerable: true,
@@ -2402,7 +2411,7 @@ function initProperty(props, name, el) {
         var rawValue_1 = props['_' + camelizedName] = props['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
             merge: function (v, ov) {
                 if (v !== ov) {
-                    var newValue = handlers[0](v, defaultValue);
+                    var newValue = handlers[0](v, defaultValue, component);
                     if (newValue === value_2) {
                         return ov;
                     }
@@ -2432,7 +2441,7 @@ function initProperty(props, name, el) {
                 return value_2;
             },
             set: function (v) {
-                v = handlers[1](v, defaultValue);
+                v = handlers[1](v, defaultValue, component);
                 if (v === null) {
                     el.removeAttribute(hyphenizedName);
                 }
@@ -4575,16 +4584,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var escape_html_1 = __webpack_require__(12);
 var isRegExp_1 = __webpack_require__(19);
-exports.default = new cellx_1.JS.Map([
+var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Boolean, [
-            function (value) {
-                return value !== null && value != 'no';
-            },
-            function (value) {
-                return value ? '' : null;
-            }
-        ]],
-    ['boolean', [
             function (value, defaultValue) {
                 return value !== null ? value != 'no' : !!defaultValue;
             },
@@ -4593,14 +4594,6 @@ exports.default = new cellx_1.JS.Map([
             }
         ]],
     [Number, [
-            function (value) {
-                return value !== null ? +value : null;
-            },
-            function (value) {
-                return value != null ? String(+value) : null;
-            }
-        ]],
-    ['number', [
             function (value, defaultValue) {
                 return value !== null ? +value : (defaultValue !== undefined ? defaultValue : null);
             },
@@ -4609,14 +4602,6 @@ exports.default = new cellx_1.JS.Map([
             }
         ]],
     [String, [
-            function (value) {
-                return value !== null ? value : null;
-            },
-            function (value) {
-                return value != null ? String(value) : null;
-            }
-        ]],
-    ['string', [
             function (value, defaultValue) {
                 return value !== null ? value : (defaultValue !== undefined ? defaultValue : null);
             },
@@ -4625,14 +4610,6 @@ exports.default = new cellx_1.JS.Map([
             }
         ]],
     [Object, [
-            function (value) {
-                return value !== null ? Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) : null;
-            },
-            function (value) {
-                return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
-            }
-        ]],
-    ['object', [
             function (value, defaultValue) {
                 return value !== null ?
                     Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) :
@@ -4641,8 +4618,31 @@ exports.default = new cellx_1.JS.Map([
             function (value) {
                 return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
             }
+        ]],
+    ['ref', [
+            function (value, defaultValue, component) {
+                if (value === null) {
+                    return (defaultValue !== undefined ? defaultValue : null);
+                }
+                var propertyValuesByReference = component.ownerComponent &&
+                    component.ownerComponent._propertyValuesByReference;
+                if (!propertyValuesByReference || !propertyValuesByReference.has(value)) {
+                    return (defaultValue !== undefined ? defaultValue : null);
+                }
+                var result = propertyValuesByReference.get(value);
+                propertyValuesByReference.delete(value);
+                return result;
+            },
+            function (value) {
+                return value != null ? '' : null;
+            }
         ]]
 ]);
+componentPropertyTypeHandlersMap.set('boolean', componentPropertyTypeHandlersMap.get(Boolean));
+componentPropertyTypeHandlersMap.set('number', componentPropertyTypeHandlersMap.get(Number));
+componentPropertyTypeHandlersMap.set('string', componentPropertyTypeHandlersMap.get(String));
+componentPropertyTypeHandlersMap.set('object', componentPropertyTypeHandlersMap.get(Object));
+exports.default = componentPropertyTypeHandlersMap;
 
 
 /***/ }),

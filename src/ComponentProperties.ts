@@ -28,7 +28,10 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 
 		if (type === undefined) {
 			type = typeof defaultValue;
-		} else if (defaultValue !== undefined && componentPropertyTypeMap.get(type) !== typeof defaultValue) {
+		} else if (
+			defaultValue !== undefined && componentPropertyTypeMap.has(type) &&
+				componentPropertyTypeMap.get(type) != typeof defaultValue
+		) {
 			throw new TypeError('Specified type does not match type of defaultValue');
 		}
 
@@ -55,7 +58,7 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 	let descriptor: Object;
 
 	if (readonly) {
-		let value = handlers[0](el.getAttribute(hyphenizedName), defaultValue);
+		let value = handlers[0](el.getAttribute(hyphenizedName), defaultValue, component);
 
 		descriptor = {
 			configurable: true,
@@ -81,7 +84,7 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 			{
 				merge(v, ov) {
 					if (v !== ov) {
-						let newValue = handlers[0](v, defaultValue);
+						let newValue = handlers[0](v, defaultValue, component);
 
 						if (newValue === value) {
 							return ov;
@@ -121,7 +124,7 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 			},
 
 			set(v: any) {
-				v = handlers[1](v, defaultValue);
+				v = handlers[1](v, defaultValue, component);
 
 				if (v === null) {
 					el.removeAttribute(hyphenizedName);
