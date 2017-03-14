@@ -644,7 +644,7 @@ THE SOFTWARE.
     hasAttribute = HTMLElementPrototype.hasAttribute,
     removeAttribute = HTMLElementPrototype.removeAttribute,
     setAttribute = HTMLElementPrototype.setAttribute,
-
+  
     // replaced later on
     createElement = document.createElement,
     patchedCreateElement = createElement,
@@ -655,7 +655,7 @@ THE SOFTWARE.
       characterData: true,
       attributeOldValue: true
     },
-  
+
     // useful to detect only if there's no MutationObserver
     DOMAttrModified = MutationObserver || function(e) {
       doesNotSupportDOMAttrModified = false;
@@ -670,7 +670,9 @@ THE SOFTWARE.
     asapTimer = 0,
   
     // internal flags
-    setListener = false,
+    V0 = REGISTER_ELEMENT in document,
+    setListener = true,
+    justSetup = false,
     doesNotSupportDOMAttrModified = true,
     dropDomContentLoaded = true,
   
@@ -692,8 +694,8 @@ THE SOFTWARE.
   ;
   
   // only if needed
-  if (!(REGISTER_ELEMENT in document)) {
-  
+  if (!V0) {
+
     if (sPO || hasProto) {
         patchIfNotAlready = function (node, proto) {
           if (!iPO.call(proto, node)) {
@@ -880,11 +882,11 @@ THE SOFTWARE.
     // set as enumerable, writable and configurable
     document[REGISTER_ELEMENT] = function registerElement(type, options) {
       upperType = type.toUpperCase();
-      if (!setListener) {
+      if (setListener) {
         // only first time document.registerElement is used
         // we need to set this listener
         // setting it by default might slow down for no reason
-        setListener = true;
+        setListener = false;
         if (MutationObserver) {
           observer = (function(attached, detached){
             function checkEmAll(list, callback) {
@@ -945,7 +947,7 @@ THE SOFTWARE.
         [HTMLElementPrototype, DocumentFragment.prototype].forEach(function(proto) {
           var origCloneNode = proto.cloneNode;
 
-          proto.cloneNode = function(deep) {
+          proto.cloneNode = function (deep) {
             var
               node = origCloneNode.call(this, !!deep),
               i
@@ -954,11 +956,13 @@ THE SOFTWARE.
               i = getTypeIndex(node);
               if (-1 < i) patch(node, protos[i]);
             }
-            if (deep) loopAndSetup(node.querySelectorAll(query));
+            if (deep && query.length) loopAndSetup(node.querySelectorAll(query));
             return node;
           };
         });
       }
+
+      if (justSetup) return (justSetup = false);
   
       if (-2 < (
         indexOf.call(types, PREFIX_IS + upperType) +
@@ -1003,7 +1007,7 @@ THE SOFTWARE.
           create(HTMLElementPrototype)
       );
   
-      loopAndVerify(
+      if (query.length) loopAndVerify(
         document.querySelectorAll(query),
         ATTACHED
       );
@@ -1065,7 +1069,7 @@ THE SOFTWARE.
     return function (node) {
       if (isValidNode(node)) {
         verifyAndSetupAndAction(node, action);
-        loopAndVerify(
+        if (query.length) loopAndVerify(
           node.querySelectorAll(query),
           action
         );
@@ -1133,7 +1137,7 @@ THE SOFTWARE.
       dropDomContentLoaded = false;
       e.currentTarget.removeEventListener(DOM_CONTENT_LOADED, onReadyStateChange);
     }
-    loopAndVerify(
+    if (query.length) loopAndVerify(
       (e.target || document).querySelectorAll(query),
       e.detail === DETACHED ? DETACHED : ATTACHED
     );
@@ -1390,6 +1394,10 @@ THE SOFTWARE.
         patchedCreateElement.call(this, name, secondArgument(is)) :
         patchedCreateElement.call(this, name);
     });
+    if (!V0) {
+      justSetup = true;
+      document[REGISTER_ELEMENT]('');
+    }
   }
   
   // if customElements is not there at all
@@ -1429,5 +1437,5 @@ THE SOFTWARE.
       return {is: is};
     };
   }
-  
+
 }(window));
