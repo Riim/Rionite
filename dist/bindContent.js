@@ -15,7 +15,7 @@ function bindContent(content, ownerComponent, context) {
     function bind(content) {
         var _loop_1 = function (child) {
             switch (child.nodeType) {
-                case 1: {
+                case Node.ELEMENT_NODE: {
                     var attrs = child.attributes;
                     var _loop_2 = function (i) {
                         var attr = attrs.item(--i);
@@ -56,7 +56,7 @@ function bindContent(content, ownerComponent, context) {
                     }
                     break;
                 }
-                case 3: {
+                case Node.TEXT_NODE: {
                     var content_1 = child.textContent;
                     if (reBinding.test(content_1)) {
                         var parsedContent = (new ContentParser_1.default(content_1)).parse();

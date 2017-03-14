@@ -32,7 +32,7 @@ var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
 function findChildComponentElements(node, ownerComponent, context, _childComponents) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
-        if (child.nodeType == 1) {
+        if (child.nodeType == Node.ELEMENT_NODE) {
             var childComponent = child.$c;
             if (childComponent) {
                 childComponent.ownerComponent = ownerComponent;
@@ -79,7 +79,7 @@ var Component = (function (_super) {
             el = document.createElement(elIs);
             el.innerHTML = html;
             var firstChild = el.firstChild;
-            if (firstChild && firstChild == el.lastChild && firstChild.nodeType == 1 && (firstChild.tagName.toLowerCase() == elIs ||
+            if (firstChild && firstChild == el.lastChild && firstChild.nodeType == Node.ELEMENT_NODE && (firstChild.tagName.toLowerCase() == elIs ||
                 firstChild.getAttribute('is') == elIs)) {
                 el = firstChild;
             }

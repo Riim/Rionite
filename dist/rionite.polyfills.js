@@ -1587,7 +1587,7 @@ var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
 function findChildComponentElements(node, ownerComponent, context, _childComponents) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
-        if (child.nodeType == 1) {
+        if (child.nodeType == Node.ELEMENT_NODE) {
             var childComponent = child.$c;
             if (childComponent) {
                 childComponent.ownerComponent = ownerComponent;
@@ -1634,7 +1634,7 @@ var Component = (function (_super) {
             el = document.createElement(elIs);
             el.innerHTML = html;
             var firstChild = el.firstChild;
-            if (firstChild && firstChild == el.lastChild && firstChild.nodeType == 1 && (firstChild.tagName.toLowerCase() == elIs ||
+            if (firstChild && firstChild == el.lastChild && firstChild.nodeType == Node.ELEMENT_NODE && (firstChild.tagName.toLowerCase() == elIs ||
                 firstChild.getAttribute('is') == elIs)) {
                 el = firstChild;
             }
@@ -2026,7 +2026,7 @@ function bindContent(content, ownerComponent, context) {
     function bind(content) {
         var _loop_1 = function (child) {
             switch (child.nodeType) {
-                case 1: {
+                case Node.ELEMENT_NODE: {
                     var attrs = child.attributes;
                     var _loop_2 = function (i) {
                         var attr = attrs.item(--i);
@@ -2067,7 +2067,7 @@ function bindContent(content, ownerComponent, context) {
                     }
                     break;
                 }
-                case 3: {
+                case Node.TEXT_NODE: {
                     var content_1 = child.textContent;
                     if (reBinding.test(content_1)) {
                         var parsedContent = (new ContentParser_1.default(content_1)).parse();
@@ -3405,6 +3405,7 @@ exports.default = keypathToJSExpression;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var NodeType;
 (function (NodeType) {
     NodeType[NodeType["BLOCK"] = 1] = "BLOCK";
@@ -3725,13 +3726,13 @@ var Parser = (function () {
                 break;
             }
             case '*': {
-                var stop = false;
+                var stop_1 = false;
                 do {
                     switch (this._next()) {
                         case '*': {
                             if (this._next() == '/') {
                                 this._next();
-                                stop = true;
+                                stop_1 = true;
                             }
                             else {
                                 value += '*' + this.chr;
@@ -3750,7 +3751,7 @@ var Parser = (function () {
                             value += this.chr;
                         }
                     }
-                } while (!stop);
+                } while (!stop_1);
                 multiline = true;
                 break;
             }
@@ -3800,7 +3801,6 @@ var Parser = (function () {
     };
     return Parser;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Parser;
 
 
@@ -3810,6 +3810,7 @@ exports.default = Parser;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var Parser_1 = __webpack_require__(25);
 exports.Parser = Parser_1.default;
 var Template_1 = __webpack_require__(44);
@@ -4183,17 +4184,17 @@ var RtRepeat = (function (_super) {
                 var firstChild = rawItemContent.firstChild;
                 var lastChild = rawItemContent.lastChild;
                 if (firstChild == lastChild) {
-                    if (firstChild.nodeType == 3) {
+                    if (firstChild.nodeType == Node.TEXT_NODE) {
                         firstChild.textContent = firstChild.textContent.trim();
                     }
                 }
                 else {
-                    if (firstChild.nodeType == 3) {
+                    if (firstChild.nodeType == Node.TEXT_NODE) {
                         if (!(firstChild.textContent = firstChild.textContent.replace(/^\s+/, ''))) {
                             rawItemContent.removeChild(firstChild);
                         }
                     }
-                    if (lastChild.nodeType == 3) {
+                    if (lastChild.nodeType == Node.TEXT_NODE) {
                         if (!(lastChild.textContent = lastChild.textContent.replace(/\s+$/, ''))) {
                             rawItemContent.removeChild(lastChild);
                         }
@@ -4730,7 +4731,7 @@ function onEvent(evt) {
         attrName = 'rt-component-' + evt.type;
     }
     for (;;) {
-        if (node.nodeType == 1 && node.hasAttribute(attrName)) {
+        if (node.nodeType == Node.ELEMENT_NODE && node.hasAttribute(attrName)) {
             (targetEls || (targetEls = [])).push(node);
         }
         node = node.parentNode;
@@ -4866,6 +4867,7 @@ exports.default = registerComponent;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var escape_string_1 = __webpack_require__(13);
 var escape_html_1 = __webpack_require__(12);
 var Parser_1 = __webpack_require__(25);
@@ -5033,7 +5035,6 @@ var Template = (function () {
     };
     return Template;
 }());
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = Template;
 
 
@@ -5043,6 +5044,7 @@ exports.default = Template;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
 var selfClosingTags = {
     __proto__: null,
     area: 1,
@@ -5075,7 +5077,6 @@ var selfClosingTags = {
     stop: 1,
     use: 1
 };
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = selfClosingTags;
 
 

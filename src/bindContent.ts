@@ -24,7 +24,7 @@ export default function bindContent(
 	function bind(content: Node) {
 		for (let child = content.firstChild; child; child = child.nextSibling) {
 			switch (child.nodeType) {
-				case 1: {
+				case Node.ELEMENT_NODE: {
 					let attrs = child.attributes;
 
 					for (let i = attrs.length; i;) {
@@ -73,7 +73,7 @@ export default function bindContent(
 
 					break;
 				}
-				case 3: {
+				case Node.TEXT_NODE: {
 					let content = child.textContent as string;
 
 					if (reBinding.test(content)) {

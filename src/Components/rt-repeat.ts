@@ -82,16 +82,16 @@ export default class RtRepeat extends Component {
 				let lastChild = rawItemContent.lastChild as Node;
 
 				if (firstChild == lastChild) {
-					if (firstChild.nodeType == 3) {
+					if (firstChild.nodeType == Node.TEXT_NODE) {
 						firstChild.textContent = (firstChild.textContent as string).trim();
 					}
 				} else {
-					if (firstChild.nodeType == 3) {
+					if (firstChild.nodeType == Node.TEXT_NODE) {
 						if (!(firstChild.textContent = (firstChild.textContent as string).replace(/^\s+/, ''))) {
 							rawItemContent.removeChild(firstChild);
 						}
 					}
-					if (lastChild.nodeType == 3) {
+					if (lastChild.nodeType == Node.TEXT_NODE) {
 						if (!(lastChild.textContent = (lastChild.textContent as string).replace(/\s+$/, ''))) {
 							rawItemContent.removeChild(lastChild);
 						}

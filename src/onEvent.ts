@@ -15,7 +15,7 @@ export default function onEvent(evt: IEvent | Event) {
 	}
 
 	for (;;) {
-		if (node.nodeType == 1 && (node as HTMLElement).hasAttribute(attrName)) {
+		if (node.nodeType == Node.ELEMENT_NODE && (node as HTMLElement).hasAttribute(attrName)) {
 			(targetEls || (targetEls = [])).push(node as HTMLElement);
 		}
 

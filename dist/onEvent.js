@@ -13,7 +13,7 @@ function onEvent(evt) {
         attrName = 'rt-component-' + evt.type;
     }
     for (;;) {
-        if (node.nodeType == 1 && node.hasAttribute(attrName)) {
+        if (node.nodeType == Node.ELEMENT_NODE && node.hasAttribute(attrName)) {
             (targetEls || (targetEls = [])).push(node);
         }
         node = node.parentNode;

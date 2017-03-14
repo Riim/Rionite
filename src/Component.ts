@@ -48,7 +48,7 @@ function findChildComponentElements(
 	_childComponents?: Array<Component> | undefined
 ): Array<Component> | null {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
-		if (child.nodeType == 1) {
+		if (child.nodeType == Node.ELEMENT_NODE) {
 			let childComponent = (child as IComponentElement).$c;
 
 			if (childComponent) {
@@ -179,7 +179,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			let firstChild = el.firstChild;
 
 			if (
-				firstChild && firstChild == el.lastChild && firstChild.nodeType == 1 && (
+				firstChild && firstChild == el.lastChild && firstChild.nodeType == Node.ELEMENT_NODE && (
 					(firstChild as HTMLElement).tagName.toLowerCase() == elIs ||
 						(firstChild as HTMLElement).getAttribute('is') == elIs
 				)

@@ -56,17 +56,17 @@ var RtRepeat = (function (_super) {
                 var firstChild = rawItemContent.firstChild;
                 var lastChild = rawItemContent.lastChild;
                 if (firstChild == lastChild) {
-                    if (firstChild.nodeType == 3) {
+                    if (firstChild.nodeType == Node.TEXT_NODE) {
                         firstChild.textContent = firstChild.textContent.trim();
                     }
                 }
                 else {
-                    if (firstChild.nodeType == 3) {
+                    if (firstChild.nodeType == Node.TEXT_NODE) {
                         if (!(firstChild.textContent = firstChild.textContent.replace(/^\s+/, ''))) {
                             rawItemContent.removeChild(firstChild);
                         }
                     }
-                    if (lastChild.nodeType == 3) {
+                    if (lastChild.nodeType == Node.TEXT_NODE) {
                         if (!(lastChild.textContent = lastChild.textContent.replace(/\s+$/, ''))) {
                             rawItemContent.removeChild(lastChild);
                         }
