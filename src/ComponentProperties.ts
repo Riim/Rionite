@@ -30,7 +30,7 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 			type = typeof defaultValue;
 		} else if (
 			defaultValue !== undefined && componentPropertyTypeMap.has(type) &&
-				componentPropertyTypeMap.get(type) != typeof defaultValue
+				componentPropertyTypeMap.get(type) != (defaultValue === null ? 'null' : typeof defaultValue)
 		) {
 			throw new TypeError('Specified type does not match type of defaultValue');
 		}
