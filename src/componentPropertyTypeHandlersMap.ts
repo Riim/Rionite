@@ -1,6 +1,7 @@
 import { JS } from 'cellx';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import Component from './Component';
+import componentPropertyValuesKey from './componentPropertyValuesKey';
 import isRegExp from './Utils/isRegExp';
 
 let componentPropertyTypeHandlersMap = new JS.Map<any, [
@@ -35,37 +36,35 @@ let componentPropertyTypeHandlersMap = new JS.Map<any, [
 	]],
 
 	[Object, [
-		(value: string | null, defaultValue: Object | undefined): Object => {
-			return value !== null ?
-				Object(Function(`return ${ unescapeHTML(value) };`)()) :
-				(defaultValue !== undefined ? defaultValue : null);
-		},
-		(value: any): string | null => {
-			return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
-		}
-	]],
-
-	['ref', [
-		(value: string | null, defaultValue: any, component: Component): any => {
+		(value: string | null, defaultValue: Object | null | undefined, component: Component): Object | null => {
 			if (value === null) {
-				return (defaultValue !== undefined ? defaultValue : null);
+				return defaultValue || null;
 			}
 
-			let propertyValuesByReference = component.ownerComponent &&
-				component.ownerComponent._propertyValuesByReference as Map<string, any>;
+			let componentPropertyValues = component.ownerComponent &&
+				component.ownerComponent[componentPropertyValuesKey] as Map<string, Object> | undefined;
 
-			if (!propertyValuesByReference || !propertyValuesByReference.has(value)) {
-				return (defaultValue !== undefined ? defaultValue : null);
+			if (!componentPropertyValues || !componentPropertyValues.has(value)) {
+				throw new TypeError('Using a nonexistent key');
 			}
 
-			let result = propertyValuesByReference.get(value);
-
-			propertyValuesByReference.delete(value);
-
+			let result = componentPropertyValues.get(value);
+			componentPropertyValues.delete(value);
 			return result;
 		},
 		(value: any): string | null => {
 			return value != null ? '' : null;
+		}
+	]],
+
+	['any', [
+		(value: string | null, defaultValue: Object | undefined): Object => {
+			return value !== null ?
+				Function(`return ${ unescapeHTML(value) };`)() :
+				(defaultValue !== undefined ? defaultValue : null);
+		},
+		(value: any): string | null => {
+			return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
 		}
 	]]
 ]);

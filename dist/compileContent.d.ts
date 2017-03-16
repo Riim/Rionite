@@ -1,2 +1,3 @@
 import { TContent } from './ContentParser';
-export default function compileContent(parsedContent: TContent, content: string): () => any;
+import Component from './Component';
+export default function compileContent(parsedContent: TContent, content: string, ownerComponent?: Component): () => any;

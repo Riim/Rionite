@@ -1,48 +1,62 @@
 import escapeString from 'escape-string';
-import { IContentTextNode, IContentBinding, TContent, default as ContentParser } from './ContentParser';
+import { IContentBinding, TContent, default as ContentParser } from './ContentParser';
 import bindingToJSExpression from './bindingToJSExpression';
-import compileBinding from './compileBinding';
 import formatters from './formatters';
+import Component from './Component';
+import componentPropertyValuesKey from './componentPropertyValuesKey';
 
 let ContentNodeType = ContentParser.ContentNodeType;
 
+let keyCounter = 0;
+
 let cache = Object.create(null);
 
-export default function compileContent(parsedContent: TContent, content: string): () => any {
+export default function compileContent(
+	parsedContent: TContent,
+	content: string,
+	ownerComponent?: Component
+): () => any {
 	if (cache[content]) {
 		return cache[content];
 	}
 
+	let inner: Function;
+
 	if (parsedContent.length == 1 && parsedContent[0].nodeType == ContentNodeType.BINDING) {
-		return (cache[content] = compileBinding(parsedContent[0] as IContentBinding));
-	}
+		inner = Function(
+			'formatters',
+			`var temp; return ${ bindingToJSExpression(parsedContent[0] as IContentBinding) };`
+		);
+	} else {
+		let jsExprArray: Array<string> = [];
 
-	let usesFormatters = false;
-	let jsExprParts: Array<string> = [];
-
-	for (let node of parsedContent) {
-		if (node.nodeType == ContentNodeType.TEXT) {
-			jsExprParts.push(`'${ escapeString((node as IContentTextNode).value) }'`);
-		} else {
-			let bindingJSExpr = bindingToJSExpression(node as IContentBinding);
-
-			if (!usesFormatters && bindingJSExpr.usesFormatters) {
-				usesFormatters = true;
-			}
-
-			jsExprParts.push(bindingJSExpr.value);
+		for (let node of parsedContent) {
+			jsExprArray.push(
+				node.nodeType == ContentNodeType.TEXT ?
+					`'${ escapeString(node.value) }'` :
+					bindingToJSExpression(node)
+			);
 		}
+
+		inner = Function('formatters', `var temp; return [${ jsExprArray.join(', ') }].join('');`);
 	}
 
-	let jsExpr = `var temp; return [${ jsExprParts.join(', ') }].join('');`;
+	return (cache[content] = ownerComponent ? function() {
+		let result = inner.call(this, formatters);
 
-	if (usesFormatters) {
-		let inner = Function('formatters', jsExpr);
+		if (result && typeof result == 'object') {
+			let key = String(++keyCounter);
 
-		return (cache[content] = function() {
-			return inner.call(this, formatters);
-		});
-	}
+			(
+				ownerComponent[componentPropertyValuesKey] ||
+					(ownerComponent[componentPropertyValuesKey] = new Map<string, Object>())
+			).set(key, result);
 
-	return (cache[content] = Function(jsExpr) as any);
+			return key;
+		}
+
+		return result;
+	} : function() {
+		return inner.call(this, formatters);
+	});
 }

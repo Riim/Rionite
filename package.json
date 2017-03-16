@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.20.18",
+  "version": "0.21.0",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -20,7 +20,6 @@
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
     "benchmark": "^2.1.3",
-    "cellx-indexed-collections": "^1.0.8",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.2",

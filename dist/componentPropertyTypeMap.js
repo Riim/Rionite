@@ -7,5 +7,7 @@ exports.default = new cellx_1.JS.Map([
     [Number, 'number'],
     ['number', 'number'],
     [String, 'string'],
-    ['string', 'string']
+    ['string', 'string'],
+    [Object, 'object'],
+    ['object', 'object']
 ]);

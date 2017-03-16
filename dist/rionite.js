@@ -101,11 +101,11 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var html_to_fragment_1 = __webpack_require__(27);
-var DisposableMixin_1 = __webpack_require__(17);
-var elementConstructorMap_1 = __webpack_require__(22);
+var DisposableMixin_1 = __webpack_require__(16);
+var elementConstructorMap_1 = __webpack_require__(21);
 var registerComponent_1 = __webpack_require__(43);
 var ElementProtoMixin_1 = __webpack_require__(7);
-var ComponentProperties_1 = __webpack_require__(14);
+var ComponentProperties_1 = __webpack_require__(13);
 var initElementAttributes_1 = __webpack_require__(41);
 var bindContent_1 = __webpack_require__(6);
 var componentBinding_1 = __webpack_require__(37);
@@ -546,7 +546,7 @@ exports.default = attachChildComponentElements;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var ContentParser_1 = __webpack_require__(16);
+var ContentParser_1 = __webpack_require__(15);
 var compileContent_1 = __webpack_require__(36);
 var setAttribute_1 = __webpack_require__(33);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
@@ -572,7 +572,7 @@ function bindContent(content, ownerComponent, context) {
                                 if (name_1.charAt(0) == '_') {
                                     name_1 = name_1.slice(1);
                                 }
-                                var cell = new cellx_1.Cell(compileContent_1.default(parsedValue, value), {
+                                var cell = new cellx_1.Cell(compileContent_1.default(parsedValue, value, ownerComponent), {
                                     owner: context,
                                     onChange: function (evt) {
                                         setAttribute_1.default(child, name_1, evt['value']);
@@ -641,7 +641,7 @@ exports.default = bindContent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var defer_1 = __webpack_require__(18);
+var defer_1 = __webpack_require__(17);
 var Features_1 = __webpack_require__(2);
 var Symbol = cellx_1.JS.Symbol;
 var KEY_CONNECTED = Symbol('Rionite.ElementProtoMixin.connected');
@@ -749,73 +749,8 @@ exports.default = hyphenize;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var cellx_1 = __webpack_require__(0);
-var getText_1 = __webpack_require__(23);
-var Map = cellx_1.JS.Map;
-var nextUID = cellx_1.Utils.nextUID;
-exports.default = {
-    or: function or(value, arg) {
-        return value || arg;
-    },
-    default: function default_(value, arg) {
-        return value === undefined ? arg : value;
-    },
-    not: function not(value) {
-        return !value;
-    },
-    eq: function eq(value, arg) {
-        return value == arg;
-    },
-    identical: function identical(value, arg) {
-        return value === arg;
-    },
-    lt: function lt(value, arg) {
-        return value < arg;
-    },
-    lte: function lte(value, arg) {
-        return value <= arg;
-    },
-    gt: function gt(value, arg) {
-        return value > arg;
-    },
-    gte: function gte(value, arg) {
-        return value >= arg;
-    },
-    join: function join(arr, separator) {
-        if (separator === void 0) { separator = ', '; }
-        return arr.join(separator);
-    },
-    t: getText_1.default.t,
-    pt: getText_1.default.pt,
-    nt: function nt(count, key) {
-        var args = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            args[_i - 2] = arguments[_i];
-        }
-        args.unshift(count);
-        return getText_1.default('', key, true, args);
-    },
-    npt: function npt(count, key, context) {
-        var args = [];
-        for (var _i = 3; _i < arguments.length; _i++) {
-            args[_i - 3] = arguments[_i];
-        }
-        args.unshift(count);
-        return getText_1.default(context, key, true, args);
-    },
-    // Safary: "Cannot declare a parameter named 'key' as it shadows the name of a strict mode function."
-    key: function key_(obj, key) {
-        return obj && obj[key];
-    },
-    json: function json(value) {
-        return JSON.stringify(value);
-    },
-    ref: function ref(value) {
-        var key = nextUID();
-        (this._propertyValuesByReference || (this._propertyValuesByReference = new Map())).set(key, value);
-        return key;
-    }
-};
+var namePattern_1 = __webpack_require__(10);
+exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\.(?:" + namePattern_1.default + "|\\d+))*";
 
 
 /***/ }),
@@ -825,22 +760,11 @@ exports.default = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var namePattern_1 = __webpack_require__(11);
-exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\.(?:" + namePattern_1.default + "|\\d+))*";
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = '[$_a-zA-Z][$\\w]*';
 
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -854,7 +778,7 @@ exports.default = escapeHTML_1.default;
 
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -874,7 +798,7 @@ exports.default = escapeString;
 
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1007,7 +931,7 @@ exports.default = ComponentProperties;
 
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1031,10 +955,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var compileKeypath_1 = __webpack_require__(21);
+var compileKeypath_1 = __webpack_require__(19);
 var bindContent_1 = __webpack_require__(6);
 var attachChildComponentElements_1 = __webpack_require__(5);
-var keypathPattern_1 = __webpack_require__(10);
+var keypathPattern_1 = __webpack_require__(9);
 var Features_1 = __webpack_require__(2);
 var d_1 = __webpack_require__(3);
 var nextTick = cellx_1.Utils.nextTick;
@@ -1144,15 +1068,15 @@ exports.default = RtIfThen;
 
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var keypathToJSExpression_1 = __webpack_require__(24);
-var namePattern_1 = __webpack_require__(11);
-var keypathPattern_1 = __webpack_require__(10);
+var namePattern_1 = __webpack_require__(10);
+var keypathPattern_1 = __webpack_require__(9);
 var ContentNodeType;
 (function (ContentNodeType) {
     ContentNodeType[ContentNodeType["TEXT"] = 1] = "TEXT";
@@ -1487,7 +1411,7 @@ exports.default = ContentParser;
 
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1656,7 +1580,7 @@ exports.default = DisposableMixin;
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1690,7 +1614,7 @@ exports.default = defer;
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1704,51 +1628,7 @@ exports.default = isRegExp;
 
 
 /***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var cache = Object.create(null);
-function formattersReducer(jsExpr, formatter) {
-    var args = formatter.arguments;
-    return "(this." + formatter.name + " || formatters." + formatter.name + ").call(this, " + jsExpr + (args && args.value.length ? ', ' + args.value.join(', ') : '') + ")";
-}
-function bindingToJSExpression(binding) {
-    var bindingRaw = binding.raw;
-    if (cache[bindingRaw]) {
-        return cache[bindingRaw];
-    }
-    var keys = binding.keypath.value.split('.');
-    var keyCount = keys.length;
-    var formatters = binding.formatters;
-    var usesFormatters = !!formatters.length;
-    if (keyCount == 1) {
-        return (cache[bindingRaw] = {
-            value: usesFormatters ?
-                formatters.reduce(formattersReducer, "this['" + keys[0] + "']") :
-                "this['" + keys[0] + "']",
-            usesFormatters: usesFormatters
-        });
-    }
-    var index = keyCount - 2;
-    var jsExpr = Array(index);
-    while (index) {
-        jsExpr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
-    }
-    return (cache[bindingRaw] = {
-        value: "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && " + (usesFormatters ?
-            formatters.reduce(formattersReducer, "temp['" + keys[keyCount - 1] + "']") :
-            "temp['" + keys[keyCount - 1] + "']"),
-        usesFormatters: usesFormatters
-    });
-}
-exports.default = bindingToJSExpression;
-
-
-/***/ }),
-/* 21 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1763,7 +1643,19 @@ exports.default = compileKeypath;
 
 
 /***/ }),
-/* 22 */
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var cellx_1 = __webpack_require__(0);
+var componentPropertyValuesKey = cellx_1.JS.Symbol('componentPropertyValues');
+exports.default = componentPropertyValuesKey;
+
+
+/***/ }),
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1814,6 +1706,74 @@ exports.default = mixin(Object.create(null), {
     vhgroupv: window.HTMLUnknownElement,
     vkeygen: window.HTMLUnknownElement
 });
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var getText_1 = __webpack_require__(23);
+exports.default = {
+    or: function or(value, arg) {
+        return value || arg;
+    },
+    default: function default_(value, arg) {
+        return value === undefined ? arg : value;
+    },
+    not: function not(value) {
+        return !value;
+    },
+    eq: function eq(value, arg) {
+        return value == arg;
+    },
+    identical: function identical(value, arg) {
+        return value === arg;
+    },
+    lt: function lt(value, arg) {
+        return value < arg;
+    },
+    lte: function lte(value, arg) {
+        return value <= arg;
+    },
+    gt: function gt(value, arg) {
+        return value > arg;
+    },
+    gte: function gte(value, arg) {
+        return value >= arg;
+    },
+    join: function join(arr, separator) {
+        if (separator === void 0) { separator = ', '; }
+        return arr.join(separator);
+    },
+    t: getText_1.default.t,
+    pt: getText_1.default.pt,
+    nt: function nt(count, key) {
+        var args = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            args[_i - 2] = arguments[_i];
+        }
+        args.unshift(count);
+        return getText_1.default('', key, true, args);
+    },
+    npt: function npt(count, key, context) {
+        var args = [];
+        for (var _i = 3; _i < arguments.length; _i++) {
+            args[_i - 3] = arguments[_i];
+        }
+        args.unshift(count);
+        return getText_1.default(context, key, true, args);
+    },
+    // Safary: "Cannot declare a parameter named 'key' as it shadows the name of a strict mode function."
+    key: function key_(obj, key) {
+        return obj && obj[key];
+    },
+    json: function json(value) {
+        return JSON.stringify(value);
+    }
+};
 
 
 /***/ }),
@@ -2394,29 +2354,29 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var beml_1 = __webpack_require__(26);
 exports.BemlParser = beml_1.Parser;
 exports.BemlTemplate = beml_1.Template;
-var escape_string_1 = __webpack_require__(13);
-var escape_html_1 = __webpack_require__(12);
+var escape_string_1 = __webpack_require__(12);
+var escape_html_1 = __webpack_require__(11);
 var html_to_fragment_1 = __webpack_require__(27);
-var DisposableMixin_1 = __webpack_require__(17);
+var DisposableMixin_1 = __webpack_require__(16);
 exports.DisposableMixin = DisposableMixin_1.default;
-var formatters_1 = __webpack_require__(9);
+var formatters_1 = __webpack_require__(22);
 exports.formatters = formatters_1.default;
 var getText_1 = __webpack_require__(23);
 exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
 var rt_content_1 = __webpack_require__(29);
-var rt_if_then_1 = __webpack_require__(15);
+var rt_if_then_1 = __webpack_require__(14);
 var rt_if_else_1 = __webpack_require__(30);
 var rt_repeat_1 = __webpack_require__(31);
-var ComponentProperties_1 = __webpack_require__(14);
+var ComponentProperties_1 = __webpack_require__(13);
 exports.ComponentProperties = ComponentProperties_1.default;
 var d_1 = __webpack_require__(3);
 exports.d = d_1.default;
 var camelize_1 = __webpack_require__(4);
 var hyphenize_1 = __webpack_require__(8);
-var isRegExp_1 = __webpack_require__(19);
-var defer_1 = __webpack_require__(18);
+var isRegExp_1 = __webpack_require__(18);
+var defer_1 = __webpack_require__(17);
 var Components = {
     RtContent: rt_content_1.default,
     RtIfThen: rt_if_then_1.default,
@@ -2636,7 +2596,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var d_1 = __webpack_require__(3);
-var rt_if_then_1 = __webpack_require__(15);
+var rt_if_then_1 = __webpack_require__(14);
 var RtIfElse = (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
@@ -2680,11 +2640,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var compileKeypath_1 = __webpack_require__(21);
+var compileKeypath_1 = __webpack_require__(19);
 var bindContent_1 = __webpack_require__(6);
 var attachChildComponentElements_1 = __webpack_require__(5);
-var namePattern_1 = __webpack_require__(11);
-var keypathPattern_1 = __webpack_require__(10);
+var namePattern_1 = __webpack_require__(10);
+var keypathPattern_1 = __webpack_require__(9);
 var Features_1 = __webpack_require__(2);
 var d_1 = __webpack_require__(3);
 var Map = cellx_1.JS.Map;
@@ -2986,25 +2946,34 @@ exports.default = bindEvents;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var bindingToJSExpression_1 = __webpack_require__(20);
-var formatters_1 = __webpack_require__(9);
 var cache = Object.create(null);
-function compileBinding(binding) {
+function formattersReducer(jsExpr, formatter) {
+    var args = formatter.arguments;
+    return "(this." + formatter.name + " || formatters." + formatter.name + ").call(this, " + jsExpr + (args && args.value.length ? ', ' + args.value.join(', ') : '') + ")";
+}
+function bindingToJSExpression(binding) {
     var bindingRaw = binding.raw;
     if (cache[bindingRaw]) {
         return cache[bindingRaw];
     }
-    var bindingJSExpr = bindingToJSExpression_1.default(binding);
-    var jsExpr = "var temp; return " + bindingJSExpr.value + ";";
-    if (bindingJSExpr.usesFormatters) {
-        var inner_1 = Function('formatters', jsExpr);
-        return (cache[bindingRaw] = function () {
-            return inner_1.call(this, formatters_1.default);
-        });
+    var keys = binding.keypath.value.split('.');
+    var keyCount = keys.length;
+    var formatters = binding.formatters;
+    if (keyCount == 1) {
+        return (cache[bindingRaw] = formatters.length ?
+            formatters.reduce(formattersReducer, "this['" + keys[0] + "']") :
+            "this['" + keys[0] + "']");
     }
-    return (cache[bindingRaw] = Function(jsExpr));
+    var index = keyCount - 2;
+    var jsExpr = Array(index);
+    while (index) {
+        jsExpr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
+    }
+    return (cache[bindingRaw] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && " + (formatters.length ?
+        formatters.reduce(formattersReducer, "temp['" + keys[keyCount - 1] + "']") :
+        "temp['" + keys[keyCount - 1] + "']"));
 }
-exports.default = compileBinding;
+exports.default = bindingToJSExpression;
 
 
 /***/ }),
@@ -3014,43 +2983,44 @@ exports.default = compileBinding;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(13);
-var ContentParser_1 = __webpack_require__(16);
-var bindingToJSExpression_1 = __webpack_require__(20);
-var compileBinding_1 = __webpack_require__(35);
-var formatters_1 = __webpack_require__(9);
+var escape_string_1 = __webpack_require__(12);
+var ContentParser_1 = __webpack_require__(15);
+var bindingToJSExpression_1 = __webpack_require__(35);
+var formatters_1 = __webpack_require__(22);
+var componentPropertyValuesKey_1 = __webpack_require__(20);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
+var keyCounter = 0;
 var cache = Object.create(null);
-function compileContent(parsedContent, content) {
+function compileContent(parsedContent, content, ownerComponent) {
     if (cache[content]) {
         return cache[content];
     }
+    var inner;
     if (parsedContent.length == 1 && parsedContent[0].nodeType == ContentNodeType.BINDING) {
-        return (cache[content] = compileBinding_1.default(parsedContent[0]));
+        inner = Function('formatters', "var temp; return " + bindingToJSExpression_1.default(parsedContent[0]) + ";");
     }
-    var usesFormatters = false;
-    var jsExprParts = [];
-    for (var _i = 0, parsedContent_1 = parsedContent; _i < parsedContent_1.length; _i++) {
-        var node = parsedContent_1[_i];
-        if (node.nodeType == ContentNodeType.TEXT) {
-            jsExprParts.push("'" + escape_string_1.default(node.value) + "'");
+    else {
+        var jsExprArray = [];
+        for (var _i = 0, parsedContent_1 = parsedContent; _i < parsedContent_1.length; _i++) {
+            var node = parsedContent_1[_i];
+            jsExprArray.push(node.nodeType == ContentNodeType.TEXT ?
+                "'" + escape_string_1.default(node.value) + "'" :
+                bindingToJSExpression_1.default(node));
         }
-        else {
-            var bindingJSExpr = bindingToJSExpression_1.default(node);
-            if (!usesFormatters && bindingJSExpr.usesFormatters) {
-                usesFormatters = true;
-            }
-            jsExprParts.push(bindingJSExpr.value);
+        inner = Function('formatters', "var temp; return [" + jsExprArray.join(', ') + "].join('');");
+    }
+    return (cache[content] = ownerComponent ? function () {
+        var result = inner.call(this, formatters_1.default);
+        if (result && typeof result == 'object') {
+            var key = String(++keyCounter);
+            (ownerComponent[componentPropertyValuesKey_1.default] ||
+                (ownerComponent[componentPropertyValuesKey_1.default] = new Map())).set(key, result);
+            return key;
         }
-    }
-    var jsExpr = "var temp; return [" + jsExprParts.join(', ') + "].join('');";
-    if (usesFormatters) {
-        var inner_1 = Function('formatters', jsExpr);
-        return (cache[content] = function () {
-            return inner_1.call(this, formatters_1.default);
-        });
-    }
-    return (cache[content] = Function(jsExpr));
+        return result;
+    } : function () {
+        return inner.call(this, formatters_1.default);
+    });
 }
 exports.default = compileContent;
 
@@ -3117,8 +3087,9 @@ exports.unfreezeBindings = unfreezeBindings;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var escape_html_1 = __webpack_require__(12);
-var isRegExp_1 = __webpack_require__(19);
+var escape_html_1 = __webpack_require__(11);
+var componentPropertyValuesKey_1 = __webpack_require__(20);
+var isRegExp_1 = __webpack_require__(18);
 var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Boolean, [
             function (value, defaultValue) {
@@ -3145,31 +3116,31 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
             }
         ]],
     [Object, [
-            function (value, defaultValue) {
-                return value !== null ?
-                    Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) :
-                    (defaultValue !== undefined ? defaultValue : null);
-            },
-            function (value) {
-                return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
-            }
-        ]],
-    ['ref', [
             function (value, defaultValue, component) {
                 if (value === null) {
-                    return (defaultValue !== undefined ? defaultValue : null);
+                    return defaultValue || null;
                 }
-                var propertyValuesByReference = component.ownerComponent &&
-                    component.ownerComponent._propertyValuesByReference;
-                if (!propertyValuesByReference || !propertyValuesByReference.has(value)) {
-                    return (defaultValue !== undefined ? defaultValue : null);
+                var componentPropertyValues = component.ownerComponent &&
+                    component.ownerComponent[componentPropertyValuesKey_1.default];
+                if (!componentPropertyValues || !componentPropertyValues.has(value)) {
+                    throw new TypeError('Using a nonexistent key');
                 }
-                var result = propertyValuesByReference.get(value);
-                propertyValuesByReference.delete(value);
+                var result = componentPropertyValues.get(value);
+                componentPropertyValues.delete(value);
                 return result;
             },
             function (value) {
                 return value != null ? '' : null;
+            }
+        ]],
+    ['any', [
+            function (value, defaultValue) {
+                return value !== null ?
+                    Function("return " + escape_html_1.unescapeHTML(value) + ";")() :
+                    (defaultValue !== undefined ? defaultValue : null);
+            },
+            function (value) {
+                return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
             }
         ]]
 ]);
@@ -3194,7 +3165,9 @@ exports.default = new cellx_1.JS.Map([
     [Number, 'number'],
     ['number', 'number'],
     [String, 'string'],
-    ['string', 'string']
+    ['string', 'string'],
+    [Object, 'object'],
+    ['object', 'object']
 ]);
 
 
@@ -3302,7 +3275,7 @@ exports.default = onEvent;
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var beml_1 = __webpack_require__(26);
-var elementConstructorMap_1 = __webpack_require__(22);
+var elementConstructorMap_1 = __webpack_require__(21);
 var ElementProtoMixin_1 = __webpack_require__(7);
 var hyphenize_1 = __webpack_require__(8);
 var mixin = cellx_1.Utils.mixin;
@@ -3402,8 +3375,8 @@ exports.default = registerComponent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(13);
-var escape_html_1 = __webpack_require__(12);
+var escape_string_1 = __webpack_require__(12);
+var escape_html_1 = __webpack_require__(11);
 var Parser_1 = __webpack_require__(25);
 var selfClosingTags_1 = __webpack_require__(45);
 var join = Array.prototype.join;

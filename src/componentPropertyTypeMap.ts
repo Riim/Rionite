@@ -6,5 +6,7 @@ export default new JS.Map<any, string>([
 	[Number, 'number'],
 	['number', 'number'],
 	[String, 'string'],
-	['string', 'string']
+	['string', 'string'],
+	[Object, 'object'],
+	['object', 'object']
 ]);

@@ -13,25 +13,18 @@ function bindingToJSExpression(binding) {
     var keys = binding.keypath.value.split('.');
     var keyCount = keys.length;
     var formatters = binding.formatters;
-    var usesFormatters = !!formatters.length;
     if (keyCount == 1) {
-        return (cache[bindingRaw] = {
-            value: usesFormatters ?
-                formatters.reduce(formattersReducer, "this['" + keys[0] + "']") :
-                "this['" + keys[0] + "']",
-            usesFormatters: usesFormatters
-        });
+        return (cache[bindingRaw] = formatters.length ?
+            formatters.reduce(formattersReducer, "this['" + keys[0] + "']") :
+            "this['" + keys[0] + "']");
     }
     var index = keyCount - 2;
     var jsExpr = Array(index);
     while (index) {
         jsExpr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
     }
-    return (cache[bindingRaw] = {
-        value: "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && " + (usesFormatters ?
-            formatters.reduce(formattersReducer, "temp['" + keys[keyCount - 1] + "']") :
-            "temp['" + keys[keyCount - 1] + "']"),
-        usesFormatters: usesFormatters
-    });
+    return (cache[bindingRaw] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && " + (formatters.length ?
+        formatters.reduce(formattersReducer, "temp['" + keys[keyCount - 1] + "']") :
+        "temp['" + keys[keyCount - 1] + "']"));
 }
 exports.default = bindingToJSExpression;

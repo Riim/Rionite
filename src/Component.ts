@@ -144,8 +144,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		return props;
 	}
 
-	_propertyValuesByReference: Map<string, any> | undefined;
-
 	_bindings: Array<IFreezableCell> | null;
 
 	_elementListMap: Map<string, NodeListOf<HTMLElement>>;

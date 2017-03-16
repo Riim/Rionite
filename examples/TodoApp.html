@@ -20,7 +20,6 @@ todo-view {
 <todo-app></todo-app>
 
 <script src="../node_modules/cellx/dist/cellx.js"></script>
-<script src="../node_modules/cellx-indexed-collections/dist/cellx-indexed-collections.js"></script>
 <script src="../dist/rionite.polyfills.js"></script>
 <script>
 
@@ -35,7 +34,7 @@ var Todo = cellx.EventEmitter.extend({
 	}
 });
 
-var todos = new cellxIndexedCollections.IndexedList([
+var todos = cellx.list([
 	new Todo('Primum', true),
 	new Todo('Secundo'),
 	new Todo('Tertium')
@@ -44,7 +43,7 @@ var todos = new cellxIndexedCollections.IndexedList([
 var TodoView = Rionite.Component.extend('todo-view', {
 	Static: {
 		props: {
-			todoId: { type: String, required: true, readonly: true }
+			todo: { type: Object, required: true, readonly: true }
 		},
 
 		template: `
@@ -55,7 +54,7 @@ var TodoView = Rionite.Component.extend('todo-view', {
 	},
 
 	initialize() {
-		this.todo = todos.get(this.props['todoId'], 'id');
+		this.todo = this.props.todo;
 	},
 
 	onCbDoneChange(evt) {
@@ -74,7 +73,7 @@ Rionite.Component.extend('todo-app', {
 			<button rt-click="onBtnAddClick">Add #{nextNumber}</button>
 			<div>all: {todos.length} done: {doneTodos.length}</div>
 			<template is="rt-repeat" for="todo of todos">
-				<todo-view todo-id="{todo.id}"></todo-view>
+				<todo-view todo="{todo}"></todo-view>
 			</template>
 		`
 	},

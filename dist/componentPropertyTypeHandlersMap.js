@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var escape_html_1 = require("@riim/escape-html");
+var componentPropertyValuesKey_1 = require("./componentPropertyValuesKey");
 var isRegExp_1 = require("./Utils/isRegExp");
 var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Boolean, [
@@ -29,31 +30,31 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
             }
         ]],
     [Object, [
-            function (value, defaultValue) {
-                return value !== null ?
-                    Object(Function("return " + escape_html_1.unescapeHTML(value) + ";")()) :
-                    (defaultValue !== undefined ? defaultValue : null);
-            },
-            function (value) {
-                return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
-            }
-        ]],
-    ['ref', [
             function (value, defaultValue, component) {
                 if (value === null) {
-                    return (defaultValue !== undefined ? defaultValue : null);
+                    return defaultValue || null;
                 }
-                var propertyValuesByReference = component.ownerComponent &&
-                    component.ownerComponent._propertyValuesByReference;
-                if (!propertyValuesByReference || !propertyValuesByReference.has(value)) {
-                    return (defaultValue !== undefined ? defaultValue : null);
+                var componentPropertyValues = component.ownerComponent &&
+                    component.ownerComponent[componentPropertyValuesKey_1.default];
+                if (!componentPropertyValues || !componentPropertyValues.has(value)) {
+                    throw new TypeError('Using a nonexistent key');
                 }
-                var result = propertyValuesByReference.get(value);
-                propertyValuesByReference.delete(value);
+                var result = componentPropertyValues.get(value);
+                componentPropertyValues.delete(value);
                 return result;
             },
             function (value) {
                 return value != null ? '' : null;
+            }
+        ]],
+    ['any', [
+            function (value, defaultValue) {
+                return value !== null ?
+                    Function("return " + escape_html_1.unescapeHTML(value) + ";")() :
+                    (defaultValue !== undefined ? defaultValue : null);
+            },
+            function (value) {
+                return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
             }
         ]]
 ]);

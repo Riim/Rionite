@@ -41,7 +41,7 @@ export default function bindContent(
 									name = name.slice(1);
 								}
 
-								let cell = new Cell<any>(compileContent(parsedValue, value), {
+								let cell = new Cell<any>(compileContent(parsedValue, value, ownerComponent), {
 									owner: context,
 									onChange(evt) {
 										setAttribute(child as HTMLElement, name, evt['value']);

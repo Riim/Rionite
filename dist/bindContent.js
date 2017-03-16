@@ -27,7 +27,7 @@ function bindContent(content, ownerComponent, context) {
                                 if (name_1.charAt(0) == '_') {
                                     name_1 = name_1.slice(1);
                                 }
-                                var cell = new cellx_1.Cell(compileContent_1.default(parsedValue, value), {
+                                var cell = new cellx_1.Cell(compileContent_1.default(parsedValue, value, ownerComponent), {
                                     owner: context,
                                     onChange: function (evt) {
                                         setAttribute_1.default(child, name_1, evt['value']);

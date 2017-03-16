@@ -1,4 +1,3 @@
-import Component from './Component';
 declare var _default: {
     or: (value: any, arg: any) => any;
     default: (value: any, arg: any) => any;
@@ -16,6 +15,5 @@ declare var _default: {
     npt: (count: number, key: string, context: string, ...args: any[]) => string;
     key: (obj: Object, key: string) => any;
     json: (value: any) => string;
-    ref: (this: Component, value: any) => string;
 };
 export default _default;
