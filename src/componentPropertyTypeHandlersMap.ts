@@ -57,7 +57,7 @@ let componentPropertyTypeHandlersMap = new JS.Map<any, [
 		}
 	]],
 
-	['any', [
+	[eval, [
 		(value: string | null, defaultValue: Object | undefined): Object => {
 			return value !== null ?
 				Function(`return ${ unescapeHTML(value) };`)() :

@@ -47,7 +47,7 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
                 return value != null ? '' : null;
             }
         ]],
-    ['any', [
+    [eval, [
             function (value, defaultValue) {
                 return value !== null ?
                     Function("return " + escape_html_1.unescapeHTML(value) + ";")() :
