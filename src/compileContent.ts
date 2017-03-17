@@ -4,6 +4,7 @@ import bindingToJSExpression from './bindingToJSExpression';
 import formatters from './formatters';
 import Component from './Component';
 import componentPropertyValuesKey from './componentPropertyValuesKey';
+import getUID from './Utils/getUID';
 
 let ContentNodeType = ContentParser.ContentNodeType;
 
@@ -16,8 +17,10 @@ export default function compileContent(
 	content: string,
 	ownerComponent?: Component
 ): () => any {
-	if (cache[content]) {
-		return cache[content];
+	let cacheKey = (ownerComponent ? getUID(ownerComponent) + '/' : '/') + content;
+
+	if (cache[cacheKey]) {
+		return cache[cacheKey];
 	}
 
 	let inner: Function;
@@ -41,7 +44,7 @@ export default function compileContent(
 		inner = Function('formatters', `var temp; return [${ jsExprArray.join(', ') }].join('');`);
 	}
 
-	return (cache[content] = ownerComponent ? function() {
+	return (cache[cacheKey] = ownerComponent ? function() {
 		let result = inner.call(this, formatters);
 
 		if (result && typeof result == 'object') {

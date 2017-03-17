@@ -1574,9 +1574,9 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var html_to_fragment_1 = __webpack_require__(27);
+var html_to_fragment_1 = __webpack_require__(28);
 var DisposableMixin_1 = __webpack_require__(16);
-var elementConstructorMap_1 = __webpack_require__(21);
+var elementConstructorMap_1 = __webpack_require__(22);
 var registerComponent_1 = __webpack_require__(43);
 var ElementProtoMixin_1 = __webpack_require__(7);
 var ComponentProperties_1 = __webpack_require__(13);
@@ -1588,7 +1588,7 @@ var bindEvents_1 = __webpack_require__(34);
 var eventTypes_1 = __webpack_require__(40);
 var onEvent_1 = __webpack_require__(42);
 var camelize_1 = __webpack_require__(4);
-var getUID_1 = __webpack_require__(32);
+var getUID_1 = __webpack_require__(18);
 var Features_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
@@ -2429,7 +2429,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var compileKeypath_1 = __webpack_require__(19);
+var compileKeypath_1 = __webpack_require__(20);
 var bindContent_1 = __webpack_require__(6);
 var attachChildComponentElements_1 = __webpack_require__(5);
 var keypathPattern_1 = __webpack_require__(9);
@@ -2548,7 +2548,7 @@ exports.default = RtIfThen;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(24);
+var keypathToJSExpression_1 = __webpack_require__(25);
 var namePattern_1 = __webpack_require__(10);
 var keypathPattern_1 = __webpack_require__(9);
 var ContentNodeType;
@@ -3094,11 +3094,22 @@ exports.default = defer;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var toString = Object.prototype.toString;
-function isRegExp(value) {
-    return toString.call(value) == '[object RegExp]';
+var cellx_1 = __webpack_require__(0);
+var nextUID = cellx_1.Utils.nextUID;
+var hasOwn = Object.prototype.hasOwnProperty;
+var KEY_UID = cellx_1.JS.Symbol('uid');
+var getUID;
+if (typeof KEY_UID == 'symbol') {
+    getUID = function getUID(obj) {
+        return hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : (obj[KEY_UID] = nextUID());
+    };
 }
-exports.default = isRegExp;
+else {
+    getUID = function getUID(obj) {
+        return hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : Object.defineProperty(obj, KEY_UID, {});
+    };
+}
+exports.default = getUID;
 
 
 /***/ }),
@@ -3108,7 +3119,21 @@ exports.default = isRegExp;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(24);
+var toString = Object.prototype.toString;
+function isRegExp(value) {
+    return toString.call(value) == '[object RegExp]';
+}
+exports.default = isRegExp;
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var keypathToJSExpression_1 = __webpack_require__(25);
 var cache = Object.create(null);
 function compileKeypath(keypath) {
     return cache[keypath] || (cache[keypath] = Function("var temp; return " + keypathToJSExpression_1.default(keypath) + ";"));
@@ -3117,7 +3142,7 @@ exports.default = compileKeypath;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3129,7 +3154,7 @@ exports.default = componentPropertyValuesKey;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3183,13 +3208,13 @@ exports.default = mixin(Object.create(null), {
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var getText_1 = __webpack_require__(23);
+var getText_1 = __webpack_require__(24);
 exports.default = {
     or: function or(value, arg) {
         return value || arg;
@@ -3251,7 +3276,7 @@ exports.default = {
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3341,7 +3366,7 @@ configure({
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3368,7 +3393,7 @@ exports.default = keypathToJSExpression;
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3773,20 +3798,20 @@ exports.default = Parser;
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Parser_1 = __webpack_require__(25);
+var Parser_1 = __webpack_require__(26);
 exports.Parser = Parser_1.default;
 var Template_1 = __webpack_require__(44);
 exports.Template = Template_1.default;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3819,37 +3844,37 @@ exports.default = htmlToFragment;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var beml_1 = __webpack_require__(26);
+var beml_1 = __webpack_require__(27);
 exports.BemlParser = beml_1.Parser;
 exports.BemlTemplate = beml_1.Template;
 var escape_string_1 = __webpack_require__(12);
 var escape_html_1 = __webpack_require__(11);
-var html_to_fragment_1 = __webpack_require__(27);
+var html_to_fragment_1 = __webpack_require__(28);
 var DisposableMixin_1 = __webpack_require__(16);
 exports.DisposableMixin = DisposableMixin_1.default;
-var formatters_1 = __webpack_require__(22);
+var formatters_1 = __webpack_require__(23);
 exports.formatters = formatters_1.default;
-var getText_1 = __webpack_require__(23);
+var getText_1 = __webpack_require__(24);
 exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
-var rt_content_1 = __webpack_require__(29);
+var rt_content_1 = __webpack_require__(30);
 var rt_if_then_1 = __webpack_require__(14);
-var rt_if_else_1 = __webpack_require__(30);
-var rt_repeat_1 = __webpack_require__(31);
+var rt_if_else_1 = __webpack_require__(31);
+var rt_repeat_1 = __webpack_require__(32);
 var ComponentProperties_1 = __webpack_require__(13);
 exports.ComponentProperties = ComponentProperties_1.default;
 var d_1 = __webpack_require__(3);
 exports.d = d_1.default;
 var camelize_1 = __webpack_require__(4);
 var hyphenize_1 = __webpack_require__(8);
-var isRegExp_1 = __webpack_require__(18);
+var isRegExp_1 = __webpack_require__(19);
 var defer_1 = __webpack_require__(17);
 var Components = {
     RtContent: rt_content_1.default,
@@ -3872,7 +3897,7 @@ exports.Utils = Utils;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4047,7 +4072,7 @@ exports.default = RtContent;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4090,7 +4115,7 @@ exports.default = RtIfElse;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4114,7 +4139,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var compileKeypath_1 = __webpack_require__(19);
+var compileKeypath_1 = __webpack_require__(20);
 var bindContent_1 = __webpack_require__(6);
 var attachChildComponentElements_1 = __webpack_require__(5);
 var namePattern_1 = __webpack_require__(10);
@@ -4340,31 +4365,6 @@ exports.default = RtRepeat;
 
 
 /***/ }),
-/* 32 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var cellx_1 = __webpack_require__(0);
-var nextUID = cellx_1.Utils.nextUID;
-var hasOwn = Object.prototype.hasOwnProperty;
-var KEY_UID = cellx_1.JS.Symbol('uid');
-var getUID;
-if (typeof KEY_UID == 'symbol') {
-    getUID = function getUID(obj) {
-        return hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : (obj[KEY_UID] = nextUID());
-    };
-}
-else {
-    getUID = function getUID(obj) {
-        return hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : Object.defineProperty(obj, KEY_UID, {});
-    };
-}
-exports.default = getUID;
-
-
-/***/ }),
 /* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -4460,14 +4460,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var escape_string_1 = __webpack_require__(12);
 var ContentParser_1 = __webpack_require__(15);
 var bindingToJSExpression_1 = __webpack_require__(35);
-var formatters_1 = __webpack_require__(22);
-var componentPropertyValuesKey_1 = __webpack_require__(20);
+var formatters_1 = __webpack_require__(23);
+var componentPropertyValuesKey_1 = __webpack_require__(21);
+var getUID_1 = __webpack_require__(18);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var keyCounter = 0;
 var cache = Object.create(null);
 function compileContent(parsedContent, content, ownerComponent) {
-    if (cache[content]) {
-        return cache[content];
+    var cacheKey = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + content;
+    if (cache[cacheKey]) {
+        return cache[cacheKey];
     }
     var inner;
     if (parsedContent.length == 1 && parsedContent[0].nodeType == ContentNodeType.BINDING) {
@@ -4483,7 +4485,7 @@ function compileContent(parsedContent, content, ownerComponent) {
         }
         inner = Function('formatters', "var temp; return [" + jsExprArray.join(', ') + "].join('');");
     }
-    return (cache[content] = ownerComponent ? function () {
+    return (cache[cacheKey] = ownerComponent ? function () {
         var result = inner.call(this, formatters_1.default);
         if (result && typeof result == 'object') {
             var key = String(++keyCounter);
@@ -4562,8 +4564,8 @@ exports.unfreezeBindings = unfreezeBindings;
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var escape_html_1 = __webpack_require__(11);
-var componentPropertyValuesKey_1 = __webpack_require__(20);
-var isRegExp_1 = __webpack_require__(18);
+var componentPropertyValuesKey_1 = __webpack_require__(21);
+var isRegExp_1 = __webpack_require__(19);
 var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Boolean, [
             function (value, defaultValue) {
@@ -4748,8 +4750,8 @@ exports.default = onEvent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var beml_1 = __webpack_require__(26);
-var elementConstructorMap_1 = __webpack_require__(21);
+var beml_1 = __webpack_require__(27);
+var elementConstructorMap_1 = __webpack_require__(22);
 var ElementProtoMixin_1 = __webpack_require__(7);
 var hyphenize_1 = __webpack_require__(8);
 var mixin = cellx_1.Utils.mixin;
@@ -4851,7 +4853,7 @@ exports.default = registerComponent;
 Object.defineProperty(exports, "__esModule", { value: true });
 var escape_string_1 = __webpack_require__(12);
 var escape_html_1 = __webpack_require__(11);
-var Parser_1 = __webpack_require__(25);
+var Parser_1 = __webpack_require__(26);
 var selfClosingTags_1 = __webpack_require__(45);
 var join = Array.prototype.join;
 var elDelimiter = '__';
@@ -5103,7 +5105,7 @@ exports.default = unescapeHTML;
 /* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(28);
+module.exports = __webpack_require__(29);
 
 
 /***/ })
