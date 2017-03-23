@@ -18,6 +18,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var Component_1 = require("../Component");
+var KEY_ELEMENT_CONNECTED_1 = require("../KEY_ELEMENT_CONNECTED");
 var compileKeypath_1 = require("../compileKeypath");
 var bindContent_1 = require("../bindContent");
 var attachChildComponentElements_1 = require("../attachChildComponentElements");
@@ -50,13 +51,18 @@ var RtIfThen = (function (_super) {
             this._if = new cellx_1.Cell(function () {
                 return !!getIfValue_1.call(this);
             }, { owner: props.context });
+            this._if.on('change', this._onIfChange, this);
+            this._render(false);
             this.initialized = true;
         }
-        this._if.on('change', this._onIfChange, this);
-        this._render(false);
     };
     RtIfThen.prototype.elementDisconnected = function () {
-        this._destroy();
+        var _this = this;
+        nextTick(function () {
+            if (!_this.element[KEY_ELEMENT_CONNECTED_1.default]) {
+                _this._destroy();
+            }
+        });
     };
     RtIfThen.prototype._onIfChange = function () {
         if (this.element.parentNode) {

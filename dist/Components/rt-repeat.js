@@ -18,6 +18,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var Component_1 = require("../Component");
+var KEY_ELEMENT_CONNECTED_1 = require("../KEY_ELEMENT_CONNECTED");
 var compileKeypath_1 = require("../compileKeypath");
 var bindContent_1 = require("../bindContent");
 var attachChildComponentElements_1 = require("../attachChildComponentElements");
@@ -74,13 +75,18 @@ var RtRepeat = (function (_super) {
                 }
             }
             this._context = props.context;
+            this._list.on('change', this._onListChange, this);
+            this._render(false);
             this.initialized = true;
         }
-        this._list.on('change', this._onListChange, this);
-        this._render(false);
     };
     RtRepeat.prototype.elementDisconnected = function () {
-        this._destroy();
+        var _this = this;
+        nextTick(function () {
+            if (!_this.element[KEY_ELEMENT_CONNECTED_1.default]) {
+                _this._destroy();
+            }
+        });
     };
     RtRepeat.prototype._onListChange = function () {
         if (this.element.parentNode) {
@@ -117,14 +123,14 @@ var RtRepeat = (function (_super) {
     };
     RtRepeat.prototype._renderItem = function (item, index) {
         var trackBy = this._trackBy;
-        var trackingValue = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
-        var prevItems = this._oldItemMap.get(trackingValue);
-        var currentItems = this._itemMap.get(trackingValue);
+        var value = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
+        var prevItems = this._oldItemMap.get(value);
+        var currentItems = this._itemMap.get(value);
         if (prevItems) {
             var prevItem = void 0;
             if (prevItems.length == 1) {
                 prevItem = prevItems[0];
-                this._oldItemMap.delete(trackingValue);
+                this._oldItemMap.delete(value);
             }
             else {
                 prevItem = prevItems.shift();
@@ -133,7 +139,7 @@ var RtRepeat = (function (_super) {
                 currentItems.push(prevItem);
             }
             else {
-                this._itemMap.set(trackingValue, [prevItem]);
+                this._itemMap.set(value, [prevItem]);
             }
             prevItem.item.set(item);
             var nodes = prevItem.nodes;
@@ -185,7 +191,7 @@ var RtRepeat = (function (_super) {
             currentItems.push(newItem);
         }
         else {
-            this._itemMap.set(trackingValue, [newItem]);
+            this._itemMap.set(value, [newItem]);
         }
         var newLastNode = content.lastChild;
         this._lastNode.parentNode.insertBefore(content, this._lastNode.nextSibling);

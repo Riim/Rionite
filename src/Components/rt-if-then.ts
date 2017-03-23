@@ -1,5 +1,6 @@
 import { Cell, Utils } from 'cellx';
 import Component from '../Component';
+import KEY_ELEMENT_CONNECTED from '../KEY_ELEMENT_CONNECTED';
 import compileKeypath from '../compileKeypath';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
@@ -54,16 +55,20 @@ export default class RtIfThen extends Component {
 				return !!getIfValue.call(this);
 			}, { owner: props.context as Object });
 
+			this._if.on('change', this._onIfChange, this);
+
+			this._render(false);
+
 			this.initialized = true;
 		}
-
-		this._if.on('change', this._onIfChange, this);
-
-		this._render(false);
 	}
 
 	elementDisconnected() {
-		this._destroy();
+		nextTick(() => {
+			if (!this.element[KEY_ELEMENT_CONNECTED]) {
+				this._destroy();
+			}
+		});
 	}
 
 	_onIfChange() {

@@ -1,10 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var cellx_1 = require("cellx");
+var KEY_ELEMENT_CONNECTED_1 = require("./KEY_ELEMENT_CONNECTED");
 var defer_1 = require("./Utils/defer");
 var Features_1 = require("./Features");
-var Symbol = cellx_1.JS.Symbol;
-var KEY_CONNECTED = Symbol('Rionite.ElementProtoMixin.connected');
 exports.ElementsController = {
     skipConnectionStatusCallbacks: false
 };
@@ -14,9 +12,9 @@ var ElementProtoMixin = (_a = {
             return new this.constructor._rioniteComponentConstructor(this);
         }
     },
-    _a[KEY_CONNECTED] = false,
+    _a[KEY_ELEMENT_CONNECTED_1.default] = false,
     _a.connectedCallback = function () {
-        this[KEY_CONNECTED] = true;
+        this[KEY_ELEMENT_CONNECTED_1.default] = true;
         if (exports.ElementsController.skipConnectionStatusCallbacks) {
             return;
         }
@@ -36,7 +34,7 @@ var ElementProtoMixin = (_a = {
         }
         else {
             defer_1.default(function () {
-                if (this[KEY_CONNECTED]) {
+                if (this[KEY_ELEMENT_CONNECTED_1.default]) {
                     var component_1 = this.$c;
                     component_1._parentComponent = undefined;
                     if (!component_1.parentComponent) {
@@ -48,7 +46,7 @@ var ElementProtoMixin = (_a = {
         }
     },
     _a.disconnectedCallback = function () {
-        this[KEY_CONNECTED] = false;
+        this[KEY_ELEMENT_CONNECTED_1.default] = false;
         if (exports.ElementsController.skipConnectionStatusCallbacks) {
             return;
         }

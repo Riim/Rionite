@@ -1,11 +1,7 @@
-import { JS } from 'cellx';
+import KEY_ELEMENT_CONNECTED from './KEY_ELEMENT_CONNECTED';
 import { IComponentElement, default as Component } from './Component';
 import defer from './Utils/defer';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
-
-let Symbol = JS.Symbol;
-
-let KEY_CONNECTED = Symbol('Rionite.ElementProtoMixin.connected');
 
 export let ElementsController = {
 	skipConnectionStatusCallbacks: false
@@ -18,10 +14,10 @@ let ElementProtoMixin = {
 		return new this.constructor._rioniteComponentConstructor(this);
 	},
 
-	[KEY_CONNECTED]: false,
+	[KEY_ELEMENT_CONNECTED]: false,
 
 	connectedCallback() {
-		this[KEY_CONNECTED] = true;
+		this[KEY_ELEMENT_CONNECTED] = true;
 
 		if (ElementsController.skipConnectionStatusCallbacks) {
 			return;
@@ -43,7 +39,7 @@ let ElementProtoMixin = {
 			}
 		} else {
 			defer(function(this: IComponentElement) {
-				if (this[KEY_CONNECTED]) {
+				if (this[KEY_ELEMENT_CONNECTED]) {
 					let component = this.$c;
 
 					component._parentComponent = undefined;
@@ -58,7 +54,7 @@ let ElementProtoMixin = {
 	},
 
 	disconnectedCallback() {
-		this[KEY_CONNECTED] = false;
+		this[KEY_ELEMENT_CONNECTED] = false;
 
 		if (ElementsController.skipConnectionStatusCallbacks) {
 			return;

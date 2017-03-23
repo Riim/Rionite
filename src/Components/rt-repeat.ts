@@ -1,5 +1,6 @@
 import { ObservableList, Cell, JS, Utils } from 'cellx';
 import Component from '../Component';
+import KEY_ELEMENT_CONNECTED from '../KEY_ELEMENT_CONNECTED';
 import compileKeypath from '../compileKeypath';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
@@ -101,16 +102,20 @@ export default class RtRepeat extends Component {
 
 			this._context = props.context as Object;
 
+			this._list.on('change', this._onListChange, this);
+
+			this._render(false);
+
 			this.initialized = true;
 		}
-
-		this._list.on('change', this._onListChange, this);
-
-		this._render(false);
 	}
 
 	elementDisconnected() {
-		this._destroy();
+		nextTick(() => {
+			if (!this.element[KEY_ELEMENT_CONNECTED]) {
+				this._destroy();
+			}
+		});
 	}
 
 	_onListChange() {
@@ -153,16 +158,16 @@ export default class RtRepeat extends Component {
 
 	_renderItem(item: Object, index: number): boolean {
 		let trackBy = this._trackBy;
-		let trackingValue = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
-		let prevItems = this._oldItemMap.get(trackingValue);
-		let currentItems = this._itemMap.get(trackingValue);
+		let value = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
+		let prevItems = this._oldItemMap.get(value);
+		let currentItems = this._itemMap.get(value);
 
 		if (prevItems) {
 			let prevItem: TRtRepeatItem;
 
 			if (prevItems.length == 1) {
 				prevItem = prevItems[0];
-				this._oldItemMap.delete(trackingValue);
+				this._oldItemMap.delete(value);
 			} else {
 				prevItem = prevItems.shift() as TRtRepeatItem;
 			}
@@ -170,7 +175,7 @@ export default class RtRepeat extends Component {
 			if (currentItems) {
 				currentItems.push(prevItem);
 			} else {
-				this._itemMap.set(trackingValue, [prevItem]);
+				this._itemMap.set(value, [prevItem]);
 			}
 
 			prevItem.item.set(item);
@@ -233,7 +238,7 @@ export default class RtRepeat extends Component {
 		if (currentItems) {
 			currentItems.push(newItem);
 		} else {
-			this._itemMap.set(trackingValue, [newItem]);
+			this._itemMap.set(value, [newItem]);
 		}
 
 		let newLastNode = content.lastChild as Node;
