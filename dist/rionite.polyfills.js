@@ -3425,10 +3425,10 @@ var NodeType;
     NodeType[NodeType["SUPER_CALL"] = 5] = "SUPER_CALL";
 })(NodeType = exports.NodeType || (exports.NodeType = {}));
 var reBlockNameOrNothing = /[a-zA-Z][\-\w]*|/g;
-var reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[_a-zA-Z][\-\w]*)?|/g;
-var reElementNameOrNothing = /[_a-zA-Z][\-\w]*|/g;
+var reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
+var reElementNameOrNothing = /[a-zA-Z][\-\w]*|/g;
 var reAttributeNameOrNothing = /[_a-zA-Z][\-\w]*(?::[_a-zA-Z][\-\w]*)?|/g;
-var reSuperCallOrNothing = /super(?:\.([_a-zA-Z][\-\w]*))?!|/g;
+var reSuperCallOrNothing = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
 function normalizeMultilineText(text) {
     return text.trim().replace(/\s*(?:\r\n?|\n)/g, '\n').replace(/\n\s+/g, '\n');
 }
@@ -3446,9 +3446,8 @@ var Parser = (function () {
         var decl = this.chr == '#' ? this._readBlockDeclaration() : null;
         return {
             nodeType: NodeType.BLOCK,
-            nodeName: '#root',
             declaration: decl,
-            name: decl ? decl.blockName : undefined,
+            name: decl && decl.blockName,
             content: content ? content.concat(this._readContent(false)) : this._readContent(false),
             at: 0,
             raw: this.beml,
@@ -3538,10 +3537,9 @@ var Parser = (function () {
                 beml: this.beml
             };
         }
-        var elName = this._skipWhitespaces() == '/' ? (this._next(), this._readName(reElementNameOrNothing)) : null;
-        if (elName) {
-            this._skipWhitespaces();
-        }
+        var elNames = this._skipWhitespaces() == '/' ?
+            (this._next(), this._skipWhitespaces(), this._readElementNames()) :
+            null;
         var attrs = this.chr == '(' ? this._readAttributes() : null;
         if (attrs) {
             this._skipWhitespaces();
@@ -3549,9 +3547,8 @@ var Parser = (function () {
         var content = this.chr == '{' ? this._readContent(true) : null;
         return {
             nodeType: NodeType.ELEMENT,
-            nodeName: elName,
             tagName: tagName,
-            name: elName,
+            names: elNames,
             attributes: attrs,
             content: content,
             at: at,
@@ -3781,6 +3778,18 @@ var Parser = (function () {
             at: at,
             raw: this.beml.slice(at, this.at)
         };
+    };
+    Parser.prototype._readElementNames = function () {
+        var names = this.chr == ',' ? (this._next(), this._skipWhitespaces(), [null]) : null;
+        for (var name_2; (name_2 = this._readName(reElementNameOrNothing));) {
+            (names || (names = [])).push(name_2);
+            if (this._skipWhitespaces() != ',') {
+                break;
+            }
+            this._next();
+            this._skipWhitespaces();
+        }
+        return names;
     };
     Parser.prototype._readName = function (reNameOrNothing) {
         reNameOrNothing.lastIndex = this.at;
@@ -4891,125 +4900,140 @@ var Template = (function () {
         this._elementClassesTemplate = parent ?
             [blockName + elDelimiter].concat(parent._elementClassesTemplate) :
             [blockName + elDelimiter, ''];
-        var rootNode = { elementName: null, source: null, innerSource: [], containsSuperCall: false };
-        this._currentNode = rootNode;
-        this._nodes = [rootNode];
-        var nodeMap = this._nodeMap = { '#root': rootNode };
+        this._nodes = [(this._currentNode = { elementName: null, superCall: false, source: null, innerSource: [] })];
+        var nodeMap = this._nodeMap = {};
         for (var _i = 0, _a = block.content; _i < _a.length; _i++) {
             var node = _a[_i];
-            this._handleNode(node, '#root');
+            this._handleNode(node);
         }
         this._renderer = parent ?
             parent._renderer :
             Function("return " + this._currentNode.innerSource.join(' + ') + ";");
         Object.keys(nodeMap).forEach(function (name) {
             var node = nodeMap[name];
-            if (node.source) {
-                this[name] = Function("return " + node.source.join(' + ') + ";");
-                if (node.containsSuperCall) {
-                    var inner_1 = Function('$super', "return " + (node.innerSource.join(' + ') || "''") + ";");
-                    var parentElementRendererMap_1 = parent && parent._elementRendererMap;
-                    this[name + '@content'] = function () { return inner_1.call(this, parentElementRendererMap_1); };
-                }
-                else {
-                    this[name + '@content'] = Function("return " + (node.innerSource.join(' + ') || "''") + ";");
-                }
+            this[name] = Function("return " + node.source.join(' + ') + ";");
+            if (node.superCall) {
+                var inner_1 = Function('$super', "return " + (node.innerSource.join(' + ') || "''") + ";");
+                var parentElementRendererMap_1 = parent && parent._elementRendererMap;
+                this[name + '@content'] = function () { return inner_1.call(this, parentElementRendererMap_1); };
+            }
+            else {
+                this[name + '@content'] = Function("return " + (node.innerSource.join(' + ') || "''") + ";");
             }
         }, (this._elementRendererMap = { __proto__: parent && parent._elementRendererMap }));
     }
-    Template.prototype._handleNode = function (node, parentNodeName) {
+    Template.prototype._handleNode = function (node, parentElementName) {
         switch (node.nodeType) {
             case Parser_1.NodeType.ELEMENT: {
-                var parent_1 = this.parent;
                 var nodes = this._nodes;
                 var el = node;
                 var tagName = el.tagName;
-                var elName = el.name;
+                var elNames = el.names;
+                var elName = elNames && elNames[0];
                 var elAttrs = el.attributes;
                 var content = el.content;
-                if (elName) {
-                    var attrListMap = this._attributeListMap ||
-                        (this._attributeListMap = { __proto__: parent_1 && parent_1._attributeListMap || null });
-                    var attrCountMap = this._attributeCountMap ||
-                        (this._attributeCountMap = { __proto__: parent_1 && parent_1._attributeCountMap || null });
-                    var renderredAttrs = void 0;
-                    if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
-                        var superCall = elAttrs.superCall;
-                        var attrList = void 0;
-                        var attrCount = void 0;
-                        if (superCall) {
-                            if (!parent_1) {
-                                throw new TypeError("Required parent template for \"" + superCall.raw + "\"");
-                            }
-                            attrList = attrListMap[elName] =
-                                Object.create(parent_1._attributeListMap[superCall.elementName || elName] || null);
-                            attrCount = attrCountMap[elName] =
-                                parent_1._attributeCountMap[superCall.elementName || elName] || 0;
-                        }
-                        else {
-                            attrList = attrListMap[elName] = {};
-                            attrCount = attrCountMap[elName] = 0;
-                        }
-                        for (var _i = 0, _a = elAttrs.list; _i < _a.length; _i++) {
-                            var attr = _a[_i];
-                            var name_1 = attr.name;
-                            var value = attr.value;
-                            var index = attrList[name_1];
-                            if (index === undefined) {
-                                attrList[attrCount] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
-                                attrList[name_1] = attrCount++;
-                                attrCountMap[elName] = attrCount;
+                if (elNames) {
+                    if (elName) {
+                        var renderedAttrs = void 0;
+                        if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
+                            var parent_1 = this.parent;
+                            var attrListMap = this._attributeListMap || (this._attributeListMap = {
+                                __proto__: parent_1 && parent_1._attributeListMap || null
+                            });
+                            var attrCountMap = this._attributeCountMap || (this._attributeCountMap = {
+                                __proto__: parent_1 && parent_1._attributeCountMap || null
+                            });
+                            var elAttrsSuperCall = elAttrs.superCall;
+                            var attrList = void 0;
+                            var attrCount = void 0;
+                            if (elAttrsSuperCall) {
+                                if (!parent_1) {
+                                    throw new TypeError("Required parent template for \"" + elAttrsSuperCall.raw + "\"");
+                                }
+                                attrList = attrListMap[elName] = Object.create(parent_1._attributeListMap[elAttrsSuperCall.elementName || elName] || null);
+                                attrCount = attrCountMap[elName] =
+                                    parent_1._attributeCountMap[elAttrsSuperCall.elementName || elName] || 0;
                             }
                             else {
-                                attrList[index] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
-                                attrList[name_1] = index;
+                                attrList = attrListMap[elName] = {};
+                                attrCount = attrCountMap[elName] = 0;
                             }
-                        }
-                        if (elName.charAt(0) != '_') {
+                            for (var _i = 0, _a = elAttrs.list; _i < _a.length; _i++) {
+                                var attr = _a[_i];
+                                var name_1 = attr.name;
+                                var value = attr.value;
+                                var index = attrList[name_1];
+                                if (index === undefined) {
+                                    attrList[attrCount] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
+                                    attrList[name_1] = attrCount;
+                                    attrCountMap[elName] = ++attrCount;
+                                }
+                                else {
+                                    attrList[index] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
+                                    attrList[name_1] = index;
+                                }
+                            }
                             var hasAttrClass = 'class' in attrList;
-                            attrList = { __proto__: attrList, length: attrCount + +!hasAttrClass };
+                            attrList = {
+                                __proto__: attrList,
+                                length: attrCount + !hasAttrClass
+                            };
                             if (hasAttrClass) {
-                                attrList[attrList['class']] = ' class="' +
-                                    this._elementClassesTemplate.join(elName + ' ') +
-                                    attrList[attrList['class']].slice(8);
+                                attrList[attrList['class']] = ' class="' + this._renderElementClasses(elNames) +
+                                    attrList[attrList['class']].slice(' class="'.length);
                             }
                             else {
-                                attrList[attrCount] = " class=\"" + this._elementClassesTemplate.join(elName + ' ').slice(0, -1) + "\"";
+                                attrList[attrCount] = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
                             }
+                            renderedAttrs = join.call(attrList, '');
                         }
                         else {
-                            attrList = { __proto__: attrList, length: attrCount };
+                            renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
                         }
-                        renderredAttrs = join.call(attrList, '');
+                        var currentNode = {
+                            elementName: elName,
+                            superCall: false,
+                            source: [
+                                "'<" + tagName + renderedAttrs + ">'",
+                                content && content.length ?
+                                    "this['" + elName + "@content']() + '</" + tagName + ">'" :
+                                    (!content && tagName in selfClosingTags_1.default ? "''" : "'</" + tagName + ">'")
+                            ],
+                            innerSource: []
+                        };
+                        nodes.push((this._currentNode = currentNode));
+                        this._nodeMap[elName] = currentNode;
+                    }
+                    else if (elAttrs && elAttrs.list.length) {
+                        var renderedClasses = void 0;
+                        var attrs = '';
+                        for (var _b = 0, _c = elAttrs.list; _b < _c.length; _b++) {
+                            var attr = _c[_b];
+                            var value = attr.value;
+                            if (attr.name == 'class') {
+                                renderedClasses = this._renderElementClasses(elNames);
+                                attrs += " class=\"" + (value ? renderedClasses + value : renderedClasses.slice(0, -1)) + "\"";
+                            }
+                            else {
+                                attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
+                            }
+                        }
+                        this._currentNode.innerSource.push("'<" + tagName + (renderedClasses ?
+                            attrs :
+                            " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" + attrs) + ">'");
                     }
                     else {
-                        renderredAttrs = elName.charAt(0) != '_' ?
-                            " class=\"" + this._elementClassesTemplate.join(elName + ' ').slice(0, -1) + "\"" :
-                            '';
+                        this._currentNode.innerSource
+                            .push("'<" + tagName + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
                     }
-                    var currentNode = {
-                        elementName: elName,
-                        source: [
-                            "'<" + tagName + renderredAttrs + ">'",
-                            content && content.length ?
-                                "this['" + elName + "@content']() + '</" + tagName + ">'" :
-                                (!content && tagName in selfClosingTags_1.default ? "''" : "'</" + tagName + ">'")
-                        ],
-                        innerSource: [],
-                        containsSuperCall: false
-                    };
-                    nodes.push((this._currentNode = currentNode));
-                    this._nodeMap[elName] = currentNode;
                 }
                 else {
-                    this._currentNode.innerSource.push("'<" + tagName + (elAttrs ?
-                        elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') :
-                        '') + ">'");
+                    this._currentNode.innerSource.push("'<" + tagName + (elAttrs ? elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') : '') + ">'");
                 }
                 if (content) {
-                    for (var _b = 0, content_1 = content; _b < content_1.length; _b++) {
-                        var contentNode = content_1[_b];
-                        this._handleNode(contentNode, elName || parentNodeName);
+                    for (var _d = 0, content_1 = content; _d < content_1.length; _d++) {
+                        var contentNode = content_1[_d];
+                        this._handleNode(contentNode, elName || parentElementName);
                     }
                 }
                 if (elName) {
@@ -5027,11 +5051,21 @@ var Template = (function () {
                 break;
             }
             case Parser_1.NodeType.SUPER_CALL: {
-                this._currentNode.innerSource.push("$super['" + (node.elementName || parentNodeName) + "@content'].call(this)");
-                this._currentNode.containsSuperCall = true;
+                this._currentNode.innerSource.push("$super['" + (node.elementName || parentElementName) + "@content'].call(this)");
+                this._currentNode.superCall = true;
                 break;
             }
         }
+    };
+    Template.prototype._renderElementClasses = function (elNames) {
+        var elClasses = elNames[0] ? this._elementClassesTemplate.join(elNames[0] + ' ') : '';
+        var elNameCount = elNames.length;
+        if (elNameCount > 1) {
+            for (var i = 1; i < elNameCount; i++) {
+                elClasses += this._elementClassesTemplate.join(elNames[i] + ' ');
+            }
+        }
+        return elClasses;
     };
     Template.prototype.extend = function (beml, opts) {
         return new Template(beml, { __proto__: opts || null, parent: this });
