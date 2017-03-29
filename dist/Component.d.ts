@@ -55,7 +55,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     });
     _handleEvent(evt: IEvent): void;
     listenTo: typeof DisposableMixin.prototype.listenTo;
-    _listenTo(target: EventEmitter | EventTarget, type: string, listener: IListener, context: any): IDisposableListening;
+    _listenTo(target: EventEmitter | EventTarget, type: string, listener: IListener, context: any, useCapture: boolean): IDisposableListening;
     setTimeout: typeof DisposableMixin.prototype.setTimeout;
     setInterval: typeof DisposableMixin.prototype.setInterval;
     registerCallback: typeof DisposableMixin.prototype.registerCallback;

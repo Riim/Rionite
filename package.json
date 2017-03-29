@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.21.7",
+  "version": "0.21.9",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "benchmark": "^2.1.3",
+    "benchmark": "^2.1.4",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.2",
@@ -28,11 +28,11 @@
     "pump": "^1.0.2",
     "require-dir": "^0.3.1",
     "run-sequence": "^1.2.2",
-    "typescript": "^2.2.1",
-    "webpack": "^2.3.1"
+    "typescript": "^2.2.2",
+    "webpack": "^2.3.2"
   },
   "dependencies": {
-    "@riim/beml": "^0.3.1",
+    "@riim/beml": "^0.3.2",
     "@riim/escape-html": "^1.1.0",
     "cellx": "^1.6.92",
     "document-register-element": "^1.4.1",

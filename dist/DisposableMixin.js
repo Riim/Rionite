@@ -6,18 +6,17 @@ var DisposableMixin = (function () {
     function DisposableMixin() {
         this._disposables = {};
     }
-    DisposableMixin.prototype.listenTo = function (target, typeOrListeners, listenerOrContext, context) {
+    DisposableMixin.prototype.listenTo = function (target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture) {
         var _this = this;
         var listenings;
         if (typeof typeOrListeners == 'object') {
             listenings = [];
             if (Array.isArray(typeOrListeners)) {
                 if (arguments.length < 4) {
-                    context = this;
+                    contextOrUseCapture = this;
                 }
-                for (var _i = 0, typeOrListeners_1 = typeOrListeners; _i < typeOrListeners_1.length; _i++) {
-                    var type = typeOrListeners_1[_i];
-                    listenings.push(this.listenTo(target, type, listenerOrContext, context));
+                for (var i = 0, l = typeOrListeners.length; i < l; i++) {
+                    listenings.push(this.listenTo(target, typeOrListeners[i], listenerOrContext, contextOrUseCapture, useCapture || false));
                 }
             }
             else {
@@ -25,29 +24,28 @@ var DisposableMixin = (function () {
                     listenerOrContext = this;
                 }
                 for (var type in typeOrListeners) {
-                    listenings.push(this.listenTo(target, type, typeOrListeners[type], listenerOrContext));
+                    listenings.push(this.listenTo(target, type, typeOrListeners[type], listenerOrContext, contextOrUseCapture || false));
                 }
             }
         }
         else {
             if (arguments.length < 4) {
-                context = this;
+                contextOrUseCapture = this;
             }
             if (Array.isArray(target) || target instanceof NodeList || target instanceof HTMLCollection) {
                 listenings = [];
                 for (var i = 0, l = target.length; i < l; i++) {
-                    listenings.push(this.listenTo(target[i], typeOrListeners, listenerOrContext, context));
+                    listenings.push(this.listenTo(target[i], typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture || false));
                 }
             }
             else if (Array.isArray(listenerOrContext)) {
                 listenings = [];
-                for (var _a = 0, listenerOrContext_1 = listenerOrContext; _a < listenerOrContext_1.length; _a++) {
-                    var listener = listenerOrContext_1[_a];
-                    listenings.push(this.listenTo(target, typeOrListeners, listener, context));
+                for (var i = 0, l = listenerOrContext.length; i < l; i++) {
+                    listenings.push(this.listenTo(target, typeOrListeners, listenerOrContext[i], contextOrUseCapture, useCapture || false));
                 }
             }
             else {
-                return this._listenTo(target, typeOrListeners, listenerOrContext, context);
+                return this._listenTo(target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture || false);
             }
         }
         var id = nextUID();
@@ -63,7 +61,7 @@ var DisposableMixin = (function () {
         };
         return listening;
     };
-    DisposableMixin.prototype._listenTo = function (target, type, listener, context) {
+    DisposableMixin.prototype._listenTo = function (target, type, listener, context, useCapture) {
         var _this = this;
         if (target instanceof cellx_1.EventEmitter) {
             target.on(type, listener, context);
@@ -72,7 +70,7 @@ var DisposableMixin = (function () {
             if (target !== context) {
                 listener = listener.bind(context);
             }
-            target.addEventListener(type, listener);
+            target.addEventListener(type, listener, useCapture);
         }
         else {
             throw new TypeError('Unable to add a listener');
@@ -84,7 +82,7 @@ var DisposableMixin = (function () {
                     target.off(type, listener, context);
                 }
                 else {
-                    target.removeEventListener(type, listener);
+                    target.removeEventListener(type, listener, useCapture);
                 }
                 delete _this._disposables[id];
             }

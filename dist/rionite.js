@@ -235,7 +235,7 @@ var Component = (function (_super) {
             }
         }
     };
-    Component.prototype._listenTo = function (target, type, listener, context) {
+    Component.prototype._listenTo = function (target, type, listener, context, useCapture) {
         if (target instanceof Component) {
             var index = void 0;
             if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
@@ -264,7 +264,7 @@ var Component = (function (_super) {
                 };
             }
         }
-        return DisposableMixin_1.default.prototype._listenTo.call(this, target, type, listener, context);
+        return DisposableMixin_1.default.prototype._listenTo.call(this, target, type, listener, context, useCapture);
     };
     Component.prototype._attach = function () {
         this._attached = true;
@@ -1440,18 +1440,17 @@ var DisposableMixin = (function () {
     function DisposableMixin() {
         this._disposables = {};
     }
-    DisposableMixin.prototype.listenTo = function (target, typeOrListeners, listenerOrContext, context) {
+    DisposableMixin.prototype.listenTo = function (target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture) {
         var _this = this;
         var listenings;
         if (typeof typeOrListeners == 'object') {
             listenings = [];
             if (Array.isArray(typeOrListeners)) {
                 if (arguments.length < 4) {
-                    context = this;
+                    contextOrUseCapture = this;
                 }
-                for (var _i = 0, typeOrListeners_1 = typeOrListeners; _i < typeOrListeners_1.length; _i++) {
-                    var type = typeOrListeners_1[_i];
-                    listenings.push(this.listenTo(target, type, listenerOrContext, context));
+                for (var i = 0, l = typeOrListeners.length; i < l; i++) {
+                    listenings.push(this.listenTo(target, typeOrListeners[i], listenerOrContext, contextOrUseCapture, useCapture || false));
                 }
             }
             else {
@@ -1459,29 +1458,28 @@ var DisposableMixin = (function () {
                     listenerOrContext = this;
                 }
                 for (var type in typeOrListeners) {
-                    listenings.push(this.listenTo(target, type, typeOrListeners[type], listenerOrContext));
+                    listenings.push(this.listenTo(target, type, typeOrListeners[type], listenerOrContext, contextOrUseCapture || false));
                 }
             }
         }
         else {
             if (arguments.length < 4) {
-                context = this;
+                contextOrUseCapture = this;
             }
             if (Array.isArray(target) || target instanceof NodeList || target instanceof HTMLCollection) {
                 listenings = [];
                 for (var i = 0, l = target.length; i < l; i++) {
-                    listenings.push(this.listenTo(target[i], typeOrListeners, listenerOrContext, context));
+                    listenings.push(this.listenTo(target[i], typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture || false));
                 }
             }
             else if (Array.isArray(listenerOrContext)) {
                 listenings = [];
-                for (var _a = 0, listenerOrContext_1 = listenerOrContext; _a < listenerOrContext_1.length; _a++) {
-                    var listener = listenerOrContext_1[_a];
-                    listenings.push(this.listenTo(target, typeOrListeners, listener, context));
+                for (var i = 0, l = listenerOrContext.length; i < l; i++) {
+                    listenings.push(this.listenTo(target, typeOrListeners, listenerOrContext[i], contextOrUseCapture, useCapture || false));
                 }
             }
             else {
-                return this._listenTo(target, typeOrListeners, listenerOrContext, context);
+                return this._listenTo(target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture || false);
             }
         }
         var id = nextUID();
@@ -1497,7 +1495,7 @@ var DisposableMixin = (function () {
         };
         return listening;
     };
-    DisposableMixin.prototype._listenTo = function (target, type, listener, context) {
+    DisposableMixin.prototype._listenTo = function (target, type, listener, context, useCapture) {
         var _this = this;
         if (target instanceof cellx_1.EventEmitter) {
             target.on(type, listener, context);
@@ -1506,7 +1504,7 @@ var DisposableMixin = (function () {
             if (target !== context) {
                 listener = listener.bind(context);
             }
-            target.addEventListener(type, listener);
+            target.addEventListener(type, listener, useCapture);
         }
         else {
             throw new TypeError('Unable to add a listener');
@@ -1518,7 +1516,7 @@ var DisposableMixin = (function () {
                     target.off(type, listener, context);
                 }
                 else {
-                    target.removeEventListener(type, listener);
+                    target.removeEventListener(type, listener, useCapture);
                 }
                 delete _this._disposables[id];
             }
@@ -1997,8 +1995,8 @@ var Parser = (function () {
             raw: '#' + blockName
         };
     };
-    Parser.prototype._readContent = function (withBrackets) {
-        if (withBrackets) {
+    Parser.prototype._readContent = function (brackets) {
+        if (brackets) {
             this._next('{');
         }
         var content = [];
@@ -2010,12 +2008,8 @@ var Parser = (function () {
                     content.push(this._readTextNode());
                     break;
                 }
-                case '/': {
-                    content.push(this._readComment());
-                    break;
-                }
                 case '': {
-                    if (withBrackets) {
+                    if (brackets) {
                         throw {
                             name: 'SyntaxError',
                             message: 'Missing "}" in compound statement',
@@ -2026,7 +2020,14 @@ var Parser = (function () {
                     return content;
                 }
                 default: {
-                    if (withBrackets) {
+                    if (this.chr == '/') {
+                        var next = this.beml.charAt(this.at + 1);
+                        if (next == '/' || next == '*') {
+                            content.push(this._readComment());
+                            break;
+                        }
+                    }
+                    if (brackets) {
                         if (this.chr == '}') {
                             this._next();
                             return content;
@@ -2055,7 +2056,10 @@ var Parser = (function () {
     Parser.prototype._readElement = function () {
         var at = this.at;
         var tagName = this._readName(reTagNameOrNothing);
-        if (!tagName) {
+        var elNames = (tagName ? this._skipWhitespaces() : this.chr) == '/' ?
+            (this._next(), this._skipWhitespaces(), this._readElementNames()) :
+            null;
+        if (!tagName && !elNames) {
             throw {
                 name: 'SyntaxError',
                 message: 'Expected tag name',
@@ -2063,9 +2067,6 @@ var Parser = (function () {
                 beml: this.beml
             };
         }
-        var elNames = this._skipWhitespaces() == '/' ?
-            (this._next(), this._skipWhitespaces(), this._readElementNames()) :
-            null;
         var attrs = this.chr == '(' ? this._readAttributes() : null;
         if (attrs) {
             this._skipWhitespaces();
@@ -3460,9 +3461,15 @@ var Template = (function () {
                 var content = el.content;
                 if (elNames) {
                     if (elName) {
+                        var parent_1 = this.parent;
                         var renderedAttrs = void 0;
+                        if (tagName) {
+                            (this._tagNameMap || (this._tagNameMap = { __proto__: parent_1 && parent_1._tagNameMap || null }))[elName] = tagName;
+                        }
+                        else {
+                            tagName = parent_1 && parent_1._tagNameMap && parent_1._tagNameMap[elName] || 'div';
+                        }
                         if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
-                            var parent_1 = this.parent;
                             var attrListMap = this._attributeListMap || (this._attributeListMap = {
                                 __proto__: parent_1 && parent_1._attributeListMap || null
                             });
@@ -3544,17 +3551,16 @@ var Template = (function () {
                                 attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
                             }
                         }
-                        this._currentNode.innerSource.push("'<" + tagName + (renderedClasses ?
+                        this._currentNode.innerSource.push("'<" + (tagName || 'div') + (renderedClasses ?
                             attrs :
                             " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" + attrs) + ">'");
                     }
                     else {
-                        this._currentNode.innerSource
-                            .push("'<" + tagName + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
+                        this._currentNode.innerSource.push("'<" + (tagName || 'div') + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
                     }
                 }
                 else {
-                    this._currentNode.innerSource.push("'<" + tagName + (elAttrs ? elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') : '') + ">'");
+                    this._currentNode.innerSource.push("'<" + (tagName || 'div') + (elAttrs ? elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') : '') + ">'");
                 }
                 if (content) {
                     for (var _d = 0, content_1 = content; _d < content_1.length; _d++) {
@@ -3567,8 +3573,8 @@ var Template = (function () {
                     this._currentNode = nodes[nodes.length - 1];
                     this._currentNode.innerSource.push("this['" + elName + "']()");
                 }
-                else if (content || !(tagName in selfClosingTags_1.default)) {
-                    this._currentNode.innerSource.push("'</" + tagName + ">'");
+                else if (content || !tagName || !(tagName in selfClosingTags_1.default)) {
+                    this._currentNode.innerSource.push("'</" + (tagName || 'div') + ">'");
                 }
                 break;
             }

@@ -1,9 +1,11 @@
 import { ErrorLogger } from 'cellx';
 
-let queue: Array<{ callback: () => void; context: any }> | null;
+type TQueue = Array<{ callback: () => void; context: any }>;
+
+let queue: TQueue | null;
 
 function run() {
-	let track = queue as Array<{ callback: () => void; context: any }>;
+	let track = queue as TQueue;
 
 	queue = null;
 

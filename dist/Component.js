@@ -146,7 +146,7 @@ var Component = (function (_super) {
             }
         }
     };
-    Component.prototype._listenTo = function (target, type, listener, context) {
+    Component.prototype._listenTo = function (target, type, listener, context, useCapture) {
         if (target instanceof Component) {
             var index = void 0;
             if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
@@ -175,7 +175,7 @@ var Component = (function (_super) {
                 };
             }
         }
-        return DisposableMixin_1.default.prototype._listenTo.call(this, target, type, listener, context);
+        return DisposableMixin_1.default.prototype._listenTo.call(this, target, type, listener, context, useCapture);
     };
     Component.prototype._attach = function () {
         this._attached = true;

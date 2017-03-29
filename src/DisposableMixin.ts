@@ -38,18 +38,21 @@ export default class DisposableMixin implements IDisposable {
 		target: TListeningTarget | Array<TListeningTarget>,
 		type: string | Array<string>,
 		listener: IListener | Array<IListener>,
-		context?: any
+		context?: any,
+		useCapture?: boolean
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
 		listeners: { [type: string]: IListener | Array<IListener> },
-		context?: any
+		context?: any,
+		useCapture?: boolean
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
 		typeOrListeners: string | Array<string> | { [type: string]: IListener | Array<IListener> },
 		listenerOrContext?: IListener | Array<IListener> | any,
-		context?: any
+		contextOrUseCapture?: any,
+		useCapture?: boolean
 	): IDisposableListening {
 		let listenings: Array<IDisposableListening>;
 
@@ -58,11 +61,19 @@ export default class DisposableMixin implements IDisposable {
 
 			if (Array.isArray(typeOrListeners)) {
 				if (arguments.length < 4) {
-					context = this;
+					contextOrUseCapture = this;
 				}
 
-				for (let type of typeOrListeners) {
-					listenings.push(this.listenTo(target, type, listenerOrContext, context));
+				for (let i = 0, l = typeOrListeners.length; i < l; i++) {
+					listenings.push(
+						this.listenTo(
+							target,
+							typeOrListeners[i],
+							listenerOrContext,
+							contextOrUseCapture,
+							useCapture || false
+						)
+					);
 				}
 			} else {
 				if (arguments.length < 3) {
@@ -70,28 +81,58 @@ export default class DisposableMixin implements IDisposable {
 				}
 
 				for (let type in typeOrListeners) {
-					listenings.push(this.listenTo(target, type, typeOrListeners[type], listenerOrContext));
+					listenings.push(
+						this.listenTo(
+							target,
+							type,
+							typeOrListeners[type],
+							listenerOrContext,
+							contextOrUseCapture || false
+						)
+					);
 				}
 			}
 		} else {
 			if (arguments.length < 4) {
-				context = this;
+				contextOrUseCapture = this;
 			}
 
 			if (Array.isArray(target) || target instanceof NodeList || target instanceof HTMLCollection) {
 				listenings = [];
 
 				for (let i = 0, l = target.length; i < l; i++) {
-					listenings.push(this.listenTo(target[i], typeOrListeners, listenerOrContext, context));
+					listenings.push(
+						this.listenTo(
+							target[i],
+							typeOrListeners,
+							listenerOrContext,
+							contextOrUseCapture,
+							useCapture || false
+						)
+					);
 				}
 			} else if (Array.isArray(listenerOrContext)) {
 				listenings = [];
 
-				for (let listener of listenerOrContext) {
-					listenings.push(this.listenTo(target, typeOrListeners, listener, context));
+				for (let i = 0, l = listenerOrContext.length; i < l; i++) {
+					listenings.push(
+						this.listenTo(
+							target,
+							typeOrListeners,
+							listenerOrContext[i],
+							contextOrUseCapture,
+							useCapture || false
+						)
+					);
 				}
 			} else {
-				return this._listenTo(target, typeOrListeners, listenerOrContext, context);
+				return this._listenTo(
+					target,
+					typeOrListeners,
+					listenerOrContext,
+					contextOrUseCapture,
+					useCapture || false
+				);
 			}
 		}
 
@@ -117,7 +158,8 @@ export default class DisposableMixin implements IDisposable {
 		target: EventEmitter | EventTarget,
 		type: string,
 		listener: IListener,
-		context: any
+		context: any,
+		useCapture: boolean
 	): IDisposableListening {
 		if (target instanceof EventEmitter) {
 			target.on(type, listener, context);
@@ -126,7 +168,7 @@ export default class DisposableMixin implements IDisposable {
 				listener = listener.bind(context);
 			}
 
-			target.addEventListener(type, listener);
+			target.addEventListener(type, listener, useCapture);
 		} else {
 			throw new TypeError('Unable to add a listener');
 		}
@@ -138,7 +180,7 @@ export default class DisposableMixin implements IDisposable {
 				if (target instanceof EventEmitter) {
 					target.off(type, listener, context);
 				} else {
-					target.removeEventListener(type, listener);
+					target.removeEventListener(type, listener, useCapture);
 				}
 
 				delete this._disposables[id];

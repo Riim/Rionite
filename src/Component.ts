@@ -228,7 +228,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		target: EventEmitter | EventTarget,
 		type: string,
 		listener: IListener,
-		context: any
+		context: any,
+		useCapture: boolean
 	): IDisposableListening {
 		if (target instanceof Component) {
 			let index: number;
@@ -265,7 +266,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			}
 		}
 
-		return DisposableMixin.prototype._listenTo.call(this, target, type, listener, context);
+		return DisposableMixin.prototype._listenTo.call(this, target, type, listener, context, useCapture);
 	}
 
 	setTimeout: typeof DisposableMixin.prototype.setTimeout;
