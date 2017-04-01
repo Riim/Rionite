@@ -14,7 +14,7 @@ function bindingToJSExpression(binding) {
     var keyCount = keys.length;
     var formatters = binding.formatters;
     if (keyCount == 1) {
-        return (cache[bindingRaw] = formatters.length ?
+        return (cache[bindingRaw] = formatters ?
             formatters.reduce(formattersReducer, "this['" + keys[0] + "']") :
             "this['" + keys[0] + "']");
     }
@@ -23,7 +23,7 @@ function bindingToJSExpression(binding) {
     while (index) {
         jsExpr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
     }
-    return (cache[bindingRaw] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && " + (formatters.length ?
+    return (cache[bindingRaw] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && " + (formatters ?
         formatters.reduce(formattersReducer, "temp['" + keys[keyCount - 1] + "']") :
         "temp['" + keys[keyCount - 1] + "']"));
 }

@@ -40,7 +40,7 @@ export interface IContentBindingFormatter extends IContentNode {
 export interface IContentBinding extends IContentNode {
 	nodeType: ContentNodeType.BINDING;
 	keypath: IContentBindingKeypath;
-	formatters: Array<IContentBindingFormatter>;
+	formatters: Array<IContentBindingFormatter> | null;
 }
 
 export type TContent = Array<IContentTextNode | IContentBinding>;
@@ -125,13 +125,13 @@ export default class ContentParser {
 		let keypath = this._readBindingKeypath();
 
 		if (keypath) {
-			let formatters: Array<IContentBindingFormatter> = [];
+			let formatters: Array<IContentBindingFormatter> | undefined;
 
 			for (
 				let formatter: IContentBindingFormatter | null;
 				this._skipWhitespaces() == '|' && (formatter = this._readFormatter());
 			) {
-				formatters.push(formatter);
+				(formatters || (formatters = [])).push(formatter);
 			}
 
 			if (this.chr == '}') {
@@ -140,7 +140,7 @@ export default class ContentParser {
 				return {
 					nodeType: ContentNodeType.BINDING,
 					keypath,
-					formatters,
+					formatters: formatters || null,
 					at,
 					raw: this.content.slice(at, this.at)
 				};

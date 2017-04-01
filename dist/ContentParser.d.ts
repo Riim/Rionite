@@ -30,7 +30,7 @@ export interface IContentBindingFormatter extends IContentNode {
 export interface IContentBinding extends IContentNode {
     nodeType: ContentNodeType.BINDING;
     keypath: IContentBindingKeypath;
-    formatters: Array<IContentBindingFormatter>;
+    formatters: Array<IContentBindingFormatter> | null;
 }
 export declare type TContent = Array<IContentTextNode | IContentBinding>;
 export default class ContentParser {

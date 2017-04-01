@@ -68,16 +68,16 @@ var ContentParser = (function () {
         this._skipWhitespaces();
         var keypath = this._readBindingKeypath();
         if (keypath) {
-            var formatters = [];
+            var formatters = void 0;
             for (var formatter = void 0; this._skipWhitespaces() == '|' && (formatter = this._readFormatter());) {
-                formatters.push(formatter);
+                (formatters || (formatters = [])).push(formatter);
             }
             if (this.chr == '}') {
                 this._next();
                 return {
                     nodeType: ContentNodeType.BINDING,
                     keypath: keypath,
-                    formatters: formatters,
+                    formatters: formatters || null,
                     at: at,
                     raw: this.content.slice(at, this.at)
                 };

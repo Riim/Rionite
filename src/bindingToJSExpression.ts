@@ -23,7 +23,7 @@ export default function bindingToJSExpression(binding: IContentBinding): string 
 
 	if (keyCount == 1) {
 		return (
-			cache[bindingRaw] = formatters.length ?
+			cache[bindingRaw] = formatters ?
 				formatters.reduce(formattersReducer, `this['${ keys[0] }']`) :
 				`this['${ keys[0] }']`
 		);
@@ -37,7 +37,7 @@ export default function bindingToJSExpression(binding: IContentBinding): string 
 	}
 
 	return (cache[bindingRaw] = `(temp = this['${ keys[0] }'])${ jsExpr.join('') } && ${
-		formatters.length ?
+		formatters ?
 			formatters.reduce(formattersReducer, `temp['${ keys[keyCount - 1] }']`) :
 			`temp['${ keys[keyCount - 1] }']`
 	}`);
