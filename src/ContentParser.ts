@@ -77,7 +77,7 @@ export default class ContentParser {
 
 		let result: TContent = this.result = [];
 
-		for (let index: number; (index = content.indexOf('{', this.at)) > -1;) {
+		for (let index: number; (index = content.indexOf('{', this.at)) != -1;) {
 			this._pushText(content.slice(this.at, index));
 
 			this.at = index;

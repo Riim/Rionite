@@ -2594,7 +2594,7 @@ var ContentParser = (function () {
         }
         this.at = 0;
         var result = this.result = [];
-        for (var index = void 0; (index = content.indexOf('{', this.at)) > -1;) {
+        for (var index = void 0; (index = content.indexOf('{', this.at)) != -1;) {
             this._pushText(content.slice(this.at, index));
             this.at = index;
             this.chr = content.charAt(index);
