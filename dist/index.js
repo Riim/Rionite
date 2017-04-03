@@ -15,6 +15,7 @@ exports.getText = getText_1.default;
 var Component_1 = require("./Component");
 exports.Component = Component_1.default;
 var rt_content_1 = require("./Components/rt-content");
+var rt_slot_1 = require("./Components/rt-slot");
 var rt_if_then_1 = require("./Components/rt-if-then");
 var rt_if_else_1 = require("./Components/rt-if-else");
 var rt_repeat_1 = require("./Components/rt-repeat");
@@ -28,6 +29,7 @@ var isRegExp_1 = require("./Utils/isRegExp");
 var defer_1 = require("./Utils/defer");
 var Components = {
     RtContent: rt_content_1.default,
+    RtSlot: rt_slot_1.default,
     RtIfThen: rt_if_then_1.default,
     RtIfElse: rt_if_else_1.default,
     RtRepeat: rt_repeat_1.default

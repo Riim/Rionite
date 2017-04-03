@@ -22,8 +22,8 @@ function registerComponent(componentConstr) {
         throw new TypeError('Static property "elementIs" is required');
     }
     var props = componentConstr.props;
-    if (props && (props['content'] || props['context'])) {
-        throw new TypeError("No need to declare property \"" + (props['content'] ? 'content' : 'context') + "\"");
+    if (props && (props.content || props.context)) {
+        throw new TypeError("No need to declare property \"" + (props.content ? 'content' : 'context') + "\"");
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
     var bemlTemplate = componentConstr.bemlTemplate;
@@ -55,7 +55,7 @@ function registerComponent(componentConstr) {
         initBlockNames(componentConstr, parentComponentConstr, elIs);
     }
     componentConstr._blockNamesString = elIs + ' ' + parentComponentConstr._blockNamesString;
-    componentConstr._rawContent = undefined;
+    componentConstr._templateContent = undefined;
     componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
     var elExtends = componentConstr.elementExtends;
     var parentElConstr = elExtends ?

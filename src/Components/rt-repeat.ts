@@ -73,12 +73,12 @@ export default class RtRepeat extends Component {
 
 			this._itemMap = new Map<any, TRtRepeatItemList>();
 
-			this._trackBy = props['trackBy'];
+			this._trackBy = props.trackBy;
 
 			let rawItemContent = this._rawItemContent =
 				document.importNode((this.element as any).content, true) as DocumentFragment;
 
-			if (props['strip']) {
+			if (props.strip) {
 				let firstChild = rawItemContent.firstChild as Node;
 				let lastChild = rawItemContent.lastChild as Node;
 

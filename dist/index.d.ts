@@ -4,6 +4,7 @@ import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
 import { IComponentElement, IComponentTemplate, IComponentElementClassNameMap, IComponentEvents, default as Component } from './Component';
 import RtContent from './Components/rt-content';
+import RtSlot from './Components/rt-slot';
 import { TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
 import RtIfElse from './Components/rt-if-else';
 import { TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, default as RtRepeat } from './Components/rt-repeat';
@@ -11,6 +12,7 @@ import { IComponentProperties, default as ComponentProperties } from './Componen
 import d from './d';
 declare let Components: {
     RtContent: typeof RtContent;
+    RtSlot: typeof RtSlot;
     RtIfThen: typeof RtIfThen;
     RtIfElse: typeof RtIfElse;
     RtRepeat: typeof RtRepeat;

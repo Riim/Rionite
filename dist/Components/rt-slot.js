@@ -25,12 +25,12 @@ var clearNode_1 = require("../Utils/clearNode");
 var Features_1 = require("../Features");
 var d_1 = require("../d");
 var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
-var RtContent = (function (_super) {
-    __extends(RtContent, _super);
-    function RtContent() {
+var RtSlot = (function (_super) {
+    __extends(RtSlot, _super);
+    function RtSlot() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    RtContent.prototype._attach = function () {
+    RtSlot.prototype._attach = function () {
         this._attached = true;
         if (this.isReady) {
             this._unfreezeBindings();
@@ -41,9 +41,9 @@ var RtContent = (function (_super) {
             var ownerComponentInputContent = ownerComponent.props.content;
             var content = void 0;
             if (ownerComponentInputContent.firstChild) {
-                var selector = props.select;
-                var cloning = props.cloning;
-                if (selector) {
+                var name_1 = props.name;
+                var cloneContent = props.cloneContent;
+                if (name_1) {
                     if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
                         var templates = ownerComponentInputContent.querySelectorAll('template');
                         for (var i = templates.length; i;) {
@@ -51,16 +51,16 @@ var RtContent = (function (_super) {
                         }
                         ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
                     }
-                    var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+                    var selectedEls = ownerComponentInputContent.querySelectorAll("[rt-slot=" + name_1 + "]");
                     var selectedElCount = selectedEls.length;
                     if (selectedElCount) {
                         content = document.createDocumentFragment();
                         for (var i = 0; i < selectedElCount; i++) {
-                            content.appendChild(cloning ? selectedEls[i].cloneNode(true) : selectedEls[i]);
+                            content.appendChild(cloneContent ? selectedEls[i].cloneNode(true) : selectedEls[i]);
                         }
                     }
                 }
-                else if (cloning) {
+                else if (cloneContent) {
                     content = ownerComponentInputContent.cloneNode(true);
                 }
                 else {
@@ -89,21 +89,21 @@ var RtContent = (function (_super) {
             this.isReady = true;
         }
     };
-    RtContent.prototype._detach = function () {
+    RtSlot.prototype._detach = function () {
         this._attached = false;
         this._freezeBindings();
     };
-    return RtContent;
+    return RtSlot;
 }(Component_1.default));
-RtContent = __decorate([
+RtSlot = __decorate([
     d_1.default.Component({
-        elementIs: 'rt-content',
+        elementIs: 'rt-slot',
         props: {
-            select: { type: String, readonly: true },
-            cloning: { default: true, readonly: true },
+            name: { type: String, readonly: true },
+            cloneContent: { default: false, readonly: true },
             getContext: { type: String, readonly: true }
         },
         template: ''
     })
-], RtContent);
-exports.default = RtContent;
+], RtSlot);
+exports.default = RtSlot;

@@ -30,7 +30,7 @@ function bindContent(content, ownerComponent, context) {
                                 var cell = new cellx_1.Cell(compileContent_1.default(parsedValue, value, ownerComponent), {
                                     owner: context,
                                     onChange: function (evt) {
-                                        setAttribute_1.default(child, name_1, evt['value']);
+                                        setAttribute_1.default(child, name_1, evt.value);
                                     }
                                 });
                                 setAttribute_1.default(child, name_1, cell.get());
@@ -64,7 +64,7 @@ function bindContent(content, ownerComponent, context) {
                             var cell = new cellx_1.Cell(compileContent_1.default(parsedContent, content_1), {
                                 owner: context,
                                 onChange: function (evt) {
-                                    child.textContent = evt['value'];
+                                    child.textContent = evt.value;
                                 }
                             });
                             child.textContent = cell.get();

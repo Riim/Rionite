@@ -10,17 +10,17 @@ import d from '../d';
 let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 
 @d.Component({
-	elementIs: 'rt-content',
+	elementIs: 'rt-slot',
 
 	props: {
-		select: { type: String, readonly: true },
-		cloning: { default: true, readonly: true },
+		name: { type: String, readonly: true },
+		cloneContent: { default: false, readonly: true },
 		getContext: { type: String, readonly: true }
 	},
 
 	template: ''
 })
-export default class RtContent extends Component {
+export default class RtSlot extends Component {
 	_templateContent: DocumentFragment;
 
 	_attach() {
@@ -35,10 +35,10 @@ export default class RtContent extends Component {
 			let content: DocumentFragment | undefined;
 
 			if (ownerComponentInputContent.firstChild) {
-				let selector = props.select;
-				let cloning = props.cloning;
+				let name = props.name;
+				let cloneContent = props.cloneContent;
 
-				if (selector) {
+				if (name) {
 					if (!templateTagFeature && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
 						let templates = ownerComponentInputContent.querySelectorAll('template');
 
@@ -49,17 +49,17 @@ export default class RtContent extends Component {
 						ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
 					}
 
-					let selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+					let selectedEls = ownerComponentInputContent.querySelectorAll(`[rt-slot=${ name }]`);
 					let selectedElCount = selectedEls.length;
 
 					if (selectedElCount) {
 						content = document.createDocumentFragment();
 
 						for (let i = 0; i < selectedElCount; i++) {
-							content.appendChild(cloning ? selectedEls[i].cloneNode(true) : selectedEls[i]);
+							content.appendChild(cloneContent ? selectedEls[i].cloneNode(true) : selectedEls[i]);
 						}
 					}
-				} else if (cloning) {
+				} else if (cloneContent) {
 					content = ownerComponentInputContent.cloneNode(true) as DocumentFragment;
 				} else {
 					content = ownerComponentInputContent;

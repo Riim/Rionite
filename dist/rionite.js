@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 49);
+/******/ 	return __webpack_require__(__webpack_require__.s = 52);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -100,21 +100,22 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var html_to_fragment_1 = __webpack_require__(29);
+var html_to_fragment_1 = __webpack_require__(30);
 var DisposableMixin_1 = __webpack_require__(17);
-var elementConstructorMap_1 = __webpack_require__(23);
-var registerComponent_1 = __webpack_require__(44);
-var ElementProtoMixin_1 = __webpack_require__(7);
+var elementConstructorMap_1 = __webpack_require__(24);
+var registerComponent_1 = __webpack_require__(47);
+var ElementProtoMixin_1 = __webpack_require__(6);
 var ComponentProperties_1 = __webpack_require__(14);
-var initElementAttributes_1 = __webpack_require__(42);
-var bindContent_1 = __webpack_require__(6);
-var componentBinding_1 = __webpack_require__(38);
-var attachChildComponentElements_1 = __webpack_require__(5);
-var bindEvents_1 = __webpack_require__(35);
-var eventTypes_1 = __webpack_require__(41);
-var onEvent_1 = __webpack_require__(43);
-var camelize_1 = __webpack_require__(4);
-var getUID_1 = __webpack_require__(19);
+var initElementAttributes_1 = __webpack_require__(45);
+var bindContent_1 = __webpack_require__(5);
+var componentBinding_1 = __webpack_require__(41);
+var attachChildComponentElements_1 = __webpack_require__(4);
+var bindEvents_1 = __webpack_require__(38);
+var eventTypes_1 = __webpack_require__(44);
+var onEvent_1 = __webpack_require__(46);
+var camelize_1 = __webpack_require__(7);
+var getUID_1 = __webpack_require__(20);
+var moveContent_1 = __webpack_require__(36);
 var Features_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
@@ -294,17 +295,14 @@ var Component = (function (_super) {
                 }
             }
             else {
-                var inputContent = this.props.content = document.createDocumentFragment();
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
-                for (var child = void 0; (child = el.firstChild);) {
-                    inputContent.appendChild(child);
-                }
+                moveContent_1.default((this.props.content = document.createDocumentFragment()), el);
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
-                var rawContent = constr._rawContent;
-                if (!rawContent) {
-                    rawContent = constr._rawContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));
+                var templateContent = constr._templateContent;
+                if (!templateContent) {
+                    templateContent = constr._templateContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));
                 }
-                var content = rawContent.cloneNode(true);
+                var content = templateContent.cloneNode(true);
                 var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
                 this._bindings = bindings;
                 this.element.appendChild(content);
@@ -508,23 +506,6 @@ exports.default = d;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var reHyphen = /[-_]+([a-z]|$)/g;
-var cache = Object.create(null);
-function camelize(str) {
-    return cache[str] || (cache[str] = str.replace(reHyphen, function (match, chr) {
-        return chr.toUpperCase();
-    }));
-}
-exports.default = camelize;
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 function attachChildComponentElements(childComponents) {
     for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
         var childComponent = childComponents_1[_i];
@@ -539,7 +520,7 @@ exports.default = attachChildComponentElements;
 
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -547,8 +528,8 @@ exports.default = attachChildComponentElements;
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var ContentParser_1 = __webpack_require__(16);
-var compileContent_1 = __webpack_require__(37);
-var setAttribute_1 = __webpack_require__(34);
+var compileContent_1 = __webpack_require__(40);
+var setAttribute_1 = __webpack_require__(37);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var reBinding = /{[^}]+}/;
 function bindContent(content, ownerComponent, context) {
@@ -575,7 +556,7 @@ function bindContent(content, ownerComponent, context) {
                                 var cell = new cellx_1.Cell(compileContent_1.default(parsedValue, value, ownerComponent), {
                                     owner: context,
                                     onChange: function (evt) {
-                                        setAttribute_1.default(child, name_1, evt['value']);
+                                        setAttribute_1.default(child, name_1, evt.value);
                                     }
                                 });
                                 setAttribute_1.default(child, name_1, cell.get());
@@ -609,7 +590,7 @@ function bindContent(content, ownerComponent, context) {
                             var cell = new cellx_1.Cell(compileContent_1.default(parsedContent, content_1), {
                                 owner: context,
                                 onChange: function (evt) {
-                                    child.textContent = evt['value'];
+                                    child.textContent = evt.value;
                                 }
                             });
                             child.textContent = cell.get();
@@ -634,14 +615,14 @@ exports.default = bindContent;
 
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
-var defer_1 = __webpack_require__(18);
+var defer_1 = __webpack_require__(19);
 var Features_1 = __webpack_require__(2);
 exports.ElementsController = {
     skipConnectionStatusCallbacks: false
@@ -720,6 +701,23 @@ var _a;
 
 
 /***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var reHyphen = /[-_]+([a-z]|$)/g;
+var cache = Object.create(null);
+function camelize(str) {
+    return cache[str] || (cache[str] = str.replace(reHyphen, function (match, chr) {
+        return chr.toUpperCase();
+    }));
+}
+exports.default = camelize;
+
+
+/***/ }),
 /* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -780,9 +778,9 @@ exports.default = '[$_a-zA-Z][$\\w]*';
 
 "use strict";
 
-var escapeHTML_1 = __webpack_require__(47);
+var escapeHTML_1 = __webpack_require__(50);
 exports.escapeHTML = escapeHTML_1.default;
-var unescapeHTML_1 = __webpack_require__(48);
+var unescapeHTML_1 = __webpack_require__(51);
 exports.unescapeHTML = unescapeHTML_1.default;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = escapeHTML_1.default;
@@ -816,9 +814,9 @@ exports.default = escapeString;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var componentPropertyTypeMap_1 = __webpack_require__(40);
-var componentPropertyTypeHandlersMap_1 = __webpack_require__(39);
-var camelize_1 = __webpack_require__(4);
+var componentPropertyTypeMap_1 = __webpack_require__(43);
+var componentPropertyTypeHandlersMap_1 = __webpack_require__(42);
+var camelize_1 = __webpack_require__(7);
 var hyphenize_1 = __webpack_require__(9);
 function initProperty(props, name, el) {
     var component = el.$c;
@@ -967,9 +965,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
-var compileKeypath_1 = __webpack_require__(21);
-var bindContent_1 = __webpack_require__(6);
-var attachChildComponentElements_1 = __webpack_require__(5);
+var compileKeypath_1 = __webpack_require__(22);
+var bindContent_1 = __webpack_require__(5);
+var attachChildComponentElements_1 = __webpack_require__(4);
 var keypathPattern_1 = __webpack_require__(10);
 var Features_1 = __webpack_require__(2);
 var d_1 = __webpack_require__(3);
@@ -1091,7 +1089,7 @@ exports.default = RtIfThen;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(26);
+var keypathToJSExpression_1 = __webpack_require__(27);
 var namePattern_1 = __webpack_require__(11);
 var keypathPattern_1 = __webpack_require__(10);
 var ContentNodeType;
@@ -1601,6 +1599,22 @@ exports.default = DisposableMixin;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+function clearNode(node) {
+    for (var child = void 0; (child = node.firstChild);) {
+        node.removeChild(child);
+    }
+    return node;
+}
+exports.default = clearNode;
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var queue;
 function run() {
@@ -1629,7 +1643,7 @@ exports.default = defer;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1654,7 +1668,7 @@ exports.default = getUID;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1668,13 +1682,13 @@ exports.default = isRegExp;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(26);
+var keypathToJSExpression_1 = __webpack_require__(27);
 var cache = Object.create(null);
 function compileKeypath(keypath) {
     return cache[keypath] || (cache[keypath] = Function("var temp; return " + keypathToJSExpression_1.default(keypath) + ";"));
@@ -1683,7 +1697,7 @@ exports.default = compileKeypath;
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1695,7 +1709,7 @@ exports.default = componentPropertyValuesKey;
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1749,13 +1763,13 @@ exports.default = mixin(Object.create(null), {
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var getText_1 = __webpack_require__(25);
+var getText_1 = __webpack_require__(26);
 exports.default = {
     or: function or(value, arg) {
         return value || arg;
@@ -1817,7 +1831,7 @@ exports.default = {
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1907,7 +1921,7 @@ configure({
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1934,7 +1948,7 @@ exports.default = keypathToJSExpression;
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2351,20 +2365,20 @@ exports.default = Parser;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Parser_1 = __webpack_require__(27);
+var Parser_1 = __webpack_require__(28);
 exports.Parser = Parser_1.default;
-var Template_1 = __webpack_require__(45);
+var Template_1 = __webpack_require__(48);
 exports.Template = Template_1.default;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2397,40 +2411,42 @@ exports.default = htmlToFragment;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var beml_1 = __webpack_require__(28);
+var beml_1 = __webpack_require__(29);
 exports.BemlParser = beml_1.Parser;
 exports.BemlTemplate = beml_1.Template;
 var escape_string_1 = __webpack_require__(13);
 var escape_html_1 = __webpack_require__(12);
-var html_to_fragment_1 = __webpack_require__(29);
+var html_to_fragment_1 = __webpack_require__(30);
 var DisposableMixin_1 = __webpack_require__(17);
 exports.DisposableMixin = DisposableMixin_1.default;
-var formatters_1 = __webpack_require__(24);
+var formatters_1 = __webpack_require__(25);
 exports.formatters = formatters_1.default;
-var getText_1 = __webpack_require__(25);
+var getText_1 = __webpack_require__(26);
 exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
-var rt_content_1 = __webpack_require__(31);
+var rt_content_1 = __webpack_require__(32);
+var rt_slot_1 = __webpack_require__(35);
 var rt_if_then_1 = __webpack_require__(15);
-var rt_if_else_1 = __webpack_require__(32);
-var rt_repeat_1 = __webpack_require__(33);
+var rt_if_else_1 = __webpack_require__(33);
+var rt_repeat_1 = __webpack_require__(34);
 var ComponentProperties_1 = __webpack_require__(14);
 exports.ComponentProperties = ComponentProperties_1.default;
 var d_1 = __webpack_require__(3);
 exports.d = d_1.default;
-var camelize_1 = __webpack_require__(4);
+var camelize_1 = __webpack_require__(7);
 var hyphenize_1 = __webpack_require__(9);
-var isRegExp_1 = __webpack_require__(20);
-var defer_1 = __webpack_require__(18);
+var isRegExp_1 = __webpack_require__(21);
+var defer_1 = __webpack_require__(19);
 var Components = {
     RtContent: rt_content_1.default,
+    RtSlot: rt_slot_1.default,
     RtIfThen: rt_if_then_1.default,
     RtIfElse: rt_if_else_1.default,
     RtRepeat: rt_repeat_1.default
@@ -2450,7 +2466,7 @@ exports.Utils = Utils;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2474,9 +2490,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var ElementProtoMixin_1 = __webpack_require__(7);
-var bindContent_1 = __webpack_require__(6);
-var attachChildComponentElements_1 = __webpack_require__(5);
+var ElementProtoMixin_1 = __webpack_require__(6);
+var bindContent_1 = __webpack_require__(5);
+var attachChildComponentElements_1 = __webpack_require__(4);
+var clearNode_1 = __webpack_require__(18);
 var Features_1 = __webpack_require__(2);
 var d_1 = __webpack_require__(3);
 var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
@@ -2487,24 +2504,17 @@ var RtContent = (function (_super) {
     }
     RtContent.prototype._attach = function () {
         this._attached = true;
-        var props = this.props;
-        if (props['cloning']) {
+        if (this.isReady) {
+            this._unfreezeBindings();
+        }
+        else {
+            var props = this.props;
             var ownerComponent = this.ownerComponent;
-            var el = this.element;
-            if (this.isReady) {
-                for (var child = void 0; (child = el.firstChild);) {
-                    el.removeChild(child);
-                }
-            }
-            else {
-                var content_1 = props.content = document.createDocumentFragment();
-                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
-                for (var child = void 0; (child = el.firstChild);) {
-                    content_1.appendChild(child);
-                }
-                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
-                var ownerComponentInputContent = ownerComponent.props.content;
-                var selector = this.props['select'];
+            var ownerComponentInputContent = ownerComponent.props.content;
+            var content = void 0;
+            if (ownerComponentInputContent.firstChild) {
+                var selector = props.select;
+                var cloning = props.cloning;
                 if (selector) {
                     if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
                         var templates = ownerComponentInputContent.querySelectorAll('template');
@@ -2516,97 +2526,44 @@ var RtContent = (function (_super) {
                     var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
                     var selectedElCount = selectedEls.length;
                     if (selectedElCount) {
-                        var rawContent = this._rawContent = document.createDocumentFragment();
-                        ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
+                        content = document.createDocumentFragment();
                         for (var i = 0; i < selectedElCount; i++) {
-                            rawContent.appendChild(selectedEls[i].cloneNode(true));
+                            content.appendChild(cloning ? selectedEls[i].cloneNode(true) : selectedEls[i]);
                         }
-                        ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                     }
-                    else {
-                        this._rawContent = content_1;
-                    }
+                }
+                else if (cloning) {
+                    content = ownerComponentInputContent.cloneNode(true);
                 }
                 else {
-                    this._rawContent = ownerComponentInputContent.firstChild ? ownerComponentInputContent : content_1;
+                    content = ownerComponentInputContent;
                 }
-                this.isReady = true;
             }
-            var content = this._rawContent.cloneNode(true);
-            var getContext = props['getContext'];
-            var _a = this._rawContent == props.content ?
-                bindContent_1.default(content, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context) :
+            var el = this.element;
+            var getContext = props.getContext;
+            var _a = content ?
                 bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
                     ownerComponent[getContext](this, ownerComponent.props.context) :
-                    ownerComponent.props.context), bindings = _a.bindings, childComponents = _a.childComponents;
+                    ownerComponent.props.context) :
+                bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _a.bindings, childComponents = _a.childComponents;
             this._bindings = bindings;
-            el.appendChild(content);
-            if (!Features_1.nativeCustomElements && childComponents) {
+            if (content) {
+                if (el.firstChild) {
+                    ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
+                    clearNode_1.default(el);
+                    ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
+                }
+                el.appendChild(content);
+            }
+            if ((!content || !Features_1.nativeCustomElements) && childComponents) {
                 attachChildComponentElements_1.default(childComponents);
             }
-        }
-        else {
-            if (this.isReady) {
-                this._unfreezeBindings();
-            }
-            else {
-                var ownerComponent = this.ownerComponent;
-                var ownerComponentInputContent = ownerComponent.props.content;
-                var content = void 0;
-                if (ownerComponentInputContent.firstChild) {
-                    var selector = this.props['select'];
-                    if (selector) {
-                        if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
-                            var templates = ownerComponentInputContent.querySelectorAll('template');
-                            for (var i = templates.length; i;) {
-                                templates[--i].content;
-                            }
-                            ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
-                        }
-                        var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
-                        var selectedElCount = selectedEls.length;
-                        if (selectedElCount) {
-                            content = document.createDocumentFragment();
-                            ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
-                            for (var i = 0; i < selectedElCount; i++) {
-                                content.appendChild(selectedEls[i]);
-                            }
-                            ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
-                        }
-                    }
-                    else {
-                        content = ownerComponentInputContent;
-                    }
-                }
-                var el = this.element;
-                var getContext = props['getContext'];
-                var _b = content ?
-                    bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
-                        ownerComponent[getContext](this, ownerComponent.props.context) :
-                        ownerComponent.props.context) :
-                    bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _b.bindings, childComponents = _b.childComponents;
-                this._bindings = bindings;
-                if (content) {
-                    for (var child = void 0; (child = el.firstChild);) {
-                        el.removeChild(child);
-                    }
-                    el.appendChild(content);
-                }
-                if ((!content || !Features_1.nativeCustomElements) && childComponents) {
-                    attachChildComponentElements_1.default(childComponents);
-                }
-                this.isReady = true;
-            }
+            this.isReady = true;
         }
     };
     RtContent.prototype._detach = function () {
         this._attached = false;
-        if (this.props['cloning']) {
-            this._destroyBindings();
-        }
-        else {
-            this._freezeBindings();
-        }
+        this._freezeBindings();
     };
     return RtContent;
 }(Component_1.default));
@@ -2625,7 +2582,7 @@ exports.default = RtContent;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2668,7 +2625,7 @@ exports.default = RtIfElse;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2693,9 +2650,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
-var compileKeypath_1 = __webpack_require__(21);
-var bindContent_1 = __webpack_require__(6);
-var attachChildComponentElements_1 = __webpack_require__(5);
+var compileKeypath_1 = __webpack_require__(22);
+var bindContent_1 = __webpack_require__(5);
+var attachChildComponentElements_1 = __webpack_require__(4);
 var namePattern_1 = __webpack_require__(11);
 var keypathPattern_1 = __webpack_require__(10);
 var Features_1 = __webpack_require__(2);
@@ -2724,10 +2681,10 @@ var RtRepeat = (function (_super) {
             this._itemName = forAttrValue[1];
             this._list = new cellx_1.Cell(compileKeypath_1.default(forAttrValue[2]), { owner: props.context });
             this._itemMap = new Map();
-            this._trackBy = props['trackBy'];
+            this._trackBy = props.trackBy;
             var rawItemContent = this._rawItemContent =
                 document.importNode(this.element.content, true);
-            if (props['strip']) {
+            if (props.strip) {
                 var firstChild = rawItemContent.firstChild;
                 var lastChild = rawItemContent.lastChild;
                 if (firstChild == lastChild) {
@@ -2924,7 +2881,139 @@ exports.default = RtRepeat;
 
 
 /***/ }),
-/* 34 */
+/* 35 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var cellx_1 = __webpack_require__(0);
+var Component_1 = __webpack_require__(1);
+var ElementProtoMixin_1 = __webpack_require__(6);
+var bindContent_1 = __webpack_require__(5);
+var attachChildComponentElements_1 = __webpack_require__(4);
+var clearNode_1 = __webpack_require__(18);
+var Features_1 = __webpack_require__(2);
+var d_1 = __webpack_require__(3);
+var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
+var RtSlot = (function (_super) {
+    __extends(RtSlot, _super);
+    function RtSlot() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    RtSlot.prototype._attach = function () {
+        this._attached = true;
+        if (this.isReady) {
+            this._unfreezeBindings();
+        }
+        else {
+            var props = this.props;
+            var ownerComponent = this.ownerComponent;
+            var ownerComponentInputContent = ownerComponent.props.content;
+            var content = void 0;
+            if (ownerComponentInputContent.firstChild) {
+                var name_1 = props.name;
+                var cloneContent = props.cloneContent;
+                if (name_1) {
+                    if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
+                        var templates = ownerComponentInputContent.querySelectorAll('template');
+                        for (var i = templates.length; i;) {
+                            templates[--i].content;
+                        }
+                        ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
+                    }
+                    var selectedEls = ownerComponentInputContent.querySelectorAll("[rt-slot=" + name_1 + "]");
+                    var selectedElCount = selectedEls.length;
+                    if (selectedElCount) {
+                        content = document.createDocumentFragment();
+                        for (var i = 0; i < selectedElCount; i++) {
+                            content.appendChild(cloneContent ? selectedEls[i].cloneNode(true) : selectedEls[i]);
+                        }
+                    }
+                }
+                else if (cloneContent) {
+                    content = ownerComponentInputContent.cloneNode(true);
+                }
+                else {
+                    content = ownerComponentInputContent;
+                }
+            }
+            var el = this.element;
+            var getContext = props.getContext;
+            var _a = content ?
+                bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
+                    ownerComponent[getContext](this, ownerComponent.props.context) :
+                    ownerComponent.props.context) :
+                bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _a.bindings, childComponents = _a.childComponents;
+            this._bindings = bindings;
+            if (content) {
+                if (el.firstChild) {
+                    ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
+                    clearNode_1.default(el);
+                    ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
+                }
+                el.appendChild(content);
+            }
+            if ((!content || !Features_1.nativeCustomElements) && childComponents) {
+                attachChildComponentElements_1.default(childComponents);
+            }
+            this.isReady = true;
+        }
+    };
+    RtSlot.prototype._detach = function () {
+        this._attached = false;
+        this._freezeBindings();
+    };
+    return RtSlot;
+}(Component_1.default));
+RtSlot = __decorate([
+    d_1.default.Component({
+        elementIs: 'rt-slot',
+        props: {
+            name: { type: String, readonly: true },
+            cloneContent: { default: false, readonly: true },
+            getContext: { type: String, readonly: true }
+        },
+        template: ''
+    })
+], RtSlot);
+exports.default = RtSlot;
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function moveContent(target, source) {
+    for (var child = void 0; (child = source.firstChild);) {
+        target.appendChild(child);
+    }
+    return target;
+}
+exports.default = moveContent;
+
+
+/***/ }),
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2942,7 +3031,7 @@ exports.default = setAttribute;
 
 
 /***/ }),
-/* 35 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2973,7 +3062,7 @@ exports.default = bindEvents;
 
 
 /***/ }),
-/* 36 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3010,7 +3099,7 @@ exports.default = bindingToJSExpression;
 
 
 /***/ }),
-/* 37 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3018,10 +3107,10 @@ exports.default = bindingToJSExpression;
 Object.defineProperty(exports, "__esModule", { value: true });
 var escape_string_1 = __webpack_require__(13);
 var ContentParser_1 = __webpack_require__(16);
-var bindingToJSExpression_1 = __webpack_require__(36);
-var formatters_1 = __webpack_require__(24);
-var componentPropertyValuesKey_1 = __webpack_require__(22);
-var getUID_1 = __webpack_require__(19);
+var bindingToJSExpression_1 = __webpack_require__(39);
+var formatters_1 = __webpack_require__(25);
+var componentPropertyValuesKey_1 = __webpack_require__(23);
+var getUID_1 = __webpack_require__(20);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var keyCounter = 0;
 var cache = Object.create(null);
@@ -3061,7 +3150,7 @@ exports.default = compileContent;
 
 
 /***/ }),
-/* 38 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3115,7 +3204,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 39 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3123,8 +3212,8 @@ exports.unfreezeBindings = unfreezeBindings;
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var escape_html_1 = __webpack_require__(12);
-var componentPropertyValuesKey_1 = __webpack_require__(22);
-var isRegExp_1 = __webpack_require__(20);
+var componentPropertyValuesKey_1 = __webpack_require__(23);
+var isRegExp_1 = __webpack_require__(21);
 var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Boolean, [
             function (value, defaultValue) {
@@ -3187,7 +3276,7 @@ exports.default = componentPropertyTypeHandlersMap;
 
 
 /***/ }),
-/* 40 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3207,7 +3296,7 @@ exports.default = new cellx_1.JS.Map([
 
 
 /***/ }),
-/* 41 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3230,13 +3319,13 @@ exports.default = [
 
 
 /***/ }),
-/* 42 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(4);
+var camelize_1 = __webpack_require__(7);
 function initElementAttributes(component, constr) {
     var propsConfig = constr.props;
     if (propsConfig) {
@@ -3254,7 +3343,7 @@ exports.default = initElementAttributes;
 
 
 /***/ }),
-/* 43 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3302,16 +3391,16 @@ exports.default = onEvent;
 
 
 /***/ }),
-/* 44 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var beml_1 = __webpack_require__(28);
-var elementConstructorMap_1 = __webpack_require__(23);
-var ElementProtoMixin_1 = __webpack_require__(7);
+var beml_1 = __webpack_require__(29);
+var elementConstructorMap_1 = __webpack_require__(24);
+var ElementProtoMixin_1 = __webpack_require__(6);
 var hyphenize_1 = __webpack_require__(9);
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
@@ -3330,8 +3419,8 @@ function registerComponent(componentConstr) {
         throw new TypeError('Static property "elementIs" is required');
     }
     var props = componentConstr.props;
-    if (props && (props['content'] || props['context'])) {
-        throw new TypeError("No need to declare property \"" + (props['content'] ? 'content' : 'context') + "\"");
+    if (props && (props.content || props.context)) {
+        throw new TypeError("No need to declare property \"" + (props.content ? 'content' : 'context') + "\"");
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
     var bemlTemplate = componentConstr.bemlTemplate;
@@ -3363,7 +3452,7 @@ function registerComponent(componentConstr) {
         initBlockNames(componentConstr, parentComponentConstr, elIs);
     }
     componentConstr._blockNamesString = elIs + ' ' + parentComponentConstr._blockNamesString;
-    componentConstr._rawContent = undefined;
+    componentConstr._templateContent = undefined;
     componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
     var elExtends = componentConstr.elementExtends;
     var parentElConstr = elExtends ?
@@ -3404,7 +3493,7 @@ exports.default = registerComponent;
 
 
 /***/ }),
-/* 45 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3412,8 +3501,8 @@ exports.default = registerComponent;
 Object.defineProperty(exports, "__esModule", { value: true });
 var escape_string_1 = __webpack_require__(13);
 var escape_html_1 = __webpack_require__(12);
-var Parser_1 = __webpack_require__(27);
-var selfClosingTags_1 = __webpack_require__(46);
+var Parser_1 = __webpack_require__(28);
+var selfClosingTags_1 = __webpack_require__(49);
 var join = Array.prototype.join;
 var elDelimiter = '__';
 var Template = (function () {
@@ -3611,7 +3700,7 @@ exports.default = Template;
 
 
 /***/ }),
-/* 46 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3653,7 +3742,7 @@ exports.default = selfClosingTags;
 
 
 /***/ }),
-/* 47 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3672,7 +3761,7 @@ exports.default = escapeHTML;
 
 
 /***/ }),
-/* 48 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3691,10 +3780,10 @@ exports.default = unescapeHTML;
 
 
 /***/ }),
-/* 49 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(30);
+module.exports = __webpack_require__(31);
 
 
 /***/ })

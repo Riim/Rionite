@@ -44,7 +44,7 @@ export default function bindContent(
 								let cell = new Cell<any>(compileContent(parsedValue, value, ownerComponent), {
 									owner: context,
 									onChange(evt) {
-										setAttribute(child as HTMLElement, name, evt['value']);
+										setAttribute(child as HTMLElement, name, evt.value);
 									}
 								});
 
@@ -83,7 +83,7 @@ export default function bindContent(
 							let cell = new Cell<any>(compileContent(parsedContent, content), {
 								owner: context,
 								onChange(evt) {
-									(child as Node).textContent = evt['value'];
+									(child as Node).textContent = evt.value;
 								}
 							});
 

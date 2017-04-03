@@ -22,6 +22,7 @@ import {
 	default as Component
 } from './Component';
 import RtContent from './Components/rt-content';
+import RtSlot from './Components/rt-slot';
 import { TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
 import RtIfElse from './Components/rt-if-else';
 import {
@@ -40,6 +41,7 @@ import defer from './Utils/defer';
 
 let Components = {
 	RtContent,
+	RtSlot,
 	RtIfThen,
 	RtIfElse,
 	RtRepeat

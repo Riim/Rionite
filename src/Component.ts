@@ -15,6 +15,7 @@ import eventTypes from './eventTypes';
 import onEvent from './onEvent';
 import camelize from './Utils/camelize';
 import getUID from './Utils/getUID';
+import moveContent from './Utils/moveContent';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
 
 let Map = JS.Map;
@@ -102,7 +103,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	static _blockNamesString: string = '';
 
-	static _rawContent: DocumentFragment | undefined;
+	static _templateContent: DocumentFragment | undefined;
 
 	static _blockNames: Array<string>;
 	static _elementClassNameMap: IComponentElementClassNameMap;
@@ -313,23 +314,19 @@ export default class Component extends EventEmitter implements DisposableMixin {
 					bindEvents(this, constr.events);
 				}
 			} else {
-				let inputContent = this.props.content = document.createDocumentFragment();
-
 				ElementsController.skipConnectionStatusCallbacks = true;
-				for (let child: Node | null; (child = el.firstChild);) {
-					inputContent.appendChild(child);
-				}
+				moveContent((this.props.content = document.createDocumentFragment()), el);
 				ElementsController.skipConnectionStatusCallbacks = false;
 
-				let rawContent = constr._rawContent;
+				let templateContent = constr._templateContent;
 
-				if (!rawContent) {
-					rawContent = constr._rawContent = htmlToFragment(
+				if (!templateContent) {
+					templateContent = constr._templateContent = htmlToFragment(
 						typeof template == 'string' ? template : template.render(constr)
 					);
 				}
 
-				let content = rawContent.cloneNode(true);
+				let content = templateContent.cloneNode(true);
 				let { bindings, childComponents } = bindContent(content, this);
 
 				this._bindings = bindings;

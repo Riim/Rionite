@@ -26,6 +26,7 @@ var eventTypes_1 = require("./eventTypes");
 var onEvent_1 = require("./onEvent");
 var camelize_1 = require("./Utils/camelize");
 var getUID_1 = require("./Utils/getUID");
+var moveContent_1 = require("./Utils/moveContent");
 var Features_1 = require("./Features");
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
@@ -205,17 +206,14 @@ var Component = (function (_super) {
                 }
             }
             else {
-                var inputContent = this.props.content = document.createDocumentFragment();
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
-                for (var child = void 0; (child = el.firstChild);) {
-                    inputContent.appendChild(child);
-                }
+                moveContent_1.default((this.props.content = document.createDocumentFragment()), el);
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
-                var rawContent = constr._rawContent;
-                if (!rawContent) {
-                    rawContent = constr._rawContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));
+                var templateContent = constr._templateContent;
+                if (!templateContent) {
+                    templateContent = constr._templateContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));
                 }
-                var content = rawContent.cloneNode(true);
+                var content = templateContent.cloneNode(true);
                 var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
                 this._bindings = bindings;
                 this.element.appendChild(content);
