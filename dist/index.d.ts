@@ -10,6 +10,7 @@ import RtIfElse from './Components/rt-if-else';
 import { TRtRepeatListCell, TRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, default as RtRepeat } from './Components/rt-repeat';
 import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
 import d from './d';
+import './bemlTemplateHelpers';
 declare let Components: {
     RtContent: typeof RtContent;
     RtSlot: typeof RtSlot;

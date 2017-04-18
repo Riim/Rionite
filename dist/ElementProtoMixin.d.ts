@@ -3,7 +3,7 @@ export declare let ElementsController: {
     skipConnectionStatusCallbacks: boolean;
 };
 declare let ElementProtoMixin: {
-    [x: string]: boolean | Component | ((name: string, oldValue: string | null, value: string | null) => void) | null;
+    [x: string]: boolean | ((name: string, oldValue: string | null, value: string | null) => void) | Component | null;
     rioniteComponent: null;
     readonly $c: Component;
     connectedCallback(): void;

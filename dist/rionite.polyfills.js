@@ -1490,9 +1490,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
@@ -1547,7 +1547,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 52);
+/******/ 	return __webpack_require__(__webpack_require__.s = 53);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1575,20 +1575,20 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var html_to_fragment_1 = __webpack_require__(30);
-var DisposableMixin_1 = __webpack_require__(17);
-var elementConstructorMap_1 = __webpack_require__(24);
-var registerComponent_1 = __webpack_require__(47);
+var DisposableMixin_1 = __webpack_require__(18);
+var elementConstructorMap_1 = __webpack_require__(25);
+var registerComponent_1 = __webpack_require__(48);
 var ElementProtoMixin_1 = __webpack_require__(6);
-var ComponentProperties_1 = __webpack_require__(14);
-var initElementAttributes_1 = __webpack_require__(45);
+var ComponentProperties_1 = __webpack_require__(15);
+var initElementAttributes_1 = __webpack_require__(46);
 var bindContent_1 = __webpack_require__(5);
-var componentBinding_1 = __webpack_require__(41);
+var componentBinding_1 = __webpack_require__(42);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var bindEvents_1 = __webpack_require__(38);
-var eventTypes_1 = __webpack_require__(44);
-var onEvent_1 = __webpack_require__(46);
+var bindEvents_1 = __webpack_require__(39);
+var eventTypes_1 = __webpack_require__(45);
+var onEvent_1 = __webpack_require__(47);
 var camelize_1 = __webpack_require__(7);
-var getUID_1 = __webpack_require__(20);
+var getUID_1 = __webpack_require__(21);
 var moveContent_1 = __webpack_require__(36);
 var Features_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
@@ -2001,8 +2001,8 @@ exports.default = attachChildComponentElements;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var ContentParser_1 = __webpack_require__(16);
-var compileContent_1 = __webpack_require__(40);
+var ContentParser_1 = __webpack_require__(17);
+var compileContent_1 = __webpack_require__(41);
 var setAttribute_1 = __webpack_require__(37);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var reBinding = /{[^}]+}/;
@@ -2096,7 +2096,7 @@ exports.default = bindContent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
-var defer_1 = __webpack_require__(19);
+var defer_1 = __webpack_require__(20);
 var Features_1 = __webpack_require__(2);
 exports.ElementsController = {
     skipConnectionStatusCallbacks: false
@@ -2252,16 +2252,30 @@ exports.default = '[$_a-zA-Z][$\\w]*';
 
 "use strict";
 
-var escapeHTML_1 = __webpack_require__(50);
+Object.defineProperty(exports, "__esModule", { value: true });
+var Parser_1 = __webpack_require__(29);
+exports.NodeType = Parser_1.NodeType;
+exports.Parser = Parser_1.default;
+var Template_1 = __webpack_require__(49);
+exports.Template = Template_1.default;
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var escapeHTML_1 = __webpack_require__(51);
 exports.escapeHTML = escapeHTML_1.default;
-var unescapeHTML_1 = __webpack_require__(51);
+var unescapeHTML_1 = __webpack_require__(52);
 exports.unescapeHTML = unescapeHTML_1.default;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = escapeHTML_1.default;
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2281,15 +2295,15 @@ exports.default = escapeString;
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var componentPropertyTypeMap_1 = __webpack_require__(43);
-var componentPropertyTypeHandlersMap_1 = __webpack_require__(42);
+var componentPropertyTypeMap_1 = __webpack_require__(44);
+var componentPropertyTypeHandlersMap_1 = __webpack_require__(43);
 var camelize_1 = __webpack_require__(7);
 var hyphenize_1 = __webpack_require__(9);
 function initProperty(props, name, el) {
@@ -2414,7 +2428,7 @@ exports.default = ComponentProperties;
 
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2439,7 +2453,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
-var compileKeypath_1 = __webpack_require__(22);
+var compileKeypath_1 = __webpack_require__(23);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
 var keypathPattern_1 = __webpack_require__(10);
@@ -2557,13 +2571,13 @@ exports.default = RtIfThen;
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(27);
+var keypathToJSExpression_1 = __webpack_require__(28);
 var namePattern_1 = __webpack_require__(11);
 var keypathPattern_1 = __webpack_require__(10);
 var ContentNodeType;
@@ -2900,7 +2914,7 @@ exports.default = ContentParser;
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3067,7 +3081,7 @@ exports.default = DisposableMixin;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3083,7 +3097,7 @@ exports.default = clearNode;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3117,7 +3131,7 @@ exports.default = defer;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3142,7 +3156,7 @@ exports.default = getUID;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3156,13 +3170,13 @@ exports.default = isRegExp;
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(27);
+var keypathToJSExpression_1 = __webpack_require__(28);
 var cache = Object.create(null);
 function compileKeypath(keypath) {
     return cache[keypath] || (cache[keypath] = Function("var temp; return " + keypathToJSExpression_1.default(keypath) + ";"));
@@ -3171,7 +3185,7 @@ exports.default = compileKeypath;
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3183,7 +3197,7 @@ exports.default = componentPropertyValuesKey;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3237,13 +3251,13 @@ exports.default = mixin(Object.create(null), {
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var getText_1 = __webpack_require__(26);
+var getText_1 = __webpack_require__(27);
 exports.default = {
     or: function or(value, arg) {
         return value || arg;
@@ -3305,7 +3319,7 @@ exports.default = {
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3395,7 +3409,7 @@ configure({
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3422,7 +3436,7 @@ exports.default = keypathToJSExpression;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3543,6 +3557,10 @@ var Parser = (function () {
     };
     Parser.prototype._readElement = function () {
         var at = this.at;
+        var isHelper = this.chr == '@';
+        if (isHelper) {
+            this._next();
+        }
         var tagName = this._readName(reTagNameOrNothing);
         var elNames = (tagName ? this._skipWhitespaces() : this.chr) == '/' ?
             (this._next(), this._skipWhitespaces(), this._readElementNames()) :
@@ -3562,6 +3580,7 @@ var Parser = (function () {
         var content = this.chr == '{' ? this._readContent(true) : null;
         return {
             nodeType: NodeType.ELEMENT,
+            isHelper: isHelper,
             tagName: tagName,
             names: elNames,
             attributes: attrs,
@@ -3839,19 +3858,6 @@ exports.default = Parser;
 
 
 /***/ }),
-/* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Parser_1 = __webpack_require__(28);
-exports.Parser = Parser_1.default;
-var Template_1 = __webpack_require__(48);
-exports.Template = Template_1.default;
-
-
-/***/ }),
 /* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3891,33 +3897,34 @@ exports.default = htmlToFragment;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var beml_1 = __webpack_require__(29);
+var beml_1 = __webpack_require__(12);
 exports.BemlParser = beml_1.Parser;
 exports.BemlTemplate = beml_1.Template;
-var escape_string_1 = __webpack_require__(13);
-var escape_html_1 = __webpack_require__(12);
+var escape_string_1 = __webpack_require__(14);
+var escape_html_1 = __webpack_require__(13);
 var html_to_fragment_1 = __webpack_require__(30);
-var DisposableMixin_1 = __webpack_require__(17);
+var DisposableMixin_1 = __webpack_require__(18);
 exports.DisposableMixin = DisposableMixin_1.default;
-var formatters_1 = __webpack_require__(25);
+var formatters_1 = __webpack_require__(26);
 exports.formatters = formatters_1.default;
-var getText_1 = __webpack_require__(26);
+var getText_1 = __webpack_require__(27);
 exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
 var rt_content_1 = __webpack_require__(32);
 var rt_slot_1 = __webpack_require__(35);
-var rt_if_then_1 = __webpack_require__(15);
+var rt_if_then_1 = __webpack_require__(16);
 var rt_if_else_1 = __webpack_require__(33);
 var rt_repeat_1 = __webpack_require__(34);
-var ComponentProperties_1 = __webpack_require__(14);
+var ComponentProperties_1 = __webpack_require__(15);
 exports.ComponentProperties = ComponentProperties_1.default;
 var d_1 = __webpack_require__(3);
 exports.d = d_1.default;
 var camelize_1 = __webpack_require__(7);
 var hyphenize_1 = __webpack_require__(9);
-var isRegExp_1 = __webpack_require__(21);
-var defer_1 = __webpack_require__(19);
+var isRegExp_1 = __webpack_require__(22);
+var defer_1 = __webpack_require__(20);
+__webpack_require__(38);
 var Components = {
     RtContent: rt_content_1.default,
     RtSlot: rt_slot_1.default,
@@ -3967,7 +3974,7 @@ var Component_1 = __webpack_require__(1);
 var ElementProtoMixin_1 = __webpack_require__(6);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var clearNode_1 = __webpack_require__(18);
+var clearNode_1 = __webpack_require__(19);
 var Features_1 = __webpack_require__(2);
 var d_1 = __webpack_require__(3);
 var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
@@ -4079,7 +4086,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var d_1 = __webpack_require__(3);
-var rt_if_then_1 = __webpack_require__(15);
+var rt_if_then_1 = __webpack_require__(16);
 var RtIfElse = (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
@@ -4124,7 +4131,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
-var compileKeypath_1 = __webpack_require__(22);
+var compileKeypath_1 = __webpack_require__(23);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
 var namePattern_1 = __webpack_require__(11);
@@ -4382,7 +4389,7 @@ var Component_1 = __webpack_require__(1);
 var ElementProtoMixin_1 = __webpack_require__(6);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var clearNode_1 = __webpack_require__(18);
+var clearNode_1 = __webpack_require__(19);
 var Features_1 = __webpack_require__(2);
 var d_1 = __webpack_require__(3);
 var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
@@ -4511,6 +4518,35 @@ exports.default = setAttribute;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var beml_1 = __webpack_require__(12);
+beml_1.Template.helpers['if-then'] = beml_1.Template.helpers['if-else'] = beml_1.Template.helpers['repeat'] = function (el) {
+    var origAttrs = el.attributes;
+    var attrs = {
+        superCall: origAttrs && origAttrs.superCall,
+        list: origAttrs ? origAttrs.list.slice() : []
+    };
+    attrs.list.push({
+        name: 'is',
+        value: 'rt-' + el.tagName
+    });
+    return [{
+            nodeType: beml_1.NodeType.ELEMENT,
+            isHelper: false,
+            tagName: 'template',
+            names: el.names,
+            attributes: attrs,
+            content: el.content
+        }];
+};
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 function bindEvents(component, events) {
     for (var elName in events) {
         var asset = void 0;
@@ -4536,7 +4572,7 @@ exports.default = bindEvents;
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4573,18 +4609,18 @@ exports.default = bindingToJSExpression;
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(13);
-var ContentParser_1 = __webpack_require__(16);
-var bindingToJSExpression_1 = __webpack_require__(39);
-var formatters_1 = __webpack_require__(25);
-var componentPropertyValuesKey_1 = __webpack_require__(23);
-var getUID_1 = __webpack_require__(20);
+var escape_string_1 = __webpack_require__(14);
+var ContentParser_1 = __webpack_require__(17);
+var bindingToJSExpression_1 = __webpack_require__(40);
+var formatters_1 = __webpack_require__(26);
+var componentPropertyValuesKey_1 = __webpack_require__(24);
+var getUID_1 = __webpack_require__(21);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var keyCounter = 0;
 var cache = Object.create(null);
@@ -4624,7 +4660,7 @@ exports.default = compileContent;
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4678,16 +4714,16 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var escape_html_1 = __webpack_require__(12);
-var componentPropertyValuesKey_1 = __webpack_require__(23);
-var isRegExp_1 = __webpack_require__(21);
+var escape_html_1 = __webpack_require__(13);
+var componentPropertyValuesKey_1 = __webpack_require__(24);
+var isRegExp_1 = __webpack_require__(22);
 var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Boolean, [
             function (value, defaultValue) {
@@ -4750,7 +4786,7 @@ exports.default = componentPropertyTypeHandlersMap;
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4770,7 +4806,7 @@ exports.default = new cellx_1.JS.Map([
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4793,7 +4829,7 @@ exports.default = [
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4817,7 +4853,7 @@ exports.default = initElementAttributes;
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4865,15 +4901,15 @@ exports.default = onEvent;
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var beml_1 = __webpack_require__(29);
-var elementConstructorMap_1 = __webpack_require__(24);
+var beml_1 = __webpack_require__(12);
+var elementConstructorMap_1 = __webpack_require__(25);
 var ElementProtoMixin_1 = __webpack_require__(6);
 var hyphenize_1 = __webpack_require__(9);
 var mixin = cellx_1.Utils.mixin;
@@ -4967,16 +5003,16 @@ exports.default = registerComponent;
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(13);
-var escape_html_1 = __webpack_require__(12);
-var Parser_1 = __webpack_require__(28);
-var selfClosingTags_1 = __webpack_require__(49);
+var escape_string_1 = __webpack_require__(14);
+var escape_html_1 = __webpack_require__(13);
+var Parser_1 = __webpack_require__(29);
+var selfClosingTags_1 = __webpack_require__(50);
 var join = Array.prototype.join;
 var elDelimiter = '__';
 var Template = (function () {
@@ -4990,48 +5026,74 @@ var Template = (function () {
         this._elementClassesTemplate = parent ?
             [blockName + elDelimiter].concat(parent._elementClassesTemplate) :
             [blockName + elDelimiter, ''];
-        this._nodes = [(this._currentNode = { elementName: null, superCall: false, source: null, innerSource: [] })];
-        var nodeMap = this._nodeMap = {};
+        this._elements = [(this._currentElement = { name: null, superCall: false, source: null, innerSource: [] })];
+        var elMap = this._elementMap = {};
         for (var _i = 0, _a = block.content; _i < _a.length; _i++) {
             var node = _a[_i];
             this._handleNode(node);
         }
         this._renderer = parent ?
             parent._renderer :
-            Function("return " + this._currentNode.innerSource.join(' + ') + ";");
-        Object.keys(nodeMap).forEach(function (name) {
-            var node = nodeMap[name];
-            this[name] = Function("return " + node.source.join(' + ') + ";");
-            if (node.superCall) {
-                var inner_1 = Function('$super', "return " + (node.innerSource.join(' + ') || "''") + ";");
+            Function("return " + this._currentElement.innerSource.join(' + ') + ";");
+        Object.keys(elMap).forEach(function (name) {
+            var el = elMap[name];
+            this[name] = Function("return " + el.source.join(' + ') + ";");
+            if (el.superCall) {
+                var inner_1 = Function('$super', "return " + (el.innerSource.join(' + ') || "''") + ";");
                 var parentElementRendererMap_1 = parent && parent._elementRendererMap;
                 this[name + '@content'] = function () { return inner_1.call(this, parentElementRendererMap_1); };
             }
             else {
-                this[name + '@content'] = Function("return " + (node.innerSource.join(' + ') || "''") + ";");
+                this[name + '@content'] = Function("return " + (el.innerSource.join(' + ') || "''") + ";");
             }
         }, (this._elementRendererMap = { __proto__: parent && parent._elementRendererMap }));
     }
     Template.prototype._handleNode = function (node, parentElementName) {
         switch (node.nodeType) {
             case Parser_1.NodeType.ELEMENT: {
-                var nodes = this._nodes;
+                var parent_1 = this.parent;
+                var els = this._elements;
                 var el = node;
                 var tagName = el.tagName;
                 var elNames = el.names;
                 var elName = elNames && elNames[0];
+                if (el.isHelper) {
+                    if (!tagName) {
+                        throw new TypeError('tagName is required');
+                    }
+                    var helper = Template.helpers[tagName];
+                    if (!helper) {
+                        throw new TypeError("Helper \"" + tagName + "\" is not defined");
+                    }
+                    var content_1 = helper(el);
+                    if (!content_1) {
+                        return;
+                    }
+                    if (content_1.length == 1 && content_1[0].nodeType == Parser_1.NodeType.ELEMENT) {
+                        el = content_1[0];
+                        tagName = el.tagName;
+                        elNames = el.names;
+                        elName = elNames && elNames[0];
+                    }
+                    else {
+                        for (var _i = 0, content_2 = content_1; _i < content_2.length; _i++) {
+                            var contentNode = content_2[_i];
+                            this._handleNode(contentNode, elName || parentElementName);
+                        }
+                        return;
+                    }
+                }
                 var elAttrs = el.attributes;
                 var content = el.content;
                 if (elNames) {
                     if (elName) {
-                        var parent_1 = this.parent;
-                        var renderedAttrs = void 0;
                         if (tagName) {
                             (this._tagNameMap || (this._tagNameMap = { __proto__: parent_1 && parent_1._tagNameMap || null }))[elName] = tagName;
                         }
                         else {
                             tagName = parent_1 && parent_1._tagNameMap && parent_1._tagNameMap[elName] || 'div';
                         }
+                        var renderedAttrs = void 0;
                         if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
                             var attrListMap = this._attributeListMap || (this._attributeListMap = {
                                 __proto__: parent_1 && parent_1._attributeListMap || null
@@ -5054,8 +5116,8 @@ var Template = (function () {
                                 attrList = attrListMap[elName] = {};
                                 attrCount = attrCountMap[elName] = 0;
                             }
-                            for (var _i = 0, _a = elAttrs.list; _i < _a.length; _i++) {
-                                var attr = _a[_i];
+                            for (var _a = 0, _b = elAttrs.list; _a < _b.length; _a++) {
+                                var attr = _b[_a];
                                 var name_1 = attr.name;
                                 var value = attr.value;
                                 var index = attrList[name_1];
@@ -5086,8 +5148,8 @@ var Template = (function () {
                         else {
                             renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
                         }
-                        var currentNode = {
-                            elementName: elName,
+                        var currentEl = {
+                            name: elName,
                             superCall: false,
                             source: [
                                 "'<" + tagName + renderedAttrs + ">'",
@@ -5097,14 +5159,14 @@ var Template = (function () {
                             ],
                             innerSource: []
                         };
-                        nodes.push((this._currentNode = currentNode));
-                        this._nodeMap[elName] = currentNode;
+                        els.push((this._currentElement = currentEl));
+                        this._elementMap[elName] = currentEl;
                     }
                     else if (elAttrs && elAttrs.list.length) {
                         var renderedClasses = void 0;
                         var attrs = '';
-                        for (var _b = 0, _c = elAttrs.list; _b < _c.length; _b++) {
-                            var attr = _c[_b];
+                        for (var _c = 0, _d = elAttrs.list; _c < _d.length; _c++) {
+                            var attr = _d[_c];
                             var value = attr.value;
                             if (attr.name == 'class') {
                                 renderedClasses = this._renderElementClasses(elNames);
@@ -5114,40 +5176,40 @@ var Template = (function () {
                                 attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
                             }
                         }
-                        this._currentNode.innerSource.push("'<" + (tagName || 'div') + (renderedClasses ?
+                        this._currentElement.innerSource.push("'<" + (tagName || 'div') + (renderedClasses ?
                             attrs :
                             " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" + attrs) + ">'");
                     }
                     else {
-                        this._currentNode.innerSource.push("'<" + (tagName || 'div') + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
+                        this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
                     }
                 }
                 else {
-                    this._currentNode.innerSource.push("'<" + (tagName || 'div') + (elAttrs ? elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') : '') + ">'");
+                    this._currentElement.innerSource.push("'<" + (tagName || 'div') + (elAttrs ? elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') : '') + ">'");
                 }
                 if (content) {
-                    for (var _d = 0, content_1 = content; _d < content_1.length; _d++) {
-                        var contentNode = content_1[_d];
+                    for (var _e = 0, content_3 = content; _e < content_3.length; _e++) {
+                        var contentNode = content_3[_e];
                         this._handleNode(contentNode, elName || parentElementName);
                     }
                 }
                 if (elName) {
-                    nodes.pop();
-                    this._currentNode = nodes[nodes.length - 1];
-                    this._currentNode.innerSource.push("this['" + elName + "']()");
+                    els.pop();
+                    this._currentElement = els[els.length - 1];
+                    this._currentElement.innerSource.push("this['" + elName + "']()");
                 }
                 else if (content || !tagName || !(tagName in selfClosingTags_1.default)) {
-                    this._currentNode.innerSource.push("'</" + (tagName || 'div') + ">'");
+                    this._currentElement.innerSource.push("'</" + (tagName || 'div') + ">'");
                 }
                 break;
             }
             case Parser_1.NodeType.TEXT: {
-                this._currentNode.innerSource.push("'" + escape_string_1.default(node.value) + "'");
+                this._currentElement.innerSource.push("'" + escape_string_1.default(node.value) + "'");
                 break;
             }
             case Parser_1.NodeType.SUPER_CALL: {
-                this._currentNode.innerSource.push("$super['" + (node.elementName || parentElementName) + "@content'].call(this)");
-                this._currentNode.superCall = true;
+                this._currentElement.innerSource.push("$super['" + (node.elementName || parentElementName) + "@content'].call(this)");
+                this._currentElement.superCall = true;
                 break;
             }
         }
@@ -5170,11 +5232,14 @@ var Template = (function () {
     };
     return Template;
 }());
+Template.helpers = {
+    section: function (el) { return el.content; }
+};
 exports.default = Template;
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5216,7 +5281,7 @@ exports.default = selfClosingTags;
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5235,7 +5300,7 @@ exports.default = escapeHTML;
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5254,7 +5319,7 @@ exports.default = unescapeHTML;
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(31);

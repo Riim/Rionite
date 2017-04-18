@@ -38,6 +38,7 @@ import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
 import isRegExp from './Utils/isRegExp';
 import defer from './Utils/defer';
+import './bemlTemplateHelpers';
 
 let Components = {
 	RtContent,

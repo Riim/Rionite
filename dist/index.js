@@ -27,6 +27,7 @@ var camelize_1 = require("./Utils/camelize");
 var hyphenize_1 = require("./Utils/hyphenize");
 var isRegExp_1 = require("./Utils/isRegExp");
 var defer_1 = require("./Utils/defer");
+require("./bemlTemplateHelpers");
 var Components = {
     RtContent: rt_content_1.default,
     RtSlot: rt_slot_1.default,
