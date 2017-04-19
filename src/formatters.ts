@@ -32,8 +32,8 @@ export default {
 		return value >= arg;
 	},
 
-	join: function join(arr: Array<any>, separator = ', '): string {
-		return arr.join(separator);
+	join: function join(arr: Array<any> | null | undefined, separator = ', '): string | null | undefined {
+		return arr && arr.join(separator);
 	},
 
 	t: getText.t,

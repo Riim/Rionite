@@ -3288,7 +3288,7 @@ exports.default = {
     },
     join: function join(arr, separator) {
         if (separator === void 0) { separator = ', '; }
-        return arr.join(separator);
+        return arr && arr.join(separator);
     },
     t: getText_1.default.t,
     pt: getText_1.default.pt,
@@ -4597,13 +4597,12 @@ function bindingToJSExpression(binding) {
             "this['" + keys[0] + "']");
     }
     var index = keyCount - 2;
-    var jsExpr = Array(index);
+    var jsExprArr = Array(index);
     while (index) {
-        jsExpr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
+        jsExprArr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
     }
-    return (cache[bindingRaw] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && " + (formatters ?
-        formatters.reduce(formattersReducer, "temp['" + keys[keyCount - 1] + "']") :
-        "temp['" + keys[keyCount - 1] + "']"));
+    var jsExpr = "(temp = this['" + keys[0] + "'])" + jsExprArr.join('') + " && temp['" + keys[keyCount - 1] + "']";
+    return (cache[bindingRaw] = formatters ? formatters.reduce(formattersReducer, jsExpr) : jsExpr);
 }
 exports.default = bindingToJSExpression;
 
@@ -4634,14 +4633,14 @@ function compileContent(parsedContent, content, ownerComponent) {
         inner = Function('formatters', "var temp; return " + bindingToJSExpression_1.default(parsedContent[0]) + ";");
     }
     else {
-        var jsExprArray = [];
+        var jsExpr = [];
         for (var _i = 0, parsedContent_1 = parsedContent; _i < parsedContent_1.length; _i++) {
             var node = parsedContent_1[_i];
-            jsExprArray.push(node.nodeType == ContentNodeType.TEXT ?
+            jsExpr.push(node.nodeType == ContentNodeType.TEXT ?
                 "'" + escape_string_1.default(node.value) + "'" :
                 bindingToJSExpression_1.default(node));
         }
-        inner = Function('formatters', "var temp; return [" + jsExprArray.join(', ') + "].join('');");
+        inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
     }
     return (cache[cacheKey] = ownerComponent ? function () {
         var result = inner.call(this, formatters_1.default);

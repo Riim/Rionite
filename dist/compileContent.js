@@ -19,14 +19,14 @@ function compileContent(parsedContent, content, ownerComponent) {
         inner = Function('formatters', "var temp; return " + bindingToJSExpression_1.default(parsedContent[0]) + ";");
     }
     else {
-        var jsExprArray = [];
+        var jsExpr = [];
         for (var _i = 0, parsedContent_1 = parsedContent; _i < parsedContent_1.length; _i++) {
             var node = parsedContent_1[_i];
-            jsExprArray.push(node.nodeType == ContentNodeType.TEXT ?
+            jsExpr.push(node.nodeType == ContentNodeType.TEXT ?
                 "'" + escape_string_1.default(node.value) + "'" :
                 bindingToJSExpression_1.default(node));
         }
-        inner = Function('formatters', "var temp; return [" + jsExprArray.join(', ') + "].join('');");
+        inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
     }
     return (cache[cacheKey] = ownerComponent ? function () {
         var result = inner.call(this, formatters_1.default);

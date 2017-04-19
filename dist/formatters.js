@@ -31,7 +31,7 @@ exports.default = {
     },
     join: function join(arr, separator) {
         if (separator === void 0) { separator = ', '; }
-        return arr.join(separator);
+        return arr && arr.join(separator);
     },
     t: getText_1.default.t,
     pt: getText_1.default.pt,

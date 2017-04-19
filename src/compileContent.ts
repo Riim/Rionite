@@ -31,17 +31,17 @@ export default function compileContent(
 			`var temp; return ${ bindingToJSExpression(parsedContent[0] as IContentBinding) };`
 		);
 	} else {
-		let jsExprArray: Array<string> = [];
+		let jsExpr: Array<string> = [];
 
 		for (let node of parsedContent) {
-			jsExprArray.push(
+			jsExpr.push(
 				node.nodeType == ContentNodeType.TEXT ?
 					`'${ escapeString(node.value) }'` :
 					bindingToJSExpression(node)
 			);
 		}
 
-		inner = Function('formatters', `var temp; return [${ jsExprArray.join(', ') }].join('');`);
+		inner = Function('formatters', `var temp; return [${ jsExpr.join(', ') }].join('');`);
 	}
 
 	return (cache[cacheKey] = ownerComponent ? function() {

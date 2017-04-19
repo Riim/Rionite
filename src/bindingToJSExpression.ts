@@ -30,15 +30,12 @@ export default function bindingToJSExpression(binding: IContentBinding): string 
 	}
 
 	let index = keyCount - 2;
-	let jsExpr = Array(index);
+	let jsExprArr = Array(index);
 
 	while (index) {
-		jsExpr[--index] = ` && (temp = temp['${ keys[index + 1] }'])`;
+		jsExprArr[--index] = ` && (temp = temp['${ keys[index + 1] }'])`;
 	}
 
-	return (cache[bindingRaw] = `(temp = this['${ keys[0] }'])${ jsExpr.join('') } && ${
-		formatters ?
-			formatters.reduce(formattersReducer, `temp['${ keys[keyCount - 1] }']`) :
-			`temp['${ keys[keyCount - 1] }']`
-	}`);
+	let jsExpr = `(temp = this['${ keys[0] }'])${ jsExprArr.join('') } && temp['${ keys[keyCount - 1] }']`;
+	return (cache[bindingRaw] = formatters ? formatters.reduce(formattersReducer, jsExpr) : jsExpr);
 }
