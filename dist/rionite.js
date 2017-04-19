@@ -3580,35 +3580,10 @@ var Template = (function () {
                 var parent_1 = this.parent;
                 var els = this._elements;
                 var el = node;
+                var isHelper = el.isHelper;
                 var tagName = el.tagName;
                 var elNames = el.names;
                 var elName = elNames && elNames[0];
-                if (el.isHelper) {
-                    if (!tagName) {
-                        throw new TypeError('tagName is required');
-                    }
-                    var helper = Template.helpers[tagName];
-                    if (!helper) {
-                        throw new TypeError("Helper \"" + tagName + "\" is not defined");
-                    }
-                    var content_1 = helper(el);
-                    if (!content_1) {
-                        return;
-                    }
-                    if (content_1.length == 1 && content_1[0].nodeType == Parser_1.NodeType.ELEMENT) {
-                        el = content_1[0];
-                        tagName = el.tagName;
-                        elNames = el.names;
-                        elName = elNames && elNames[0];
-                    }
-                    else {
-                        for (var _i = 0, content_2 = content_1; _i < content_2.length; _i++) {
-                            var contentNode = content_2[_i];
-                            this._handleNode(contentNode, elName || parentElementName);
-                        }
-                        return;
-                    }
-                }
                 var elAttrs = el.attributes;
                 var content = el.content;
                 if (elNames) {
@@ -3617,7 +3592,8 @@ var Template = (function () {
                             (this._tagNameMap || (this._tagNameMap = { __proto__: parent_1 && parent_1._tagNameMap || null }))[elName] = tagName;
                         }
                         else {
-                            tagName = parent_1 && parent_1._tagNameMap && parent_1._tagNameMap[elName] || 'div';
+                            // Не надо добавлять в конец ` || 'div'`, тк. ниже tagName используется как имя хелпера.
+                            tagName = parent_1 && parent_1._tagNameMap && parent_1._tagNameMap[elName];
                         }
                         var renderedAttrs = void 0;
                         if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
@@ -3642,8 +3618,8 @@ var Template = (function () {
                                 attrList = attrListMap[elName] = {};
                                 attrCount = attrCountMap[elName] = 0;
                             }
-                            for (var _a = 0, _b = elAttrs.list; _a < _b.length; _a++) {
-                                var attr = _b[_a];
+                            for (var _i = 0, _a = elAttrs.list; _i < _a.length; _i++) {
+                                var attr = _a[_i];
                                 var name_1 = attr.name;
                                 var value = attr.value;
                                 var index = attrList[name_1];
@@ -3671,49 +3647,72 @@ var Template = (function () {
                             }
                             renderedAttrs = join.call(attrList, '');
                         }
-                        else {
+                        else if (!isHelper) {
                             renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
+                        }
+                        else {
+                            renderedAttrs = '';
                         }
                         var currentEl = {
                             name: elName,
                             superCall: false,
-                            source: [
-                                "'<" + tagName + renderedAttrs + ">'",
+                            source: isHelper ? ["this['" + elName + "@content']()"] : [
+                                "'<" + (tagName || 'div') + renderedAttrs + ">'",
                                 content && content.length ?
-                                    "this['" + elName + "@content']() + '</" + tagName + ">'" :
-                                    (!content && tagName in selfClosingTags_1.default ? "''" : "'</" + tagName + ">'")
+                                    "this['" + elName + "@content']() + '</" + (tagName || 'div') + ">'" :
+                                    (!content && tagName && tagName in selfClosingTags_1.default ?
+                                        "''" :
+                                        "'</" + (tagName || 'div') + ">'")
                             ],
                             innerSource: []
                         };
                         els.push((this._currentElement = currentEl));
                         this._elementMap[elName] = currentEl;
                     }
-                    else if (elAttrs && elAttrs.list.length) {
-                        var renderedClasses = void 0;
-                        var attrs = '';
-                        for (var _c = 0, _d = elAttrs.list; _c < _d.length; _c++) {
-                            var attr = _d[_c];
-                            var value = attr.value;
-                            if (attr.name == 'class') {
-                                renderedClasses = this._renderElementClasses(elNames);
-                                attrs += " class=\"" + (value ? renderedClasses + value : renderedClasses.slice(0, -1)) + "\"";
+                    else if (!isHelper) {
+                        if (elAttrs && elAttrs.list.length) {
+                            var renderedClasses = void 0;
+                            var attrs = '';
+                            for (var _b = 0, _c = elAttrs.list; _b < _c.length; _b++) {
+                                var attr = _c[_b];
+                                var value = attr.value;
+                                if (attr.name == 'class') {
+                                    renderedClasses = this._renderElementClasses(elNames);
+                                    attrs += " class=\"" + (value ? renderedClasses + value : renderedClasses.slice(0, -1)) + "\"";
+                                }
+                                else {
+                                    attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
+                                }
                             }
-                            else {
-                                attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
-                            }
+                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + (renderedClasses ?
+                                attrs :
+                                " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" + attrs) + ">'");
                         }
-                        this._currentElement.innerSource.push("'<" + (tagName || 'div') + (renderedClasses ?
-                            attrs :
-                            " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" + attrs) + ">'");
-                    }
-                    else {
-                        this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
+                        else {
+                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
+                        }
                     }
                 }
-                else {
+                else if (!isHelper) {
                     this._currentElement.innerSource.push("'<" + (tagName || 'div') + (elAttrs ? elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') : '') + ">'");
                 }
-                if (content) {
+                if (isHelper) {
+                    if (!tagName) {
+                        throw new TypeError('tagName is required');
+                    }
+                    var helper = Template.helpers[tagName];
+                    if (!helper) {
+                        throw new TypeError("Helper \"" + tagName + "\" is not defined");
+                    }
+                    var content_1 = helper(el);
+                    if (content_1) {
+                        for (var _d = 0, content_2 = content_1; _d < content_2.length; _d++) {
+                            var contentNode = content_2[_d];
+                            this._handleNode(contentNode, elName || parentElementName);
+                        }
+                    }
+                }
+                else if (content) {
                     for (var _e = 0, content_3 = content; _e < content_3.length; _e++) {
                         var contentNode = content_3[_e];
                         this._handleNode(contentNode, elName || parentElementName);
@@ -3724,7 +3723,7 @@ var Template = (function () {
                     this._currentElement = els[els.length - 1];
                     this._currentElement.innerSource.push("this['" + elName + "']()");
                 }
-                else if (content || !tagName || !(tagName in selfClosingTags_1.default)) {
+                else if (!isHelper && (content || !tagName || !(tagName in selfClosingTags_1.default))) {
                     this._currentElement.innerSource.push("'</" + (tagName || 'div') + ">'");
                 }
                 break;
@@ -3734,7 +3733,8 @@ var Template = (function () {
                 break;
             }
             case Parser_1.NodeType.SUPER_CALL: {
-                this._currentElement.innerSource.push("$super['" + (node.elementName || parentElementName) + "@content'].call(this)");
+                this._currentElement.innerSource
+                    .push("$super['" + (node.elementName || parentElementName) + "@content'].call(this)");
                 this._currentElement.superCall = true;
                 break;
             }
