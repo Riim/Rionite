@@ -10,6 +10,10 @@ let ContentNodeType = ContentParser.ContentNodeType;
 
 let keyCounter = 0;
 
+export function nextComponentPropertyValueKey(): string {
+	return String(++keyCounter);
+}
+
 let cache = Object.create(null);
 
 export default function compileContent(
@@ -45,20 +49,20 @@ export default function compileContent(
 	}
 
 	return (cache[cacheKey] = ownerComponent ? function() {
-		let result = inner.call(this, formatters);
+		let value = inner.call(this, formatters);
 
-		if (result && typeof result == 'object') {
+		if (value && typeof value == 'object') {
 			let key = String(++keyCounter);
 
 			(
 				ownerComponent[componentPropertyValuesKey] ||
 					(ownerComponent[componentPropertyValuesKey] = new Map<string, Object>())
-			).set(key, result);
+			).set(key, value);
 
 			return key;
 		}
 
-		return result;
+		return value;
 	} : function() {
 		return inner.call(this, formatters);
 	});

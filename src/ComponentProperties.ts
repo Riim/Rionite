@@ -79,7 +79,7 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 		let value: any;
 		let needHandling = false;
 
-		let rawValue = props['_' + camelizedName] = props['_' + hyphenizedName] = new Cell(
+		let rawValue = props['_' + camelizedName] = props['_' + hyphenizedName] = new Cell<any>(
 			el.getAttribute(hyphenizedName),
 			{
 				merge(v, ov) {

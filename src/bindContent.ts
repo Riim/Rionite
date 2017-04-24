@@ -1,13 +1,29 @@
 import { Cell } from 'cellx';
 import { IComponentElement, default as Component } from './Component';
-import ContentParser from './ContentParser';
-import compileContent from './compileContent';
+import { IContentBinding, default as ContentParser } from './ContentParser';
+import { nextComponentPropertyValueKey, default as compileContent } from './compileContent';
+import componentPropertyValuesKey from './componentPropertyValuesKey';
 import { IFreezableCell } from './componentBinding';
 import setAttribute from './Utils/setAttribute';
 
 let ContentNodeType = ContentParser.ContentNodeType;
 
 let reBinding = /{[^}]+}/;
+
+function isNotObservable(obj: Object, keypath: string): { value: any } | false {
+	let index = keypath.indexOf('.', 1);
+	let key = index == -1 ? keypath : keypath.slice(0, index);
+
+	if ('_' + key in obj) {
+		return false;
+	}
+
+	let value = obj[key];
+
+	return index == -1 ?
+		{ value } :
+		(value == null ? false : isNotObservable(value, keypath.slice(index + 1)));
+}
 
 export default function bindContent(
 	content: Node,
@@ -41,16 +57,44 @@ export default function bindContent(
 									name = name.slice(1);
 								}
 
-								let cell = new Cell<any>(compileContent(parsedValue, value, ownerComponent), {
-									owner: context,
-									onChange(evt) {
-										setAttribute(child as HTMLElement, name, evt.value);
+								let isNotObservable_;
+
+								if (
+									parsedValue.length == 1 &&
+										!(parsedValue[0] as IContentBinding).formatters &&
+										(
+											isNotObservable_ = isNotObservable(
+												context as Object,
+												(parsedValue[0] as IContentBinding).keypath.value
+											)
+										)
+								) {
+									let value = (isNotObservable_ as any).value;
+
+									if (value && typeof value == 'object') {
+										let key = nextComponentPropertyValueKey();
+
+										(
+											ownerComponent[componentPropertyValuesKey] ||
+												(ownerComponent[componentPropertyValuesKey] = new Map<string, Object>())
+										).set(key, value);
+
+										setAttribute(child as HTMLElement, name, key);
+									} else {
+										setAttribute(child as HTMLElement, name, value);
 									}
-								});
+								} else {
+									let cell = new Cell<any>(compileContent(parsedValue, value, ownerComponent), {
+										owner: context,
+										onChange(evt) {
+											setAttribute(child as HTMLElement, name, evt.value);
+										}
+									});
 
-								setAttribute(child as HTMLElement, name, cell.get());
+									setAttribute(child as HTMLElement, name, cell.get());
 
-								(bindings || (bindings = [])).push(cell as IFreezableCell);
+									(bindings || (bindings = [])).push(cell as IFreezableCell);
+								}
 							}
 						}
 					}
@@ -80,16 +124,31 @@ export default function bindContent(
 						let parsedContent = (new ContentParser(content)).parse();
 
 						if (parsedContent.length > 1 || parsedContent[0].nodeType == ContentNodeType.BINDING) {
-							let cell = new Cell<any>(compileContent(parsedContent, content), {
-								owner: context,
-								onChange(evt) {
-									(child as Node).textContent = evt.value;
-								}
-							});
+							let isNotObservable_;
 
-							child.textContent = cell.get();
+							if (
+								parsedContent.length == 1 &&
+									!(parsedContent[0] as IContentBinding).formatters &&
+									(
+										isNotObservable_ = isNotObservable(
+											context as Object,
+											(parsedContent[0] as IContentBinding).keypath.value
+										)
+									)
+							) {
+								child.textContent = (isNotObservable_ as any).value;
+							} else {
+								let cell = new Cell<any>(compileContent(parsedContent, content), {
+									owner: context,
+									onChange(evt) {
+										(child as Node).textContent = evt.value;
+									}
+								});
 
-							(bindings || (bindings = [])).push(cell as IFreezableCell);
+								child.textContent = cell.get();
+
+								(bindings || (bindings = [])).push(cell as IFreezableCell);
+							}
 						}
 					}
 

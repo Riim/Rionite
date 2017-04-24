@@ -8,6 +8,10 @@ var componentPropertyValuesKey_1 = require("./componentPropertyValuesKey");
 var getUID_1 = require("./Utils/getUID");
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var keyCounter = 0;
+function nextComponentPropertyValueKey() {
+    return String(++keyCounter);
+}
+exports.nextComponentPropertyValueKey = nextComponentPropertyValueKey;
 var cache = Object.create(null);
 function compileContent(parsedContent, content, ownerComponent) {
     var cacheKey = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + content;
@@ -29,14 +33,14 @@ function compileContent(parsedContent, content, ownerComponent) {
         inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
     }
     return (cache[cacheKey] = ownerComponent ? function () {
-        var result = inner.call(this, formatters_1.default);
-        if (result && typeof result == 'object') {
+        var value = inner.call(this, formatters_1.default);
+        if (value && typeof value == 'object') {
             var key = String(++keyCounter);
             (ownerComponent[componentPropertyValuesKey_1.default] ||
-                (ownerComponent[componentPropertyValuesKey_1.default] = new Map())).set(key, result);
+                (ownerComponent[componentPropertyValuesKey_1.default] = new Map())).set(key, value);
             return key;
         }
-        return result;
+        return value;
     } : function () {
         return inner.call(this, formatters_1.default);
     });
