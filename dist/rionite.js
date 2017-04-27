@@ -532,7 +532,6 @@ var compileContent_1 = __webpack_require__(41);
 var componentPropertyValuesKey_1 = __webpack_require__(10);
 var setAttribute_1 = __webpack_require__(37);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
-var reBinding = /{[^}]+}/;
 function isNotObservable(obj, keypath) {
     var index = keypath.indexOf('.', 1);
     var key = index == -1 ? keypath : keypath.slice(0, index);
@@ -558,7 +557,7 @@ function bindContent(content, ownerComponent, context) {
                     var _loop_2 = function (i) {
                         var attr = attrs.item(--i);
                         var value = attr.value;
-                        if (reBinding.test(value)) {
+                        if (value.indexOf('{') != -1) {
                             var parsedValue = (new ContentParser_1.default(value)).parse();
                             if (parsedValue.length > 1 || parsedValue[0].nodeType == ContentNodeType.BINDING) {
                                 var name_1 = attr.name;
@@ -613,7 +612,7 @@ function bindContent(content, ownerComponent, context) {
                 }
                 case Node.TEXT_NODE: {
                     var content_1 = child.textContent;
-                    if (reBinding.test(content_1)) {
+                    if (content_1.indexOf('{') != -1) {
                         var parsedContent = (new ContentParser_1.default(content_1)).parse();
                         if (parsedContent.length > 1 || parsedContent[0].nodeType == ContentNodeType.BINDING) {
                             var isNotObservable_ = void 0;

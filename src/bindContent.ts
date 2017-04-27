@@ -8,8 +8,6 @@ import setAttribute from './Utils/setAttribute';
 
 let ContentNodeType = ContentParser.ContentNodeType;
 
-let reBinding = /{[^}]+}/;
-
 function isNotObservable(obj: Object, keypath: string): { value: any } | false {
 	let index = keypath.indexOf('.', 1);
 	let key = index == -1 ? keypath : keypath.slice(0, index);
@@ -47,7 +45,7 @@ export default function bindContent(
 						let attr = attrs.item(--i);
 						let value = attr.value;
 
-						if (reBinding.test(value)) {
+						if (value.indexOf('{') != -1) {
 							let parsedValue = (new ContentParser(value)).parse();
 
 							if (parsedValue.length > 1 || parsedValue[0].nodeType == ContentNodeType.BINDING) {
@@ -120,7 +118,7 @@ export default function bindContent(
 				case Node.TEXT_NODE: {
 					let content = child.textContent as string;
 
-					if (reBinding.test(content)) {
+					if (content.indexOf('{') != -1) {
 						let parsedContent = (new ContentParser(content)).parse();
 
 						if (parsedContent.length > 1 || parsedContent[0].nodeType == ContentNodeType.BINDING) {
