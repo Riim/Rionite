@@ -25,14 +25,14 @@ export default function onEvent(evt: IEvent | Event) {
 			break;
 		}
 
-		let component = (node as any).$c as Component | undefined;
+		let component = (node as any).$component as Component | undefined;
 
 		if (component && targetEls) {
 			for (let targetEl of targetEls) {
 				let handler = component[targetEl.getAttribute(attrName) as string];
 
 				if (typeof handler == 'function') {
-					if (handler.call(component, evt, (targetEl as any).$c || targetEl) === false) {
+					if (handler.call(component, evt, (targetEl as any).$component || targetEl) === false) {
 						(evt as IEvent).isPropagationStopped = true;
 						return;
 					}

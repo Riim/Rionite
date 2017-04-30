@@ -97,7 +97,7 @@ export default function bindContent(
 						}
 					}
 
-					let childComponent = (child as IComponentElement).$c;
+					let childComponent = (child as IComponentElement).$component;
 
 					if (childComponent) {
 						childComponent.ownerComponent = ownerComponent;

@@ -6,7 +6,7 @@ import isRegExp from './Utils/isRegExp';
 
 let componentPropertyTypeHandlersMap = new JS.Map<any, [
 	(value: string | null, defaultValue: any, component: Component) => any,
-	(value: any, defaultValue: any, component: Component) => string | null
+	(value: any, defaultValue?: any) => string | null
 ]>([
 	[Boolean, [
 		(value: string | null, defaultValue: boolean | undefined): boolean => {

@@ -8,7 +8,7 @@ exports.ElementsController = {
 };
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
-        get $c() {
+        get $component() {
             return new this.constructor._rioniteComponentConstructor(this);
         }
     },
@@ -35,7 +35,7 @@ var ElementProtoMixin = (_a = {
         else {
             defer_1.default(function () {
                 if (this[KEY_ELEMENT_CONNECTED_1.default]) {
-                    var component_1 = this.$c;
+                    var component_1 = this.$component;
                     component_1._parentComponent = undefined;
                     if (!component_1.parentComponent) {
                         component_1.elementConnected();
@@ -67,10 +67,10 @@ var ElementProtoMixin = (_a = {
             var props = component.props;
             var privateName = '_' + name;
             if (props[privateName]) {
-                props[privateName].set(value);
+                props[privateName](value);
             }
             else if (Features_1.nativeCustomElements) {
-                throw new TypeError("Cannot write to readonly property \"" + privateName.slice(1) + "\"");
+                throw new TypeError("Cannot write to readonly property \"" + name + "\"");
             }
         }
     },

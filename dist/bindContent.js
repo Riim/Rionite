@@ -72,7 +72,7 @@ function bindContent(content, ownerComponent, context) {
                         _loop_2(i);
                         i = out_i_1;
                     }
-                    var childComponent = child.$c;
+                    var childComponent = child.$component;
                     if (childComponent) {
                         childComponent.ownerComponent = ownerComponent;
                         childComponent.props.context = context;

@@ -3,10 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var componentPropertyTypeMap_1 = require("./componentPropertyTypeMap");
 var componentPropertyTypeHandlersMap_1 = require("./componentPropertyTypeHandlersMap");
-var camelize_1 = require("./Utils/camelize");
 var hyphenize_1 = require("./Utils/hyphenize");
 function initProperty(props, name, el) {
-    var component = el.$c;
+    var component = el.$component;
     var propConfig = component.constructor.props[name];
     var type = typeof propConfig;
     var defaultValue;
@@ -37,14 +36,14 @@ function initProperty(props, name, el) {
     if (!handlers) {
         throw new TypeError('Unsupported attribute type');
     }
-    var camelizedName = camelize_1.default(name);
     var hyphenizedName = hyphenize_1.default(name);
-    if (required && !el.hasAttribute(hyphenizedName)) {
+    var rawValue = el.getAttribute(hyphenizedName);
+    if (required && rawValue === null) {
         throw new TypeError("Property \"" + name + "\" is required");
     }
     var descriptor;
     if (readonly) {
-        var value_1 = handlers[0](el.getAttribute(hyphenizedName), defaultValue, component);
+        var value_1 = handlers[0](rawValue, defaultValue, component);
         descriptor = {
             configurable: true,
             enumerable: true,
@@ -59,61 +58,73 @@ function initProperty(props, name, el) {
         };
     }
     else {
-        var oldValue_1;
-        var value_2;
-        var needHandling_1 = false;
-        var rawValue_1 = props['_' + camelizedName] = props['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
-            merge: function (v, ov) {
-                if (v !== ov) {
-                    var newValue = handlers[0](v, defaultValue, component);
-                    if (newValue === value_2) {
-                        return ov;
-                    }
-                    oldValue_1 = value_2;
-                    value_2 = newValue;
-                    needHandling_1 = component.isReady;
-                }
-                return v;
-            },
-            onChange: function () {
-                if (needHandling_1) {
-                    needHandling_1 = false;
-                    component.propertyChanged(camelizedName, value_2, oldValue_1);
-                    component.emit({
-                        type: "property-" + hyphenizedName + "-change",
-                        oldValue: oldValue_1,
-                        value: value_2
-                    });
-                }
+        var value_2 = handlers[0](rawValue, defaultValue, component);
+        var valueCell_1;
+        if (rawValue === null && defaultValue != null && defaultValue !== false) {
+            props['_initialize_' + name] = function () {
+                el.setAttribute(hyphenizedName, handlers[1](defaultValue));
+            };
+        }
+        var setRawValue = function (rawValue) {
+            var v = handlers[0](rawValue, defaultValue, component);
+            if (valueCell_1) {
+                valueCell_1.set(v);
             }
-        });
+            else {
+                value_2 = v;
+            }
+        };
+        props['_' + name] = setRawValue;
+        if (name != hyphenizedName) {
+            props['_' + hyphenizedName] = setRawValue;
+        }
         descriptor = {
             configurable: true,
             enumerable: true,
             get: function () {
-                rawValue_1.get();
+                if (valueCell_1) {
+                    return valueCell_1.get();
+                }
+                var currentlyPulling = cellx_1.Cell.currentlyPulling;
+                if (currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
+                    valueCell_1 = new cellx_1.Cell(value_2, {
+                        onChange: function (evt) {
+                            component.emit({
+                                type: "property-" + hyphenizedName + "-change",
+                                oldValue: evt.oldValue,
+                                value: evt.value
+                            });
+                        }
+                    });
+                    if (currentlyPulling) {
+                        return valueCell_1.get();
+                    }
+                }
                 return value_2;
             },
             set: function (v) {
-                v = handlers[1](v, defaultValue, component);
-                if (v === null) {
+                var rawValue = handlers[1](v, defaultValue);
+                if (rawValue === null) {
                     el.removeAttribute(hyphenizedName);
                 }
                 else {
-                    el.setAttribute(hyphenizedName, v);
+                    el.setAttribute(hyphenizedName, rawValue);
                 }
-                rawValue_1.set(v);
+                if (valueCell_1) {
+                    valueCell_1.set(v);
+                }
+                else {
+                    value_2 = v;
+                }
             }
         };
     }
-    Object.defineProperty(props, camelizedName, descriptor);
-    if (hyphenizedName != camelizedName) {
-        Object.defineProperty(props, hyphenizedName, descriptor);
-    }
+    Object.defineProperty(props, name, descriptor);
 }
 var ComponentProperties = {
-    create: function (el) {
-        var propsConfig = el.$c.constructor.props;
+    init: function (component) {
+        var propsConfig = component.constructor.props;
+        var el = component.element;
         var props = { content: null, context: null };
         if (propsConfig) {
             for (var name_1 in propsConfig) {

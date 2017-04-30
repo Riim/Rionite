@@ -5,7 +5,7 @@ export declare let ElementsController: {
 declare let ElementProtoMixin: {
     [x: string]: boolean | ((name: string, oldValue: string | null, value: string | null) => void) | Component | null;
     rioniteComponent: null;
-    readonly $c: Component;
+    readonly $component: Component;
     connectedCallback(): void;
     disconnectedCallback(): void;
     attributeChangedCallback(name: string, oldValue: string | null, value: string | null): void;

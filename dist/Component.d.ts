@@ -1,4 +1,4 @@
-import { IEvent, EventEmitter } from 'cellx';
+import { IEvent, IEventEmitterListener, EventEmitter } from 'cellx';
 import { Template as BemlTemplate } from '@riim/beml';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
 import registerComponent from './registerComponent';
@@ -6,7 +6,7 @@ import { IComponentProperties } from './ComponentProperties';
 import { IFreezableCell } from './componentBinding';
 export interface IComponentElement extends HTMLElement {
     rioniteComponent: Component | null;
-    $c: Component;
+    $component: Component;
 }
 export interface IComponentTemplate {
     render: (data: Object) => string;
@@ -53,6 +53,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     constructor(el?: HTMLElement | string, props?: {
         [name: string]: any;
     });
+    _on(type: string, listener: IEventEmitterListener, context: any): void;
     _handleEvent(evt: IEvent): void;
     listenTo: typeof DisposableMixin.prototype.listenTo;
     _listenTo(target: EventEmitter | EventTarget, type: string, listener: IListener, context: any, useCapture: boolean): IDisposableListening;
@@ -73,7 +74,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
     elementAttached(): void;
     elementDetached(): void;
     elementMoved(): void;
-    propertyChanged(name: string, oldValue: any, value: any): void;
     $(name: string, container?: Component | HTMLElement): Component | HTMLElement | null;
     $$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement>;
     _getElementList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined;

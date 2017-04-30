@@ -1,4 +1,4 @@
-import { IEvent, EventEmitter, JS, Utils } from 'cellx';
+import { IEvent, IEventEmitterListener, EventEmitter, JS, Utils } from 'cellx';
 import { Template as BemlTemplate } from '@riim/beml';
 import htmlToFragment from 'html-to-fragment';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
@@ -25,7 +25,7 @@ let map = Array.prototype.map;
 
 export interface IComponentElement extends HTMLElement {
 	rioniteComponent: Component | null;
-	$c: Component;
+	$component: Component;
 }
 
 export interface IComponentTemplate {
@@ -42,6 +42,8 @@ export interface IComponentEvents<T> {
 	};
 }
 
+let rePropertyChangeEventName = /property\-([\-0-9a-z]*)\-change/;
+
 function findChildComponentElements(
 	node: Node,
 	ownerComponent: Component,
@@ -50,7 +52,7 @@ function findChildComponentElements(
 ): Array<Component> | null {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		if (child.nodeType == Node.ELEMENT_NODE) {
-			let childComponent = (child as IComponentElement).$c;
+			let childComponent = (child as IComponentElement).$component;
 
 			if (childComponent) {
 				childComponent.ownerComponent = ownerComponent;
@@ -79,7 +81,6 @@ let elementDisconnected: any;
 let elementAttached: any;
 let elementDetached: any;
 let elementMoved: any;
-let propertyChanged: any;
 
 export default class Component extends EventEmitter implements DisposableMixin {
 	static extend(elIs: string, description: any): typeof Component {
@@ -122,8 +123,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		}
 
 		for (let node: any; (node = (node || this.element).parentNode);) {
-			if (node.$c) {
-				return (this._parentComponent = node.$c);
+			if (node.$component) {
+				return (this._parentComponent = node.$component);
 			}
 		}
 
@@ -133,7 +134,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	element: IComponentElement;
 
 	get props(): IComponentProperties {
-		let props = ComponentProperties.create(this.element);
+		let props = ComponentProperties.init(this);
 
 		Object.defineProperty(this, 'props', {
 			configurable: true,
@@ -190,7 +191,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		this.element = el as IComponentElement;
 
 		(el as IComponentElement).rioniteComponent = this;
-		Object.defineProperty(el, '$c', { value: this });
+		Object.defineProperty(el, '$component', { value: this });
 
 		if (props) {
 			let properties = this.props;
@@ -201,6 +202,16 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		}
 
 		this.created();
+	}
+
+	_on(type: string, listener: IEventEmitterListener, context: any) {
+		if (!type.lastIndexOf('property-', 0) && rePropertyChangeEventName.test(type)) {
+			EventEmitter.currentlySubscribing = true;
+			this.props[camelize(RegExp.$1)];
+			EventEmitter.currentlySubscribing = false;
+		}
+
+		super._on(type, listener, context);
 	}
 
 	_handleEvent(evt: IEvent) {
@@ -295,7 +306,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 			el.className = constr._blockNamesString + el.className;
 
-			initElementAttributes(this, constr);
+			initElementAttributes(this);
 
 			let template = constr.template;
 
@@ -395,18 +406,17 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	elementAttached() {}
 	elementDetached() {}
 	elementMoved() {}
-	propertyChanged(name: string, oldValue: any, value: any) {}
 
 	// Utils
 
 	$(name: string, container?: Component | HTMLElement): Component | HTMLElement | null {
 		let elList = this._getElementList(name, container);
-		return elList && elList.length ? (elList[0] as IComponentElement).$c || elList[0] : null;
+		return elList && elList.length ? (elList[0] as IComponentElement).$component || elList[0] : null;
 	}
 
 	$$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement> {
 		let elList = this._getElementList(name, container);
-		return elList ? map.call(elList, (el: IComponentElement) => el.$c || el) : [];
+		return elList ? map.call(elList, (el: IComponentElement) => el.$component || el) : [];
 	}
 
 	_getElementList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined {
@@ -470,7 +480,6 @@ elementDisconnected = ComponentProto.elementDisconnected;
 elementAttached = ComponentProto.elementAttached;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;
-propertyChanged = ComponentProto.propertyChanged;
 
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);

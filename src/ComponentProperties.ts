@@ -1,18 +1,17 @@
-import { Cell } from 'cellx';
+import { EventEmitter, Cell } from 'cellx';
 import { IComponentElement, default as Component } from './Component';
 import componentPropertyTypeMap from './componentPropertyTypeMap';
 import componentPropertyTypeHandlersMap from './componentPropertyTypeHandlersMap';
-import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
 
-export interface IComponentProperties {
+export interface IComponentProperties extends Object {
 	content: any;
 	context: any;
 	[name: string]: any;
 }
 
 function initProperty(props: IComponentProperties, name: string, el: IComponentElement) {
-	let component = el.$c;
+	let component = el.$component;
 	let propConfig = ((component.constructor as typeof Component).props as { [name: string]: any })[name];
 	let type = typeof propConfig;
 	let defaultValue: any;
@@ -48,17 +47,17 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 		throw new TypeError('Unsupported attribute type');
 	}
 
-	let camelizedName = camelize(name);
 	let hyphenizedName = hyphenize(name);
+	let rawValue = el.getAttribute(hyphenizedName);
 
-	if (required && !el.hasAttribute(hyphenizedName)) {
+	if (required && rawValue === null) {
 		throw new TypeError(`Property "${ name }" is required`);
 	}
 
 	let descriptor: Object;
 
 	if (readonly) {
-		let value = handlers[0](el.getAttribute(hyphenizedName), defaultValue, component);
+		let value = handlers[0](rawValue, defaultValue, component);
 
 		descriptor = {
 			configurable: true,
@@ -75,78 +74,86 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 			}
 		};
 	} else {
-		let oldValue: any;
-		let value: any;
-		let needHandling = false;
+		let value = handlers[0](rawValue, defaultValue, component);
+		let valueCell: Cell<any> | undefined;
 
-		let rawValue = props['_' + camelizedName] = props['_' + hyphenizedName] = new Cell<any>(
-			el.getAttribute(hyphenizedName),
-			{
-				merge(v, ov) {
-					if (v !== ov) {
-						let newValue = handlers[0](v, defaultValue, component);
+		if (rawValue === null && defaultValue != null && defaultValue !== false) {
+			props['_initialize_' + name] = () => {
+				el.setAttribute(hyphenizedName, handlers[1](defaultValue) as string);
+			};
+		}
 
-						if (newValue === value) {
-							return ov;
-						}
+		let setRawValue = (rawValue: string | null) => {
+			let v = handlers[0](rawValue, defaultValue, component);
 
-						oldValue = value;
-						value = newValue;
-						needHandling = component.isReady;
-					}
-
-					return v;
-				},
-
-				onChange() {
-					if (needHandling) {
-						needHandling = false;
-
-						component.propertyChanged(camelizedName, value, oldValue);
-
-						component.emit({
-							type: `property-${ hyphenizedName }-change`,
-							oldValue: oldValue,
-							value: value
-						});
-					}
-				}
+			if (valueCell) {
+				valueCell.set(v);
+			} else {
+				value = v;
 			}
-		);
+		};
+
+		props['_' + name] = setRawValue;
+
+		if (name != hyphenizedName) {
+			props['_' + hyphenizedName] = setRawValue;
+		}
 
 		descriptor = {
 			configurable: true,
 			enumerable: true,
 
 			get() {
-				rawValue.get();
+				if (valueCell) {
+					return valueCell.get();
+				}
+
+				let currentlyPulling = Cell.currentlyPulling;
+
+				if (currentlyPulling || EventEmitter.currentlySubscribing) {
+					valueCell = new Cell<any>(value, {
+						onChange(evt) {
+							component.emit({
+								type: `property-${ hyphenizedName }-change`,
+								oldValue: evt.oldValue,
+								value: evt.value
+							});
+						}
+					});
+
+					if (currentlyPulling) {
+						return valueCell.get();
+					}
+				}
+
 				return value;
 			},
 
 			set(v: any) {
-				v = handlers[1](v, defaultValue, component);
+				let rawValue = handlers[1](v, defaultValue);
 
-				if (v === null) {
+				if (rawValue === null) {
 					el.removeAttribute(hyphenizedName);
 				} else {
-					el.setAttribute(hyphenizedName, v);
+					el.setAttribute(hyphenizedName, rawValue);
 				}
 
-				rawValue.set(v);
+				if (valueCell) {
+					valueCell.set(v);
+				} else {
+					value = v;
+				}
 			}
 		};
 	}
 
-	Object.defineProperty(props, camelizedName, descriptor);
-
-	if (hyphenizedName != camelizedName) {
-		Object.defineProperty(props, hyphenizedName, descriptor);
-	}
+	Object.defineProperty(props, name, descriptor);
 }
 
 let ComponentProperties = {
-	create(el: IComponentElement): IComponentProperties {
-		let propsConfig = (el.$c.constructor as typeof Component).props;
+	init(component: Component): IComponentProperties {
+		let propsConfig = (component.constructor as typeof Component).props;
+		let el = component.element;
 		let props = { content: null, context: null };
 
 		if (propsConfig) {

@@ -1,10 +1,10 @@
-import { IComponentElement } from './Component';
-export interface IComponentProperties {
+import { default as Component } from './Component';
+export interface IComponentProperties extends Object {
     content: any;
     context: any;
     [name: string]: any;
 }
 declare let ComponentProperties: {
-    create(el: IComponentElement): IComponentProperties;
+    init(component: Component): IComponentProperties;
 };
 export default ComponentProperties;

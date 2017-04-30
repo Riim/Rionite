@@ -31,10 +31,11 @@ var Features_1 = require("./Features");
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
+var rePropertyChangeEventName = /property\-([\-0-9a-z]*)\-change/;
 function findChildComponentElements(node, ownerComponent, context, _childComponents) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         if (child.nodeType == Node.ELEMENT_NODE) {
-            var childComponent = child.$c;
+            var childComponent = child.$component;
             if (childComponent) {
                 childComponent.ownerComponent = ownerComponent;
                 childComponent.props.context = context;
@@ -56,7 +57,6 @@ var elementDisconnected;
 var elementAttached;
 var elementDetached;
 var elementMoved;
-var propertyChanged;
 var Component = (function (_super) {
     __extends(Component, _super);
     function Component(el, props) {
@@ -87,7 +87,7 @@ var Component = (function (_super) {
         }
         _this.element = el;
         el.rioniteComponent = _this;
-        Object.defineProperty(el, '$c', { value: _this });
+        Object.defineProperty(el, '$component', { value: _this });
         if (props) {
             var properties = _this.props;
             for (var name_1 in props) {
@@ -108,8 +108,8 @@ var Component = (function (_super) {
                 return this._parentComponent;
             }
             for (var node = void 0; (node = (node || this.element).parentNode);) {
-                if (node.$c) {
-                    return (this._parentComponent = node.$c);
+                if (node.$component) {
+                    return (this._parentComponent = node.$component);
                 }
             }
             return (this._parentComponent = null);
@@ -119,7 +119,7 @@ var Component = (function (_super) {
     });
     Object.defineProperty(Component.prototype, "props", {
         get: function () {
-            var props = ComponentProperties_1.default.create(this.element);
+            var props = ComponentProperties_1.default.init(this);
             Object.defineProperty(this, 'props', {
                 configurable: true,
                 enumerable: true,
@@ -131,6 +131,14 @@ var Component = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    Component.prototype._on = function (type, listener, context) {
+        if (!type.lastIndexOf('property-', 0) && rePropertyChangeEventName.test(type)) {
+            cellx_1.EventEmitter.currentlySubscribing = true;
+            this.props[camelize_1.default(RegExp.$1)];
+            cellx_1.EventEmitter.currentlySubscribing = false;
+        }
+        _super.prototype._on.call(this, type, listener, context);
+    };
     Component.prototype._handleEvent = function (evt) {
         _super.prototype._handleEvent.call(this, evt);
         var silent = this._silent;
@@ -194,7 +202,7 @@ var Component = (function (_super) {
         else {
             var el = this.element;
             el.className = constr._blockNamesString + el.className;
-            initElementAttributes_1.default(this, constr);
+            initElementAttributes_1.default(this);
             var template = constr.template;
             if (template == null) {
                 var childComponents = findChildComponentElements(el, this.ownerComponent, this.ownerComponent);
@@ -266,15 +274,14 @@ var Component = (function (_super) {
     Component.prototype.elementAttached = function () { };
     Component.prototype.elementDetached = function () { };
     Component.prototype.elementMoved = function () { };
-    Component.prototype.propertyChanged = function (name, oldValue, value) { };
     // Utils
     Component.prototype.$ = function (name, container) {
         var elList = this._getElementList(name, container);
-        return elList && elList.length ? elList[0].$c || elList[0] : null;
+        return elList && elList.length ? elList[0].$component || elList[0] : null;
     };
     Component.prototype.$$ = function (name, container) {
         var elList = this._getElementList(name, container);
-        return elList ? map.call(elList, function (el) { return el.$c || el; }) : [];
+        return elList ? map.call(elList, function (el) { return el.$component || el; }) : [];
     };
     Component.prototype._getElementList = function (name, container) {
         var elListMap = this._elementListMap || (this._elementListMap = new Map());
@@ -331,7 +338,6 @@ elementDisconnected = ComponentProto.elementDisconnected;
 elementAttached = ComponentProto.elementAttached;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;
-propertyChanged = ComponentProto.propertyChanged;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
     eventTypes_1.default.forEach(function (type) {

@@ -101,11 +101,11 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var html_to_fragment_1 = __webpack_require__(30);
-var DisposableMixin_1 = __webpack_require__(19);
+var DisposableMixin_1 = __webpack_require__(18);
 var elementConstructorMap_1 = __webpack_require__(25);
 var registerComponent_1 = __webpack_require__(48);
 var ElementProtoMixin_1 = __webpack_require__(6);
-var ComponentProperties_1 = __webpack_require__(16);
+var ComponentProperties_1 = __webpack_require__(15);
 var initElementAttributes_1 = __webpack_require__(46);
 var bindContent_1 = __webpack_require__(5);
 var componentBinding_1 = __webpack_require__(42);
@@ -113,17 +113,18 @@ var attachChildComponentElements_1 = __webpack_require__(4);
 var bindEvents_1 = __webpack_require__(39);
 var eventTypes_1 = __webpack_require__(45);
 var onEvent_1 = __webpack_require__(47);
-var camelize_1 = __webpack_require__(7);
+var camelize_1 = __webpack_require__(19);
 var getUID_1 = __webpack_require__(22);
 var moveContent_1 = __webpack_require__(36);
 var Features_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
+var rePropertyChangeEventName = /property\-([\-0-9a-z]*)\-change/;
 function findChildComponentElements(node, ownerComponent, context, _childComponents) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         if (child.nodeType == Node.ELEMENT_NODE) {
-            var childComponent = child.$c;
+            var childComponent = child.$component;
             if (childComponent) {
                 childComponent.ownerComponent = ownerComponent;
                 childComponent.props.context = context;
@@ -145,7 +146,6 @@ var elementDisconnected;
 var elementAttached;
 var elementDetached;
 var elementMoved;
-var propertyChanged;
 var Component = (function (_super) {
     __extends(Component, _super);
     function Component(el, props) {
@@ -176,7 +176,7 @@ var Component = (function (_super) {
         }
         _this.element = el;
         el.rioniteComponent = _this;
-        Object.defineProperty(el, '$c', { value: _this });
+        Object.defineProperty(el, '$component', { value: _this });
         if (props) {
             var properties = _this.props;
             for (var name_1 in props) {
@@ -197,8 +197,8 @@ var Component = (function (_super) {
                 return this._parentComponent;
             }
             for (var node = void 0; (node = (node || this.element).parentNode);) {
-                if (node.$c) {
-                    return (this._parentComponent = node.$c);
+                if (node.$component) {
+                    return (this._parentComponent = node.$component);
                 }
             }
             return (this._parentComponent = null);
@@ -208,7 +208,7 @@ var Component = (function (_super) {
     });
     Object.defineProperty(Component.prototype, "props", {
         get: function () {
-            var props = ComponentProperties_1.default.create(this.element);
+            var props = ComponentProperties_1.default.init(this);
             Object.defineProperty(this, 'props', {
                 configurable: true,
                 enumerable: true,
@@ -220,6 +220,14 @@ var Component = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    Component.prototype._on = function (type, listener, context) {
+        if (!type.lastIndexOf('property-', 0) && rePropertyChangeEventName.test(type)) {
+            cellx_1.EventEmitter.currentlySubscribing = true;
+            this.props[camelize_1.default(RegExp.$1)];
+            cellx_1.EventEmitter.currentlySubscribing = false;
+        }
+        _super.prototype._on.call(this, type, listener, context);
+    };
     Component.prototype._handleEvent = function (evt) {
         _super.prototype._handleEvent.call(this, evt);
         var silent = this._silent;
@@ -283,7 +291,7 @@ var Component = (function (_super) {
         else {
             var el = this.element;
             el.className = constr._blockNamesString + el.className;
-            initElementAttributes_1.default(this, constr);
+            initElementAttributes_1.default(this);
             var template = constr.template;
             if (template == null) {
                 var childComponents = findChildComponentElements(el, this.ownerComponent, this.ownerComponent);
@@ -355,15 +363,14 @@ var Component = (function (_super) {
     Component.prototype.elementAttached = function () { };
     Component.prototype.elementDetached = function () { };
     Component.prototype.elementMoved = function () { };
-    Component.prototype.propertyChanged = function (name, oldValue, value) { };
     // Utils
     Component.prototype.$ = function (name, container) {
         var elList = this._getElementList(name, container);
-        return elList && elList.length ? elList[0].$c || elList[0] : null;
+        return elList && elList.length ? elList[0].$component || elList[0] : null;
     };
     Component.prototype.$$ = function (name, container) {
         var elList = this._getElementList(name, container);
-        return elList ? map.call(elList, function (el) { return el.$c || el; }) : [];
+        return elList ? map.call(elList, function (el) { return el.$component || el; }) : [];
     };
     Component.prototype._getElementList = function (name, container) {
         var elListMap = this._elementListMap || (this._elementListMap = new Map());
@@ -420,7 +427,6 @@ elementDisconnected = ComponentProto.elementDisconnected;
 elementAttached = ComponentProto.elementAttached;
 elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;
-propertyChanged = ComponentProto.propertyChanged;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
     eventTypes_1.default.forEach(function (type) {
@@ -527,9 +533,9 @@ exports.default = attachChildComponentElements;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var ContentParser_1 = __webpack_require__(18);
+var ContentParser_1 = __webpack_require__(17);
 var compileContent_1 = __webpack_require__(41);
-var componentPropertyValuesKey_1 = __webpack_require__(10);
+var componentPropertyValuesKey_1 = __webpack_require__(9);
 var setAttribute_1 = __webpack_require__(37);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 function isNotObservable(obj, keypath) {
@@ -598,7 +604,7 @@ function bindContent(content, ownerComponent, context) {
                         _loop_2(i);
                         i = out_i_1;
                     }
-                    var childComponent = child.$c;
+                    var childComponent = child.$component;
                     if (childComponent) {
                         childComponent.ownerComponent = ownerComponent;
                         childComponent.props.context = context;
@@ -657,7 +663,7 @@ exports.default = bindContent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(7);
 var defer_1 = __webpack_require__(21);
 var Features_1 = __webpack_require__(2);
 exports.ElementsController = {
@@ -665,7 +671,7 @@ exports.ElementsController = {
 };
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
-        get $c() {
+        get $component() {
             return new this.constructor._rioniteComponentConstructor(this);
         }
     },
@@ -692,7 +698,7 @@ var ElementProtoMixin = (_a = {
         else {
             defer_1.default(function () {
                 if (this[KEY_ELEMENT_CONNECTED_1.default]) {
-                    var component_1 = this.$c;
+                    var component_1 = this.$component;
                     component_1._parentComponent = undefined;
                     if (!component_1.parentComponent) {
                         component_1.elementConnected();
@@ -724,10 +730,10 @@ var ElementProtoMixin = (_a = {
             var props = component.props;
             var privateName = '_' + name;
             if (props[privateName]) {
-                props[privateName].set(value);
+                props[privateName](value);
             }
             else if (Features_1.nativeCustomElements) {
-                throw new TypeError("Cannot write to readonly property \"" + privateName.slice(1) + "\"");
+                throw new TypeError("Cannot write to readonly property \"" + name + "\"");
             }
         }
     },
@@ -743,23 +749,6 @@ var _a;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var reHyphen = /[-_]+([a-z]|$)/g;
-var cache = Object.create(null);
-function camelize(str) {
-    return cache[str] || (cache[str] = str.replace(reHyphen, function (match, chr) {
-        return chr.toUpperCase();
-    }));
-}
-exports.default = camelize;
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Symbol = cellx_1.JS.Symbol;
 var KEY_ELEMENT_CONNECTED = Symbol('Rionite.KEY_ELEMENT_CONNECTED');
@@ -767,7 +756,7 @@ exports.default = KEY_ELEMENT_CONNECTED;
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -788,7 +777,7 @@ exports.default = hyphenize;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -800,18 +789,18 @@ exports.default = componentPropertyValuesKey;
 
 
 /***/ }),
-/* 11 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var namePattern_1 = __webpack_require__(12);
+var namePattern_1 = __webpack_require__(11);
 exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\.(?:" + namePattern_1.default + "|\\d+))*";
 
 
 /***/ }),
-/* 12 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -821,7 +810,7 @@ exports.default = '[$_a-zA-Z][$\\w]*';
 
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -835,7 +824,7 @@ exports.Template = Template_1.default;
 
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -849,7 +838,7 @@ exports.default = escapeHTML_1.default;
 
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -869,7 +858,7 @@ exports.default = escapeString;
 
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -878,10 +867,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var componentPropertyTypeMap_1 = __webpack_require__(44);
 var componentPropertyTypeHandlersMap_1 = __webpack_require__(43);
-var camelize_1 = __webpack_require__(7);
-var hyphenize_1 = __webpack_require__(9);
+var hyphenize_1 = __webpack_require__(8);
 function initProperty(props, name, el) {
-    var component = el.$c;
+    var component = el.$component;
     var propConfig = component.constructor.props[name];
     var type = typeof propConfig;
     var defaultValue;
@@ -912,14 +900,14 @@ function initProperty(props, name, el) {
     if (!handlers) {
         throw new TypeError('Unsupported attribute type');
     }
-    var camelizedName = camelize_1.default(name);
     var hyphenizedName = hyphenize_1.default(name);
-    if (required && !el.hasAttribute(hyphenizedName)) {
+    var rawValue = el.getAttribute(hyphenizedName);
+    if (required && rawValue === null) {
         throw new TypeError("Property \"" + name + "\" is required");
     }
     var descriptor;
     if (readonly) {
-        var value_1 = handlers[0](el.getAttribute(hyphenizedName), defaultValue, component);
+        var value_1 = handlers[0](rawValue, defaultValue, component);
         descriptor = {
             configurable: true,
             enumerable: true,
@@ -934,61 +922,73 @@ function initProperty(props, name, el) {
         };
     }
     else {
-        var oldValue_1;
-        var value_2;
-        var needHandling_1 = false;
-        var rawValue_1 = props['_' + camelizedName] = props['_' + hyphenizedName] = new cellx_1.Cell(el.getAttribute(hyphenizedName), {
-            merge: function (v, ov) {
-                if (v !== ov) {
-                    var newValue = handlers[0](v, defaultValue, component);
-                    if (newValue === value_2) {
-                        return ov;
-                    }
-                    oldValue_1 = value_2;
-                    value_2 = newValue;
-                    needHandling_1 = component.isReady;
-                }
-                return v;
-            },
-            onChange: function () {
-                if (needHandling_1) {
-                    needHandling_1 = false;
-                    component.propertyChanged(camelizedName, value_2, oldValue_1);
-                    component.emit({
-                        type: "property-" + hyphenizedName + "-change",
-                        oldValue: oldValue_1,
-                        value: value_2
-                    });
-                }
+        var value_2 = handlers[0](rawValue, defaultValue, component);
+        var valueCell_1;
+        if (rawValue === null && defaultValue != null && defaultValue !== false) {
+            props['_initialize_' + name] = function () {
+                el.setAttribute(hyphenizedName, handlers[1](defaultValue));
+            };
+        }
+        var setRawValue = function (rawValue) {
+            var v = handlers[0](rawValue, defaultValue, component);
+            if (valueCell_1) {
+                valueCell_1.set(v);
             }
-        });
+            else {
+                value_2 = v;
+            }
+        };
+        props['_' + name] = setRawValue;
+        if (name != hyphenizedName) {
+            props['_' + hyphenizedName] = setRawValue;
+        }
         descriptor = {
             configurable: true,
             enumerable: true,
             get: function () {
-                rawValue_1.get();
+                if (valueCell_1) {
+                    return valueCell_1.get();
+                }
+                var currentlyPulling = cellx_1.Cell.currentlyPulling;
+                if (currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
+                    valueCell_1 = new cellx_1.Cell(value_2, {
+                        onChange: function (evt) {
+                            component.emit({
+                                type: "property-" + hyphenizedName + "-change",
+                                oldValue: evt.oldValue,
+                                value: evt.value
+                            });
+                        }
+                    });
+                    if (currentlyPulling) {
+                        return valueCell_1.get();
+                    }
+                }
                 return value_2;
             },
             set: function (v) {
-                v = handlers[1](v, defaultValue, component);
-                if (v === null) {
+                var rawValue = handlers[1](v, defaultValue);
+                if (rawValue === null) {
                     el.removeAttribute(hyphenizedName);
                 }
                 else {
-                    el.setAttribute(hyphenizedName, v);
+                    el.setAttribute(hyphenizedName, rawValue);
                 }
-                rawValue_1.set(v);
+                if (valueCell_1) {
+                    valueCell_1.set(v);
+                }
+                else {
+                    value_2 = v;
+                }
             }
         };
     }
-    Object.defineProperty(props, camelizedName, descriptor);
-    if (hyphenizedName != camelizedName) {
-        Object.defineProperty(props, hyphenizedName, descriptor);
-    }
+    Object.defineProperty(props, name, descriptor);
 }
 var ComponentProperties = {
-    create: function (el) {
-        var propsConfig = el.$c.constructor.props;
+    init: function (component) {
+        var propsConfig = component.constructor.props;
+        var el = component.element;
         var props = { content: null, context: null };
         if (propsConfig) {
             for (var name_1 in propsConfig) {
@@ -1002,7 +1002,7 @@ exports.default = ComponentProperties;
 
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1026,11 +1026,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(7);
 var compileKeypath_1 = __webpack_require__(24);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var keypathPattern_1 = __webpack_require__(11);
+var keypathPattern_1 = __webpack_require__(10);
 var Features_1 = __webpack_require__(2);
 var d_1 = __webpack_require__(3);
 var nextTick = cellx_1.Utils.nextTick;
@@ -1145,15 +1145,15 @@ exports.default = RtIfThen;
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var keypathToJSExpression_1 = __webpack_require__(28);
-var namePattern_1 = __webpack_require__(12);
-var keypathPattern_1 = __webpack_require__(11);
+var namePattern_1 = __webpack_require__(11);
+var keypathPattern_1 = __webpack_require__(10);
 var ContentNodeType;
 (function (ContentNodeType) {
     ContentNodeType[ContentNodeType["TEXT"] = 1] = "TEXT";
@@ -1488,7 +1488,7 @@ exports.default = ContentParser;
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1652,6 +1652,23 @@ var DisposableMixin = (function () {
     return DisposableMixin;
 }());
 exports.default = DisposableMixin;
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var reHyphen = /[-_]+([a-z]|$)/g;
+var cache = Object.create(null);
+function camelize(str) {
+    return cache[str] || (cache[str] = str.replace(reHyphen, function (match, chr) {
+        return chr.toUpperCase();
+    }));
+}
+exports.default = camelize;
 
 
 /***/ }),
@@ -2459,13 +2476,13 @@ exports.default = htmlToFragment;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var beml_1 = __webpack_require__(13);
+var beml_1 = __webpack_require__(12);
 exports.BemlParser = beml_1.Parser;
 exports.BemlTemplate = beml_1.Template;
-var escape_string_1 = __webpack_require__(15);
-var escape_html_1 = __webpack_require__(14);
+var escape_string_1 = __webpack_require__(14);
+var escape_html_1 = __webpack_require__(13);
 var html_to_fragment_1 = __webpack_require__(30);
-var DisposableMixin_1 = __webpack_require__(19);
+var DisposableMixin_1 = __webpack_require__(18);
 exports.DisposableMixin = DisposableMixin_1.default;
 var formatters_1 = __webpack_require__(26);
 exports.formatters = formatters_1.default;
@@ -2475,15 +2492,15 @@ var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
 var rt_content_1 = __webpack_require__(32);
 var rt_slot_1 = __webpack_require__(35);
-var rt_if_then_1 = __webpack_require__(17);
+var rt_if_then_1 = __webpack_require__(16);
 var rt_if_else_1 = __webpack_require__(33);
 var rt_repeat_1 = __webpack_require__(34);
-var ComponentProperties_1 = __webpack_require__(16);
+var ComponentProperties_1 = __webpack_require__(15);
 exports.ComponentProperties = ComponentProperties_1.default;
 var d_1 = __webpack_require__(3);
 exports.d = d_1.default;
-var camelize_1 = __webpack_require__(7);
-var hyphenize_1 = __webpack_require__(9);
+var camelize_1 = __webpack_require__(19);
+var hyphenize_1 = __webpack_require__(8);
 var isRegExp_1 = __webpack_require__(23);
 var defer_1 = __webpack_require__(21);
 __webpack_require__(38);
@@ -2648,7 +2665,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var d_1 = __webpack_require__(3);
-var rt_if_then_1 = __webpack_require__(17);
+var rt_if_then_1 = __webpack_require__(16);
 var RtIfElse = (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
@@ -2692,12 +2709,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(7);
 var compileKeypath_1 = __webpack_require__(24);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var namePattern_1 = __webpack_require__(12);
-var keypathPattern_1 = __webpack_require__(11);
+var namePattern_1 = __webpack_require__(11);
+var keypathPattern_1 = __webpack_require__(10);
 var Features_1 = __webpack_require__(2);
 var d_1 = __webpack_require__(3);
 var Map = cellx_1.JS.Map;
@@ -3080,7 +3097,7 @@ exports.default = setAttribute;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var beml_1 = __webpack_require__(13);
+var beml_1 = __webpack_require__(12);
 beml_1.Template.helpers['if-then'] = beml_1.Template.helpers['if-else'] = beml_1.Template.helpers['repeat'] = function (el) {
     var origAttrs = el.attributes;
     var attrs = {
@@ -3176,11 +3193,11 @@ exports.default = bindingToJSExpression;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(15);
-var ContentParser_1 = __webpack_require__(18);
+var escape_string_1 = __webpack_require__(14);
+var ContentParser_1 = __webpack_require__(17);
 var bindingToJSExpression_1 = __webpack_require__(40);
 var formatters_1 = __webpack_require__(26);
-var componentPropertyValuesKey_1 = __webpack_require__(10);
+var componentPropertyValuesKey_1 = __webpack_require__(9);
 var getUID_1 = __webpack_require__(22);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var keyCounter = 0;
@@ -3286,8 +3303,8 @@ exports.unfreezeBindings = unfreezeBindings;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var escape_html_1 = __webpack_require__(14);
-var componentPropertyValuesKey_1 = __webpack_require__(10);
+var escape_html_1 = __webpack_require__(13);
+var componentPropertyValuesKey_1 = __webpack_require__(9);
 var isRegExp_1 = __webpack_require__(23);
 var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Boolean, [
@@ -3400,16 +3417,14 @@ exports.default = [
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(7);
-function initElementAttributes(component, constr) {
+function initElementAttributes(component) {
+    var constr = component.constructor;
     var propsConfig = constr.props;
     if (propsConfig) {
         var props = component.props;
         for (var name_1 in propsConfig) {
-            var type = typeof propsConfig[name_1];
-            if (type != 'function' && (type != 'object' || propsConfig[name_1].default !== undefined)) {
-                var camelizedName = camelize_1.default(name_1);
-                props[camelizedName] = props[camelizedName];
+            if (props.hasOwnProperty('_initialize_' + name_1)) {
+                props['_initialize_' + name_1]();
             }
         }
     }
@@ -3444,13 +3459,13 @@ function onEvent(evt) {
         if (!node) {
             break;
         }
-        var component = node.$c;
+        var component = node.$component;
         if (component && targetEls) {
             for (var _i = 0, targetEls_1 = targetEls; _i < targetEls_1.length; _i++) {
                 var targetEl = targetEls_1[_i];
                 var handler = component[targetEl.getAttribute(attrName)];
                 if (typeof handler == 'function') {
-                    if (handler.call(component, evt, targetEl.$c || targetEl) === false) {
+                    if (handler.call(component, evt, targetEl.$component || targetEl) === false) {
                         evt.isPropagationStopped = true;
                         return;
                     }
@@ -3473,10 +3488,10 @@ exports.default = onEvent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var beml_1 = __webpack_require__(13);
+var beml_1 = __webpack_require__(12);
 var elementConstructorMap_1 = __webpack_require__(25);
 var ElementProtoMixin_1 = __webpack_require__(6);
-var hyphenize_1 = __webpack_require__(9);
+var hyphenize_1 = __webpack_require__(8);
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
 function initBlockNames(componentConstr, parentComponentConstr, elIs) {
@@ -3574,8 +3589,8 @@ exports.default = registerComponent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(15);
-var escape_html_1 = __webpack_require__(14);
+var escape_string_1 = __webpack_require__(14);
+var escape_html_1 = __webpack_require__(13);
 var Parser_1 = __webpack_require__(29);
 var selfClosingTags_1 = __webpack_require__(50);
 var join = Array.prototype.join;
