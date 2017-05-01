@@ -3522,33 +3522,25 @@ var Parser = (function () {
         while (this._skipWhitespaces() == '/') {
             (content || (content = [])).push(this._readComment());
         }
-        var decl = this.chr == '#' ? this._readBlockDeclaration() : null;
+        var blockName = this.chr == '#' ? this._readBlockName() : null;
         return {
             nodeType: NodeType.BLOCK,
-            declaration: decl,
-            name: decl && decl.blockName,
-            content: content ? content.concat(this._readContent(false)) : this._readContent(false),
-            at: 0,
-            raw: this.beml,
+            name: blockName,
+            content: content ? content.concat(this._readContent(false)) : this._readContent(false)
         };
     };
-    Parser.prototype._readBlockDeclaration = function () {
-        var at = this.at;
+    Parser.prototype._readBlockName = function () {
         this._next('#');
         var blockName = this._readName(reBlockNameOrNothing);
         if (!blockName) {
             throw {
                 name: 'SyntaxError',
                 message: 'Invalid block declaration',
-                at: at,
+                at: this.at,
                 beml: this.beml
             };
         }
-        return {
-            blockName: blockName,
-            at: at,
-            raw: '#' + blockName
-        };
+        return blockName;
     };
     Parser.prototype._readContent = function (brackets) {
         if (brackets) {
@@ -3587,17 +3579,13 @@ var Parser = (function () {
                             this._next();
                             return content;
                         }
-                        var at = this.at;
-                        reSuperCallOrNothing.lastIndex = at;
+                        reSuperCallOrNothing.lastIndex = this.at;
                         var superCallMatch = reSuperCallOrNothing.exec(this.beml);
-                        var superCallRaw = superCallMatch[0];
-                        if (superCallRaw) {
-                            this.chr = this.beml.charAt((this.at = at + superCallRaw.length));
+                        if (superCallMatch[0]) {
+                            this.chr = this.beml.charAt((this.at = reSuperCallOrNothing.lastIndex));
                             content.push({
                                 nodeType: NodeType.SUPER_CALL,
-                                elementName: superCallMatch[1] || null,
-                                at: at,
-                                raw: superCallRaw
+                                elementName: superCallMatch[1] || null
                             });
                             break;
                         }
@@ -3621,7 +3609,7 @@ var Parser = (function () {
         if (!tagName && !elNames) {
             throw {
                 name: 'SyntaxError',
-                message: 'Expected tag name',
+                message: 'Expected element',
                 at: at,
                 beml: this.beml
             };
@@ -3633,25 +3621,20 @@ var Parser = (function () {
         var content = this.chr == '{' ? this._readContent(true) : null;
         return {
             nodeType: NodeType.ELEMENT,
-            isHelper: isHelper,
             tagName: tagName,
+            isHelper: isHelper,
             names: elNames,
             attributes: attrs,
-            content: content,
-            at: at,
-            raw: this.beml.slice(at, this.at).trim(),
+            content: content
         };
     };
     Parser.prototype._readAttributes = function () {
-        var at = this.at;
         this._next('(');
         if (this._skipWhitespacesAndComments() == ')') {
             this._next();
             return {
                 superCall: null,
-                list: [],
-                at: at,
-                raw: this.beml.slice(at, this.at)
+                list: []
             };
         }
         var superCall;
@@ -3724,9 +3707,7 @@ var Parser = (function () {
         }
         return {
             superCall: superCall || null,
-            list: list,
-            at: at,
-            raw: this.beml.slice(at, this.at)
+            list: list
         };
     };
     Parser.prototype._skipWhitespacesAndComments = function () {
@@ -3746,29 +3727,22 @@ var Parser = (function () {
         return chr;
     };
     Parser.prototype._readSuperCall = function () {
-        var at = this.at;
-        reSuperCallOrNothing.lastIndex = at;
+        reSuperCallOrNothing.lastIndex = this.at;
         var superCallMatch = reSuperCallOrNothing.exec(this.beml);
-        var superCallRaw = superCallMatch[0];
-        if (superCallRaw) {
-            this.chr = this.beml.charAt((this.at = at + superCallRaw.length));
+        if (superCallMatch[0]) {
+            this.chr = this.beml.charAt((this.at = reSuperCallOrNothing.lastIndex));
             return {
                 nodeType: NodeType.SUPER_CALL,
-                elementName: superCallMatch[1] || null,
-                at: at,
-                raw: superCallRaw
+                elementName: superCallMatch[1] || null
             };
         }
         return null;
     };
     Parser.prototype._readTextNode = function () {
-        var at = this.at;
         var str = this._readString();
         return {
             nodeType: NodeType.TEXT,
-            value: str.multiline ? normalizeMultilineText(str.value) : str.value,
-            at: at,
-            raw: this.beml.slice(at, this.at)
+            value: str.multiline ? normalizeMultilineText(str.value) : str.value
         };
     };
     Parser.prototype._readString = function () {
@@ -3808,7 +3782,6 @@ var Parser = (function () {
         };
     };
     Parser.prototype._readComment = function () {
-        var at = this.at;
         var value = '';
         var multiline;
         switch (this._next('/')) {
@@ -3861,9 +3834,7 @@ var Parser = (function () {
         return {
             nodeType: NodeType.COMMENT,
             value: value,
-            multiline: multiline,
-            at: at,
-            raw: this.beml.slice(at, this.at)
+            multiline: multiline
         };
     };
     Parser.prototype._readElementNames = function () {
@@ -3882,7 +3853,7 @@ var Parser = (function () {
         reNameOrNothing.lastIndex = this.at;
         var name = reNameOrNothing.exec(this.beml)[0];
         if (name) {
-            this.chr = this.beml.charAt((this.at += name.length));
+            this.chr = this.beml.charAt((this.at = reNameOrNothing.lastIndex));
             return name;
         }
         return null;
@@ -5071,15 +5042,14 @@ var join = Array.prototype.join;
 var elDelimiter = '__';
 var Template = (function () {
     function Template(beml, opts) {
-        var block = new Parser_1.default(beml).parse();
-        var blockName = opts && opts.blockName || block.name;
-        if (!blockName) {
-            throw new TypeError('blockName is required');
-        }
         var parent = this.parent = opts && opts.parent || null;
+        var block = typeof beml == 'string' ? new Parser_1.default(beml).parse() : beml;
+        var blockName = opts && opts.blockName || block.name;
         this._elementClassesTemplate = parent ?
-            [blockName + elDelimiter].concat(parent._elementClassesTemplate) :
-            [blockName + elDelimiter, ''];
+            (blockName ?
+                [blockName + elDelimiter].concat(parent._elementClassesTemplate) :
+                parent._elementClassesTemplate) :
+            [blockName ? blockName + elDelimiter : '', ''];
         this._elements = [(this._currentElement = { name: null, superCall: false, source: null, innerSource: [] })];
         var elMap = this._elementMap = {};
         for (var _i = 0, _a = block.content; _i < _a.length; _i++) {
@@ -5108,8 +5078,8 @@ var Template = (function () {
                 var parent_1 = this.parent;
                 var els = this._elements;
                 var el = node;
-                var isHelper = el.isHelper;
                 var tagName = el.tagName;
+                var isHelper = el.isHelper;
                 var elNames = el.names;
                 var elName = elNames && elNames[0];
                 var elAttrs = el.attributes;
@@ -5136,7 +5106,7 @@ var Template = (function () {
                             var attrCount = void 0;
                             if (elAttrsSuperCall) {
                                 if (!parent_1) {
-                                    throw new TypeError("Required parent template for \"" + elAttrsSuperCall.raw + "\"");
+                                    throw new TypeError('Parent template is required when using super');
                                 }
                                 attrList = attrListMap[elName] = Object.create(parent_1._attributeListMap[elAttrsSuperCall.elementName || elName] || null);
                                 attrCount = attrCountMap[elName] =

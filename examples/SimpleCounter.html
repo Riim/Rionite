@@ -14,9 +14,9 @@
 
 Rionite.Component.extend('simple-counter', {
 	Static: {
-		template: `
-			<div>value: {value}</div>
-			<button rt-click="onButtonClick">value++</button>
+		bemlTemplate: `
+			div { 'value: {value}' }
+			button (rt-click=onButtonClick) { 'value++' }
 		`
 	},
 

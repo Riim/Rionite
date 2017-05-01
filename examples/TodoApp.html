@@ -46,10 +46,10 @@ var TodoView = Rionite.Component.extend('todo-view', {
 			todo: { type: Object, required: true, readonly: true }
 		},
 
-		template: `
-			<input class="todo-view__cb-done" type="checkbox" checked="{todo.done}" rt-change="onCbDoneChange">
-			<span class="todo-view__text">{todo.text}</span>
-			<button rt-click="onBtnRemoveClick">remove</button>
+		bemlTemplate: `
+			input/cb-done (type=checkbox, checked={todo.done}, rt-change=onCbDoneChange)
+			span/text { '{todo.text}' }
+			button (rt-click=onBtnRemoveClick) { 'remove' }
 		`
 	},
 
@@ -68,13 +68,13 @@ var TodoView = Rionite.Component.extend('todo-view', {
 
 Rionite.Component.extend('todo-app', {
 	Static: {
-		template: `
-			<input class="todo-app__tf-new-todo">
-			<button rt-click="onBtnAddClick">Add #{nextNumber}</button>
-			<div>all: {todos.length} done: {doneTodos.length}</div>
-			<template is="rt-repeat" for="todo of todos">
-				<todo-view todo="{todo}"></todo-view>
-			</template>
+		bemlTemplate: `
+			input/tf-new-todo
+			button (rt-click=onBtnAddClick) { 'Add #{nextNumber}' }
+			div { 'all: {todos.length} done: {doneTodos.length}' }
+			@repeat (for=todo of todos) {
+				todo-view (todo={todo})
+			}
 		`
 	},
 
