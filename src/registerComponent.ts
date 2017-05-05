@@ -36,32 +36,25 @@ export default function registerComponent(componentConstr: typeof Component) {
 
 	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor as typeof Component;
 
-	let bemlTemplate = componentConstr.bemlTemplate;
+	let template = componentConstr.template;
 
-	if (bemlTemplate !== undefined && bemlTemplate !== parentComponentConstr.bemlTemplate) {
-		if (bemlTemplate !== null) {
-			if (typeof bemlTemplate == 'string') {
-				if (parentComponentConstr.bemlTemplate) {
-					componentConstr.template = (parentComponentConstr.bemlTemplate as BemlTemplate)
-						.extend(bemlTemplate, { blockName: elIs });
-				} else {
-					componentConstr.template = componentConstr.bemlTemplate =
-						new BemlTemplate(bemlTemplate, { blockName: elIs });
-				}
+	if (template !== undefined && template !== parentComponentConstr.template) {
+		if (template === null) {
+			componentConstr.template = null;
+		} else {
+			if (template instanceof BemlTemplate) {
+				componentConstr.template = template;
 			} else {
-				componentConstr.template = bemlTemplate;
+				if (parentComponentConstr.template) {
+					componentConstr.template = (parentComponentConstr.template as BemlTemplate)
+						.extend(template, { blockName: elIs });
+				} else {
+					componentConstr.template = new BemlTemplate(template, { blockName: elIs });
+				}
 			}
 
 			initBlockNames(componentConstr, parentComponentConstr, elIs);
-		} else {
-			componentConstr.template = null;
 		}
-	} else if (componentConstr.template !== undefined && componentConstr.template !== parentComponentConstr.template) {
-		if (bemlTemplate !== null && bemlTemplate !== undefined) {
-			componentConstr.bemlTemplate = null;
-		}
-
-		initBlockNames(componentConstr, parentComponentConstr, elIs);
 	}
 
 	componentConstr._blockNamesString = elIs + ' ' + parentComponentConstr._blockNamesString;

@@ -1,5 +1,5 @@
 import { IEvent, IEventEmitterListener, EventEmitter, JS, Utils } from 'cellx';
-import { Template as BemlTemplate } from '@riim/beml';
+import { IBlock, Template as BemlTemplate } from '@riim/beml';
 import htmlToFragment from 'html-to-fragment';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
 import elementConstructorMap from './elementConstructorMap';
@@ -26,10 +26,6 @@ let map = Array.prototype.map;
 export interface IComponentElement extends HTMLElement {
 	rioniteComponent: Component | null;
 	$component: Component;
-}
-
-export interface IComponentTemplate {
-	render: (data: Object) => string;
 }
 
 export interface IComponentElementClassNameMap {
@@ -93,14 +89,13 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static register = registerComponent;
 
 	static elementIs: string;
-	static elementExtends: string;
+	static elementExtends: string | null = null;
 
-	static props: { [name: string]: any } | null;
+	static props: { [name: string]: any } | null = null;
 
 	static i18n: { [key: string]: any };
 
-	static template: string | IComponentTemplate | null;
-	static bemlTemplate: string | BemlTemplate | null;
+	static template: string | IBlock | BemlTemplate | null = null;
 
 	static _blockNamesString: string = '';
 
@@ -109,7 +104,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static _blockNames: Array<string>;
 	static _elementClassNameMap: IComponentElementClassNameMap;
 
-	static events: IComponentEvents<Component> | null;
+	static events: IComponentEvents<Component> | null = null;
 
 	_disposables: typeof DisposableMixin.prototype._disposables;
 
@@ -308,9 +303,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 			initElementAttributes(this);
 
-			let template = constr.template;
-
-			if (template == null) {
+			if (constr.template == null) {
 				let childComponents = findChildComponentElements(
 					el,
 					this.ownerComponent as Component,
@@ -332,9 +325,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				let templateContent = constr._templateContent;
 
 				if (!templateContent) {
-					templateContent = constr._templateContent = htmlToFragment(
-						typeof template == 'string' ? template : template.render(constr)
-					);
+					templateContent = constr._templateContent =
+						htmlToFragment((constr.template as BemlTemplate).render());
 				}
 
 				let content = templateContent.cloneNode(true);

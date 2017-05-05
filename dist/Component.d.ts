@@ -1,5 +1,5 @@
 import { IEvent, IEventEmitterListener, EventEmitter } from 'cellx';
-import { Template as BemlTemplate } from '@riim/beml';
+import { IBlock, Template as BemlTemplate } from '@riim/beml';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
 import registerComponent from './registerComponent';
 import { IComponentProperties } from './ComponentProperties';
@@ -7,9 +7,6 @@ import { IFreezableCell } from './componentBinding';
 export interface IComponentElement extends HTMLElement {
     rioniteComponent: Component | null;
     $component: Component;
-}
-export interface IComponentTemplate {
-    render: (data: Object) => string;
 }
 export interface IComponentElementClassNameMap {
     [elName: string]: string;
@@ -24,15 +21,14 @@ export default class Component extends EventEmitter implements DisposableMixin {
     static _registeredComponent: typeof Component;
     static register: typeof registerComponent;
     static elementIs: string;
-    static elementExtends: string;
+    static elementExtends: string | null;
     static props: {
         [name: string]: any;
     } | null;
     static i18n: {
         [key: string]: any;
     };
-    static template: string | IComponentTemplate | null;
-    static bemlTemplate: string | BemlTemplate | null;
+    static template: string | IBlock | BemlTemplate | null;
     static _blockNamesString: string;
     static _templateContent: DocumentFragment | undefined;
     static _blockNames: Array<string>;

@@ -4,10 +4,8 @@ var Component_1 = require("./Component");
 var d = {
     Component: function Component_(config) {
         return function (componentConstr) {
-            if (config.elementIs) {
-                componentConstr.elementIs = config.elementIs;
-            }
-            if (config.elementExtends) {
+            componentConstr.elementIs = config.elementIs;
+            if (config.elementExtends !== undefined) {
                 componentConstr.elementExtends = config.elementExtends;
             }
             if (config.props !== undefined) {
@@ -18,9 +16,6 @@ var d = {
             }
             if (config.template !== undefined) {
                 componentConstr.template = config.template;
-            }
-            if (config.bemlTemplate !== undefined) {
-                componentConstr.bemlTemplate = config.bemlTemplate;
             }
             if (config.events !== undefined) {
                 componentConstr.events = config.events;

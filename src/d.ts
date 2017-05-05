@@ -1,21 +1,19 @@
-import { IComponentTemplate, IComponentEvents, default as Component } from './Component';
+import { IBlock, Template as BemlTemplate } from '@riim/beml';
+import { IComponentEvents, default as Component } from './Component';
 
 let d = {
 	Component: function Component_<T extends Component>(config: {
-		elementIs?: string,
-		elementExtends?: string,
+		elementIs: string,
+		elementExtends?: string | null,
 		props?: { [name: string]: any } | null,
 		i18n?: { [key: string]: any },
-		template?: string | IComponentTemplate | null,
-		bemlTemplate?: string | null,
+		template?: string | IBlock | BemlTemplate | null,
 		events?: IComponentEvents<T> | null
 	}) {
 		return function(componentConstr: typeof Component) {
-			if (config.elementIs) {
-				componentConstr.elementIs = config.elementIs;
-			}
+			componentConstr.elementIs = config.elementIs;
 
-			if (config.elementExtends) {
+			if (config.elementExtends !== undefined) {
 				componentConstr.elementExtends = config.elementExtends;
 			}
 
@@ -29,9 +27,6 @@ let d = {
 
 			if (config.template !== undefined) {
 				componentConstr.template = config.template;
-			}
-			if (config.bemlTemplate !== undefined) {
-				componentConstr.bemlTemplate = config.bemlTemplate;
 			}
 
 			if (config.events !== undefined) {

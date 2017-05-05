@@ -203,8 +203,7 @@ var Component = (function (_super) {
             var el = this.element;
             el.className = constr._blockNamesString + el.className;
             initElementAttributes_1.default(this);
-            var template = constr.template;
-            if (template == null) {
+            if (constr.template == null) {
                 var childComponents = findChildComponentElements(el, this.ownerComponent, this.ownerComponent);
                 if (childComponents) {
                     attachChildComponentElements_1.default(childComponents);
@@ -219,7 +218,8 @@ var Component = (function (_super) {
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                 var templateContent = constr._templateContent;
                 if (!templateContent) {
-                    templateContent = constr._templateContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));
+                    templateContent = constr._templateContent =
+                        html_to_fragment_1.default(constr.template.render());
                 }
                 var content = templateContent.cloneNode(true);
                 var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
@@ -321,7 +321,11 @@ var Component = (function (_super) {
     return Component;
 }(cellx_1.EventEmitter));
 Component.register = registerComponent_1.default;
+Component.elementExtends = null;
+Component.props = null;
+Component.template = null;
 Component._blockNamesString = '';
+Component.events = null;
 exports.default = Component;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
 var ComponentProto = Component.prototype;

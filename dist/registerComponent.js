@@ -26,33 +26,26 @@ function registerComponent(componentConstr) {
         throw new TypeError("No need to declare property \"" + (props.content ? 'content' : 'context') + "\"");
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
-    var bemlTemplate = componentConstr.bemlTemplate;
-    if (bemlTemplate !== undefined && bemlTemplate !== parentComponentConstr.bemlTemplate) {
-        if (bemlTemplate !== null) {
-            if (typeof bemlTemplate == 'string') {
-                if (parentComponentConstr.bemlTemplate) {
-                    componentConstr.template = parentComponentConstr.bemlTemplate
-                        .extend(bemlTemplate, { blockName: elIs });
-                }
-                else {
-                    componentConstr.template = componentConstr.bemlTemplate =
-                        new beml_1.Template(bemlTemplate, { blockName: elIs });
-                }
+    var template = componentConstr.template;
+    if (template !== undefined && template !== parentComponentConstr.template) {
+        if (template === null) {
+            componentConstr.template = null;
+        }
+        else {
+            if (template instanceof beml_1.Template) {
+                componentConstr.template = template;
             }
             else {
-                componentConstr.template = bemlTemplate;
+                if (parentComponentConstr.template) {
+                    componentConstr.template = parentComponentConstr.template
+                        .extend(template, { blockName: elIs });
+                }
+                else {
+                    componentConstr.template = new beml_1.Template(template, { blockName: elIs });
+                }
             }
             initBlockNames(componentConstr, parentComponentConstr, elIs);
         }
-        else {
-            componentConstr.template = null;
-        }
-    }
-    else if (componentConstr.template !== undefined && componentConstr.template !== parentComponentConstr.template) {
-        if (bemlTemplate !== null && bemlTemplate !== undefined) {
-            componentConstr.bemlTemplate = null;
-        }
-        initBlockNames(componentConstr, parentComponentConstr, elIs);
     }
     componentConstr._blockNamesString = elIs + ' ' + parentComponentConstr._blockNamesString;
     componentConstr._templateContent = undefined;

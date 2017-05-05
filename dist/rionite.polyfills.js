@@ -1766,8 +1766,7 @@ var Component = (function (_super) {
             var el = this.element;
             el.className = constr._blockNamesString + el.className;
             initElementAttributes_1.default(this);
-            var template = constr.template;
-            if (template == null) {
+            if (constr.template == null) {
                 var childComponents = findChildComponentElements(el, this.ownerComponent, this.ownerComponent);
                 if (childComponents) {
                     attachChildComponentElements_1.default(childComponents);
@@ -1782,7 +1781,8 @@ var Component = (function (_super) {
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                 var templateContent = constr._templateContent;
                 if (!templateContent) {
-                    templateContent = constr._templateContent = html_to_fragment_1.default(typeof template == 'string' ? template : template.render(constr));
+                    templateContent = constr._templateContent =
+                        html_to_fragment_1.default(constr.template.render());
                 }
                 var content = templateContent.cloneNode(true);
                 var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
@@ -1884,7 +1884,11 @@ var Component = (function (_super) {
     return Component;
 }(cellx_1.EventEmitter));
 Component.register = registerComponent_1.default;
+Component.elementExtends = null;
+Component.props = null;
+Component.template = null;
 Component._blockNamesString = '';
+Component.events = null;
 exports.default = Component;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
 var ComponentProto = Component.prototype;
@@ -1951,10 +1955,8 @@ var Component_1 = __webpack_require__(1);
 var d = {
     Component: function Component_(config) {
         return function (componentConstr) {
-            if (config.elementIs) {
-                componentConstr.elementIs = config.elementIs;
-            }
-            if (config.elementExtends) {
+            componentConstr.elementIs = config.elementIs;
+            if (config.elementExtends !== undefined) {
                 componentConstr.elementExtends = config.elementExtends;
             }
             if (config.props !== undefined) {
@@ -1965,9 +1967,6 @@ var d = {
             }
             if (config.template !== undefined) {
                 componentConstr.template = config.template;
-            }
-            if (config.bemlTemplate !== undefined) {
-                componentConstr.bemlTemplate = config.bemlTemplate;
             }
             if (config.events !== undefined) {
                 componentConstr.events = config.events;
@@ -3503,6 +3502,16 @@ var NodeType;
     NodeType[NodeType["COMMENT"] = 4] = "COMMENT";
     NodeType[NodeType["SUPER_CALL"] = 5] = "SUPER_CALL";
 })(NodeType = exports.NodeType || (exports.NodeType = {}));
+var escapee = {
+    __proto__: null,
+    '/': '/',
+    '\\': '\\',
+    b: '\b',
+    f: '\f',
+    n: '\n',
+    r: '\r',
+    t: '\t'
+};
 var reBlockNameOrNothing = /[a-zA-Z][\-\w]*|/g;
 var reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
 var reElementNameOrNothing = /[a-zA-Z][\-\w]*|/g;
@@ -3655,8 +3664,8 @@ var Parser = (function () {
                 }
                 if (this._skipWhitespacesAndComments() == '=') {
                     this._next();
-                    var next = this._skipWhitespaces();
-                    if (next == "'" || next == '"' || next == '`') {
+                    var chr = this._skipWhitespaces();
+                    if (chr == "'" || chr == '"' || chr == '`') {
                         var str = this._readString();
                         list.push({
                             name: name_1,
@@ -3666,7 +3675,7 @@ var Parser = (function () {
                     else {
                         var value = '';
                         for (;;) {
-                            if (!next) {
+                            if (!chr) {
                                 throw {
                                     name: 'SyntaxError',
                                     message: 'Invalid attribute',
@@ -3674,12 +3683,12 @@ var Parser = (function () {
                                     beml: this.beml
                                 };
                             }
-                            if (next == '\r' || next == '\n' || next == ',' || next == ')') {
+                            if (chr == '\r' || chr == '\n' || chr == ',' || chr == ')') {
                                 list.push({ name: name_1, value: value.trim() });
                                 break;
                             }
-                            value += next;
-                            next = this._next();
+                            value += chr;
+                            chr = this._next();
                         }
                     }
                     this._skipWhitespacesAndComments();
@@ -3756,22 +3765,45 @@ var Parser = (function () {
             };
         }
         var str = '';
-        for (var next = void 0; (next = this._next());) {
-            if (next == quoteChar) {
+        for (var chr = this._next(); chr;) {
+            if (chr == quoteChar) {
                 this._next();
                 return {
                     value: str,
                     multiline: quoteChar == '`'
                 };
             }
-            if (next == '\\') {
-                str += next + this._next();
-            }
-            else {
-                if (quoteChar != '`' && (next == '\r' || next == '\n')) {
+            if (chr == '\\') {
+                chr = this._next();
+                if (chr == 'x' || chr == 'u') {
+                    var at = this.at;
+                    var hexadecimal = chr == 'x';
+                    var code = parseInt(this.beml.slice(at + 1, at + (hexadecimal ? 3 : 5)), 16);
+                    if (!isFinite(code)) {
+                        throw {
+                            name: 'SyntaxError',
+                            message: "Malformed " + (hexadecimal ? 'hexadecimal' : 'unicode') + " escape sequence",
+                            at: at - 1,
+                            beml: this.beml
+                        };
+                    }
+                    str += String.fromCharCode(code);
+                    chr = this.chr = this.beml.charAt((this.at = at + (hexadecimal ? 3 : 5)));
+                }
+                else if (chr in escapee) {
+                    str += escapee[chr];
+                    chr = this._next();
+                }
+                else {
                     break;
                 }
-                str += next;
+            }
+            else {
+                if (quoteChar != '`' && (chr == '\r' || chr == '\n')) {
+                    break;
+                }
+                str += chr;
+                chr = this._next();
             }
         }
         throw {
@@ -3786,8 +3818,8 @@ var Parser = (function () {
         var multiline;
         switch (this._next('/')) {
             case '/': {
-                for (var next = void 0; (next = this._next()) && next != '\r' && next != '\n';) {
-                    value += next;
+                for (var chr = void 0; (chr = this._next()) && chr != '\r' && chr != '\n';) {
+                    value += chr;
                 }
                 multiline = false;
                 break;
@@ -4958,33 +4990,26 @@ function registerComponent(componentConstr) {
         throw new TypeError("No need to declare property \"" + (props.content ? 'content' : 'context') + "\"");
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
-    var bemlTemplate = componentConstr.bemlTemplate;
-    if (bemlTemplate !== undefined && bemlTemplate !== parentComponentConstr.bemlTemplate) {
-        if (bemlTemplate !== null) {
-            if (typeof bemlTemplate == 'string') {
-                if (parentComponentConstr.bemlTemplate) {
-                    componentConstr.template = parentComponentConstr.bemlTemplate
-                        .extend(bemlTemplate, { blockName: elIs });
-                }
-                else {
-                    componentConstr.template = componentConstr.bemlTemplate =
-                        new beml_1.Template(bemlTemplate, { blockName: elIs });
-                }
+    var template = componentConstr.template;
+    if (template !== undefined && template !== parentComponentConstr.template) {
+        if (template === null) {
+            componentConstr.template = null;
+        }
+        else {
+            if (template instanceof beml_1.Template) {
+                componentConstr.template = template;
             }
             else {
-                componentConstr.template = bemlTemplate;
+                if (parentComponentConstr.template) {
+                    componentConstr.template = parentComponentConstr.template
+                        .extend(template, { blockName: elIs });
+                }
+                else {
+                    componentConstr.template = new beml_1.Template(template, { blockName: elIs });
+                }
             }
             initBlockNames(componentConstr, parentComponentConstr, elIs);
         }
-        else {
-            componentConstr.template = null;
-        }
-    }
-    else if (componentConstr.template !== undefined && componentConstr.template !== parentComponentConstr.template) {
-        if (bemlTemplate !== null && bemlTemplate !== undefined) {
-            componentConstr.bemlTemplate = null;
-        }
-        initBlockNames(componentConstr, parentComponentConstr, elIs);
     }
     componentConstr._blockNamesString = elIs + ' ' + parentComponentConstr._blockNamesString;
     componentConstr._templateContent = undefined;

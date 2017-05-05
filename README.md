@@ -134,7 +134,7 @@ Rionite.Component.extend('hello-user', {
 
 Rionite.Component.extend('super-button', {
 	Static: {
-		template: '<button><rt-content/></button>'
+		template: 'button { rt-content }'
 	}
 });
 
@@ -158,15 +158,15 @@ Rionite.Component.extend('super-button', {
 Rionite.Component.extend('super-select', {
 	Static: {
 		template: `
-            <rt-content select="super-button">
-                <super-button>{selectedValues}</super-button>
-            </rt-content>
+            rt-content (select=super-button) {
+                super-button { '{selectedValues}' }
+            }
 
-            <rt-content select="super-dropdown, super-popover">
-                <super-dropdown>
-                    <rt-content select="super-select-option"/>
-                </super-dropdown>
-            </rt-content>
+            rt-content (select=super-dropdown, super-popover) {
+                super-dropdown {
+                    rt-content (select=super-select-option)
+                }
+            }
         `
 	}
 });
@@ -183,8 +183,8 @@ Rionite.Component.extend('super-select', {
 Rionite.Component.extend('simple-counter', {
 	Static: {
 		template: `
-            <div>value: {value}</div>
-            <button rt-click="onButtonClick">value++</button>
+            div { 'value: {value}' }
+            button (rt-click=onButtonClick) { 'value++' }
         `
 	},
 
@@ -226,9 +226,9 @@ Rionite.Component.extend('user-card', {
     Static: {
         // Наблюдаемое и вычисляемое свойства используются в шаблоне.
         template: `
-            <x-modal shown="{ageLess18}">
-                Привет, {user.name}! Кажется вам ещё нет 18 лет.
-            </x-modal>
+            x-modal (shown={ageLess16}) {
+                'Привет, {user.name}! Кажется вам ещё нет 16 лет.'
+            }
         `
     },
 
@@ -237,8 +237,8 @@ Rionite.Component.extend('user-card', {
             user: someUser,
 
             // Ещё одно вычисляемое свойство.
-            ageLess18: function() {
-                return this.user.age < 18;
+            ageLess16: function() {
+                return this.user.age < 16;
             }
         });
     }
@@ -279,16 +279,16 @@ let someUser = new User('Matroskin', '05/03/1986');
     elementIs: 'user-card',
 
     template: `
-        <x-modal shown="{ageLess18}">
-            Привет, {user.name}! Кажется вам ещё нет 18 лет.
-        </x-modal>
+        x-modal (shown={ageLess16}) {
+            'Привет, {user.name}! Кажется вам ещё нет 16 лет.'
+        }
     `
 })
 class UserCard extends Component {
     @observable user = null;
 
-    @computed ageLess18 = function() {
-        return this.user.age < 18;
+    @computed ageLess16 = function() {
+        return this.user.age < 16;
     };
 
     initialize() {
@@ -315,8 +315,8 @@ TODO:
 Rionite.Component.extend('simple-counter', {
 	Static: {
 		template: `
-            <div>value: {value}</div>
-            <button rt-click="onButtonClick">value++</button>
+            div { 'value: {value}' }
+            button (rt-click=onButtonClick) { 'value++' }
         `
 	},
 

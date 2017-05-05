@@ -16,7 +16,6 @@ import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
 import {
 	IComponentElement,
-	IComponentTemplate,
 	IComponentElementClassNameMap,
 	IComponentEvents,
 	default as Component
@@ -80,7 +79,6 @@ export {
 	getText,
 
 	IComponentElement,
-	IComponentTemplate,
 	IComponentElementClassNameMap,
 	IComponentEvents,
 	Component,
