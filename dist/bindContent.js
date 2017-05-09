@@ -6,16 +6,16 @@ var compileContent_1 = require("./compileContent");
 var componentPropertyValuesKey_1 = require("./componentPropertyValuesKey");
 var setAttribute_1 = require("./Utils/setAttribute");
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
-function isNotObservable(obj, keypath) {
+function readValue(obj, keypath) {
     var index = keypath.indexOf('.', 1);
     var key = index == -1 ? keypath : keypath.slice(0, index);
     if ('_' + key in obj) {
-        return false;
+        return null;
     }
     var value = obj[key];
     return index == -1 ?
         { value: value } :
-        (value == null ? false : isNotObservable(value, keypath.slice(index + 1)));
+        (value == null ? null : readValue(value, keypath.slice(index + 1)));
 }
 function bindContent(content, ownerComponent, context) {
     if (!context) {
@@ -38,11 +38,11 @@ function bindContent(content, ownerComponent, context) {
                                 if (name_1.charAt(0) == '_') {
                                     name_1 = name_1.slice(1);
                                 }
-                                var isNotObservable_ = void 0;
+                                var readedValue = void 0;
                                 if (parsedValue.length == 1 &&
                                     !parsedValue[0].formatters &&
-                                    (isNotObservable_ = isNotObservable(context, parsedValue[0].keypath.value))) {
-                                    var value_1 = isNotObservable_.value;
+                                    (readedValue = readValue(context, parsedValue[0].keypath.value))) {
+                                    var value_1 = readedValue.value;
                                     if (value_1 && typeof value_1 == 'object') {
                                         var key = compileContent_1.nextComponentPropertyValueKey();
                                         (ownerComponent[componentPropertyValuesKey_1.default] ||
@@ -89,11 +89,11 @@ function bindContent(content, ownerComponent, context) {
                     if (content_1.indexOf('{') != -1) {
                         var parsedContent = (new ContentParser_1.default(content_1)).parse();
                         if (parsedContent.length > 1 || parsedContent[0].nodeType == ContentNodeType.BINDING) {
-                            var isNotObservable_ = void 0;
+                            var readedValue = void 0;
                             if (parsedContent.length == 1 &&
                                 !parsedContent[0].formatters &&
-                                (isNotObservable_ = isNotObservable(context, parsedContent[0].keypath.value))) {
-                                child.textContent = isNotObservable_.value;
+                                (readedValue = readValue(context, parsedContent[0].keypath.value))) {
+                                child.textContent = readedValue.value;
                             }
                             else {
                                 var cell = new cellx_1.Cell(compileContent_1.default(parsedContent, content_1), {

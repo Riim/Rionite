@@ -204,7 +204,7 @@ var Component = (function (_super) {
             el.className = constr._blockNamesString + el.className;
             initElementAttributes_1.default(this);
             if (constr.template == null) {
-                var childComponents = findChildComponentElements(el, this.ownerComponent, this.ownerComponent);
+                var childComponents = findChildComponentElements(el, this.ownerComponent, this.props.context);
                 if (childComponents) {
                     attachChildComponentElements_1.default(childComponents);
                 }

@@ -21,6 +21,8 @@ let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 	template: ''
 })
 export default class RtContent extends Component {
+	ownerComponent: Component;
+
 	_templateContent: DocumentFragment;
 
 	_attach() {
@@ -30,7 +32,7 @@ export default class RtContent extends Component {
 			this._unfreezeBindings();
 		} else {
 			let props = this.props;
-			let ownerComponent = this.ownerComponent as Component;
+			let ownerComponent = this.ownerComponent;
 			let ownerComponentInputContent = ownerComponent.props.content as DocumentFragment;
 			let content: DocumentFragment | undefined;
 

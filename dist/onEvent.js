@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 function onEvent(evt) {
+    var isNativeEvent = evt instanceof Event;
     var node;
     var attrName;
     var targetEls;
-    if (evt instanceof Event) {
+    if (isNativeEvent) {
         node = evt.target;
         attrName = 'rt-' + evt.type;
     }
@@ -26,12 +27,17 @@ function onEvent(evt) {
                 var targetEl = targetEls_1[_i];
                 var handler = component[targetEl.getAttribute(attrName)];
                 if (typeof handler == 'function') {
-                    if (handler.call(component, evt, targetEl.$component || targetEl) === false) {
-                        evt.isPropagationStopped = true;
-                        return;
+                    if (isNativeEvent) {
+                        handler.call(component, evt, targetEl);
                     }
-                    if (evt.isPropagationStopped) {
-                        return;
+                    else {
+                        if (handler.call(component, evt, targetEl) === false) {
+                            evt.isPropagationStopped = true;
+                            return;
+                        }
+                        if (evt.isPropagationStopped) {
+                            return;
+                        }
                     }
                 }
             }

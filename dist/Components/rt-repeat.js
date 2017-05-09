@@ -168,19 +168,18 @@ var RtRepeat = (function (_super) {
         var itemCell = new cellx_1.Cell(item);
         var indexCell = new cellx_1.Cell(index);
         var content = this._rawItemContent.cloneNode(true);
-        var context = Object.create(this._context, (_a = {},
-            _a[this._itemName] = {
+        var _a = bindContent_1.default(content, this.ownerComponent, Object.create(this._context, (_b = {},
+            _b[this._itemName] = {
                 get: function () {
                     return itemCell.get();
                 }
             },
-            _a.$index = {
+            _b.$index = {
                 get: function () {
                     return indexCell.get();
                 }
             },
-            _a));
-        var _b = bindContent_1.default(content, this.ownerComponent, context), bindings = _b.bindings, childComponents = _b.childComponents;
+            _b))), bindings = _a.bindings, childComponents = _a.childComponents;
         var newItem = {
             item: itemCell,
             index: indexCell,
@@ -200,7 +199,7 @@ var RtRepeat = (function (_super) {
             attachChildComponentElements_1.default(childComponents);
         }
         return true;
-        var _a;
+        var _b;
     };
     RtRepeat.prototype._clearByItemMap = function (itemMap) {
         itemMap.forEach(this._clearByItems, this);

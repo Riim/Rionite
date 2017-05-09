@@ -37,6 +37,8 @@ let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPa
 	}
 })
 export default class RtRepeat extends Component {
+	ownerComponent: Component;
+
 	_itemName: string;
 
 	_list: TRtRepeatListCell;
@@ -212,7 +214,7 @@ export default class RtRepeat extends Component {
 		let indexCell = new Cell(index);
 
 		let content = this._rawItemContent.cloneNode(true);
-		let context = Object.create(this._context, {
+		let { bindings, childComponents } = bindContent(content, this.ownerComponent, Object.create(this._context, {
 			[this._itemName]: {
 				get() {
 					return itemCell.get();
@@ -224,9 +226,7 @@ export default class RtRepeat extends Component {
 					return indexCell.get();
 				}
 			}
-		});
-
-		let { bindings, childComponents } = bindContent(content, this.ownerComponent as Component, context);
+		}));
 
 		let newItem = {
 			item: itemCell,

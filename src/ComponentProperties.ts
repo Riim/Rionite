@@ -5,8 +5,8 @@ import componentPropertyTypeHandlersMap from './componentPropertyTypeHandlersMap
 import hyphenize from './Utils/hyphenize';
 
 export interface IComponentProperties extends Object {
-	content: any;
-	context: any;
+	content: DocumentFragment | null;
+	context: Object | null;
 	[name: string]: any;
 }
 

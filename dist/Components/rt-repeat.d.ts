@@ -10,6 +10,7 @@ export declare type TRtRepeatItem = {
 export declare type TRtRepeatItemList = Array<TRtRepeatItem>;
 export declare type TRtRepeatItemMap = Map<any, TRtRepeatItemList>;
 export default class RtRepeat extends Component {
+    ownerComponent: Component;
     _itemName: string;
     _list: TRtRepeatListCell;
     _itemMap: TRtRepeatItemMap;

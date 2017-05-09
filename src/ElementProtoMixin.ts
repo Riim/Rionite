@@ -16,14 +16,14 @@ let ElementProtoMixin = {
 
 	[KEY_ELEMENT_CONNECTED]: false,
 
-	connectedCallback() {
+	connectedCallback(this: IComponentElement) {
 		this[KEY_ELEMENT_CONNECTED] = true;
 
 		if (ElementsController.skipConnectionStatusCallbacks) {
 			return;
 		}
 
-		let component = this.rioniteComponent as Component;
+		let component = this.rioniteComponent;
 
 		if (component) {
 			component.elementConnected();
@@ -44,7 +44,7 @@ let ElementProtoMixin = {
 
 					component._parentComponent = undefined;
 
-					if (!component.parentComponent) {
+					if (!component.parentComponent && !component._attached) {
 						component.elementConnected();
 						component._attach();
 					}
@@ -53,14 +53,14 @@ let ElementProtoMixin = {
 		}
 	},
 
-	disconnectedCallback() {
+	disconnectedCallback(this: IComponentElement) {
 		this[KEY_ELEMENT_CONNECTED] = false;
 
 		if (ElementsController.skipConnectionStatusCallbacks) {
 			return;
 		}
 
-		let component = this.rioniteComponent as Component;
+		let component = this.rioniteComponent;
 
 		if (component && component._attached) {
 			component._parentComponent = null;
@@ -68,15 +68,15 @@ let ElementProtoMixin = {
 			component.elementDisconnected();
 
 			defer(() => {
-				if (component._parentComponent === null && component._attached) {
-					component._detach();
+				if ((component as Component)._parentComponent === null && (component as Component)._attached) {
+					(component as Component)._detach();
 				}
 			});
 		}
 	},
 
-	attributeChangedCallback(name: string, oldValue: string | null, value: string | null) {
-		let component = this.rioniteComponent as Component;
+	attributeChangedCallback(this: IComponentElement, name: string, oldValue: string | null, value: string | null) {
+		let component = this.rioniteComponent;
 
 		if (component && component.isReady) {
 			let props = component.props;

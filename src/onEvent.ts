@@ -1,12 +1,13 @@
 import { IEvent } from 'cellx';
-import Component from './Component';
+import { IPossiblyComponentElement, default as Component } from './Component';
 
 export default function onEvent(evt: IEvent | Event) {
+	let isNativeEvent = evt instanceof Event;
 	let node: Node | null;
 	let attrName: string;
 	let targetEls: Array<HTMLElement> | undefined;
 
-	if (evt instanceof Event) {
+	if (isNativeEvent) {
 		node = evt.target as Node;
 		attrName = 'rt-' + evt.type;
 	} else {
@@ -25,20 +26,24 @@ export default function onEvent(evt: IEvent | Event) {
 			break;
 		}
 
-		let component = (node as any).$component as Component | undefined;
+		let component = (node as IPossiblyComponentElement).$component;
 
 		if (component && targetEls) {
 			for (let targetEl of targetEls) {
 				let handler = component[targetEl.getAttribute(attrName) as string];
 
 				if (typeof handler == 'function') {
-					if (handler.call(component, evt, (targetEl as any).$component || targetEl) === false) {
-						(evt as IEvent).isPropagationStopped = true;
-						return;
-					}
+					if (isNativeEvent) {
+						handler.call(component, evt, targetEl);
+					} else {
+						if (handler.call(component, evt, targetEl) === false) {
+							(evt as IEvent).isPropagationStopped = true;
+							return;
+						}
 
-					if ((evt as IEvent).isPropagationStopped) {
-						return;
+						if ((evt as IEvent).isPropagationStopped) {
+							return;
+						}
 					}
 				}
 			}

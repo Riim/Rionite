@@ -4,6 +4,10 @@ import { IDisposableListening, IListener, default as DisposableMixin } from './D
 import registerComponent from './registerComponent';
 import { IComponentProperties } from './ComponentProperties';
 import { IFreezableCell } from './componentBinding';
+export interface IPossiblyComponentElement extends HTMLElement {
+    rioniteComponent?: Component | null;
+    $component?: Component;
+}
 export interface IComponentElement extends HTMLElement {
     rioniteComponent: Component | null;
     $component: Component;

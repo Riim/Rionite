@@ -293,7 +293,7 @@ var Component = (function (_super) {
             el.className = constr._blockNamesString + el.className;
             initElementAttributes_1.default(this);
             if (constr.template == null) {
-                var childComponents = findChildComponentElements(el, this.ownerComponent, this.ownerComponent);
+                var childComponents = findChildComponentElements(el, this.ownerComponent, this.props.context);
                 if (childComponents) {
                     attachChildComponentElements_1.default(childComponents);
                 }
@@ -537,16 +537,16 @@ var compileContent_1 = __webpack_require__(41);
 var componentPropertyValuesKey_1 = __webpack_require__(9);
 var setAttribute_1 = __webpack_require__(37);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
-function isNotObservable(obj, keypath) {
+function readValue(obj, keypath) {
     var index = keypath.indexOf('.', 1);
     var key = index == -1 ? keypath : keypath.slice(0, index);
     if ('_' + key in obj) {
-        return false;
+        return null;
     }
     var value = obj[key];
     return index == -1 ?
         { value: value } :
-        (value == null ? false : isNotObservable(value, keypath.slice(index + 1)));
+        (value == null ? null : readValue(value, keypath.slice(index + 1)));
 }
 function bindContent(content, ownerComponent, context) {
     if (!context) {
@@ -569,11 +569,11 @@ function bindContent(content, ownerComponent, context) {
                                 if (name_1.charAt(0) == '_') {
                                     name_1 = name_1.slice(1);
                                 }
-                                var isNotObservable_ = void 0;
+                                var readedValue = void 0;
                                 if (parsedValue.length == 1 &&
                                     !parsedValue[0].formatters &&
-                                    (isNotObservable_ = isNotObservable(context, parsedValue[0].keypath.value))) {
-                                    var value_1 = isNotObservable_.value;
+                                    (readedValue = readValue(context, parsedValue[0].keypath.value))) {
+                                    var value_1 = readedValue.value;
                                     if (value_1 && typeof value_1 == 'object') {
                                         var key = compileContent_1.nextComponentPropertyValueKey();
                                         (ownerComponent[componentPropertyValuesKey_1.default] ||
@@ -620,11 +620,11 @@ function bindContent(content, ownerComponent, context) {
                     if (content_1.indexOf('{') != -1) {
                         var parsedContent = (new ContentParser_1.default(content_1)).parse();
                         if (parsedContent.length > 1 || parsedContent[0].nodeType == ContentNodeType.BINDING) {
-                            var isNotObservable_ = void 0;
+                            var readedValue = void 0;
                             if (parsedContent.length == 1 &&
                                 !parsedContent[0].formatters &&
-                                (isNotObservable_ = isNotObservable(context, parsedContent[0].keypath.value))) {
-                                child.textContent = isNotObservable_.value;
+                                (readedValue = readValue(context, parsedContent[0].keypath.value))) {
+                                child.textContent = readedValue.value;
                             }
                             else {
                                 var cell = new cellx_1.Cell(compileContent_1.default(parsedContent, content_1), {
@@ -699,7 +699,7 @@ var ElementProtoMixin = (_a = {
                 if (this[KEY_ELEMENT_CONNECTED_1.default]) {
                     var component_1 = this.$component;
                     component_1._parentComponent = undefined;
-                    if (!component_1.parentComponent) {
+                    if (!component_1.parentComponent && !component_1._attached) {
                         component_1.elementConnected();
                         component_1._attach();
                     }
@@ -2862,19 +2862,18 @@ var RtRepeat = (function (_super) {
         var itemCell = new cellx_1.Cell(item);
         var indexCell = new cellx_1.Cell(index);
         var content = this._rawItemContent.cloneNode(true);
-        var context = Object.create(this._context, (_a = {},
-            _a[this._itemName] = {
+        var _a = bindContent_1.default(content, this.ownerComponent, Object.create(this._context, (_b = {},
+            _b[this._itemName] = {
                 get: function () {
                     return itemCell.get();
                 }
             },
-            _a.$index = {
+            _b.$index = {
                 get: function () {
                     return indexCell.get();
                 }
             },
-            _a));
-        var _b = bindContent_1.default(content, this.ownerComponent, context), bindings = _b.bindings, childComponents = _b.childComponents;
+            _b))), bindings = _a.bindings, childComponents = _a.childComponents;
         var newItem = {
             item: itemCell,
             index: indexCell,
@@ -2894,7 +2893,7 @@ var RtRepeat = (function (_super) {
             attachChildComponentElements_1.default(childComponents);
         }
         return true;
-        var _a;
+        var _b;
     };
     RtRepeat.prototype._clearByItemMap = function (itemMap) {
         itemMap.forEach(this._clearByItems, this);
@@ -3443,10 +3442,11 @@ exports.default = initElementAttributes;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 function onEvent(evt) {
+    var isNativeEvent = evt instanceof Event;
     var node;
     var attrName;
     var targetEls;
-    if (evt instanceof Event) {
+    if (isNativeEvent) {
         node = evt.target;
         attrName = 'rt-' + evt.type;
     }
@@ -3468,12 +3468,17 @@ function onEvent(evt) {
                 var targetEl = targetEls_1[_i];
                 var handler = component[targetEl.getAttribute(attrName)];
                 if (typeof handler == 'function') {
-                    if (handler.call(component, evt, targetEl.$component || targetEl) === false) {
-                        evt.isPropagationStopped = true;
-                        return;
+                    if (isNativeEvent) {
+                        handler.call(component, evt, targetEl);
                     }
-                    if (evt.isPropagationStopped) {
-                        return;
+                    else {
+                        if (handler.call(component, evt, targetEl) === false) {
+                            evt.isPropagationStopped = true;
+                            return;
+                        }
+                        if (evt.isPropagationStopped) {
+                            return;
+                        }
                     }
                 }
             }

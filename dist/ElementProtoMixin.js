@@ -37,7 +37,7 @@ var ElementProtoMixin = (_a = {
                 if (this[KEY_ELEMENT_CONNECTED_1.default]) {
                     var component_1 = this.$component;
                     component_1._parentComponent = undefined;
-                    if (!component_1.parentComponent) {
+                    if (!component_1.parentComponent && !component_1._attached) {
                         component_1.elementConnected();
                         component_1._attach();
                     }

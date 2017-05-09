@@ -2,6 +2,7 @@ import { Cell } from 'cellx';
 import Component from '../Component';
 export declare type TRtIfThenIfCell = Cell<boolean>;
 export default class RtIfThen extends Component {
+    ownerComponent: Component;
     _elseMode: boolean;
     _if: TRtIfThenIfCell;
     _nodes: Array<Node> | null;

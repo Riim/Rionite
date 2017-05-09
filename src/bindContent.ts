@@ -8,19 +8,19 @@ import setAttribute from './Utils/setAttribute';
 
 let ContentNodeType = ContentParser.ContentNodeType;
 
-function isNotObservable(obj: Object, keypath: string): { value: any } | false {
+function readValue(obj: Object, keypath: string): { value: any } | null {
 	let index = keypath.indexOf('.', 1);
 	let key = index == -1 ? keypath : keypath.slice(0, index);
 
 	if ('_' + key in obj) {
-		return false;
+		return null;
 	}
 
 	let value = obj[key];
 
 	return index == -1 ?
 		{ value } :
-		(value == null ? false : isNotObservable(value, keypath.slice(index + 1)));
+		(value == null ? null : readValue(value, keypath.slice(index + 1)));
 }
 
 export default function bindContent(
@@ -55,19 +55,19 @@ export default function bindContent(
 									name = name.slice(1);
 								}
 
-								let isNotObservable_;
+								let readedValue;
 
 								if (
 									parsedValue.length == 1 &&
 										!(parsedValue[0] as IContentBinding).formatters &&
 										(
-											isNotObservable_ = isNotObservable(
+											readedValue = readValue(
 												context as Object,
 												(parsedValue[0] as IContentBinding).keypath.value
 											)
 										)
 								) {
-									let value = (isNotObservable_ as any).value;
+									let value = readedValue.value;
 
 									if (value && typeof value == 'object') {
 										let key = nextComponentPropertyValueKey();
@@ -122,19 +122,19 @@ export default function bindContent(
 						let parsedContent = (new ContentParser(content)).parse();
 
 						if (parsedContent.length > 1 || parsedContent[0].nodeType == ContentNodeType.BINDING) {
-							let isNotObservable_;
+							let readedValue;
 
 							if (
 								parsedContent.length == 1 &&
 									!(parsedContent[0] as IContentBinding).formatters &&
 									(
-										isNotObservable_ = isNotObservable(
+										readedValue = readValue(
 											context as Object,
 											(parsedContent[0] as IContentBinding).keypath.value
 										)
 									)
 							) {
-								child.textContent = (isNotObservable_ as any).value;
+								child.textContent = readedValue.value;
 							} else {
 								let cell = new Cell<any>(compileContent(parsedContent, content), {
 									owner: context,

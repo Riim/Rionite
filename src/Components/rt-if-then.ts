@@ -25,6 +25,8 @@ let reKeypath = RegExp(`^${ keypathPattern }$`);
 	}
 })
 export default class RtIfThen extends Component {
+	ownerComponent: Component;
+
 	_elseMode = false;
 
 	_if: TRtIfThenIfCell;
@@ -87,12 +89,7 @@ export default class RtIfThen extends Component {
 	_render(changed: boolean) {
 		if (this._elseMode ? !this._if.get() : this._if.get()) {
 			let content = (this.props.content as DocumentFragment).cloneNode(true);
-
-			let { bindings, childComponents } = bindContent(
-				content,
-				(this.ownerComponent as Component),
-				this.props.context as Object
-			);
+			let { bindings, childComponents } = bindContent(content, this.ownerComponent, this.props.context as Object);
 
 			this._nodes = slice.call(content.childNodes);
 			this._bindings = bindings;

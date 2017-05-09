@@ -23,6 +23,11 @@ let createClass = (Utils as any).createClass;
 
 let map = Array.prototype.map;
 
+export interface IPossiblyComponentElement extends HTMLElement {
+	rioniteComponent?: Component | null;
+	$component?: Component;
+}
+
 export interface IComponentElement extends HTMLElement {
 	rioniteComponent: Component | null;
 	$component: Component;
@@ -42,17 +47,17 @@ let rePropertyChangeEventName = /property\-([\-0-9a-z]*)\-change/;
 
 function findChildComponentElements(
 	node: Node,
-	ownerComponent: Component,
-	context: Object,
+	ownerComponent: Component | null,
+	context: Object | null,
 	_childComponents?: Array<Component> | undefined
 ): Array<Component> | null {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		if (child.nodeType == Node.ELEMENT_NODE) {
-			let childComponent = (child as IComponentElement).$component;
+			let childComponent = (child as IPossiblyComponentElement).$component;
 
 			if (childComponent) {
 				childComponent.ownerComponent = ownerComponent;
-				childComponent.props.context = context as Object;
+				childComponent.props.context = context;
 
 				(_childComponents || (_childComponents = [])).push(childComponent);
 			}
@@ -82,7 +87,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static extend(elIs: string, description: any): typeof Component {
 		description.Extends = this;
 		(description.Static || (description.Static = {})).elementIs = elIs;
-		return (registerComponent as any)(createClass(description));
+		return registerComponent(createClass(description));
 	}
 
 	static _registeredComponent: typeof Component;
@@ -304,11 +309,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			initElementAttributes(this);
 
 			if (constr.template == null) {
-				let childComponents = findChildComponentElements(
-					el,
-					this.ownerComponent as Component,
-					this.ownerComponent as Component
-				);
+				let childComponents = findChildComponentElements(el, this.ownerComponent, this.props.context);
 
 				if (childComponents) {
 					attachChildComponentElements(childComponents);
@@ -403,7 +404,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	$(name: string, container?: Component | HTMLElement): Component | HTMLElement | null {
 		let elList = this._getElementList(name, container);
-		return elList && elList.length ? (elList[0] as IComponentElement).$component || elList[0] : null;
+		return elList && elList.length ? (elList[0] as IPossiblyComponentElement).$component || elList[0] : null;
 	}
 
 	$$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement> {
