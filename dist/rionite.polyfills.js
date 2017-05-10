@@ -4877,9 +4877,6 @@ exports.default = [
     'focusin',
     'focusout',
     'input',
-    'keydown',
-    'keypress',
-    'keyup',
     'mousedown',
     'mouseup',
     'submit'
@@ -4917,23 +4914,15 @@ exports.default = initElementAttributes;
 Object.defineProperty(exports, "__esModule", { value: true });
 function onEvent(evt) {
     var isNativeEvent = evt instanceof Event;
-    var node;
-    var attrName;
+    var node = isNativeEvent ? evt.target : evt.target.element;
+    var attrName = (isNativeEvent ? 'rt-' : 'rt-component-') + evt.type;
     var targetEls;
-    if (isNativeEvent) {
-        node = evt.target;
-        attrName = 'rt-' + evt.type;
-    }
-    else {
-        node = evt.target.element;
-        attrName = 'rt-component-' + evt.type;
-    }
     for (;;) {
-        if (node.nodeType == Node.ELEMENT_NODE && node.hasAttribute(attrName)) {
+        if (node.hasAttribute(attrName)) {
             (targetEls || (targetEls = [])).push(node);
         }
         node = node.parentNode;
-        if (!node) {
+        if (!node || node == document) {
             break;
         }
         var component = node.$component;

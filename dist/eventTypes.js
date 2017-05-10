@@ -7,9 +7,6 @@ exports.default = [
     'focusin',
     'focusout',
     'input',
-    'keydown',
-    'keypress',
-    'keyup',
     'mousedown',
     'mouseup',
     'submit'

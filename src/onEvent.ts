@@ -3,26 +3,18 @@ import { IPossiblyComponentElement, default as Component } from './Component';
 
 export default function onEvent(evt: IEvent | Event) {
 	let isNativeEvent = evt instanceof Event;
-	let node: Node | null;
-	let attrName: string;
+	let node: Node | null = isNativeEvent ? evt.target as Node : (evt.target as Component).element;
+	let attrName = (isNativeEvent ? 'rt-' : 'rt-component-') + evt.type;
 	let targetEls: Array<HTMLElement> | undefined;
 
-	if (isNativeEvent) {
-		node = evt.target as Node;
-		attrName = 'rt-' + evt.type;
-	} else {
-		node = (evt.target as Component).element;
-		attrName = 'rt-component-' + evt.type;
-	}
-
 	for (;;) {
-		if (node.nodeType == Node.ELEMENT_NODE && (node as HTMLElement).hasAttribute(attrName)) {
+		if ((node as HTMLElement).hasAttribute(attrName)) {
 			(targetEls || (targetEls = [])).push(node as HTMLElement);
 		}
 
 		node = node.parentNode;
 
-		if (!node) {
+		if (!node || node == document) {
 			break;
 		}
 
