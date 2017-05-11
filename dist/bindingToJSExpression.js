@@ -10,7 +10,7 @@ function bindingToJSExpression(binding) {
     if (cache[bindingRaw]) {
         return cache[bindingRaw];
     }
-    var keys = binding.keypath.value.split('.');
+    var keys = binding.keypath.split('.');
     var keyCount = keys.length;
     var formatters = binding.formatters;
     if (keyCount == 1) {

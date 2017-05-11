@@ -9,14 +9,6 @@ let mixin = Utils.mixin;
 
 let push = Array.prototype.push;
 
-function initBlockNames(componentConstr: typeof Component, parentComponentConstr: typeof Component, elIs: string) {
-	componentConstr._blockNames = [elIs];
-
-	if (parentComponentConstr._blockNames) {
-		push.apply(componentConstr._blockNames, parentComponentConstr._blockNames);
-	}
-}
-
 export default function registerComponent(componentConstr: typeof Component) {
 	if (componentConstr._registeredComponent === componentConstr) {
 		throw new TypeError('Component already registered');
@@ -38,28 +30,26 @@ export default function registerComponent(componentConstr: typeof Component) {
 
 	let template = componentConstr.template;
 
-	if (template !== undefined && template !== parentComponentConstr.template) {
-		if (template === null) {
-			componentConstr.template = null;
-		} else {
-			if (template instanceof BemlTemplate) {
-				componentConstr.template = template;
-			} else {
-				if (parentComponentConstr.template) {
-					componentConstr.template = (parentComponentConstr.template as BemlTemplate)
-						.extend(template, { blockName: elIs });
-				} else {
-					componentConstr.template = new BemlTemplate(template, { blockName: elIs });
-				}
-			}
+	componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
 
-			initBlockNames(componentConstr, parentComponentConstr, elIs);
+	if (template !== null && template !== parentComponentConstr.template) {
+		if (template instanceof BemlTemplate) {
+			componentConstr.template = template;
+		} else if (parentComponentConstr.template) {
+			componentConstr.template = (parentComponentConstr.template as BemlTemplate)
+				.extend(template, { blockName: elIs });
+		} else {
+			componentConstr.template = new BemlTemplate(template, { blockName: elIs });
 		}
 	}
 
-	componentConstr._blockNamesString = elIs + ' ' + parentComponentConstr._blockNamesString;
+	componentConstr._contentBlockNames = [elIs];
 
-	componentConstr._templateContent = undefined;
+	if (parentComponentConstr._contentBlockNames) {
+		push.apply(componentConstr._contentBlockNames, parentComponentConstr._contentBlockNames);
+	}
+
+	componentConstr._rawContent = undefined;
 
 	componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
 

@@ -100,13 +100,13 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	static i18n: { [key: string]: any };
 
+	static _blockNamesString: string;
+
 	static template: string | IBlock | BemlTemplate | null = null;
+	static _contentBlockNames: Array<string>;
 
-	static _blockNamesString: string = '';
+	static _rawContent: DocumentFragment | undefined;
 
-	static _templateContent: DocumentFragment | undefined;
-
-	static _blockNames: Array<string>;
 	static _elementClassNameMap: IComponentElementClassNameMap;
 
 	static events: IComponentEvents<Component> | null = null;
@@ -323,14 +323,13 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				moveContent((this.props.content = document.createDocumentFragment()), el);
 				ElementsController.skipConnectionStatusCallbacks = false;
 
-				let templateContent = constr._templateContent;
+				let rawContent = constr._rawContent;
 
-				if (!templateContent) {
-					templateContent = constr._templateContent =
-						htmlToFragment((constr.template as BemlTemplate).render());
+				if (!rawContent) {
+					rawContent = constr._rawContent = htmlToFragment((constr.template as BemlTemplate).render());
 				}
 
-				let content = templateContent.cloneNode(true);
+				let content = rawContent.cloneNode(true);
 				let { bindings, childComponents } = bindContent(content, this);
 
 				this._bindings = bindings;
@@ -409,7 +408,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	$$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement> {
 		let elList = this._getElementList(name, container);
-		return elList ? map.call(elList, (el: IComponentElement) => el.$component || el) : [];
+		return elList ? map.call(elList, (el: IPossiblyComponentElement) => el.$component || el) : [];
 	}
 
 	_getElementList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined {
@@ -428,14 +427,10 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				elList = containerEl.getElementsByClassName(className) as NodeListOf<HTMLElement>;
 				elListMap.set(key, elList);
 			} else {
-				let blockNames = constr._blockNames;
+				let contentBlockNames = constr._contentBlockNames;
 
-				if (!blockNames) {
-					throw new TypeError('Component must have a template');
-				}
-
-				for (let i = blockNames.length; i;) {
-					className = blockNames[--i] + '__' + name;
+				for (let i = contentBlockNames.length; i;) {
+					className = contentBlockNames[--i] + '__' + name;
 
 					elList = containerEl.getElementsByClassName(className) as NodeListOf<HTMLElement>;
 

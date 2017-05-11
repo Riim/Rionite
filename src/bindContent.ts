@@ -63,7 +63,7 @@ export default function bindContent(
 										(
 											readedValue = readValue(
 												context as Object,
-												(parsedValue[0] as IContentBinding).keypath.value
+												(parsedValue[0] as IContentBinding).keypath
 											)
 										)
 								) {
@@ -130,7 +130,7 @@ export default function bindContent(
 									(
 										readedValue = readValue(
 											context as Object,
-											(parsedContent[0] as IContentBinding).keypath.value
+											(parsedContent[0] as IContentBinding).keypath
 										)
 									)
 							) {

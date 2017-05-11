@@ -32,10 +32,10 @@ export default class Component extends EventEmitter implements DisposableMixin {
     static i18n: {
         [key: string]: any;
     };
-    static template: string | IBlock | BemlTemplate | null;
     static _blockNamesString: string;
-    static _templateContent: DocumentFragment | undefined;
-    static _blockNames: Array<string>;
+    static template: string | IBlock | BemlTemplate | null;
+    static _contentBlockNames: Array<string>;
+    static _rawContent: DocumentFragment | undefined;
     static _elementClassNameMap: IComponentElementClassNameMap;
     static events: IComponentEvents<Component> | null;
     _disposables: typeof DisposableMixin.prototype._disposables;

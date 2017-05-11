@@ -41,7 +41,7 @@ function bindContent(content, ownerComponent, context) {
                                 var readedValue = void 0;
                                 if (parsedValue.length == 1 &&
                                     !parsedValue[0].formatters &&
-                                    (readedValue = readValue(context, parsedValue[0].keypath.value))) {
+                                    (readedValue = readValue(context, parsedValue[0].keypath))) {
                                     var value_1 = readedValue.value;
                                     if (value_1 && typeof value_1 == 'object') {
                                         var key = compileContent_1.nextComponentPropertyValueKey();
@@ -92,7 +92,7 @@ function bindContent(content, ownerComponent, context) {
                             var readedValue = void 0;
                             if (parsedContent.length == 1 &&
                                 !parsedContent[0].formatters &&
-                                (readedValue = readValue(context, parsedContent[0].keypath.value))) {
+                                (readedValue = readValue(context, parsedContent[0].keypath))) {
                                 child.textContent = readedValue.value;
                             }
                             else {

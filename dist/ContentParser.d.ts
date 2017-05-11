@@ -7,15 +7,9 @@ export declare enum ContentNodeType {
 }
 export interface IContentNode {
     nodeType: ContentNodeType;
-    at: number;
-    raw: string;
 }
 export interface IContentTextNode extends IContentNode {
     nodeType: ContentNodeType.TEXT;
-    value: string;
-}
-export interface IContentBindingKeypath extends IContentNode {
-    nodeType: ContentNodeType.BINDING_KEYPATH;
     value: string;
 }
 export interface IContentBindingFormatterArguments extends IContentNode {
@@ -29,8 +23,9 @@ export interface IContentBindingFormatter extends IContentNode {
 }
 export interface IContentBinding extends IContentNode {
     nodeType: ContentNodeType.BINDING;
-    keypath: IContentBindingKeypath;
+    keypath: string;
     formatters: Array<IContentBindingFormatter> | null;
+    raw: string;
 }
 export declare type TContent = Array<IContentTextNode | IContentBinding>;
 export default class ContentParser {
@@ -43,7 +38,7 @@ export default class ContentParser {
     parse(): TContent;
     _pushText(value: string): void;
     _readBinding(): IContentBinding | null;
-    _readBindingKeypath(): IContentBindingKeypath | null;
+    _readBindingKeypath(): string | null;
     _readFormatter(): IContentBindingFormatter | null;
     _readFormatterArguments(): IContentBindingFormatterArguments | null;
     _readValueOrValueKeypath(): string | Object;

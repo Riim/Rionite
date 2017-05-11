@@ -17,7 +17,7 @@ export default function bindingToJSExpression(binding: IContentBinding): string 
 		return cache[bindingRaw];
 	}
 
-	let keys = binding.keypath.value.split('.');
+	let keys = binding.keypath.split('.');
 	let keyCount = keys.length;
 	let formatters = binding.formatters;
 

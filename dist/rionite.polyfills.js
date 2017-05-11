@@ -1779,12 +1779,11 @@ var Component = (function (_super) {
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                 moveContent_1.default((this.props.content = document.createDocumentFragment()), el);
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
-                var templateContent = constr._templateContent;
-                if (!templateContent) {
-                    templateContent = constr._templateContent =
-                        html_to_fragment_1.default(constr.template.render());
+                var rawContent = constr._rawContent;
+                if (!rawContent) {
+                    rawContent = constr._rawContent = html_to_fragment_1.default(constr.template.render());
                 }
-                var content = templateContent.cloneNode(true);
+                var content = rawContent.cloneNode(true);
                 var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
                 this._bindings = bindings;
                 this.element.appendChild(content);
@@ -1861,12 +1860,9 @@ var Component = (function (_super) {
                 elListMap.set(key, elList);
             }
             else {
-                var blockNames = constr._blockNames;
-                if (!blockNames) {
-                    throw new TypeError('Component must have a template');
-                }
-                for (var i = blockNames.length; i;) {
-                    className = blockNames[--i] + '__' + name;
+                var contentBlockNames = constr._contentBlockNames;
+                for (var i = contentBlockNames.length; i;) {
+                    className = contentBlockNames[--i] + '__' + name;
                     elList = containerEl.getElementsByClassName(className);
                     if (elList.length) {
                         constr._elementClassNameMap[name] = className;
@@ -1887,7 +1883,6 @@ Component.register = registerComponent_1.default;
 Component.elementExtends = null;
 Component.props = null;
 Component.template = null;
-Component._blockNamesString = '';
 Component.events = null;
 exports.default = Component;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;
@@ -2046,7 +2041,7 @@ function bindContent(content, ownerComponent, context) {
                                 var readedValue = void 0;
                                 if (parsedValue.length == 1 &&
                                     !parsedValue[0].formatters &&
-                                    (readedValue = readValue(context, parsedValue[0].keypath.value))) {
+                                    (readedValue = readValue(context, parsedValue[0].keypath))) {
                                     var value_1 = readedValue.value;
                                     if (value_1 && typeof value_1 == 'object') {
                                         var key = compileContent_1.nextComponentPropertyValueKey();
@@ -2097,7 +2092,7 @@ function bindContent(content, ownerComponent, context) {
                             var readedValue = void 0;
                             if (parsedContent.length == 1 &&
                                 !parsedContent[0].formatters &&
-                                (readedValue = readValue(context, parsedContent[0].keypath.value))) {
+                                (readedValue = readValue(context, parsedContent[0].keypath))) {
                                 child.textContent = readedValue.value;
                             }
                             else {
@@ -2674,14 +2669,12 @@ var ContentParser = (function () {
             var result = this.result;
             var resultLen = result.length;
             if (resultLen && result[resultLen - 1].nodeType == ContentNodeType.TEXT) {
-                result[resultLen - 1].value = result[resultLen - 1].raw += value;
+                result[resultLen - 1].value = value;
             }
             else {
                 result.push({
                     nodeType: ContentNodeType.TEXT,
-                    value: value,
-                    at: this.at,
-                    raw: value
+                    value: value
                 });
             }
         }
@@ -2702,7 +2695,6 @@ var ContentParser = (function () {
                     nodeType: ContentNodeType.BINDING,
                     keypath: keypath,
                     formatters: formatters || null,
-                    at: at,
                     raw: this.content.slice(at, this.at)
                 };
             }
@@ -2716,14 +2708,8 @@ var ContentParser = (function () {
         reKeypathOrNothing.lastIndex = this.at;
         var keypath = reKeypathOrNothing.exec(content)[0];
         if (keypath) {
-            var at = this.at;
             this.chr = content.charAt((this.at += keypath.length));
-            return {
-                nodeType: ContentNodeType.BINDING_KEYPATH,
-                value: keypath,
-                at: at,
-                raw: content.slice(at, this.at)
-            };
+            return keypath;
         }
         return null;
     };
@@ -2737,9 +2723,7 @@ var ContentParser = (function () {
             return {
                 nodeType: ContentNodeType.BINDING_FORMATTER,
                 name: name,
-                arguments: args,
-                at: at,
-                raw: this.content.slice(at, this.at)
+                arguments: args
             };
         }
         this.at = at;
@@ -2772,9 +2756,7 @@ var ContentParser = (function () {
         this._next();
         return {
             nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
-            value: args,
-            at: at,
-            raw: this.content.slice(at, this.at)
+            value: args
         };
     };
     ContentParser.prototype._readValueOrValueKeypath = function () {
@@ -4643,7 +4625,7 @@ function bindingToJSExpression(binding) {
     if (cache[bindingRaw]) {
         return cache[bindingRaw];
     }
-    var keys = binding.keypath.value.split('.');
+    var keys = binding.keypath.split('.');
     var keyCount = keys.length;
     var formatters = binding.formatters;
     if (keyCount == 1) {
@@ -4965,12 +4947,6 @@ var ElementProtoMixin_1 = __webpack_require__(6);
 var hyphenize_1 = __webpack_require__(8);
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
-function initBlockNames(componentConstr, parentComponentConstr, elIs) {
-    componentConstr._blockNames = [elIs];
-    if (parentComponentConstr._blockNames) {
-        push.apply(componentConstr._blockNames, parentComponentConstr._blockNames);
-    }
-}
 function registerComponent(componentConstr) {
     if (componentConstr._registeredComponent === componentConstr) {
         throw new TypeError('Component already registered');
@@ -4985,28 +4961,24 @@ function registerComponent(componentConstr) {
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
     var template = componentConstr.template;
-    if (template !== undefined && template !== parentComponentConstr.template) {
-        if (template === null) {
-            componentConstr.template = null;
+    componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
+    if (template !== null && template !== parentComponentConstr.template) {
+        if (template instanceof beml_1.Template) {
+            componentConstr.template = template;
+        }
+        else if (parentComponentConstr.template) {
+            componentConstr.template = parentComponentConstr.template
+                .extend(template, { blockName: elIs });
         }
         else {
-            if (template instanceof beml_1.Template) {
-                componentConstr.template = template;
-            }
-            else {
-                if (parentComponentConstr.template) {
-                    componentConstr.template = parentComponentConstr.template
-                        .extend(template, { blockName: elIs });
-                }
-                else {
-                    componentConstr.template = new beml_1.Template(template, { blockName: elIs });
-                }
-            }
-            initBlockNames(componentConstr, parentComponentConstr, elIs);
+            componentConstr.template = new beml_1.Template(template, { blockName: elIs });
         }
     }
-    componentConstr._blockNamesString = elIs + ' ' + parentComponentConstr._blockNamesString;
-    componentConstr._templateContent = undefined;
+    componentConstr._contentBlockNames = [elIs];
+    if (parentComponentConstr._contentBlockNames) {
+        push.apply(componentConstr._contentBlockNames, parentComponentConstr._contentBlockNames);
+    }
+    componentConstr._rawContent = undefined;
     componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
     var elExtends = componentConstr.elementExtends;
     var parentElConstr = elExtends ?
@@ -5156,16 +5128,16 @@ var Template = (function () {
                                 length: attrCount + !hasAttrClass
                             };
                             if (hasAttrClass) {
-                                attrList[attrList['class']] = ' class="' + this._renderElementClasses(elNames) +
+                                attrList[attrList['class']] = " class=\"<<" + elNames.join(',') + ">> " +
                                     attrList[attrList['class']].slice(' class="'.length);
                             }
                             else {
-                                attrList[attrCount] = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
+                                attrList[attrCount] = " class=\"<<" + elNames.join(',') + ">>\"";
                             }
                             renderedAttrs = join.call(attrList, '');
                         }
                         else if (!isHelper) {
-                            renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
+                            renderedAttrs = " class=\"<<" + elNames.join(',') + ">>\"";
                         }
                         else {
                             renderedAttrs = '';
@@ -5188,25 +5160,23 @@ var Template = (function () {
                     }
                     else if (!isHelper) {
                         if (elAttrs && elAttrs.list.length) {
-                            var renderedClasses = void 0;
+                            var elNamesInsert = void 0;
                             var attrs = '';
                             for (var _b = 0, _c = elAttrs.list; _b < _c.length; _b++) {
                                 var attr = _c[_b];
                                 var value = attr.value;
                                 if (attr.name == 'class') {
-                                    renderedClasses = this._renderElementClasses(elNames);
-                                    attrs += " class=\"" + (value ? renderedClasses + value : renderedClasses.slice(0, -1)) + "\"";
+                                    elNamesInsert = "<<" + elNames.slice(1).join(',') + ">>";
+                                    attrs += " class=\"" + (value ? elNamesInsert + ' ' + value : elNamesInsert) + "\"";
                                 }
                                 else {
                                     attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
                                 }
                             }
-                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + (renderedClasses ?
-                                attrs :
-                                " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" + attrs) + ">'");
+                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + (elNamesInsert ? attrs : " class=\"<<" + elNames.slice(1).join(',') + ">>\"" + attrs) + ">'");
                         }
                         else {
-                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
+                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"<<" + elNames.slice(1).join(',') + ">>\">'");
                         }
                     }
                 }
@@ -5257,21 +5227,19 @@ var Template = (function () {
             }
         }
     };
-    Template.prototype._renderElementClasses = function (elNames) {
-        var elClasses = elNames[0] ? this._elementClassesTemplate.join(elNames[0] + ' ') : '';
-        var elNameCount = elNames.length;
-        if (elNameCount > 1) {
-            for (var i = 1; i < elNameCount; i++) {
-                elClasses += this._elementClassesTemplate.join(elNames[i] + ' ');
-            }
-        }
-        return elClasses;
-    };
     Template.prototype.extend = function (beml, opts) {
         return new Template(beml, { __proto__: opts || null, parent: this });
     };
     Template.prototype.render = function () {
-        return this._renderer.call(this._elementRendererMap);
+        var _this = this;
+        return this._renderer.call(this._elementRendererMap).replace(/<<([^>]+)>>/g, function (match, names) { return _this._renderElementClasses(names.split(',')); });
+    };
+    Template.prototype._renderElementClasses = function (elNames) {
+        var elClasses = '';
+        for (var i = 0, l = elNames.length; i < l; i++) {
+            elClasses += this._elementClassesTemplate.join(elNames[i] + ' ');
+        }
+        return elClasses.slice(0, -1);
     };
     return Template;
 }());

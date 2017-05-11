@@ -216,12 +216,11 @@ var Component = (function (_super) {
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
                 moveContent_1.default((this.props.content = document.createDocumentFragment()), el);
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
-                var templateContent = constr._templateContent;
-                if (!templateContent) {
-                    templateContent = constr._templateContent =
-                        html_to_fragment_1.default(constr.template.render());
+                var rawContent = constr._rawContent;
+                if (!rawContent) {
+                    rawContent = constr._rawContent = html_to_fragment_1.default(constr.template.render());
                 }
-                var content = templateContent.cloneNode(true);
+                var content = rawContent.cloneNode(true);
                 var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
                 this._bindings = bindings;
                 this.element.appendChild(content);
@@ -298,12 +297,9 @@ var Component = (function (_super) {
                 elListMap.set(key, elList);
             }
             else {
-                var blockNames = constr._blockNames;
-                if (!blockNames) {
-                    throw new TypeError('Component must have a template');
-                }
-                for (var i = blockNames.length; i;) {
-                    className = blockNames[--i] + '__' + name;
+                var contentBlockNames = constr._contentBlockNames;
+                for (var i = contentBlockNames.length; i;) {
+                    className = contentBlockNames[--i] + '__' + name;
                     elList = containerEl.getElementsByClassName(className);
                     if (elList.length) {
                         constr._elementClassNameMap[name] = className;
@@ -324,7 +320,6 @@ Component.register = registerComponent_1.default;
 Component.elementExtends = null;
 Component.props = null;
 Component.template = null;
-Component._blockNamesString = '';
 Component.events = null;
 exports.default = Component;
 var DisposableMixinProto = DisposableMixin_1.default.prototype;

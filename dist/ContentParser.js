@@ -50,14 +50,12 @@ var ContentParser = (function () {
             var result = this.result;
             var resultLen = result.length;
             if (resultLen && result[resultLen - 1].nodeType == ContentNodeType.TEXT) {
-                result[resultLen - 1].value = result[resultLen - 1].raw += value;
+                result[resultLen - 1].value = value;
             }
             else {
                 result.push({
                     nodeType: ContentNodeType.TEXT,
-                    value: value,
-                    at: this.at,
-                    raw: value
+                    value: value
                 });
             }
         }
@@ -78,7 +76,6 @@ var ContentParser = (function () {
                     nodeType: ContentNodeType.BINDING,
                     keypath: keypath,
                     formatters: formatters || null,
-                    at: at,
                     raw: this.content.slice(at, this.at)
                 };
             }
@@ -92,14 +89,8 @@ var ContentParser = (function () {
         reKeypathOrNothing.lastIndex = this.at;
         var keypath = reKeypathOrNothing.exec(content)[0];
         if (keypath) {
-            var at = this.at;
             this.chr = content.charAt((this.at += keypath.length));
-            return {
-                nodeType: ContentNodeType.BINDING_KEYPATH,
-                value: keypath,
-                at: at,
-                raw: content.slice(at, this.at)
-            };
+            return keypath;
         }
         return null;
     };
@@ -113,9 +104,7 @@ var ContentParser = (function () {
             return {
                 nodeType: ContentNodeType.BINDING_FORMATTER,
                 name: name,
-                arguments: args,
-                at: at,
-                raw: this.content.slice(at, this.at)
+                arguments: args
             };
         }
         this.at = at;
@@ -148,9 +137,7 @@ var ContentParser = (function () {
         this._next();
         return {
             nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
-            value: args,
-            at: at,
-            raw: this.content.slice(at, this.at)
+            value: args
         };
     };
     ContentParser.prototype._readValueOrValueKeypath = function () {

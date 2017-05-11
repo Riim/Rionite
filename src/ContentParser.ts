@@ -12,17 +12,10 @@ export enum ContentNodeType {
 
 export interface IContentNode {
 	nodeType: ContentNodeType;
-	at: number;
-	raw: string;
 }
 
 export interface IContentTextNode extends IContentNode {
 	nodeType: ContentNodeType.TEXT;
-	value: string;
-}
-
-export interface IContentBindingKeypath extends IContentNode {
-	nodeType: ContentNodeType.BINDING_KEYPATH;
 	value: string;
 }
 
@@ -39,8 +32,9 @@ export interface IContentBindingFormatter extends IContentNode {
 
 export interface IContentBinding extends IContentNode {
 	nodeType: ContentNodeType.BINDING;
-	keypath: IContentBindingKeypath;
+	keypath: string;
 	formatters: Array<IContentBindingFormatter> | null;
+	raw: string;
 }
 
 export type TContent = Array<IContentTextNode | IContentBinding>;
@@ -104,13 +98,11 @@ export default class ContentParser {
 			let resultLen = result.length;
 
 			if (resultLen && result[resultLen - 1].nodeType == ContentNodeType.TEXT) {
-				(result[resultLen - 1] as IContentTextNode).value = result[resultLen - 1].raw += value;
+				(result[resultLen - 1] as IContentTextNode).value = value;
 			} else {
 				result.push({
 					nodeType: ContentNodeType.TEXT,
-					value,
-					at: this.at,
-					raw: value
+					value
 				});
 			}
 		}
@@ -141,7 +133,6 @@ export default class ContentParser {
 					nodeType: ContentNodeType.BINDING,
 					keypath,
 					formatters: formatters || null,
-					at,
 					raw: this.content.slice(at, this.at)
 				};
 			}
@@ -153,23 +144,15 @@ export default class ContentParser {
 		return null;
 	}
 
-	_readBindingKeypath(): IContentBindingKeypath | null {
+	_readBindingKeypath(): string | null {
 		let content = this.content;
 
 		reKeypathOrNothing.lastIndex = this.at;
 		let keypath = (reKeypathOrNothing.exec(content) as RegExpExecArray)[0];
 
 		if (keypath) {
-			let at = this.at;
-
 			this.chr = content.charAt((this.at += keypath.length));
-
-			return {
-				nodeType: ContentNodeType.BINDING_KEYPATH,
-				value: keypath,
-				at,
-				raw: content.slice(at, this.at)
-			};
+			return keypath;
 		}
 
 		return null;
@@ -189,9 +172,7 @@ export default class ContentParser {
 			return {
 				nodeType: ContentNodeType.BINDING_FORMATTER,
 				name,
-				arguments: args,
-				at,
-				raw: this.content.slice(at, this.at)
+				arguments: args
 			};
 		}
 
@@ -237,9 +218,7 @@ export default class ContentParser {
 
 		return {
 			nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
-			value: args,
-			at,
-			raw: this.content.slice(at, this.at)
+			value: args
 		};
 	}
 

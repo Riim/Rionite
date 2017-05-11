@@ -23,8 +23,6 @@ let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 export default class RtContent extends Component {
 	ownerComponent: Component;
 
-	_templateContent: DocumentFragment;
-
 	_attach() {
 		this._attached = true;
 
