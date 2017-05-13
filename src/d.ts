@@ -1,4 +1,4 @@
-import { IBlock, Template as BemlTemplate } from '@riim/beml';
+import { IBlock, Template } from '@riim/beml';
 import { IComponentEvents, default as Component } from './Component';
 
 let d = {
@@ -7,7 +7,7 @@ let d = {
 		elementExtends?: string | null,
 		props?: { [name: string]: any } | null,
 		i18n?: { [key: string]: any },
-		template?: string | IBlock | BemlTemplate | null,
+		template?: string | IBlock | Template | null,
 		events?: IComponentEvents<T> | null
 	}) {
 		return function(componentConstr: typeof Component) {

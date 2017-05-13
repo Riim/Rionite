@@ -1,4 +1,4 @@
-import { IBlock, Template as BemlTemplate } from '@riim/beml';
+import { IBlock, Template } from '@riim/beml';
 import { IComponentEvents, default as Component } from './Component';
 declare let d: {
     Component: <T extends Component>(config: {
@@ -10,7 +10,7 @@ declare let d: {
         i18n?: {
             [key: string]: any;
         } | undefined;
-        template?: string | IBlock | BemlTemplate | null | undefined;
+        template?: string | IBlock | Template | null | undefined;
         events?: IComponentEvents<T> | null | undefined;
     }) => (componentConstr: typeof Component) => void;
 };

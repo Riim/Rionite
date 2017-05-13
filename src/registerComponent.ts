@@ -1,5 +1,5 @@
 import { Utils } from 'cellx';
-import { Template as BemlTemplate } from '@riim/beml';
+import { Template } from '@riim/beml';
 import Component from './Component';
 import elementConstructorMap from './elementConstructorMap';
 import ElementProtoMixin from './ElementProtoMixin';
@@ -28,19 +28,14 @@ export default function registerComponent(componentConstr: typeof Component) {
 
 	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor as typeof Component;
 
-	let template = componentConstr.template;
-
 	componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
 
+	let template = componentConstr.template;
+
 	if (template !== null && template !== parentComponentConstr.template) {
-		if (template instanceof BemlTemplate) {
-			componentConstr.template = template;
-		} else if (parentComponentConstr.template) {
-			componentConstr.template = (parentComponentConstr.template as BemlTemplate)
-				.extend(template, { blockName: elIs });
-		} else {
-			componentConstr.template = new BemlTemplate(template, { blockName: elIs });
-		}
+		componentConstr.template = template instanceof Template ?
+			template.setBlockName(elIs) :
+			new Template(template, { blockName: elIs });
 	}
 
 	componentConstr._contentBlockNames = [elIs];

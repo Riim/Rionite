@@ -1,5 +1,5 @@
 import { IEvent, IEventEmitterListener, EventEmitter } from 'cellx';
-import { IBlock, Template as BemlTemplate } from '@riim/beml';
+import { IBlock, Template } from '@riim/beml';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
 import registerComponent from './registerComponent';
 import { IComponentProperties } from './ComponentProperties';
@@ -33,7 +33,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
         [key: string]: any;
     };
     static _blockNamesString: string;
-    static template: string | IBlock | BemlTemplate | null;
+    static template: string | IBlock | Template | null;
     static _contentBlockNames: Array<string>;
     static _rawContent: DocumentFragment | undefined;
     static _elementClassNameMap: IComponentElementClassNameMap;

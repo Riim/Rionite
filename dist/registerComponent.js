@@ -20,19 +20,12 @@ function registerComponent(componentConstr) {
         throw new TypeError("No need to declare property \"" + (props.content ? 'content' : 'context') + "\"");
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
-    var template = componentConstr.template;
     componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
+    var template = componentConstr.template;
     if (template !== null && template !== parentComponentConstr.template) {
-        if (template instanceof beml_1.Template) {
-            componentConstr.template = template;
-        }
-        else if (parentComponentConstr.template) {
-            componentConstr.template = parentComponentConstr.template
-                .extend(template, { blockName: elIs });
-        }
-        else {
-            componentConstr.template = new beml_1.Template(template, { blockName: elIs });
-        }
+        componentConstr.template = template instanceof beml_1.Template ?
+            template.setBlockName(elIs) :
+            new beml_1.Template(template, { blockName: elIs });
     }
     componentConstr._contentBlockNames = [elIs];
     if (parentComponentConstr._contentBlockNames) {

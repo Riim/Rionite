@@ -3937,7 +3937,7 @@ exports.default = htmlToFragment;
 Object.defineProperty(exports, "__esModule", { value: true });
 var beml_1 = __webpack_require__(12);
 exports.BemlParser = beml_1.Parser;
-exports.BemlTemplate = beml_1.Template;
+exports.Template = beml_1.Template;
 var escape_string_1 = __webpack_require__(14);
 var escape_html_1 = __webpack_require__(13);
 var html_to_fragment_1 = __webpack_require__(30);
@@ -4960,19 +4960,12 @@ function registerComponent(componentConstr) {
         throw new TypeError("No need to declare property \"" + (props.content ? 'content' : 'context') + "\"");
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
-    var template = componentConstr.template;
     componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
+    var template = componentConstr.template;
     if (template !== null && template !== parentComponentConstr.template) {
-        if (template instanceof beml_1.Template) {
-            componentConstr.template = template;
-        }
-        else if (parentComponentConstr.template) {
-            componentConstr.template = parentComponentConstr.template
-                .extend(template, { blockName: elIs });
-        }
-        else {
-            componentConstr.template = new beml_1.Template(template, { blockName: elIs });
-        }
+        componentConstr.template = template instanceof beml_1.Template ?
+            template.setBlockName(elIs) :
+            new beml_1.Template(template, { blockName: elIs });
     }
     componentConstr._contentBlockNames = [elIs];
     if (parentComponentConstr._contentBlockNames) {
@@ -5037,9 +5030,7 @@ var Template = (function () {
         var block = typeof beml == 'string' ? new Parser_1.default(beml).parse() : beml;
         var blockName = opts && opts.blockName || block.name;
         this._elementClassesTemplate = parent ?
-            (blockName ?
-                [blockName + elDelimiter].concat(parent._elementClassesTemplate) :
-                parent._elementClassesTemplate) :
+            [blockName ? blockName + elDelimiter : ''].concat(parent._elementClassesTemplate) :
             [blockName ? blockName + elDelimiter : '', ''];
         this._elements = [(this._currentElement = { name: null, superCall: false, source: null, innerSource: [] })];
         var elMap = this._elementMap = {};
@@ -5229,6 +5220,10 @@ var Template = (function () {
     };
     Template.prototype.extend = function (beml, opts) {
         return new Template(beml, { __proto__: opts || null, parent: this });
+    };
+    Template.prototype.setBlockName = function (blockName) {
+        this._elementClassesTemplate[0] = blockName ? blockName + elDelimiter : '';
+        return this;
     };
     Template.prototype.render = function () {
         var _this = this;

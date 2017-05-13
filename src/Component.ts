@@ -1,5 +1,5 @@
 import { IEvent, IEventEmitterListener, EventEmitter, JS, Utils } from 'cellx';
-import { IBlock, Template as BemlTemplate } from '@riim/beml';
+import { IBlock, Template } from '@riim/beml';
 import htmlToFragment from 'html-to-fragment';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
 import elementConstructorMap from './elementConstructorMap';
@@ -102,7 +102,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	static _blockNamesString: string;
 
-	static template: string | IBlock | BemlTemplate | null = null;
+	static template: string | IBlock | Template | null = null;
 	static _contentBlockNames: Array<string>;
 
 	static _rawContent: DocumentFragment | undefined;
@@ -326,7 +326,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				let rawContent = constr._rawContent;
 
 				if (!rawContent) {
-					rawContent = constr._rawContent = htmlToFragment((constr.template as BemlTemplate).render());
+					rawContent = constr._rawContent = htmlToFragment((constr.template as Template).render());
 				}
 
 				let content = rawContent.cloneNode(true);
