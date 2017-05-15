@@ -1,9 +1,8 @@
-import { IEventData, IEvent, Cell } from 'cellx';
-
-export type TFrozenStateChangeEvents = Array<{ listener: (evt: IEvent) => boolean | void; context: any }>;
+import { IEvent, IEventEmitterListener, Cell } from 'cellx';
 
 export interface IFrozenState {
-	changeEvents: TFrozenStateChangeEvents;
+	changeEventListener: IEventEmitterListener;
+	changeEventContext: any;
 	value: any;
 }
 
@@ -16,27 +15,29 @@ export interface IFreezableCell extends Cell<any> {
 	_frozenState: IFrozenState | null;
 
 	_addToRelease(): void;
-	_handleErrorEvent(evt: IEventData): void;
 }
 
 function freezeBinding(binding: IFreezableCell) {
-	binding._frozenState = {
-		changeEvents: binding.getEvents('change') as TFrozenStateChangeEvents,
-		value: binding._value
+	let changeEvent = binding._events.get('change') as any as {
+		listener: IEventEmitterListener;
+		context: any;
 	};
 
-	binding.off();
+	binding._events.delete('change');
+
+	binding._frozenState = {
+		changeEventListener: changeEvent.listener,
+		changeEventContext: changeEvent.context,
+		value: binding._value
+	};
 }
 
 function unfreezeBinding(binding: IFreezableCell) {
 	let frozenState = binding._frozenState as IFrozenState;
-	let changeEvents = frozenState.changeEvents;
 
 	binding._frozenState = null;
 
-	for (let evt of changeEvents) {
-		binding.on('change', evt.listener, evt.context);
-	}
+	binding.on('change', frozenState.changeEventListener, frozenState.changeEventContext);
 
 	if (frozenState.value !== binding._value) {
 		binding._changeEvent = {
@@ -61,11 +62,11 @@ export function freezeBindings(bindings: Array<IFreezableCell>) {
 }
 
 export function unfreezeBindings(bindings: Array<IFreezableCell>) {
-	Cell.forceRelease();
+	Cell.afterRelease(() => {
+		for (let binding of bindings) {
+			unfreezeBinding(binding);
+		}
 
-	for (let binding of bindings) {
-		unfreezeBinding(binding);
-	}
-
-	Cell.forceRelease();
+		Cell.forceRelease();
+	});
 }

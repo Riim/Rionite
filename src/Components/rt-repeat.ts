@@ -214,7 +214,7 @@ export default class RtRepeat extends Component {
 		let indexCell = new Cell(index);
 
 		let content = this._rawItemContent.cloneNode(true);
-		let { bindings, childComponents } = bindContent(content, this.ownerComponent, Object.create(this._context, {
+		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(this._context, {
 			[this._itemName]: {
 				get() {
 					return itemCell.get();

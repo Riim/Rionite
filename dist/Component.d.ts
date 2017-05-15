@@ -45,12 +45,12 @@ export default class Component extends EventEmitter implements DisposableMixin {
     element: IComponentElement;
     readonly props: IComponentProperties;
     _bindings: Array<IFreezableCell> | null;
-    _elementListMap: Map<string, NodeListOf<HTMLElement>>;
+    _elementListMap: Map<string, NodeListOf<Element>>;
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;
     _silent: boolean;
-    constructor(el?: HTMLElement | string, props?: {
+    constructor(el?: HTMLElement, props?: {
         [name: string]: any;
     });
     _on(type: string, listener: IEventEmitterListener, context: any): void;
@@ -74,7 +74,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     elementAttached(): void;
     elementDetached(): void;
     elementMoved(): void;
-    $(name: string, container?: Component | HTMLElement): Component | HTMLElement | null;
-    $$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement>;
-    _getElementList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined;
+    $(name: string, container?: Component | Element): Component | Element | null;
+    $$(name: string, container?: Component | Element): Array<Component | Element>;
+    _getElementList(name: string, container?: Component | Element): NodeListOf<Element> | undefined;
 }

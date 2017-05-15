@@ -71,19 +71,8 @@ var Component = (function (_super) {
         if (constr._registeredComponent !== constr) {
             throw new TypeError('Component must be registered');
         }
-        if (el === undefined) {
+        if (!el) {
             el = document.createElement(constr.elementIs);
-        }
-        else if (typeof el == 'string') {
-            var elIs = constr.elementIs;
-            var html = el;
-            el = document.createElement(elIs);
-            el.innerHTML = html;
-            var firstChild = el.firstChild;
-            if (firstChild && firstChild == el.lastChild && firstChild.nodeType == Node.ELEMENT_NODE && (firstChild.tagName.toLowerCase() == elIs ||
-                firstChild.getAttribute('is') == elIs)) {
-                el = firstChild;
-            }
         }
         _this.element = el;
         el.rioniteComponent = _this;
@@ -221,7 +210,7 @@ var Component = (function (_super) {
                     rawContent = constr._rawContent = html_to_fragment_1.default(constr.template.render());
                 }
                 var content = rawContent.cloneNode(true);
-                var _a = bindContent_1.default(content, this), bindings = _a.bindings, childComponents = _a.childComponents;
+                var _a = bindContent_1.default(content, this), bindings = _a[0], childComponents = _a[1];
                 this._bindings = bindings;
                 this.element.appendChild(content);
                 if (!Features_1.nativeCustomElements && childComponents) {

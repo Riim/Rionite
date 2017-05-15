@@ -116,9 +116,6 @@ function bindContent(content, ownerComponent, context) {
         }
     }
     bind(content);
-    return {
-        bindings: bindings || null,
-        childComponents: childComponents || null
-    };
+    return [bindings || null, childComponents || null];
 }
 exports.default = bindContent;

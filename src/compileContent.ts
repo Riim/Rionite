@@ -56,7 +56,7 @@ export default function compileContent(
 
 			(
 				ownerComponent[componentPropertyValuesKey] ||
-					(ownerComponent[componentPropertyValuesKey] = new Map<string, Object>())
+					(ownerComponent[componentPropertyValuesKey] = new Map())
 			).set(key, value);
 
 			return key;

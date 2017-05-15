@@ -1,5 +1,5 @@
 import { Cell } from 'cellx';
-import { IComponentElement, default as Component } from './Component';
+import { IPossiblyComponentElement, default as Component } from './Component';
 import { IContentBinding, default as ContentParser } from './ContentParser';
 import { nextComponentPropertyValueKey, default as compileContent } from './compileContent';
 import componentPropertyValuesKey from './componentPropertyValuesKey';
@@ -23,11 +23,10 @@ function readValue(obj: Object, keypath: string): { value: any } | null {
 		(value == null ? null : readValue(value, keypath.slice(index + 1)));
 }
 
-export default function bindContent(
-	content: Node,
-	ownerComponent: Component,
-	context?: Object
-): { bindings: Array<IFreezableCell> | null; childComponents: Array<Component> | null } {
+export default function bindContent(content: Node, ownerComponent: Component, context?: Object): [
+	Array<IFreezableCell> | null,
+	Array<Component> | null
+] {
 	if (!context) {
 		context = ownerComponent;
 	}
@@ -74,22 +73,22 @@ export default function bindContent(
 
 										(
 											ownerComponent[componentPropertyValuesKey] ||
-												(ownerComponent[componentPropertyValuesKey] = new Map<string, Object>())
+												(ownerComponent[componentPropertyValuesKey] = new Map())
 										).set(key, value);
 
-										setAttribute(child as HTMLElement, name, key);
+										setAttribute(child as Element, name, key);
 									} else {
-										setAttribute(child as HTMLElement, name, value);
+										setAttribute(child as Element, name, value);
 									}
 								} else {
 									let cell = new Cell<any>(compileContent(parsedValue, value, ownerComponent), {
 										owner: context,
 										onChange(evt) {
-											setAttribute(child as HTMLElement, name, evt.value);
+											setAttribute(child as Element, name, evt.value);
 										}
 									});
 
-									setAttribute(child as HTMLElement, name, cell.get());
+									setAttribute(child as Element, name, cell.get());
 
 									(bindings || (bindings = [])).push(cell as IFreezableCell);
 								}
@@ -97,7 +96,7 @@ export default function bindContent(
 						}
 					}
 
-					let childComponent = (child as IComponentElement).$component;
+					let childComponent = (child as IPossiblyComponentElement).$component;
 
 					if (childComponent) {
 						childComponent.ownerComponent = ownerComponent;
@@ -158,8 +157,5 @@ export default function bindContent(
 
 	bind(content);
 
-	return {
-		bindings: bindings || null,
-		childComponents: childComponents || null
-	};
+	return [bindings || null, childComponents || null];
 }

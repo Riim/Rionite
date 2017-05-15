@@ -179,7 +179,7 @@ var RtRepeat = (function (_super) {
                     return indexCell.get();
                 }
             },
-            _b))), bindings = _a.bindings, childComponents = _a.childComponents;
+            _b))), bindings = _a[0], childComponents = _a[1];
         var newItem = {
             item: itemCell,
             index: indexCell,

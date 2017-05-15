@@ -148,7 +148,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	_bindings: Array<IFreezableCell> | null;
 
-	_elementListMap: Map<string, NodeListOf<HTMLElement>>;
+	_elementListMap: Map<string, NodeListOf<Element>>;
 
 	_attached = false;
 
@@ -157,7 +157,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	_silent: boolean;
 
-	constructor(el?: HTMLElement | string, props?: { [name: string]: any }) {
+	constructor(el?: HTMLElement, props?: { [name: string]: any }) {
 		super();
 		DisposableMixin.call(this);
 
@@ -167,25 +167,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			throw new TypeError('Component must be registered');
 		}
 
-		if (el === undefined) {
+		if (!el) {
 			el = document.createElement(constr.elementIs);
-		} else if (typeof el == 'string') {
-			let elIs = constr.elementIs;
-			let html = el;
-
-			el = document.createElement(elIs);
-			el.innerHTML = html;
-
-			let firstChild = el.firstChild;
-
-			if (
-				firstChild && firstChild == el.lastChild && firstChild.nodeType == Node.ELEMENT_NODE && (
-					(firstChild as HTMLElement).tagName.toLowerCase() == elIs ||
-						(firstChild as HTMLElement).getAttribute('is') == elIs
-				)
-			) {
-				el = firstChild as HTMLElement;
-			}
 		}
 
 		this.element = el as IComponentElement;
@@ -330,7 +313,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				}
 
 				let content = rawContent.cloneNode(true);
-				let { bindings, childComponents } = bindContent(content, this);
+				let [bindings, childComponents] = bindContent(content, this);
 
 				this._bindings = bindings;
 
@@ -401,19 +384,19 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	// Utils
 
-	$(name: string, container?: Component | HTMLElement): Component | HTMLElement | null {
+	$(name: string, container?: Component | Element): Component | Element | null {
 		let elList = this._getElementList(name, container);
 		return elList && elList.length ? (elList[0] as IPossiblyComponentElement).$component || elList[0] : null;
 	}
 
-	$$(name: string, container?: Component | HTMLElement): Array<Component | HTMLElement> {
+	$$(name: string, container?: Component | Element): Array<Component | Element> {
 		let elList = this._getElementList(name, container);
 		return elList ? map.call(elList, (el: IPossiblyComponentElement) => el.$component || el) : [];
 	}
 
-	_getElementList(name: string, container?: Component | HTMLElement): NodeListOf<HTMLElement> | undefined {
-		let elListMap = this._elementListMap || (this._elementListMap = new Map<string, NodeListOf<HTMLElement>>());
-		let containerEl: HTMLElement = container ?
+	_getElementList(name: string, container?: Component | Element): NodeListOf<Element> | undefined {
+		let elListMap = this._elementListMap || (this._elementListMap = new Map<string, NodeListOf<Element>>());
+		let containerEl: Element = container ?
 			(container instanceof Component ? container.element : container) :
 			this.element;
 		let key = container ? getUID(containerEl) + '/' + name : name;
@@ -424,7 +407,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			let className = constr._elementClassNameMap[name];
 
 			if (className) {
-				elList = containerEl.getElementsByClassName(className) as NodeListOf<HTMLElement>;
+				elList = containerEl.getElementsByClassName(className) as NodeListOf<Element>;
 				elListMap.set(key, elList);
 			} else {
 				let contentBlockNames = constr._contentBlockNames;
@@ -432,7 +415,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				for (let i = contentBlockNames.length; i;) {
 					className = contentBlockNames[--i] + '__' + name;
 
-					elList = containerEl.getElementsByClassName(className) as NodeListOf<HTMLElement>;
+					elList = containerEl.getElementsByClassName(className) as NodeListOf<Element>;
 
 					if (elList.length) {
 						constr._elementClassNameMap[name] = className;

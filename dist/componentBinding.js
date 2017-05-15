@@ -2,20 +2,18 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 function freezeBinding(binding) {
+    var changeEvent = binding._events.get('change');
+    binding._events.delete('change');
     binding._frozenState = {
-        changeEvents: binding.getEvents('change'),
+        changeEventListener: changeEvent.listener,
+        changeEventContext: changeEvent.context,
         value: binding._value
     };
-    binding.off();
 }
 function unfreezeBinding(binding) {
     var frozenState = binding._frozenState;
-    var changeEvents = frozenState.changeEvents;
     binding._frozenState = null;
-    for (var _i = 0, changeEvents_1 = changeEvents; _i < changeEvents_1.length; _i++) {
-        var evt = changeEvents_1[_i];
-        binding.on('change', evt.listener, evt.context);
-    }
+    binding.on('change', frozenState.changeEventListener, frozenState.changeEventContext);
     if (frozenState.value !== binding._value) {
         binding._changeEvent = {
             target: binding,
@@ -37,11 +35,12 @@ function freezeBindings(bindings) {
 }
 exports.freezeBindings = freezeBindings;
 function unfreezeBindings(bindings) {
-    cellx_1.Cell.forceRelease();
-    for (var _i = 0, bindings_2 = bindings; _i < bindings_2.length; _i++) {
-        var binding = bindings_2[_i];
-        unfreezeBinding(binding);
-    }
-    cellx_1.Cell.forceRelease();
+    cellx_1.Cell.afterRelease(function () {
+        for (var _i = 0, bindings_2 = bindings; _i < bindings_2.length; _i++) {
+            var binding = bindings_2[_i];
+            unfreezeBinding(binding);
+        }
+        cellx_1.Cell.forceRelease();
+    });
 }
 exports.unfreezeBindings = unfreezeBindings;

@@ -29,27 +29,27 @@ export default class RtContent extends Component {
 		if (this.isReady) {
 			this._unfreezeBindings();
 		} else {
-			let props = this.props;
 			let ownerComponent = this.ownerComponent;
-			let ownerComponentInputContent = ownerComponent.props.content as DocumentFragment;
+			let props = this.props;
+			let ownerComponentContent = ownerComponent.props.content as DocumentFragment;
 			let content: DocumentFragment | undefined;
 
-			if (ownerComponentInputContent.firstChild) {
+			if (ownerComponentContent.firstChild) {
 				let selector = props.select;
 				let cloning = props.cloning;
 
 				if (selector) {
-					if (!templateTagFeature && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
-						let templates = ownerComponentInputContent.querySelectorAll('template');
+					if (!templateTagFeature && !ownerComponentContent[KEY_TEMPLATES_FIXED]) {
+						let templates = ownerComponentContent.querySelectorAll('template');
 
 						for (let i = templates.length; i;) {
 							templates[--i].content;
 						}
 
-						ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
+						ownerComponentContent[KEY_TEMPLATES_FIXED] = true;
 					}
 
-					let selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+					let selectedEls = ownerComponentContent.querySelectorAll(selector);
 					let selectedElCount = selectedEls.length;
 
 					if (selectedElCount) {
@@ -59,17 +59,17 @@ export default class RtContent extends Component {
 							content.appendChild(cloning ? selectedEls[i].cloneNode(true) : selectedEls[i]);
 						}
 					}
-				} else if (cloning) {
-					content = ownerComponentInputContent.cloneNode(true) as DocumentFragment;
 				} else {
-					content = ownerComponentInputContent;
+					content = cloning ?
+						ownerComponentContent.cloneNode(true) as DocumentFragment :
+						ownerComponentContent;
 				}
 			}
 
 			let el = this.element;
 			let getContext = props.getContext;
 
-			let { bindings, childComponents } = content ?
+			let [bindings, childComponents] = content ?
 				bindContent(
 					content,
 					ownerComponent.ownerComponent as Component,

@@ -13,12 +13,12 @@
 		enumerable: true,
 
 		get: function() {
-			if (this.__contentische__) {
-				return this.__contentische__;
+			if (this.__$$content__) {
+				return this.__$$content__;
 			}
 
 			if (this.tagName == 'TEMPLATE') {
-				var df = this.__contentische__ = d.createDocumentFragment();
+				var df = this.__$$content__ = d.createDocumentFragment();
 
 				for (var child; (child = this.firstChild);) {
 					df.appendChild(child);

@@ -1,1 +1,1 @@
-export default function setAttribute(el: HTMLElement, name: string, value: any): void;
+export default function setAttribute(el: Element, name: string, value: any): void;

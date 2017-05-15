@@ -36,22 +36,22 @@ var RtContent = (function (_super) {
             this._unfreezeBindings();
         }
         else {
-            var props = this.props;
             var ownerComponent = this.ownerComponent;
-            var ownerComponentInputContent = ownerComponent.props.content;
+            var props = this.props;
+            var ownerComponentContent = ownerComponent.props.content;
             var content = void 0;
-            if (ownerComponentInputContent.firstChild) {
+            if (ownerComponentContent.firstChild) {
                 var selector = props.select;
                 var cloning = props.cloning;
                 if (selector) {
-                    if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
-                        var templates = ownerComponentInputContent.querySelectorAll('template');
+                    if (!Features_1.templateTag && !ownerComponentContent[KEY_TEMPLATES_FIXED]) {
+                        var templates = ownerComponentContent.querySelectorAll('template');
                         for (var i = templates.length; i;) {
                             templates[--i].content;
                         }
-                        ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
+                        ownerComponentContent[KEY_TEMPLATES_FIXED] = true;
                     }
-                    var selectedEls = ownerComponentInputContent.querySelectorAll(selector);
+                    var selectedEls = ownerComponentContent.querySelectorAll(selector);
                     var selectedElCount = selectedEls.length;
                     if (selectedElCount) {
                         content = document.createDocumentFragment();
@@ -60,11 +60,10 @@ var RtContent = (function (_super) {
                         }
                     }
                 }
-                else if (cloning) {
-                    content = ownerComponentInputContent.cloneNode(true);
-                }
                 else {
-                    content = ownerComponentInputContent;
+                    content = cloning ?
+                        ownerComponentContent.cloneNode(true) :
+                        ownerComponentContent;
                 }
             }
             var el = this.element;
@@ -73,7 +72,7 @@ var RtContent = (function (_super) {
                 bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
                     ownerComponent[getContext](this, ownerComponent.props.context) :
                     ownerComponent.props.context) :
-                bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _a.bindings, childComponents = _a.childComponents;
+                bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _a[0], childComponents = _a[1];
             this._bindings = bindings;
             if (content) {
                 if (el.firstChild) {

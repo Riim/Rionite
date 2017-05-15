@@ -5,11 +5,11 @@ export default function onEvent(evt: IEvent | Event) {
 	let isNativeEvent = evt instanceof Event;
 	let node: Node | null = isNativeEvent ? evt.target as Node : (evt.target as Component).element;
 	let attrName = (isNativeEvent ? 'rt-' : 'rt-component-') + evt.type;
-	let targetEls: Array<HTMLElement> | undefined;
+	let targetEls: Array<Element> | undefined;
 
 	for (;;) {
-		if ((node as HTMLElement).hasAttribute(attrName)) {
-			(targetEls || (targetEls = [])).push(node as HTMLElement);
+		if ((node as Element).hasAttribute(attrName)) {
+			(targetEls || (targetEls = [])).push(node as Element);
 		}
 
 		node = node.parentNode;

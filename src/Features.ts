@@ -1,7 +1,7 @@
 let dummyEl = document.createElement('div');
 
 dummyEl.innerHTML = '<template>1</template>';
-export let templateTag = !(dummyEl.firstChild as HTMLElement).firstChild;
+export let templateTag = !(dummyEl.firstChild as Node).firstChild;
 
 let nativeCustomElementsFeature = false;
 

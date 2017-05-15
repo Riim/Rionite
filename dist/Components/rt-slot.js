@@ -21,9 +21,12 @@ var Component_1 = require("../Component");
 var ElementProtoMixin_1 = require("../ElementProtoMixin");
 var bindContent_1 = require("../bindContent");
 var attachChildComponentElements_1 = require("../attachChildComponentElements");
+var moveContent_1 = require("../Utils/moveContent");
 var clearNode_1 = require("../Utils/clearNode");
 var Features_1 = require("../Features");
 var d_1 = require("../d");
+var Map = cellx_1.JS.Map;
+var KEY_SLOT_CONTENT_MAP = cellx_1.JS.Symbol('slotContentMap');
 var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
 var RtSlot = (function (_super) {
     __extends(RtSlot, _super);
@@ -36,45 +39,88 @@ var RtSlot = (function (_super) {
             this._unfreezeBindings();
         }
         else {
-            var props = this.props;
             var ownerComponent = this.ownerComponent;
-            var ownerComponentInputContent = ownerComponent.props.content;
+            var el = this.element;
+            var props = this.props;
+            var ownerComponentContent = ownerComponent.props.content;
             var content = void 0;
-            if (ownerComponentInputContent.firstChild) {
+            var bindings = void 0;
+            var childComponents = void 0;
+            if (ownerComponentContent.firstChild) {
                 var name_1 = props.name;
                 var cloneContent = props.cloneContent;
                 if (name_1) {
-                    if (!Features_1.templateTag && !ownerComponentInputContent[KEY_TEMPLATES_FIXED]) {
-                        var templates = ownerComponentInputContent.querySelectorAll('template');
-                        for (var i = templates.length; i;) {
-                            templates[--i].content;
-                        }
-                        ownerComponentInputContent[KEY_TEMPLATES_FIXED] = true;
+                    var contentMap = void 0;
+                    if (!cloneContent &&
+                        (contentMap = ownerComponent.ownerComponent[KEY_SLOT_CONTENT_MAP]) &&
+                        contentMap.has(name_1)) {
+                        var c = contentMap.get(name_1);
+                        content = moveContent_1.default(document.createDocumentFragment(), c);
+                        contentMap.set(name_1, el);
+                        bindings = c.$component._bindings;
+                        childComponents = c.$component._childComponents;
                     }
-                    var selectedEls = ownerComponentInputContent.querySelectorAll("[rt-slot=" + name_1 + "]");
-                    var selectedElCount = selectedEls.length;
-                    if (selectedElCount) {
-                        content = document.createDocumentFragment();
-                        for (var i = 0; i < selectedElCount; i++) {
-                            content.appendChild(cloneContent ? selectedEls[i].cloneNode(true) : selectedEls[i]);
+                    else {
+                        if (!Features_1.templateTag && !ownerComponentContent[KEY_TEMPLATES_FIXED]) {
+                            var templates = ownerComponentContent.querySelectorAll('template');
+                            for (var i = templates.length; i;) {
+                                templates[--i].content;
+                            }
+                            ownerComponentContent[KEY_TEMPLATES_FIXED] = true;
+                        }
+                        var selectedEls = ownerComponentContent.querySelectorAll("[rt-slot=" + name_1 + "]");
+                        var selectedElCount = selectedEls.length;
+                        if (selectedElCount) {
+                            content = document.createDocumentFragment();
+                            for (var i = 0; i < selectedElCount; i++) {
+                                content.appendChild(cloneContent ? selectedEls[i].cloneNode(true) : selectedEls[i]);
+                            }
+                        }
+                        if (!cloneContent) {
+                            (contentMap ||
+                                ownerComponent.ownerComponent[KEY_SLOT_CONTENT_MAP] ||
+                                (ownerComponent.ownerComponent[KEY_SLOT_CONTENT_MAP] = new Map())).set(name_1, el);
                         }
                     }
                 }
                 else if (cloneContent) {
-                    content = ownerComponentInputContent.cloneNode(true);
+                    content = ownerComponentContent.cloneNode(true);
                 }
                 else {
-                    content = ownerComponentInputContent;
+                    var contentMap = ownerComponent.ownerComponent[KEY_SLOT_CONTENT_MAP];
+                    if (contentMap && contentMap.has('')) {
+                        var c = contentMap.get('');
+                        content = moveContent_1.default(document.createDocumentFragment(), c);
+                        contentMap.set('', el);
+                        bindings = c.$component._bindings;
+                        childComponents = c.$component._childComponents;
+                    }
+                    else {
+                        content = ownerComponentContent;
+                        (contentMap || (ownerComponent.ownerComponent[KEY_SLOT_CONTENT_MAP] = new Map()))
+                            .set('', el);
+                    }
                 }
             }
-            var el = this.element;
-            var getContext = props.getContext;
-            var _a = content ?
-                bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
-                    ownerComponent[getContext](this, ownerComponent.props.context) :
-                    ownerComponent.props.context) :
-                bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), bindings = _a.bindings, childComponents = _a.childComponents;
-            this._bindings = bindings;
+            if (bindings === undefined) {
+                if (content || el.firstChild) {
+                    var getContext = props.getContext;
+                    _a = content ?
+                        bindContent_1.default(content, ownerComponent.ownerComponent, getContext ?
+                            ownerComponent[getContext](this, ownerComponent.props.context) :
+                            ownerComponent.props.context) :
+                        bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), this._bindings = _a[0], this._childComponents = _a[1];
+                }
+                else {
+                    this._bindings = null;
+                    this._childComponents = null;
+                }
+            }
+            else {
+                this._bindings = bindings;
+                this._childComponents = childComponents;
+                this._unfreezeBindings();
+            }
             if (content) {
                 if (el.firstChild) {
                     ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
@@ -88,6 +134,7 @@ var RtSlot = (function (_super) {
             }
             this.isReady = true;
         }
+        var _a;
     };
     RtSlot.prototype._detach = function () {
         this._attached = false;

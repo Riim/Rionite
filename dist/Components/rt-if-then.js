@@ -79,7 +79,7 @@ var RtIfThen = (function (_super) {
         var _this = this;
         if (this._elseMode ? !this._if.get() : this._if.get()) {
             var content = this.props.content.cloneNode(true);
-            var _a = bindContent_1.default(content, this.ownerComponent, this.props.context), bindings = _a.bindings, childComponents = _a.childComponents;
+            var _a = bindContent_1.default(content, this.ownerComponent, this.props.context), bindings = _a[0], childComponents = _a[1];
             this._nodes = slice.call(content.childNodes);
             this._bindings = bindings;
             this.element.parentNode.insertBefore(content, this.element.nextSibling);
