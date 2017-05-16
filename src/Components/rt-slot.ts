@@ -4,6 +4,7 @@ import { ElementsController } from '../ElementProtoMixin';
 import bindContent from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import attachChildComponentElements from '../attachChildComponentElements';
+import getUID from '../Utils/getUID';
 import moveContent from '../Utils/moveContent';
 import clearNode from '../Utils/clearNode';
 import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
@@ -39,31 +40,36 @@ export default class RtSlot extends Component {
 			let ownerComponent = this.ownerComponent;
 			let el = this.element;
 			let props = this.props;
+			let contentOwnerComponent = ownerComponent.ownerComponent;
 			let ownerComponentContent = ownerComponent.props.content as DocumentFragment;
+			let cloneContent = props.cloneContent;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
 			let childComponents: Array<Component> | null | undefined;
 
-			if (ownerComponentContent.firstChild) {
+			if (!cloneContent || ownerComponentContent.firstChild) {
 				let name = props.name;
-				let cloneContent = props.cloneContent;
+				let key = getUID(ownerComponent) + '/' + (name || '');
 
 				if (name) {
 					let contentMap: Map<string, IComponentElement> | undefined;
 
 					if (
 						!cloneContent &&
-							(contentMap = (ownerComponent.ownerComponent as Component)[KEY_SLOT_CONTENT_MAP]) &&
-							contentMap.has(name)
+							contentOwnerComponent &&
+							(contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
+							contentMap.has(key)
 					) {
-						let c: IComponentElement = contentMap.get(name);
+						let c: IComponentElement = contentMap.get(key);
 
-						content = moveContent(document.createDocumentFragment(), c);
-						contentMap.set(name, el);
+						if (c.firstChild) {
+							content = moveContent(document.createDocumentFragment(), c);
+							contentMap.set(key, el);
 
-						bindings = c.$component._bindings;
-						childComponents = (c.$component as RtSlot)._childComponents;
-					} else {
+							bindings = c.$component._bindings;
+							childComponents = (c.$component as RtSlot)._childComponents;
+						}
+					} else if (ownerComponentContent.firstChild) {
 						if (!templateTagFeature && !ownerComponentContent[KEY_TEMPLATES_FIXED]) {
 							let templates = ownerComponentContent.querySelectorAll('template');
 
@@ -85,33 +91,34 @@ export default class RtSlot extends Component {
 							}
 						}
 
-						if (!cloneContent) {
+						if (!cloneContent && contentOwnerComponent) {
 							(
 								contentMap ||
-									(ownerComponent.ownerComponent as Component)[KEY_SLOT_CONTENT_MAP] ||
-									((ownerComponent.ownerComponent as Component)[KEY_SLOT_CONTENT_MAP] = new Map())
-							).set(name, el);
+									contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
+									(contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())
+							).set(key, el);
 						}
 					}
-				} else if (cloneContent) {
-					content = ownerComponentContent.cloneNode(true) as DocumentFragment;
-				} else {
+				} else if (!cloneContent && contentOwnerComponent) {
 					let contentMap: Map<string, IComponentElement> | undefined =
-						(ownerComponent.ownerComponent as Component)[KEY_SLOT_CONTENT_MAP];
+						contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
 
-					if (contentMap && contentMap.has('')) {
-						let c = contentMap.get('');
+					if (contentMap && contentMap.has(key)) {
+						let c = contentMap.get(key);
 
 						content = moveContent(document.createDocumentFragment(), c);
-						contentMap.set('', el);
+						contentMap.set(key, el);
 
 						bindings = c.$component._bindings;
 						childComponents = (c.$component as RtSlot)._childComponents;
-					} else {
+					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
-						(contentMap || ((ownerComponent.ownerComponent as Component)[KEY_SLOT_CONTENT_MAP] = new Map()))
-							.set('', el);
+						(contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())).set(key, el);
 					}
+				} else if (ownerComponentContent.firstChild) {
+					content = cloneContent ?
+						ownerComponentContent.cloneNode(true) as DocumentFragment :
+						ownerComponentContent;
 				}
 			}
 
@@ -119,10 +126,10 @@ export default class RtSlot extends Component {
 				if (content || el.firstChild) {
 					let getContext = props.getContext;
 
-					[this._bindings, this._childComponents] = content ?
+					[this._bindings, childComponents] = content ?
 						bindContent(
 							content,
-							ownerComponent.ownerComponent as Component,
+							contentOwnerComponent as Component,
 							getContext ?
 								ownerComponent[getContext](this, ownerComponent.props.context) :
 								ownerComponent.props.context
@@ -132,9 +139,11 @@ export default class RtSlot extends Component {
 							ownerComponent,
 							getContext ? ownerComponent[getContext](this, props.context) : props.context
 						);
+
+					this._childComponents = childComponents;
 				} else {
 					this._bindings = null;
-					this._childComponents = null;
+					childComponents = this._childComponents = null;
 				}
 			} else {
 				this._bindings = bindings;
@@ -153,7 +162,7 @@ export default class RtSlot extends Component {
 				el.appendChild(content);
 			}
 
-			if ((!content || !nativeCustomElementsFeature) && childComponents) {
+			if (!(content && nativeCustomElementsFeature) && childComponents) {
 				attachChildComponentElements(childComponents);
 			}
 
