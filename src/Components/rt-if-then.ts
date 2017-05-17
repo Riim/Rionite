@@ -12,7 +12,7 @@ let nextTick = Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
-export type TRtIfThenIfCell = Cell<boolean>;
+export type TIfCell = Cell<boolean>;
 
 let reKeypath = RegExp(`^${ keypathPattern }$`);
 
@@ -29,21 +29,23 @@ export default class RtIfThen extends Component {
 
 	_elseMode = false;
 
-	_if: TRtIfThenIfCell;
+	_if: TIfCell;
 
 	_nodes: Array<Node> | null;
 
-	_destroyed = false;
+	_active = false;
 
 	elementConnected() {
-		if (this._destroyed) {
-			throw new TypeError('Instance of RtIfThen was destroyed and can no longer be used');
+		if (this._active) {
+			return;
 		}
+
+		this._active = true;
 
 		if (!this.initialized) {
 			let props = this.props;
 
-			props.content = document.importNode((this.element as any).content, true) as DocumentFragment;
+			props.content = document.importNode((this.element as any as HTMLTemplateElement).content, true);
 
 			let if_ = (props['if'] || '').trim();
 
@@ -57,18 +59,18 @@ export default class RtIfThen extends Component {
 				return !!getIfValue.call(this);
 			}, { owner: props.context as Object });
 
-			this._if.on('change', this._onIfChange, this);
-
-			this._render(false);
-
 			this.initialized = true;
 		}
+
+		this._if.on('change', this._onIfChange, this);
+
+		this._render(false);
 	}
 
 	elementDisconnected() {
 		nextTick(() => {
 			if (!this.element[KEY_ELEMENT_CONNECTED]) {
-				this._destroy();
+				this._deactivate();
 			}
 		});
 	}
@@ -100,11 +102,11 @@ export default class RtIfThen extends Component {
 				attachChildComponentElements(childComponents);
 			}
 		} else {
-			this._destroyBindings();
-
 			let nodes = this._nodes;
 
 			if (nodes) {
+				this._destroyBindings();
+
 				for (let i = nodes.length; i;) {
 					let node = nodes[--i];
 					(node.parentNode as Node).removeChild(node);
@@ -115,25 +117,26 @@ export default class RtIfThen extends Component {
 		}
 
 		if (changed) {
-			nextTick(() => {
+			Cell.afterRelease(() => {
 				this.emit('change');
 			});
 		}
 	}
 
-	_destroy() {
-		if (this._destroyed) {
+	_deactivate() {
+		if (!this._active) {
 			return;
 		}
 
-		this._destroyed = true;
+		this._active = false;
 
-		this._destroyBindings();
 		this._if.off('change', this._onIfChange, this);
 
 		let nodes = this._nodes;
 
 		if (nodes) {
+			this._destroyBindings();
+
 			for (let i = nodes.length; i;) {
 				let node = nodes[--i];
 				let parentNode = node.parentNode;

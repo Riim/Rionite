@@ -33,13 +33,14 @@ var RtIfThen = (function (_super) {
     function RtIfThen() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._elseMode = false;
-        _this._destroyed = false;
+        _this._active = false;
         return _this;
     }
     RtIfThen.prototype.elementConnected = function () {
-        if (this._destroyed) {
-            throw new TypeError('Instance of RtIfThen was destroyed and can no longer be used');
+        if (this._active) {
+            return;
         }
+        this._active = true;
         if (!this.initialized) {
             var props = this.props;
             props.content = document.importNode(this.element.content, true);
@@ -51,16 +52,16 @@ var RtIfThen = (function (_super) {
             this._if = new cellx_1.Cell(function () {
                 return !!getIfValue_1.call(this);
             }, { owner: props.context });
-            this._if.on('change', this._onIfChange, this);
-            this._render(false);
             this.initialized = true;
         }
+        this._if.on('change', this._onIfChange, this);
+        this._render(false);
     };
     RtIfThen.prototype.elementDisconnected = function () {
         var _this = this;
         nextTick(function () {
             if (!_this.element[KEY_ELEMENT_CONNECTED_1.default]) {
-                _this._destroy();
+                _this._deactivate();
             }
         });
     };
@@ -88,9 +89,9 @@ var RtIfThen = (function (_super) {
             }
         }
         else {
-            this._destroyBindings();
             var nodes = this._nodes;
             if (nodes) {
+                this._destroyBindings();
                 for (var i = nodes.length; i;) {
                     var node = nodes[--i];
                     node.parentNode.removeChild(node);
@@ -99,20 +100,20 @@ var RtIfThen = (function (_super) {
             }
         }
         if (changed) {
-            nextTick(function () {
+            cellx_1.Cell.afterRelease(function () {
                 _this.emit('change');
             });
         }
     };
-    RtIfThen.prototype._destroy = function () {
-        if (this._destroyed) {
+    RtIfThen.prototype._deactivate = function () {
+        if (!this._active) {
             return;
         }
-        this._destroyed = true;
-        this._destroyBindings();
+        this._active = false;
         this._if.off('change', this._onIfChange, this);
         var nodes = this._nodes;
         if (nodes) {
+            this._destroyBindings();
             for (var i = nodes.length; i;) {
                 var node = nodes[--i];
                 var parentNode = node.parentNode;

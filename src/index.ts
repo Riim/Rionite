@@ -23,13 +23,13 @@ import {
 } from './Component';
 import RtContent from './Components/rt-content';
 import RtSlot from './Components/rt-slot';
-import { TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
+import { TIfCell as TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
 import RtIfElse from './Components/rt-if-else';
 import {
-	TRtRepeatListCell,
-	TRtRepeatItem,
-	TRtRepeatItemList,
-	TRtRepeatItemMap,
+	TListCell as TRtRepeatListCell,
+	IItem as IRtRepeatItem,
+	TItemList as TRtRepeatItemList,
+	TItemMap as TRtRepeatItemMap,
 	default as RtRepeat
 } from './Components/rt-repeat';
 import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
@@ -87,7 +87,7 @@ export {
 
 	TRtIfThenIfCell,
 	TRtRepeatListCell,
-	TRtRepeatItem,
+	IRtRepeatItem,
 	TRtRepeatItemList,
 	TRtRepeatItemMap,
 	Components,

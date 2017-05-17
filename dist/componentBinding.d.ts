@@ -4,7 +4,7 @@ export interface IFrozenState {
     changeEventContext: any;
     value: any;
 }
-export interface IFreezableCell extends Cell<any> {
+export interface IFreezableCell extends Cell {
     _value: any;
     _changeEvent: IEvent | null;
     _canCancelChange: boolean;

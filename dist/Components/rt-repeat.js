@@ -29,21 +29,23 @@ var d_1 = require("../d");
 var Map = cellx_1.JS.Map;
 var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
-var reForAttributeValue = RegExp("^\\s*(" + namePattern_1.default + ")\\s+of\\s+(" + keypathPattern_1.default + ")\\s*$");
+;
+var reForAttrValue = RegExp("^\\s*(" + namePattern_1.default + ")\\s+of\\s+(" + keypathPattern_1.default + ")\\s*$");
 var RtRepeat = (function (_super) {
     __extends(RtRepeat, _super);
     function RtRepeat() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this._destroyed = false;
+        _this._active = false;
         return _this;
     }
     RtRepeat.prototype.elementConnected = function () {
-        if (this._destroyed) {
-            throw new TypeError('Instance of RtRepeat was destroyed and can no longer be used');
+        if (this._active) {
+            return;
         }
+        this._active = true;
         if (!this.initialized) {
             var props = this.props;
-            var forAttrValue = props['for'].match(reForAttributeValue);
+            var forAttrValue = props['for'].match(reForAttrValue);
             if (!forAttrValue) {
                 throw new SyntaxError("Invalid value of attribute \"for\" (" + props['for'] + ")");
             }
@@ -74,17 +76,16 @@ var RtRepeat = (function (_super) {
                     }
                 }
             }
-            this._context = props.context;
-            this._list.on('change', this._onListChange, this);
-            this._render(false);
             this.initialized = true;
         }
+        this._list.on('change', this._onListChange, this);
+        this._render(false);
     };
     RtRepeat.prototype.elementDisconnected = function () {
         var _this = this;
         nextTick(function () {
             if (!_this.element[KEY_ELEMENT_CONNECTED_1.default]) {
-                _this._destroy();
+                _this._deactivate();
             }
         });
     };
@@ -99,24 +100,24 @@ var RtRepeat = (function (_super) {
     RtRepeat.prototype._detach = function () {
         this._attached = false;
     };
-    RtRepeat.prototype._render = function (c) {
+    RtRepeat.prototype._render = function (changed) {
         var _this = this;
-        var oldItemMap = this._oldItemMap = this._itemMap;
+        var prevItemMap = this._prevItemMap = this._itemMap;
         this._itemMap = new Map();
         var list = this._list.get();
-        var changed = false;
+        var c = false;
         if (list) {
             this._lastNode = this.element;
-            changed = list.reduce(function (changed, item, index) { return _this._renderItem(item, index) || changed; }, changed);
+            c = list.reduce(function (changed, item, index) { return _this._renderItem(item, index) || changed; }, c);
         }
-        if (oldItemMap.size) {
-            this._clearByItemMap(oldItemMap);
+        if (prevItemMap.size) {
+            this._clearByItemMap(prevItemMap);
         }
-        else if (!changed) {
+        else if (!c) {
             return;
         }
-        if (c) {
-            nextTick(function () {
+        if (changed) {
+            cellx_1.Cell.afterRelease(function () {
                 _this.emit('change');
             });
         }
@@ -124,19 +125,19 @@ var RtRepeat = (function (_super) {
     RtRepeat.prototype._renderItem = function (item, index) {
         var trackBy = this._trackBy;
         var value = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
-        var prevItems = this._oldItemMap.get(value);
-        var currentItems = this._itemMap.get(value);
+        var prevItems = this._prevItemMap.get(value);
+        var items = this._itemMap.get(value);
         if (prevItems) {
             var prevItem = void 0;
             if (prevItems.length == 1) {
                 prevItem = prevItems[0];
-                this._oldItemMap.delete(value);
+                this._prevItemMap.delete(value);
             }
             else {
                 prevItem = prevItems.shift();
             }
-            if (currentItems) {
-                currentItems.push(prevItem);
+            if (items) {
+                items.push(prevItem);
             }
             else {
                 this._itemMap.set(value, [prevItem]);
@@ -148,27 +149,31 @@ var RtRepeat = (function (_super) {
                 return false;
             }
             prevItem.index.set(index);
-            if (nodes.length == 1) {
+            var nodeCount = nodes.length;
+            if (nodeCount == 1) {
                 var node = nodes[0];
-                this._lastNode.parentNode.insertBefore(node, this._lastNode.nextSibling);
+                var nextNode = this._lastNode.nextSibling;
+                if (node !== nextNode) {
+                    this._lastNode.parentNode.insertBefore(node, nextNode);
+                }
                 this._lastNode = node;
             }
             else {
-                var df = document.createDocumentFragment();
-                for (var _i = 0, nodes_1 = nodes; _i < nodes_1.length; _i++) {
-                    var node = nodes_1[_i];
-                    df.appendChild(node);
+                if (nodes[0] !== this._lastNode.nextSibling) {
+                    var df = document.createDocumentFragment();
+                    for (var i = 0; i < nodeCount; i++) {
+                        df.appendChild(nodes[i]);
+                    }
+                    this._lastNode.parentNode.insertBefore(df, this._lastNode.nextSibling);
                 }
-                var newLastNode_1 = df.lastChild;
-                this._lastNode.parentNode.insertBefore(df, this._lastNode.nextSibling);
-                this._lastNode = newLastNode_1;
+                this._lastNode = nodes[nodeCount - 1];
             }
             return true;
         }
         var itemCell = new cellx_1.Cell(item);
         var indexCell = new cellx_1.Cell(index);
         var content = this._rawItemContent.cloneNode(true);
-        var _a = bindContent_1.default(content, this.ownerComponent, Object.create(this._context, (_b = {},
+        var _a = bindContent_1.default(content, this.ownerComponent, Object.create(this.props.context, (_b = {},
             _b[this._itemName] = {
                 get: function () {
                     return itemCell.get();
@@ -186,8 +191,8 @@ var RtRepeat = (function (_super) {
             nodes: slice.call(content.childNodes),
             bindings: bindings
         };
-        if (currentItems) {
-            currentItems.push(newItem);
+        if (items) {
+            items.push(newItem);
         }
         else {
             this._itemMap.set(value, [newItem]);
@@ -224,13 +229,13 @@ var RtRepeat = (function (_super) {
             }
         }
     };
-    RtRepeat.prototype._destroy = function () {
-        if (this._destroyed) {
+    RtRepeat.prototype._deactivate = function () {
+        if (!this._active) {
             return;
         }
-        this._destroyed = true;
-        this._clearByItemMap(this._itemMap);
+        this._active = false;
         this._list.off('change', this._onListChange, this);
+        this._clearByItemMap(this._itemMap);
     };
     return RtRepeat;
 }(Component_1.default));

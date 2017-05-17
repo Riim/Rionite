@@ -14,17 +14,17 @@ let nextTick = Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
-export type TRtRepeatListCell = Cell<ObservableList<Object>>;
-export type TRtRepeatItem = {
-	item: Cell<Object>,
-	index: Cell<number>,
-	nodes: Array<Node>,
-	bindings: Cell<any>[] | null
+export type TListCell = Cell<ObservableList<Object>>;
+export interface IItem {
+	item: Cell<Object>;
+	index: Cell<number>;
+	nodes: Array<Node>;
+	bindings: Cell[] | null;
 };
-export type TRtRepeatItemList = Array<TRtRepeatItem>;
-export type TRtRepeatItemMap = Map<any, TRtRepeatItemList>;
+export type TItemList = Array<IItem>;
+export type TItemMap = Map<any, TItemList>;
 
-let reForAttributeValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern })\\s*$`);
+let reForAttrValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern })\\s*$`);
 
 @d.Component({
 	elementIs: 'rt-repeat',
@@ -41,29 +41,29 @@ export default class RtRepeat extends Component {
 
 	_itemName: string;
 
-	_list: TRtRepeatListCell;
+	_list: TListCell;
 
-	_itemMap: TRtRepeatItemMap;
-	_oldItemMap: TRtRepeatItemMap;
+	_itemMap: TItemMap;
+	_prevItemMap: TItemMap;
 
 	_trackBy: string;
 
 	_rawItemContent: DocumentFragment;
 
-	_context: Object;
-
 	_lastNode: Node;
 
-	_destroyed = false;
+	_active = false;
 
 	elementConnected() {
-		if (this._destroyed) {
-			throw new TypeError('Instance of RtRepeat was destroyed and can no longer be used');
+		if (this._active) {
+			return;
 		}
+
+		this._active = true;
 
 		if (!this.initialized) {
 			let props = this.props;
-			let forAttrValue = props['for'].match(reForAttributeValue);
+			let forAttrValue = props['for'].match(reForAttrValue);
 
 			if (!forAttrValue) {
 				throw new SyntaxError(`Invalid value of attribute "for" (${ props['for'] })`);
@@ -73,12 +73,12 @@ export default class RtRepeat extends Component {
 
 			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: props.context as Object });
 
-			this._itemMap = new Map<any, TRtRepeatItemList>();
+			this._itemMap = new Map<any, TItemList>();
 
 			this._trackBy = props.trackBy;
 
 			let rawItemContent = this._rawItemContent =
-				document.importNode((this.element as any).content, true) as DocumentFragment;
+				document.importNode((this.element as any as HTMLTemplateElement).content, true);
 
 			if (props.strip) {
 				let firstChild = rawItemContent.firstChild as Node;
@@ -102,20 +102,18 @@ export default class RtRepeat extends Component {
 				}
 			}
 
-			this._context = props.context as Object;
-
-			this._list.on('change', this._onListChange, this);
-
-			this._render(false);
-
 			this.initialized = true;
 		}
+
+		this._list.on('change', this._onListChange, this);
+
+		this._render(false);
 	}
 
 	elementDisconnected() {
 		nextTick(() => {
 			if (!this.element[KEY_ELEMENT_CONNECTED]) {
-				this._destroy();
+				this._deactivate();
 			}
 		});
 	}
@@ -133,26 +131,26 @@ export default class RtRepeat extends Component {
 		this._attached = false;
 	}
 
-	_render(c: boolean) {
-		let oldItemMap = this._oldItemMap = this._itemMap;
-		this._itemMap = new Map<any, TRtRepeatItemList>();
+	_render(changed: boolean) {
+		let prevItemMap = this._prevItemMap = this._itemMap;
+		this._itemMap = new Map<any, TItemList>();
 
 		let list = this._list.get();
-		let changed = false;
+		let c = false;
 
 		if (list) {
 			this._lastNode = this.element;
-			changed = list.reduce((changed, item, index) => this._renderItem(item, index) || changed, changed);
+			c = list.reduce((changed: boolean, item, index) => this._renderItem(item, index) || changed, c);
 		}
 
-		if (oldItemMap.size) {
-			this._clearByItemMap(oldItemMap);
-		} else if (!changed) {
+		if (prevItemMap.size) {
+			this._clearByItemMap(prevItemMap);
+		} else if (!c) {
 			return;
 		}
 
-		if (c) {
-			nextTick(() => {
+		if (changed) {
+			Cell.afterRelease(() => {
 				this.emit('change');
 			});
 		}
@@ -161,21 +159,21 @@ export default class RtRepeat extends Component {
 	_renderItem(item: Object, index: number): boolean {
 		let trackBy = this._trackBy;
 		let value = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
-		let prevItems = this._oldItemMap.get(value);
-		let currentItems = this._itemMap.get(value);
+		let prevItems = this._prevItemMap.get(value);
+		let items = this._itemMap.get(value);
 
 		if (prevItems) {
-			let prevItem: TRtRepeatItem;
+			let prevItem: IItem;
 
 			if (prevItems.length == 1) {
 				prevItem = prevItems[0];
-				this._oldItemMap.delete(value);
+				this._prevItemMap.delete(value);
 			} else {
-				prevItem = prevItems.shift() as TRtRepeatItem;
+				prevItem = prevItems.shift() as IItem;
 			}
 
-			if (currentItems) {
-				currentItems.push(prevItem);
+			if (items) {
+				items.push(prevItem);
 			} else {
 				this._itemMap.set(value, [prevItem]);
 			}
@@ -191,20 +189,29 @@ export default class RtRepeat extends Component {
 
 			prevItem.index.set(index);
 
-			if (nodes.length == 1) {
-				let node = nodes[0];
-				(this._lastNode.parentNode as Node).insertBefore(node, this._lastNode.nextSibling);
-				this._lastNode = node;
-			} else {
-				let df = document.createDocumentFragment();
+			let nodeCount = nodes.length;
 
-				for (let node of nodes) {
-					df.appendChild(node);
+			if (nodeCount == 1) {
+				let node = nodes[0];
+				let nextNode = this._lastNode.nextSibling;
+
+				if (node !== nextNode) {
+					(this._lastNode.parentNode as Node).insertBefore(node, nextNode);
 				}
 
-				let newLastNode = df.lastChild as Node;
-				(this._lastNode.parentNode as Node).insertBefore(df, this._lastNode.nextSibling);
-				this._lastNode = newLastNode;
+				this._lastNode = node;
+			} else {
+				if (nodes[0] !== this._lastNode.nextSibling) {
+					let df = document.createDocumentFragment();
+
+					for (let i = 0; i < nodeCount; i++) {
+						df.appendChild(nodes[i]);
+					}
+
+					(this._lastNode.parentNode as Node).insertBefore(df, this._lastNode.nextSibling);
+				}
+
+				this._lastNode = nodes[nodeCount - 1];
 			}
 
 			return true;
@@ -214,7 +221,7 @@ export default class RtRepeat extends Component {
 		let indexCell = new Cell(index);
 
 		let content = this._rawItemContent.cloneNode(true);
-		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(this._context, {
+		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(this.props.context, {
 			[this._itemName]: {
 				get() {
 					return itemCell.get();
@@ -235,8 +242,8 @@ export default class RtRepeat extends Component {
 			bindings
 		};
 
-		if (currentItems) {
-			currentItems.push(newItem);
+		if (items) {
+			items.push(newItem);
 		} else {
 			this._itemMap.set(value, [newItem]);
 		}
@@ -252,12 +259,12 @@ export default class RtRepeat extends Component {
 		return true;
 	}
 
-	_clearByItemMap(itemMap: TRtRepeatItemMap) {
+	_clearByItemMap(itemMap: TItemMap) {
 		itemMap.forEach(this._clearByItems, this);
 		itemMap.clear();
 	}
 
-	_clearByItems(items: TRtRepeatItemList) {
+	_clearByItems(items: TItemList) {
 		for (let i = items.length; i;) {
 			let item = items[--i];
 			let bindings = item.bindings;
@@ -281,14 +288,15 @@ export default class RtRepeat extends Component {
 		}
 	}
 
-	_destroy() {
-		if (this._destroyed) {
+	_deactivate() {
+		if (!this._active) {
 			return;
 		}
 
-		this._destroyed = true;
+		this._active = false;
+
+		this._list.off('change', this._onListChange, this);
 
 		this._clearByItemMap(this._itemMap);
-		this._list.off('change', this._onListChange, this);
 	}
 }

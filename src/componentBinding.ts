@@ -6,7 +6,7 @@ export interface IFrozenState {
 	value: any;
 }
 
-export interface IFreezableCell extends Cell<any> {
+export interface IFreezableCell extends Cell {
 	_value: any;
 
 	_changeEvent: IEvent | null;

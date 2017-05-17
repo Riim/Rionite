@@ -75,7 +75,7 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 		};
 	} else {
 		let value = handlers[0](rawValue, defaultValue, component);
-		let valueCell: Cell<any> | undefined;
+		let valueCell: Cell | undefined;
 
 		if (rawValue === null && defaultValue != null && defaultValue !== false) {
 			props['_initialize_' + name] = () => {
@@ -111,7 +111,7 @@ function initProperty(props: IComponentProperties, name: string, el: IComponentE
 				let currentlyPulling = Cell.currentlyPulling;
 
 				if (currentlyPulling || EventEmitter.currentlySubscribing) {
-					valueCell = new Cell<any>(value, {
+					valueCell = new Cell(value, {
 						onChange(evt) {
 							component.emit({
 								type: `property-${ hyphenizedName }-change`,
