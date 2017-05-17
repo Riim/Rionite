@@ -13,6 +13,11 @@ export interface IComponentProperties extends Object {
 function initProperty(props: IComponentProperties, name: string, el: IComponentElement) {
 	let component = el.$component;
 	let propConfig = ((component.constructor as typeof Component).props as { [name: string]: any })[name];
+
+	if (propConfig == null) {
+		return;
+	}
+
 	let type = typeof propConfig;
 	let defaultValue: any;
 	let required: boolean;

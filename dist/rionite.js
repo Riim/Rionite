@@ -892,6 +892,9 @@ var hyphenize_1 = __webpack_require__(9);
 function initProperty(props, name, el) {
     var component = el.$component;
     var propConfig = component.constructor.props[name];
+    if (propConfig == null) {
+        return;
+    }
     var type = typeof propConfig;
     var defaultValue;
     var required;

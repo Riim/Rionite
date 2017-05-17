@@ -7,6 +7,9 @@ var hyphenize_1 = require("./Utils/hyphenize");
 function initProperty(props, name, el) {
     var component = el.$component;
     var propConfig = component.constructor.props[name];
+    if (propConfig == null) {
+        return;
+    }
     var type = typeof propConfig;
     var defaultValue;
     var required;
