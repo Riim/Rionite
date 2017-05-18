@@ -21,23 +21,30 @@ export default function onEvent(evt: IEvent | Event) {
 		let component = (node as IPossiblyComponentElement).$component;
 
 		if (component && targetEls) {
-			for (let targetEl of targetEls) {
+			for (let i = 0, l = targetEls.length; i < l;) {
+				let targetEl = targetEls[i];
 				let handler = component[targetEl.getAttribute(attrName) as string];
 
 				if (typeof handler == 'function') {
-					if (isNativeEvent) {
-						handler.call(component, evt, targetEl);
-					} else {
-						if (handler.call(component, evt, targetEl) === false) {
+					if (handler.call(component, evt, targetEl) === false) {
+						if (!isNativeEvent) {
 							(evt as IEvent).isPropagationStopped = true;
-							return;
 						}
 
-						if ((evt as IEvent).isPropagationStopped) {
-							return;
-						}
+						return;
 					}
+
+					if (!isNativeEvent && (evt as IEvent).isPropagationStopped) {
+						return;
+					}
+
+					targetEls.splice(i, 1);
+					l--;
+
+					continue;
 				}
+
+				i++;
 			}
 		}
 	}

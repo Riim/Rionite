@@ -5011,23 +5011,24 @@ function onEvent(evt) {
         }
         var component = node.$component;
         if (component && targetEls) {
-            for (var _i = 0, targetEls_1 = targetEls; _i < targetEls_1.length; _i++) {
-                var targetEl = targetEls_1[_i];
+            for (var i = 0, l = targetEls.length; i < l;) {
+                var targetEl = targetEls[i];
                 var handler = component[targetEl.getAttribute(attrName)];
                 if (typeof handler == 'function') {
-                    if (isNativeEvent) {
-                        handler.call(component, evt, targetEl);
-                    }
-                    else {
-                        if (handler.call(component, evt, targetEl) === false) {
+                    if (handler.call(component, evt, targetEl) === false) {
+                        if (!isNativeEvent) {
                             evt.isPropagationStopped = true;
-                            return;
                         }
-                        if (evt.isPropagationStopped) {
-                            return;
-                        }
+                        return;
                     }
+                    if (!isNativeEvent && evt.isPropagationStopped) {
+                        return;
+                    }
+                    targetEls.splice(i, 1);
+                    l--;
+                    continue;
                 }
+                i++;
             }
         }
     }
