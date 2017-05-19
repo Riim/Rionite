@@ -1,11 +1,11 @@
 {
   "name": "rionite",
-  "version": "0.23.26",
+  "version": "0.23.27",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "node_modules/.bin/tsc && node_modules/.bin/webpack && node_modules/.bin/gulp",
+    "build": "node_modules/.bin/gulp clear && node_modules/.bin/webpack && node_modules/.bin/gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
+    "awesome-typescript-loader": "^3.1.3",
     "benchmark": "^2.1.4",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
@@ -27,8 +28,8 @@
     "gulp-uglify": "^2.1.2",
     "pump": "^1.0.2",
     "require-dir": "^0.3.1",
+    "rimraf": "^2.6.1",
     "run-sequence": "^1.2.2",
-    "typescript": "^2.3.2",
     "webpack": "^2.5.1"
   },
   "dependencies": {

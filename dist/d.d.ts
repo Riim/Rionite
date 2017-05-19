@@ -10,7 +10,7 @@ declare let d: {
         i18n?: {
             [key: string]: any;
         } | undefined;
-        template?: string | IBlock | Template | null | undefined;
+        template?: string | Template | IBlock | null | undefined;
         events?: IComponentEvents<T> | null | undefined;
     }) => (componentConstr: typeof Component) => void;
 };

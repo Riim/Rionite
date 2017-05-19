@@ -12,8 +12,5 @@
 		"strictNullChecks": true,
 		"suppressImplicitAnyIndexErrors": true,
 		"target": "es5"
-	},
-	"files": [
-		"src/index.ts"
-	]
+	}
 }

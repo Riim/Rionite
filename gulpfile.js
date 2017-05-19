@@ -1,1 +1,1 @@
-require('require-dir')('./tasks');
+require('require-dir')('./build/tasks');

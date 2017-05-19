@@ -18,8 +18,8 @@ let componentPropertyTypeHandlersMap = new JS.Map<any, [
 	]],
 
 	[Number, [
-		(value: string | null, defaultValue: number | undefined): number | undefined => {
-			return value !== null ? +value : defaultValue;
+		(value: string | null, defaultValue: number | undefined): number | null => {
+			return value !== null ? +value : (defaultValue !== undefined ? defaultValue : null);
 		},
 		(value: any): string | null => {
 			return value != null ? String(+value) : null;
@@ -27,8 +27,8 @@ let componentPropertyTypeHandlersMap = new JS.Map<any, [
 	]],
 
 	[String, [
-		(value: string | null, defaultValue: string | undefined): string | undefined => {
-			return value !== null ? value : defaultValue;
+		(value: string | null, defaultValue: string | undefined): string | null => {
+			return value !== null ? value : (defaultValue !== undefined ? defaultValue : null);
 		},
 		(value: any): string | null => {
 			return value != null ? String(value) : null;
@@ -36,13 +36,9 @@ let componentPropertyTypeHandlersMap = new JS.Map<any, [
 	]],
 
 	[Object, [
-		(
-			value: string | null,
-			defaultValue: Object | null | undefined,
-			component: Component
-		): Object | null | undefined => {
+		(value: string | null, defaultValue: Object | null | undefined, component: Component): Object | null => {
 			if (value === null) {
-				return defaultValue;
+				return defaultValue || null;
 			}
 
 			let componentPropertyValues = component.ownerComponent &&
@@ -63,7 +59,9 @@ let componentPropertyTypeHandlersMap = new JS.Map<any, [
 
 	[eval, [
 		(value: string | null, defaultValue: any): any => {
-			return value !== null ? Function(`return ${ unescapeHTML(value) };`)() : defaultValue;
+			return value !== null ?
+				Function(`return ${ unescapeHTML(value) };`)() :
+				(defaultValue !== undefined ? defaultValue : null);
 		},
 		(value: any): string | null => {
 			return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
