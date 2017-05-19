@@ -4052,9 +4052,9 @@ var RtContent = (function (_super) {
                     var getContext = props.getContext;
                     _a = content ?
                         bindContent_1.default(content, contentOwnerComponent, getContext ?
-                            ownerComponent[getContext](this, ownerComponent.props.context) :
+                            ownerComponent[getContext](ownerComponent.props.context, this) :
                             ownerComponent.props.context) :
-                        bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), this._bindings = _a[0], childComponents = _a[1];
+                        bindContent_1.default(el, ownerComponent, props.context), this._bindings = _a[0], childComponents = _a[1];
                     this._childComponents = childComponents;
                 }
                 else {
@@ -4526,9 +4526,9 @@ var RtSlot = (function (_super) {
                     var getContext = props.getContext;
                     _a = content ?
                         bindContent_1.default(content, contentOwnerComponent, getContext ?
-                            ownerComponent[getContext](this, ownerComponent.props.context) :
+                            ownerComponent[getContext](ownerComponent.props.context, this) :
                             ownerComponent.props.context) :
-                        bindContent_1.default(el, ownerComponent, getContext ? ownerComponent[getContext](this, props.context) : props.context), this._bindings = _a[0], childComponents = _a[1];
+                        bindContent_1.default(el, ownerComponent, props.context), this._bindings = _a[0], childComponents = _a[1];
                     this._childComponents = childComponents;
                 }
                 else {

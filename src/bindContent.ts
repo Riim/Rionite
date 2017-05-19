@@ -23,7 +23,7 @@ function readValue(obj: Object, keypath: string): { value: any } | null {
 		(value == null ? null : readValue(value, keypath.slice(index + 1)));
 }
 
-export default function bindContent(content: Node, ownerComponent: Component, context?: Object): [
+export default function bindContent(content: Node, ownerComponent: Component, context?: Object | null): [
 	Array<IFreezableCell> | null,
 	Array<Component> | null
 ] {
@@ -82,7 +82,7 @@ export default function bindContent(content: Node, ownerComponent: Component, co
 									}
 								} else {
 									let cell = new Cell<any>(compileContent(parsedValue, value, ownerComponent), {
-										owner: context,
+										owner: context as Object,
 										onChange(evt) {
 											setAttribute(child as Element, name, evt.value);
 										}
@@ -136,7 +136,7 @@ export default function bindContent(content: Node, ownerComponent: Component, co
 								child.textContent = readedValue.value;
 							} else {
 								let cell = new Cell<any>(compileContent(parsedContent, content), {
-									owner: context,
+									owner: context as Object,
 									onChange(evt) {
 										(child as Node).textContent = evt.value;
 									}

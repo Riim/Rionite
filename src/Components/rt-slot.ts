@@ -131,14 +131,10 @@ export default class RtSlot extends Component {
 							content,
 							contentOwnerComponent as Component,
 							getContext ?
-								ownerComponent[getContext](this, ownerComponent.props.context) :
+								ownerComponent[getContext](ownerComponent.props.context, this) :
 								ownerComponent.props.context
 						) :
-						bindContent(
-							el,
-							ownerComponent,
-							getContext ? ownerComponent[getContext](this, props.context) : props.context
-						);
+						bindContent(el, ownerComponent, props.context);
 
 					this._childComponents = childComponents;
 				} else {
