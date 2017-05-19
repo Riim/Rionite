@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
 var escape_html_1 = require("@riim/escape-html");
-var componentPropertyValuesKey_1 = require("./componentPropertyValuesKey");
+var KEY_COMPONENT_PROPERTY_VALUES_1 = require("./KEY_COMPONENT_PROPERTY_VALUES");
 var isRegExp_1 = require("./Utils/isRegExp");
 var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Boolean, [
@@ -15,7 +15,7 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
         ]],
     [Number, [
             function (value, defaultValue) {
-                return value !== null ? +value : (defaultValue !== undefined ? defaultValue : null);
+                return value !== null ? +value : defaultValue;
             },
             function (value) {
                 return value != null ? String(+value) : null;
@@ -23,7 +23,7 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
         ]],
     [String, [
             function (value, defaultValue) {
-                return value !== null ? value : (defaultValue !== undefined ? defaultValue : null);
+                return value !== null ? value : defaultValue;
             },
             function (value) {
                 return value != null ? String(value) : null;
@@ -32,16 +32,16 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Object, [
             function (value, defaultValue, component) {
                 if (value === null) {
-                    return defaultValue || null;
+                    return defaultValue;
                 }
                 var componentPropertyValues = component.ownerComponent &&
-                    component.ownerComponent[componentPropertyValuesKey_1.default];
+                    component.ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default];
                 if (!componentPropertyValues || !componentPropertyValues.has(value)) {
-                    throw new TypeError('Using a nonexistent key');
+                    throw new TypeError('Value is not an object');
                 }
-                var result = componentPropertyValues.get(value);
+                var val = componentPropertyValues.get(value);
                 componentPropertyValues.delete(value);
-                return result;
+                return val;
             },
             function (value) {
                 return value != null ? '' : null;
@@ -49,9 +49,7 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
         ]],
     [eval, [
             function (value, defaultValue) {
-                return value !== null ?
-                    Function("return " + escape_html_1.unescapeHTML(value) + ";")() :
-                    (defaultValue !== undefined ? defaultValue : null);
+                return value !== null ? Function("return " + escape_html_1.unescapeHTML(value) + ";")() : defaultValue;
             },
             function (value) {
                 return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;

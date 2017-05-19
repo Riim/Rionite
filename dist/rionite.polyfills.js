@@ -1588,8 +1588,8 @@ var bindEvents_1 = __webpack_require__(39);
 var eventTypes_1 = __webpack_require__(45);
 var onEvent_1 = __webpack_require__(47);
 var camelize_1 = __webpack_require__(21);
-var getUID_1 = __webpack_require__(7);
-var moveContent_1 = __webpack_require__(10);
+var getUID_1 = __webpack_require__(9);
+var moveContent_1 = __webpack_require__(11);
 var Features_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
@@ -1990,9 +1990,9 @@ exports.default = attachChildComponentElements;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
+var KEY_COMPONENT_PROPERTY_VALUES_1 = __webpack_require__(7);
 var ContentParser_1 = __webpack_require__(19);
 var compileContent_1 = __webpack_require__(41);
-var componentPropertyValuesKey_1 = __webpack_require__(11);
 var setAttribute_1 = __webpack_require__(37);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 function readValue(obj, keypath) {
@@ -2034,8 +2034,8 @@ function bindContent(content, ownerComponent, context) {
                                     var value_1 = readedValue.value;
                                     if (value_1 && typeof value_1 == 'object') {
                                         var key = compileContent_1.nextComponentPropertyValueKey();
-                                        (ownerComponent[componentPropertyValuesKey_1.default] ||
-                                            (ownerComponent[componentPropertyValuesKey_1.default] = new Map())).set(key, value_1);
+                                        (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] ||
+                                            (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] = new Map())).set(key, value_1);
                                         setAttribute_1.default(child, name_1, key);
                                     }
                                     else {
@@ -2204,6 +2204,30 @@ var _a;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
+var KEY_COMPONENT_PROPERTY_VALUES = cellx_1.JS.Symbol('Rionite.KEY_COMPONENT_PROPERTY_VALUES');
+exports.default = KEY_COMPONENT_PROPERTY_VALUES;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var cellx_1 = __webpack_require__(0);
+var KEY_ELEMENT_CONNECTED = cellx_1.JS.Symbol('Rionite.KEY_ELEMENT_CONNECTED');
+exports.default = KEY_ELEMENT_CONNECTED;
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var cellx_1 = __webpack_require__(0);
 var nextUID = cellx_1.Utils.nextUID;
 var hasOwn = Object.prototype.hasOwnProperty;
 var KEY_UID = cellx_1.JS.Symbol('uid');
@@ -2222,20 +2246,7 @@ exports.default = getUID;
 
 
 /***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var cellx_1 = __webpack_require__(0);
-var Symbol = cellx_1.JS.Symbol;
-var KEY_ELEMENT_CONNECTED = Symbol('Rionite.KEY_ELEMENT_CONNECTED');
-exports.default = KEY_ELEMENT_CONNECTED;
-
-
-/***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2256,7 +2267,7 @@ exports.default = hyphenize;
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2269,18 +2280,6 @@ function moveContent(target, source) {
     return target;
 }
 exports.default = moveContent;
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var cellx_1 = __webpack_require__(0);
-var componentPropertyValuesKey = cellx_1.JS.Symbol('componentPropertyValues');
-exports.default = componentPropertyValuesKey;
 
 
 /***/ }),
@@ -2362,7 +2361,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var componentPropertyTypeMap_1 = __webpack_require__(44);
 var componentPropertyTypeHandlersMap_1 = __webpack_require__(43);
-var hyphenize_1 = __webpack_require__(9);
+var hyphenize_1 = __webpack_require__(10);
 function initProperty(props, name, el) {
     var component = el.$component;
     var propConfig = component.constructor.props[name];
@@ -2384,7 +2383,7 @@ function initProperty(props, name, el) {
             type = typeof defaultValue;
         }
         else if (defaultValue !== undefined && componentPropertyTypeMap_1.default.has(type) &&
-            componentPropertyTypeMap_1.default.get(type) != (defaultValue === null ? 'null' : typeof defaultValue)) {
+            componentPropertyTypeMap_1.default.get(type) != typeof defaultValue) {
             throw new TypeError('Specified type does not match type of defaultValue');
         }
         required = propConfig.required;
@@ -3955,17 +3954,21 @@ var getText_1 = __webpack_require__(28);
 exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
+exports.KEY_ELEMENT_CONNECTED = KEY_ELEMENT_CONNECTED_1.default;
+var KEY_COMPONENT_PROPERTY_VALUES_1 = __webpack_require__(7);
+exports.KEY_COMPONENT_PROPERTY_VALUES = KEY_COMPONENT_PROPERTY_VALUES_1.default;
+var ComponentProperties_1 = __webpack_require__(17);
+exports.ComponentProperties = ComponentProperties_1.default;
 var rt_content_1 = __webpack_require__(33);
 var rt_slot_1 = __webpack_require__(36);
 var rt_if_then_1 = __webpack_require__(18);
 var rt_if_else_1 = __webpack_require__(34);
 var rt_repeat_1 = __webpack_require__(35);
-var ComponentProperties_1 = __webpack_require__(17);
-exports.ComponentProperties = ComponentProperties_1.default;
 var d_1 = __webpack_require__(3);
 exports.d = d_1.default;
 var camelize_1 = __webpack_require__(21);
-var hyphenize_1 = __webpack_require__(9);
+var hyphenize_1 = __webpack_require__(10);
 var isRegExp_1 = __webpack_require__(24);
 var defer_1 = __webpack_require__(23);
 __webpack_require__(38);
@@ -4018,8 +4021,8 @@ var Component_1 = __webpack_require__(1);
 var ElementProtoMixin_1 = __webpack_require__(6);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var getUID_1 = __webpack_require__(7);
-var moveContent_1 = __webpack_require__(10);
+var getUID_1 = __webpack_require__(9);
+var moveContent_1 = __webpack_require__(11);
 var clearNode_1 = __webpack_require__(22);
 var Features_1 = __webpack_require__(2);
 var d_1 = __webpack_require__(3);
@@ -4490,8 +4493,8 @@ var Component_1 = __webpack_require__(1);
 var ElementProtoMixin_1 = __webpack_require__(6);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var getUID_1 = __webpack_require__(7);
-var moveContent_1 = __webpack_require__(10);
+var getUID_1 = __webpack_require__(9);
+var moveContent_1 = __webpack_require__(11);
 var clearNode_1 = __webpack_require__(22);
 var Features_1 = __webpack_require__(2);
 var d_1 = __webpack_require__(3);
@@ -4758,8 +4761,8 @@ var escape_string_1 = __webpack_require__(16);
 var ContentParser_1 = __webpack_require__(19);
 var bindingToJSExpression_1 = __webpack_require__(40);
 var formatters_1 = __webpack_require__(27);
-var componentPropertyValuesKey_1 = __webpack_require__(11);
-var getUID_1 = __webpack_require__(7);
+var KEY_COMPONENT_PROPERTY_VALUES_1 = __webpack_require__(7);
+var getUID_1 = __webpack_require__(9);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var keyCounter = 0;
 function nextComponentPropertyValueKey() {
@@ -4768,9 +4771,9 @@ function nextComponentPropertyValueKey() {
 exports.nextComponentPropertyValueKey = nextComponentPropertyValueKey;
 var cache = Object.create(null);
 function compileContent(parsedContent, content, ownerComponent) {
-    var cacheKey = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + content;
-    if (cache[cacheKey]) {
-        return cache[cacheKey];
+    var key = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + content;
+    if (cache[key]) {
+        return cache[key];
     }
     var inner;
     if (parsedContent.length == 1 && parsedContent[0].nodeType == ContentNodeType.BINDING) {
@@ -4786,13 +4789,13 @@ function compileContent(parsedContent, content, ownerComponent) {
         }
         inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
     }
-    return (cache[cacheKey] = ownerComponent ? function () {
+    return (cache[key] = ownerComponent ? function () {
         var value = inner.call(this, formatters_1.default);
         if (value && typeof value == 'object') {
-            var key = String(++keyCounter);
-            (ownerComponent[componentPropertyValuesKey_1.default] ||
-                (ownerComponent[componentPropertyValuesKey_1.default] = new Map())).set(key, value);
-            return key;
+            var key_1 = String(++keyCounter);
+            (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] ||
+                (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] = new Map())).set(key_1, value);
+            return key_1;
         }
         return value;
     } : function () {
@@ -4864,7 +4867,7 @@ exports.unfreezeBindings = unfreezeBindings;
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var escape_html_1 = __webpack_require__(15);
-var componentPropertyValuesKey_1 = __webpack_require__(11);
+var KEY_COMPONENT_PROPERTY_VALUES_1 = __webpack_require__(7);
 var isRegExp_1 = __webpack_require__(24);
 var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Boolean, [
@@ -4877,7 +4880,7 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
         ]],
     [Number, [
             function (value, defaultValue) {
-                return value !== null ? +value : (defaultValue !== undefined ? defaultValue : null);
+                return value !== null ? +value : defaultValue;
             },
             function (value) {
                 return value != null ? String(+value) : null;
@@ -4885,7 +4888,7 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
         ]],
     [String, [
             function (value, defaultValue) {
-                return value !== null ? value : (defaultValue !== undefined ? defaultValue : null);
+                return value !== null ? value : defaultValue;
             },
             function (value) {
                 return value != null ? String(value) : null;
@@ -4894,16 +4897,16 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
     [Object, [
             function (value, defaultValue, component) {
                 if (value === null) {
-                    return defaultValue || null;
+                    return defaultValue;
                 }
                 var componentPropertyValues = component.ownerComponent &&
-                    component.ownerComponent[componentPropertyValuesKey_1.default];
+                    component.ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default];
                 if (!componentPropertyValues || !componentPropertyValues.has(value)) {
-                    throw new TypeError('Using a nonexistent key');
+                    throw new TypeError('Value is not an object');
                 }
-                var result = componentPropertyValues.get(value);
+                var val = componentPropertyValues.get(value);
                 componentPropertyValues.delete(value);
-                return result;
+                return val;
             },
             function (value) {
                 return value != null ? '' : null;
@@ -4911,9 +4914,7 @@ var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
         ]],
     [eval, [
             function (value, defaultValue) {
-                return value !== null ?
-                    Function("return " + escape_html_1.unescapeHTML(value) + ";")() :
-                    (defaultValue !== undefined ? defaultValue : null);
+                return value !== null ? Function("return " + escape_html_1.unescapeHTML(value) + ";")() : defaultValue;
             },
             function (value) {
                 return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
@@ -5047,7 +5048,7 @@ var cellx_1 = __webpack_require__(0);
 var beml_1 = __webpack_require__(14);
 var elementConstructorMap_1 = __webpack_require__(26);
 var ElementProtoMixin_1 = __webpack_require__(6);
-var hyphenize_1 = __webpack_require__(9);
+var hyphenize_1 = __webpack_require__(10);
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
 function registerComponent(componentConstr) {

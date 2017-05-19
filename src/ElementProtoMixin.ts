@@ -1,5 +1,5 @@
-import KEY_ELEMENT_CONNECTED from './KEY_ELEMENT_CONNECTED';
 import { IComponentElement, default as Component } from './Component';
+import KEY_ELEMENT_CONNECTED from './KEY_ELEMENT_CONNECTED';
 import defer from './Utils/defer';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
 

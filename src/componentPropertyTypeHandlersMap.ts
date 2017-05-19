@@ -1,7 +1,7 @@
 import { JS } from 'cellx';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import Component from './Component';
-import componentPropertyValuesKey from './componentPropertyValuesKey';
+import KEY_COMPONENT_PROPERTY_VALUES from './KEY_COMPONENT_PROPERTY_VALUES';
 import isRegExp from './Utils/isRegExp';
 
 let componentPropertyTypeHandlersMap = new JS.Map<any, [
@@ -18,8 +18,8 @@ let componentPropertyTypeHandlersMap = new JS.Map<any, [
 	]],
 
 	[Number, [
-		(value: string | null, defaultValue: number | undefined): number | null => {
-			return value !== null ? +value : (defaultValue !== undefined ? defaultValue : null);
+		(value: string | null, defaultValue: number | undefined): number | undefined => {
+			return value !== null ? +value : defaultValue;
 		},
 		(value: any): string | null => {
 			return value != null ? String(+value) : null;
@@ -27,8 +27,8 @@ let componentPropertyTypeHandlersMap = new JS.Map<any, [
 	]],
 
 	[String, [
-		(value: string | null, defaultValue: string | undefined): string | null => {
-			return value !== null ? value : (defaultValue !== undefined ? defaultValue : null);
+		(value: string | null, defaultValue: string | undefined): string | undefined => {
+			return value !== null ? value : defaultValue;
 		},
 		(value: any): string | null => {
 			return value != null ? String(value) : null;
@@ -36,21 +36,25 @@ let componentPropertyTypeHandlersMap = new JS.Map<any, [
 	]],
 
 	[Object, [
-		(value: string | null, defaultValue: Object | null | undefined, component: Component): Object | null => {
+		(
+			value: string | null,
+			defaultValue: Object | null | undefined,
+			component: Component
+		): Object | null | undefined => {
 			if (value === null) {
-				return defaultValue || null;
+				return defaultValue;
 			}
 
 			let componentPropertyValues = component.ownerComponent &&
-				component.ownerComponent[componentPropertyValuesKey] as Map<string, Object> | undefined;
+				component.ownerComponent[KEY_COMPONENT_PROPERTY_VALUES] as Map<string, Object> | undefined;
 
 			if (!componentPropertyValues || !componentPropertyValues.has(value)) {
-				throw new TypeError('Using a nonexistent key');
+				throw new TypeError('Value is not an object');
 			}
 
-			let result = componentPropertyValues.get(value);
+			let val = componentPropertyValues.get(value);
 			componentPropertyValues.delete(value);
-			return result;
+			return val;
 		},
 		(value: any): string | null => {
 			return value != null ? '' : null;
@@ -58,10 +62,8 @@ let componentPropertyTypeHandlersMap = new JS.Map<any, [
 	]],
 
 	[eval, [
-		(value: string | null, defaultValue: Object | undefined): Object => {
-			return value !== null ?
-				Function(`return ${ unescapeHTML(value) };`)() :
-				(defaultValue !== undefined ? defaultValue : null);
+		(value: string | null, defaultValue: any): any => {
+			return value !== null ? Function(`return ${ unescapeHTML(value) };`)() : defaultValue;
 		},
 		(value: any): string | null => {
 			return value != null ? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;

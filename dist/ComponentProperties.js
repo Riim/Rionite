@@ -25,7 +25,7 @@ function initProperty(props, name, el) {
             type = typeof defaultValue;
         }
         else if (defaultValue !== undefined && componentPropertyTypeMap_1.default.has(type) &&
-            componentPropertyTypeMap_1.default.get(type) != (defaultValue === null ? 'null' : typeof defaultValue)) {
+            componentPropertyTypeMap_1.default.get(type) != typeof defaultValue) {
             throw new TypeError('Specified type does not match type of defaultValue');
         }
         required = propConfig.required;

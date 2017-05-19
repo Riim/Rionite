@@ -21,6 +21,9 @@ import {
 	IComponentEvents,
 	default as Component
 } from './Component';
+import KEY_ELEMENT_CONNECTED from './KEY_ELEMENT_CONNECTED';
+import KEY_COMPONENT_PROPERTY_VALUES from './KEY_COMPONENT_PROPERTY_VALUES';
+import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
 import RtContent from './Components/rt-content';
 import RtSlot from './Components/rt-slot';
 import { TIfCell as TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
@@ -32,7 +35,6 @@ import {
 	TItemMap as TRtRepeatItemMap,
 	default as RtRepeat
 } from './Components/rt-repeat';
-import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
 import d from './d';
 import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
@@ -85,15 +87,17 @@ export {
 	IComponentEvents,
 	Component,
 
+	KEY_ELEMENT_CONNECTED,
+	KEY_COMPONENT_PROPERTY_VALUES,
+	IComponentProperties,
+	ComponentProperties,
+
 	TRtIfThenIfCell,
 	TRtRepeatListCell,
 	IRtRepeatItem,
 	TRtRepeatItemList,
 	TRtRepeatItemMap,
 	Components,
-
-	IComponentProperties,
-	ComponentProperties,
 
 	d,
 

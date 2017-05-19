@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = require("cellx");
+var KEY_COMPONENT_PROPERTY_VALUES_1 = require("./KEY_COMPONENT_PROPERTY_VALUES");
 var ContentParser_1 = require("./ContentParser");
 var compileContent_1 = require("./compileContent");
-var componentPropertyValuesKey_1 = require("./componentPropertyValuesKey");
 var setAttribute_1 = require("./Utils/setAttribute");
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 function readValue(obj, keypath) {
@@ -45,8 +45,8 @@ function bindContent(content, ownerComponent, context) {
                                     var value_1 = readedValue.value;
                                     if (value_1 && typeof value_1 == 'object') {
                                         var key = compileContent_1.nextComponentPropertyValueKey();
-                                        (ownerComponent[componentPropertyValuesKey_1.default] ||
-                                            (ownerComponent[componentPropertyValuesKey_1.default] = new Map())).set(key, value_1);
+                                        (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] ||
+                                            (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] = new Map())).set(key, value_1);
                                         setAttribute_1.default(child, name_1, key);
                                     }
                                     else {

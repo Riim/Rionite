@@ -1,0 +1,5 @@
+import { JS } from 'cellx';
+
+let KEY_COMPONENT_PROPERTY_VALUES = JS.Symbol('Rionite.KEY_COMPONENT_PROPERTY_VALUES');
+
+export default KEY_COMPONENT_PROPERTY_VALUES;

@@ -4,7 +4,7 @@ var escape_string_1 = require("escape-string");
 var ContentParser_1 = require("./ContentParser");
 var bindingToJSExpression_1 = require("./bindingToJSExpression");
 var formatters_1 = require("./formatters");
-var componentPropertyValuesKey_1 = require("./componentPropertyValuesKey");
+var KEY_COMPONENT_PROPERTY_VALUES_1 = require("./KEY_COMPONENT_PROPERTY_VALUES");
 var getUID_1 = require("./Utils/getUID");
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var keyCounter = 0;
@@ -14,9 +14,9 @@ function nextComponentPropertyValueKey() {
 exports.nextComponentPropertyValueKey = nextComponentPropertyValueKey;
 var cache = Object.create(null);
 function compileContent(parsedContent, content, ownerComponent) {
-    var cacheKey = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + content;
-    if (cache[cacheKey]) {
-        return cache[cacheKey];
+    var key = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + content;
+    if (cache[key]) {
+        return cache[key];
     }
     var inner;
     if (parsedContent.length == 1 && parsedContent[0].nodeType == ContentNodeType.BINDING) {
@@ -32,13 +32,13 @@ function compileContent(parsedContent, content, ownerComponent) {
         }
         inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
     }
-    return (cache[cacheKey] = ownerComponent ? function () {
+    return (cache[key] = ownerComponent ? function () {
         var value = inner.call(this, formatters_1.default);
         if (value && typeof value == 'object') {
-            var key = String(++keyCounter);
-            (ownerComponent[componentPropertyValuesKey_1.default] ||
-                (ownerComponent[componentPropertyValuesKey_1.default] = new Map())).set(key, value);
-            return key;
+            var key_1 = String(++keyCounter);
+            (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] ||
+                (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] = new Map())).set(key_1, value);
+            return key_1;
         }
         return value;
     } : function () {

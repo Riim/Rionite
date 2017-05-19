@@ -3,7 +3,7 @@ import { IContentBinding, TContent, default as ContentParser } from './ContentPa
 import bindingToJSExpression from './bindingToJSExpression';
 import formatters from './formatters';
 import Component from './Component';
-import componentPropertyValuesKey from './componentPropertyValuesKey';
+import KEY_COMPONENT_PROPERTY_VALUES from './KEY_COMPONENT_PROPERTY_VALUES';
 import getUID from './Utils/getUID';
 
 let ContentNodeType = ContentParser.ContentNodeType;
@@ -21,10 +21,10 @@ export default function compileContent(
 	content: string,
 	ownerComponent?: Component
 ): () => any {
-	let cacheKey = (ownerComponent ? getUID(ownerComponent) + '/' : '/') + content;
+	let key = (ownerComponent ? getUID(ownerComponent) + '/' : '/') + content;
 
-	if (cache[cacheKey]) {
-		return cache[cacheKey];
+	if (cache[key]) {
+		return cache[key];
 	}
 
 	let inner: Function;
@@ -48,15 +48,15 @@ export default function compileContent(
 		inner = Function('formatters', `var temp; return [${ jsExpr.join(', ') }].join('');`);
 	}
 
-	return (cache[cacheKey] = ownerComponent ? function() {
+	return (cache[key] = ownerComponent ? function() {
 		let value = inner.call(this, formatters);
 
 		if (value && typeof value == 'object') {
 			let key = String(++keyCounter);
 
 			(
-				ownerComponent[componentPropertyValuesKey] ||
-					(ownerComponent[componentPropertyValuesKey] = new Map())
+				ownerComponent[KEY_COMPONENT_PROPERTY_VALUES] ||
+					(ownerComponent[KEY_COMPONENT_PROPERTY_VALUES] = new Map())
 			).set(key, value);
 
 			return key;
