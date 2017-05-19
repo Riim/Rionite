@@ -49,7 +49,7 @@ function findChildComponentElements(
 	node: Node,
 	ownerComponent: Component | null,
 	context: Object | null,
-	_childComponents?: Array<Component> | undefined
+	_childComponents?: Array<Component> | null | undefined
 ): Array<Component> | null {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		if (child.nodeType == Node.ELEMENT_NODE) {
@@ -66,7 +66,7 @@ function findChildComponentElements(
 				child.firstChild &&
 					(!childComponent || (childComponent.constructor as typeof Component).template == null)
 			) {
-				findChildComponentElements(child, ownerComponent, context, _childComponents);
+				_childComponents = findChildComponentElements(child, ownerComponent, context, _childComponents);
 			}
 		}
 	}

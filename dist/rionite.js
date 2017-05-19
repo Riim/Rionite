@@ -132,7 +132,7 @@ function findChildComponentElements(node, ownerComponent, context, _childCompone
             }
             if (child.firstChild &&
                 (!childComponent || childComponent.constructor.template == null)) {
-                findChildComponentElements(child, ownerComponent, context, _childComponents);
+                _childComponents = findChildComponentElements(child, ownerComponent, context, _childComponents);
             }
         }
     }
