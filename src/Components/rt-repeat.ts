@@ -222,12 +222,14 @@ export default class RtRepeat extends Component {
 
 		let content = this._rawItemContent.cloneNode(true);
 		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(this.input.$context, {
+			['_' + this._itemName]: itemCell,
 			[this._itemName]: {
 				get() {
 					return itemCell.get();
 				}
 			},
 
+			_$index: indexCell,
 			$index: {
 				get() {
 					return indexCell.get();

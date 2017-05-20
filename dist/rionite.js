@@ -2852,11 +2852,13 @@ var RtRepeat = (function (_super) {
         var indexCell = new cellx_1.Cell(index);
         var content = this._rawItemContent.cloneNode(true);
         var _a = bindContent_1.default(content, this.ownerComponent, Object.create(this.input.$context, (_b = {},
+            _b['_' + this._itemName] = itemCell,
             _b[this._itemName] = {
                 get: function () {
                     return itemCell.get();
                 }
             },
+            _b._$index = indexCell,
             _b.$index = {
                 get: function () {
                     return indexCell.get();
