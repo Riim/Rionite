@@ -103,16 +103,15 @@ var cellx_1 = __webpack_require__(0);
 var html_to_fragment_1 = __webpack_require__(25);
 var DisposableMixin_1 = __webpack_require__(19);
 var elementConstructorMap_1 = __webpack_require__(30);
-var registerComponent_1 = __webpack_require__(52);
+var registerComponent_1 = __webpack_require__(51);
 var ElementProtoMixin_1 = __webpack_require__(8);
 var ComponentInput_1 = __webpack_require__(17);
-var initElementAttributes_1 = __webpack_require__(50);
 var bindContent_1 = __webpack_require__(5);
 var componentBinding_1 = __webpack_require__(45);
 var attachChildComponentElements_1 = __webpack_require__(4);
 var bindEvents_1 = __webpack_require__(42);
 var eventTypes_1 = __webpack_require__(48);
-var onEvent_1 = __webpack_require__(51);
+var onEvent_1 = __webpack_require__(50);
 var camelize_1 = __webpack_require__(20);
 var getUID_1 = __webpack_require__(9);
 var moveContent_1 = __webpack_require__(14);
@@ -148,7 +147,7 @@ var elementDetached;
 var elementMoved;
 var Component = (function (_super) {
     __extends(Component, _super);
-    function Component(el, props) {
+    function Component(el) {
         var _this = _super.call(this) || this;
         _this.ownerComponent = null;
         _this._parentComponent = null;
@@ -166,12 +165,6 @@ var Component = (function (_super) {
         _this.element = el;
         el.rioniteComponent = _this;
         Object.defineProperty(el, '$component', { value: _this });
-        if (props) {
-            var input = _this.input;
-            for (var name_1 in props) {
-                input[camelize_1.default(name_1)] = props[name_1];
-            }
-        }
         _this.created();
         return _this;
     }
@@ -280,8 +273,8 @@ var Component = (function (_super) {
         else {
             var el = this.element;
             el.className = constr._blockNamesString + el.className;
-            initElementAttributes_1.default(this);
             if (constr.template == null) {
+                this.input;
                 var childComponents = findChildComponentElements(el, this.ownerComponent, this.input.$context);
                 if (childComponents) {
                     attachChildComponentElements_1.default(childComponents);
@@ -292,7 +285,7 @@ var Component = (function (_super) {
             }
             else {
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
-                moveContent_1.default((this.input.$content = document.createDocumentFragment()), el);
+                this.input.$content = moveContent_1.default(document.createDocumentFragment(), el);
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
@@ -926,39 +919,36 @@ function initInputProperty(input, name, el) {
     var hyphenizedName = hyphenize_1.default(name);
     var rawValue = el.getAttribute(hyphenizedName);
     if (required && rawValue === null) {
-        throw new TypeError("Property \"" + name + "\" is required");
+        throw new TypeError("Input property \"" + name + "\" is required");
     }
+    if (rawValue === null && defaultValue != null && defaultValue !== false) {
+        el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue));
+    }
+    var value = typeSerializer.read(rawValue, defaultValue, component);
     var descriptor;
     if (readonly) {
-        var value_1 = typeSerializer.read(rawValue, defaultValue, component);
         descriptor = {
             configurable: true,
             enumerable: true,
             get: function () {
-                return value_1;
+                return value;
             },
-            set: function (v) {
-                if (v !== value_1) {
+            set: function (val) {
+                if (val !== value) {
                     throw new TypeError("Input property \"" + name + "\" is readonly");
                 }
             }
         };
     }
     else {
-        var value_2 = typeSerializer.read(rawValue, defaultValue, component);
         var valueCell_1;
-        if (rawValue === null && defaultValue != null && defaultValue !== false) {
-            input['_initialize_' + name] = function () {
-                el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue));
-            };
-        }
         var setRawValue = function (rawValue) {
-            var v = typeSerializer.read(rawValue, defaultValue, component);
+            var val = typeSerializer.read(rawValue, defaultValue, component);
             if (valueCell_1) {
-                valueCell_1.set(v);
+                valueCell_1.set(val);
             }
             else {
-                value_2 = v;
+                value = val;
             }
         };
         input['_' + name] = setRawValue;
@@ -974,7 +964,7 @@ function initInputProperty(input, name, el) {
                 }
                 var currentlyPulling = cellx_1.Cell.currentlyPulling;
                 if (currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
-                    valueCell_1 = new cellx_1.Cell(value_2, {
+                    valueCell_1 = new cellx_1.Cell(value, {
                         onChange: function (evt) {
                             component.emit({
                                 type: "input-" + hyphenizedName + "-change",
@@ -987,10 +977,10 @@ function initInputProperty(input, name, el) {
                         return valueCell_1.get();
                     }
                 }
-                return value_2;
+                return value;
             },
-            set: function (v) {
-                var rawValue = typeSerializer.write(v, defaultValue);
+            set: function (val) {
+                var rawValue = typeSerializer.write(val, defaultValue);
                 if (rawValue === null) {
                     el.removeAttribute(hyphenizedName);
                 }
@@ -998,10 +988,10 @@ function initInputProperty(input, name, el) {
                     el.setAttribute(hyphenizedName, rawValue);
                 }
                 if (valueCell_1) {
-                    valueCell_1.set(v);
+                    valueCell_1.set(val);
                 }
                 else {
-                    value_2 = v;
+                    value = val;
                 }
             }
         };
@@ -2141,7 +2131,7 @@ var ContentParser = (function () {
         var args = [];
         if (this._skipWhitespaces() != ')') {
             for (;;) {
-                var arg = this._readValueOrValueKeypath();
+                var arg = this._readValueOrKeypath();
                 if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
                     if (this._skipWhitespaces() == ',' || this.chr == ')') {
                         args.push(arg);
@@ -2164,9 +2154,9 @@ var ContentParser = (function () {
             value: args
         };
     };
-    ContentParser.prototype._readValueOrValueKeypath = function () {
+    ContentParser.prototype._readValueOrKeypath = function () {
         var value = this._readValue();
-        return value === NOT_VALUE_AND_NOT_KEYPATH ? this._readValueKeypath() : value;
+        return value === NOT_VALUE_AND_NOT_KEYPATH ? this._readKeypath() : value;
     };
     ContentParser.prototype._readValue = function () {
         switch (this.chr) {
@@ -2200,15 +2190,15 @@ var ContentParser = (function () {
             if (key !== NOT_VALUE_AND_NOT_KEYPATH && key !== null && this._skipWhitespaces() == ':') {
                 this._next();
                 this._skipWhitespaces();
-                var v = this._readValueOrValueKeypath();
-                if (v !== NOT_VALUE_AND_NOT_KEYPATH) {
+                var valueOrKeypath = this._readValueOrKeypath();
+                if (valueOrKeypath !== NOT_VALUE_AND_NOT_KEYPATH) {
                     if (this._skipWhitespaces() == ',') {
-                        obj += key + ':' + v + ',';
+                        obj += key + ':' + valueOrKeypath + ',';
                         this._next();
                         continue;
                     }
                     else if (this.chr == '}') {
-                        obj += key + ':' + v + '}';
+                        obj += key + ':' + valueOrKeypath + '}';
                         break;
                     }
                 }
@@ -2233,14 +2223,14 @@ var ContentParser = (function () {
                 this._next();
             }
             else {
-                var v = this._readValueOrValueKeypath();
-                if (v === NOT_VALUE_AND_NOT_KEYPATH) {
+                var valueOrKeypath = this._readValueOrKeypath();
+                if (valueOrKeypath === NOT_VALUE_AND_NOT_KEYPATH) {
                     this.at = at;
                     this.chr = this.content.charAt(at);
                     return NOT_VALUE_AND_NOT_KEYPATH;
                 }
                 else {
-                    arr += v;
+                    arr += valueOrKeypath;
                 }
             }
         }
@@ -2305,7 +2295,7 @@ var ContentParser = (function () {
         }
         return NOT_VALUE_AND_NOT_KEYPATH;
     };
-    ContentParser.prototype._readValueKeypath = function () {
+    ContentParser.prototype._readKeypath = function () {
         reKeypathOrNothing.lastIndex = this.at;
         var keypath = reKeypathOrNothing.exec(this.content)[0];
         if (keypath) {
@@ -3818,29 +3808,6 @@ exports.Utils = Utils;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var hasOwn = Object.prototype.hasOwnProperty;
-function initElementAttributes(component) {
-    var constr = component.constructor;
-    var inputConfig = constr.input;
-    if (inputConfig) {
-        var input = component.input;
-        for (var name_1 in inputConfig) {
-            if (hasOwn.call(input, '_initialize_' + name_1)) {
-                input['_initialize_' + name_1]();
-            }
-        }
-    }
-}
-exports.default = initElementAttributes;
-
-
-/***/ }),
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 function onEvent(evt) {
     var isNativeEvent = evt instanceof Event;
     var node = isNativeEvent ? evt.target : evt.target.element;
@@ -3882,7 +3849,7 @@ exports.default = onEvent;
 
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

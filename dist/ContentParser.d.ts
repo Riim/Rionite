@@ -41,7 +41,7 @@ export default class ContentParser {
     _readBindingKeypath(): string | null;
     _readFormatter(): IContentBindingFormatter | null;
     _readFormatterArguments(): IContentBindingFormatterArguments | null;
-    _readValueOrValueKeypath(): string | Object;
+    _readValueOrKeypath(): string | Object;
     _readValue(): string | Object;
     _readObject(): string | Object;
     _readObjectKey(): string | null;
@@ -50,7 +50,7 @@ export default class ContentParser {
     _readNumber(): string | Object;
     _readString(): string | Object;
     _readVacuum(): string | Object;
-    _readValueKeypath(): string | Object;
+    _readKeypath(): string | Object;
     _readName(): string | null;
     _skipWhitespaces(): string;
     _next(current?: string): string;

@@ -191,7 +191,7 @@ export default class ContentParser {
 
 		if (this._skipWhitespaces() != ')') {
 			for (;;) {
-				let arg = this._readValueOrValueKeypath();
+				let arg = this._readValueOrKeypath();
 
 				if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
 					if (this._skipWhitespaces() == ',' || this.chr == ')') {
@@ -222,9 +222,9 @@ export default class ContentParser {
 		};
 	}
 
-	_readValueOrValueKeypath(): string | Object {
+	_readValueOrKeypath(): string | Object {
 		let value = this._readValue();
-		return value === NOT_VALUE_AND_NOT_KEYPATH ? this._readValueKeypath() : value;
+		return value === NOT_VALUE_AND_NOT_KEYPATH ? this._readKeypath() : value;
 	}
 
 	_readValue(): string | Object {
@@ -268,15 +268,15 @@ export default class ContentParser {
 				this._next();
 				this._skipWhitespaces();
 
-				let v = this._readValueOrValueKeypath();
+				let valueOrKeypath = this._readValueOrKeypath();
 
-				if (v !== NOT_VALUE_AND_NOT_KEYPATH) {
+				if (valueOrKeypath !== NOT_VALUE_AND_NOT_KEYPATH) {
 					if (this._skipWhitespaces() == ',') {
-						obj += key + ':' + v + ',';
+						obj += key + ':' + valueOrKeypath + ',';
 						this._next();
 						continue;
 					} else if (this.chr == '}') {
-						obj += key + ':' + v + '}';
+						obj += key + ':' + valueOrKeypath + '}';
 						break;
 					}
 				}
@@ -309,15 +309,15 @@ export default class ContentParser {
 				arr += ',';
 				this._next();
 			} else {
-				let v = this._readValueOrValueKeypath();
+				let valueOrKeypath = this._readValueOrKeypath();
 
-				if (v === NOT_VALUE_AND_NOT_KEYPATH) {
+				if (valueOrKeypath === NOT_VALUE_AND_NOT_KEYPATH) {
 					this.at = at;
 					this.chr = this.content.charAt(at);
 
 					return NOT_VALUE_AND_NOT_KEYPATH;
 				} else {
-					arr += v;
+					arr += valueOrKeypath;
 				}
 			}
 		}
@@ -401,7 +401,7 @@ export default class ContentParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	_readValueKeypath(): string | Object {
+	_readKeypath(): string | Object {
 		reKeypathOrNothing.lastIndex = this.at;
 		let keypath = (reKeypathOrNothing.exec(this.content) as RegExpExecArray)[0];
 

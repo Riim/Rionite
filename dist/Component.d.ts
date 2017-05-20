@@ -50,9 +50,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     initialized: boolean;
     isReady: boolean;
     _silent: boolean;
-    constructor(el?: HTMLElement, props?: {
-        [name: string]: any;
-    });
+    constructor(el?: HTMLElement);
     _on(type: string, listener: IEventEmitterListener, context: any): void;
     _handleEvent(evt: IEvent): void;
     listenTo: typeof DisposableMixin.prototype.listenTo;

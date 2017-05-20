@@ -6,7 +6,6 @@ import elementConstructorMap from './elementConstructorMap';
 import registerComponent from './registerComponent';
 import { ElementsController } from './ElementProtoMixin';
 import { IComponentInput, default as ComponentInput } from './ComponentInput';
-import initElementAttributes from './initElementAttributes';
 import bindContent from './bindContent';
 import { IFreezableCell, freezeBindings, unfreezeBindings } from './componentBinding';
 import attachChildComponentElements from './attachChildComponentElements';
@@ -157,7 +156,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	_silent: boolean;
 
-	constructor(el?: HTMLElement, props?: { [name: string]: any }) {
+	constructor(el?: HTMLElement) {
 		super();
 		DisposableMixin.call(this);
 
@@ -175,14 +174,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 		(el as IComponentElement).rioniteComponent = this;
 		Object.defineProperty(el, '$component', { value: this });
-
-		if (props) {
-			let input = this.input;
-
-			for (let name in props) {
-				input[camelize(name)] = props[name];
-			}
-		}
 
 		this.created();
 	}
@@ -289,9 +280,9 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 			el.className = constr._blockNamesString + el.className;
 
-			initElementAttributes(this);
-
 			if (constr.template == null) {
+				this.input;
+
 				let childComponents = findChildComponentElements(el, this.ownerComponent, this.input.$context);
 
 				if (childComponents) {
@@ -303,7 +294,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				}
 			} else {
 				ElementsController.skipConnectionStatusCallbacks = true;
-				moveContent((this.input.$content = document.createDocumentFragment()), el);
+				this.input.$content = moveContent(document.createDocumentFragment(), el);
 				ElementsController.skipConnectionStatusCallbacks = false;
 
 				let rawContent = constr._rawContent;

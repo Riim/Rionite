@@ -58,14 +58,17 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 	let rawValue = el.getAttribute(hyphenizedName);
 
 	if (required && rawValue === null) {
-		throw new TypeError(`Property "${ name }" is required`);
+		throw new TypeError(`Input property "${ name }" is required`);
 	}
 
+	if (rawValue === null && defaultValue != null && defaultValue !== false) {
+		el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue) as string);
+	}
+
+	let value = typeSerializer.read(rawValue, defaultValue, component);
 	let descriptor: Object;
 
 	if (readonly) {
-		let value = typeSerializer.read(rawValue, defaultValue, component);
-
 		descriptor = {
 			configurable: true,
 			enumerable: true,
@@ -74,29 +77,22 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 				return value;
 			},
 
-			set(v: any) {
-				if (v !== value) {
+			set(val: any) {
+				if (val !== value) {
 					throw new TypeError(`Input property "${ name }" is readonly`);
 				}
 			}
 		};
 	} else {
-		let value = typeSerializer.read(rawValue, defaultValue, component);
 		let valueCell: Cell | undefined;
 
-		if (rawValue === null && defaultValue != null && defaultValue !== false) {
-			input['_initialize_' + name] = () => {
-				el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue) as string);
-			};
-		}
-
 		let setRawValue = (rawValue: string | null) => {
-			let v = typeSerializer.read(rawValue, defaultValue, component);
+			let val = typeSerializer.read(rawValue, defaultValue, component);
 
 			if (valueCell) {
-				valueCell.set(v);
+				valueCell.set(val);
 			} else {
-				value = v;
+				value = val;
 			}
 		};
 
@@ -136,8 +132,8 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 				return value;
 			},
 
-			set(v: any) {
-				let rawValue = typeSerializer.write(v, defaultValue);
+			set(val: any) {
+				let rawValue = typeSerializer.write(val, defaultValue);
 
 				if (rawValue === null) {
 					el.removeAttribute(hyphenizedName);
@@ -146,9 +142,9 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 				}
 
 				if (valueCell) {
-					valueCell.set(v);
+					valueCell.set(val);
 				} else {
-					value = v;
+					value = val;
 				}
 			}
 		};
