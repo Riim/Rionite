@@ -5,7 +5,7 @@ export let templateTag = !(dummyEl.firstChild as Node).firstChild;
 
 let nativeCustomElementsFeature = false;
 
-function TestNativeCustomElementsFeature(self: any) {
+function TestNativeCustomElementsFeature(self: any): HTMLElement {
 	return HTMLElement.call(this, self);
 }
 Object.defineProperty(TestNativeCustomElementsFeature, 'observedAttributes', {

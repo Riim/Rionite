@@ -3,7 +3,7 @@ import { IContentBinding, TContent, default as ContentParser } from './ContentPa
 import bindingToJSExpression from './bindingToJSExpression';
 import formatters from './formatters';
 import Component from './Component';
-import KEY_COMPONENT_PROPERTY_VALUES from './KEY_COMPONENT_PROPERTY_VALUES';
+import KEY_COMPONENT_INPUT_VALUES from './KEY_COMPONENT_INPUT_VALUES';
 import getUID from './Utils/getUID';
 
 let ContentNodeType = ContentParser.ContentNodeType;
@@ -55,8 +55,8 @@ export default function compileContent(
 			let key = String(++keyCounter);
 
 			(
-				ownerComponent[KEY_COMPONENT_PROPERTY_VALUES] ||
-					(ownerComponent[KEY_COMPONENT_PROPERTY_VALUES] = new Map())
+				ownerComponent[KEY_COMPONENT_INPUT_VALUES] ||
+					(ownerComponent[KEY_COMPONENT_INPUT_VALUES] = new Map())
 			).set(key, value);
 
 			return key;

@@ -1579,7 +1579,7 @@ var DisposableMixin_1 = __webpack_require__(19);
 var elementConstructorMap_1 = __webpack_require__(30);
 var registerComponent_1 = __webpack_require__(52);
 var ElementProtoMixin_1 = __webpack_require__(8);
-var ComponentProperties_1 = __webpack_require__(17);
+var ComponentInput_1 = __webpack_require__(17);
 var initElementAttributes_1 = __webpack_require__(50);
 var bindContent_1 = __webpack_require__(5);
 var componentBinding_1 = __webpack_require__(45);
@@ -1594,14 +1594,14 @@ var Features_1 = __webpack_require__(3);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
-var rePropertyChangeEventName = /property\-([\-0-9a-z]*)\-change/;
+var reInputChangeEventName = /input\-([\-0-9a-z]*)\-change/;
 function findChildComponentElements(node, ownerComponent, context, _childComponents) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         if (child.nodeType == Node.ELEMENT_NODE) {
             var childComponent = child.$component;
             if (childComponent) {
                 childComponent.ownerComponent = ownerComponent;
-                childComponent.props.context = context;
+                childComponent.input.$context = context;
                 (_childComponents || (_childComponents = [])).push(childComponent);
             }
             if (child.firstChild &&
@@ -1641,9 +1641,9 @@ var Component = (function (_super) {
         el.rioniteComponent = _this;
         Object.defineProperty(el, '$component', { value: _this });
         if (props) {
-            var properties = _this.props;
+            var input = _this.input;
             for (var name_1 in props) {
-                properties[camelize_1.default(name_1)] = props[name_1];
+                input[camelize_1.default(name_1)] = props[name_1];
             }
         }
         _this.created();
@@ -1669,24 +1669,24 @@ var Component = (function (_super) {
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(Component.prototype, "props", {
+    Object.defineProperty(Component.prototype, "input", {
         get: function () {
-            var props = ComponentProperties_1.default.init(this);
-            Object.defineProperty(this, 'props', {
+            var input = ComponentInput_1.default.init(this);
+            Object.defineProperty(this, 'input', {
                 configurable: true,
                 enumerable: true,
                 writable: true,
-                value: props
+                value: input
             });
-            return props;
+            return input;
         },
         enumerable: true,
         configurable: true
     });
     Component.prototype._on = function (type, listener, context) {
-        if (!type.lastIndexOf('property-', 0) && rePropertyChangeEventName.test(type)) {
+        if (!type.lastIndexOf('input-', 0) && reInputChangeEventName.test(type)) {
             cellx_1.EventEmitter.currentlySubscribing = true;
-            this.props[camelize_1.default(RegExp.$1)];
+            this.input[camelize_1.default(RegExp.$1)];
             cellx_1.EventEmitter.currentlySubscribing = false;
         }
         _super.prototype._on.call(this, type, listener, context);
@@ -1756,7 +1756,7 @@ var Component = (function (_super) {
             el.className = constr._blockNamesString + el.className;
             initElementAttributes_1.default(this);
             if (constr.template == null) {
-                var childComponents = findChildComponentElements(el, this.ownerComponent, this.props.context);
+                var childComponents = findChildComponentElements(el, this.ownerComponent, this.input.$context);
                 if (childComponents) {
                     attachChildComponentElements_1.default(childComponents);
                 }
@@ -1766,7 +1766,7 @@ var Component = (function (_super) {
             }
             else {
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
-                moveContent_1.default((this.props.content = document.createDocumentFragment()), el);
+                moveContent_1.default((this.input.$content = document.createDocumentFragment()), el);
                 ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
@@ -1870,7 +1870,7 @@ var Component = (function (_super) {
 }(cellx_1.EventEmitter));
 Component.register = registerComponent_1.default;
 Component.elementExtends = null;
-Component.props = null;
+Component.input = null;
 Component.template = null;
 Component.events = null;
 exports.default = Component;
@@ -1912,8 +1912,8 @@ var d = {
             if (config.elementExtends !== undefined) {
                 componentConstr.elementExtends = config.elementExtends;
             }
-            if (config.props !== undefined) {
-                componentConstr.props = config.props;
+            if (config.input !== undefined) {
+                componentConstr.input = config.input;
             }
             if (config.i18n) {
                 componentConstr.i18n = config.i18n;
@@ -1990,7 +1990,7 @@ exports.default = attachChildComponentElements;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var KEY_COMPONENT_PROPERTY_VALUES_1 = __webpack_require__(6);
+var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(6);
 var ContentParser_1 = __webpack_require__(27);
 var compileContent_1 = __webpack_require__(44);
 var setAttribute_1 = __webpack_require__(41);
@@ -2034,8 +2034,8 @@ function bindContent(content, ownerComponent, context) {
                                     var value_1 = readedValue.value;
                                     if (value_1 && typeof value_1 == 'object') {
                                         var key = compileContent_1.nextComponentPropertyValueKey();
-                                        (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] ||
-                                            (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] = new Map())).set(key, value_1);
+                                        (ownerComponent[KEY_COMPONENT_INPUT_VALUES_1.default] ||
+                                            (ownerComponent[KEY_COMPONENT_INPUT_VALUES_1.default] = new Map())).set(key, value_1);
                                         setAttribute_1.default(child, name_1, key);
                                     }
                                     else {
@@ -2064,7 +2064,7 @@ function bindContent(content, ownerComponent, context) {
                     var childComponent = child.$component;
                     if (childComponent) {
                         childComponent.ownerComponent = ownerComponent;
-                        childComponent.props.context = context;
+                        childComponent.input.$context = context;
                         (childComponents || (childComponents = [])).push(childComponent);
                     }
                     if (child.firstChild &&
@@ -2118,8 +2118,8 @@ exports.default = bindContent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var KEY_COMPONENT_PROPERTY_VALUES = cellx_1.JS.Symbol('Rionite.KEY_COMPONENT_PROPERTY_VALUES');
-exports.default = KEY_COMPONENT_PROPERTY_VALUES;
+var KEY_COMPONENT_INPUT_VALUES = cellx_1.JS.Symbol('Rionite.KEY_COMPONENT_INPUT_VALUES');
+exports.default = KEY_COMPONENT_INPUT_VALUES;
 
 
 /***/ }),
@@ -2205,13 +2205,13 @@ var ElementProtoMixin = (_a = {
     _a.attributeChangedCallback = function (name, oldValue, value) {
         var component = this.rioniteComponent;
         if (component && component.isReady) {
-            var props = component.props;
+            var input = component.input;
             var privateName = '_' + name;
-            if (props[privateName]) {
-                props[privateName](value);
+            if (input[privateName]) {
+                input[privateName](value);
             }
             else if (Features_1.nativeCustomElements) {
-                throw new TypeError("Cannot write to readonly property \"" + name + "\"");
+                throw new TypeError("Cannot write to readonly input property \"" + name + "\"");
             }
         }
     },
@@ -2359,43 +2359,43 @@ exports.default = '[$_a-zA-Z][$\\w]*';
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var componentPropertyTypeMap_1 = __webpack_require__(47);
-var componentPropertyTypeHandlersMap_1 = __webpack_require__(46);
+var componentInputTypeMap_1 = __webpack_require__(46);
+var componentInputTypeSerializerMap_1 = __webpack_require__(47);
 var hyphenize_1 = __webpack_require__(12);
-function initProperty(props, name, el) {
+function initInputProperty(input, name, el) {
     var component = el.$component;
-    var propConfig = component.constructor.props[name];
-    if (propConfig == null) {
+    var inputPropertyConfig = component.constructor.input[name];
+    if (inputPropertyConfig == null) {
         return;
     }
-    var type = typeof propConfig;
+    var type = typeof inputPropertyConfig;
     var defaultValue;
     var required;
     var readonly;
     if (type == 'function') {
-        type = propConfig;
+        type = inputPropertyConfig;
         required = readonly = false;
     }
-    else if (type == 'object' && (propConfig.type !== undefined || propConfig.default !== undefined)) {
-        type = propConfig.type;
-        defaultValue = propConfig.default;
+    else if (type == 'object' && (inputPropertyConfig.type !== undefined || inputPropertyConfig.default !== undefined)) {
+        type = inputPropertyConfig.type;
+        defaultValue = inputPropertyConfig.default;
         if (type === undefined) {
             type = typeof defaultValue;
         }
-        else if (defaultValue !== undefined && componentPropertyTypeMap_1.default.has(type) &&
-            componentPropertyTypeMap_1.default.get(type) != typeof defaultValue) {
-            throw new TypeError('Specified type does not match type of defaultValue');
+        else if (defaultValue !== undefined && componentInputTypeMap_1.default.has(type) &&
+            componentInputTypeMap_1.default.get(type) != typeof defaultValue) {
+            throw new TypeError('Specified type does not match defaultValue type');
         }
-        required = propConfig.required;
-        readonly = propConfig.readonly;
+        required = inputPropertyConfig.required;
+        readonly = inputPropertyConfig.readonly;
     }
     else {
-        defaultValue = propConfig;
+        defaultValue = inputPropertyConfig;
         required = readonly = false;
     }
-    var handlers = componentPropertyTypeHandlersMap_1.default.get(type);
-    if (!handlers) {
-        throw new TypeError('Unsupported attribute type');
+    var typeSerializer = componentInputTypeSerializerMap_1.default.get(type);
+    if (!typeSerializer) {
+        throw new TypeError('Unsupported component input type');
     }
     var hyphenizedName = hyphenize_1.default(name);
     var rawValue = el.getAttribute(hyphenizedName);
@@ -2404,7 +2404,7 @@ function initProperty(props, name, el) {
     }
     var descriptor;
     if (readonly) {
-        var value_1 = handlers[0](rawValue, defaultValue, component);
+        var value_1 = typeSerializer.read(rawValue, defaultValue, component);
         descriptor = {
             configurable: true,
             enumerable: true,
@@ -2413,21 +2413,21 @@ function initProperty(props, name, el) {
             },
             set: function (v) {
                 if (v !== value_1) {
-                    throw new TypeError("Property \"" + name + "\" is readonly");
+                    throw new TypeError("Input property \"" + name + "\" is readonly");
                 }
             }
         };
     }
     else {
-        var value_2 = handlers[0](rawValue, defaultValue, component);
+        var value_2 = typeSerializer.read(rawValue, defaultValue, component);
         var valueCell_1;
         if (rawValue === null && defaultValue != null && defaultValue !== false) {
-            props['_initialize_' + name] = function () {
-                el.setAttribute(hyphenizedName, handlers[1](defaultValue));
+            input['_initialize_' + name] = function () {
+                el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue));
             };
         }
         var setRawValue = function (rawValue) {
-            var v = handlers[0](rawValue, defaultValue, component);
+            var v = typeSerializer.read(rawValue, defaultValue, component);
             if (valueCell_1) {
                 valueCell_1.set(v);
             }
@@ -2435,9 +2435,9 @@ function initProperty(props, name, el) {
                 value_2 = v;
             }
         };
-        props['_' + name] = setRawValue;
+        input['_' + name] = setRawValue;
         if (name != hyphenizedName) {
-            props['_' + hyphenizedName] = setRawValue;
+            input['_' + hyphenizedName] = setRawValue;
         }
         descriptor = {
             configurable: true,
@@ -2451,7 +2451,7 @@ function initProperty(props, name, el) {
                     valueCell_1 = new cellx_1.Cell(value_2, {
                         onChange: function (evt) {
                             component.emit({
-                                type: "property-" + hyphenizedName + "-change",
+                                type: "input-" + hyphenizedName + "-change",
                                 oldValue: evt.oldValue,
                                 value: evt.value
                             });
@@ -2464,7 +2464,7 @@ function initProperty(props, name, el) {
                 return value_2;
             },
             set: function (v) {
-                var rawValue = handlers[1](v, defaultValue);
+                var rawValue = typeSerializer.write(v, defaultValue);
                 if (rawValue === null) {
                     el.removeAttribute(hyphenizedName);
                 }
@@ -2480,22 +2480,22 @@ function initProperty(props, name, el) {
             }
         };
     }
-    Object.defineProperty(props, name, descriptor);
+    Object.defineProperty(input, name, descriptor);
 }
-var ComponentProperties = {
+var ComponentInput = {
     init: function (component) {
-        var propsConfig = component.constructor.props;
+        var inputConfig = component.constructor.input;
         var el = component.element;
-        var props = { content: null, context: null };
-        if (propsConfig) {
-            for (var name_1 in propsConfig) {
-                initProperty(props, name_1, el);
+        var input = { $content: null, $context: null };
+        if (inputConfig) {
+            for (var name_1 in inputConfig) {
+                initInputProperty(input, name_1, el);
             }
         }
-        return props;
+        return input;
     }
 };
-exports.default = ComponentProperties;
+exports.default = ComponentInput;
 
 
 /***/ }),
@@ -2547,16 +2547,16 @@ var RtIfThen = (function (_super) {
         }
         this._active = true;
         if (!this.initialized) {
-            var props = this.props;
-            props.content = document.importNode(this.element.content, true);
-            var if_ = (props['if'] || '').trim();
+            var input = this.input;
+            input.$content = document.importNode(this.element.content, true);
+            var if_ = (input['if'] || '').trim();
             if (!reKeypath.test(if_)) {
                 throw new SyntaxError("Invalid value of attribute \"if\" (" + if_ + ")");
             }
             var getIfValue_1 = compileKeypath_1.default(if_);
             this._if = new cellx_1.Cell(function () {
                 return !!getIfValue_1.call(this);
-            }, { owner: props.context });
+            }, { owner: input.$context });
             this.initialized = true;
         }
         this._if.on('change', this._onIfChange, this);
@@ -2584,8 +2584,8 @@ var RtIfThen = (function (_super) {
     RtIfThen.prototype._render = function (changed) {
         var _this = this;
         if (this._elseMode ? !this._if.get() : this._if.get()) {
-            var content = this.props.content.cloneNode(true);
-            var _a = bindContent_1.default(content, this.ownerComponent, this.props.context), bindings = _a[0], childComponents = _a[1];
+            var content = this.input.$content.cloneNode(true);
+            var _a = bindContent_1.default(content, this.ownerComponent, this.input.$context), bindings = _a[0], childComponents = _a[1];
             this._nodes = slice.call(content.childNodes);
             this._bindings = bindings;
             this.element.parentNode.insertBefore(content, this.element.nextSibling);
@@ -2634,7 +2634,7 @@ RtIfThen = __decorate([
     d_1.default.Component({
         elementIs: 'rt-if-then',
         elementExtends: 'template',
-        props: {
+        input: {
             if: { type: String, required: true, readonly: true }
         }
     })
@@ -3982,15 +3982,15 @@ var RtContent = (function (_super) {
         else {
             var ownerComponent = this.ownerComponent;
             var el = this.element;
-            var props = this.props;
+            var input = this.input;
             var contentOwnerComponent = ownerComponent.ownerComponent;
-            var ownerComponentContent = ownerComponent.props.content;
-            var clone = props.clone;
+            var ownerComponentContent = ownerComponent.input.$content;
+            var clone = input.clone;
             var content = void 0;
             var bindings = void 0;
             var childComponents = void 0;
             if (!clone || ownerComponentContent.firstChild) {
-                var selector = props.select;
+                var selector = input.select;
                 var key = getUID_1.default(ownerComponent) + '/' + (selector || '');
                 if (selector) {
                     var contentMap = void 0;
@@ -4049,12 +4049,12 @@ var RtContent = (function (_super) {
             }
             if (bindings === undefined) {
                 if (content || el.firstChild) {
-                    var getContext = props.getContext;
+                    var getContext = input.getContext;
                     _a = content ?
                         bindContent_1.default(content, contentOwnerComponent, getContext ?
-                            ownerComponent[getContext](ownerComponent.props.context, this) :
-                            ownerComponent.props.context) :
-                        bindContent_1.default(el, ownerComponent, props.context), this._bindings = _a[0], childComponents = _a[1];
+                            ownerComponent[getContext](ownerComponent.input.$context, this) :
+                            ownerComponent.input.$context) :
+                        bindContent_1.default(el, ownerComponent, input.$context), this._bindings = _a[0], childComponents = _a[1];
                     this._childComponents = childComponents;
                 }
                 else {
@@ -4091,7 +4091,7 @@ var RtContent = (function (_super) {
 RtContent = __decorate([
     d_1.default.Component({
         elementIs: 'rt-content',
-        props: {
+        input: {
             select: { type: String, readonly: true },
             clone: { default: false, readonly: true },
             getContext: { type: String, readonly: true }
@@ -4196,18 +4196,18 @@ var RtRepeat = (function (_super) {
         }
         this._active = true;
         if (!this.initialized) {
-            var props = this.props;
-            var forAttrValue = props['for'].match(reForAttrValue);
+            var input = this.input;
+            var forAttrValue = input['for'].match(reForAttrValue);
             if (!forAttrValue) {
-                throw new SyntaxError("Invalid value of attribute \"for\" (" + props['for'] + ")");
+                throw new SyntaxError("Invalid value of attribute \"for\" (" + input['for'] + ")");
             }
             this._itemName = forAttrValue[1];
-            this._list = new cellx_1.Cell(compileKeypath_1.default(forAttrValue[2]), { owner: props.context });
+            this._list = new cellx_1.Cell(compileKeypath_1.default(forAttrValue[2]), { owner: input.$context });
             this._itemMap = new Map();
-            this._trackBy = props.trackBy;
+            this._trackBy = input.trackBy;
             var rawItemContent = this._rawItemContent =
                 document.importNode(this.element.content, true);
-            if (props.strip) {
+            if (input.strip) {
                 var firstChild = rawItemContent.firstChild;
                 var lastChild = rawItemContent.lastChild;
                 if (firstChild == lastChild) {
@@ -4325,7 +4325,7 @@ var RtRepeat = (function (_super) {
         var itemCell = new cellx_1.Cell(item);
         var indexCell = new cellx_1.Cell(index);
         var content = this._rawItemContent.cloneNode(true);
-        var _a = bindContent_1.default(content, this.ownerComponent, Object.create(this.props.context, (_b = {},
+        var _a = bindContent_1.default(content, this.ownerComponent, Object.create(this.input.$context, (_b = {},
             _b[this._itemName] = {
                 get: function () {
                     return itemCell.get();
@@ -4395,7 +4395,7 @@ RtRepeat = __decorate([
     d_1.default.Component({
         elementIs: 'rt-repeat',
         elementExtends: 'template',
-        props: {
+        input: {
             for: { type: String, required: true, readonly: true },
             trackBy: { type: String, readonly: true },
             strip: { default: false, readonly: true }
@@ -4454,15 +4454,15 @@ var RtSlot = (function (_super) {
         else {
             var ownerComponent = this.ownerComponent;
             var el = this.element;
-            var props = this.props;
+            var input = this.input;
             var contentOwnerComponent = ownerComponent.ownerComponent;
-            var ownerComponentContent = ownerComponent.props.content;
-            var cloneContent = props.cloneContent;
+            var ownerComponentContent = ownerComponent.input.$content;
+            var cloneContent = input.cloneContent;
             var content = void 0;
             var bindings = void 0;
             var childComponents = void 0;
             if (!cloneContent || ownerComponentContent.firstChild) {
-                var name_1 = props.name;
+                var name_1 = input.name;
                 var key = getUID_1.default(ownerComponent) + '/' + (name_1 || '');
                 if (name_1) {
                     var contentMap = void 0;
@@ -4523,12 +4523,12 @@ var RtSlot = (function (_super) {
             }
             if (bindings === undefined) {
                 if (content || el.firstChild) {
-                    var getContext = props.getContext;
+                    var getContext = input.getContext;
                     _a = content ?
                         bindContent_1.default(content, contentOwnerComponent, getContext ?
-                            ownerComponent[getContext](ownerComponent.props.context, this) :
-                            ownerComponent.props.context) :
-                        bindContent_1.default(el, ownerComponent, props.context), this._bindings = _a[0], childComponents = _a[1];
+                            ownerComponent[getContext](ownerComponent.input.$context, this) :
+                            ownerComponent.input.$context) :
+                        bindContent_1.default(el, ownerComponent, input.$context), this._bindings = _a[0], childComponents = _a[1];
                     this._childComponents = childComponents;
                 }
                 else {
@@ -4565,7 +4565,7 @@ var RtSlot = (function (_super) {
 RtSlot = __decorate([
     d_1.default.Component({
         elementIs: 'rt-slot',
-        props: {
+        input: {
             name: { type: String, readonly: true },
             cloneContent: { default: false, readonly: true },
             getContext: { type: String, readonly: true }
@@ -5014,7 +5014,7 @@ var escape_string_1 = __webpack_require__(13);
 var ContentParser_1 = __webpack_require__(27);
 var bindingToJSExpression_1 = __webpack_require__(43);
 var formatters_1 = __webpack_require__(23);
-var KEY_COMPONENT_PROPERTY_VALUES_1 = __webpack_require__(6);
+var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(6);
 var getUID_1 = __webpack_require__(9);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var keyCounter = 0;
@@ -5046,8 +5046,8 @@ function compileContent(parsedContent, content, ownerComponent) {
         var value = inner.call(this, formatters_1.default);
         if (value && typeof value == 'object') {
             var key_1 = String(++keyCounter);
-            (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] ||
-                (ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default] = new Map())).set(key_1, value);
+            (ownerComponent[KEY_COMPONENT_INPUT_VALUES_1.default] ||
+                (ownerComponent[KEY_COMPONENT_INPUT_VALUES_1.default] = new Map())).set(key_1, value);
             return key_1;
         }
         return value;
@@ -5119,78 +5119,6 @@ exports.unfreezeBindings = unfreezeBindings;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var escape_html_1 = __webpack_require__(11);
-var KEY_COMPONENT_PROPERTY_VALUES_1 = __webpack_require__(6);
-var isRegExp_1 = __webpack_require__(22);
-var componentPropertyTypeHandlersMap = new cellx_1.JS.Map([
-    [Boolean, [
-            function (value, defaultValue) {
-                return value !== null ? value != 'no' : !!defaultValue;
-            },
-            function (value, defaultValue) {
-                return value ? '' : (defaultValue ? 'no' : null);
-            }
-        ]],
-    [Number, [
-            function (value, defaultValue) {
-                return value !== null ? +value : (defaultValue !== undefined ? defaultValue : null);
-            },
-            function (value) {
-                return value != null ? String(+value) : null;
-            }
-        ]],
-    [String, [
-            function (value, defaultValue) {
-                return value !== null ? value : (defaultValue !== undefined ? defaultValue : null);
-            },
-            function (value) {
-                return value != null ? String(value) : null;
-            }
-        ]],
-    [Object, [
-            function (value, defaultValue, component) {
-                if (value === null) {
-                    return defaultValue || null;
-                }
-                var componentPropertyValues = component.ownerComponent &&
-                    component.ownerComponent[KEY_COMPONENT_PROPERTY_VALUES_1.default];
-                if (!componentPropertyValues || !componentPropertyValues.has(value)) {
-                    throw new TypeError('Value is not an object');
-                }
-                var val = componentPropertyValues.get(value);
-                componentPropertyValues.delete(value);
-                return val;
-            },
-            function (value) {
-                return value != null ? '' : null;
-            }
-        ]],
-    [eval, [
-            function (value, defaultValue) {
-                return value !== null ?
-                    Function("return " + escape_html_1.unescapeHTML(value) + ";")() :
-                    (defaultValue !== undefined ? defaultValue : null);
-            },
-            function (value) {
-                return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
-            }
-        ]]
-]);
-componentPropertyTypeHandlersMap.set('boolean', componentPropertyTypeHandlersMap.get(Boolean));
-componentPropertyTypeHandlersMap.set('number', componentPropertyTypeHandlersMap.get(Number));
-componentPropertyTypeHandlersMap.set('string', componentPropertyTypeHandlersMap.get(String));
-componentPropertyTypeHandlersMap.set('object', componentPropertyTypeHandlersMap.get(Object));
-exports.default = componentPropertyTypeHandlersMap;
-
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var cellx_1 = __webpack_require__(0);
 exports.default = new cellx_1.JS.Map([
     [Boolean, 'boolean'],
     ['boolean', 'boolean'],
@@ -5201,6 +5129,78 @@ exports.default = new cellx_1.JS.Map([
     [Object, 'object'],
     ['object', 'object']
 ]);
+
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var cellx_1 = __webpack_require__(0);
+var escape_html_1 = __webpack_require__(11);
+var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(6);
+var isRegExp_1 = __webpack_require__(22);
+var componentInputTypeSerializerMap = new cellx_1.JS.Map([
+    [Boolean, {
+            read: function (value, defaultValue) {
+                return value !== null ? value != 'no' : !!defaultValue;
+            },
+            write: function (value, defaultValue) {
+                return value ? '' : (defaultValue ? 'no' : null);
+            }
+        }],
+    [Number, {
+            read: function (value, defaultValue) {
+                return value !== null ? +value : (defaultValue !== undefined ? defaultValue : null);
+            },
+            write: function (value) {
+                return value != null ? String(+value) : null;
+            }
+        }],
+    [String, {
+            read: function (value, defaultValue) {
+                return value !== null ? value : (defaultValue !== undefined ? defaultValue : null);
+            },
+            write: function (value) {
+                return value != null ? String(value) : null;
+            }
+        }],
+    [Object, {
+            read: function (value, defaultValue, component) {
+                if (value === null) {
+                    return defaultValue || null;
+                }
+                var componentInputValues = component.ownerComponent &&
+                    component.ownerComponent[KEY_COMPONENT_INPUT_VALUES_1.default];
+                if (!componentInputValues || !componentInputValues.has(value)) {
+                    throw new TypeError('Value is not an object');
+                }
+                var val = componentInputValues.get(value);
+                componentInputValues.delete(value);
+                return val;
+            },
+            write: function (value) {
+                return value != null ? '' : null;
+            }
+        }],
+    [eval, {
+            read: function (value, defaultValue) {
+                return value !== null ?
+                    Function("return " + escape_html_1.unescapeHTML(value) + ";")() :
+                    (defaultValue !== undefined ? defaultValue : null);
+            },
+            write: function (value) {
+                return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
+            }
+        }]
+]);
+componentInputTypeSerializerMap.set('boolean', componentInputTypeSerializerMap.get(Boolean));
+componentInputTypeSerializerMap.set('number', componentInputTypeSerializerMap.get(Number));
+componentInputTypeSerializerMap.set('string', componentInputTypeSerializerMap.get(String));
+componentInputTypeSerializerMap.set('object', componentInputTypeSerializerMap.get(Object));
+exports.default = componentInputTypeSerializerMap;
 
 
 /***/ }),
@@ -5246,10 +5246,10 @@ var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(7);
 exports.KEY_ELEMENT_CONNECTED = KEY_ELEMENT_CONNECTED_1.default;
-var KEY_COMPONENT_PROPERTY_VALUES_1 = __webpack_require__(6);
-exports.KEY_COMPONENT_PROPERTY_VALUES = KEY_COMPONENT_PROPERTY_VALUES_1.default;
-var ComponentProperties_1 = __webpack_require__(17);
-exports.ComponentProperties = ComponentProperties_1.default;
+var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(6);
+exports.KEY_COMPONENT_INPUT_VALUES = KEY_COMPONENT_INPUT_VALUES_1.default;
+var ComponentInput_1 = __webpack_require__(17);
+exports.ComponentInput = ComponentInput_1.default;
 var rt_content_1 = __webpack_require__(32);
 var rt_slot_1 = __webpack_require__(35);
 var rt_if_then_1 = __webpack_require__(18);
@@ -5290,14 +5290,15 @@ exports.Utils = Utils;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var hasOwn = Object.prototype.hasOwnProperty;
 function initElementAttributes(component) {
     var constr = component.constructor;
-    var propsConfig = constr.props;
-    if (propsConfig) {
-        var props = component.props;
-        for (var name_1 in propsConfig) {
-            if (props.hasOwnProperty('_initialize_' + name_1)) {
-                props['_initialize_' + name_1]();
+    var inputConfig = constr.input;
+    if (inputConfig) {
+        var input = component.input;
+        for (var name_1 in inputConfig) {
+            if (hasOwn.call(input, '_initialize_' + name_1)) {
+                input['_initialize_' + name_1]();
             }
         }
     }
@@ -5374,10 +5375,6 @@ function registerComponent(componentConstr) {
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
-    var props = componentConstr.props;
-    if (props && (props.content || props.context)) {
-        throw new TypeError("No need to declare property \"" + (props.content ? 'content' : 'context') + "\"");
-    }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
     componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
     var template = componentConstr.template;
@@ -5405,12 +5402,12 @@ function registerComponent(componentConstr) {
         configurable: true,
         enumerable: true,
         get: function () {
-            var props = componentConstr.props;
-            if (!props) {
+            var inputConfig = componentConstr.input;
+            if (!inputConfig) {
                 return [];
             }
             var observedAttrs = [];
-            for (var name_1 in props) {
+            for (var name_1 in inputConfig) {
                 observedAttrs.push(hyphenize_1.default(name_1));
             }
             return observedAttrs;

@@ -22,8 +22,8 @@ import {
 	default as Component
 } from './Component';
 import KEY_ELEMENT_CONNECTED from './KEY_ELEMENT_CONNECTED';
-import KEY_COMPONENT_PROPERTY_VALUES from './KEY_COMPONENT_PROPERTY_VALUES';
-import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
+import KEY_COMPONENT_INPUT_VALUES from './KEY_COMPONENT_INPUT_VALUES';
+import { IComponentInput, default as ComponentInput } from './ComponentInput';
 import RtContent from './Components/rt-content';
 import RtSlot from './Components/rt-slot';
 import { TIfCell as TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
@@ -88,9 +88,10 @@ export {
 	Component,
 
 	KEY_ELEMENT_CONNECTED,
-	KEY_COMPONENT_PROPERTY_VALUES,
-	IComponentProperties,
-	ComponentProperties,
+	KEY_COMPONENT_INPUT_VALUES,
+
+	IComponentInput,
+	ComponentInput,
 
 	TRtIfThenIfCell,
 	TRtRepeatListCell,

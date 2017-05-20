@@ -20,12 +20,6 @@ export default function registerComponent(componentConstr: typeof Component) {
 		throw new TypeError('Static property "elementIs" is required');
 	}
 
-	let props = componentConstr.props;
-
-	if (props && (props.content || props.context)) {
-		throw new TypeError(`No need to declare property "${ props.content ? 'content' : 'context' }"`);
-	}
-
 	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor as typeof Component;
 
 	componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
@@ -65,15 +59,15 @@ export default function registerComponent(componentConstr: typeof Component) {
 		enumerable: true,
 
 		get() {
-			let props = componentConstr.props;
+			let inputConfig = componentConstr.input;
 
-			if (!props) {
+			if (!inputConfig) {
 				return [];
 			}
 
 			let observedAttrs: Array<string> = [];
 
-			for (let name in props) {
+			for (let name in inputConfig) {
 				observedAttrs.push(hyphenize(name));
 			}
 

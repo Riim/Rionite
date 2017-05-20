@@ -1,15 +1,17 @@
 import Component from './Component';
 
+let hasOwn = Object.prototype.hasOwnProperty;
+
 export default function initElementAttributes(component: Component) {
 	let constr = component.constructor as typeof Component;
-	let propsConfig = constr.props;
+	let inputConfig = constr.input;
 
-	if (propsConfig) {
-		let props = component.props;
+	if (inputConfig) {
+		let input = component.input;
 
-		for (let name in propsConfig) {
-			if (props.hasOwnProperty('_initialize_' + name)) {
-				props['_initialize_' + name]();
+		for (let name in inputConfig) {
+			if (hasOwn.call(input, '_initialize_' + name)) {
+				input['_initialize_' + name]();
 			}
 		}
 	}

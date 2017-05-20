@@ -5,7 +5,7 @@ let d = {
 	Component: function Component_<T extends Component>(config: {
 		elementIs: string,
 		elementExtends?: string | null,
-		props?: { [name: string]: any } | null,
+		input?: { [name: string]: any } | null,
 		i18n?: { [key: string]: any },
 		template?: string | IBlock | Template | null,
 		events?: IComponentEvents<T> | null
@@ -17,8 +17,8 @@ let d = {
 				componentConstr.elementExtends = config.elementExtends;
 			}
 
-			if (config.props !== undefined) {
-				componentConstr.props = config.props;
+			if (config.input !== undefined) {
+				componentConstr.input = config.input;
 			}
 
 			if (config.i18n) {

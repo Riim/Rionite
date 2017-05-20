@@ -30,7 +30,7 @@ let reForAttrValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern
 	elementIs: 'rt-repeat',
 	elementExtends: 'template',
 
-	props: {
+	input: {
 		for: { type: String, required: true, readonly: true },
 		trackBy: { type: String, readonly: true },
 		strip: { default: false, readonly: true }
@@ -62,25 +62,25 @@ export default class RtRepeat extends Component {
 		this._active = true;
 
 		if (!this.initialized) {
-			let props = this.props;
-			let forAttrValue = props['for'].match(reForAttrValue);
+			let input = this.input;
+			let forAttrValue = input['for'].match(reForAttrValue);
 
 			if (!forAttrValue) {
-				throw new SyntaxError(`Invalid value of attribute "for" (${ props['for'] })`);
+				throw new SyntaxError(`Invalid value of attribute "for" (${ input['for'] })`);
 			}
 
 			this._itemName = forAttrValue[1];
 
-			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: props.context as Object });
+			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: input.$context as Object });
 
 			this._itemMap = new Map<any, TItemList>();
 
-			this._trackBy = props.trackBy;
+			this._trackBy = input.trackBy;
 
 			let rawItemContent = this._rawItemContent =
 				document.importNode((this.element as any as HTMLTemplateElement).content, true);
 
-			if (props.strip) {
+			if (input.strip) {
 				let firstChild = rawItemContent.firstChild as Node;
 				let lastChild = rawItemContent.lastChild as Node;
 
@@ -221,7 +221,7 @@ export default class RtRepeat extends Component {
 		let indexCell = new Cell(index);
 
 		let content = this._rawItemContent.cloneNode(true);
-		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(this.props.context, {
+		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(this.input.$context, {
 			[this._itemName]: {
 				get() {
 					return itemCell.get();

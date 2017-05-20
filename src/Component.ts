@@ -5,7 +5,7 @@ import { IDisposableListening, IListener, default as DisposableMixin } from './D
 import elementConstructorMap from './elementConstructorMap';
 import registerComponent from './registerComponent';
 import { ElementsController } from './ElementProtoMixin';
-import { IComponentProperties, default as ComponentProperties } from './ComponentProperties';
+import { IComponentInput, default as ComponentInput } from './ComponentInput';
 import initElementAttributes from './initElementAttributes';
 import bindContent from './bindContent';
 import { IFreezableCell, freezeBindings, unfreezeBindings } from './componentBinding';
@@ -43,7 +43,7 @@ export interface IComponentEvents<T> {
 	};
 }
 
-let rePropertyChangeEventName = /property\-([\-0-9a-z]*)\-change/;
+let reInputChangeEventName = /input\-([\-0-9a-z]*)\-change/;
 
 function findChildComponentElements(
 	node: Node,
@@ -57,7 +57,7 @@ function findChildComponentElements(
 
 			if (childComponent) {
 				childComponent.ownerComponent = ownerComponent;
-				childComponent.props.context = context;
+				childComponent.input.$context = context;
 
 				(_childComponents || (_childComponents = [])).push(childComponent);
 			}
@@ -96,7 +96,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static elementIs: string;
 	static elementExtends: string | null = null;
 
-	static props: { [name: string]: any } | null = null;
+	static input: { [name: string]: any } | null = null;
 
 	static i18n: { [key: string]: any };
 
@@ -133,17 +133,17 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	element: IComponentElement;
 
-	get props(): IComponentProperties {
-		let props = ComponentProperties.init(this);
+	get input(): IComponentInput {
+		let input = ComponentInput.init(this);
 
-		Object.defineProperty(this, 'props', {
+		Object.defineProperty(this, 'input', {
 			configurable: true,
 			enumerable: true,
 			writable: true,
-			value: props
+			value: input
 		});
 
-		return props;
+		return input;
 	}
 
 	_bindings: Array<IFreezableCell> | null;
@@ -177,10 +177,10 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		Object.defineProperty(el, '$component', { value: this });
 
 		if (props) {
-			let properties = this.props;
+			let input = this.input;
 
 			for (let name in props) {
-				properties[camelize(name)] = props[name];
+				input[camelize(name)] = props[name];
 			}
 		}
 
@@ -188,9 +188,9 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	}
 
 	_on(type: string, listener: IEventEmitterListener, context: any) {
-		if (!type.lastIndexOf('property-', 0) && rePropertyChangeEventName.test(type)) {
+		if (!type.lastIndexOf('input-', 0) && reInputChangeEventName.test(type)) {
 			EventEmitter.currentlySubscribing = true;
-			this.props[camelize(RegExp.$1)];
+			this.input[camelize(RegExp.$1)];
 			EventEmitter.currentlySubscribing = false;
 		}
 
@@ -292,7 +292,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			initElementAttributes(this);
 
 			if (constr.template == null) {
-				let childComponents = findChildComponentElements(el, this.ownerComponent, this.props.context);
+				let childComponents = findChildComponentElements(el, this.ownerComponent, this.input.$context);
 
 				if (childComponents) {
 					attachChildComponentElements(childComponents);
@@ -303,7 +303,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				}
 			} else {
 				ElementsController.skipConnectionStatusCallbacks = true;
-				moveContent((this.props.content = document.createDocumentFragment()), el);
+				moveContent((this.input.$content = document.createDocumentFragment()), el);
 				ElementsController.skipConnectionStatusCallbacks = false;
 
 				let rawContent = constr._rawContent;

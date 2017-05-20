@@ -20,7 +20,7 @@ let reKeypath = RegExp(`^${ keypathPattern }$`);
 	elementIs: 'rt-if-then',
 	elementExtends: 'template',
 
-	props: {
+	input: {
 		if: { type: String, required: true, readonly: true }
 	}
 })
@@ -43,11 +43,11 @@ export default class RtIfThen extends Component {
 		this._active = true;
 
 		if (!this.initialized) {
-			let props = this.props;
+			let input = this.input;
 
-			props.content = document.importNode((this.element as any as HTMLTemplateElement).content, true);
+			input.$content = document.importNode((this.element as any as HTMLTemplateElement).content, true);
 
-			let if_ = (props['if'] || '').trim();
+			let if_ = (input['if'] || '').trim();
 
 			if (!reKeypath.test(if_)) {
 				throw new SyntaxError(`Invalid value of attribute "if" (${ if_ })`);
@@ -57,7 +57,7 @@ export default class RtIfThen extends Component {
 
 			this._if = new Cell<boolean>(function() {
 				return !!getIfValue.call(this);
-			}, { owner: props.context as Object });
+			}, { owner: input.$context as Object });
 
 			this.initialized = true;
 		}
@@ -90,8 +90,8 @@ export default class RtIfThen extends Component {
 
 	_render(changed: boolean) {
 		if (this._elseMode ? !this._if.get() : this._if.get()) {
-			let content = (this.props.content as DocumentFragment).cloneNode(true);
-			let [bindings, childComponents] = bindContent(content, this.ownerComponent, this.props.context as Object);
+			let content = (this.input.$content as DocumentFragment).cloneNode(true);
+			let [bindings, childComponents] = bindContent(content, this.ownerComponent, this.input.$context as Object);
 
 			this._nodes = slice.call(content.childNodes);
 			this._bindings = bindings;

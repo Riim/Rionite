@@ -4,7 +4,7 @@ declare let d: {
     Component: <T extends Component>(config: {
         elementIs: string;
         elementExtends?: string | null | undefined;
-        props?: {
+        input?: {
             [name: string]: any;
         } | null | undefined;
         i18n?: {

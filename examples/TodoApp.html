@@ -42,7 +42,7 @@ var todos = cellx.list([
 
 var TodoView = Rionite.Component.extend('todo-view', {
 	Static: {
-		props: {
+		input: {
 			todo: { type: Object, required: true, readonly: true }
 		},
 
@@ -56,7 +56,7 @@ var TodoView = Rionite.Component.extend('todo-view', {
 	},
 
 	initialize() {
-		this.todo = this.props.todo;
+		this.todo = this.input.todo;
 	},
 
 	onCbDoneChange(evt) {

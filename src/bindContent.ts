@@ -1,6 +1,6 @@
 import { Cell } from 'cellx';
 import { IPossiblyComponentElement, default as Component } from './Component';
-import KEY_COMPONENT_PROPERTY_VALUES from './KEY_COMPONENT_PROPERTY_VALUES';
+import KEY_COMPONENT_INPUT_VALUES from './KEY_COMPONENT_INPUT_VALUES';
 import { IContentBinding, default as ContentParser } from './ContentParser';
 import { nextComponentPropertyValueKey, default as compileContent } from './compileContent';
 import { IFreezableCell } from './componentBinding';
@@ -72,8 +72,8 @@ export default function bindContent(content: Node, ownerComponent: Component, co
 										let key = nextComponentPropertyValueKey();
 
 										(
-											ownerComponent[KEY_COMPONENT_PROPERTY_VALUES] ||
-												(ownerComponent[KEY_COMPONENT_PROPERTY_VALUES] = new Map())
+											ownerComponent[KEY_COMPONENT_INPUT_VALUES] ||
+												(ownerComponent[KEY_COMPONENT_INPUT_VALUES] = new Map())
 										).set(key, value);
 
 										setAttribute(child as Element, name, key);
@@ -100,7 +100,7 @@ export default function bindContent(content: Node, ownerComponent: Component, co
 
 					if (childComponent) {
 						childComponent.ownerComponent = ownerComponent;
-						childComponent.props.context = context as Object;
+						childComponent.input.$context = context as Object;
 
 						(childComponents || (childComponents = [])).push(childComponent);
 					}

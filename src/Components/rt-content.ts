@@ -18,7 +18,7 @@ let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 @d.Component({
 	elementIs: 'rt-content',
 
-	props: {
+	input: {
 		select: { type: String, readonly: true },
 		clone: { default: false, readonly: true },
 		getContext: { type: String, readonly: true }
@@ -39,16 +39,16 @@ export default class RtContent extends Component {
 		} else {
 			let ownerComponent = this.ownerComponent;
 			let el = this.element;
-			let props = this.props;
+			let input = this.input;
 			let contentOwnerComponent = ownerComponent.ownerComponent;
-			let ownerComponentContent = ownerComponent.props.content as DocumentFragment;
-			let clone = props.clone;
+			let ownerComponentContent = ownerComponent.input.$content as DocumentFragment;
+			let clone = input.clone;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
 			let childComponents: Array<Component> | null | undefined;
 
 			if (!clone || ownerComponentContent.firstChild) {
-				let selector = props.select;
+				let selector = input.select;
 				let key = getUID(ownerComponent) + '/' + (selector || '');
 
 				if (selector) {
@@ -121,17 +121,17 @@ export default class RtContent extends Component {
 
 			if (bindings === undefined) {
 				if (content || el.firstChild) {
-					let getContext = props.getContext;
+					let getContext = input.getContext;
 
 					[this._bindings, childComponents] = content ?
 						bindContent(
 							content,
 							contentOwnerComponent as Component,
 							getContext ?
-								ownerComponent[getContext](ownerComponent.props.context, this) :
-								ownerComponent.props.context
+								ownerComponent[getContext](ownerComponent.input.$context, this) :
+								ownerComponent.input.$context
 						) :
-						bindContent(el, ownerComponent, props.context);
+						bindContent(el, ownerComponent, input.$context);
 
 					this._childComponents = childComponents;
 				} else {

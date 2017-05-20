@@ -2,7 +2,7 @@ import { IEvent, IEventEmitterListener, EventEmitter } from 'cellx';
 import { IBlock, Template } from '@riim/beml';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
 import registerComponent from './registerComponent';
-import { IComponentProperties } from './ComponentProperties';
+import { IComponentInput } from './ComponentInput';
 import { IFreezableCell } from './componentBinding';
 export interface IPossiblyComponentElement extends HTMLElement {
     rioniteComponent?: Component | null;
@@ -26,7 +26,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     static register: typeof registerComponent;
     static elementIs: string;
     static elementExtends: string | null;
-    static props: {
+    static input: {
         [name: string]: any;
     } | null;
     static i18n: {
@@ -43,7 +43,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     _parentComponent: Component | null | undefined;
     readonly parentComponent: Component | null;
     element: IComponentElement;
-    readonly props: IComponentProperties;
+    readonly input: IComponentInput;
     _bindings: Array<IFreezableCell> | null;
     _elementListMap: Map<string, NodeListOf<Element>>;
     _attached: boolean;
