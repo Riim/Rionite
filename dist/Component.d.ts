@@ -1,5 +1,5 @@
 import { IEvent, IEventEmitterListener, EventEmitter } from 'cellx';
-import { IBlock, Template } from '@riim/beml';
+import { IBlock, Template } from 'nelm';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
 import registerComponent from './registerComponent';
 import { IComponentInput } from './ComponentInput';

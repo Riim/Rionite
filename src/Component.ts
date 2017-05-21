@@ -1,5 +1,5 @@
 import { IEvent, IEventEmitterListener, EventEmitter, JS, Utils } from 'cellx';
-import { IBlock, Template } from '@riim/beml';
+import { IBlock, Template } from 'nelm';
 import htmlToFragment from 'html-to-fragment';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
 import elementConstructorMap from './elementConstructorMap';

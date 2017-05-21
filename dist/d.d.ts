@@ -1,4 +1,4 @@
-import { IBlock, Template } from '@riim/beml';
+import { IBlock, Template } from 'nelm';
 import { IComponentEvents, default as Component } from './Component';
 declare let d: {
     Component: <T extends Component>(config: {

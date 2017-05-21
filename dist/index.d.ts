@@ -1,4 +1,4 @@
-import { Parser as BemlParser, Template } from '@riim/beml';
+import { Parser as NelmParser, Template } from 'nelm';
 import { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, default as DisposableMixin } from './DisposableMixin';
 import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
@@ -12,7 +12,7 @@ import { TIfCell as TRtIfThenIfCell, default as RtIfThen } from './Components/rt
 import RtIfElse from './Components/rt-if-else';
 import { TListCell as TRtRepeatListCell, IItem as IRtRepeatItem, TItemList as TRtRepeatItemList, TItemMap as TRtRepeatItemMap, default as RtRepeat } from './Components/rt-repeat';
 import d from './d';
-import './bemlTemplateHelpers';
+import './nelmTemplateHelpers';
 declare let Components: {
     RtContent: typeof RtContent;
     RtSlot: typeof RtSlot;
@@ -30,4 +30,4 @@ declare let Utils: {
     defer: (cb: () => void, context?: any) => void;
     htmlToFragment: (html: string) => DocumentFragment;
 };
-export { BemlParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, KEY_COMPONENT_INPUT_VALUES, IComponentInput, ComponentInput, TRtIfThenIfCell, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, d, Utils };
+export { NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, KEY_COMPONENT_INPUT_VALUES, IComponentInput, ComponentInput, TRtIfThenIfCell, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, d, Utils };

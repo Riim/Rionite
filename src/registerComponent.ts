@@ -1,5 +1,5 @@
 import { Utils } from 'cellx';
-import { Template } from '@riim/beml';
+import { Template } from 'nelm';
 import Component from './Component';
 import elementConstructorMap from './elementConstructorMap';
 import ElementProtoMixin from './ElementProtoMixin';

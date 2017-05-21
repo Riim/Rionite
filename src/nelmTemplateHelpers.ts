@@ -1,4 +1,4 @@
-import { NodeType, TContent, IElement, Template } from '@riim/beml';
+import { NodeType, TContent, IElement, Template } from 'nelm';
 
 Template.helpers['if-then'] = Template.helpers['if-else'] = Template.helpers['repeat'] = (el: IElement): TContent => {
 	let origAttrs = el.attributes;

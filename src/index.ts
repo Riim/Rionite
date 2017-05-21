@@ -1,4 +1,4 @@
-import { Parser as BemlParser, Template } from '@riim/beml';
+import { Parser as NelmParser, Template } from 'nelm';
 import escapeString from 'escape-string';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import htmlToFragment from 'html-to-fragment';
@@ -40,7 +40,7 @@ import camelize from './Utils/camelize';
 import hyphenize from './Utils/hyphenize';
 import isRegExp from './Utils/isRegExp';
 import defer from './Utils/defer';
-import './bemlTemplateHelpers';
+import './nelmTemplateHelpers';
 
 let Components = {
 	RtContent,
@@ -62,7 +62,7 @@ let Utils = {
 };
 
 export {
-	BemlParser,
+	NelmParser,
 	Template,
 	IDisposable,
 	IDisposableListening,
