@@ -20,8 +20,10 @@ export default function onEvent(evt: IEvent | Event) {
 
 		let component = (node as IPossiblyComponentElement).$component;
 
-		if (component && targetEls) {
-			for (let i = 0, l = targetEls.length; i < l;) {
+		if (component && targetEls && targetEls.length) {
+			let i = 0;
+
+			do {
 				let targetEl = targetEls[i];
 				let handler = component[targetEl.getAttribute(attrName) as string];
 
@@ -39,13 +41,12 @@ export default function onEvent(evt: IEvent | Event) {
 					}
 
 					targetEls.splice(i, 1);
-					l--;
 
 					continue;
 				}
 
 				i++;
-			}
+			} while (i < targetEls.length);
 		}
 	}
 }

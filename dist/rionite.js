@@ -3547,8 +3547,9 @@ function onEvent(evt) {
             break;
         }
         var component = node.$component;
-        if (component && targetEls) {
-            for (var i = 0, l = targetEls.length; i < l;) {
+        if (component && targetEls && targetEls.length) {
+            var i = 0;
+            do {
                 var targetEl = targetEls[i];
                 var handler = component[targetEl.getAttribute(attrName)];
                 if (typeof handler == 'function') {
@@ -3562,11 +3563,10 @@ function onEvent(evt) {
                         return;
                     }
                     targetEls.splice(i, 1);
-                    l--;
                     continue;
                 }
                 i++;
-            }
+            } while (i < targetEls.length);
         }
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.24.3",
+  "version": "0.24.4",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -30,11 +30,11 @@
     "require-dir": "^0.3.1",
     "rimraf": "^2.6.1",
     "run-sequence": "^1.2.2",
-    "webpack": "^2.5.1"
+    "webpack": "^2.6.0"
   },
   "dependencies": {
     "@riim/escape-html": "^1.1.0",
-    "cellx": "^1.7.7",
+    "cellx": "^1.7.9",
     "document-register-element": "^1.4.1",
     "escape-string": "^1.0.1",
     "html-to-fragment": "^1.0.0",
