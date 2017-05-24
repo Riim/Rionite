@@ -2064,7 +2064,8 @@ var Parser = (function () {
         this.at = 0;
         this.chr = this.nelm.charAt(0);
         var content;
-        while (this._skipWhitespaces() == '/') {
+        var nextChr;
+        while (this._skipWhitespaces() == '/' && ((nextChr = this.nelm.charAt(this.at + 1)) == '/' || nextChr == '*')) {
             (content || (content = [])).push(this._readComment());
         }
         var blockName = this.chr == '#' ? this._readBlockName() : null;
@@ -2113,8 +2114,8 @@ var Parser = (function () {
                 }
                 default: {
                     if (this.chr == '/') {
-                        var next = this.nelm.charAt(this.at + 1);
-                        if (next == '/' || next == '*') {
+                        var nextChr = this.nelm.charAt(this.at + 1);
+                        if (nextChr == '/' || nextChr == '*') {
                             content.push(this._readComment());
                             break;
                         }
@@ -2257,11 +2258,12 @@ var Parser = (function () {
     };
     Parser.prototype._skipWhitespacesAndComments = function () {
         var chr = this.chr;
+        var nextChr;
         for (;;) {
             if (chr && chr <= ' ') {
                 chr = this._next();
             }
-            else if (chr == '/') {
+            else if (chr == '/' && ((nextChr = this.nelm.charAt(this.at + 1)) == '/' || nextChr == '*')) {
                 this._readComment();
                 chr = this.chr;
             }
