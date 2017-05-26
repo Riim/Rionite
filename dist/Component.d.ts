@@ -22,7 +22,6 @@ export interface IComponentEvents<T> {
 }
 export default class Component extends EventEmitter implements DisposableMixin {
     static extend(elIs: string, description: any): typeof Component;
-    static _registeredComponent: typeof Component;
     static register: typeof registerComponent;
     static elementIs: string;
     static elementExtends: string | null;
@@ -31,7 +30,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
     } | null;
     static i18n: {
         [key: string]: any;
-    };
+    } | null;
     static _blockNamesString: string;
     static template: string | IBlock | Template | null;
     static _contentBlockNames: Array<string>;
@@ -45,11 +44,11 @@ export default class Component extends EventEmitter implements DisposableMixin {
     element: IComponentElement;
     readonly input: IComponentInput;
     _bindings: Array<IFreezableCell> | null;
-    _elementListMap: Map<string, NodeListOf<Element>>;
+    _elementListMap: Map<string, NodeListOf<Element>> | undefined;
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;
-    _silent: boolean;
+    _silent: boolean | undefined;
     constructor(el?: HTMLElement);
     _on(type: string, listener: IEventEmitterListener, context: any): void;
     _handleEvent(evt: IEvent): void;

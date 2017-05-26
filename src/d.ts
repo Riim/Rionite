@@ -6,7 +6,7 @@ let d = {
 		elementIs: string,
 		elementExtends?: string | null,
 		input?: { [name: string]: any } | null,
-		i18n?: { [key: string]: any },
+		i18n?: { [key: string]: any } | null,
 		template?: string | IBlock | Template | null,
 		events?: IComponentEvents<T> | null
 	}) {
@@ -21,7 +21,7 @@ let d = {
 				componentConstr.input = config.input;
 			}
 
-			if (config.i18n) {
+			if (config.i18n !== undefined) {
 				componentConstr.i18n = config.i18n;
 			}
 

@@ -1630,7 +1630,7 @@ var Component = (function (_super) {
         _this.isReady = false;
         DisposableMixin_1.default.call(_this);
         var constr = _this.constructor;
-        if (constr._registeredComponent !== constr) {
+        if (!elementConstructorMap_1.default[constr.elementIs]) {
             throw new TypeError('Component must be registered');
         }
         if (!el) {
@@ -1749,6 +1749,7 @@ var Component = (function (_super) {
             el.className = constr._blockNamesString + el.className;
             if (constr.template == null) {
                 this.input;
+                this._bindings = null;
                 var childComponents = findChildComponentElements(el, this.ownerComponent, this.input.$context);
                 if (childComponents) {
                     attachChildComponentElements_1.default(childComponents);
@@ -1864,6 +1865,7 @@ var Component = (function (_super) {
 Component.register = registerComponent_1.default;
 Component.elementExtends = null;
 Component.input = null;
+Component.i18n = null;
 Component.template = null;
 Component.events = null;
 exports.default = Component;
@@ -1908,7 +1910,7 @@ var d = {
             if (config.input !== undefined) {
                 componentConstr.input = config.input;
             }
-            if (config.i18n) {
+            if (config.i18n !== undefined) {
                 componentConstr.i18n = config.i18n;
             }
             if (config.template !== undefined) {
@@ -5063,28 +5065,47 @@ var ElementProtoMixin_1 = __webpack_require__(8);
 var hyphenize_1 = __webpack_require__(11);
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
-function registerComponent(componentConstr) {
-    if (componentConstr._registeredComponent === componentConstr) {
-        throw new TypeError('Component already registered');
+function inheritProperty(target, source, name, depth) {
+    var obj = target[name];
+    var parentObj = source[name];
+    if (obj && parentObj && obj != parentObj) {
+        var o = target[name] = { __proto__: parentObj };
+        for (var key in obj) {
+            o[key] = obj[key];
+            if (depth) {
+                inheritProperty(o, parentObj, key, depth - 1);
+            }
+        }
     }
+}
+function registerComponent(componentConstr) {
     var elIs = componentConstr.elementIs;
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
+    if (elementConstructorMap_1.default[elIs]) {
+        throw new TypeError("Component \"" + elIs + "\" already registered");
+    }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
+    inheritProperty(componentConstr, parentComponentConstr, 'input', 0);
+    inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
     componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
     var template = componentConstr.template;
     if (template !== null && template !== parentComponentConstr.template) {
-        componentConstr.template = template instanceof nelm_1.Template ?
-            template.setBlockName(elIs) :
-            new nelm_1.Template(template, { blockName: elIs });
+        if (template instanceof nelm_1.Template) {
+            template.setBlockName(elIs);
+        }
+        else {
+            componentConstr.template = new nelm_1.Template(template, { blockName: elIs });
+        }
     }
     componentConstr._contentBlockNames = [elIs];
     if (parentComponentConstr._contentBlockNames) {
-        push.apply(componentConstr._contentBlockNames, parentComponentConstr._contentBlockNames);
+        push.apply([elIs], parentComponentConstr._contentBlockNames);
     }
     componentConstr._rawContent = undefined;
     componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
+    inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
     var elExtends = componentConstr.elementExtends;
     var parentElConstr = elExtends ?
         elementConstructorMap_1.default[elExtends] ||
@@ -5093,7 +5114,7 @@ function registerComponent(componentConstr) {
     var elConstr = function (self) {
         return parentElConstr.call(this, self);
     };
-    var elProto = elConstr.prototype = Object.create(parentElConstr.prototype);
+    elConstr['_rioniteComponentConstructor'] = componentConstr;
     Object.defineProperty(elConstr, 'observedAttributes', {
         configurable: true,
         enumerable: true,
@@ -5109,16 +5130,12 @@ function registerComponent(componentConstr) {
             return observedAttrs;
         }
     });
-    elConstr['_rioniteComponentConstructor'] = componentConstr;
+    var elProto = elConstr.prototype = Object.create(parentElConstr.prototype);
+    elProto.constructor = elConstr;
     mixin(elProto, ElementProtoMixin_1.default);
-    Object.defineProperty(elProto, 'constructor', {
-        configurable: true,
-        writable: true,
-        value: elConstr
-    });
-    elementConstructorMap_1.default[elIs] = elConstr;
     window.customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
-    return (componentConstr._registeredComponent = componentConstr);
+    elementConstructorMap_1.default[elIs] = elConstr;
+    return componentConstr;
 }
 exports.default = registerComponent;
 

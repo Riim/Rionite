@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.24.5",
+  "version": "0.24.10",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -30,7 +30,7 @@
     "require-dir": "^0.3.1",
     "rimraf": "^2.6.1",
     "run-sequence": "^1.2.2",
-    "webpack": "^2.6.0"
+    "webpack": "^2.6.1"
   },
   "dependencies": {
     "@riim/escape-html": "^1.1.0",

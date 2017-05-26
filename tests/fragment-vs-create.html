@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<script src="../node_modules/lodash/lodash.js"></script>
+<script src="../node_modules/platform/platform.js"></script>
+<script src="../node_modules/benchmark/benchmark.js"></script>
+<script>
+
+var range = document.createRange();
+var selected = false;
+
+function htmlToFragment(html) {
+	if (!selected) {
+		range.selectNode(document.body);
+		selected = true;
+	}
+
+	return range.createContextualFragment(html);
+}
+
+function fragment() {
+	return htmlToFragment('<ul><li class="li1">1</li><li class="li2">2</li><li class="li3">3</li></ul>');
+}
+
+function create1() {
+	let ul = document.createElement('ul');
+	let li1 = document.createElement('li');
+	li1.setAttribute('class', 'li1');
+	ul.appendChild(li1);
+	let li2 = document.createElement('li');
+	li2.setAttribute('class', 'li2');
+	ul.appendChild(li2);
+	let li3 = document.createElement('li');
+	li3.setAttribute('class', 'li3');
+	ul.appendChild(li3);
+	return ul;
+}
+
+var suite = new Benchmark.Suite();
+
+suite
+	.add('fragment', function() {
+		fragment();
+	})
+	.add('create1', function() {
+		create1();
+	})
+	.on('cycle', function(evt) {
+		document.body.innerHTML += '<br>' + String(evt.target);
+	})
+	.run({ 'async': true });
+
+// fragment x 47,337 ops/sec ±4.23% (55 runs sampled)
+// create1 x 175,494 ops/sec ±4.01% (55 runs sampled)
+
+</script>
+
+</body>
+</html>

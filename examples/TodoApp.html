@@ -23,64 +23,54 @@ todo-view {
 <script src="../dist/rionite.polyfills.js"></script>
 <script>
 
-var Todo = cellx.EventEmitter.extend({
-	constructor: function Todo(text, done) {
-		cellx.EventEmitter.call(this);
+class Todo extends cellx.EventEmitter {
+	constructor(text, done) {
+		super();
 
 		cellx.define(this, {
 			text: text,
 			done: !!done
 		});
 	}
-});
+}
 
-var todos = cellx.list([
+let todos = new cellx.ObservableList([
 	new Todo('Primum', true),
 	new Todo('Secundo'),
 	new Todo('Tertium')
 ]);
 
-var TodoView = Rionite.Component.extend('todo-view', {
-	Static: {
-		input: {
-			todo: { type: Object, required: true, readonly: true }
-		},
-
-		template: `
-			input/cb-done (type=checkbox, checked={todo.done}, rt-change=onCbDoneChange)
-			' '
-			span/text { '{todo.text}' }
-			' '
-			button (rt-click=onBtnRemoveClick) { 'remove' }
-		`
-	},
-
+class TodoView extends Rionite.Component {
 	initialize() {
 		this.todo = this.input.todo;
-	},
+	}
 
 	onCbDoneChange(evt) {
 		this.todo.done = evt.target.checked;
-	},
+	}
 
 	onBtnRemoveClick() {
 		todos.remove(this.todo);
 	}
-});
+}
 
-Rionite.Component.extend('todo-app', {
-	Static: {
-		template: `
-			input/tf-new-todo
-			' '
-			button (rt-click=onBtnAddClick) { 'Add #{nextNumber}' }
-			div { 'all: {todos.length} done: {doneTodos.length}' }
-			@repeat (for=todo of todos) {
-				todo-view (todo={todo})
-			}
-		`
-	},
+TodoView.elementIs = 'todo-view';
 
+TodoView.input = {
+	todo: { type: Object, required: true, readonly: true }
+};
+
+TodoView.template = `
+	input/cb-done (type=checkbox, checked={todo.done}, rt-change=onCbDoneChange)
+	' '
+	span/text { '{todo.text}' }
+	' '
+	button (rt-click=onBtnRemoveClick) { 'remove' }
+`;
+
+Rionite.Component.register(TodoView);
+
+class TodoApp extends Rionite.Component {
 	initialize() {
 		cellx.define(this, {
 			todos: todos,
@@ -95,14 +85,28 @@ Rionite.Component.extend('todo-app', {
 				return this.todos.length + 1;
 			}
 		});
-	},
+	}
 
 	onBtnAddClick() {
-		var tfNewTodo = this.$('tf-new-todo');
+		let tfNewTodo = this.$('tf-new-todo');
 		todos.add(new Todo(tfNewTodo.value));
 		tfNewTodo.value = '';
 	}
-});
+}
+
+TodoApp.elementIs = 'todo-app';
+
+TodoApp.template = `
+	input/tf-new-todo
+	' '
+	button (rt-click=onBtnAddClick) { 'Add #{nextNumber}' }
+	div { 'all: {todos.length} done: {doneTodos.length}' }
+	@repeat (for=todo of todos) {
+		todo-view (todo={todo})
+	}
+`;
+
+Rionite.Component.register(TodoApp);
 
 </script>
 

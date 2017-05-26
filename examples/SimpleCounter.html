@@ -12,24 +12,26 @@
 <script src="../dist/rionite.polyfills.js"></script>
 <script>
 
-Rionite.Component.extend('simple-counter', {
-	Static: {
-		template: `
-			div { 'value: {value}' }
-			button (rt-click=onButtonClick) { 'value++' }
-		`
-	},
-
+class SimpleCounter extends Rionite.Component {
 	initialize() {
 		cellx.define(this, {
 			value: 0
 		});
-	},
+	}
 
 	onButtonClick() {
 		this.value++;
 	}
-});
+}
+
+SimpleCounter.elementIs = 'simple-counter';
+
+SimpleCounter.template = `
+	div { 'value: {value}' }
+	button (rt-click=onButtonClick) { 'value++' }
+`;
+
+Rionite.Component.register(SimpleCounter);
 
 </script>
 

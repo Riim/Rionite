@@ -89,7 +89,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		return registerComponent(createClass(description));
 	}
 
-	static _registeredComponent: typeof Component;
 	static register = registerComponent;
 
 	static elementIs: string;
@@ -97,7 +96,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	static input: { [name: string]: any } | null = null;
 
-	static i18n: { [key: string]: any };
+	static i18n: { [key: string]: any } | null = null;
 
 	static _blockNamesString: string;
 
@@ -147,14 +146,14 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	_bindings: Array<IFreezableCell> | null;
 
-	_elementListMap: Map<string, NodeListOf<Element>>;
+	_elementListMap: Map<string, NodeListOf<Element>> | undefined;
 
 	_attached = false;
 
 	initialized = false;
 	isReady = false;
 
-	_silent: boolean;
+	_silent: boolean | undefined;
 
 	constructor(el?: HTMLElement) {
 		super();
@@ -162,7 +161,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 		let constr = this.constructor as typeof Component;
 
-		if (constr._registeredComponent !== constr) {
+		if (!elementConstructorMap[constr.elementIs]) {
 			throw new TypeError('Component must be registered');
 		}
 
@@ -282,6 +281,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 			if (constr.template == null) {
 				this.input;
+
+				this._bindings = null;
 
 				let childComponents = findChildComponentElements(el, this.ownerComponent, this.input.$context);
 
