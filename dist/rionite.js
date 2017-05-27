@@ -3681,21 +3681,37 @@ var join = Array.prototype.join;
 var elDelimiter = '__';
 var Template = (function () {
     function Template(nelm, opts) {
-        var parent = this.parent = opts && opts.parent || null;
-        var block = typeof nelm == 'string' ? new Parser_1.default(nelm).parse() : nelm;
-        var blockName = opts && opts.blockName || block.name;
-        this._elementClassesTemplate = parent ?
-            [blockName ? blockName + elDelimiter : ''].concat(parent._elementClassesTemplate) :
+        this.parent = opts && opts.parent || null;
+        this.nelm = typeof nelm == 'string' ? new Parser_1.default(nelm).parse() : nelm;
+        var blockName = opts && opts.blockName || this.nelm.name;
+        this._elementClassesTemplate = this.parent ?
+            [blockName ? blockName + elDelimiter : ''].concat(this.parent._elementClassesTemplate) :
             [blockName ? blockName + elDelimiter : '', ''];
+    }
+    Template.prototype.extend = function (nelm, opts) {
+        return new Template(nelm, { __proto__: opts || null, parent: this });
+    };
+    Template.prototype.setBlockName = function (blockName) {
+        this._elementClassesTemplate[0] = blockName ? blockName + elDelimiter : '';
+        return this;
+    };
+    Template.prototype.render = function () {
+        return (this._renderer || this._compileRenderers()).call(this._elementRendererMap);
+    };
+    Template.prototype._compileRenderers = function () {
+        var parent = this.parent;
         this._elements = [(this._currentElement = { name: null, superCall: false, source: null, innerSource: [] })];
         var elMap = this._elementMap = {};
-        for (var _i = 0, _a = block.content; _i < _a.length; _i++) {
-            var node = _a[_i];
-            this._handleNode(node);
+        if (parent) {
+            this._renderer = parent._renderer || parent._compileRenderers();
         }
-        this._renderer = parent ?
-            parent._renderer :
-            Function("return " + this._currentElement.innerSource.join(' + ') + ";");
+        for (var _i = 0, _a = this.nelm.content; _i < _a.length; _i++) {
+            var node = _a[_i];
+            this._compileNode(node);
+        }
+        if (!parent) {
+            this._renderer = Function("return " + this._currentElement.innerSource.join(' + ') + ";");
+        }
         Object.keys(elMap).forEach(function (name) {
             var el = elMap[name];
             this[name] = Function("return " + el.source.join(' + ') + ";");
@@ -3708,8 +3724,9 @@ var Template = (function () {
                 this[name + '@content'] = Function("return " + (el.innerSource.join(' + ') || "''") + ";");
             }
         }, (this._elementRendererMap = { __proto__: parent && parent._elementRendererMap }));
-    }
-    Template.prototype._handleNode = function (node, parentElementName) {
+        return this._renderer;
+    };
+    Template.prototype._compileNode = function (node, parentElementName) {
         switch (node.nodeType) {
             case Parser_1.NodeType.ELEMENT: {
                 var parent_1 = this.parent;
@@ -3732,9 +3749,7 @@ var Template = (function () {
                         }
                         var renderedAttrs = void 0;
                         if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
-                            var attrListMap = this._attributeListMap || (this._attributeListMap = {
-                                __proto__: parent_1 && parent_1._attributeListMap || null
-                            });
+                            var attrListMap = this._attributeListMap || (this._attributeListMap = { __proto__: parent_1 && parent_1._attributeListMap || null });
                             var attrCountMap = this._attributeCountMap || (this._attributeCountMap = {
                                 __proto__: parent_1 && parent_1._attributeCountMap || null
                             });
@@ -3774,16 +3789,16 @@ var Template = (function () {
                                 length: attrCount + !hasAttrClass
                             };
                             if (hasAttrClass) {
-                                attrList[attrList['class']] = " class=\"<<" + elNames.join(',') + ">> " +
+                                attrList[attrList['class']] = ' class="' + this._renderElementClasses(elNames) +
                                     attrList[attrList['class']].slice(' class="'.length);
                             }
                             else {
-                                attrList[attrCount] = " class=\"<<" + elNames.join(',') + ">>\"";
+                                attrList[attrCount] = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
                             }
                             renderedAttrs = join.call(attrList, '');
                         }
                         else if (!isHelper) {
-                            renderedAttrs = " class=\"<<" + elNames.join(',') + ">>\"";
+                            renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
                         }
                         else {
                             renderedAttrs = '';
@@ -3806,23 +3821,25 @@ var Template = (function () {
                     }
                     else if (!isHelper) {
                         if (elAttrs && elAttrs.list.length) {
-                            var elNamesInsert = void 0;
+                            var renderedClasses = void 0;
                             var attrs = '';
                             for (var _b = 0, _c = elAttrs.list; _b < _c.length; _b++) {
                                 var attr = _c[_b];
                                 var value = attr.value;
                                 if (attr.name == 'class') {
-                                    elNamesInsert = "<<" + elNames.slice(1).join(',') + ">>";
-                                    attrs += " class=\"" + (value ? elNamesInsert + ' ' + value : elNamesInsert) + "\"";
+                                    renderedClasses = this._renderElementClasses(elNames);
+                                    attrs += " class=\"" + (value ? renderedClasses + value : renderedClasses.slice(0, -1)) + "\"";
                                 }
                                 else {
                                     attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
                                 }
                             }
-                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + (elNamesInsert ? attrs : " class=\"<<" + elNames.slice(1).join(',') + ">>\"" + attrs) + ">'");
+                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + (renderedClasses ?
+                                attrs :
+                                " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" + attrs) + ">'");
                         }
                         else {
-                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"<<" + elNames.slice(1).join(',') + ">>\">'");
+                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
                         }
                     }
                 }
@@ -3841,14 +3858,14 @@ var Template = (function () {
                     if (content_1) {
                         for (var _d = 0, content_2 = content_1; _d < content_2.length; _d++) {
                             var contentNode = content_2[_d];
-                            this._handleNode(contentNode, elName || parentElementName);
+                            this._compileNode(contentNode, elName || parentElementName);
                         }
                     }
                 }
                 else if (content) {
                     for (var _e = 0, content_3 = content; _e < content_3.length; _e++) {
                         var contentNode = content_3[_e];
-                        this._handleNode(contentNode, elName || parentElementName);
+                        this._compileNode(contentNode, elName || parentElementName);
                     }
                 }
                 if (elName) {
@@ -3873,23 +3890,16 @@ var Template = (function () {
             }
         }
     };
-    Template.prototype.extend = function (nelm, opts) {
-        return new Template(nelm, { __proto__: opts || null, parent: this });
-    };
-    Template.prototype.setBlockName = function (blockName) {
-        this._elementClassesTemplate[0] = blockName ? blockName + elDelimiter : '';
-        return this;
-    };
-    Template.prototype.render = function () {
-        var _this = this;
-        return this._renderer.call(this._elementRendererMap).replace(/<<([^>]+)>>/g, function (match, names) { return _this._renderElementClasses(names.split(',')); });
-    };
     Template.prototype._renderElementClasses = function (elNames) {
-        var elClasses = '';
-        for (var i = 0, l = elNames.length; i < l; i++) {
-            elClasses += this._elementClassesTemplate.join(elNames[i] + ' ');
+        var elClasses = elNames[0] ? this._elementClassesTemplate.join(elNames[0] + ' ') : '';
+        var elNameCount = elNames.length;
+        if (elNameCount > 1) {
+            var i = 1;
+            do {
+                elClasses += this._elementClassesTemplate.join(elNames[i] + ' ');
+            } while (++i < elNameCount);
         }
-        return elClasses.slice(0, -1);
+        return elClasses;
     };
     return Template;
 }());
