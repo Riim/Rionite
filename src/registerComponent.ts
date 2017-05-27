@@ -57,7 +57,7 @@ export default function registerComponent(componentConstr: typeof Component) {
 	componentConstr._contentBlockNames = [elIs];
 
 	if (parentComponentConstr._contentBlockNames) {
-		push.apply([elIs], parentComponentConstr._contentBlockNames)
+		push.apply(componentConstr._contentBlockNames, parentComponentConstr._contentBlockNames);
 	}
 
 	componentConstr._rawContent = undefined;
