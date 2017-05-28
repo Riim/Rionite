@@ -1,4 +1,4 @@
-declare var _default: {
+declare const _default: {
     or: (value: any, arg: any) => any;
     default: (value: any, arg: any) => any;
     not: (value: any) => boolean;

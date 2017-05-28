@@ -1,4 +1,5 @@
-import { IBlock, Template } from 'nelm';
+import { IBlock } from 'nelm-parser';
+import Template from './Template';
 import { IComponentEvents, default as Component } from './Component';
 
 let d = {

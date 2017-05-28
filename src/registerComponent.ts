@@ -1,5 +1,5 @@
 import { Utils } from 'cellx';
-import { Template } from 'nelm';
+import Template from './Template';
 import { IComponentElement, default as Component } from './Component';
 import elementConstructorMap from './elementConstructorMap';
 import ElementProtoMixin from './ElementProtoMixin';

@@ -1,2 +1,2 @@
-declare var _default: Object;
+declare const _default: Object;
 export default _default;

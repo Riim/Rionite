@@ -1,4 +1,4 @@
-import { Parser as NelmParser, Template } from 'nelm';
+import { Parser as NelmParser } from 'nelm-parser';
 import escapeString from 'escape-string';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import htmlToFragment from 'html-to-fragment';
@@ -12,6 +12,7 @@ import {
 	IListener,
 	default as DisposableMixin
 } from './DisposableMixin';
+import Template from './Template';
 import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
 import {
@@ -63,7 +64,6 @@ let Utils = {
 
 export {
 	NelmParser,
-	Template,
 	IDisposable,
 	IDisposableListening,
 	IDisposableTimeout,
@@ -72,6 +72,7 @@ export {
 	TListeningTarget,
 	IListener,
 	DisposableMixin,
+	Template,
 
 	formatters,
 
