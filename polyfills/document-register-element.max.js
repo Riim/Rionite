@@ -564,7 +564,9 @@ THE SOFTWARE.
     constructors = Dict(null),
     waitingList = Dict(null),
     nodeNames = new Map(),
-    secondArgument = String,
+    secondArgument = function (is) {
+      return is.toLowerCase();
+    },
   
     // used to create unique instances
     create = Object.create || function Bridge(proto) {
@@ -655,7 +657,7 @@ THE SOFTWARE.
       characterData: true,
       attributeOldValue: true
     },
-
+  
     // useful to detect only if there's no MutationObserver
     DOMAttrModified = MutationObserver || function(e) {
       doesNotSupportDOMAttrModified = false;
@@ -695,7 +697,7 @@ THE SOFTWARE.
   
   // only if needed
   if (!V0) {
-
+  
     if (sPO || hasProto) {
         patchIfNotAlready = function (node, proto) {
           if (!iPO.call(proto, node)) {
@@ -943,7 +945,7 @@ THE SOFTWARE.
   
         document[ADD_EVENT_LISTENER](DOM_CONTENT_LOADED, onReadyStateChange);
         document[ADD_EVENT_LISTENER]('readystatechange', onReadyStateChange);
-
+  
         [HTMLElementPrototype, DocumentFragment.prototype].forEach(function(proto) {
           var origCloneNode = proto.cloneNode;
 
@@ -1434,8 +1436,8 @@ THE SOFTWARE.
     createElement.call(document, 'a', 'a');
   } catch(FireFox) {
     secondArgument = function (is) {
-      return {is: is};
+      return {is: is.toLowerCase()};
     };
   }
-
+  
 }(window));

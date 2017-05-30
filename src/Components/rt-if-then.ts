@@ -109,7 +109,11 @@ export default class RtIfThen extends Component {
 
 				for (let i = nodes.length; i;) {
 					let node = nodes[--i];
-					(node.parentNode as Node).removeChild(node);
+					let parentNode = node.parentNode;
+
+					if (parentNode) {
+						parentNode.removeChild(node);
+					}
 				}
 
 				this._nodes = null;

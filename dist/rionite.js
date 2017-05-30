@@ -1358,7 +1358,10 @@ var RtIfThen = (function (_super) {
                 this._destroyBindings();
                 for (var i = nodes.length; i;) {
                     var node = nodes[--i];
-                    node.parentNode.removeChild(node);
+                    var parentNode = node.parentNode;
+                    if (parentNode) {
+                        parentNode.removeChild(node);
+                    }
                 }
                 this._nodes = null;
             }
