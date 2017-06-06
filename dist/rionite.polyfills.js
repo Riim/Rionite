@@ -4965,7 +4965,9 @@ function registerComponent(componentConstr) {
             template.setBlockName(elIs);
         }
         else {
-            componentConstr.template = new Template_1.default(template, { blockName: elIs });
+            componentConstr.template = parentComponentConstr.template ?
+                parentComponentConstr.template.extend(template, { blockName: elIs }) :
+                new Template_1.default(template, { blockName: elIs });
         }
     }
     componentConstr._contentBlockNames = [elIs];

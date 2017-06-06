@@ -50,7 +50,9 @@ export default function registerComponent(componentConstr: typeof Component) {
 		if (template instanceof Template) {
 			template.setBlockName(elIs);
 		} else {
-			componentConstr.template = new Template(template, { blockName: elIs });
+			componentConstr.template = parentComponentConstr.template ?
+				(parentComponentConstr.template as Template).extend(template, { blockName: elIs }) :
+				new Template(template, { blockName: elIs });
 		}
 	}
 
