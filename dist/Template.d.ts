@@ -47,6 +47,6 @@ export default class Template {
     setBlockName(blockName: string | null): Template;
     render(): string;
     _compileRenderers(): IRenderer;
-    _compileNode(node: INode, parentElementName?: string): void;
+    _compileNode(node: INode, parentElName?: string): void;
     _renderElementClasses(elNames: Array<string | null>): string;
 }

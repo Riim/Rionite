@@ -1,4 +1,4 @@
-import { Parser as NelmParser } from 'nelm-parser';
+import { NodeType as NelmNodeType, Parser as NelmParser } from 'nelm-parser';
 import escapeString from 'escape-string';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import htmlToFragment from 'html-to-fragment';
@@ -63,6 +63,7 @@ let Utils = {
 };
 
 export {
+	NelmNodeType,
 	NelmParser,
 	IDisposable,
 	IDisposableListening,

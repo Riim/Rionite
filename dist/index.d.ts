@@ -1,4 +1,4 @@
-import { Parser as NelmParser } from 'nelm-parser';
+import { NodeType as NelmNodeType, Parser as NelmParser } from 'nelm-parser';
 import { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, default as DisposableMixin } from './DisposableMixin';
 import Template from './Template';
 import formatters from './formatters';
@@ -31,4 +31,4 @@ declare let Utils: {
     defer: (cb: () => void, context?: any) => void;
     htmlToFragment: (html: string) => DocumentFragment;
 };
-export { NelmParser, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, Template, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, KEY_COMPONENT_INPUT_VALUES, IComponentInput, ComponentInput, TRtIfThenIfCell, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, d, Utils };
+export { NelmNodeType, NelmParser, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, Template, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, KEY_COMPONENT_INPUT_VALUES, IComponentInput, ComponentInput, TRtIfThenIfCell, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, d, Utils };

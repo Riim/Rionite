@@ -1,12 +1,12 @@
 {
   "name": "rionite",
-  "version": "0.24.15",
+  "version": "0.24.16",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
   "scripts": {
     "build": "rm -rf ./dist && ./node_modules/.bin/webpack && ./node_modules/.bin/gulp",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/.bin/jest"
   },
   "repository": {
     "type": "git",
@@ -27,15 +27,16 @@
     "gulp-rename": "^1.2.2",
     "gulp-replace": "^0.5.4",
     "gulp-uglify": "^3.0.0",
+    "jest": "^20.0.4",
     "pump": "^1.0.2",
-    "require-dir": "^0.3.1",
+    "require-dir": "^0.3.2",
     "run-sequence": "^1.2.2",
     "webpack": "^2.6.1"
   },
   "dependencies": {
     "@riim/escape-html": "^1.1.0",
     "@riim/self-closing-tags": "^1.0.1",
-    "cellx": "^1.7.10",
+    "cellx": "^1.7.11",
     "escape-string": "^1.0.1",
     "html-to-fragment": "^1.0.0",
     "nelm-parser": "^1.0.0"

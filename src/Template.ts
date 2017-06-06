@@ -33,7 +33,7 @@ export interface IElementRendererMap {
 	[elName: string]: IElementRenderer;
 }
 
-let elDelimiter = '__';
+let elNameDelimiter = '__';
 
 export default class Template {
 	static helpers: { [name: string]: (el: INelmElement) => TContent | null } = {
@@ -64,8 +64,8 @@ export default class Template {
 		let blockName = opts && opts.blockName || this.nelm.name;
 
 		this._elementClassesTemplate = this.parent ?
-			[blockName ? blockName + elDelimiter : ''].concat(this.parent._elementClassesTemplate) :
-			[blockName ? blockName + elDelimiter : '', ''];
+			[blockName ? blockName + elNameDelimiter : ''].concat(this.parent._elementClassesTemplate) :
+			[blockName ? blockName + elNameDelimiter : '', ''];
 	}
 
 	extend(nelm: string | IBlock, opts?: { blockName?: string }): Template {
@@ -73,7 +73,7 @@ export default class Template {
 	}
 
 	setBlockName(blockName: string | null): Template {
-		this._elementClassesTemplate[0] = blockName ? blockName + elDelimiter : '';
+		this._elementClassesTemplate[0] = blockName ? blockName + elNameDelimiter : '';
 		return this;
 	}
 
@@ -117,7 +117,7 @@ export default class Template {
 		return this._renderer;
 	}
 
-	_compileNode(node: INode, parentElementName?: string) {
+	_compileNode(node: INode, parentElName?: string) {
 		switch (node.nodeType) {
 			case NodeType.ELEMENT: {
 				let parent = this.parent;
@@ -141,7 +141,7 @@ export default class Template {
 							tagName = parent && parent._tagNameMap && parent._tagNameMap[elName];
 						}
 
-						let renderedAttrs: string;
+						let renderedAttrs: string | undefined;
 
 						if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
 							let attrListMap = this._attributeListMap || (
@@ -163,13 +163,13 @@ export default class Template {
 									throw new TypeError('Parent template is required when using super');
 								}
 
-								attrList = attrListMap[elName] = Object.create(
-									parent._attributeListMap[elAttrsSuperCall.elementName || elName] || null
-								);
+								attrList = attrListMap[elName] = {
+									__proto__: parent._attributeListMap[elAttrsSuperCall.elementName || elName] || null
+								};
 								attrCount = attrCountMap[elName] =
 									parent._attributeCountMap[elAttrsSuperCall.elementName || elName] || 0;
 							} else {
-								attrList = attrListMap[elName] = {};
+								attrList = attrListMap[elName] = { __proto__: null };
 								attrCount = attrCountMap[elName] = 0;
 							}
 
@@ -184,29 +184,27 @@ export default class Template {
 									attrCountMap[elName] = ++attrCount;
 								} else {
 									attrList[index] = ` ${ name }="${ value && escapeHTML(escapeString(value)) }"`;
-									attrList[name] = index;
 								}
 							}
 
-							let hasAttrClass = 'class' in attrList;
+							if (!isHelper) {
+								attrList = {
+									__proto__: attrList,
+									length: attrCount
+								};
 
-							attrList = {
-								__proto__: attrList,
-								length: attrCount + (!hasAttrClass as any)
-							};
+								if (attrList['class'] !== undefined) {
+									attrList[attrList['class']] = ' class="' + this._renderElementClasses(elNames) +
+										attrList[attrList['class']].slice(' class="'.length);
 
-							if (hasAttrClass) {
-								attrList[attrList['class']] = ' class="' + this._renderElementClasses(elNames) +
-									attrList[attrList['class']].slice(' class="'.length);
-							} else {
-								attrList[attrCount] = ` class="${ this._renderElementClasses(elNames).slice(0, -1) }"`;
+									renderedAttrs = join.call(attrList, '');
+								} else {
+									renderedAttrs = ` class="${ this._renderElementClasses(elNames).slice(0, -1) }"` +
+										join.call(attrList, '');
+								}
 							}
-
-							renderedAttrs = join.call(attrList, '');
 						} else if (!isHelper) {
 							renderedAttrs = ` class="${ this._renderElementClasses(elNames).slice(0, -1) }"`;
-						} else {
-							renderedAttrs = '';
 						}
 
 						let currentEl = {
@@ -238,7 +236,9 @@ export default class Template {
 								if (attr.name == 'class') {
 									renderedClasses = this._renderElementClasses(elNames);
 									attrs += ` class="${
-										value ? renderedClasses + value : renderedClasses.slice(0, -1)
+										value ?
+											renderedClasses + escapeHTML(escapeString(value)) :
+											renderedClasses.slice(0, -1)
 									}"`;
 								} else {
 									attrs += ` ${ attr.name }="${ value && escapeHTML(escapeString(value)) }"`;
@@ -262,9 +262,11 @@ export default class Template {
 					}
 				} else if (!isHelper) {
 					this._currentElement.innerSource.push(`'<${ tagName || 'div' }${
-						elAttrs ? elAttrs.list.map(
-							attr => ` ${ attr.name }="${ attr.value && escapeHTML(escapeString(attr.value)) }"`
-						).join('') : ''
+						elAttrs ?
+							elAttrs.list.map(
+								attr => ` ${ attr.name }="${ attr.value && escapeHTML(escapeString(attr.value)) }"`
+							).join('') :
+							''
 					}>'`);
 				}
 
@@ -283,12 +285,12 @@ export default class Template {
 
 					if (content) {
 						for (let contentNode of content) {
-							this._compileNode(contentNode, elName || parentElementName);
+							this._compileNode(contentNode, elName || parentElName);
 						}
 					}
 				} else if (content) {
 					for (let contentNode of content) {
-						this._compileNode(contentNode, elName || parentElementName);
+						this._compileNode(contentNode, elName || parentElName);
 					}
 				}
 
@@ -308,7 +310,7 @@ export default class Template {
 			}
 			case NodeType.SUPER_CALL: {
 				this._currentElement.innerSource
-					.push(`$super['${ (node as ISuperCall).elementName || parentElementName }@content'].call(this)`);
+					.push(`$super['${ (node as ISuperCall).elementName || parentElName }@content'].call(this)`);
 				this._currentElement.superCall = true;
 				break;
 			}

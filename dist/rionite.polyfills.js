@@ -2268,21 +2268,21 @@ var escape_string_1 = __webpack_require__(13);
 var escape_html_1 = __webpack_require__(10);
 var self_closing_tags_1 = __webpack_require__(39);
 var join = Array.prototype.join;
-var elDelimiter = '__';
+var elNameDelimiter = '__';
 var Template = (function () {
     function Template(nelm, opts) {
         this.parent = opts && opts.parent || null;
         this.nelm = typeof nelm == 'string' ? new nelm_parser_1.Parser(nelm).parse() : nelm;
         var blockName = opts && opts.blockName || this.nelm.name;
         this._elementClassesTemplate = this.parent ?
-            [blockName ? blockName + elDelimiter : ''].concat(this.parent._elementClassesTemplate) :
-            [blockName ? blockName + elDelimiter : '', ''];
+            [blockName ? blockName + elNameDelimiter : ''].concat(this.parent._elementClassesTemplate) :
+            [blockName ? blockName + elNameDelimiter : '', ''];
     }
     Template.prototype.extend = function (nelm, opts) {
         return new Template(nelm, { __proto__: opts || null, parent: this });
     };
     Template.prototype.setBlockName = function (blockName) {
-        this._elementClassesTemplate[0] = blockName ? blockName + elDelimiter : '';
+        this._elementClassesTemplate[0] = blockName ? blockName + elNameDelimiter : '';
         return this;
     };
     Template.prototype.render = function () {
@@ -2316,7 +2316,7 @@ var Template = (function () {
         }, (this._elementRendererMap = { __proto__: parent && parent._elementRendererMap }));
         return this._renderer;
     };
-    Template.prototype._compileNode = function (node, parentElementName) {
+    Template.prototype._compileNode = function (node, parentElName) {
         switch (node.nodeType) {
             case nelm_parser_1.NodeType.ELEMENT: {
                 var parent_1 = this.parent;
@@ -2350,12 +2350,14 @@ var Template = (function () {
                                 if (!parent_1) {
                                     throw new TypeError('Parent template is required when using super');
                                 }
-                                attrList = attrListMap[elName] = Object.create(parent_1._attributeListMap[elAttrsSuperCall.elementName || elName] || null);
+                                attrList = attrListMap[elName] = {
+                                    __proto__: parent_1._attributeListMap[elAttrsSuperCall.elementName || elName] || null
+                                };
                                 attrCount = attrCountMap[elName] =
                                     parent_1._attributeCountMap[elAttrsSuperCall.elementName || elName] || 0;
                             }
                             else {
-                                attrList = attrListMap[elName] = {};
+                                attrList = attrListMap[elName] = { __proto__: null };
                                 attrCount = attrCountMap[elName] = 0;
                             }
                             for (var _i = 0, _a = elAttrs.list; _i < _a.length; _i++) {
@@ -2370,28 +2372,26 @@ var Template = (function () {
                                 }
                                 else {
                                     attrList[index] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
-                                    attrList[name_1] = index;
                                 }
                             }
-                            var hasAttrClass = 'class' in attrList;
-                            attrList = {
-                                __proto__: attrList,
-                                length: attrCount + !hasAttrClass
-                            };
-                            if (hasAttrClass) {
-                                attrList[attrList['class']] = ' class="' + this._renderElementClasses(elNames) +
-                                    attrList[attrList['class']].slice(' class="'.length);
+                            if (!isHelper) {
+                                attrList = {
+                                    __proto__: attrList,
+                                    length: attrCount
+                                };
+                                if (attrList['class'] !== undefined) {
+                                    attrList[attrList['class']] = ' class="' + this._renderElementClasses(elNames) +
+                                        attrList[attrList['class']].slice(' class="'.length);
+                                    renderedAttrs = join.call(attrList, '');
+                                }
+                                else {
+                                    renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" +
+                                        join.call(attrList, '');
+                                }
                             }
-                            else {
-                                attrList[attrCount] = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
-                            }
-                            renderedAttrs = join.call(attrList, '');
                         }
                         else if (!isHelper) {
                             renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
-                        }
-                        else {
-                            renderedAttrs = '';
                         }
                         var currentEl = {
                             name: elName,
@@ -2418,7 +2418,9 @@ var Template = (function () {
                                 var value = attr.value;
                                 if (attr.name == 'class') {
                                     renderedClasses = this._renderElementClasses(elNames);
-                                    attrs += " class=\"" + (value ? renderedClasses + value : renderedClasses.slice(0, -1)) + "\"";
+                                    attrs += " class=\"" + (value ?
+                                        renderedClasses + escape_html_1.default(escape_string_1.default(value)) :
+                                        renderedClasses.slice(0, -1)) + "\"";
                                 }
                                 else {
                                     attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
@@ -2434,7 +2436,9 @@ var Template = (function () {
                     }
                 }
                 else if (!isHelper) {
-                    this._currentElement.innerSource.push("'<" + (tagName || 'div') + (elAttrs ? elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') : '') + ">'");
+                    this._currentElement.innerSource.push("'<" + (tagName || 'div') + (elAttrs ?
+                        elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') :
+                        '') + ">'");
                 }
                 if (isHelper) {
                     if (!tagName) {
@@ -2448,14 +2452,14 @@ var Template = (function () {
                     if (content_1) {
                         for (var _d = 0, content_2 = content_1; _d < content_2.length; _d++) {
                             var contentNode = content_2[_d];
-                            this._compileNode(contentNode, elName || parentElementName);
+                            this._compileNode(contentNode, elName || parentElName);
                         }
                     }
                 }
                 else if (content) {
                     for (var _e = 0, content_3 = content; _e < content_3.length; _e++) {
                         var contentNode = content_3[_e];
-                        this._compileNode(contentNode, elName || parentElementName);
+                        this._compileNode(contentNode, elName || parentElName);
                     }
                 }
                 if (elName) {
@@ -2474,7 +2478,7 @@ var Template = (function () {
             }
             case nelm_parser_1.NodeType.SUPER_CALL: {
                 this._currentElement.innerSource
-                    .push("$super['" + (node.elementName || parentElementName) + "@content'].call(this)");
+                    .push("$super['" + (node.elementName || parentElName) + "@content'].call(this)");
                 this._currentElement.superCall = true;
                 break;
             }
@@ -4815,6 +4819,7 @@ exports.default = [
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var nelm_parser_1 = __webpack_require__(14);
+exports.NelmNodeType = nelm_parser_1.NodeType;
 exports.NelmParser = nelm_parser_1.Parser;
 var escape_string_1 = __webpack_require__(13);
 var escape_html_1 = __webpack_require__(10);
