@@ -1,7 +1,10 @@
 import { EventEmitter, Cell } from 'cellx';
 import { IComponentElement, default as Component } from './Component';
 import componentInputTypeMap from './componentInputTypeMap';
-import componentInputTypeSerializerMap from './componentInputTypeSerializerMap';
+import {
+	IComponentInputTypeSerializer,
+	default as componentInputTypeSerializerMap
+} from './componentInputTypeSerializerMap';
 import hyphenize from './Utils/hyphenize';
 
 export interface IComponentInput extends Object {
@@ -87,7 +90,7 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 		let valueCell: Cell | undefined;
 
 		let setRawValue = (rawValue: string | null) => {
-			let val = typeSerializer.read(rawValue, defaultValue, component);
+			let val = (typeSerializer as IComponentInputTypeSerializer).read(rawValue, defaultValue, component);
 
 			if (valueCell) {
 				valueCell.set(val);
@@ -133,7 +136,7 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 			},
 
 			set(val: any) {
-				let rawValue = typeSerializer.write(val, defaultValue);
+				let rawValue = (typeSerializer as IComponentInputTypeSerializer).write(val, defaultValue);
 
 				if (rawValue === null) {
 					el.removeAttribute(hyphenizedName);

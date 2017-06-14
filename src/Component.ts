@@ -417,7 +417,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 					}
 				}
 
-				if (!elList.length) {
+				if (!(elList as NodeListOf<Element>).length) {
 					return;
 				}
 			}

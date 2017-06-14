@@ -4,10 +4,12 @@ import Component from './Component';
 import KEY_COMPONENT_INPUT_VALUES from './KEY_COMPONENT_INPUT_VALUES';
 import isRegExp from './Utils/isRegExp';
 
-let componentInputTypeSerializerMap = new JS.Map<any, {
+export interface IComponentInputTypeSerializer {
 	read: (value: string | null, defaultValue: any, component: Component) => any;
 	write: (value: any, defaultValue?: any) => string | null;
-}>([
+}
+
+let componentInputTypeSerializerMap = new JS.Map<any, IComponentInputTypeSerializer>([
 	[Boolean, {
 		read: (value: string | null, defaultValue: boolean | undefined): boolean => {
 			return value !== null ? value != 'no' : !!defaultValue;
@@ -48,7 +50,7 @@ let componentInputTypeSerializerMap = new JS.Map<any, {
 				throw new TypeError('Value is not an object');
 			}
 
-			let val = componentInputValues.get(value);
+			let val = componentInputValues.get(value) as Object;
 			componentInputValues.delete(value);
 			return val;
 		},
@@ -69,9 +71,21 @@ let componentInputTypeSerializerMap = new JS.Map<any, {
 	}]
 ]);
 
-componentInputTypeSerializerMap.set('boolean', componentInputTypeSerializerMap.get(Boolean));
-componentInputTypeSerializerMap.set('number', componentInputTypeSerializerMap.get(Number));
-componentInputTypeSerializerMap.set('string', componentInputTypeSerializerMap.get(String));
-componentInputTypeSerializerMap.set('object', componentInputTypeSerializerMap.get(Object));
+componentInputTypeSerializerMap.set(
+	'boolean',
+	componentInputTypeSerializerMap.get(Boolean) as IComponentInputTypeSerializer
+);
+componentInputTypeSerializerMap.set(
+	'number',
+	componentInputTypeSerializerMap.get(Number) as IComponentInputTypeSerializer
+);
+componentInputTypeSerializerMap.set(
+	'string',
+	componentInputTypeSerializerMap.get(String) as IComponentInputTypeSerializer
+);
+componentInputTypeSerializerMap.set(
+	'object',
+	componentInputTypeSerializerMap.get(Object) as IComponentInputTypeSerializer
+);
 
 export default componentInputTypeSerializerMap;

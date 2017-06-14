@@ -1948,7 +1948,12 @@ Object.defineProperty(TestNativeCustomElementsFeature, 'observedAttributes', {
     }
 });
 TestNativeCustomElementsFeature.prototype = Object.create(HTMLElement.prototype, {
-    constructor: { value: TestNativeCustomElementsFeature }
+    constructor: {
+        configurable: true,
+        enumerable: false,
+        writable: true,
+        value: TestNativeCustomElementsFeature
+    }
 });
 TestNativeCustomElementsFeature.prototype.attributeChangedCallback = function () {
     nativeCustomElementsFeature = true;

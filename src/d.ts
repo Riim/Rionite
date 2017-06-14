@@ -4,12 +4,12 @@ import { IComponentEvents, default as Component } from './Component';
 
 let d = {
 	Component: function Component_<T extends Component>(config: {
-		elementIs: string,
-		elementExtends?: string | null,
-		input?: { [name: string]: any } | null,
-		i18n?: { [key: string]: any } | null,
-		template?: string | IBlock | Template | null,
-		events?: IComponentEvents<T> | null
+		elementIs: string;
+		elementExtends?: string | null;
+		input?: { [name: string]: any } | null;
+		i18n?: { [key: string]: any } | null;
+		template?: string | IBlock | Template | null;
+		events?: IComponentEvents<T> | null;
 	}) {
 		return function(componentConstr: typeof Component) {
 			componentConstr.elementIs = config.elementIs;

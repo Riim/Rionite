@@ -60,7 +60,7 @@ export default class RtContent extends Component {
 							(contentMap = contentOwnerComponent[KEY_CONTENT_MAP]) &&
 							contentMap.has(key)
 					) {
-						let c: IComponentElement = contentMap.get(key);
+						let c = contentMap.get(key) as IComponentElement;
 
 						if (c.firstChild) {
 							content = moveContent(document.createDocumentFragment(), c);
@@ -103,7 +103,7 @@ export default class RtContent extends Component {
 					let contentMap: Map<string, IComponentElement> | undefined = contentOwnerComponent[KEY_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
-						let c = contentMap.get(key);
+						let c = contentMap.get(key) as IComponentElement;
 
 						content = moveContent(document.createDocumentFragment(), c);
 						contentMap.set(key, el);

@@ -57,7 +57,7 @@ export default class Template {
 	_renderer: IRenderer;
 	_elementRendererMap: IElementRendererMap;
 
-	constructor(nelm: string | IBlock, opts?: { parent?: Template, blockName?: string }) {
+	constructor(nelm: string | IBlock, opts?: { parent?: Template; blockName?: string }) {
 		this.parent = opts && opts.parent || null;
 		this.nelm = typeof nelm == 'string' ? new Parser(nelm).parse() : nelm;
 
