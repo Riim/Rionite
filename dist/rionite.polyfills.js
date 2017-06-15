@@ -2152,7 +2152,7 @@ exports.ElementsController = {
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
         get $component() {
-            return new this.constructor._rioniteComponentConstructor(this);
+            return this.rioniteComponent || new this.constructor._rioniteComponentConstructor(this);
         }
     },
     _a[KEY_ELEMENT_CONNECTED_1.default] = false,
