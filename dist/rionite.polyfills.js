@@ -2241,7 +2241,10 @@ if (typeof KEY_UID == 'symbol') {
 }
 else {
     getUID = function getUID(obj) {
-        return hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : Object.defineProperty(obj, KEY_UID, {});
+        if (!hasOwn.call(obj, KEY_UID)) {
+            Object.defineProperty(obj, KEY_UID, { value: nextUID() });
+        }
+        return obj[KEY_UID];
     };
 }
 exports.default = getUID;
