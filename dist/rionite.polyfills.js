@@ -1769,6 +1769,12 @@ var Component = (function (_super) {
                     rawContent = constr._rawContent = html_to_fragment_1.default(constr.template.render());
                 }
                 var content = rawContent.cloneNode(true);
+                if (!Features_1.templateTag) {
+                    var templates = content.querySelectorAll('template');
+                    for (var i = 0, l = templates.length; i < l;) {
+                        i += templates[i].content.querySelectorAll('template').length + 1;
+                    }
+                }
                 var _a = bindContent_1.default(content, this), bindings = _a[0], childComponents = _a[1];
                 this._bindings = bindings;
                 this.element.appendChild(content);
@@ -2014,7 +2020,7 @@ function bindContent(content, ownerComponent, context) {
     }
     var bindings;
     var childComponents;
-    function bind(content) {
+    function bind(node) {
         var _loop_1 = function (child) {
             switch (child.nodeType) {
                 case Node.ELEMENT_NODE: {
@@ -2023,16 +2029,14 @@ function bindContent(content, ownerComponent, context) {
                         var attr = attrs.item(--i);
                         var value = attr.value;
                         if (value.indexOf('{') != -1) {
-                            var parsedValue = (new ContentParser_1.default(value)).parse();
-                            if (parsedValue.length > 1 || parsedValue[0].nodeType == ContentNodeType.BINDING) {
+                            var content_1 = (new ContentParser_1.default(value)).parse();
+                            if (content_1.length > 1 || content_1[0].nodeType == ContentNodeType.BINDING) {
                                 var name_1 = attr.name;
                                 if (name_1.charAt(0) == '_') {
                                     name_1 = name_1.slice(1);
                                 }
                                 var readedValue = void 0;
-                                if (parsedValue.length == 1 &&
-                                    !parsedValue[0].formatters &&
-                                    (readedValue = readValue(context, parsedValue[0].keypath))) {
+                                if (content_1.length == 1 && !content_1[0].formatters && (readedValue = readValue(context, content_1[0].keypath))) {
                                     var value_1 = readedValue.value;
                                     if (value_1 && typeof value_1 == 'object') {
                                         var key = compileContent_1.nextComponentPropertyValueKey();
@@ -2045,7 +2049,7 @@ function bindContent(content, ownerComponent, context) {
                                     }
                                 }
                                 else {
-                                    var cell = new cellx_1.Cell(compileContent_1.default(parsedValue, value, ownerComponent), {
+                                    var cell = new cellx_1.Cell(compileContent_1.default(content_1, value, ownerComponent), {
                                         owner: context,
                                         onChange: function (evt) {
                                             setAttribute_1.default(child, name_1, evt.value);
@@ -2076,24 +2080,26 @@ function bindContent(content, ownerComponent, context) {
                     break;
                 }
                 case Node.TEXT_NODE: {
-                    var content_1 = child.textContent;
-                    if (content_1.indexOf('{') != -1) {
-                        var parsedContent = (new ContentParser_1.default(content_1)).parse();
-                        if (parsedContent.length > 1 || parsedContent[0].nodeType == ContentNodeType.BINDING) {
+                    for (var nextChild = void 0; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE;) {
+                        child.nodeValue += nextChild.nodeValue;
+                        node.removeChild(nextChild);
+                    }
+                    var value = child.nodeValue;
+                    if (value.indexOf('{') != -1) {
+                        var content_2 = (new ContentParser_1.default(value)).parse();
+                        if (content_2.length > 1 || content_2[0].nodeType == ContentNodeType.BINDING) {
                             var readedValue = void 0;
-                            if (parsedContent.length == 1 &&
-                                !parsedContent[0].formatters &&
-                                (readedValue = readValue(context, parsedContent[0].keypath))) {
-                                child.textContent = readedValue.value;
+                            if (content_2.length == 1 && !content_2[0].formatters && (readedValue = readValue(context, content_2[0].keypath))) {
+                                child.nodeValue = readedValue.value;
                             }
                             else {
-                                var cell = new cellx_1.Cell(compileContent_1.default(parsedContent, content_1), {
+                                var cell = new cellx_1.Cell(compileContent_1.default(content_2, value), {
                                     owner: context,
                                     onChange: function (evt) {
-                                        child.textContent = evt.value;
+                                        child.nodeValue = evt.value;
                                     }
                                 });
-                                child.textContent = cell.get();
+                                child.nodeValue = cell.get();
                                 (bindings || (bindings = [])).push(cell);
                             }
                         }
@@ -2102,7 +2108,7 @@ function bindContent(content, ownerComponent, context) {
                 }
             }
         };
-        for (var child = content.firstChild; child; child = child.nextSibling) {
+        for (var child = node.firstChild; child; child = child.nextSibling) {
             _loop_1(child);
         }
     }
@@ -2832,6 +2838,12 @@ var RtIfThen = (function (_super) {
         var _this = this;
         if (this._elseMode ? !this._if.get() : this._if.get()) {
             var content = this.input.$content.cloneNode(true);
+            if (!Features_1.templateTag) {
+                var templates = content.querySelectorAll('template');
+                for (var i = 0, l = templates.length; i < l;) {
+                    i += templates[i].content.querySelectorAll('template').length + 1;
+                }
+            }
             var _a = bindContent_1.default(content, this.ownerComponent, this.input.$context), bindings = _a[0], childComponents = _a[1];
             this._nodes = slice.call(content.childNodes);
             this._bindings = bindings;
@@ -3792,7 +3804,6 @@ var Features_1 = __webpack_require__(3);
 var d_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var KEY_CONTENT_MAP = cellx_1.JS.Symbol('contentMap');
-var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
 var RtContent = (function (_super) {
     __extends(RtContent, _super);
     function RtContent() {
@@ -3831,13 +3842,6 @@ var RtContent = (function (_super) {
                         }
                     }
                     else if (ownerComponentContent.firstChild) {
-                        if (!Features_1.templateTag && !ownerComponentContent[KEY_TEMPLATES_FIXED]) {
-                            var templates = ownerComponentContent.querySelectorAll('template');
-                            for (var i = templates.length; i;) {
-                                templates[--i].content;
-                            }
-                            ownerComponentContent[KEY_TEMPLATES_FIXED] = true;
-                        }
                         var selectedEls = ownerComponentContent.querySelectorAll(selector);
                         var selectedElCount = selectedEls.length;
                         if (selectedElCount) {
@@ -4036,17 +4040,17 @@ var RtRepeat = (function (_super) {
                 var lastChild = rawItemContent.lastChild;
                 if (firstChild == lastChild) {
                     if (firstChild.nodeType == Node.TEXT_NODE) {
-                        firstChild.textContent = firstChild.textContent.trim();
+                        firstChild.nodeValue = firstChild.nodeValue.trim();
                     }
                 }
                 else {
                     if (firstChild.nodeType == Node.TEXT_NODE) {
-                        if (!(firstChild.textContent = firstChild.textContent.replace(/^\s+/, ''))) {
+                        if (!(firstChild.nodeValue = firstChild.nodeValue.replace(/^\s+/, ''))) {
                             rawItemContent.removeChild(firstChild);
                         }
                     }
                     if (lastChild.nodeType == Node.TEXT_NODE) {
-                        if (!(lastChild.textContent = lastChild.textContent.replace(/\s+$/, ''))) {
+                        if (!(lastChild.nodeValue = lastChild.nodeValue.replace(/\s+$/, ''))) {
                             rawItemContent.removeChild(lastChild);
                         }
                     }
@@ -4149,6 +4153,12 @@ var RtRepeat = (function (_super) {
         var itemCell = new cellx_1.Cell(item);
         var indexCell = new cellx_1.Cell(index);
         var content = this._rawItemContent.cloneNode(true);
+        if (!Features_1.templateTag) {
+            var templates = content.querySelectorAll('template');
+            for (var i = 0, l = templates.length; i < l;) {
+                i += templates[i].content.querySelectorAll('template').length + 1;
+            }
+        }
         var _a = bindContent_1.default(content, this.ownerComponent, Object.create(this.input.$context, (_b = {},
             _b['_' + this._itemName] = itemCell,
             _b[this._itemName] = {
@@ -4266,7 +4276,6 @@ var Features_1 = __webpack_require__(3);
 var d_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var KEY_SLOT_CONTENT_MAP = cellx_1.JS.Symbol('slotContentMap');
-var KEY_TEMPLATES_FIXED = cellx_1.JS.Symbol('Rionite.RtContent#templatesFixed');
 var RtSlot = (function (_super) {
     __extends(RtSlot, _super);
     function RtSlot() {
@@ -4305,13 +4314,6 @@ var RtSlot = (function (_super) {
                         }
                     }
                     else if (ownerComponentContent.firstChild) {
-                        if (!Features_1.templateTag && !ownerComponentContent[KEY_TEMPLATES_FIXED]) {
-                            var templates = ownerComponentContent.querySelectorAll('template');
-                            for (var i = templates.length; i;) {
-                                templates[--i].content;
-                            }
-                            ownerComponentContent[KEY_TEMPLATES_FIXED] = true;
-                        }
                         var selectedEls = ownerComponentContent.querySelectorAll("[rt-slot=" + name_1 + "]");
                         var selectedElCount = selectedEls.length;
                         if (selectedElCount) {
@@ -4619,19 +4621,19 @@ function nextComponentPropertyValueKey() {
 }
 exports.nextComponentPropertyValueKey = nextComponentPropertyValueKey;
 var cache = Object.create(null);
-function compileContent(parsedContent, content, ownerComponent) {
-    var key = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + content;
+function compileContent(content, contentString, ownerComponent) {
+    var key = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + contentString;
     if (cache[key]) {
         return cache[key];
     }
     var inner;
-    if (parsedContent.length == 1 && parsedContent[0].nodeType == ContentNodeType.BINDING) {
-        inner = Function('formatters', "var temp; return " + bindingToJSExpression_1.default(parsedContent[0]) + ";");
+    if (content.length == 1 && content[0].nodeType == ContentNodeType.BINDING) {
+        inner = Function('formatters', "var temp; return " + bindingToJSExpression_1.default(content[0]) + ";");
     }
     else {
         var jsExpr = [];
-        for (var _i = 0, parsedContent_1 = parsedContent; _i < parsedContent_1.length; _i++) {
-            var node = parsedContent_1[_i];
+        for (var _i = 0, content_1 = content; _i < content_1.length; _i++) {
+            var node = content_1[_i];
             jsExpr.push(node.nodeType == ContentNodeType.TEXT ?
                 "'" + escape_string_1.default(node.value) + "'" :
                 bindingToJSExpression_1.default(node));

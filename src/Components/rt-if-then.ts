@@ -5,7 +5,7 @@ import compileKeypath from '../compileKeypath';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import keypathPattern from '../keypathPattern';
-import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
+import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 import d from '../d';
 
 let nextTick = Utils.nextTick;
@@ -90,7 +90,14 @@ export default class RtIfThen extends Component {
 
 	_render(changed: boolean) {
 		if (this._elseMode ? !this._if.get() : this._if.get()) {
-			let content = (this.input.$content as DocumentFragment).cloneNode(true);
+			let content = (this.input.$content as DocumentFragment).cloneNode(true) as DocumentFragment;
+			if (!templateTagFeature) {
+				let templates = content.querySelectorAll('template');
+
+				for (let i = 0, l = templates.length; i < l;) {
+					i += templates[i].content.querySelectorAll('template').length + 1;
+				}
+			}
 			let [bindings, childComponents] = bindContent(content, this.ownerComponent, this.input.$context as Object);
 
 			this._nodes = slice.call(content.childNodes);

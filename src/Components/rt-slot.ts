@@ -7,13 +7,12 @@ import attachChildComponentElements from '../attachChildComponentElements';
 import getUID from '../Utils/getUID';
 import moveContent from '../Utils/moveContent';
 import clearNode from '../Utils/clearNode';
-import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
+import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 import d from '../d';
 
 let Map = JS.Map;
 
 let KEY_SLOT_CONTENT_MAP = JS.Symbol('slotContentMap');
-let KEY_TEMPLATES_FIXED = JS.Symbol('Rionite.RtContent#templatesFixed');
 
 @d.Component({
 	elementIs: 'rt-slot',
@@ -70,16 +69,6 @@ export default class RtSlot extends Component {
 							childComponents = (c.$component as RtSlot)._childComponents;
 						}
 					} else if (ownerComponentContent.firstChild) {
-						if (!templateTagFeature && !ownerComponentContent[KEY_TEMPLATES_FIXED]) {
-							let templates = ownerComponentContent.querySelectorAll('template');
-
-							for (let i = templates.length; i;) {
-								templates[--i].content;
-							}
-
-							ownerComponentContent[KEY_TEMPLATES_FIXED] = true;
-						}
-
 						let selectedEls = ownerComponentContent.querySelectorAll(`[rt-slot=${ name }]`);
 						let selectedElCount = selectedEls.length;
 

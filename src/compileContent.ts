@@ -17,11 +17,11 @@ export function nextComponentPropertyValueKey(): string {
 let cache = Object.create(null);
 
 export default function compileContent(
-	parsedContent: TContent,
-	content: string,
+	content: TContent,
+	contentString: string,
 	ownerComponent?: Component
 ): () => any {
-	let key = (ownerComponent ? getUID(ownerComponent) + '/' : '/') + content;
+	let key = (ownerComponent ? getUID(ownerComponent) + '/' : '/') + contentString;
 
 	if (cache[key]) {
 		return cache[key];
@@ -29,15 +29,15 @@ export default function compileContent(
 
 	let inner: Function;
 
-	if (parsedContent.length == 1 && parsedContent[0].nodeType == ContentNodeType.BINDING) {
+	if (content.length == 1 && content[0].nodeType == ContentNodeType.BINDING) {
 		inner = Function(
 			'formatters',
-			`var temp; return ${ bindingToJSExpression(parsedContent[0] as IContentBinding) };`
+			`var temp; return ${ bindingToJSExpression(content[0] as IContentBinding) };`
 		);
 	} else {
 		let jsExpr: Array<string> = [];
 
-		for (let node of parsedContent) {
+		for (let node of content) {
 			jsExpr.push(
 				node.nodeType == ContentNodeType.TEXT ?
 					`'${ escapeString(node.value) }'` :

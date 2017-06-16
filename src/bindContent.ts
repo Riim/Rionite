@@ -23,7 +23,11 @@ function readValue(obj: Object, keypath: string): { value: any } | null {
 		(value == null ? null : readValue(value, keypath.slice(index + 1)));
 }
 
-export default function bindContent(content: Node, ownerComponent: Component, context?: Object | null): [
+export default function bindContent(
+	content: HTMLElement | DocumentFragment,
+	ownerComponent: Component,
+	context?: Object | null
+): [
 	Array<IFreezableCell> | null,
 	Array<Component> | null
 ] {
@@ -34,8 +38,8 @@ export default function bindContent(content: Node, ownerComponent: Component, co
 	let bindings: Array<IFreezableCell> | undefined;
 	let childComponents: Array<Component> | undefined;
 
-	function bind(content: Node) {
-		for (let child = content.firstChild; child; child = child.nextSibling) {
+	function bind(node: Element | DocumentFragment) {
+		for (let child = node.firstChild; child; child = child.nextSibling) {
 			switch (child.nodeType) {
 				case Node.ELEMENT_NODE: {
 					let attrs = child.attributes;
@@ -45,9 +49,9 @@ export default function bindContent(content: Node, ownerComponent: Component, co
 						let value = attr.value;
 
 						if (value.indexOf('{') != -1) {
-							let parsedValue = (new ContentParser(value)).parse();
+							let content = (new ContentParser(value)).parse();
 
-							if (parsedValue.length > 1 || parsedValue[0].nodeType == ContentNodeType.BINDING) {
+							if (content.length > 1 || content[0].nodeType == ContentNodeType.BINDING) {
 								let name = attr.name;
 
 								if (name.charAt(0) == '_') {
@@ -56,16 +60,9 @@ export default function bindContent(content: Node, ownerComponent: Component, co
 
 								let readedValue;
 
-								if (
-									parsedValue.length == 1 &&
-										!(parsedValue[0] as IContentBinding).formatters &&
-										(
-											readedValue = readValue(
-												context as Object,
-												(parsedValue[0] as IContentBinding).keypath
-											)
-										)
-								) {
+								if (content.length == 1 && !(content[0] as IContentBinding).formatters && (
+									readedValue = readValue(context as Object, (content[0] as IContentBinding).keypath)
+								)) {
 									let value = readedValue.value;
 
 									if (value && typeof value == 'object') {
@@ -81,7 +78,7 @@ export default function bindContent(content: Node, ownerComponent: Component, co
 										setAttribute(child as Element, name, value);
 									}
 								} else {
-									let cell = new Cell<any>(compileContent(parsedValue, value, ownerComponent), {
+									let cell = new Cell<any>(compileContent(content, value, ownerComponent), {
 										owner: context as Object,
 										onChange(evt) {
 											setAttribute(child as Element, name, evt.value);
@@ -109,40 +106,38 @@ export default function bindContent(content: Node, ownerComponent: Component, co
 						child.firstChild &&
 							(!childComponent || (childComponent.constructor as typeof Component).template == null)
 					) {
-						bind(child);
+						bind(child as Element);
 					}
 
 					break;
 				}
 				case Node.TEXT_NODE: {
-					let content = child.textContent as string;
+					for (let nextChild; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE;) {
+						child.nodeValue += nextChild.nodeValue as string;
+						node.removeChild(nextChild);
+					}
 
-					if (content.indexOf('{') != -1) {
-						let parsedContent = (new ContentParser(content)).parse();
+					let value = child.nodeValue as string;
 
-						if (parsedContent.length > 1 || parsedContent[0].nodeType == ContentNodeType.BINDING) {
+					if (value.indexOf('{') != -1) {
+						let content = (new ContentParser(value)).parse();
+
+						if (content.length > 1 || content[0].nodeType == ContentNodeType.BINDING) {
 							let readedValue;
 
-							if (
-								parsedContent.length == 1 &&
-									!(parsedContent[0] as IContentBinding).formatters &&
-									(
-										readedValue = readValue(
-											context as Object,
-											(parsedContent[0] as IContentBinding).keypath
-										)
-									)
-							) {
-								child.textContent = readedValue.value;
+							if (content.length == 1 && !(content[0] as IContentBinding).formatters && (
+								readedValue = readValue(context as Object, (content[0] as IContentBinding).keypath)
+							)) {
+								child.nodeValue = readedValue.value;
 							} else {
-								let cell = new Cell<any>(compileContent(parsedContent, content), {
+								let cell = new Cell<any>(compileContent(content, value), {
 									owner: context as Object,
 									onChange(evt) {
-										(child as Node).textContent = evt.value;
+										(child as Node).nodeValue = evt.value;
 									}
 								});
 
-								child.textContent = cell.get();
+								child.nodeValue = cell.get();
 
 								(bindings || (bindings = [])).push(cell as IFreezableCell);
 							}

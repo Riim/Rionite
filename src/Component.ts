@@ -16,7 +16,7 @@ import onEvent from './onEvent';
 import camelize from './Utils/camelize';
 import getUID from './Utils/getUID';
 import moveContent from './Utils/moveContent';
-import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
+import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from './Features';
 
 let Map = JS.Map;
 let createClass = (Utils as any).createClass;
@@ -305,7 +305,14 @@ export default class Component extends EventEmitter implements DisposableMixin {
 					rawContent = constr._rawContent = htmlToFragment((constr.template as Template).render());
 				}
 
-				let content = rawContent.cloneNode(true);
+				let content = rawContent.cloneNode(true) as DocumentFragment;
+				if (!templateTagFeature) {
+					let templates = content.querySelectorAll('template');
+
+					for (let i = 0, l = templates.length; i < l;) {
+						i += templates[i].content.querySelectorAll('template').length + 1;
+					}
+				}
 				let [bindings, childComponents] = bindContent(content, this);
 
 				this._bindings = bindings;

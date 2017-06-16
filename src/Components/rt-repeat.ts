@@ -6,7 +6,7 @@ import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import namePattern from '../namePattern';
 import keypathPattern from '../keypathPattern';
-import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
+import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 import d from '../d';
 
 let Map = JS.Map;
@@ -86,16 +86,16 @@ export default class RtRepeat extends Component {
 
 				if (firstChild == lastChild) {
 					if (firstChild.nodeType == Node.TEXT_NODE) {
-						firstChild.textContent = (firstChild.textContent as string).trim();
+						firstChild.nodeValue = (firstChild.nodeValue as string).trim();
 					}
 				} else {
 					if (firstChild.nodeType == Node.TEXT_NODE) {
-						if (!(firstChild.textContent = (firstChild.textContent as string).replace(/^\s+/, ''))) {
+						if (!(firstChild.nodeValue = (firstChild.nodeValue as string).replace(/^\s+/, ''))) {
 							rawItemContent.removeChild(firstChild);
 						}
 					}
 					if (lastChild.nodeType == Node.TEXT_NODE) {
-						if (!(lastChild.textContent = (lastChild.textContent as string).replace(/\s+$/, ''))) {
+						if (!(lastChild.nodeValue = (lastChild.nodeValue as string).replace(/\s+$/, ''))) {
 							rawItemContent.removeChild(lastChild);
 						}
 					}
@@ -220,7 +220,14 @@ export default class RtRepeat extends Component {
 		let itemCell = new Cell(item);
 		let indexCell = new Cell(index);
 
-		let content = this._rawItemContent.cloneNode(true);
+		let content = this._rawItemContent.cloneNode(true) as DocumentFragment;
+		if (!templateTagFeature) {
+			let templates = content.querySelectorAll('template');
+
+			for (let i = 0, l = templates.length; i < l;) {
+				i += templates[i].content.querySelectorAll('template').length + 1;
+			}
+		}
 		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(this.input.$context, {
 			['_' + this._itemName]: itemCell,
 			[this._itemName]: {
