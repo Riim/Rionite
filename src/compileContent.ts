@@ -10,10 +10,6 @@ let ContentNodeType = ContentParser.ContentNodeType;
 
 let keyCounter = 0;
 
-export function nextComponentPropertyValueKey(): string {
-	return String(++keyCounter);
-}
-
 let cache = Object.create(null);
 
 export default function compileContent(

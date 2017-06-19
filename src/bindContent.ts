@@ -1,27 +1,11 @@
 import { Cell } from 'cellx';
 import { IPossiblyComponentElement, default as Component } from './Component';
-import KEY_COMPONENT_INPUT_VALUES from './KEY_COMPONENT_INPUT_VALUES';
-import { IContentBinding, default as ContentParser } from './ContentParser';
-import { nextComponentPropertyValueKey, default as compileContent } from './compileContent';
+import ContentParser from './ContentParser';
+import compileContent from './compileContent';
 import { IFreezableCell } from './componentBinding';
 import setAttribute from './Utils/setAttribute';
 
 let ContentNodeType = ContentParser.ContentNodeType;
-
-function readValue(obj: Object, keypath: string): { value: any } | null {
-	let index = keypath.indexOf('.', 1);
-	let key = index == -1 ? keypath : keypath.slice(0, index);
-
-	if ('_' + key in obj) {
-		return null;
-	}
-
-	let value = obj[key];
-
-	return index == -1 ?
-		{ value } :
-		(value == null ? null : readValue(value, keypath.slice(index + 1)));
-}
 
 export default function bindContent(
 	content: HTMLElement | DocumentFragment,
@@ -58,37 +42,16 @@ export default function bindContent(
 									name = name.slice(1);
 								}
 
-								let readedValue;
-
-								if (content.length == 1 && !(content[0] as IContentBinding).formatters && (
-									readedValue = readValue(context as Object, (content[0] as IContentBinding).keypath)
-								)) {
-									let value = readedValue.value;
-
-									if (value && typeof value == 'object') {
-										let key = nextComponentPropertyValueKey();
-
-										(
-											ownerComponent[KEY_COMPONENT_INPUT_VALUES] ||
-												(ownerComponent[KEY_COMPONENT_INPUT_VALUES] = new Map())
-										).set(key, value);
-
-										setAttribute(child as Element, name, key);
-									} else {
-										setAttribute(child as Element, name, value);
+								let cell = new Cell<any>(compileContent(content, value, ownerComponent), {
+									owner: context as Object,
+									onChange(evt) {
+										setAttribute(child as Element, name, evt.value);
 									}
-								} else {
-									let cell = new Cell<any>(compileContent(content, value, ownerComponent), {
-										owner: context as Object,
-										onChange(evt) {
-											setAttribute(child as Element, name, evt.value);
-										}
-									});
+								});
 
-									setAttribute(child as Element, name, cell.get());
+								setAttribute(child as Element, name, cell.get());
 
-									(bindings || (bindings = [])).push(cell as IFreezableCell);
-								}
+								(bindings || (bindings = [])).push(cell as IFreezableCell);
 							}
 						}
 					}
@@ -123,24 +86,16 @@ export default function bindContent(
 						let content = (new ContentParser(value)).parse();
 
 						if (content.length > 1 || content[0].nodeType == ContentNodeType.BINDING) {
-							let readedValue;
+							let cell = new Cell<any>(compileContent(content, value), {
+								owner: context as Object,
+								onChange(evt) {
+									(child as Node).nodeValue = evt.value;
+								}
+							});
 
-							if (content.length == 1 && !(content[0] as IContentBinding).formatters && (
-								readedValue = readValue(context as Object, (content[0] as IContentBinding).keypath)
-							)) {
-								child.nodeValue = readedValue.value;
-							} else {
-								let cell = new Cell<any>(compileContent(content, value), {
-									owner: context as Object,
-									onChange(evt) {
-										(child as Node).nodeValue = evt.value;
-									}
-								});
+							child.nodeValue = cell.get();
 
-								child.nodeValue = cell.get();
-
-								(bindings || (bindings = [])).push(cell as IFreezableCell);
-							}
+							(bindings || (bindings = [])).push(cell as IFreezableCell);
 						}
 					}
 

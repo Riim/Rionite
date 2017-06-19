@@ -104,7 +104,7 @@ var html_to_fragment_1 = __webpack_require__(26);
 var DisposableMixin_1 = __webpack_require__(20);
 var elementConstructorMap_1 = __webpack_require__(30);
 var registerComponent_1 = __webpack_require__(50);
-var ElementProtoMixin_1 = __webpack_require__(8);
+var ElementProtoMixin_1 = __webpack_require__(7);
 var ComponentInput_1 = __webpack_require__(18);
 var bindContent_1 = __webpack_require__(5);
 var componentBinding_1 = __webpack_require__(44);
@@ -113,7 +113,7 @@ var bindEvents_1 = __webpack_require__(41);
 var eventTypes_1 = __webpack_require__(47);
 var onEvent_1 = __webpack_require__(49);
 var camelize_1 = __webpack_require__(21);
-var getUID_1 = __webpack_require__(9);
+var getUID_1 = __webpack_require__(8);
 var moveContent_1 = __webpack_require__(15);
 var Features_1 = __webpack_require__(3);
 var Map = cellx_1.JS.Map;
@@ -522,22 +522,10 @@ exports.default = attachChildComponentElements;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(6);
 var ContentParser_1 = __webpack_require__(27);
 var compileContent_1 = __webpack_require__(43);
 var setAttribute_1 = __webpack_require__(40);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
-function readValue(obj, keypath) {
-    var index = keypath.indexOf('.', 1);
-    var key = index == -1 ? keypath : keypath.slice(0, index);
-    if ('_' + key in obj) {
-        return null;
-    }
-    var value = obj[key];
-    return index == -1 ?
-        { value: value } :
-        (value == null ? null : readValue(value, keypath.slice(index + 1)));
-}
 function bindContent(content, ownerComponent, context) {
     if (!context) {
         context = ownerComponent;
@@ -559,29 +547,14 @@ function bindContent(content, ownerComponent, context) {
                                 if (name_1.charAt(0) == '_') {
                                     name_1 = name_1.slice(1);
                                 }
-                                var readedValue = void 0;
-                                if (content_1.length == 1 && !content_1[0].formatters && (readedValue = readValue(context, content_1[0].keypath))) {
-                                    var value_1 = readedValue.value;
-                                    if (value_1 && typeof value_1 == 'object') {
-                                        var key = compileContent_1.nextComponentPropertyValueKey();
-                                        (ownerComponent[KEY_COMPONENT_INPUT_VALUES_1.default] ||
-                                            (ownerComponent[KEY_COMPONENT_INPUT_VALUES_1.default] = new Map())).set(key, value_1);
-                                        setAttribute_1.default(child, name_1, key);
+                                var cell = new cellx_1.Cell(compileContent_1.default(content_1, value, ownerComponent), {
+                                    owner: context,
+                                    onChange: function (evt) {
+                                        setAttribute_1.default(child, name_1, evt.value);
                                     }
-                                    else {
-                                        setAttribute_1.default(child, name_1, value_1);
-                                    }
-                                }
-                                else {
-                                    var cell = new cellx_1.Cell(compileContent_1.default(content_1, value, ownerComponent), {
-                                        owner: context,
-                                        onChange: function (evt) {
-                                            setAttribute_1.default(child, name_1, evt.value);
-                                        }
-                                    });
-                                    setAttribute_1.default(child, name_1, cell.get());
-                                    (bindings || (bindings = [])).push(cell);
-                                }
+                                });
+                                setAttribute_1.default(child, name_1, cell.get());
+                                (bindings || (bindings = [])).push(cell);
                             }
                         }
                         out_i_1 = i;
@@ -612,20 +585,14 @@ function bindContent(content, ownerComponent, context) {
                     if (value.indexOf('{') != -1) {
                         var content_2 = (new ContentParser_1.default(value)).parse();
                         if (content_2.length > 1 || content_2[0].nodeType == ContentNodeType.BINDING) {
-                            var readedValue = void 0;
-                            if (content_2.length == 1 && !content_2[0].formatters && (readedValue = readValue(context, content_2[0].keypath))) {
-                                child.nodeValue = readedValue.value;
-                            }
-                            else {
-                                var cell = new cellx_1.Cell(compileContent_1.default(content_2, value), {
-                                    owner: context,
-                                    onChange: function (evt) {
-                                        child.nodeValue = evt.value;
-                                    }
-                                });
-                                child.nodeValue = cell.get();
-                                (bindings || (bindings = [])).push(cell);
-                            }
+                            var cell = new cellx_1.Cell(compileContent_1.default(content_2, value), {
+                                owner: context,
+                                onChange: function (evt) {
+                                    child.nodeValue = evt.value;
+                                }
+                            });
+                            child.nodeValue = cell.get();
+                            (bindings || (bindings = [])).push(cell);
                         }
                     }
                     break;
@@ -650,8 +617,8 @@ exports.default = bindContent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var KEY_COMPONENT_INPUT_VALUES = cellx_1.JS.Symbol('Rionite.KEY_COMPONENT_INPUT_VALUES');
-exports.default = KEY_COMPONENT_INPUT_VALUES;
+var KEY_ELEMENT_CONNECTED = cellx_1.JS.Symbol('Rionite.KEY_ELEMENT_CONNECTED');
+exports.default = KEY_ELEMENT_CONNECTED;
 
 
 /***/ }),
@@ -661,19 +628,7 @@ exports.default = KEY_COMPONENT_INPUT_VALUES;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var cellx_1 = __webpack_require__(0);
-var KEY_ELEMENT_CONNECTED = cellx_1.JS.Symbol('Rionite.KEY_ELEMENT_CONNECTED');
-exports.default = KEY_ELEMENT_CONNECTED;
-
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(7);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
 var defer_1 = __webpack_require__(22);
 var Features_1 = __webpack_require__(3);
 exports.ElementsController = {
@@ -753,7 +708,7 @@ var _a;
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -781,7 +736,7 @@ exports.default = getUID;
 
 
 /***/ }),
-/* 10 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -795,6 +750,18 @@ exports.default = escapeHTML_1.default;
 
 
 /***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var cellx_1 = __webpack_require__(0);
+var KEY_COMPONENT_INPUT_VALUES = cellx_1.JS.Symbol('Rionite.KEY_COMPONENT_INPUT_VALUES');
+exports.default = KEY_COMPONENT_INPUT_VALUES;
+
+
+/***/ }),
 /* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -803,7 +770,7 @@ exports.default = escapeHTML_1.default;
 Object.defineProperty(exports, "__esModule", { value: true });
 var nelm_parser_1 = __webpack_require__(14);
 var escape_string_1 = __webpack_require__(13);
-var escape_html_1 = __webpack_require__(10);
+var escape_html_1 = __webpack_require__(9);
 var self_closing_tags_1 = __webpack_require__(39);
 var join = Array.prototype.join;
 var elNameDelimiter = '__';
@@ -1300,7 +1267,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(7);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
 var compileKeypath_1 = __webpack_require__(29);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
@@ -2318,10 +2285,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var ElementProtoMixin_1 = __webpack_require__(8);
+var ElementProtoMixin_1 = __webpack_require__(7);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var getUID_1 = __webpack_require__(9);
+var getUID_1 = __webpack_require__(8);
 var moveContent_1 = __webpack_require__(15);
 var clearNode_1 = __webpack_require__(28);
 var Features_1 = __webpack_require__(3);
@@ -2522,7 +2489,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(7);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
 var compileKeypath_1 = __webpack_require__(29);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
@@ -2790,10 +2757,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
-var ElementProtoMixin_1 = __webpack_require__(8);
+var ElementProtoMixin_1 = __webpack_require__(7);
 var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var getUID_1 = __webpack_require__(9);
+var getUID_1 = __webpack_require__(8);
 var moveContent_1 = __webpack_require__(15);
 var clearNode_1 = __webpack_require__(28);
 var Features_1 = __webpack_require__(3);
@@ -3136,14 +3103,10 @@ var escape_string_1 = __webpack_require__(13);
 var ContentParser_1 = __webpack_require__(27);
 var bindingToJSExpression_1 = __webpack_require__(42);
 var formatters_1 = __webpack_require__(24);
-var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(6);
-var getUID_1 = __webpack_require__(9);
+var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(10);
+var getUID_1 = __webpack_require__(8);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
 var keyCounter = 0;
-function nextComponentPropertyValueKey() {
-    return String(++keyCounter);
-}
-exports.nextComponentPropertyValueKey = nextComponentPropertyValueKey;
 var cache = Object.create(null);
 function compileContent(content, contentString, ownerComponent) {
     var key = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + contentString;
@@ -3261,8 +3224,8 @@ exports.default = new cellx_1.JS.Map([
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var escape_html_1 = __webpack_require__(10);
-var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(6);
+var escape_html_1 = __webpack_require__(9);
+var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(10);
 var isRegExp_1 = __webpack_require__(23);
 var componentInputTypeSerializerMap = new cellx_1.JS.Map([
     [Boolean, {
@@ -3356,7 +3319,7 @@ var nelm_parser_1 = __webpack_require__(14);
 exports.NelmNodeType = nelm_parser_1.NodeType;
 exports.NelmParser = nelm_parser_1.Parser;
 var escape_string_1 = __webpack_require__(13);
-var escape_html_1 = __webpack_require__(10);
+var escape_html_1 = __webpack_require__(9);
 var html_to_fragment_1 = __webpack_require__(26);
 var DisposableMixin_1 = __webpack_require__(20);
 exports.DisposableMixin = DisposableMixin_1.default;
@@ -3368,9 +3331,9 @@ var getText_1 = __webpack_require__(25);
 exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(7);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
 exports.KEY_ELEMENT_CONNECTED = KEY_ELEMENT_CONNECTED_1.default;
-var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(6);
+var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(10);
 exports.KEY_COMPONENT_INPUT_VALUES = KEY_COMPONENT_INPUT_VALUES_1.default;
 var ComponentInput_1 = __webpack_require__(18);
 exports.ComponentInput = ComponentInput_1.default;
@@ -3464,7 +3427,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Template_1 = __webpack_require__(11);
 var elementConstructorMap_1 = __webpack_require__(30);
-var ElementProtoMixin_1 = __webpack_require__(8);
+var ElementProtoMixin_1 = __webpack_require__(7);
 var hyphenize_1 = __webpack_require__(12);
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
