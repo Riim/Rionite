@@ -5,7 +5,7 @@ import compileKeypath from '../compileKeypath';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import keypathPattern from '../keypathPattern';
-import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
+import { templateTag as templateTagFeature } from '../Features';
 import d from '../d';
 
 let nextTick = Utils.nextTick;
@@ -105,7 +105,7 @@ export default class RtIfThen extends Component {
 
 			(this.element.parentNode as Node).insertBefore(content, this.element.nextSibling);
 
-			if (!nativeCustomElementsFeature && childComponents) {
+			if (childComponents && !childComponents[0]._attached) {
 				attachChildComponentElements(childComponents);
 			}
 		} else {

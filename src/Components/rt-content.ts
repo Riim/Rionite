@@ -7,7 +7,6 @@ import attachChildComponentElements from '../attachChildComponentElements';
 import getUID from '../Utils/getUID';
 import moveContent from '../Utils/moveContent';
 import clearNode from '../Utils/clearNode';
-import { nativeCustomElements as nativeCustomElementsFeature } from '../Features';
 import d from '../d';
 
 let Map = JS.Map;
@@ -144,7 +143,7 @@ export default class RtContent extends Component {
 				el.appendChild(content);
 			}
 
-			if (!(content && nativeCustomElementsFeature) && childComponents) {
+			if (childComponents && !childComponents[0]._attached) {
 				attachChildComponentElements(childComponents);
 			}
 

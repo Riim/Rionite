@@ -6,7 +6,7 @@ import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
 import namePattern from '../namePattern';
 import keypathPattern from '../keypathPattern';
-import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from '../Features';
+import { templateTag as templateTagFeature } from '../Features';
 import d from '../d';
 
 let Map = JS.Map;
@@ -261,7 +261,7 @@ export default class RtRepeat extends Component {
 		(this._lastNode.parentNode as Node).insertBefore(content, this._lastNode.nextSibling);
 		this._lastNode = newLastNode;
 
-		if (!nativeCustomElementsFeature && childComponents) {
+		if (childComponents && !childComponents[0]._attached) {
 			attachChildComponentElements(childComponents);
 		}
 

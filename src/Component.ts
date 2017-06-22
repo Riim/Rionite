@@ -16,7 +16,7 @@ import onEvent from './onEvent';
 import camelize from './Utils/camelize';
 import getUID from './Utils/getUID';
 import moveContent from './Utils/moveContent';
-import { templateTag as templateTagFeature, nativeCustomElements as nativeCustomElementsFeature } from './Features';
+import { templateTag as templateTagFeature } from './Features';
 
 let Map = JS.Map;
 let createClass = (Utils as any).createClass;
@@ -319,7 +319,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 				this.element.appendChild(content);
 
-				if (!nativeCustomElementsFeature && childComponents) {
+				if (childComponents && !childComponents[0]._attached) {
 					attachChildComponentElements(childComponents);
 				}
 
