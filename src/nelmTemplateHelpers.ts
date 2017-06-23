@@ -1,5 +1,4 @@
-import { NodeType, TContent, IElement } from 'nelm-parser';
-import Template from './Template';
+import { NodeType, TContent, IElement, Template } from 'nelm';
 
 Template.helpers['if-then'] = Template.helpers['if-else'] = Template.helpers['repeat'] = (el: IElement): TContent => {
 	let origAttrs = el.attributes;

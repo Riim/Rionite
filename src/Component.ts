@@ -1,8 +1,7 @@
 import { IEvent, IEventEmitterListener, EventEmitter, JS, Utils } from 'cellx';
-import { IBlock } from 'nelm-parser';
+import { IBlock, Template } from 'nelm';
 import htmlToFragment from 'html-to-fragment';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
-import Template from './Template';
 import elementConstructorMap from './elementConstructorMap';
 import registerComponent from './registerComponent';
 import { ElementsController } from './ElementProtoMixin';

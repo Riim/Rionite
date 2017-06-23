@@ -1,7 +1,6 @@
 import { IEvent, IEventEmitterListener, EventEmitter } from 'cellx';
-import { IBlock } from 'nelm-parser';
+import { IBlock, Template } from 'nelm';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
-import Template from './Template';
 import registerComponent from './registerComponent';
 import { IComponentInput } from './ComponentInput';
 import { IFreezableCell } from './componentBinding';

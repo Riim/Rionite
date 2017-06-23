@@ -1576,21 +1576,21 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var html_to_fragment_1 = __webpack_require__(26);
-var DisposableMixin_1 = __webpack_require__(20);
-var elementConstructorMap_1 = __webpack_require__(30);
+var html_to_fragment_1 = __webpack_require__(25);
+var DisposableMixin_1 = __webpack_require__(19);
+var elementConstructorMap_1 = __webpack_require__(29);
 var registerComponent_1 = __webpack_require__(50);
 var ElementProtoMixin_1 = __webpack_require__(6);
-var ComponentInput_1 = __webpack_require__(18);
+var ComponentInput_1 = __webpack_require__(17);
 var bindContent_1 = __webpack_require__(4);
 var componentBinding_1 = __webpack_require__(44);
 var attachChildComponentElements_1 = __webpack_require__(3);
 var bindEvents_1 = __webpack_require__(41);
 var eventTypes_1 = __webpack_require__(47);
 var onEvent_1 = __webpack_require__(49);
-var camelize_1 = __webpack_require__(21);
+var camelize_1 = __webpack_require__(20);
 var getUID_1 = __webpack_require__(8);
-var moveContent_1 = __webpack_require__(15);
+var moveContent_1 = __webpack_require__(14);
 var Features_1 = __webpack_require__(7);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
@@ -1962,7 +1962,7 @@ exports.default = attachChildComponentElements;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var ContentParser_1 = __webpack_require__(27);
+var ContentParser_1 = __webpack_require__(26);
 var compileContent_1 = __webpack_require__(43);
 var setAttribute_1 = __webpack_require__(40);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
@@ -2069,7 +2069,7 @@ exports.default = KEY_ELEMENT_CONNECTED;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(5);
-var defer_1 = __webpack_require__(22);
+var defer_1 = __webpack_require__(21);
 var Features_1 = __webpack_require__(7);
 exports.ElementsController = {
     skipConnectionStatusCallbacks: false
@@ -2244,253 +2244,6 @@ exports.default = KEY_COMPONENT_INPUT_VALUES;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var nelm_parser_1 = __webpack_require__(14);
-var escape_string_1 = __webpack_require__(13);
-var escape_html_1 = __webpack_require__(9);
-var self_closing_tags_1 = __webpack_require__(39);
-var join = Array.prototype.join;
-var elNameDelimiter = '__';
-var Template = (function () {
-    function Template(nelm, opts) {
-        this.parent = opts && opts.parent || null;
-        this.nelm = typeof nelm == 'string' ? new nelm_parser_1.Parser(nelm).parse() : nelm;
-        var blockName = opts && opts.blockName || this.nelm.name;
-        this._elementClassesTemplate = this.parent ?
-            [blockName ? blockName + elNameDelimiter : ''].concat(this.parent._elementClassesTemplate) :
-            [blockName ? blockName + elNameDelimiter : '', ''];
-    }
-    Template.prototype.extend = function (nelm, opts) {
-        return new Template(nelm, { __proto__: opts || null, parent: this });
-    };
-    Template.prototype.setBlockName = function (blockName) {
-        this._elementClassesTemplate[0] = blockName ? blockName + elNameDelimiter : '';
-        return this;
-    };
-    Template.prototype.render = function () {
-        return (this._renderer || this._compileRenderers()).call(this._elementRendererMap);
-    };
-    Template.prototype._compileRenderers = function () {
-        var parent = this.parent;
-        this._elements = [(this._currentElement = { name: null, superCall: false, source: null, innerSource: [] })];
-        var elMap = this._elementMap = {};
-        if (parent) {
-            this._renderer = parent._renderer || parent._compileRenderers();
-        }
-        for (var _i = 0, _a = this.nelm.content; _i < _a.length; _i++) {
-            var node = _a[_i];
-            this._compileNode(node);
-        }
-        if (!parent) {
-            this._renderer = Function("return " + this._currentElement.innerSource.join(' + ') + ";");
-        }
-        Object.keys(elMap).forEach(function (name) {
-            var el = elMap[name];
-            this[name] = Function("return " + el.source.join(' + ') + ";");
-            if (el.superCall) {
-                var inner_1 = Function('$super', "return " + (el.innerSource.join(' + ') || "''") + ";");
-                var parentElementRendererMap_1 = parent && parent._elementRendererMap;
-                this[name + '@content'] = function () { return inner_1.call(this, parentElementRendererMap_1); };
-            }
-            else {
-                this[name + '@content'] = Function("return " + (el.innerSource.join(' + ') || "''") + ";");
-            }
-        }, (this._elementRendererMap = { __proto__: parent && parent._elementRendererMap }));
-        return this._renderer;
-    };
-    Template.prototype._compileNode = function (node, parentElName) {
-        switch (node.nodeType) {
-            case nelm_parser_1.NodeType.ELEMENT: {
-                var parent_1 = this.parent;
-                var els = this._elements;
-                var el = node;
-                var tagName = el.tagName;
-                var isHelper = el.isHelper;
-                var elNames = el.names;
-                var elName = elNames && elNames[0];
-                var elAttrs = el.attributes;
-                var content = el.content;
-                if (elNames) {
-                    if (elName) {
-                        if (tagName) {
-                            (this._tagNameMap || (this._tagNameMap = { __proto__: parent_1 && parent_1._tagNameMap || null }))[elName] = tagName;
-                        }
-                        else {
-                            // Не надо добавлять в конец ` || 'div'`, тк. ниже tagName используется как имя хелпера.
-                            tagName = parent_1 && parent_1._tagNameMap && parent_1._tagNameMap[elName];
-                        }
-                        var renderedAttrs = void 0;
-                        if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
-                            var attrListMap = this._attributeListMap || (this._attributeListMap = { __proto__: parent_1 && parent_1._attributeListMap || null });
-                            var attrCountMap = this._attributeCountMap || (this._attributeCountMap = {
-                                __proto__: parent_1 && parent_1._attributeCountMap || null
-                            });
-                            var elAttrsSuperCall = elAttrs.superCall;
-                            var attrList = void 0;
-                            var attrCount = void 0;
-                            if (elAttrsSuperCall) {
-                                if (!parent_1) {
-                                    throw new TypeError('Parent template is required when using super');
-                                }
-                                attrList = attrListMap[elName] = {
-                                    __proto__: parent_1._attributeListMap[elAttrsSuperCall.elementName || elName] || null
-                                };
-                                attrCount = attrCountMap[elName] =
-                                    parent_1._attributeCountMap[elAttrsSuperCall.elementName || elName] || 0;
-                            }
-                            else {
-                                attrList = attrListMap[elName] = { __proto__: null };
-                                attrCount = attrCountMap[elName] = 0;
-                            }
-                            for (var _i = 0, _a = elAttrs.list; _i < _a.length; _i++) {
-                                var attr = _a[_i];
-                                var name_1 = attr.name;
-                                var value = attr.value;
-                                var index = attrList[name_1];
-                                if (index === undefined) {
-                                    attrList[attrCount] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
-                                    attrList[name_1] = attrCount;
-                                    attrCountMap[elName] = ++attrCount;
-                                }
-                                else {
-                                    attrList[index] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
-                                }
-                            }
-                            if (!isHelper) {
-                                attrList = {
-                                    __proto__: attrList,
-                                    length: attrCount
-                                };
-                                if (attrList['class'] !== undefined) {
-                                    attrList[attrList['class']] = ' class="' + this._renderElementClasses(elNames) +
-                                        attrList[attrList['class']].slice(' class="'.length);
-                                    renderedAttrs = join.call(attrList, '');
-                                }
-                                else {
-                                    renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" +
-                                        join.call(attrList, '');
-                                }
-                            }
-                        }
-                        else if (!isHelper) {
-                            renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
-                        }
-                        var currentEl = {
-                            name: elName,
-                            superCall: false,
-                            source: isHelper ? ["this['" + elName + "@content']()"] : [
-                                "'<" + (tagName || 'div') + renderedAttrs + ">'",
-                                content && content.length ?
-                                    "this['" + elName + "@content']() + '</" + (tagName || 'div') + ">'" :
-                                    (!content && tagName && tagName in self_closing_tags_1.map ?
-                                        "''" :
-                                        "'</" + (tagName || 'div') + ">'")
-                            ],
-                            innerSource: []
-                        };
-                        els.push((this._currentElement = currentEl));
-                        this._elementMap[elName] = currentEl;
-                    }
-                    else if (!isHelper) {
-                        if (elAttrs && elAttrs.list.length) {
-                            var renderedClasses = void 0;
-                            var attrs = '';
-                            for (var _b = 0, _c = elAttrs.list; _b < _c.length; _b++) {
-                                var attr = _c[_b];
-                                var value = attr.value;
-                                if (attr.name == 'class') {
-                                    renderedClasses = this._renderElementClasses(elNames);
-                                    attrs += " class=\"" + (value ?
-                                        renderedClasses + escape_html_1.default(escape_string_1.default(value)) :
-                                        renderedClasses.slice(0, -1)) + "\"";
-                                }
-                                else {
-                                    attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
-                                }
-                            }
-                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + (renderedClasses ?
-                                attrs :
-                                " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" + attrs) + ">'");
-                        }
-                        else {
-                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
-                        }
-                    }
-                }
-                else if (!isHelper) {
-                    this._currentElement.innerSource.push("'<" + (tagName || 'div') + (elAttrs ?
-                        elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') :
-                        '') + ">'");
-                }
-                if (isHelper) {
-                    if (!tagName) {
-                        throw new TypeError('tagName is required');
-                    }
-                    var helper = Template.helpers[tagName];
-                    if (!helper) {
-                        throw new TypeError("Helper \"" + tagName + "\" is not defined");
-                    }
-                    var content_1 = helper(el);
-                    if (content_1) {
-                        for (var _d = 0, content_2 = content_1; _d < content_2.length; _d++) {
-                            var contentNode = content_2[_d];
-                            this._compileNode(contentNode, elName || parentElName);
-                        }
-                    }
-                }
-                else if (content) {
-                    for (var _e = 0, content_3 = content; _e < content_3.length; _e++) {
-                        var contentNode = content_3[_e];
-                        this._compileNode(contentNode, elName || parentElName);
-                    }
-                }
-                if (elName) {
-                    els.pop();
-                    this._currentElement = els[els.length - 1];
-                    this._currentElement.innerSource.push("this['" + elName + "']()");
-                }
-                else if (!isHelper && (content || !tagName || !(tagName in self_closing_tags_1.map))) {
-                    this._currentElement.innerSource.push("'</" + (tagName || 'div') + ">'");
-                }
-                break;
-            }
-            case nelm_parser_1.NodeType.TEXT: {
-                this._currentElement.innerSource.push("'" + escape_string_1.default(node.value) + "'");
-                break;
-            }
-            case nelm_parser_1.NodeType.SUPER_CALL: {
-                this._currentElement.innerSource
-                    .push("$super['" + (node.elementName || parentElName) + "@content'].call(this)");
-                this._currentElement.superCall = true;
-                break;
-            }
-        }
-    };
-    Template.prototype._renderElementClasses = function (elNames) {
-        var elClasses = elNames[0] ? this._elementClassesTemplate.join(elNames[0] + ' ') : '';
-        var elNameCount = elNames.length;
-        if (elNameCount > 1) {
-            var i = 1;
-            do {
-                elClasses += this._elementClassesTemplate.join(elNames[i] + ' ');
-            } while (++i < elNameCount);
-        }
-        return elClasses;
-    };
-    return Template;
-}());
-Template.helpers = {
-    section: function (el) { return el.content; }
-};
-exports.default = Template;
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 var reHump = /-?([A-Z])([^A-Z])/g;
 var reLongHump = /-?([A-Z]+)/g;
 var reMinus = /^-/;
@@ -2506,7 +2259,7 @@ exports.default = hyphenize;
 
 
 /***/ }),
-/* 13 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2526,19 +2279,21 @@ exports.default = escapeString;
 
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Parser_1 = __webpack_require__(51);
-exports.NodeType = Parser_1.NodeType;
-exports.Parser = Parser_1.default;
+var nelm_parser_1 = __webpack_require__(31);
+exports.NodeType = nelm_parser_1.NodeType;
+exports.Parser = nelm_parser_1.default;
+var Template_1 = __webpack_require__(52);
+exports.Template = Template_1.default;
 
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2554,18 +2309,18 @@ exports.default = moveContent;
 
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var namePattern_1 = __webpack_require__(17);
+var namePattern_1 = __webpack_require__(16);
 exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\.(?:" + namePattern_1.default + "|\\d+))*";
 
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2575,7 +2330,7 @@ exports.default = '[$_a-zA-Z][$\\w]*';
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2584,7 +2339,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var componentInputTypeMap_1 = __webpack_require__(45);
 var componentInputTypeSerializerMap_1 = __webpack_require__(46);
-var hyphenize_1 = __webpack_require__(12);
+var hyphenize_1 = __webpack_require__(11);
 function initInputProperty(input, name, el) {
     var component = el.$component;
     var inputPropertyConfig = component.constructor.input[name];
@@ -2719,7 +2474,7 @@ exports.default = ComponentInput;
 
 
 /***/ }),
-/* 19 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2744,10 +2499,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(5);
-var compileKeypath_1 = __webpack_require__(29);
+var compileKeypath_1 = __webpack_require__(28);
 var bindContent_1 = __webpack_require__(4);
 var attachChildComponentElements_1 = __webpack_require__(3);
-var keypathPattern_1 = __webpack_require__(16);
+var keypathPattern_1 = __webpack_require__(15);
 var Features_1 = __webpack_require__(7);
 var d_1 = __webpack_require__(2);
 var nextTick = cellx_1.Utils.nextTick;
@@ -2872,7 +2627,7 @@ exports.default = RtIfThen;
 
 
 /***/ }),
-/* 20 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3039,7 +2794,7 @@ exports.default = DisposableMixin;
 
 
 /***/ }),
-/* 21 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3056,7 +2811,7 @@ exports.default = camelize;
 
 
 /***/ }),
-/* 22 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3090,7 +2845,7 @@ exports.default = defer;
 
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3104,13 +2859,13 @@ exports.default = isRegExp;
 
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var getText_1 = __webpack_require__(25);
+var getText_1 = __webpack_require__(24);
 exports.default = {
     or: function or(value, arg) {
         return value || arg;
@@ -3172,7 +2927,7 @@ exports.default = {
 
 
 /***/ }),
-/* 25 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3262,7 +3017,7 @@ configure({
 
 
 /***/ }),
-/* 26 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3295,15 +3050,15 @@ exports.default = htmlToFragment;
 
 
 /***/ }),
-/* 27 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(31);
-var namePattern_1 = __webpack_require__(17);
-var keypathPattern_1 = __webpack_require__(16);
+var keypathToJSExpression_1 = __webpack_require__(30);
+var namePattern_1 = __webpack_require__(16);
+var keypathPattern_1 = __webpack_require__(15);
 var ContentNodeType;
 (function (ContentNodeType) {
     ContentNodeType[ContentNodeType["TEXT"] = 1] = "TEXT";
@@ -3625,7 +3380,7 @@ exports.default = ContentParser;
 
 
 /***/ }),
-/* 28 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3641,13 +3396,13 @@ exports.default = clearNode;
 
 
 /***/ }),
-/* 29 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(31);
+var keypathToJSExpression_1 = __webpack_require__(30);
 var cache = Object.create(null);
 function compileKeypath(keypath) {
     return cache[keypath] || (cache[keypath] = Function("var temp; return " + keypathToJSExpression_1.default(keypath) + ";"));
@@ -3656,7 +3411,7 @@ exports.default = compileKeypath;
 
 
 /***/ }),
-/* 30 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3710,7 +3465,7 @@ exports.default = mixin(Object.create(null), {
 
 
 /***/ }),
-/* 31 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3734,6 +3489,18 @@ function keypathToJSExpression(keypath) {
     return (cache[keypath] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && temp['" + keys[keyCount - 1] + "']");
 }
 exports.default = keypathToJSExpression;
+
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Parser_1 = __webpack_require__(51);
+exports.NodeType = Parser_1.NodeType;
+exports.Parser = Parser_1.default;
 
 
 /***/ }),
@@ -3765,8 +3532,8 @@ var ElementProtoMixin_1 = __webpack_require__(6);
 var bindContent_1 = __webpack_require__(4);
 var attachChildComponentElements_1 = __webpack_require__(3);
 var getUID_1 = __webpack_require__(8);
-var moveContent_1 = __webpack_require__(15);
-var clearNode_1 = __webpack_require__(28);
+var moveContent_1 = __webpack_require__(14);
+var clearNode_1 = __webpack_require__(27);
 var d_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var KEY_CONTENT_MAP = cellx_1.JS.Symbol('contentMap');
@@ -3920,7 +3687,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var d_1 = __webpack_require__(2);
-var rt_if_then_1 = __webpack_require__(19);
+var rt_if_then_1 = __webpack_require__(18);
 var RtIfElse = (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
@@ -3965,11 +3732,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var Component_1 = __webpack_require__(1);
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(5);
-var compileKeypath_1 = __webpack_require__(29);
+var compileKeypath_1 = __webpack_require__(28);
 var bindContent_1 = __webpack_require__(4);
 var attachChildComponentElements_1 = __webpack_require__(3);
-var namePattern_1 = __webpack_require__(17);
-var keypathPattern_1 = __webpack_require__(16);
+var namePattern_1 = __webpack_require__(16);
+var keypathPattern_1 = __webpack_require__(15);
 var Features_1 = __webpack_require__(7);
 var d_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
@@ -4236,8 +4003,8 @@ var ElementProtoMixin_1 = __webpack_require__(6);
 var bindContent_1 = __webpack_require__(4);
 var attachChildComponentElements_1 = __webpack_require__(3);
 var getUID_1 = __webpack_require__(8);
-var moveContent_1 = __webpack_require__(15);
-var clearNode_1 = __webpack_require__(28);
+var moveContent_1 = __webpack_require__(14);
+var clearNode_1 = __webpack_require__(27);
 var d_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var KEY_SLOT_CONTENT_MAP = cellx_1.JS.Symbol('slotContentMap');
@@ -4376,9 +4143,8 @@ exports.default = RtSlot;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var nelm_parser_1 = __webpack_require__(14);
-var Template_1 = __webpack_require__(11);
-Template_1.default.helpers['if-then'] = Template_1.default.helpers['if-else'] = Template_1.default.helpers['repeat'] = function (el) {
+var nelm_1 = __webpack_require__(13);
+nelm_1.Template.helpers['if-then'] = nelm_1.Template.helpers['if-else'] = nelm_1.Template.helpers['repeat'] = function (el) {
     var origAttrs = el.attributes;
     var attrs = {
         superCall: origAttrs && origAttrs.superCall,
@@ -4389,7 +4155,7 @@ Template_1.default.helpers['if-then'] = Template_1.default.helpers['if-else'] = 
         value: 'rt-' + el.tagName
     });
     return [{
-            nodeType: nelm_parser_1.NodeType.ELEMENT,
+            nodeType: nelm_1.NodeType.ELEMENT,
             isHelper: false,
             tagName: 'template',
             names: el.names,
@@ -4573,10 +4339,10 @@ exports.default = bindingToJSExpression;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(13);
-var ContentParser_1 = __webpack_require__(27);
+var escape_string_1 = __webpack_require__(12);
+var ContentParser_1 = __webpack_require__(26);
 var bindingToJSExpression_1 = __webpack_require__(42);
-var formatters_1 = __webpack_require__(24);
+var formatters_1 = __webpack_require__(23);
 var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(10);
 var getUID_1 = __webpack_require__(8);
 var ContentNodeType = ContentParser_1.default.ContentNodeType;
@@ -4700,7 +4466,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var escape_html_1 = __webpack_require__(9);
 var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(10);
-var isRegExp_1 = __webpack_require__(23);
+var isRegExp_1 = __webpack_require__(22);
 var componentInputTypeSerializerMap = new cellx_1.JS.Map([
     [Boolean, {
             read: function (value, defaultValue) {
@@ -4789,19 +4555,18 @@ exports.default = [
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var nelm_parser_1 = __webpack_require__(14);
-exports.NelmNodeType = nelm_parser_1.NodeType;
-exports.NelmParser = nelm_parser_1.Parser;
-var escape_string_1 = __webpack_require__(13);
+var nelm_1 = __webpack_require__(13);
+exports.NelmNodeType = nelm_1.NodeType;
+exports.NelmParser = nelm_1.Parser;
+exports.Template = nelm_1.Template;
+var escape_string_1 = __webpack_require__(12);
 var escape_html_1 = __webpack_require__(9);
-var html_to_fragment_1 = __webpack_require__(26);
-var DisposableMixin_1 = __webpack_require__(20);
+var html_to_fragment_1 = __webpack_require__(25);
+var DisposableMixin_1 = __webpack_require__(19);
 exports.DisposableMixin = DisposableMixin_1.default;
-var Template_1 = __webpack_require__(11);
-exports.Template = Template_1.default;
-var formatters_1 = __webpack_require__(24);
+var formatters_1 = __webpack_require__(23);
 exports.formatters = formatters_1.default;
-var getText_1 = __webpack_require__(25);
+var getText_1 = __webpack_require__(24);
 exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.default;
@@ -4809,19 +4574,19 @@ var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(5);
 exports.KEY_ELEMENT_CONNECTED = KEY_ELEMENT_CONNECTED_1.default;
 var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(10);
 exports.KEY_COMPONENT_INPUT_VALUES = KEY_COMPONENT_INPUT_VALUES_1.default;
-var ComponentInput_1 = __webpack_require__(18);
+var ComponentInput_1 = __webpack_require__(17);
 exports.ComponentInput = ComponentInput_1.default;
 var rt_content_1 = __webpack_require__(32);
 var rt_slot_1 = __webpack_require__(35);
-var rt_if_then_1 = __webpack_require__(19);
+var rt_if_then_1 = __webpack_require__(18);
 var rt_if_else_1 = __webpack_require__(33);
 var rt_repeat_1 = __webpack_require__(34);
 var d_1 = __webpack_require__(2);
 exports.d = d_1.default;
-var camelize_1 = __webpack_require__(21);
-var hyphenize_1 = __webpack_require__(12);
-var isRegExp_1 = __webpack_require__(23);
-var defer_1 = __webpack_require__(22);
+var camelize_1 = __webpack_require__(20);
+var hyphenize_1 = __webpack_require__(11);
+var isRegExp_1 = __webpack_require__(22);
+var defer_1 = __webpack_require__(21);
 __webpack_require__(36);
 var Components = {
     RtContent: rt_content_1.default,
@@ -4899,10 +4664,10 @@ exports.default = onEvent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var Template_1 = __webpack_require__(11);
-var elementConstructorMap_1 = __webpack_require__(30);
+var nelm_1 = __webpack_require__(13);
+var elementConstructorMap_1 = __webpack_require__(29);
 var ElementProtoMixin_1 = __webpack_require__(6);
-var hyphenize_1 = __webpack_require__(12);
+var hyphenize_1 = __webpack_require__(11);
 var mixin = cellx_1.Utils.mixin;
 var push = Array.prototype.push;
 function inheritProperty(target, source, name, depth) {
@@ -4932,13 +4697,13 @@ function registerComponent(componentConstr) {
     componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
     var template = componentConstr.template;
     if (template !== null && template !== parentComponentConstr.template) {
-        if (template instanceof Template_1.default) {
+        if (template instanceof nelm_1.Template) {
             template.setBlockName(elIs);
         }
         else {
             componentConstr.template = parentComponentConstr.template ?
                 parentComponentConstr.template.extend(template, { blockName: elIs }) :
-                new Template_1.default(template, { blockName: elIs });
+                new nelm_1.Template(template, { blockName: elIs });
         }
     }
     componentConstr._contentBlockNames = [elIs];
@@ -5408,6 +5173,253 @@ var Parser = (function () {
     return Parser;
 }());
 exports.default = Parser;
+
+
+/***/ }),
+/* 52 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var nelm_parser_1 = __webpack_require__(31);
+var escape_string_1 = __webpack_require__(12);
+var escape_html_1 = __webpack_require__(9);
+var self_closing_tags_1 = __webpack_require__(39);
+var join = Array.prototype.join;
+var elNameDelimiter = '__';
+var Template = (function () {
+    function Template(nelm, opts) {
+        this.parent = opts && opts.parent || null;
+        this.nelm = typeof nelm == 'string' ? new nelm_parser_1.Parser(nelm).parse() : nelm;
+        var blockName = opts && opts.blockName || this.nelm.name;
+        this._elementClassesTemplate = this.parent ?
+            [blockName ? blockName + elNameDelimiter : ''].concat(this.parent._elementClassesTemplate) :
+            [blockName ? blockName + elNameDelimiter : '', ''];
+    }
+    Template.prototype.extend = function (nelm, opts) {
+        return new Template(nelm, { __proto__: opts || null, parent: this });
+    };
+    Template.prototype.setBlockName = function (blockName) {
+        this._elementClassesTemplate[0] = blockName ? blockName + elNameDelimiter : '';
+        return this;
+    };
+    Template.prototype.render = function () {
+        return (this._renderer || this._compileRenderers()).call(this._elementRendererMap);
+    };
+    Template.prototype._compileRenderers = function () {
+        var parent = this.parent;
+        this._elements = [(this._currentElement = { name: null, superCall: false, source: null, innerSource: [] })];
+        var elMap = this._elementMap = {};
+        if (parent) {
+            this._renderer = parent._renderer || parent._compileRenderers();
+        }
+        for (var _i = 0, _a = this.nelm.content; _i < _a.length; _i++) {
+            var node = _a[_i];
+            this._compileNode(node);
+        }
+        if (!parent) {
+            this._renderer = Function("return " + this._currentElement.innerSource.join(' + ') + ";");
+        }
+        Object.keys(elMap).forEach(function (name) {
+            var el = elMap[name];
+            this[name] = Function("return " + el.source.join(' + ') + ";");
+            if (el.superCall) {
+                var inner_1 = Function('$super', "return " + (el.innerSource.join(' + ') || "''") + ";");
+                var parentElementRendererMap_1 = parent && parent._elementRendererMap;
+                this[name + '@content'] = function () { return inner_1.call(this, parentElementRendererMap_1); };
+            }
+            else {
+                this[name + '@content'] = Function("return " + (el.innerSource.join(' + ') || "''") + ";");
+            }
+        }, (this._elementRendererMap = { __proto__: parent && parent._elementRendererMap }));
+        return this._renderer;
+    };
+    Template.prototype._compileNode = function (node, parentElName) {
+        switch (node.nodeType) {
+            case nelm_parser_1.NodeType.ELEMENT: {
+                var parent_1 = this.parent;
+                var els = this._elements;
+                var el = node;
+                var tagName = el.tagName;
+                var isHelper = el.isHelper;
+                var elNames = el.names;
+                var elName = elNames && elNames[0];
+                var elAttrs = el.attributes;
+                var content = el.content;
+                if (elNames) {
+                    if (elName) {
+                        if (tagName) {
+                            (this._tagNameMap || (this._tagNameMap = { __proto__: parent_1 && parent_1._tagNameMap || null }))[elName] = tagName;
+                        }
+                        else {
+                            // Не надо добавлять в конец ` || 'div'`, тк. ниже tagName используется как имя хелпера.
+                            tagName = parent_1 && parent_1._tagNameMap && parent_1._tagNameMap[elName];
+                        }
+                        var renderedAttrs = void 0;
+                        if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
+                            var attrListMap = this._attributeListMap || (this._attributeListMap = { __proto__: parent_1 && parent_1._attributeListMap || null });
+                            var attrCountMap = this._attributeCountMap || (this._attributeCountMap = {
+                                __proto__: parent_1 && parent_1._attributeCountMap || null
+                            });
+                            var elAttrsSuperCall = elAttrs.superCall;
+                            var attrList = void 0;
+                            var attrCount = void 0;
+                            if (elAttrsSuperCall) {
+                                if (!parent_1) {
+                                    throw new TypeError('Parent template is required when using super');
+                                }
+                                attrList = attrListMap[elName] = {
+                                    __proto__: parent_1._attributeListMap[elAttrsSuperCall.elementName || elName] || null
+                                };
+                                attrCount = attrCountMap[elName] =
+                                    parent_1._attributeCountMap[elAttrsSuperCall.elementName || elName] || 0;
+                            }
+                            else {
+                                attrList = attrListMap[elName] = { __proto__: null };
+                                attrCount = attrCountMap[elName] = 0;
+                            }
+                            for (var _i = 0, _a = elAttrs.list; _i < _a.length; _i++) {
+                                var attr = _a[_i];
+                                var name_1 = attr.name;
+                                var value = attr.value;
+                                var index = attrList[name_1];
+                                if (index === undefined) {
+                                    attrList[attrCount] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
+                                    attrList[name_1] = attrCount;
+                                    attrCountMap[elName] = ++attrCount;
+                                }
+                                else {
+                                    attrList[index] = " " + name_1 + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
+                                }
+                            }
+                            if (!isHelper) {
+                                attrList = {
+                                    __proto__: attrList,
+                                    length: attrCount
+                                };
+                                if (attrList['class'] !== undefined) {
+                                    attrList[attrList['class']] = ' class="' + this._renderElementClasses(elNames) +
+                                        attrList[attrList['class']].slice(' class="'.length);
+                                    renderedAttrs = join.call(attrList, '');
+                                }
+                                else {
+                                    renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" +
+                                        join.call(attrList, '');
+                                }
+                            }
+                        }
+                        else if (!isHelper) {
+                            renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
+                        }
+                        var currentEl = {
+                            name: elName,
+                            superCall: false,
+                            source: isHelper ? ["this['" + elName + "@content']()"] : [
+                                "'<" + (tagName || 'div') + renderedAttrs + ">'",
+                                content && content.length ?
+                                    "this['" + elName + "@content']() + '</" + (tagName || 'div') + ">'" :
+                                    (!content && tagName && tagName in self_closing_tags_1.map ?
+                                        "''" :
+                                        "'</" + (tagName || 'div') + ">'")
+                            ],
+                            innerSource: []
+                        };
+                        els.push((this._currentElement = currentEl));
+                        this._elementMap[elName] = currentEl;
+                    }
+                    else if (!isHelper) {
+                        if (elAttrs && elAttrs.list.length) {
+                            var renderedClasses = void 0;
+                            var attrs = '';
+                            for (var _b = 0, _c = elAttrs.list; _b < _c.length; _b++) {
+                                var attr = _c[_b];
+                                var value = attr.value;
+                                if (attr.name == 'class') {
+                                    renderedClasses = this._renderElementClasses(elNames);
+                                    attrs += " class=\"" + (value ?
+                                        renderedClasses + escape_html_1.default(escape_string_1.default(value)) :
+                                        renderedClasses.slice(0, -1)) + "\"";
+                                }
+                                else {
+                                    attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
+                                }
+                            }
+                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + (renderedClasses ?
+                                attrs :
+                                " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" + attrs) + ">'");
+                        }
+                        else {
+                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
+                        }
+                    }
+                }
+                else if (!isHelper) {
+                    this._currentElement.innerSource.push("'<" + (tagName || 'div') + (elAttrs ?
+                        elAttrs.list.map(function (attr) { return " " + attr.name + "=\"" + (attr.value && escape_html_1.default(escape_string_1.default(attr.value))) + "\""; }).join('') :
+                        '') + ">'");
+                }
+                if (isHelper) {
+                    if (!tagName) {
+                        throw new TypeError('tagName is required');
+                    }
+                    var helper = Template.helpers[tagName];
+                    if (!helper) {
+                        throw new TypeError("Helper \"" + tagName + "\" is not defined");
+                    }
+                    var content_1 = helper(el);
+                    if (content_1) {
+                        for (var _d = 0, content_2 = content_1; _d < content_2.length; _d++) {
+                            var contentNode = content_2[_d];
+                            this._compileNode(contentNode, elName || parentElName);
+                        }
+                    }
+                }
+                else if (content) {
+                    for (var _e = 0, content_3 = content; _e < content_3.length; _e++) {
+                        var contentNode = content_3[_e];
+                        this._compileNode(contentNode, elName || parentElName);
+                    }
+                }
+                if (elName) {
+                    els.pop();
+                    this._currentElement = els[els.length - 1];
+                    this._currentElement.innerSource.push("this['" + elName + "']()");
+                }
+                else if (!isHelper && (content || !tagName || !(tagName in self_closing_tags_1.map))) {
+                    this._currentElement.innerSource.push("'</" + (tagName || 'div') + ">'");
+                }
+                break;
+            }
+            case nelm_parser_1.NodeType.TEXT: {
+                this._currentElement.innerSource.push("'" + escape_string_1.default(node.value) + "'");
+                break;
+            }
+            case nelm_parser_1.NodeType.SUPER_CALL: {
+                this._currentElement.innerSource
+                    .push("$super['" + (node.elementName || parentElName) + "@content'].call(this)");
+                this._currentElement.superCall = true;
+                break;
+            }
+        }
+    };
+    Template.prototype._renderElementClasses = function (elNames) {
+        var elClasses = elNames[0] ? this._elementClassesTemplate.join(elNames[0] + ' ') : '';
+        var elNameCount = elNames.length;
+        if (elNameCount > 1) {
+            var i = 1;
+            do {
+                elClasses += this._elementClassesTemplate.join(elNames[i] + ' ');
+            } while (++i < elNameCount);
+        }
+        return elClasses;
+    };
+    return Template;
+}());
+Template.helpers = {
+    section: function (el) { return el.content; }
+};
+exports.default = Template;
 
 
 /***/ })
