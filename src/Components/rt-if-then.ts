@@ -43,21 +43,16 @@ export default class RtIfThen extends Component {
 		this._active = true;
 
 		if (!this.initialized) {
-			let input = this.input;
-
-			input.$content = document.importNode((this.element as any as HTMLTemplateElement).content, true);
-
-			let if_ = (input['if'] || '').trim();
+			let if_ = (this.input['if'] || '').trim();
 
 			if (!reKeypath.test(if_)) {
 				throw new SyntaxError(`Invalid value of attribute "if" (${ if_ })`);
 			}
 
 			let getIfValue = compileKeypath(if_);
-
 			this._if = new Cell<boolean>(function() {
 				return !!getIfValue.call(this);
-			}, { owner: input.$context as Object });
+			}, { owner: this.input.$context as Object });
 
 			this.initialized = true;
 		}
@@ -90,7 +85,7 @@ export default class RtIfThen extends Component {
 
 	_render(changed: boolean) {
 		if (this._elseMode ? !this._if.get() : this._if.get()) {
-			let content = (this.input.$content as DocumentFragment).cloneNode(true) as DocumentFragment;
+			let content = document.importNode((this.element as any as HTMLTemplateElement).content, true);
 			if (!templateTagFeature) {
 				let templates = content.querySelectorAll('template');
 

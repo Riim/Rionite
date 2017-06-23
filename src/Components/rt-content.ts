@@ -1,6 +1,6 @@
 import { JS } from 'cellx';
 import { IComponentElement, default as Component } from '../Component';
-import { ElementsController } from '../ElementProtoMixin';
+import { suppressConnectionStatusCallbacks, resumeConnectionStatusCallbacks } from '../ElementProtoMixin';
 import bindContent from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import attachChildComponentElements from '../attachChildComponentElements';
@@ -135,9 +135,9 @@ export default class RtContent extends Component {
 
 			if (content) {
 				if (el.firstChild) {
-					ElementsController.skipConnectionStatusCallbacks = true;
+					suppressConnectionStatusCallbacks();
 					clearNode(el);
-					ElementsController.skipConnectionStatusCallbacks = false;
+					resumeConnectionStatusCallbacks();
 				}
 
 				el.appendChild(content);

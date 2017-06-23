@@ -107,5 +107,8 @@ export default function bindContent(
 
 	bind(content);
 
-	return [bindings || null, childComponents || null];
+	return {
+		0: bindings || null,
+		1: childComponents || null
+	} as any;
 }

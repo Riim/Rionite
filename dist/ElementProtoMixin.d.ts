@@ -1,7 +1,6 @@
 import { IComponentElement, default as Component } from './Component';
-export declare let ElementsController: {
-    skipConnectionStatusCallbacks: boolean;
-};
+export declare function suppressConnectionStatusCallbacks(): void;
+export declare function resumeConnectionStatusCallbacks(): void;
 declare let ElementProtoMixin: {
     [x: string]: boolean | Component | ((this: IComponentElement, name: string, oldValue: string | null, value: string | null) => void) | null;
     rioniteComponent: null;

@@ -3,9 +3,15 @@ import KEY_ELEMENT_CONNECTED from './KEY_ELEMENT_CONNECTED';
 import defer from './Utils/defer';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
 
-export let ElementsController = {
-	skipConnectionStatusCallbacks: false
-};
+let isConnectionStatusCallbacksSuppressed = false;
+
+export function suppressConnectionStatusCallbacks() {
+	isConnectionStatusCallbacksSuppressed = true;
+}
+
+export function resumeConnectionStatusCallbacks() {
+	isConnectionStatusCallbacksSuppressed = false;
+}
 
 let ElementProtoMixin = {
 	rioniteComponent: null,
@@ -19,7 +25,7 @@ let ElementProtoMixin = {
 	connectedCallback(this: IComponentElement) {
 		this[KEY_ELEMENT_CONNECTED] = true;
 
-		if (ElementsController.skipConnectionStatusCallbacks) {
+		if (isConnectionStatusCallbacksSuppressed) {
 			return;
 		}
 
@@ -56,7 +62,7 @@ let ElementProtoMixin = {
 	disconnectedCallback(this: IComponentElement) {
 		this[KEY_ELEMENT_CONNECTED] = false;
 
-		if (ElementsController.skipConnectionStatusCallbacks) {
+		if (isConnectionStatusCallbacksSuppressed) {
 			return;
 		}
 

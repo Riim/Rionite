@@ -1761,9 +1761,9 @@ var Component = (function (_super) {
                 }
             }
             else {
-                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
+                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
                 this.input.$content = moveContent_1.default(document.createDocumentFragment(), el);
-                ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
+                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
                     rawContent = constr._rawContent = html_to_fragment_1.default(constr.template.render());
@@ -2044,7 +2044,10 @@ function bindContent(content, ownerComponent, context) {
         }
     }
     bind(content);
-    return [bindings || null, childComponents || null];
+    return {
+        0: bindings || null,
+        1: childComponents || null
+    };
 }
 exports.default = bindContent;
 
@@ -2071,9 +2074,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(5);
 var defer_1 = __webpack_require__(21);
 var Features_1 = __webpack_require__(7);
-exports.ElementsController = {
-    skipConnectionStatusCallbacks: false
-};
+var isConnectionStatusCallbacksSuppressed = false;
+function suppressConnectionStatusCallbacks() {
+    isConnectionStatusCallbacksSuppressed = true;
+}
+exports.suppressConnectionStatusCallbacks = suppressConnectionStatusCallbacks;
+function resumeConnectionStatusCallbacks() {
+    isConnectionStatusCallbacksSuppressed = false;
+}
+exports.resumeConnectionStatusCallbacks = resumeConnectionStatusCallbacks;
 var ElementProtoMixin = (_a = {
         rioniteComponent: null,
         get $component() {
@@ -2083,7 +2092,7 @@ var ElementProtoMixin = (_a = {
     _a[KEY_ELEMENT_CONNECTED_1.default] = false,
     _a.connectedCallback = function () {
         this[KEY_ELEMENT_CONNECTED_1.default] = true;
-        if (exports.ElementsController.skipConnectionStatusCallbacks) {
+        if (isConnectionStatusCallbacksSuppressed) {
             return;
         }
         var component = this.rioniteComponent;
@@ -2115,7 +2124,7 @@ var ElementProtoMixin = (_a = {
     },
     _a.disconnectedCallback = function () {
         this[KEY_ELEMENT_CONNECTED_1.default] = false;
-        if (exports.ElementsController.skipConnectionStatusCallbacks) {
+        if (isConnectionStatusCallbacksSuppressed) {
             return;
         }
         var component = this.rioniteComponent;
@@ -2522,16 +2531,14 @@ var RtIfThen = (function (_super) {
         }
         this._active = true;
         if (!this.initialized) {
-            var input = this.input;
-            input.$content = document.importNode(this.element.content, true);
-            var if_ = (input['if'] || '').trim();
+            var if_ = (this.input['if'] || '').trim();
             if (!reKeypath.test(if_)) {
                 throw new SyntaxError("Invalid value of attribute \"if\" (" + if_ + ")");
             }
             var getIfValue_1 = compileKeypath_1.default(if_);
             this._if = new cellx_1.Cell(function () {
                 return !!getIfValue_1.call(this);
-            }, { owner: input.$context });
+            }, { owner: this.input.$context });
             this.initialized = true;
         }
         this._if.on('change', this._onIfChange, this);
@@ -2559,7 +2566,7 @@ var RtIfThen = (function (_super) {
     RtIfThen.prototype._render = function (changed) {
         var _this = this;
         if (this._elseMode ? !this._if.get() : this._if.get()) {
-            var content = this.input.$content.cloneNode(true);
+            var content = document.importNode(this.element.content, true);
             if (!Features_1.templateTag) {
                 var templates = content.querySelectorAll('template');
                 for (var i = 0, l = templates.length; i < l;) {
@@ -3630,9 +3637,9 @@ var RtContent = (function (_super) {
             }
             if (content) {
                 if (el.firstChild) {
-                    ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
+                    ElementProtoMixin_1.suppressConnectionStatusCallbacks();
                     clearNode_1.default(el);
-                    ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
+                    ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                 }
                 el.appendChild(content);
             }
@@ -3893,13 +3900,13 @@ var RtRepeat = (function (_super) {
             }
         }
         var _a = bindContent_1.default(content, this.ownerComponent, Object.create(this.input.$context, (_b = {},
-            _b['_' + this._itemName] = itemCell,
+            _b[this._itemName + 'Cell'] = itemCell,
             _b[this._itemName] = {
                 get: function () {
                     return itemCell.get();
                 }
             },
-            _b._$index = indexCell,
+            _b.$indexCell = indexCell,
             _b.$index = {
                 get: function () {
                     return indexCell.get();
@@ -4103,9 +4110,9 @@ var RtSlot = (function (_super) {
             }
             if (content) {
                 if (el.firstChild) {
-                    ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = true;
+                    ElementProtoMixin_1.suppressConnectionStatusCallbacks();
                     clearNode_1.default(el);
-                    ElementProtoMixin_1.ElementsController.skipConnectionStatusCallbacks = false;
+                    ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                 }
                 el.appendChild(content);
             }

@@ -229,14 +229,14 @@ export default class RtRepeat extends Component {
 			}
 		}
 		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(this.input.$context, {
-			['_' + this._itemName]: itemCell,
+			[this._itemName + 'Cell']: itemCell,
 			[this._itemName]: {
 				get() {
 					return itemCell.get();
 				}
 			},
 
-			_$index: indexCell,
+			$indexCell: indexCell,
 			$index: {
 				get() {
 					return indexCell.get();

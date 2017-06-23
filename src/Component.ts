@@ -4,7 +4,7 @@ import htmlToFragment from 'html-to-fragment';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
 import elementConstructorMap from './elementConstructorMap';
 import registerComponent from './registerComponent';
-import { ElementsController } from './ElementProtoMixin';
+import { suppressConnectionStatusCallbacks, resumeConnectionStatusCallbacks } from './ElementProtoMixin';
 import { IComponentInput, default as ComponentInput } from './ComponentInput';
 import bindContent from './bindContent';
 import { IFreezableCell, freezeBindings, unfreezeBindings } from './componentBinding';
@@ -294,9 +294,9 @@ export default class Component extends EventEmitter implements DisposableMixin {
 					bindEvents(this, constr.events);
 				}
 			} else {
-				ElementsController.skipConnectionStatusCallbacks = true;
+				suppressConnectionStatusCallbacks();
 				this.input.$content = moveContent(document.createDocumentFragment(), el);
-				ElementsController.skipConnectionStatusCallbacks = false;
+				resumeConnectionStatusCallbacks();
 
 				let rawContent = constr._rawContent;
 
