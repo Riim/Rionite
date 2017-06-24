@@ -2,7 +2,7 @@ import keypathToJSExpression from './keypathToJSExpression';
 import namePattern from './namePattern';
 import keypathPattern from './keypathPattern';
 
-export enum ContentNodeType {
+export enum ContentTextNodeType {
 	TEXT = 1,
 	BINDING,
 	BINDING_KEYPATH,
@@ -10,34 +10,34 @@ export enum ContentNodeType {
 	BINDING_FORMATTER_ARGUMENTS
 };
 
-export interface IContentNode {
-	nodeType: ContentNodeType;
+export interface IContentTextNode {
+	nodeType: ContentTextNodeType;
 }
 
-export interface IContentTextNode extends IContentNode {
-	nodeType: ContentNodeType.TEXT;
+export interface IContentTextTextNode extends IContentTextNode {
+	nodeType: ContentTextNodeType.TEXT;
 	value: string;
 }
 
-export interface IContentBindingFormatterArguments extends IContentNode {
-	nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS;
+export interface IContentTextBindingFormatterArguments extends IContentTextNode {
+	nodeType: ContentTextNodeType.BINDING_FORMATTER_ARGUMENTS;
 	value: Array<string>;
 }
 
-export interface IContentBindingFormatter extends IContentNode {
-	nodeType: ContentNodeType.BINDING_FORMATTER;
+export interface IContentTextBindingFormatter extends IContentTextNode {
+	nodeType: ContentTextNodeType.BINDING_FORMATTER;
 	name: string;
-	arguments: IContentBindingFormatterArguments | null;
+	arguments: IContentTextBindingFormatterArguments | null;
 }
 
-export interface IContentBinding extends IContentNode {
-	nodeType: ContentNodeType.BINDING;
+export interface IContentTextBinding extends IContentTextNode {
+	nodeType: ContentTextNodeType.BINDING;
 	keypath: string;
-	formatters: Array<IContentBindingFormatter> | null;
+	formatters: Array<IContentTextBindingFormatter> | null;
 	raw: string;
 }
 
-export type TContent = Array<IContentTextNode | IContentBinding>;
+export type TContentText = Array<IContentTextTextNode | IContentTextBinding>;
 
 let reNameOrNothing = RegExp(namePattern + '|', 'g');
 let reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
@@ -48,34 +48,34 @@ let reVacuumOrNothing = /null|undefined|void 0|/g;
 
 let NOT_VALUE_AND_NOT_KEYPATH = {};
 
-export default class ContentParser {
-	static ContentNodeType = ContentNodeType;
+export default class ContentTextParser {
+	static ContentTextNodeType = ContentTextNodeType;
 
-	content: string;
+	contentText: string;
 	at: number;
 	chr: string;
-	result: TContent;
+	result: TContentText;
 
-	constructor(content: string) {
-		this.content = content;
+	constructor(contentText: string) {
+		this.contentText = contentText;
 	}
 
-	parse(): TContent {
-		let content = this.content;
+	parse(): TContentText {
+		let contentText = this.contentText;
 
-		if (!content) {
+		if (!contentText) {
 			return [];
 		}
 
 		this.at = 0;
 
-		let result: TContent = this.result = [];
+		let result: TContentText = this.result = [];
 
-		for (let index: number; (index = content.indexOf('{', this.at)) != -1;) {
-			this._pushText(content.slice(this.at, index));
+		for (let index: number; (index = contentText.indexOf('{', this.at)) != -1;) {
+			this._pushText(contentText.slice(this.at, index));
 
 			this.at = index;
-			this.chr = content.charAt(index);
+			this.chr = contentText.charAt(index);
 
 			let binding = this._readBinding();
 
@@ -87,7 +87,7 @@ export default class ContentParser {
 			}
 		}
 
-		this._pushText(content.slice(this.at));
+		this._pushText(contentText.slice(this.at));
 
 		return result;
 	}
@@ -97,18 +97,18 @@ export default class ContentParser {
 			let result = this.result;
 			let resultLen = result.length;
 
-			if (resultLen && result[resultLen - 1].nodeType == ContentNodeType.TEXT) {
-				(result[resultLen - 1] as IContentTextNode).value = value;
+			if (resultLen && result[resultLen - 1].nodeType == ContentTextNodeType.TEXT) {
+				(result[resultLen - 1] as IContentTextTextNode).value = value;
 			} else {
 				result.push({
-					nodeType: ContentNodeType.TEXT,
+					nodeType: ContentTextNodeType.TEXT,
 					value
 				});
 			}
 		}
 	}
 
-	_readBinding(): IContentBinding | null {
+	_readBinding(): IContentTextBinding | null {
 		let at = this.at;
 
 		this._next('{');
@@ -117,10 +117,10 @@ export default class ContentParser {
 		let keypath = this._readBindingKeypath();
 
 		if (keypath) {
-			let formatters: Array<IContentBindingFormatter> | undefined;
+			let formatters: Array<IContentTextBindingFormatter> | undefined;
 
 			for (
-				let formatter: IContentBindingFormatter | null;
+				let formatter: IContentTextBindingFormatter | null;
 				this._skipWhitespaces() == '|' && (formatter = this._readFormatter());
 			) {
 				(formatters || (formatters = [])).push(formatter);
@@ -130,35 +130,35 @@ export default class ContentParser {
 				this._next();
 
 				return {
-					nodeType: ContentNodeType.BINDING,
+					nodeType: ContentTextNodeType.BINDING,
 					keypath,
 					formatters: formatters || null,
-					raw: this.content.slice(at, this.at)
+					raw: this.contentText.slice(at, this.at)
 				};
 			}
 		}
 
 		this.at = at;
-		this.chr = this.content.charAt(at);
+		this.chr = this.contentText.charAt(at);
 
 		return null;
 	}
 
 	_readBindingKeypath(): string | null {
-		let content = this.content;
+		let contentText = this.contentText;
 
 		reKeypathOrNothing.lastIndex = this.at;
-		let keypath = (reKeypathOrNothing.exec(content) as RegExpExecArray)[0];
+		let keypath = (reKeypathOrNothing.exec(contentText) as RegExpExecArray)[0];
 
 		if (keypath) {
-			this.chr = content.charAt((this.at += keypath.length));
+			this.chr = contentText.charAt((this.at += keypath.length));
 			return keypath;
 		}
 
 		return null;
 	}
 
-	_readFormatter(): IContentBindingFormatter | null {
+	_readFormatter(): IContentTextBindingFormatter | null {
 		let at = this.at;
 
 		this._next('|');
@@ -170,19 +170,19 @@ export default class ContentParser {
 			let args = this.chr == '(' ? this._readFormatterArguments() : null;
 
 			return {
-				nodeType: ContentNodeType.BINDING_FORMATTER,
+				nodeType: ContentTextNodeType.BINDING_FORMATTER,
 				name,
 				arguments: args
 			};
 		}
 
 		this.at = at;
-		this.chr = this.content.charAt(at);
+		this.chr = this.contentText.charAt(at);
 
 		return null;
 	}
 
-	_readFormatterArguments(): IContentBindingFormatterArguments | null {
+	_readFormatterArguments(): IContentTextBindingFormatterArguments | null {
 		let at = this.at;
 
 		this._next('(');
@@ -208,7 +208,7 @@ export default class ContentParser {
 				}
 
 				this.at = at;
-				this.chr = this.content.charAt(at);
+				this.chr = this.contentText.charAt(at);
 
 				return null;
 			}
@@ -217,7 +217,7 @@ export default class ContentParser {
 		this._next();
 
 		return {
-			nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
+			nodeType: ContentTextNodeType.BINDING_FORMATTER_ARGUMENTS,
 			value: args
 		};
 	}
@@ -283,7 +283,7 @@ export default class ContentParser {
 			}
 
 			this.at = at;
-			this.chr = this.content.charAt(at);
+			this.chr = this.contentText.charAt(at);
 
 			return NOT_VALUE_AND_NOT_KEYPATH;
 		}
@@ -313,7 +313,7 @@ export default class ContentParser {
 
 				if (valueOrKeypath === NOT_VALUE_AND_NOT_KEYPATH) {
 					this.at = at;
-					this.chr = this.content.charAt(at);
+					this.chr = this.contentText.charAt(at);
 
 					return NOT_VALUE_AND_NOT_KEYPATH;
 				} else {
@@ -329,10 +329,10 @@ export default class ContentParser {
 
 	_readBoolean(): string | Object {
 		reBooleanOrNothing.lastIndex = this.at;
-		let bool = (reBooleanOrNothing.exec(this.content) as RegExpExecArray)[0];
+		let bool = (reBooleanOrNothing.exec(this.contentText) as RegExpExecArray)[0];
 
 		if (bool) {
-			this.chr = this.content.charAt((this.at += bool.length));
+			this.chr = this.contentText.charAt((this.at += bool.length));
 			return bool;
 		}
 
@@ -341,10 +341,10 @@ export default class ContentParser {
 
 	_readNumber(): string | Object {
 		reNumberOrNothing.lastIndex = this.at;
-		let num = (reNumberOrNothing.exec(this.content) as RegExpExecArray)[0];
+		let num = (reNumberOrNothing.exec(this.contentText) as RegExpExecArray)[0];
 
 		if (num) {
-			this.chr = this.content.charAt((this.at += num.length));
+			this.chr = this.contentText.charAt((this.at += num.length));
 			return num;
 		}
 
@@ -359,7 +359,7 @@ export default class ContentParser {
 				name: 'SyntaxError',
 				message: `Expected "'" instead of "${ this.chr }"`,
 				at: this.at,
-				content: this.content
+				contentText: this.contentText
 			};
 		}
 
@@ -384,17 +384,17 @@ export default class ContentParser {
 		}
 
 		this.at = at;
-		this.chr = this.content.charAt(at);
+		this.chr = this.contentText.charAt(at);
 
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
 	_readVacuum(): string | Object {
 		reVacuumOrNothing.lastIndex = this.at;
-		let vacuum = (reVacuumOrNothing.exec(this.content) as RegExpExecArray)[0];
+		let vacuum = (reVacuumOrNothing.exec(this.contentText) as RegExpExecArray)[0];
 
 		if (vacuum) {
-			this.chr = this.content.charAt((this.at += vacuum.length));
+			this.chr = this.contentText.charAt((this.at += vacuum.length));
 			return vacuum;
 		}
 
@@ -403,10 +403,10 @@ export default class ContentParser {
 
 	_readKeypath(): string | Object {
 		reKeypathOrNothing.lastIndex = this.at;
-		let keypath = (reKeypathOrNothing.exec(this.content) as RegExpExecArray)[0];
+		let keypath = (reKeypathOrNothing.exec(this.contentText) as RegExpExecArray)[0];
 
 		if (keypath) {
-			this.chr = this.content.charAt((this.at += keypath.length));
+			this.chr = this.contentText.charAt((this.at += keypath.length));
 			return keypathToJSExpression(keypath);
 		}
 
@@ -415,10 +415,10 @@ export default class ContentParser {
 
 	_readName(): string | null {
 		reNameOrNothing.lastIndex = this.at;
-		let name = (reNameOrNothing.exec(this.content) as RegExpExecArray)[0];
+		let name = (reNameOrNothing.exec(this.contentText) as RegExpExecArray)[0];
 
 		if (name) {
-			this.chr = this.content.charAt((this.at += name.length));
+			this.chr = this.contentText.charAt((this.at += name.length));
 			return name;
 		}
 
@@ -441,10 +441,10 @@ export default class ContentParser {
 				name: 'SyntaxError',
 				message: `Expected "${ current }" instead of "${ this.chr }"`,
 				at: this.at,
-				content: this.content
+				contentText: this.contentText
 			};
 		}
 
-		return (this.chr = this.content.charAt(++this.at));
+		return (this.chr = this.contentText.charAt(++this.at));
 	}
 }

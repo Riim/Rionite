@@ -1,23 +1,28 @@
 import escapeString from 'escape-string';
-import { IContentBinding, TContent, default as ContentParser } from './ContentParser';
+import {
+	IContentTextTextNode,
+	IContentTextBinding,
+	TContentText,
+	default as ContentTextParser
+} from './ContentTextParser';
 import bindingToJSExpression from './bindingToJSExpression';
 import formatters from './formatters';
 import Component from './Component';
 import KEY_COMPONENT_INPUT_VALUES from './KEY_COMPONENT_INPUT_VALUES';
 import getUID from './Utils/getUID';
 
-let ContentNodeType = ContentParser.ContentNodeType;
+let ContentTextNodeType = ContentTextParser.ContentTextNodeType;
 
 let keyCounter = 0;
 
 let cache = Object.create(null);
 
-export default function compileContent(
-	content: TContent,
-	contentString: string,
+export default function compileContentText(
+	contentText: TContentText,
+	contentTextString: string,
 	ownerComponent?: Component
 ): () => any {
-	let key = (ownerComponent ? getUID(ownerComponent) + '/' : '/') + contentString;
+	let key = (ownerComponent ? getUID(ownerComponent) + '/' : '/') + contentTextString;
 
 	if (cache[key]) {
 		return cache[key];
@@ -25,17 +30,21 @@ export default function compileContent(
 
 	let inner: Function;
 
-	if (content.length == 1 && content[0].nodeType == ContentNodeType.BINDING) {
+	if (contentText.length == 1) {
 		inner = Function(
 			'formatters',
-			`var temp; return ${ bindingToJSExpression(content[0] as IContentBinding) };`
+			`var temp; return ${
+				contentText[0].nodeType == ContentTextNodeType.TEXT ?
+					`'${ escapeString((contentText[0] as IContentTextTextNode).value) }'` :
+					bindingToJSExpression(contentText[0] as IContentTextBinding)
+			};`
 		);
 	} else {
 		let jsExpr: Array<string> = [];
 
-		for (let node of content) {
+		for (let node of contentText) {
 			jsExpr.push(
-				node.nodeType == ContentNodeType.TEXT ?
+				node.nodeType == ContentTextNodeType.TEXT ?
 					`'${ escapeString(node.value) }'` :
 					bindingToJSExpression(node)
 			);

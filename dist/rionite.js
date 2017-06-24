@@ -486,10 +486,10 @@ exports.default = attachChildComponentElements;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var ContentParser_1 = __webpack_require__(26);
-var compileContent_1 = __webpack_require__(43);
+var ContentTextParser_1 = __webpack_require__(26);
+var compileContentText_1 = __webpack_require__(43);
 var setAttribute_1 = __webpack_require__(40);
-var ContentNodeType = ContentParser_1.default.ContentNodeType;
+var ContentTextNodeType = ContentTextParser_1.default.ContentTextNodeType;
 function bindContent(content, ownerComponent, context) {
     if (!context) {
         context = ownerComponent;
@@ -505,13 +505,13 @@ function bindContent(content, ownerComponent, context) {
                         var attr = attrs.item(--i);
                         var value = attr.value;
                         if (value.indexOf('{') != -1) {
-                            var content_1 = (new ContentParser_1.default(value)).parse();
-                            if (content_1.length > 1 || content_1[0].nodeType == ContentNodeType.BINDING) {
+                            var contentText = (new ContentTextParser_1.default(value)).parse();
+                            if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
                                 var name_1 = attr.name;
                                 if (name_1.charAt(0) == '_') {
                                     name_1 = name_1.slice(1);
                                 }
-                                var cell = new cellx_1.Cell(compileContent_1.default(content_1, value, ownerComponent), {
+                                var cell = new cellx_1.Cell(compileContentText_1.default(contentText, value, ownerComponent), {
                                     owner: context,
                                     onChange: function (evt) {
                                         setAttribute_1.default(child, name_1, evt.value);
@@ -547,9 +547,9 @@ function bindContent(content, ownerComponent, context) {
                     }
                     var value = child.nodeValue;
                     if (value.indexOf('{') != -1) {
-                        var content_2 = (new ContentParser_1.default(value)).parse();
-                        if (content_2.length > 1 || content_2[0].nodeType == ContentNodeType.BINDING) {
-                            var cell = new cellx_1.Cell(compileContent_1.default(content_2, value), {
+                        var contentText = (new ContentTextParser_1.default(value)).parse();
+                        if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
+                            var cell = new cellx_1.Cell(compileContentText_1.default(contentText, value), {
                                 owner: context,
                                 onChange: function (evt) {
                                     child.nodeValue = evt.value;
@@ -1590,14 +1590,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var keypathToJSExpression_1 = __webpack_require__(30);
 var namePattern_1 = __webpack_require__(16);
 var keypathPattern_1 = __webpack_require__(15);
-var ContentNodeType;
-(function (ContentNodeType) {
-    ContentNodeType[ContentNodeType["TEXT"] = 1] = "TEXT";
-    ContentNodeType[ContentNodeType["BINDING"] = 2] = "BINDING";
-    ContentNodeType[ContentNodeType["BINDING_KEYPATH"] = 3] = "BINDING_KEYPATH";
-    ContentNodeType[ContentNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
-    ContentNodeType[ContentNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
-})(ContentNodeType = exports.ContentNodeType || (exports.ContentNodeType = {}));
+var ContentTextNodeType;
+(function (ContentTextNodeType) {
+    ContentTextNodeType[ContentTextNodeType["TEXT"] = 1] = "TEXT";
+    ContentTextNodeType[ContentTextNodeType["BINDING"] = 2] = "BINDING";
+    ContentTextNodeType[ContentTextNodeType["BINDING_KEYPATH"] = 3] = "BINDING_KEYPATH";
+    ContentTextNodeType[ContentTextNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
+    ContentTextNodeType[ContentTextNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
+})(ContentTextNodeType = exports.ContentTextNodeType || (exports.ContentTextNodeType = {}));
 ;
 var reNameOrNothing = RegExp(namePattern_1.default + '|', 'g');
 var reKeypathOrNothing = RegExp(keypathPattern_1.default + '|', 'g');
@@ -1605,21 +1605,21 @@ var reBooleanOrNothing = /false|true|/g;
 var reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 var reVacuumOrNothing = /null|undefined|void 0|/g;
 var NOT_VALUE_AND_NOT_KEYPATH = {};
-var ContentParser = (function () {
-    function ContentParser(content) {
-        this.content = content;
+var ContentTextParser = (function () {
+    function ContentTextParser(contentText) {
+        this.contentText = contentText;
     }
-    ContentParser.prototype.parse = function () {
-        var content = this.content;
-        if (!content) {
+    ContentTextParser.prototype.parse = function () {
+        var contentText = this.contentText;
+        if (!contentText) {
             return [];
         }
         this.at = 0;
         var result = this.result = [];
-        for (var index = void 0; (index = content.indexOf('{', this.at)) != -1;) {
-            this._pushText(content.slice(this.at, index));
+        for (var index = void 0; (index = contentText.indexOf('{', this.at)) != -1;) {
+            this._pushText(contentText.slice(this.at, index));
             this.at = index;
-            this.chr = content.charAt(index);
+            this.chr = contentText.charAt(index);
             var binding = this._readBinding();
             if (binding) {
                 result.push(binding);
@@ -1629,25 +1629,25 @@ var ContentParser = (function () {
                 this._next('{');
             }
         }
-        this._pushText(content.slice(this.at));
+        this._pushText(contentText.slice(this.at));
         return result;
     };
-    ContentParser.prototype._pushText = function (value) {
+    ContentTextParser.prototype._pushText = function (value) {
         if (value) {
             var result = this.result;
             var resultLen = result.length;
-            if (resultLen && result[resultLen - 1].nodeType == ContentNodeType.TEXT) {
+            if (resultLen && result[resultLen - 1].nodeType == ContentTextNodeType.TEXT) {
                 result[resultLen - 1].value = value;
             }
             else {
                 result.push({
-                    nodeType: ContentNodeType.TEXT,
+                    nodeType: ContentTextNodeType.TEXT,
                     value: value
                 });
             }
         }
     };
-    ContentParser.prototype._readBinding = function () {
+    ContentTextParser.prototype._readBinding = function () {
         var at = this.at;
         this._next('{');
         this._skipWhitespaces();
@@ -1660,28 +1660,28 @@ var ContentParser = (function () {
             if (this.chr == '}') {
                 this._next();
                 return {
-                    nodeType: ContentNodeType.BINDING,
+                    nodeType: ContentTextNodeType.BINDING,
                     keypath: keypath,
                     formatters: formatters || null,
-                    raw: this.content.slice(at, this.at)
+                    raw: this.contentText.slice(at, this.at)
                 };
             }
         }
         this.at = at;
-        this.chr = this.content.charAt(at);
+        this.chr = this.contentText.charAt(at);
         return null;
     };
-    ContentParser.prototype._readBindingKeypath = function () {
-        var content = this.content;
+    ContentTextParser.prototype._readBindingKeypath = function () {
+        var contentText = this.contentText;
         reKeypathOrNothing.lastIndex = this.at;
-        var keypath = reKeypathOrNothing.exec(content)[0];
+        var keypath = reKeypathOrNothing.exec(contentText)[0];
         if (keypath) {
-            this.chr = content.charAt((this.at += keypath.length));
+            this.chr = contentText.charAt((this.at += keypath.length));
             return keypath;
         }
         return null;
     };
-    ContentParser.prototype._readFormatter = function () {
+    ContentTextParser.prototype._readFormatter = function () {
         var at = this.at;
         this._next('|');
         this._skipWhitespaces();
@@ -1689,16 +1689,16 @@ var ContentParser = (function () {
         if (name) {
             var args = this.chr == '(' ? this._readFormatterArguments() : null;
             return {
-                nodeType: ContentNodeType.BINDING_FORMATTER,
+                nodeType: ContentTextNodeType.BINDING_FORMATTER,
                 name: name,
                 arguments: args
             };
         }
         this.at = at;
-        this.chr = this.content.charAt(at);
+        this.chr = this.contentText.charAt(at);
         return null;
     };
-    ContentParser.prototype._readFormatterArguments = function () {
+    ContentTextParser.prototype._readFormatterArguments = function () {
         var at = this.at;
         this._next('(');
         var args = [];
@@ -1717,21 +1717,21 @@ var ContentParser = (function () {
                     }
                 }
                 this.at = at;
-                this.chr = this.content.charAt(at);
+                this.chr = this.contentText.charAt(at);
                 return null;
             }
         }
         this._next();
         return {
-            nodeType: ContentNodeType.BINDING_FORMATTER_ARGUMENTS,
+            nodeType: ContentTextNodeType.BINDING_FORMATTER_ARGUMENTS,
             value: args
         };
     };
-    ContentParser.prototype._readValueOrKeypath = function () {
+    ContentTextParser.prototype._readValueOrKeypath = function () {
         var value = this._readValue();
         return value === NOT_VALUE_AND_NOT_KEYPATH ? this._readKeypath() : value;
     };
-    ContentParser.prototype._readValue = function () {
+    ContentTextParser.prototype._readValue = function () {
         switch (this.chr) {
             case '{': {
                 return this._readObject();
@@ -1754,7 +1754,7 @@ var ContentParser = (function () {
         }
         return NOT_VALUE_AND_NOT_KEYPATH;
     };
-    ContentParser.prototype._readObject = function () {
+    ContentTextParser.prototype._readObject = function () {
         var at = this.at;
         this._next('{');
         var obj = '{';
@@ -1777,16 +1777,16 @@ var ContentParser = (function () {
                 }
             }
             this.at = at;
-            this.chr = this.content.charAt(at);
+            this.chr = this.contentText.charAt(at);
             return NOT_VALUE_AND_NOT_KEYPATH;
         }
         this._next();
         return obj;
     };
-    ContentParser.prototype._readObjectKey = function () {
+    ContentTextParser.prototype._readObjectKey = function () {
         return this._readName();
     };
-    ContentParser.prototype._readArray = function () {
+    ContentTextParser.prototype._readArray = function () {
         var at = this.at;
         this._next('[');
         var arr = '[';
@@ -1799,7 +1799,7 @@ var ContentParser = (function () {
                 var valueOrKeypath = this._readValueOrKeypath();
                 if (valueOrKeypath === NOT_VALUE_AND_NOT_KEYPATH) {
                     this.at = at;
-                    this.chr = this.content.charAt(at);
+                    this.chr = this.contentText.charAt(at);
                     return NOT_VALUE_AND_NOT_KEYPATH;
                 }
                 else {
@@ -1810,32 +1810,32 @@ var ContentParser = (function () {
         this._next();
         return arr + ']';
     };
-    ContentParser.prototype._readBoolean = function () {
+    ContentTextParser.prototype._readBoolean = function () {
         reBooleanOrNothing.lastIndex = this.at;
-        var bool = reBooleanOrNothing.exec(this.content)[0];
+        var bool = reBooleanOrNothing.exec(this.contentText)[0];
         if (bool) {
-            this.chr = this.content.charAt((this.at += bool.length));
+            this.chr = this.contentText.charAt((this.at += bool.length));
             return bool;
         }
         return NOT_VALUE_AND_NOT_KEYPATH;
     };
-    ContentParser.prototype._readNumber = function () {
+    ContentTextParser.prototype._readNumber = function () {
         reNumberOrNothing.lastIndex = this.at;
-        var num = reNumberOrNothing.exec(this.content)[0];
+        var num = reNumberOrNothing.exec(this.contentText)[0];
         if (num) {
-            this.chr = this.content.charAt((this.at += num.length));
+            this.chr = this.contentText.charAt((this.at += num.length));
             return num;
         }
         return NOT_VALUE_AND_NOT_KEYPATH;
     };
-    ContentParser.prototype._readString = function () {
+    ContentTextParser.prototype._readString = function () {
         var quoteChar = this.chr;
         if (quoteChar != "'" && quoteChar != '"') {
             throw {
                 name: 'SyntaxError',
                 message: "Expected \"'\" instead of \"" + this.chr + "\"",
                 at: this.at,
-                content: this.content
+                contentText: this.contentText
             };
         }
         var at = this.at;
@@ -1856,58 +1856,58 @@ var ContentParser = (function () {
             }
         }
         this.at = at;
-        this.chr = this.content.charAt(at);
+        this.chr = this.contentText.charAt(at);
         return NOT_VALUE_AND_NOT_KEYPATH;
     };
-    ContentParser.prototype._readVacuum = function () {
+    ContentTextParser.prototype._readVacuum = function () {
         reVacuumOrNothing.lastIndex = this.at;
-        var vacuum = reVacuumOrNothing.exec(this.content)[0];
+        var vacuum = reVacuumOrNothing.exec(this.contentText)[0];
         if (vacuum) {
-            this.chr = this.content.charAt((this.at += vacuum.length));
+            this.chr = this.contentText.charAt((this.at += vacuum.length));
             return vacuum;
         }
         return NOT_VALUE_AND_NOT_KEYPATH;
     };
-    ContentParser.prototype._readKeypath = function () {
+    ContentTextParser.prototype._readKeypath = function () {
         reKeypathOrNothing.lastIndex = this.at;
-        var keypath = reKeypathOrNothing.exec(this.content)[0];
+        var keypath = reKeypathOrNothing.exec(this.contentText)[0];
         if (keypath) {
-            this.chr = this.content.charAt((this.at += keypath.length));
+            this.chr = this.contentText.charAt((this.at += keypath.length));
             return keypathToJSExpression_1.default(keypath);
         }
         return NOT_VALUE_AND_NOT_KEYPATH;
     };
-    ContentParser.prototype._readName = function () {
+    ContentTextParser.prototype._readName = function () {
         reNameOrNothing.lastIndex = this.at;
-        var name = reNameOrNothing.exec(this.content)[0];
+        var name = reNameOrNothing.exec(this.contentText)[0];
         if (name) {
-            this.chr = this.content.charAt((this.at += name.length));
+            this.chr = this.contentText.charAt((this.at += name.length));
             return name;
         }
         return null;
     };
-    ContentParser.prototype._skipWhitespaces = function () {
+    ContentTextParser.prototype._skipWhitespaces = function () {
         var chr = this.chr;
         while (chr && chr <= ' ') {
             chr = this._next();
         }
         return chr;
     };
-    ContentParser.prototype._next = function (current) {
+    ContentTextParser.prototype._next = function (current) {
         if (current && current != this.chr) {
             throw {
                 name: 'SyntaxError',
                 message: "Expected \"" + current + "\" instead of \"" + this.chr + "\"",
                 at: this.at,
-                content: this.content
+                contentText: this.contentText
             };
         }
-        return (this.chr = this.content.charAt(++this.at));
+        return (this.chr = this.contentText.charAt(++this.at));
     };
-    return ContentParser;
+    return ContentTextParser;
 }());
-ContentParser.ContentNodeType = ContentNodeType;
-exports.default = ContentParser;
+ContentTextParser.ContentTextNodeType = ContentTextNodeType;
+exports.default = ContentTextParser;
 
 
 /***/ }),
@@ -2871,28 +2871,30 @@ exports.default = bindingToJSExpression;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var escape_string_1 = __webpack_require__(12);
-var ContentParser_1 = __webpack_require__(26);
+var ContentTextParser_1 = __webpack_require__(26);
 var bindingToJSExpression_1 = __webpack_require__(42);
 var formatters_1 = __webpack_require__(23);
 var KEY_COMPONENT_INPUT_VALUES_1 = __webpack_require__(10);
 var getUID_1 = __webpack_require__(8);
-var ContentNodeType = ContentParser_1.default.ContentNodeType;
+var ContentTextNodeType = ContentTextParser_1.default.ContentTextNodeType;
 var keyCounter = 0;
 var cache = Object.create(null);
-function compileContent(content, contentString, ownerComponent) {
-    var key = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + contentString;
+function compileContentText(contentText, contentTextString, ownerComponent) {
+    var key = (ownerComponent ? getUID_1.default(ownerComponent) + '/' : '/') + contentTextString;
     if (cache[key]) {
         return cache[key];
     }
     var inner;
-    if (content.length == 1 && content[0].nodeType == ContentNodeType.BINDING) {
-        inner = Function('formatters', "var temp; return " + bindingToJSExpression_1.default(content[0]) + ";");
+    if (contentText.length == 1) {
+        inner = Function('formatters', "var temp; return " + (contentText[0].nodeType == ContentTextNodeType.TEXT ?
+            "'" + escape_string_1.default(contentText[0].value) + "'" :
+            bindingToJSExpression_1.default(contentText[0])) + ";");
     }
     else {
         var jsExpr = [];
-        for (var _i = 0, content_1 = content; _i < content_1.length; _i++) {
-            var node = content_1[_i];
-            jsExpr.push(node.nodeType == ContentNodeType.TEXT ?
+        for (var _i = 0, contentText_1 = contentText; _i < contentText_1.length; _i++) {
+            var node = contentText_1[_i];
+            jsExpr.push(node.nodeType == ContentTextNodeType.TEXT ?
                 "'" + escape_string_1.default(node.value) + "'" :
                 bindingToJSExpression_1.default(node));
         }
@@ -2911,7 +2913,7 @@ function compileContent(content, contentString, ownerComponent) {
         return inner.call(this, formatters_1.default);
     });
 }
-exports.default = compileContent;
+exports.default = compileContentText;
 
 
 /***/ }),

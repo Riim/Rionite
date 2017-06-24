@@ -1,8 +1,8 @@
-import { IContentBindingFormatter, IContentBinding } from './ContentParser';
+import { IContentTextBindingFormatter, IContentTextBinding } from './ContentTextParser';
 
 let cache: { [key: string]: string } = Object.create(null);
 
-function formattersReducer(jsExpr: string, formatter: IContentBindingFormatter): string {
+function formattersReducer(jsExpr: string, formatter: IContentTextBindingFormatter): string {
 	let args = formatter.arguments;
 
 	return `(this.${ formatter.name } || formatters.${ formatter.name }).call(this, ${ jsExpr }${
@@ -10,7 +10,7 @@ function formattersReducer(jsExpr: string, formatter: IContentBindingFormatter):
 	})`;
 }
 
-export default function bindingToJSExpression(binding: IContentBinding): string {
+export default function bindingToJSExpression(binding: IContentTextBinding): string {
 	let bindingRaw = binding.raw;
 
 	if (cache[bindingRaw]) {

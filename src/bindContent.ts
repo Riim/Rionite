@@ -1,11 +1,11 @@
 import { Cell } from 'cellx';
 import { IPossiblyComponentElement, default as Component } from './Component';
-import ContentParser from './ContentParser';
-import compileContent from './compileContent';
+import ContentTextParser from './ContentTextParser';
+import compileContentText from './compileContentText';
 import { IFreezableCell } from './componentBinding';
 import setAttribute from './Utils/setAttribute';
 
-let ContentNodeType = ContentParser.ContentNodeType;
+let ContentTextNodeType = ContentTextParser.ContentTextNodeType;
 
 export default function bindContent(
 	content: HTMLElement | DocumentFragment,
@@ -33,16 +33,16 @@ export default function bindContent(
 						let value = attr.value;
 
 						if (value.indexOf('{') != -1) {
-							let content = (new ContentParser(value)).parse();
+							let contentText = (new ContentTextParser(value)).parse();
 
-							if (content.length > 1 || content[0].nodeType == ContentNodeType.BINDING) {
+							if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
 								let name = attr.name;
 
 								if (name.charAt(0) == '_') {
 									name = name.slice(1);
 								}
 
-								let cell = new Cell<any>(compileContent(content, value, ownerComponent), {
+								let cell = new Cell<any>(compileContentText(contentText, value, ownerComponent), {
 									owner: context as Object,
 									onChange(evt) {
 										setAttribute(child as Element, name, evt.value);
@@ -83,10 +83,10 @@ export default function bindContent(
 					let value = child.nodeValue as string;
 
 					if (value.indexOf('{') != -1) {
-						let content = (new ContentParser(value)).parse();
+						let contentText = (new ContentTextParser(value)).parse();
 
-						if (content.length > 1 || content[0].nodeType == ContentNodeType.BINDING) {
-							let cell = new Cell<any>(compileContent(content, value), {
+						if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
+							let cell = new Cell<any>(compileContentText(contentText, value), {
 								owner: context as Object,
 								onChange(evt) {
 									(child as Node).nodeValue = evt.value;
