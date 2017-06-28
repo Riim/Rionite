@@ -1,11 +1,10 @@
 import { JS } from 'cellx';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
-import Component from './Component';
-import KEY_COMPONENT_INPUT_VALUES from './KEY_COMPONENT_INPUT_VALUES';
+import componentInputValueMap from './componentInputValueMap';
 import isRegExp from './Utils/isRegExp';
 
 export interface IComponentInputTypeSerializer {
-	read: (value: string | null, defaultValue: any, component: Component) => any;
+	read: (value: string | null, defaultValue: any) => any;
 	write: (value: any, defaultValue?: any) => string | null;
 }
 
@@ -38,20 +37,17 @@ let componentInputTypeSerializerMap = new JS.Map<any, IComponentInputTypeSeriali
 	}],
 
 	[Object, {
-		read: (value: string | null, defaultValue: Object | null | undefined, component: Component): Object | null => {
+		read: (value: string | null, defaultValue: Object | null | undefined): Object | null => {
 			if (value === null) {
 				return defaultValue || null;
 			}
 
-			let componentInputValues = component.ownerComponent &&
-				component.ownerComponent[KEY_COMPONENT_INPUT_VALUES] as Map<string, Object> | undefined;
-
-			if (!componentInputValues || !componentInputValues.has(value)) {
+			if (!componentInputValueMap.has(value)) {
 				throw new TypeError('Value is not an object');
 			}
 
-			let val = componentInputValues.get(value) as Object;
-			componentInputValues.delete(value);
+			let val = componentInputValueMap.get(value) as Object;
+			componentInputValueMap.delete(value);
 			return val;
 		},
 		write: (value: any): string | null => {

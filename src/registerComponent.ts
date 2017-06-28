@@ -1,6 +1,7 @@
 import { Utils } from 'cellx';
 import { Template } from 'nelm';
 import { IComponentElement, default as Component } from './Component';
+import componentConstructorMap from './componentConstructorMap';
 import elementConstructorMap from './elementConstructorMap';
 import ElementProtoMixin from './ElementProtoMixin';
 import hyphenize from './Utils/hyphenize';
@@ -33,7 +34,7 @@ export default function registerComponent(componentConstr: typeof Component) {
 		throw new TypeError('Static property "elementIs" is required');
 	}
 
-	if (elementConstructorMap[elIs]) {
+	if (componentConstructorMap.has(elIs)) {
 		throw new TypeError(`Component "${ elIs }" already registered`);
 	}
 
@@ -71,7 +72,7 @@ export default function registerComponent(componentConstr: typeof Component) {
 	let elExtends = componentConstr.elementExtends;
 
 	let parentElConstr = elExtends ?
-		elementConstructorMap[elExtends] ||
+		elementConstructorMap.get(elExtends) ||
 			window[`HTML${ elExtends.charAt(0).toUpperCase() + elExtends.slice(1) }Element`] :
 		HTMLElement;
 
@@ -79,7 +80,7 @@ export default function registerComponent(componentConstr: typeof Component) {
 		return parentElConstr.call(this, self);
 	};
 
-	elConstr['_rioniteComponentConstructor'] = componentConstr;
+	(elConstr as any)._rioniteComponentConstructor = componentConstr;
 
 	Object.defineProperty(elConstr, 'observedAttributes', {
 		configurable: true,
@@ -109,7 +110,9 @@ export default function registerComponent(componentConstr: typeof Component) {
 
 	(window as any).customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
 
-	elementConstructorMap[elIs] = elConstr;
+	componentConstructorMap.set(elIs, componentConstr);
+	componentConstructorMap.set(elIs.toUpperCase(), componentConstr);
+	elementConstructorMap.set(elIs, elConstr as any);
 
 	return componentConstr;
 }

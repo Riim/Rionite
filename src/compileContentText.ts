@@ -1,4 +1,5 @@
 import escapeString from 'escape-string';
+import componentInputValueMap from './componentInputValueMap';
 import {
 	IContentTextTextNode,
 	IContentTextBinding,
@@ -7,9 +8,6 @@ import {
 } from './ContentTextParser';
 import bindingToJSExpression from './bindingToJSExpression';
 import formatters from './formatters';
-import Component from './Component';
-import KEY_COMPONENT_INPUT_VALUES from './KEY_COMPONENT_INPUT_VALUES';
-import getUID from './Utils/getUID';
 
 let ContentTextNodeType = ContentTextParser.ContentTextNodeType;
 
@@ -20,9 +18,9 @@ let cache = Object.create(null);
 export default function compileContentText(
 	contentText: TContentText,
 	contentTextString: string,
-	ownerComponent?: Component
+	c: boolean
 ): () => any {
-	let key = (ownerComponent ? getUID(ownerComponent) + '/' : '/') + contentTextString;
+	let key = contentTextString + (c ? ',' : '.');
 
 	if (cache[key]) {
 		return cache[key];
@@ -53,17 +51,12 @@ export default function compileContentText(
 		inner = Function('formatters', `var temp; return [${ jsExpr.join(', ') }].join('');`);
 	}
 
-	return (cache[key] = ownerComponent ? function() {
+	return (cache[key] = c ? function() {
 		let value = inner.call(this, formatters);
 
 		if (value && typeof value == 'object') {
 			let key = String(++keyCounter);
-
-			(
-				ownerComponent[KEY_COMPONENT_INPUT_VALUES] ||
-					(ownerComponent[KEY_COMPONENT_INPUT_VALUES] = new Map())
-			).set(key, value);
-
+			componentInputValueMap.set(key, value);
 			return key;
 		}
 

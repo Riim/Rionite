@@ -8,107 +8,94 @@ import setAttribute from './Utils/setAttribute';
 let ContentTextNodeType = ContentTextParser.ContentTextNodeType;
 
 export default function bindContent(
-	content: HTMLElement | DocumentFragment,
+	node: Element | DocumentFragment,
 	ownerComponent: Component,
-	context?: Object | null
-): [
-	Array<IFreezableCell> | null,
-	Array<Component> | null
-] {
-	if (!context) {
-		context = ownerComponent;
-	}
+	context: Object,
+	result: [Array<IFreezableCell> | null, Array<Component> | null]
+): [Array<IFreezableCell> | null, Array<Component> | null] {
+	for (let child = node.firstChild; child; child = child.nextSibling) {
+		switch (child.nodeType) {
+			case Node.ELEMENT_NODE: {
+				let attrs = child.attributes;
 
-	let bindings: Array<IFreezableCell> | undefined;
-	let childComponents: Array<Component> | undefined;
-
-	function bind(node: Element | DocumentFragment) {
-		for (let child = node.firstChild; child; child = child.nextSibling) {
-			switch (child.nodeType) {
-				case Node.ELEMENT_NODE: {
-					let attrs = child.attributes;
-
-					for (let i = attrs.length; i;) {
-						let attr = attrs.item(--i);
-						let value = attr.value;
-
-						if (value.indexOf('{') != -1) {
-							let contentText = (new ContentTextParser(value)).parse();
-
-							if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
-								let name = attr.name;
-
-								if (name.charAt(0) == '_') {
-									name = name.slice(1);
-								}
-
-								let cell = new Cell<any>(compileContentText(contentText, value, ownerComponent), {
-									owner: context as Object,
-									onChange(evt) {
-										setAttribute(child as Element, name, evt.value);
-									}
-								});
-
-								setAttribute(child as Element, name, cell.get());
-
-								(bindings || (bindings = [])).push(cell as IFreezableCell);
-							}
-						}
-					}
-
-					let childComponent = (child as IPossiblyComponentElement).$component;
-
-					if (childComponent) {
-						childComponent.ownerComponent = ownerComponent;
-						childComponent.input.$context = context as Object;
-
-						(childComponents || (childComponents = [])).push(childComponent);
-					}
-
-					if (
-						child.firstChild &&
-							(!childComponent || (childComponent.constructor as typeof Component).template == null)
-					) {
-						bind(child as Element);
-					}
-
-					break;
-				}
-				case Node.TEXT_NODE: {
-					for (let nextChild; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE;) {
-						child.nodeValue += nextChild.nodeValue as string;
-						node.removeChild(nextChild);
-					}
-
-					let value = child.nodeValue as string;
+				for (let i = attrs.length; i;) {
+					let attr = attrs.item(--i);
+					let value = attr.value;
 
 					if (value.indexOf('{') != -1) {
 						let contentText = (new ContentTextParser(value)).parse();
 
 						if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
-							let cell = new Cell<any>(compileContentText(contentText, value), {
-								owner: context as Object,
-								onChange(evt) {
-									(child as Node).nodeValue = evt.value;
+							let name = attr.name;
+
+							if (name.charAt(0) == '_') {
+								name = name.slice(1);
+							}
+
+							let cell = new Cell<any>(
+								compileContentText(contentText, value, contentText.length == 1),
+								{
+									owner: context as Object,
+									onChange(evt) {
+										setAttribute(child as Element, name, evt.value);
+									}
 								}
-							});
+							);
 
-							child.nodeValue = cell.get();
+							setAttribute(child as Element, name, cell.get());
 
-							(bindings || (bindings = [])).push(cell as IFreezableCell);
+							(result[0] || (result[0] = [])).push(cell as IFreezableCell);
 						}
 					}
-
-					break;
 				}
+
+				let childComponent = (child as IPossiblyComponentElement).$component;
+
+				if (childComponent) {
+					childComponent.ownerComponent = ownerComponent;
+					childComponent.input.$context = context as Object;
+
+					(result[1] || (result[1] = [])).push(childComponent);
+				}
+
+				if (
+					child.firstChild &&
+						(!childComponent || (childComponent.constructor as typeof Component).template == null)
+				) {
+					bindContent(child as Element, ownerComponent, context, result);
+				}
+
+				break;
+			}
+			case Node.TEXT_NODE: {
+				for (let nextChild; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE;) {
+					child.nodeValue += nextChild.nodeValue as string;
+					node.removeChild(nextChild);
+				}
+
+				let value = child.nodeValue as string;
+
+				if (value.indexOf('{') != -1) {
+					let contentText = (new ContentTextParser(value)).parse();
+
+					if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
+						let cell = new Cell<any>(compileContentText(contentText, value, false), {
+							owner: context as Object,
+							onChange(evt) {
+								(child as Node).nodeValue = evt.value;
+							}
+						});
+
+						child.nodeValue = cell.get();
+
+						(result[0] || (result[0] = [])).push(cell as IFreezableCell);
+					}
+				}
+
+				break;
 			}
 		}
 	}
 
-	bind(content);
-
-	return {
-		0: bindings || null,
-		1: childComponents || null
-	} as any;
+	return result;
 }

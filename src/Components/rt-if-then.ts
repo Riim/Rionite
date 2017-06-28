@@ -1,6 +1,7 @@
 import { Cell, Utils } from 'cellx';
 import Component from '../Component';
 import KEY_ELEMENT_CONNECTED from '../KEY_ELEMENT_CONNECTED';
+import { suppressConnectionStatusCallbacks, resumeConnectionStatusCallbacks } from '../ElementProtoMixin';
 import compileKeypath from '../compileKeypath';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
@@ -93,14 +94,21 @@ export default class RtIfThen extends Component {
 					i += templates[i].content.querySelectorAll('template').length + 1;
 				}
 			}
-			let [bindings, childComponents] = bindContent(content, this.ownerComponent, this.input.$context as Object);
+			let [bindings, childComponents] = bindContent(
+				content,
+				this.ownerComponent,
+				this.input.$context as Object,
+				{ 0: null, 1: null } as any
+			);
 
 			this._nodes = slice.call(content.childNodes);
 			this._bindings = bindings;
 
+			suppressConnectionStatusCallbacks();
 			(this.element.parentNode as Node).insertBefore(content, this.element.nextSibling);
+			resumeConnectionStatusCallbacks();
 
-			if (childComponents && !childComponents[0]._attached) {
+			if (childComponents) {
 				attachChildComponentElements(childComponents);
 			}
 		} else {

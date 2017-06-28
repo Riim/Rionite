@@ -13,27 +13,25 @@ export interface IComponentInput extends Object {
 	[name: string]: any;
 }
 
-function initInputProperty(input: IComponentInput, name: string, el: IComponentElement) {
+function initComponentInputProperty(componentInput: IComponentInput, name: string, el: IComponentElement) {
 	let component = el.$component;
-	let inputPropertyConfig = ((component.constructor as typeof Component).input as { [name: string]: any })[name];
+	let cipc = ((component.constructor as typeof Component).input as { [name: string]: any })[name];
 
-	if (inputPropertyConfig == null) {
+	if (cipc == null) {
 		return;
 	}
 
-	let type = typeof inputPropertyConfig;
+	let type = typeof cipc;
 	let defaultValue: any;
 	let required: boolean;
 	let readonly: boolean;
 
 	if (type == 'function') {
-		type = inputPropertyConfig;
+		type = cipc;
 		required = readonly = false;
-	} else if (
-		type == 'object' && (inputPropertyConfig.type !== undefined || inputPropertyConfig.default !== undefined)
-	) {
-		type = inputPropertyConfig.type;
-		defaultValue = inputPropertyConfig.default;
+	} else if (type == 'object' && (cipc.type !== undefined || cipc.default !== undefined)) {
+		type = cipc.type;
+		defaultValue = cipc.default;
 
 		if (type === undefined) {
 			type = typeof defaultValue;
@@ -44,10 +42,10 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 			throw new TypeError('Specified type does not match defaultValue type');
 		}
 
-		required = inputPropertyConfig.required;
-		readonly = inputPropertyConfig.readonly;
+		required = cipc.required;
+		readonly = cipc.readonly;
 	} else {
-		defaultValue = inputPropertyConfig;
+		defaultValue = cipc;
 		required = readonly = false;
 	}
 
@@ -68,7 +66,7 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 		el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue) as string);
 	}
 
-	let value = typeSerializer.read(rawValue, defaultValue, component);
+	let value = typeSerializer.read(rawValue, defaultValue);
 	let descriptor: Object;
 
 	if (readonly) {
@@ -90,7 +88,7 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 		let valueCell: Cell | undefined;
 
 		let setRawValue = (rawValue: string | null) => {
-			let val = (typeSerializer as IComponentInputTypeSerializer).read(rawValue, defaultValue, component);
+			let val = (typeSerializer as IComponentInputTypeSerializer).read(rawValue, defaultValue);
 
 			if (valueCell) {
 				valueCell.set(val);
@@ -99,10 +97,10 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 			}
 		};
 
-		input['_' + name] = setRawValue;
+		componentInput['_' + name] = setRawValue;
 
 		if (name != hyphenizedName) {
-			input['_' + hyphenizedName] = setRawValue;
+			componentInput['_' + hyphenizedName] = setRawValue;
 		}
 
 		descriptor = {
@@ -153,22 +151,22 @@ function initInputProperty(input: IComponentInput, name: string, el: IComponentE
 		};
 	}
 
-	Object.defineProperty(input, name, descriptor);
+	Object.defineProperty(componentInput, name, descriptor);
 }
 
 let ComponentInput = {
 	init(component: Component): IComponentInput {
-		let inputConfig = (component.constructor as typeof Component).input;
+		let componentInputConfig = (component.constructor as typeof Component).input;
 		let el = component.element;
-		let input = { $content: null, $context: null };
+		let componentInput = { $content: null, $context: null };
 
-		if (inputConfig) {
-			for (let name in inputConfig) {
-				initInputProperty(input, name, el);
+		if (componentInputConfig) {
+			for (let name in componentInputConfig) {
+				initComponentInputProperty(componentInput, name, el);
 			}
 		}
 
-		return input;
+		return componentInput;
 	}
 };
 

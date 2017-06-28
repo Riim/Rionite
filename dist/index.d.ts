@@ -4,8 +4,8 @@ import formatters from './formatters';
 import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
 import { IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, IComponentEvents, default as Component } from './Component';
 import KEY_ELEMENT_CONNECTED from './KEY_ELEMENT_CONNECTED';
-import KEY_COMPONENT_INPUT_VALUES from './KEY_COMPONENT_INPUT_VALUES';
 import { IComponentInput, default as ComponentInput } from './ComponentInput';
+import componentInputValueMap from './componentInputValueMap';
 import RtContent from './Components/rt-content';
 import RtSlot from './Components/rt-slot';
 import { TIfCell as TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
@@ -30,4 +30,4 @@ declare let Utils: {
     defer: (cb: () => void, context?: any) => void;
     htmlToFragment: (html: string) => DocumentFragment;
 };
-export { NelmNodeType, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, KEY_COMPONENT_INPUT_VALUES, IComponentInput, ComponentInput, TRtIfThenIfCell, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, d, Utils };
+export { NelmNodeType, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, IComponentInput, ComponentInput, componentInputValueMap, TRtIfThenIfCell, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, d, Utils };

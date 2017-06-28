@@ -1,6 +1,7 @@
 import { ObservableList, Cell, JS, Utils } from 'cellx';
 import Component from '../Component';
 import KEY_ELEMENT_CONNECTED from '../KEY_ELEMENT_CONNECTED';
+import { suppressConnectionStatusCallbacks, resumeConnectionStatusCallbacks } from '../ElementProtoMixin';
 import compileKeypath from '../compileKeypath';
 import bindContent from '../bindContent';
 import attachChildComponentElements from '../attachChildComponentElements';
@@ -40,15 +41,13 @@ export default class RtRepeat extends Component {
 	ownerComponent: Component;
 
 	_itemName: string;
-
 	_list: TListCell;
-
-	_itemMap: TItemMap;
-	_prevItemMap: TItemMap;
-
 	_trackBy: string;
 
 	_rawItemContent: DocumentFragment;
+
+	_itemMap: TItemMap;
+	_prevItemMap: TItemMap;
 
 	_lastNode: Node;
 
@@ -70,11 +69,7 @@ export default class RtRepeat extends Component {
 			}
 
 			this._itemName = forAttrValue[1];
-
 			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: input.$context as Object });
-
-			this._itemMap = new Map<any, TItemList>();
-
 			this._trackBy = input.trackBy;
 
 			let rawItemContent = this._rawItemContent =
@@ -101,6 +96,8 @@ export default class RtRepeat extends Component {
 					}
 				}
 			}
+
+			this._itemMap = new Map<any, TItemList>();
 
 			this.initialized = true;
 		}
@@ -242,7 +239,7 @@ export default class RtRepeat extends Component {
 					return indexCell.get();
 				}
 			}
-		}));
+		}), { 0: null, 1: null } as any);
 
 		let newItem = {
 			item: itemCell,
@@ -258,10 +255,12 @@ export default class RtRepeat extends Component {
 		}
 
 		let newLastNode = content.lastChild as Node;
+		suppressConnectionStatusCallbacks();
 		(this._lastNode.parentNode as Node).insertBefore(content, this._lastNode.nextSibling);
+		resumeConnectionStatusCallbacks();
 		this._lastNode = newLastNode;
 
-		if (childComponents && !childComponents[0]._attached) {
+		if (childComponents) {
 			attachChildComponentElements(childComponents);
 		}
 

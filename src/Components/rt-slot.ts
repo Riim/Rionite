@@ -120,9 +120,10 @@ export default class RtSlot extends Component {
 							contentOwnerComponent as Component,
 							getContext ?
 								ownerComponent[getContext](ownerComponent.input.$context, this) :
-								ownerComponent.input.$context
+								ownerComponent.input.$context,
+							{ 0: null, 1: null } as any
 						) :
-						bindContent(el, ownerComponent, input.$context);
+						bindContent(el, ownerComponent, input.$context as Object, { 0: null, 1: null } as any);
 
 					this._childComponents = childComponents;
 				} else {
@@ -137,16 +138,18 @@ export default class RtSlot extends Component {
 			}
 
 			if (content) {
+				suppressConnectionStatusCallbacks();
+
 				if (el.firstChild) {
-					suppressConnectionStatusCallbacks();
 					clearNode(el);
-					resumeConnectionStatusCallbacks();
 				}
 
 				el.appendChild(content);
+
+				resumeConnectionStatusCallbacks();
 			}
 
-			if (childComponents && !childComponents[0]._attached) {
+			if (childComponents) {
 				attachChildComponentElements(childComponents);
 			}
 

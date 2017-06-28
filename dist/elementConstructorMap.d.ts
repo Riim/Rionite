@@ -1,2 +1,5 @@
-declare const _default: Object;
-export default _default;
+declare let elementConstructorMap: Map<string, {
+    new (): Element;
+    prototype: Element;
+}>;
+export default elementConstructorMap;

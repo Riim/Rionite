@@ -13,10 +13,10 @@ export default class RtRepeat extends Component {
     ownerComponent: Component;
     _itemName: string;
     _list: TListCell;
-    _itemMap: TItemMap;
-    _prevItemMap: TItemMap;
     _trackBy: string;
     _rawItemContent: DocumentFragment;
+    _itemMap: TItemMap;
+    _prevItemMap: TItemMap;
     _lastNode: Node;
     _active: boolean;
     elementConnected(): void;

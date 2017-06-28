@@ -2,7 +2,7 @@ import { IEvent, IEventEmitterListener, EventEmitter, JS, Utils } from 'cellx';
 import { IBlock, Template } from 'nelm';
 import htmlToFragment from 'html-to-fragment';
 import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
-import elementConstructorMap from './elementConstructorMap';
+import componentConstructorMap from './componentConstructorMap';
 import registerComponent from './registerComponent';
 import { suppressConnectionStatusCallbacks, resumeConnectionStatusCallbacks } from './ElementProtoMixin';
 import { IComponentInput, default as ComponentInput } from './ComponentInput';
@@ -44,11 +44,11 @@ export interface IComponentEvents<T> {
 
 let reInputChangeEventName = /input\-([\-0-9a-z]*)\-change/;
 
-function findChildComponentElements(
+function findChildComponents(
 	node: Node,
 	ownerComponent: Component | null,
 	context: Object | null,
-	_childComponents?: Array<Component> | null | undefined
+	childComponents?: Array<Component> | null | undefined
 ): Array<Component> | null {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		if (child.nodeType == Node.ELEMENT_NODE) {
@@ -58,19 +58,19 @@ function findChildComponentElements(
 				childComponent.ownerComponent = ownerComponent;
 				childComponent.input.$context = context;
 
-				(_childComponents || (_childComponents = [])).push(childComponent);
+				(childComponents || (childComponents = [])).push(childComponent);
 			}
 
 			if (
 				child.firstChild &&
 					(!childComponent || (childComponent.constructor as typeof Component).template == null)
 			) {
-				_childComponents = findChildComponentElements(child, ownerComponent, context, _childComponents);
+				childComponents = findChildComponents(child, ownerComponent, context, childComponents);
 			}
 		}
 	}
 
-	return _childComponents || null;
+	return childComponents || null;
 }
 
 let created: any;
@@ -161,7 +161,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 		let constr = this.constructor as typeof Component;
 
-		if (!elementConstructorMap[constr.elementIs]) {
+		if (!componentConstructorMap.has(constr.elementIs)) {
 			throw new TypeError('Component must be registered');
 		}
 
@@ -223,17 +223,16 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				let targetName = type.slice(1, index);
 
 				if (targetName != '*') {
-					let targetElConstr = elementConstructorMap[targetName];
+					let targetConstr = componentConstructorMap.get(targetName);
 
-					if (!targetElConstr) {
+					if (!targetConstr) {
 						throw new TypeError(`Component "${ targetName }" is not defined`);
 					}
 
-					let targetConstr = targetElConstr._rioniteComponentConstructor;
 					let inner = listener;
 
 					listener = function(evt) {
-						if (evt.target instanceof targetConstr) {
+						if (evt.target instanceof (targetConstr as typeof Component)) {
 							return inner.call(this, evt);
 						}
 					};
@@ -284,7 +283,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 				this._bindings = null;
 
-				let childComponents = findChildComponentElements(el, this.ownerComponent, this.input.$context);
+				let childComponents = findChildComponents(el, this.ownerComponent, this.input.$context);
 
 				if (childComponents) {
 					attachChildComponentElements(childComponents);
@@ -312,13 +311,15 @@ export default class Component extends EventEmitter implements DisposableMixin {
 						i += templates[i].content.querySelectorAll('template').length + 1;
 					}
 				}
-				let [bindings, childComponents] = bindContent(content, this);
+				let [bindings, childComponents] = bindContent(content, this, this, { 0: null, 1: null } as any);
 
 				this._bindings = bindings;
 
+				suppressConnectionStatusCallbacks();
 				this.element.appendChild(content);
+				resumeConnectionStatusCallbacks();
 
-				if (childComponents && !childComponents[0]._attached) {
+				if (childComponents) {
 					attachChildComponentElements(childComponents);
 				}
 
