@@ -293,9 +293,13 @@ export default class Component extends EventEmitter implements DisposableMixin {
 					bindEvents(this, constr.events);
 				}
 			} else {
-				suppressConnectionStatusCallbacks();
-				this.input.$content = moveContent(document.createDocumentFragment(), el);
-				resumeConnectionStatusCallbacks();
+				if (el.firstChild) {
+					suppressConnectionStatusCallbacks();
+					this.input.$content = moveContent(document.createDocumentFragment(), el);
+					resumeConnectionStatusCallbacks();
+				} else {
+					this.input.$content = document.createDocumentFragment();
+				}
 
 				let rawContent = constr._rawContent;
 

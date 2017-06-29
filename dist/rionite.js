@@ -284,9 +284,14 @@ var Component = (function (_super) {
                 }
             }
             else {
-                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                this.input.$content = moveContent_1.default(document.createDocumentFragment(), el);
-                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+                if (el.firstChild) {
+                    ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+                    this.input.$content = moveContent_1.default(document.createDocumentFragment(), el);
+                    ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+                }
+                else {
+                    this.input.$content = document.createDocumentFragment();
+                }
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
                     rawContent = constr._rawContent = html_to_fragment_1.default(constr.template.render());

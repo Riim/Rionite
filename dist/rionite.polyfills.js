@@ -954,7 +954,7 @@ THE SOFTWARE.
               node = origCloneNode.call(this, !!deep),
               i
             ;
-            if (node.nodeType !== 11) {
+            if (node.nodeType === Node.ELEMENT_NODE) {
               i = getTypeIndex(node);
               if (-1 < i) patch(node, protos[i]);
             }
@@ -962,10 +962,25 @@ THE SOFTWARE.
             return node;
           };
         });
+
+        var origImportNode = document.importNode;
+
+        document.importNode = function (node, deep) {
+          var
+            importedNode = origImportNode.call(this, node, !!deep),
+            i
+          ;
+          if (importedNode.nodeType === Node.ELEMENT_NODE) {
+            i = getTypeIndex(importedNode);
+            if (-1 < i) patch(importedNode, protos[i]);
+          }
+          if (deep && query.length) loopAndSetup(importedNode.querySelectorAll(query));
+          return importedNode;
+        };
       }
 
       if (justSetup) return (justSetup = false);
-  
+
       if (-2 < (
         indexOf.call(types, PREFIX_IS + upperType) +
         indexOf.call(types, PREFIX_TAG + upperType)
@@ -1334,7 +1349,7 @@ THE SOFTWARE.
       );
     }
   }
-  
+
   function whenDefined(name) {
     name = name.toUpperCase();
     if (!(name in waitingList)) {
@@ -1760,9 +1775,14 @@ var Component = (function (_super) {
                 }
             }
             else {
-                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                this.input.$content = moveContent_1.default(document.createDocumentFragment(), el);
-                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+                if (el.firstChild) {
+                    ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+                    this.input.$content = moveContent_1.default(document.createDocumentFragment(), el);
+                    ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+                }
+                else {
+                    this.input.$content = document.createDocumentFragment();
+                }
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
                     rawContent = constr._rawContent = html_to_fragment_1.default(constr.template.render());
