@@ -2073,18 +2073,53 @@ exports.default = attachChildComponentElements;
 
 "use strict";
 
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var ContentTextParser_1 = __webpack_require__(26);
 var compileContentText_1 = __webpack_require__(43);
 var setAttribute_1 = __webpack_require__(40);
+var AttributeBindingCell = (function (_super) {
+    __extends(AttributeBindingCell, _super);
+    function AttributeBindingCell(pull, el, attrName, opts) {
+        var _this = _super.call(this, pull, opts) || this;
+        _this.element = el;
+        _this.attributeName = attrName;
+        return _this;
+    }
+    return AttributeBindingCell;
+}(cellx_1.Cell));
+var TextNodeBindingCell = (function (_super) {
+    __extends(TextNodeBindingCell, _super);
+    function TextNodeBindingCell(pull, textNode, opts) {
+        var _this = _super.call(this, pull, opts) || this;
+        _this.textNode = textNode;
+        return _this;
+    }
+    return TextNodeBindingCell;
+}(cellx_1.Cell));
+function onAttributeBindingCellChange(evt) {
+    setAttribute_1.default(evt.target.element, evt.target.attributeName, evt.value);
+}
+function onTextNodeBindingCellChange(evt) {
+    evt.target.textNode.nodeValue = evt.value;
+}
 var ContentTextNodeType = ContentTextParser_1.default.ContentTextNodeType;
 function bindContent(node, ownerComponent, context, result) {
-    var _loop_1 = function (child) {
+    for (var child = node.firstChild; child; child = child.nextSibling) {
         switch (child.nodeType) {
             case Node.ELEMENT_NODE: {
                 var attrs = child.attributes;
-                var _loop_2 = function (i) {
+                for (var i = attrs.length; i;) {
                     var attr = attrs.item(--i);
                     var value = attr.value;
                     if (value.indexOf('{') != -1) {
@@ -2094,22 +2129,14 @@ function bindContent(node, ownerComponent, context, result) {
                             if (name_1.charAt(0) == '_') {
                                 name_1 = name_1.slice(1);
                             }
-                            var cell = new cellx_1.Cell(compileContentText_1.default(contentText, value, contentText.length == 1), {
+                            var cell = new AttributeBindingCell(compileContentText_1.default(contentText, value, contentText.length == 1), child, name_1, {
                                 owner: context,
-                                onChange: function (evt) {
-                                    setAttribute_1.default(child, name_1, evt.value);
-                                }
+                                onChange: onAttributeBindingCellChange
                             });
                             setAttribute_1.default(child, name_1, cell.get());
                             (result[0] || (result[0] = [])).push(cell);
                         }
                     }
-                    out_i_1 = i;
-                };
-                var out_i_1;
-                for (var i = attrs.length; i;) {
-                    _loop_2(i);
-                    i = out_i_1;
                 }
                 var childComponent = child.$component;
                 if (childComponent) {
@@ -2132,11 +2159,9 @@ function bindContent(node, ownerComponent, context, result) {
                 if (value.indexOf('{') != -1) {
                     var contentText = (new ContentTextParser_1.default(value)).parse();
                     if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
-                        var cell = new cellx_1.Cell(compileContentText_1.default(contentText, value, false), {
+                        var cell = new TextNodeBindingCell(compileContentText_1.default(contentText, value, false), child, {
                             owner: context,
-                            onChange: function (evt) {
-                                child.nodeValue = evt.value;
-                            }
+                            onChange: onTextNodeBindingCellChange
                         });
                         child.nodeValue = cell.get();
                         (result[0] || (result[0] = [])).push(cell);
@@ -2145,9 +2170,6 @@ function bindContent(node, ownerComponent, context, result) {
                 break;
             }
         }
-    };
-    for (var child = node.firstChild; child; child = child.nextSibling) {
-        _loop_1(child);
     }
     return result;
 }

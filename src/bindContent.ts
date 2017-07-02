@@ -1,9 +1,41 @@
-import { Cell } from 'cellx';
+import { IEvent, ICellPull, ICellOptions, Cell } from 'cellx';
 import { IPossiblyComponentElement, default as Component } from './Component';
 import ContentTextParser from './ContentTextParser';
 import compileContentText from './compileContentText';
 import { IFreezableCell } from './componentBinding';
 import setAttribute from './Utils/setAttribute';
+
+class AttributeBindingCell extends Cell {
+	element: Element;
+	attributeName: string;
+
+	constructor(pull: ICellPull<any>, el: Element, attrName: string, opts?: ICellOptions<any>) {
+		super(pull, opts);
+		this.element = el;
+		this.attributeName = attrName;
+	}
+}
+
+class TextNodeBindingCell extends Cell {
+	textNode: Text;
+
+	constructor(pull: ICellPull<any>, textNode: Text, opts?: ICellOptions<any>) {
+		super(pull, opts);
+		this.textNode = textNode;
+	}
+}
+
+function onAttributeBindingCellChange(evt: IEvent) {
+	setAttribute(
+		(evt.target as AttributeBindingCell).element,
+		(evt.target as AttributeBindingCell).attributeName,
+		evt.value
+	);
+}
+
+function onTextNodeBindingCellChange(evt: IEvent) {
+	(evt.target as TextNodeBindingCell).textNode.nodeValue = evt.value;
+}
 
 let ContentTextNodeType = ContentTextParser.ContentTextNodeType;
 
@@ -32,19 +64,19 @@ export default function bindContent(
 								name = name.slice(1);
 							}
 
-							let cell = new Cell<any>(
+							let cell = new AttributeBindingCell(
 								compileContentText(contentText, value, contentText.length == 1),
+								child as Element,
+								name,
 								{
-									owner: context as Object,
-									onChange(evt) {
-										setAttribute(child as Element, name, evt.value);
-									}
+									owner: context,
+									onChange: onAttributeBindingCellChange
 								}
 							);
 
 							setAttribute(child as Element, name, cell.get());
 
-							(result[0] || (result[0] = [])).push(cell as IFreezableCell);
+							(result[0] || (result[0] = [])).push(cell as any as IFreezableCell);
 						}
 					}
 				}
@@ -53,7 +85,7 @@ export default function bindContent(
 
 				if (childComponent) {
 					childComponent.ownerComponent = ownerComponent;
-					childComponent.input.$context = context as Object;
+					childComponent.input.$context = context;
 
 					(result[1] || (result[1] = [])).push(childComponent);
 				}
@@ -79,16 +111,18 @@ export default function bindContent(
 					let contentText = (new ContentTextParser(value)).parse();
 
 					if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
-						let cell = new Cell<any>(compileContentText(contentText, value, false), {
-							owner: context as Object,
-							onChange(evt) {
-								(child as Node).nodeValue = evt.value;
+						let cell = new TextNodeBindingCell(
+							compileContentText(contentText, value, false),
+							child as Text,
+							{
+								owner: context,
+								onChange: onTextNodeBindingCellChange
 							}
-						});
+						);
 
 						child.nodeValue = cell.get();
 
-						(result[0] || (result[0] = [])).push(cell as IFreezableCell);
+						(result[0] || (result[0] = [])).push(cell as any as IFreezableCell);
 					}
 				}
 
