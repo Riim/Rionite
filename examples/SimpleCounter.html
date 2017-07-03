@@ -28,7 +28,7 @@ SimpleCounter.elementIs = 'simple-counter';
 
 SimpleCounter.template = `
 	div { 'value: {value}' }
-	button (rt-click=onButtonClick) { 'value++' }
+	button (on-click=onButtonClick) { 'value++' }
 `;
 
 Rionite.Component.register(SimpleCounter);

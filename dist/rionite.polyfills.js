@@ -4674,7 +4674,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 function onEvent(evt) {
     var isNativeEvent = evt instanceof Event;
     var node = isNativeEvent ? evt.target : evt.target.element;
-    var attrName = (isNativeEvent ? 'rt-' : 'rt-component-') + evt.type;
+    var attrName = (isNativeEvent ? 'on-' : 'oncomponent-') + evt.type;
     var targetEls;
     for (;;) {
         if (node.hasAttribute(attrName)) {
@@ -4692,12 +4692,6 @@ function onEvent(evt) {
                 var handler = component[targetEl.getAttribute(attrName)];
                 if (typeof handler == 'function') {
                     if (handler.call(component, evt, targetEl) === false) {
-                        if (!isNativeEvent) {
-                            evt.isPropagationStopped = true;
-                        }
-                        return;
-                    }
-                    if (!isNativeEvent && evt.isPropagationStopped) {
                         return;
                     }
                     targetEls.splice(i, 1);

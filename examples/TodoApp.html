@@ -61,11 +61,11 @@ TodoView.input = {
 };
 
 TodoView.template = `
-	input/cb-done (type=checkbox, checked={todo.done}, rt-change=onCbDoneChange)
+	input/cb-done (type=checkbox, checked={todo.done}, on-change=onCbDoneChange)
 	' '
 	span/text { '{todo.text}' }
 	' '
-	button (rt-click=onBtnRemoveClick) { 'remove' }
+	button (on-click=onBtnRemoveClick) { 'remove' }
 `;
 
 Rionite.Component.register(TodoView);
@@ -99,7 +99,7 @@ TodoApp.elementIs = 'todo-app';
 TodoApp.template = `
 	input/tf-new-todo
 	' '
-	button (rt-click=onBtnAddClick) { 'Add #{nextNumber}' }
+	button (on-click=onBtnAddClick) { 'Add #{nextNumber}' }
 	div { 'all: {todos.length} done: {doneTodos.length}' }
 	@repeat (for=todo of todos) {
 		todo-view (todo={todo})

@@ -4,7 +4,7 @@ import { IPossiblyComponentElement, default as Component } from './Component';
 export default function onEvent(evt: IEvent | Event) {
 	let isNativeEvent = evt instanceof Event;
 	let node: Node | null = isNativeEvent ? evt.target as Node : (evt.target as Component).element;
-	let attrName = (isNativeEvent ? 'rt-' : 'rt-component-') + evt.type;
+	let attrName = (isNativeEvent ? 'on-' : 'oncomponent-') + evt.type;
 	let targetEls: Array<Element> | undefined;
 
 	for (;;) {
@@ -29,14 +29,6 @@ export default function onEvent(evt: IEvent | Event) {
 
 				if (typeof handler == 'function') {
 					if (handler.call(component, evt, targetEl) === false) {
-						if (!isNativeEvent) {
-							(evt as IEvent).isPropagationStopped = true;
-						}
-
-						return;
-					}
-
-					if (!isNativeEvent && (evt as IEvent).isPropagationStopped) {
 						return;
 					}
 

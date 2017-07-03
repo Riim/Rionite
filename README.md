@@ -184,7 +184,7 @@ Rionite.Component.extend('simple-counter', {
 	Static: {
 		template: `
             div { 'value: {value}' }
-            button (rt-click=onButtonClick) { 'value++' }
+            button (on-click=onButtonClick) { 'value++' }
         `
 	},
 
@@ -316,7 +316,7 @@ Rionite.Component.extend('simple-counter', {
 	Static: {
 		template: `
             div { 'value: {value}' }
-            button (rt-click=onButtonClick) { 'value++' }
+            button (on-click=onButtonClick) { 'value++' }
         `
 	},
 
@@ -343,7 +343,7 @@ return `
 return `
     <div>
         <x-foo></x-foo>
-        <x-foo rt-component-baz="onFooBaz"></x-foo>
+        <x-foo oncomponent-baz="onFooBaz"></x-foo>
     </div>
 `;
 ```
