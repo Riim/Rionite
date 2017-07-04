@@ -1721,12 +1721,11 @@ var Component = (function (_super) {
         if (evt.bubbles !== false && !evt.isPropagationStopped) {
             var parentComponent = this.parentComponent;
             if (parentComponent) {
-                if (parentComponent === evt.target.ownerComponent) {
-                    onEvent_1.default(evt, parentComponent.element.parentElement);
-                }
-                else {
-                    parentComponent._handleEvent(evt);
-                }
+                parentComponent._handleEvent(evt);
+            }
+            else {
+                var targetOwnerComponent = evt.target.ownerComponent;
+                onEvent_1.default(evt, targetOwnerComponent ? targetOwnerComponent.element : this.element.parentNode);
             }
         }
     };
