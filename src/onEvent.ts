@@ -1,44 +1,61 @@
 import { IEvent } from 'cellx';
-import { IPossiblyComponentElement, default as Component } from './Component';
+import { IPossiblyComponentElement, TEventHandler2, IComponentEvents2, default as Component } from './Component';
 
-export default function onEvent(evt: IEvent | Event) {
-	let isNativeEvent = evt instanceof Event;
-	let node: Node | null = isNativeEvent ? evt.target as Node : (evt.target as Component).element;
-	let attrName = (isNativeEvent ? 'on-' : 'oncomponent-') + evt.type;
-	let targetEls: Array<Element> | undefined;
+export default function onEvent(evt: IEvent | Event, stopElement: Element) {
+	let el: Element | null;
+	let attrName: string;
+	let receivers: Array<Element> | undefined;
+	let eventsName: string;
+
+	if (evt instanceof Event) {
+		el = evt.target as Element;
+		attrName = 'on-' + evt.type;
+		eventsName = 'domEvents';
+	} else {
+		el = (evt.target as Component).element;
+		attrName = 'oncomponent-' + evt.type;
+		eventsName = 'events2';
+	}
 
 	for (;;) {
-		if ((node as Element).hasAttribute(attrName)) {
-			(targetEls || (targetEls = [])).push(node as Element);
+		if (el.hasAttribute(attrName)) {
+			(receivers || (receivers = [])).push(el);
 		}
 
-		node = node.parentNode;
+		el = el.parentNode as Element;
 
-		if (!node || node == document) {
+		if (!el || el == stopElement) {
 			break;
 		}
 
-		let component = (node as IPossiblyComponentElement).$component;
+		let component = (el as IPossiblyComponentElement).$component;
 
-		if (component && targetEls && targetEls.length) {
-			let i = 0;
+		if (component && receivers && receivers.length) {
+			for (let i = 0; ;) {
+				let attrValue = receivers[i].getAttribute(attrName) as string;
+				let handler: TEventHandler2<Component> | undefined;
 
-			do {
-				let targetEl = targetEls[i];
-				let handler = component[targetEl.getAttribute(attrName) as string];
+				if (attrValue.charAt(0) == ':') {
+					handler = ((component.constructor as typeof Component)[eventsName] as IComponentEvents2<Component>)
+						[attrValue.slice(1)][evt.type];
+				} else {
+					handler = component[attrValue];
+				}
 
-				if (typeof handler == 'function') {
-					if (handler.call(component, evt, targetEl) === false) {
+				if (handler) {
+					if (handler.call(component, evt, receivers[i]) === false) {
 						return;
 					}
 
-					targetEls.splice(i, 1);
-
-					continue;
+					receivers.splice(i, 1);
+				} else {
+					i++;
 				}
 
-				i++;
-			} while (i < targetEls.length);
+				if (i == receivers.length) {
+					break;
+				}
+			}
 		}
 	}
 }

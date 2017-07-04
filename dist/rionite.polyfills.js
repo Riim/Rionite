@@ -1610,7 +1610,22 @@ var Features_1 = __webpack_require__(7);
 var Map = cellx_1.JS.Map;
 var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
+var reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)(?:\s[^"]*)?"/g;
 var reInputChangeEventName = /input\-([\-0-9a-z]*)\-change/;
+function createClassBlockElementReplacer(contentBlockName, events, evtPrefix) {
+    return function (match, blockName, elName) {
+        var elEvents;
+        if (blockName == contentBlockName &&
+            (elEvents = events[elName])) {
+            var eventAttrs = [];
+            for (var type in elEvents) {
+                eventAttrs.push(" " + evtPrefix + type + "=\":" + elName + "\"");
+            }
+            return match + eventAttrs.join('');
+        }
+        return match;
+    };
+}
 function findChildComponents(node, ownerComponent, context, childComponents) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         if (child.nodeType == Node.ELEMENT_NODE) {
@@ -1703,17 +1718,15 @@ var Component = (function (_super) {
     };
     Component.prototype._handleEvent = function (evt) {
         _super.prototype._handleEvent.call(this, evt);
-        var silent = this._silent;
-        if (silent === undefined) {
-            silent = this._silent = this.element.hasAttribute('rt-silent');
-        }
-        if (!silent && evt.bubbles !== false && !evt.isPropagationStopped) {
+        if (evt.bubbles !== false && !evt.isPropagationStopped) {
             var parentComponent = this.parentComponent;
             if (parentComponent) {
-                parentComponent._handleEvent(evt);
-            }
-            else {
-                onEvent_1.default(evt);
+                if (parentComponent === evt.target.ownerComponent) {
+                    onEvent_1.default(evt, parentComponent.element.parentElement);
+                }
+                else {
+                    parentComponent._handleEvent(evt);
+                }
             }
         }
     };
@@ -1785,7 +1798,14 @@ var Component = (function (_super) {
                 }
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
-                    rawContent = constr._rawContent = html_to_fragment_1.default(constr.template.render());
+                    var contentHTML = constr.template.render();
+                    if (constr.events2) {
+                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr._contentBlockNames[0], constr.events2, 'oncomponent-'));
+                    }
+                    if (constr.domEvents) {
+                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr._contentBlockNames[0], constr.domEvents, 'on-'));
+                    }
+                    rawContent = constr._rawContent = html_to_fragment_1.default(contentHTML);
                 }
                 var content = rawContent.cloneNode(true);
                 if (!Features_1.templateTag) {
@@ -1873,12 +1893,15 @@ var Component = (function (_super) {
             }
             else {
                 var contentBlockNames = constr._contentBlockNames;
-                for (var i = contentBlockNames.length; i;) {
-                    className = contentBlockNames[--i] + '__' + name;
+                for (var i = contentBlockNames.length - 1;; i--) {
+                    className = contentBlockNames[i] + '__' + name;
                     elList = containerEl.getElementsByClassName(className);
                     if (elList.length) {
                         constr._elementClassNameMap[name] = className;
                         elListMap.set(key, elList);
+                        break;
+                    }
+                    if (!i) {
                         break;
                     }
                 }
@@ -1895,6 +1918,8 @@ var Component = (function (_super) {
     Component.i18n = null;
     Component.template = null;
     Component.events = null;
+    Component.events2 = null;
+    Component.domEvents = null;
     return Component;
 }(cellx_1.EventEmitter));
 exports.default = Component;
@@ -1916,7 +1941,7 @@ elementMoved = ComponentProto.elementMoved;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
     eventTypes_1.default.forEach(function (type) {
-        document.addEventListener(type, onEvent_1.default);
+        document.addEventListener(type, function (evt) { onEvent_1.default(evt, document.body); });
     });
 });
 
@@ -1947,6 +1972,12 @@ var d = {
             }
             if (config.events !== undefined) {
                 componentConstr.events = config.events;
+            }
+            if (config.events2 !== undefined) {
+                componentConstr.events2 = config.events2;
+            }
+            if (config.domEvents !== undefined) {
+                componentConstr.domEvents = config.domEvents;
             }
             Component_1.default.register(componentConstr);
         };
@@ -4671,34 +4702,53 @@ exports.Utils = Utils;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-function onEvent(evt) {
-    var isNativeEvent = evt instanceof Event;
-    var node = isNativeEvent ? evt.target : evt.target.element;
-    var attrName = (isNativeEvent ? 'on-' : 'oncomponent-') + evt.type;
-    var targetEls;
+function onEvent(evt, stopElement) {
+    var el;
+    var attrName;
+    var receivers;
+    var eventsName;
+    if (evt instanceof Event) {
+        el = evt.target;
+        attrName = 'on-' + evt.type;
+        eventsName = 'domEvents';
+    }
+    else {
+        el = evt.target.element;
+        attrName = 'oncomponent-' + evt.type;
+        eventsName = 'events2';
+    }
     for (;;) {
-        if (node.hasAttribute(attrName)) {
-            (targetEls || (targetEls = [])).push(node);
+        if (el.hasAttribute(attrName)) {
+            (receivers || (receivers = [])).push(el);
         }
-        node = node.parentNode;
-        if (!node || node == document) {
+        el = el.parentNode;
+        if (!el || el == stopElement) {
             break;
         }
-        var component = node.$component;
-        if (component && targetEls && targetEls.length) {
-            var i = 0;
-            do {
-                var targetEl = targetEls[i];
-                var handler = component[targetEl.getAttribute(attrName)];
-                if (typeof handler == 'function') {
-                    if (handler.call(component, evt, targetEl) === false) {
+        var component = el.$component;
+        if (component && receivers && receivers.length) {
+            for (var i = 0;;) {
+                var attrValue = receivers[i].getAttribute(attrName);
+                var handler = void 0;
+                if (attrValue.charAt(0) == ':') {
+                    handler = component.constructor[eventsName][attrValue.slice(1)][evt.type];
+                }
+                else {
+                    handler = component[attrValue];
+                }
+                if (handler) {
+                    if (handler.call(component, evt, receivers[i]) === false) {
                         return;
                     }
-                    targetEls.splice(i, 1);
-                    continue;
+                    receivers.splice(i, 1);
                 }
-                i++;
-            } while (i < targetEls.length);
+                else {
+                    i++;
+                }
+                if (i == receivers.length) {
+                    break;
+                }
+            }
         }
     }
 }
@@ -4763,6 +4813,8 @@ function registerComponent(componentConstr) {
     componentConstr._rawContent = undefined;
     componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
     inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
+    inheritProperty(componentConstr, parentComponentConstr, 'events2', 1);
+    inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
     var elExtends = componentConstr.elementExtends;
     var parentElConstr = elExtends ?
         elementConstructorMap_1.default.get(elExtends) ||
@@ -5257,7 +5309,8 @@ var Template = (function () {
         return this;
     };
     Template.prototype.render = function () {
-        return (this._renderer || this._compileRenderers()).call(this._elementRendererMap);
+        var _this = this;
+        return (this._renderer || this._compileRenderers()).call(this._elementRendererMap).replace(/<<([^>]+)>>/g, function (match, names) { return _this._renderElementClasses(names.split(',')); });
     };
     Template.prototype._compileRenderers = function () {
         var parent = this.parent;
@@ -5351,18 +5404,18 @@ var Template = (function () {
                                     length: attrCount
                                 };
                                 if (attrList['class'] !== undefined) {
-                                    attrList[attrList['class']] = ' class="' + this._renderElementClasses(elNames) +
+                                    attrList[attrList['class']] = " class=\"<<" + elNames.join(',') + ">> " +
                                         attrList[attrList['class']].slice(' class="'.length);
                                     renderedAttrs = join.call(attrList, '');
                                 }
                                 else {
-                                    renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" +
+                                    renderedAttrs = " class=\"<<" + elNames.join(',') + ">>\"" +
                                         join.call(attrList, '');
                                 }
                             }
                         }
                         else if (!isHelper) {
-                            renderedAttrs = " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"";
+                            renderedAttrs = " class=\"<<" + elNames.join(',') + ">>\"";
                         }
                         var currentEl = {
                             name: elName,
@@ -5382,27 +5435,23 @@ var Template = (function () {
                     }
                     else if (!isHelper) {
                         if (elAttrs && elAttrs.list.length) {
-                            var renderedClasses = void 0;
+                            var hasClassAttr = false;
                             var attrs = '';
                             for (var _b = 0, _c = elAttrs.list; _b < _c.length; _b++) {
                                 var attr = _c[_b];
                                 var value = attr.value;
                                 if (attr.name == 'class') {
-                                    renderedClasses = this._renderElementClasses(elNames);
-                                    attrs += " class=\"" + (value ?
-                                        renderedClasses + escape_html_1.default(escape_string_1.default(value)) :
-                                        renderedClasses.slice(0, -1)) + "\"";
+                                    hasClassAttr = true;
+                                    attrs += " class=\"<<" + elNames.join(',').slice(1) + ">>" + (value ? ' ' + value : '') + "\"";
                                 }
                                 else {
                                     attrs += " " + attr.name + "=\"" + (value && escape_html_1.default(escape_string_1.default(value))) + "\"";
                                 }
                             }
-                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + (renderedClasses ?
-                                attrs :
-                                " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\"" + attrs) + ">'");
+                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + (hasClassAttr ? attrs : " class=\"<<" + elNames.join(',').slice(1) + ">>\"" + attrs) + ">'");
                         }
                         else {
-                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"" + this._renderElementClasses(elNames).slice(0, -1) + "\">'");
+                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"<<" + elNames.join(',').slice(1) + ">>\">'");
                         }
                     }
                 }
@@ -5456,21 +5505,17 @@ var Template = (function () {
         }
     };
     Template.prototype._renderElementClasses = function (elNames) {
-        var elClasses = elNames[0] ? this._elementClassesTemplate.join(elNames[0] + ' ') : '';
-        var elNameCount = elNames.length;
-        if (elNameCount > 1) {
-            var i = 1;
-            do {
-                elClasses += this._elementClassesTemplate.join(elNames[i] + ' ');
-            } while (++i < elNameCount);
+        var elClasses = '';
+        for (var i = 0, l = elNames.length; i < l; i++) {
+            elClasses += this._elementClassesTemplate.join(elNames[i] + ' ');
         }
-        return elClasses;
+        return elClasses.slice(0, -1);
+    };
+    Template.helpers = {
+        section: function (el) { return el.content; }
     };
     return Template;
 }());
-Template.helpers = {
-    section: function (el) { return el.content; }
-};
 exports.default = Template;
 
 

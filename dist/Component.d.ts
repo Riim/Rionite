@@ -15,9 +15,16 @@ export interface IComponentElement extends HTMLElement {
 export interface IComponentElementClassNameMap {
     [elName: string]: string;
 }
+export declare type TEventHandler<T> = (this: T, evt: IEvent | Event) => boolean | void;
 export interface IComponentEvents<T> {
     [elName: string]: {
-        [eventName: string]: (this: T, evt: IEvent | Event) => boolean | void;
+        [eventName: string]: TEventHandler<T>;
+    };
+}
+export declare type TEventHandler2<T> = (this: T, evt: IEvent | Event, receiver: Element) => boolean | void;
+export interface IComponentEvents2<T> {
+    [elName: string]: {
+        [eventName: string]: TEventHandler2<T>;
     };
 }
 export default class Component extends EventEmitter implements DisposableMixin {
@@ -37,6 +44,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
     static _rawContent: DocumentFragment | undefined;
     static _elementClassNameMap: IComponentElementClassNameMap;
     static events: IComponentEvents<Component> | null;
+    static events2: IComponentEvents2<Component> | null;
+    static domEvents: IComponentEvents2<Component> | null;
     _disposables: typeof DisposableMixin.prototype._disposables;
     ownerComponent: Component | null;
     _parentComponent: Component | null | undefined;
@@ -48,7 +57,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;
-    _silent: boolean | undefined;
     constructor(el?: HTMLElement);
     _on(type: string, listener: IEventEmitterListener, context: any): void;
     _handleEvent(evt: IEvent): void;

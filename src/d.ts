@@ -1,5 +1,5 @@
 import { IBlock, Template } from 'nelm';
-import { IComponentEvents, default as Component } from './Component';
+import { IComponentEvents, IComponentEvents2, default as Component } from './Component';
 
 let d = {
 	Component: function Component_<T extends Component>(config: {
@@ -9,6 +9,8 @@ let d = {
 		i18n?: { [key: string]: any } | null;
 		template?: string | IBlock | Template | null;
 		events?: IComponentEvents<T> | null;
+		events2?: IComponentEvents2<T> | null;
+		domEvents?: IComponentEvents2<T> | null;
 	}) {
 		return function(componentConstr: typeof Component) {
 			componentConstr.elementIs = config.elementIs;
@@ -31,6 +33,12 @@ let d = {
 
 			if (config.events !== undefined) {
 				componentConstr.events = config.events;
+			}
+			if (config.events2 !== undefined) {
+				componentConstr.events2 = config.events2;
+			}
+			if (config.domEvents !== undefined) {
+				componentConstr.domEvents = config.domEvents;
 			}
 
 			Component.register(componentConstr);

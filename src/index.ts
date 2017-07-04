@@ -18,7 +18,10 @@ import {
 	IPossiblyComponentElement,
 	IComponentElement,
 	IComponentElementClassNameMap,
+	TEventHandler,
+	TEventHandler2,
 	IComponentEvents,
+	IComponentEvents2,
 	default as Component
 } from './Component';
 import KEY_ELEMENT_CONNECTED from './KEY_ELEMENT_CONNECTED';
@@ -85,7 +88,10 @@ export {
 	IPossiblyComponentElement,
 	IComponentElement,
 	IComponentElementClassNameMap,
+	TEventHandler,
+	TEventHandler2,
 	IComponentEvents,
+	IComponentEvents2,
 	Component,
 
 	KEY_ELEMENT_CONNECTED,

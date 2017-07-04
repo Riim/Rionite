@@ -18,17 +18,21 @@ class SimpleCounter extends Rionite.Component {
 			value: 0
 		});
 	}
-
-	onButtonClick() {
-		this.value++;
-	}
 }
 
 SimpleCounter.elementIs = 'simple-counter';
 
+SimpleCounter.domEvents = {
+	button: {
+		click() {
+			this.value++;
+		}
+	}
+};
+
 SimpleCounter.template = `
 	div { 'value: {value}' }
-	button (on-click=onButtonClick) { 'value++' }
+	button/button { 'value++' }
 `;
 
 Rionite.Component.register(SimpleCounter);

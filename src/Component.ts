@@ -36,13 +36,46 @@ export interface IComponentElementClassNameMap {
 	[elName: string]: string;
 }
 
+export type TEventHandler<T> = (this: T, evt: IEvent | Event) => boolean | void;
+
 export interface IComponentEvents<T> {
 	[elName: string]: {
-		[eventName: string]: (this: T, evt: IEvent | Event) => boolean | void;
+		[eventName: string]: TEventHandler<T>;
 	};
 }
 
+export type TEventHandler2<T> = (this: T, evt: IEvent | Event, receiver: Element) => boolean | void;
+
+export interface IComponentEvents2<T> {
+	[elName: string]: {
+		[eventName: string]: TEventHandler2<T>;
+	};
+}
+
+let reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)(?:\s[^"]*)?"/g;
 let reInputChangeEventName = /input\-([\-0-9a-z]*)\-change/;
+
+function createClassBlockElementReplacer(contentBlockName: string, events: IComponentEvents2<Component>, evtPrefix: string):
+		(match: string, blockName: string, elName: string) => string {
+	return function(match: string, blockName: string, elName: string): string {
+		let elEvents: { [eventName: string]: TEventHandler2<Component> };
+
+		if (
+			blockName == contentBlockName &&
+				(elEvents = (events as IComponentEvents2<Component>)[elName])
+		) {
+			let eventAttrs = [];
+
+			for (let type in elEvents) {
+				eventAttrs.push(` ${ evtPrefix }${ type }=":${ elName }"`);
+			}
+
+			return match + eventAttrs.join('');
+		}
+
+		return match;
+	};
+}
 
 function findChildComponents(
 	node: Node,
@@ -108,6 +141,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	static _elementClassNameMap: IComponentElementClassNameMap;
 
 	static events: IComponentEvents<Component> | null = null;
+	static events2: IComponentEvents2<Component> | null = null;
+	static domEvents: IComponentEvents2<Component> | null = null;
 
 	_disposables: typeof DisposableMixin.prototype._disposables;
 
@@ -153,8 +188,6 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	initialized = false;
 	isReady = false;
 
-	_silent: boolean | undefined;
-
 	constructor(el?: HTMLElement) {
 		super();
 		DisposableMixin.call(this);
@@ -190,19 +223,15 @@ export default class Component extends EventEmitter implements DisposableMixin {
 	_handleEvent(evt: IEvent) {
 		super._handleEvent(evt);
 
-		let silent = this._silent;
-
-		if (silent === undefined) {
-			silent = this._silent = this.element.hasAttribute('rt-silent');
-		}
-
-		if (!silent && evt.bubbles !== false && !evt.isPropagationStopped) {
+		if (evt.bubbles !== false && !evt.isPropagationStopped) {
 			let parentComponent = this.parentComponent;
 
 			if (parentComponent) {
-				parentComponent._handleEvent(evt);
-			} else {
-				onEvent(evt);
+				if (parentComponent === (evt.target as Component).ownerComponent) {
+					onEvent(evt, parentComponent.element.parentElement as Element);
+				} else {
+					parentComponent._handleEvent(evt);
+				}
 			}
 		}
 	}
@@ -304,7 +333,27 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				let rawContent = constr._rawContent;
 
 				if (!rawContent) {
-					rawContent = constr._rawContent = htmlToFragment((constr.template as Template).render());
+					let contentHTML = (constr.template as Template).render();
+
+					if (constr.events2) {
+						contentHTML = contentHTML.replace(
+							reClassBlockElement,
+							createClassBlockElementReplacer(
+								constr._contentBlockNames[0],
+								constr.events2,
+								'oncomponent-'
+							)
+						);
+					}
+
+					if (constr.domEvents) {
+						contentHTML = contentHTML.replace(
+							reClassBlockElement,
+							createClassBlockElementReplacer(constr._contentBlockNames[0], constr.domEvents, 'on-')
+						);
+					}
+
+					rawContent = constr._rawContent = htmlToFragment(contentHTML);
 				}
 
 				let content = rawContent.cloneNode(true) as DocumentFragment;
@@ -411,19 +460,23 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			let className = constr._elementClassNameMap[name];
 
 			if (className) {
-				elList = containerEl.getElementsByClassName(className) as NodeListOf<Element>;
+				elList = containerEl.getElementsByClassName(className);
 				elListMap.set(key, elList);
 			} else {
 				let contentBlockNames = constr._contentBlockNames;
 
-				for (let i = contentBlockNames.length; i;) {
-					className = contentBlockNames[--i] + '__' + name;
+				for (let i = contentBlockNames.length - 1; ; i--) {
+					className = contentBlockNames[i] + '__' + name;
 
-					elList = containerEl.getElementsByClassName(className) as NodeListOf<Element>;
+					elList = containerEl.getElementsByClassName(className);
 
 					if (elList.length) {
 						constr._elementClassNameMap[name] = className;
 						elListMap.set(key, elList);
+						break;
+					}
+
+					if (!i) {
 						break;
 					}
 				}
@@ -460,6 +513,6 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
 	eventTypes.forEach(type => {
-		document.addEventListener(type, onEvent);
+		document.addEventListener(type, evt => { onEvent(evt, document.body); });
 	});
 });

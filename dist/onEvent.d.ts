@@ -1,2 +1,2 @@
 import { IEvent } from 'cellx';
-export default function onEvent(evt: IEvent | Event): void;
+export default function onEvent(evt: IEvent | Event, stopElement: Element): void;

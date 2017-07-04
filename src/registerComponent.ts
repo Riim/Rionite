@@ -68,6 +68,8 @@ export default function registerComponent(componentConstr: typeof Component) {
 	componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
 
 	inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
+	inheritProperty(componentConstr, parentComponentConstr, 'events2', 1);
+	inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
 
 	let elExtends = componentConstr.elementExtends;
 
