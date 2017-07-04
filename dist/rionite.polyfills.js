@@ -1941,7 +1941,11 @@ elementMoved = ComponentProto.elementMoved;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
     eventTypes_1.default.forEach(function (type) {
-        document.addEventListener(type, function (evt) { onEvent_1.default(evt, document.body); });
+        document.documentElement.addEventListener(type, function (evt) {
+            if (evt.target != document.documentElement) {
+                onEvent_1.default(evt, document.documentElement);
+            }
+        });
     });
 });
 

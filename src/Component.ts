@@ -513,6 +513,10 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
 	eventTypes.forEach(type => {
-		document.addEventListener(type, evt => { onEvent(evt, document.body); });
+		document.documentElement.addEventListener(type, function(evt) {
+			if (evt.target != document.documentElement) {
+				onEvent(evt, document.documentElement);
+			}
+		});
 	});
 });
