@@ -11,7 +11,7 @@ import { IFreezableCell, freezeBindings, unfreezeBindings } from './componentBin
 import attachChildComponentElements from './attachChildComponentElements';
 import bindEvents from './bindEvents';
 import eventTypes from './eventTypes';
-import onEvent from './onEvent';
+import handleEvent from './handleEvent';
 import camelize from './Utils/camelize';
 import getUID from './Utils/getUID';
 import moveContent from './Utils/moveContent';
@@ -231,7 +231,7 @@ export default class Component extends EventEmitter implements DisposableMixin {
 			} else {
 				let targetOwnerComponent = (evt.target as Component).ownerComponent;
 
-				onEvent(
+				handleEvent(
 					evt,
 					targetOwnerComponent ? targetOwnerComponent.element : this.element.parentNode as Element
 				);
@@ -518,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	eventTypes.forEach(type => {
 		document.documentElement.addEventListener(type, function(evt) {
 			if (evt.target != document.documentElement) {
-				onEvent(evt, document.documentElement);
+				handleEvent(evt, document.documentElement);
 			}
 		});
 	});

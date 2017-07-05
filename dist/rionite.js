@@ -73,7 +73,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 49);
+/******/ 	return __webpack_require__(__webpack_require__.s = 50);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -111,7 +111,7 @@ var componentBinding_1 = __webpack_require__(44);
 var attachChildComponentElements_1 = __webpack_require__(4);
 var bindEvents_1 = __webpack_require__(41);
 var eventTypes_1 = __webpack_require__(48);
-var onEvent_1 = __webpack_require__(50);
+var handleEvent_1 = __webpack_require__(49);
 var camelize_1 = __webpack_require__(20);
 var getUID_1 = __webpack_require__(13);
 var moveContent_1 = __webpack_require__(14);
@@ -234,7 +234,7 @@ var Component = (function (_super) {
             }
             else {
                 var targetOwnerComponent = evt.target.ownerComponent;
-                onEvent_1.default(evt, targetOwnerComponent ? targetOwnerComponent.element : this.element.parentNode);
+                handleEvent_1.default(evt, targetOwnerComponent ? targetOwnerComponent.element : this.element.parentNode);
             }
         }
     };
@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     eventTypes_1.default.forEach(function (type) {
         document.documentElement.addEventListener(type, function (evt) {
             if (evt.target != document.documentElement) {
-                onEvent_1.default(evt, document.documentElement);
+                handleEvent_1.default(evt, document.documentElement);
             }
         });
     });
@@ -3153,6 +3153,66 @@ exports.default = [
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+function handleEvent(evt, stopElement) {
+    var el;
+    var attrName;
+    var receivers;
+    var eventsName;
+    if (evt instanceof Event) {
+        el = evt.target;
+        attrName = 'on-' + evt.type;
+        eventsName = 'domEvents';
+    }
+    else {
+        el = evt.target.element;
+        attrName = 'oncomponent-' + evt.type;
+        eventsName = 'events2';
+    }
+    for (;;) {
+        if (el.hasAttribute(attrName)) {
+            (receivers || (receivers = [])).push(el);
+        }
+        el = el.parentNode;
+        if (!el || el == stopElement) {
+            break;
+        }
+        var component = el.$component;
+        if (component && receivers && receivers.length) {
+            for (var i = 0;;) {
+                var attrValue = receivers[i].getAttribute(attrName);
+                var handler = void 0;
+                if (attrValue.charAt(0) == ':') {
+                    handler = component.constructor[eventsName][attrValue.slice(1)][evt.type];
+                }
+                else {
+                    handler = component[attrValue];
+                }
+                if (handler) {
+                    if (handler.call(component, evt, receivers[i]) === false) {
+                        return;
+                    }
+                    receivers.splice(i, 1);
+                }
+                else {
+                    i++;
+                }
+                if (i == receivers.length) {
+                    break;
+                }
+            }
+        }
+    }
+}
+exports.default = handleEvent;
+
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var nelm_1 = __webpack_require__(12);
 exports.NelmNodeType = nelm_1.NodeType;
 exports.NelmParser = nelm_1.Parser;
@@ -3205,66 +3265,6 @@ var Utils = {
     htmlToFragment: html_to_fragment_1.default
 };
 exports.Utils = Utils;
-
-
-/***/ }),
-/* 50 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function onEvent(evt, stopElement) {
-    var el;
-    var attrName;
-    var receivers;
-    var eventsName;
-    if (evt instanceof Event) {
-        el = evt.target;
-        attrName = 'on-' + evt.type;
-        eventsName = 'domEvents';
-    }
-    else {
-        el = evt.target.element;
-        attrName = 'oncomponent-' + evt.type;
-        eventsName = 'events2';
-    }
-    for (;;) {
-        if (el.hasAttribute(attrName)) {
-            (receivers || (receivers = [])).push(el);
-        }
-        el = el.parentNode;
-        if (!el || el == stopElement) {
-            break;
-        }
-        var component = el.$component;
-        if (component && receivers && receivers.length) {
-            for (var i = 0;;) {
-                var attrValue = receivers[i].getAttribute(attrName);
-                var handler = void 0;
-                if (attrValue.charAt(0) == ':') {
-                    handler = component.constructor[eventsName][attrValue.slice(1)][evt.type];
-                }
-                else {
-                    handler = component[attrValue];
-                }
-                if (handler) {
-                    if (handler.call(component, evt, receivers[i]) === false) {
-                        return;
-                    }
-                    receivers.splice(i, 1);
-                }
-                else {
-                    i++;
-                }
-                if (i == receivers.length) {
-                    break;
-                }
-            }
-        }
-    }
-}
-exports.default = onEvent;
 
 
 /***/ }),

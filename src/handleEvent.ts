@@ -1,7 +1,7 @@
 import { IEvent } from 'cellx';
 import { IPossiblyComponentElement, TEventHandler2, IComponentEvents2, default as Component } from './Component';
 
-export default function onEvent(evt: IEvent | Event, stopElement: Element) {
+export default function handleEvent(evt: IEvent | Event, stopElement: Element) {
 	let el: Element | null;
 	let attrName: string;
 	let receivers: Array<Element> | undefined;
