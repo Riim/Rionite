@@ -233,7 +233,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 				handleEvent(
 					evt,
-					targetOwnerComponent ? targetOwnerComponent.element : this.element.parentNode as Element
+					(targetOwnerComponent ? targetOwnerComponent.element.parentNode : this.element.parentNode) as
+						Element
 				);
 			}
 		}

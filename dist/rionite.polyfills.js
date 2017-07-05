@@ -1725,7 +1725,7 @@ var Component = (function (_super) {
             }
             else {
                 var targetOwnerComponent = evt.target.ownerComponent;
-                handleEvent_1.default(evt, targetOwnerComponent ? targetOwnerComponent.element : this.element.parentNode);
+                handleEvent_1.default(evt, (targetOwnerComponent ? targetOwnerComponent.element.parentNode : this.element.parentNode));
             }
         }
     };
@@ -4660,13 +4660,14 @@ function handleEvent(evt, stopElement) {
         eventsName = 'events2';
     }
     for (;;) {
+        var parentEl = el.parentNode;
+        if (!parentEl || parentEl == stopElement) {
+            break;
+        }
         if (el.hasAttribute(attrName)) {
             (receivers || (receivers = [])).push(el);
         }
-        el = el.parentNode;
-        if (!el || el == stopElement) {
-            break;
-        }
+        el = parentEl;
         var component = el.$component;
         if (component && receivers && receivers.length) {
             for (var i = 0;;) {

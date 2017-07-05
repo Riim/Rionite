@@ -18,15 +18,17 @@ export default function handleEvent(evt: IEvent | Event, stopElement: Element) {
 	}
 
 	for (;;) {
+		let parentEl: Element | null = (el as Element).parentNode as Element | null;
+
+		if (!parentEl || parentEl == stopElement) {
+			break;
+		}
+
 		if (el.hasAttribute(attrName)) {
 			(receivers || (receivers = [])).push(el);
 		}
 
-		el = el.parentNode as Element;
-
-		if (!el || el == stopElement) {
-			break;
-		}
+		el = parentEl;
 
 		let component = (el as IPossiblyComponentElement).$component;
 
