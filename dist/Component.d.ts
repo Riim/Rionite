@@ -15,14 +15,14 @@ export interface IComponentElement extends HTMLElement {
 export interface IComponentElementClassNameMap {
     [elName: string]: string;
 }
-export declare type TEventHandler<T> = (this: T, evt: IEvent | Event) => boolean | void;
-export interface IComponentEvents<T> {
+export declare type TEventHandler<T extends Component> = (this: T, evt: IEvent | Event) => boolean | void;
+export interface IComponentEvents<T extends Component> {
     [elName: string]: {
         [eventName: string]: TEventHandler<T>;
     };
 }
-export declare type TEventHandler2<T> = (this: T, evt: IEvent | Event, receiver: Element) => boolean | void;
-export interface IComponentEvents2<T> {
+export declare type TEventHandler2<T extends Component> = (this: T, evt: IEvent | Event, receiver: Element) => boolean | void;
+export interface IComponentEvents2<T extends Component> {
     [elName: string]: {
         [eventName: string]: TEventHandler2<T>;
     };

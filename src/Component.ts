@@ -36,17 +36,18 @@ export interface IComponentElementClassNameMap {
 	[elName: string]: string;
 }
 
-export type TEventHandler<T> = (this: T, evt: IEvent | Event) => boolean | void;
+export type TEventHandler<T extends Component> = (this: T, evt: IEvent | Event) => boolean | void;
 
-export interface IComponentEvents<T> {
+export interface IComponentEvents<T extends Component> {
 	[elName: string]: {
 		[eventName: string]: TEventHandler<T>;
 	};
 }
 
-export type TEventHandler2<T> = (this: T, evt: IEvent | Event, receiver: Element) => boolean | void;
+export type TEventHandler2<T extends Component> = (this: T, evt: IEvent | Event, receiver: Element) =>
+	boolean | void;
 
-export interface IComponentEvents2<T> {
+export interface IComponentEvents2<T extends Component> {
 	[elName: string]: {
 		[eventName: string]: TEventHandler2<T>;
 	};
@@ -55,8 +56,11 @@ export interface IComponentEvents2<T> {
 let reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)(?:\s[^"]*)?"/g;
 let reInputChangeEventName = /input\-([\-0-9a-z]*)\-change/;
 
-function createClassBlockElementReplacer(contentBlockName: string, events: IComponentEvents2<Component>, evtPrefix: string):
-		(match: string, blockName: string, elName: string) => string {
+function createClassBlockElementReplacer(
+	contentBlockName: string,
+	events: IComponentEvents2<Component>,
+	evtPrefix: string
+): (match: string, blockName: string, elName: string) => string {
 	return function(match: string, blockName: string, elName: string): string {
 		let elEvents: { [eventName: string]: TEventHandler2<Component> };
 
