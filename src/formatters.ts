@@ -1,4 +1,4 @@
-import { getText } from './getText';
+import { getText } from '@riim/gettext';
 
 export let formatters = {
 	or: function or(value: any, arg: any): any {

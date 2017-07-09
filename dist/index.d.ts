@@ -1,3 +1,4 @@
+import { getText, IGetText, IGetTextConfig, ILocaleSettings, ILocalizationTexts } from '@riim/gettext';
 import { IBlock as INelmBlock, NodeType as NelmNodeType, Parser as NelmParser, Template } from 'nelm';
 import { Component, IComponentElement, IComponentElementClassNameMap, IComponentEvents, IComponentOEvents, IPossiblyComponentElement, TEventHandler, TOEventHandler } from './Component';
 import { ComponentInput, IComponentInput } from './ComponentInput';
@@ -9,7 +10,6 @@ import { IItem as IRtRepeatItem, RtRepeat, TItemList as TRtRepeatItemList, TItem
 import { RtSlot } from './Components/rt-slot';
 import { DisposableMixin, IDisposable, IDisposableCallback, IDisposableInterval, IDisposableListening, IDisposableTimeout, IListener, TListeningTarget } from './DisposableMixin';
 import { formatters } from './formatters';
-import { getText, IGetText, IGetTextConfig, ILocaleSettings, ILocalizationTexts } from './getText';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
 import './nelmTemplateHelpers';
 declare let Components: {

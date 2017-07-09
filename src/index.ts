@@ -1,4 +1,11 @@
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
+import {
+	getText,
+	IGetText,
+	IGetTextConfig,
+	ILocaleSettings,
+	ILocalizationTexts
+	} from '@riim/gettext';
 import escapeString from 'escape-string';
 import htmlToFragment from 'html-to-fragment';
 import {
@@ -42,13 +49,6 @@ import {
 	TListeningTarget
 	} from './DisposableMixin';
 import { formatters } from './formatters';
-import {
-	getText,
-	IGetText,
-	IGetTextConfig,
-	ILocaleSettings,
-	ILocalizationTexts
-	} from './getText';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
 import './nelmTemplateHelpers';
 import { camelize } from './Utils/camelize';

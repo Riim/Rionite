@@ -106,14 +106,14 @@ var bindContent_1 = __webpack_require__(5);
 var bindEvents_1 = __webpack_require__(41);
 var componentBinding_1 = __webpack_require__(44);
 var componentConstructorMap_1 = __webpack_require__(29);
-var ComponentInput_1 = __webpack_require__(17);
-var DisposableMixin_1 = __webpack_require__(19);
+var ComponentInput_1 = __webpack_require__(18);
+var DisposableMixin_1 = __webpack_require__(20);
 var ElementProtoMixin_1 = __webpack_require__(3);
 var eventTypes_1 = __webpack_require__(48);
 var Features_1 = __webpack_require__(7);
 var handleEvent_1 = __webpack_require__(49);
 var registerComponent_1 = __webpack_require__(51);
-var camelize_1 = __webpack_require__(20);
+var camelize_1 = __webpack_require__(21);
 var getUID_1 = __webpack_require__(13);
 var moveContent_1 = __webpack_require__(14);
 var Map = cellx_1.JS.Map;
@@ -499,7 +499,7 @@ exports.ComponentDecorator = ComponentDecorator;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Features_1 = __webpack_require__(7);
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
-var defer_1 = __webpack_require__(21);
+var defer_1 = __webpack_require__(22);
 var isConnectionStatusCallbacksSuppressed = false;
 function suppressConnectionStatusCallbacks() {
     isConnectionStatusCallbacksSuppressed = true;
@@ -907,6 +907,97 @@ exports.namePattern = '[$_a-zA-Z][$\\w]*';
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var hasOwn = Object.prototype.hasOwnProperty;
+var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
+var texts;
+var getPluralIndex;
+exports.getText = function getText(context, key, plural, args) {
+    var rawText;
+    if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
+        rawText = plural ?
+            texts[context][key][getPluralIndex(+args[0])] :
+            texts[context][key];
+    }
+    else {
+        rawText = key;
+    }
+    var data = Object.create(null);
+    for (var i = args.length; i;) {
+        data[i] = args[--i];
+    }
+    if (plural) {
+        data.n = args[0];
+    }
+    var splittedRawText = rawText.split(reInsert);
+    var text = [];
+    for (var i = 0, l = splittedRawText.length; i < l;) {
+        if (i % 3) {
+            text.push(splittedRawText[i + 1] ?
+                splittedRawText[i + 1].split('|')[getPluralIndex(data[splittedRawText[i]])] :
+                data[splittedRawText[i]]);
+            i += 2;
+        }
+        else {
+            text.push(splittedRawText[i]);
+            i++;
+        }
+    }
+    return text.join('');
+};
+function configure(config) {
+    texts = config.texts;
+    getPluralIndex = Function('n', "return " + config.localeSettings.plural + ";");
+    exports.getText.localeSettings = config.localeSettings;
+}
+function t(key) {
+    var args = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
+    return exports.getText('', key, false, args);
+}
+function pt(key, context) {
+    var args = [];
+    for (var _i = 2; _i < arguments.length; _i++) {
+        args[_i - 2] = arguments[_i];
+    }
+    return exports.getText(context, key, false, args);
+}
+function nt(key) {
+    var args = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
+    return exports.getText('', key, true, args);
+}
+function npt(key, context) {
+    var args = [];
+    for (var _i = 2; _i < arguments.length; _i++) {
+        args[_i - 2] = arguments[_i];
+    }
+    return exports.getText(context, key, true, args);
+}
+exports.getText.configure = configure;
+exports.getText.t = t;
+exports.getText.pt = pt;
+exports.getText.nt = nt;
+exports.getText.npt = npt;
+configure({
+    localeSettings: {
+        code: 'ru',
+        plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
+    },
+    texts: {}
+});
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var componentInputTypeMap_1 = __webpack_require__(45);
 var componentInputTypeSerializerMap_1 = __webpack_require__(46);
@@ -1044,7 +1135,7 @@ exports.ComponentInput = {
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1198,7 +1289,7 @@ exports.RtIfThen = RtIfThen;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1365,7 +1456,7 @@ exports.DisposableMixin = DisposableMixin;
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1382,7 +1473,7 @@ exports.camelize = camelize;
 
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1416,7 +1507,7 @@ exports.defer = defer;
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1430,13 +1521,13 @@ exports.isRegExp = isRegExp;
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var getText_1 = __webpack_require__(24);
+var gettext_1 = __webpack_require__(17);
 exports.formatters = {
     or: function or(value, arg) {
         return value || arg;
@@ -1469,15 +1560,15 @@ exports.formatters = {
         if (separator === void 0) { separator = ', '; }
         return arr && arr.join(separator);
     },
-    t: getText_1.getText.t,
-    pt: getText_1.getText.pt,
+    t: gettext_1.getText.t,
+    pt: gettext_1.getText.pt,
     nt: function nt(count, key) {
         var args = [];
         for (var _i = 2; _i < arguments.length; _i++) {
             args[_i - 2] = arguments[_i];
         }
         args.unshift(count);
-        return getText_1.getText('', key, true, args);
+        return gettext_1.getText('', key, true, args);
     },
     npt: function npt(count, key, context) {
         var args = [];
@@ -1485,7 +1576,7 @@ exports.formatters = {
             args[_i - 3] = arguments[_i];
         }
         args.unshift(count);
-        return getText_1.getText(context, key, true, args);
+        return gettext_1.getText(context, key, true, args);
     },
     // Safary: "Cannot declare a parameter named 'key' as it shadows the name of a strict mode function."
     key: function key_(obj, key) {
@@ -1495,95 +1586,6 @@ exports.formatters = {
         return JSON.stringify(value);
     }
 };
-
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var hasOwn = Object.prototype.hasOwnProperty;
-var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
-var texts;
-var getPluralIndex;
-exports.getText = function getText(context, key, plural, args) {
-    var rawText;
-    if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
-        rawText = (plural ? texts[context][key][getPluralIndex(+args[0])] : texts[context][key]);
-    }
-    else {
-        rawText = key;
-    }
-    var data = Object.create(null);
-    for (var i = args.length; i;) {
-        data[i] = args[--i];
-    }
-    if (plural) {
-        data.n = args[0];
-    }
-    var splittedRawText = rawText.split(reInsert);
-    var text = [];
-    for (var i = 0, l = splittedRawText.length; i < l;) {
-        if (i % 3) {
-            text.push(splittedRawText[i + 1] ?
-                splittedRawText[i + 1].split('|')[getPluralIndex(data[splittedRawText[i]])] :
-                data[splittedRawText[i]]);
-            i += 2;
-        }
-        else {
-            text.push(splittedRawText[i]);
-            i++;
-        }
-    }
-    return text.join('');
-};
-function configure(config) {
-    texts = config.texts;
-    getPluralIndex = Function('n', "return " + config.localeSettings.plural + ";");
-    exports.getText.localeSettings = config.localeSettings;
-}
-function t(key) {
-    var args = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        args[_i - 1] = arguments[_i];
-    }
-    return exports.getText('', key, false, args);
-}
-function pt(key, context) {
-    var args = [];
-    for (var _i = 2; _i < arguments.length; _i++) {
-        args[_i - 2] = arguments[_i];
-    }
-    return exports.getText(context, key, false, args);
-}
-function nt(key) {
-    var args = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        args[_i - 1] = arguments[_i];
-    }
-    return exports.getText('', key, true, args);
-}
-function npt(key, context) {
-    var args = [];
-    for (var _i = 2; _i < arguments.length; _i++) {
-        args[_i - 2] = arguments[_i];
-    }
-    return exports.getText(context, key, true, args);
-}
-exports.getText.configure = configure;
-exports.getText.t = t;
-exports.getText.pt = pt;
-exports.getText.nt = nt;
-exports.getText.npt = npt;
-configure({
-    localeSettings: {
-        code: 'ru',
-        plural: '(n%100) >= 5 && (n%100) <= 20 ? 2 : (n%10) == 1 ? 0 : (n%10) >= 2 && (n%10) <= 4 ? 1 : 2'
-    },
-    texts: {}
-});
 
 
 /***/ }),
@@ -2214,7 +2216,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var ComponentDecorator_1 = __webpack_require__(2);
-var rt_if_then_1 = __webpack_require__(18);
+var rt_if_then_1 = __webpack_require__(19);
 var RtIfElse = (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
@@ -2873,7 +2875,7 @@ var escape_string_1 = __webpack_require__(11);
 var bindingToJSExpression_1 = __webpack_require__(42);
 var componentInputValueMap_1 = __webpack_require__(10);
 var ContentTextParser_1 = __webpack_require__(26);
-var formatters_1 = __webpack_require__(23);
+var formatters_1 = __webpack_require__(24);
 var ContentTextNodeType = ContentTextParser_1.ContentTextParser.ContentTextNodeType;
 var keyCounter = 0;
 var cache = Object.create(null);
@@ -2996,7 +2998,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var escape_html_1 = __webpack_require__(8);
 var cellx_1 = __webpack_require__(0);
 var componentInputValueMap_1 = __webpack_require__(10);
-var isRegExp_1 = __webpack_require__(22);
+var isRegExp_1 = __webpack_require__(23);
 exports.componentInputTypeSerializerMap = new cellx_1.JS.Map([
     [Boolean, {
             read: function (value, defaultValue) {
@@ -3197,6 +3199,8 @@ exports.handleEvent = handleEvent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var escape_html_1 = __webpack_require__(8);
+var gettext_1 = __webpack_require__(17);
+exports.getText = gettext_1.getText;
 var escape_string_1 = __webpack_require__(11);
 var html_to_fragment_1 = __webpack_require__(25);
 var nelm_1 = __webpack_require__(12);
@@ -3206,28 +3210,26 @@ exports.Template = nelm_1.Template;
 var Component_1 = __webpack_require__(1);
 exports.Component = Component_1.Component;
 var ComponentDecorator_1 = __webpack_require__(2);
-var ComponentInput_1 = __webpack_require__(17);
+var ComponentInput_1 = __webpack_require__(18);
 exports.ComponentInput = ComponentInput_1.ComponentInput;
 var componentInputValueMap_1 = __webpack_require__(10);
 exports.componentInputValueMap = componentInputValueMap_1.componentInputValueMap;
 var rt_content_1 = __webpack_require__(32);
 var rt_if_else_1 = __webpack_require__(33);
-var rt_if_then_1 = __webpack_require__(18);
+var rt_if_then_1 = __webpack_require__(19);
 var rt_repeat_1 = __webpack_require__(34);
 var rt_slot_1 = __webpack_require__(35);
-var DisposableMixin_1 = __webpack_require__(19);
+var DisposableMixin_1 = __webpack_require__(20);
 exports.DisposableMixin = DisposableMixin_1.DisposableMixin;
-var formatters_1 = __webpack_require__(23);
+var formatters_1 = __webpack_require__(24);
 exports.formatters = formatters_1.formatters;
-var getText_1 = __webpack_require__(24);
-exports.getText = getText_1.getText;
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
 exports.KEY_ELEMENT_CONNECTED = KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED;
 __webpack_require__(36);
-var camelize_1 = __webpack_require__(20);
-var defer_1 = __webpack_require__(21);
+var camelize_1 = __webpack_require__(21);
+var defer_1 = __webpack_require__(22);
 var hyphenize_1 = __webpack_require__(9);
-var isRegExp_1 = __webpack_require__(22);
+var isRegExp_1 = __webpack_require__(23);
 var Components = {
     RtContent: rt_content_1.RtContent,
     RtSlot: rt_slot_1.RtSlot,
