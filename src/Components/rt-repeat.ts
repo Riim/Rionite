@@ -1,14 +1,19 @@
-import { ObservableList, Cell, JS, Utils } from 'cellx';
-import Component from '../Component';
-import KEY_ELEMENT_CONNECTED from '../KEY_ELEMENT_CONNECTED';
-import { suppressConnectionStatusCallbacks, resumeConnectionStatusCallbacks } from '../ElementProtoMixin';
-import compileKeypath from '../compileKeypath';
-import bindContent from '../bindContent';
-import attachChildComponentElements from '../attachChildComponentElements';
-import namePattern from '../namePattern';
-import keypathPattern from '../keypathPattern';
+import {
+	Cell,
+	JS,
+	ObservableList,
+	Utils
+	} from 'cellx';
+import { attachChildComponentElements } from '../attachChildComponentElements';
+import { bindContent } from '../bindContent';
+import { compileKeypath } from '../compileKeypath';
+import { Component } from '../Component';
+import { ComponentDecorator } from '../ComponentDecorator';
+import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { templateTag as templateTagFeature } from '../Features';
-import d from '../d';
+import { KEY_ELEMENT_CONNECTED } from '../KEY_ELEMENT_CONNECTED';
+import { keypathPattern } from '../keypathPattern';
+import { namePattern } from '../namePattern';
 
 let Map = JS.Map;
 let nextTick = Utils.nextTick;
@@ -27,7 +32,7 @@ export type TItemMap = Map<any, TItemList>;
 
 let reForAttrValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern })\\s*$`);
 
-@d.Component({
+@ComponentDecorator({
 	elementIs: 'rt-repeat',
 	elementExtends: 'template',
 
@@ -37,7 +42,7 @@ let reForAttrValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern
 		strip: { default: false, readonly: true }
 	}
 })
-export default class RtRepeat extends Component {
+export class RtRepeat extends Component {
 	ownerComponent: Component;
 
 	_itemName: string;

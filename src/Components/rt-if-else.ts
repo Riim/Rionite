@@ -1,10 +1,10 @@
-import d from '../d';
-import RtIfThen from './rt-if-then';
+import { ComponentDecorator } from '../ComponentDecorator';
+import { RtIfThen } from './rt-if-then';
 
-@d.Component({
+@ComponentDecorator({
 	elementIs: 'rt-if-else',
 	elementExtends: 'template'
 })
-export default class RtIfElse extends RtIfThen {
+export class RtIfElse extends RtIfThen {
 	_elseMode = true;
 }

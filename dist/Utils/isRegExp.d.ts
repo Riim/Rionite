@@ -1,1 +1,1 @@
-export default function isRegExp(value: any): boolean;
+export declare function isRegExp(value: any): boolean;

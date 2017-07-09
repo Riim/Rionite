@@ -1,1 +1,1 @@
-export default '[$_a-zA-Z][$\\w]*';
+export let namePattern = '[$_a-zA-Z][$\\w]*';

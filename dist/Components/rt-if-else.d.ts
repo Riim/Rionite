@@ -1,4 +1,4 @@
-import RtIfThen from './rt-if-then';
-export default class RtIfElse extends RtIfThen {
+import { RtIfThen } from './rt-if-then';
+export declare class RtIfElse extends RtIfThen {
     _elseMode: boolean;
 }

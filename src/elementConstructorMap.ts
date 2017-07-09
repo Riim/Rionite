@@ -1,6 +1,6 @@
 import { JS } from 'cellx';
 
-let elementConstructorMap = new JS.Map<string, typeof Element>([
+export let elementConstructorMap = new JS.Map<string, typeof Element>([
 	['a', (<any>window).HTMLAnchorElement],
 	['blockquote', (<any>window).HTMLQuoteElement],
 	['br', (<any>window).HTMLBRElement],
@@ -43,5 +43,3 @@ let elementConstructorMap = new JS.Map<string, typeof Element>([
 	['vhgroupv', (<any>window).HTMLUnknownElement],
 	['vkeygen', (<any>window).HTMLUnknownElement]
 ]);
-
-export default elementConstructorMap;

@@ -1,7 +1,12 @@
 import { IEvent } from 'cellx';
-import { IPossiblyComponentElement, TEventHandler2, IComponentEvents2, default as Component } from './Component';
+import {
+	Component,
+	IComponentEvents,
+	IPossiblyComponentElement,
+	TEventHandler
+	} from './Component';
 
-export default function handleEvent(evt: IEvent | Event, stopElement: Element) {
+export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 	let el: Element | null;
 	let attrName: string;
 	let receivers: Array<Element> | undefined;
@@ -14,7 +19,7 @@ export default function handleEvent(evt: IEvent | Event, stopElement: Element) {
 	} else {
 		el = (evt.target as Component).element;
 		attrName = 'oncomponent-' + evt.type;
-		eventsName = 'events2';
+		eventsName = 'events';
 	}
 
 	for (;;) {
@@ -35,10 +40,10 @@ export default function handleEvent(evt: IEvent | Event, stopElement: Element) {
 		if (component && receivers && receivers.length) {
 			for (let i = 0; ;) {
 				let attrValue = receivers[i].getAttribute(attrName) as string;
-				let handler: TEventHandler2<Component> | undefined;
+				let handler: TEventHandler<Component> | undefined;
 
 				if (attrValue.charAt(0) == ':') {
-					handler = ((component.constructor as typeof Component)[eventsName] as IComponentEvents2<Component>)
+					handler = ((component.constructor as typeof Component)[eventsName] as IComponentEvents<Component>)
 						[attrValue.slice(1)][evt.type];
 				} else {
 					handler = component[attrValue];

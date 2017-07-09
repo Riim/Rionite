@@ -1,6 +1,6 @@
 let cache = Object.create(null);
 
-export default function keypathToJSExpression(keypath: string): string {
+export function keypathToJSExpression(keypath: string): string {
 	if (cache[keypath]) {
 		return cache[keypath];
 	}

@@ -1,1 +1,1 @@
-export default function clearNode(node: Node): Node;
+export declare function clearNode(node: Node): Node;

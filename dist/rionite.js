@@ -101,31 +101,29 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
 var html_to_fragment_1 = __webpack_require__(25);
-var DisposableMixin_1 = __webpack_require__(19);
-var componentConstructorMap_1 = __webpack_require__(29);
-var registerComponent_1 = __webpack_require__(51);
-var ElementProtoMixin_1 = __webpack_require__(3);
-var ComponentInput_1 = __webpack_require__(17);
-var bindContent_1 = __webpack_require__(5);
-var componentBinding_1 = __webpack_require__(44);
 var attachChildComponentElements_1 = __webpack_require__(4);
+var bindContent_1 = __webpack_require__(5);
 var bindEvents_1 = __webpack_require__(41);
+var componentBinding_1 = __webpack_require__(44);
+var componentConstructorMap_1 = __webpack_require__(29);
+var ComponentInput_1 = __webpack_require__(17);
+var DisposableMixin_1 = __webpack_require__(19);
+var ElementProtoMixin_1 = __webpack_require__(3);
 var eventTypes_1 = __webpack_require__(48);
+var Features_1 = __webpack_require__(7);
 var handleEvent_1 = __webpack_require__(49);
+var registerComponent_1 = __webpack_require__(51);
 var camelize_1 = __webpack_require__(20);
 var getUID_1 = __webpack_require__(13);
 var moveContent_1 = __webpack_require__(14);
-var Features_1 = __webpack_require__(7);
 var Map = cellx_1.JS.Map;
-var createClass = cellx_1.Utils.createClass;
 var map = Array.prototype.map;
 var reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)(?:\s[^"]*)?"/g;
 var reInputChangeEventName = /input\-([\-0-9a-z]*)\-change/;
 function createClassBlockElementReplacer(contentBlockName, events, evtPrefix) {
     return function (match, blockName, elName) {
         var elEvents;
-        if (blockName == contentBlockName &&
-            (elEvents = events[elName])) {
+        if (blockName == contentBlockName && (elEvents = events[elName])) {
             var eventAttrs = [];
             for (var type in elEvents) {
                 eventAttrs.push(" " + evtPrefix + type + "=\":" + elName + "\"");
@@ -169,9 +167,9 @@ var Component = (function (_super) {
         _this._attached = false;
         _this.initialized = false;
         _this.isReady = false;
-        DisposableMixin_1.default.call(_this);
+        DisposableMixin_1.DisposableMixin.call(_this);
         var constr = _this.constructor;
-        if (!componentConstructorMap_1.default.has(constr.elementIs)) {
+        if (!componentConstructorMap_1.componentConstructorMap.has(constr.elementIs)) {
             throw new TypeError('Component must be registered');
         }
         if (!el) {
@@ -183,11 +181,6 @@ var Component = (function (_super) {
         _this.created();
         return _this;
     }
-    Component.extend = function (elIs, description) {
-        description.Extends = this;
-        (description.Static || (description.Static = {})).elementIs = elIs;
-        return registerComponent_1.default(createClass(description));
-    };
     Object.defineProperty(Component.prototype, "parentComponent", {
         get: function () {
             if (this._parentComponent !== undefined) {
@@ -205,7 +198,7 @@ var Component = (function (_super) {
     });
     Object.defineProperty(Component.prototype, "input", {
         get: function () {
-            var input = ComponentInput_1.default.init(this);
+            var input = ComponentInput_1.ComponentInput.init(this);
             Object.defineProperty(this, 'input', {
                 configurable: true,
                 enumerable: true,
@@ -220,7 +213,7 @@ var Component = (function (_super) {
     Component.prototype._on = function (type, listener, context) {
         if (!type.lastIndexOf('input-', 0) && reInputChangeEventName.test(type)) {
             cellx_1.EventEmitter.currentlySubscribing = true;
-            this.input[camelize_1.default(RegExp.$1)];
+            this.input[camelize_1.camelize(RegExp.$1)];
             cellx_1.EventEmitter.currentlySubscribing = false;
         }
         _super.prototype._on.call(this, type, listener, context);
@@ -234,7 +227,7 @@ var Component = (function (_super) {
             }
             else {
                 var targetOwnerComponent = evt.target.ownerComponent;
-                handleEvent_1.default(evt, (targetOwnerComponent ? targetOwnerComponent.element.parentNode : this.element.parentNode));
+                handleEvent_1.handleEvent(evt, (targetOwnerComponent ? targetOwnerComponent.element.parentNode : this.element.parentNode));
             }
         }
     };
@@ -244,7 +237,7 @@ var Component = (function (_super) {
             if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
                 var targetName = type.slice(1, index);
                 if (targetName != '*') {
-                    var targetConstr_1 = componentConstructorMap_1.default.get(targetName);
+                    var targetConstr_1 = componentConstructorMap_1.componentConstructorMap.get(targetName);
                     if (!targetConstr_1) {
                         throw new TypeError("Component \"" + targetName + "\" is not defined");
                     }
@@ -266,7 +259,7 @@ var Component = (function (_super) {
                 };
             }
         }
-        return DisposableMixin_1.default.prototype._listenTo.call(this, target, type, listener, context, useCapture);
+        return DisposableMixin_1.DisposableMixin.prototype._listenTo.call(this, target, type, listener, context, useCapture);
     };
     Component.prototype._attach = function () {
         this._attached = true;
@@ -277,8 +270,8 @@ var Component = (function (_super) {
         var constr = this.constructor;
         if (this.isReady) {
             this._unfreezeBindings();
-            if (constr.events) {
-                bindEvents_1.default(this, constr.events);
+            if (constr.oevents) {
+                bindEvents_1.bindEvents(this, constr.oevents);
             }
         }
         else {
@@ -289,16 +282,16 @@ var Component = (function (_super) {
                 this._bindings = null;
                 var childComponents = findChildComponents(el, this.ownerComponent, this.input.$context);
                 if (childComponents) {
-                    attachChildComponentElements_1.default(childComponents);
+                    attachChildComponentElements_1.attachChildComponentElements(childComponents);
                 }
-                if (constr.events) {
-                    bindEvents_1.default(this, constr.events);
+                if (constr.oevents) {
+                    bindEvents_1.bindEvents(this, constr.oevents);
                 }
             }
             else {
                 if (el.firstChild) {
                     ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                    this.input.$content = moveContent_1.default(document.createDocumentFragment(), el);
+                    this.input.$content = moveContent_1.moveContent(document.createDocumentFragment(), el);
                     ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                 }
                 else {
@@ -307,8 +300,8 @@ var Component = (function (_super) {
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
                     var contentHTML = constr.template.render();
-                    if (constr.events2) {
-                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr._contentBlockNames[0], constr.events2, 'oncomponent-'));
+                    if (constr.events) {
+                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr._contentBlockNames[0], constr.events, 'oncomponent-'));
                     }
                     if (constr.domEvents) {
                         contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr._contentBlockNames[0], constr.domEvents, 'on-'));
@@ -322,16 +315,16 @@ var Component = (function (_super) {
                         i += templates[i].content.querySelectorAll('template').length + 1;
                     }
                 }
-                var _a = bindContent_1.default(content, this, this, { 0: null, 1: null }), bindings = _a[0], childComponents = _a[1];
+                var _a = bindContent_1.bindContent(content, this, this, { 0: null, 1: null }), bindings = _a[0], childComponents = _a[1];
                 this._bindings = bindings;
                 ElementProtoMixin_1.suppressConnectionStatusCallbacks();
                 this.element.appendChild(content);
                 ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                 if (childComponents) {
-                    attachChildComponentElements_1.default(childComponents);
+                    attachChildComponentElements_1.attachChildComponentElements(childComponents);
                 }
-                if (constr.events) {
-                    bindEvents_1.default(this, constr.events);
+                if (constr.oevents) {
+                    bindEvents_1.bindEvents(this, constr.oevents);
                 }
             }
             this.ready();
@@ -346,7 +339,7 @@ var Component = (function (_super) {
     };
     Component.prototype.dispose = function () {
         this._freezeBindings();
-        return DisposableMixin_1.default.prototype.dispose.call(this);
+        return DisposableMixin_1.DisposableMixin.prototype.dispose.call(this);
     };
     Component.prototype._freezeBindings = function () {
         if (this._bindings) {
@@ -390,7 +383,7 @@ var Component = (function (_super) {
         var containerEl = container ?
             (container instanceof Component ? container.element : container) :
             this.element;
-        var key = container ? getUID_1.default(containerEl) + '/' + name : name;
+        var key = container ? getUID_1.getUID(containerEl) + '/' + name : name;
         var elList = elListMap.get(key);
         if (!elList) {
             var constr = this.constructor;
@@ -420,18 +413,18 @@ var Component = (function (_super) {
         }
         return elList;
     };
-    Component.register = registerComponent_1.default;
+    Component.register = registerComponent_1.registerComponent;
     Component.elementExtends = null;
     Component.input = null;
     Component.i18n = null;
     Component.template = null;
+    Component.oevents = null;
     Component.events = null;
-    Component.events2 = null;
     Component.domEvents = null;
     return Component;
 }(cellx_1.EventEmitter));
-exports.default = Component;
-var DisposableMixinProto = DisposableMixin_1.default.prototype;
+exports.Component = Component;
+var DisposableMixinProto = DisposableMixin_1.DisposableMixin.prototype;
 var ComponentProto = Component.prototype;
 Object.getOwnPropertyNames(DisposableMixinProto).forEach(function (name) {
     if (!(name in ComponentProto)) {
@@ -448,10 +441,10 @@ elementDetached = ComponentProto.elementDetached;
 elementMoved = ComponentProto.elementMoved;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
-    eventTypes_1.default.forEach(function (type) {
+    eventTypes_1.eventTypes.forEach(function (type) {
         document.documentElement.addEventListener(type, function (evt) {
             if (evt.target != document.documentElement) {
-                handleEvent_1.default(evt, document.documentElement);
+                handleEvent_1.handleEvent(evt, document.documentElement);
             }
         });
     });
@@ -466,36 +459,35 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Component_1 = __webpack_require__(1);
-var d = {
-    Component: function Component_(config) {
-        return function (componentConstr) {
-            componentConstr.elementIs = config.elementIs;
-            if (config.elementExtends !== undefined) {
-                componentConstr.elementExtends = config.elementExtends;
-            }
-            if (config.input !== undefined) {
-                componentConstr.input = config.input;
-            }
-            if (config.i18n !== undefined) {
-                componentConstr.i18n = config.i18n;
-            }
-            if (config.template !== undefined) {
-                componentConstr.template = config.template;
-            }
-            if (config.events !== undefined) {
-                componentConstr.events = config.events;
-            }
-            if (config.events2 !== undefined) {
-                componentConstr.events2 = config.events2;
-            }
-            if (config.domEvents !== undefined) {
-                componentConstr.domEvents = config.domEvents;
-            }
-            Component_1.default.register(componentConstr);
-        };
-    }
-};
-exports.default = d;
+Component_1.Component.register;
+function ComponentDecorator(config) {
+    return function (componentConstr) {
+        componentConstr.elementIs = config.elementIs;
+        if (config.elementExtends !== undefined) {
+            componentConstr.elementExtends = config.elementExtends;
+        }
+        if (config.input !== undefined) {
+            componentConstr.input = config.input;
+        }
+        if (config.i18n !== undefined) {
+            componentConstr.i18n = config.i18n;
+        }
+        if (config.template !== undefined) {
+            componentConstr.template = config.template;
+        }
+        if (config.oevents !== undefined) {
+            componentConstr.oevents = config.oevents;
+        }
+        if (config.events !== undefined) {
+            componentConstr.events = config.events;
+        }
+        if (config.domEvents !== undefined) {
+            componentConstr.domEvents = config.domEvents;
+        }
+        Component_1.Component.register(componentConstr);
+    };
+}
+exports.ComponentDecorator = ComponentDecorator;
 
 
 /***/ }),
@@ -505,9 +497,9 @@ exports.default = d;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var Features_1 = __webpack_require__(7);
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
 var defer_1 = __webpack_require__(21);
-var Features_1 = __webpack_require__(7);
 var isConnectionStatusCallbacksSuppressed = false;
 function suppressConnectionStatusCallbacks() {
     isConnectionStatusCallbacksSuppressed = true;
@@ -517,15 +509,15 @@ function resumeConnectionStatusCallbacks() {
     isConnectionStatusCallbacksSuppressed = false;
 }
 exports.resumeConnectionStatusCallbacks = resumeConnectionStatusCallbacks;
-var ElementProtoMixin = (_a = {
+exports.ElementProtoMixin = (_a = {
         rioniteComponent: null,
         get $component() {
             return this.rioniteComponent || new this.constructor._rioniteComponentConstructor(this);
         }
     },
-    _a[KEY_ELEMENT_CONNECTED_1.default] = false,
+    _a[KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED] = false,
     _a.connectedCallback = function () {
-        this[KEY_ELEMENT_CONNECTED_1.default] = true;
+        this[KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED] = true;
         if (isConnectionStatusCallbacksSuppressed) {
             return;
         }
@@ -544,8 +536,8 @@ var ElementProtoMixin = (_a = {
             }
         }
         else {
-            defer_1.default(function () {
-                if (this[KEY_ELEMENT_CONNECTED_1.default]) {
+            defer_1.defer(function () {
+                if (this[KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED]) {
                     var component_1 = this.$component;
                     component_1._parentComponent = undefined;
                     if (!component_1.parentComponent && !component_1._attached) {
@@ -557,7 +549,7 @@ var ElementProtoMixin = (_a = {
         }
     },
     _a.disconnectedCallback = function () {
-        this[KEY_ELEMENT_CONNECTED_1.default] = false;
+        this[KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED] = false;
         if (isConnectionStatusCallbacksSuppressed) {
             return;
         }
@@ -565,7 +557,7 @@ var ElementProtoMixin = (_a = {
         if (component && component._attached) {
             component._parentComponent = null;
             component.elementDisconnected();
-            defer_1.default(function () {
+            defer_1.defer(function () {
                 if (component._parentComponent === null && component._attached) {
                     component._detach();
                 }
@@ -586,7 +578,6 @@ var ElementProtoMixin = (_a = {
         }
     },
     _a);
-exports.default = ElementProtoMixin;
 var _a;
 
 
@@ -607,7 +598,7 @@ function attachChildComponentElements(childComponents) {
         }
     }
 }
-exports.default = attachChildComponentElements;
+exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
@@ -628,8 +619,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var ContentTextParser_1 = __webpack_require__(26);
 var compileContentText_1 = __webpack_require__(43);
+var ContentTextParser_1 = __webpack_require__(26);
 var setAttribute_1 = __webpack_require__(40);
 var AttributeBindingCell = (function (_super) {
     __extends(AttributeBindingCell, _super);
@@ -651,12 +642,12 @@ var TextNodeBindingCell = (function (_super) {
     return TextNodeBindingCell;
 }(cellx_1.Cell));
 function onAttributeBindingCellChange(evt) {
-    setAttribute_1.default(evt.target.element, evt.target.attributeName, evt.value);
+    setAttribute_1.setAttribute(evt.target.element, evt.target.attributeName, evt.value);
 }
 function onTextNodeBindingCellChange(evt) {
     evt.target.textNode.nodeValue = evt.value;
 }
-var ContentTextNodeType = ContentTextParser_1.default.ContentTextNodeType;
+var ContentTextNodeType = ContentTextParser_1.ContentTextParser.ContentTextNodeType;
 function bindContent(node, ownerComponent, context, result) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         switch (child.nodeType) {
@@ -666,17 +657,17 @@ function bindContent(node, ownerComponent, context, result) {
                     var attr = attrs.item(--i);
                     var value = attr.value;
                     if (value.indexOf('{') != -1) {
-                        var contentText = (new ContentTextParser_1.default(value)).parse();
+                        var contentText = (new ContentTextParser_1.ContentTextParser(value)).parse();
                         if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
                             var name_1 = attr.name;
                             if (name_1.charAt(0) == '_') {
                                 name_1 = name_1.slice(1);
                             }
-                            var cell = new AttributeBindingCell(compileContentText_1.default(contentText, value, contentText.length == 1), child, name_1, {
+                            var cell = new AttributeBindingCell(compileContentText_1.compileContentText(contentText, value, contentText.length == 1), child, name_1, {
                                 owner: context,
                                 onChange: onAttributeBindingCellChange
                             });
-                            setAttribute_1.default(child, name_1, cell.get());
+                            setAttribute_1.setAttribute(child, name_1, cell.get());
                             (result[0] || (result[0] = [])).push(cell);
                         }
                     }
@@ -700,9 +691,9 @@ function bindContent(node, ownerComponent, context, result) {
                 }
                 var value = child.nodeValue;
                 if (value.indexOf('{') != -1) {
-                    var contentText = (new ContentTextParser_1.default(value)).parse();
+                    var contentText = (new ContentTextParser_1.ContentTextParser(value)).parse();
                     if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
-                        var cell = new TextNodeBindingCell(compileContentText_1.default(contentText, value, false), child, {
+                        var cell = new TextNodeBindingCell(compileContentText_1.compileContentText(contentText, value, false), child, {
                             owner: context,
                             onChange: onTextNodeBindingCellChange
                         });
@@ -716,7 +707,7 @@ function bindContent(node, ownerComponent, context, result) {
     }
     return result;
 }
-exports.default = bindContent;
+exports.bindContent = bindContent;
 
 
 /***/ }),
@@ -727,8 +718,7 @@ exports.default = bindContent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var KEY_ELEMENT_CONNECTED = cellx_1.JS.Symbol('Rionite.KEY_ELEMENT_CONNECTED');
-exports.default = KEY_ELEMENT_CONNECTED;
+exports.KEY_ELEMENT_CONNECTED = cellx_1.JS.Symbol('Rionite.KEY_ELEMENT_CONNECTED');
 
 
 /***/ }),
@@ -799,7 +789,7 @@ function hyphenize(str) {
         return '-' + chars.toLowerCase();
     }).replace(reMinus, ''));
 }
-exports.default = hyphenize;
+exports.hyphenize = hyphenize;
 
 
 /***/ }),
@@ -810,8 +800,7 @@ exports.default = hyphenize;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var componentInputValueMap = new cellx_1.JS.Map();
-exports.default = componentInputValueMap;
+exports.componentInputValueMap = new cellx_1.JS.Map();
 
 
 /***/ }),
@@ -859,21 +848,19 @@ var cellx_1 = __webpack_require__(0);
 var nextUID = cellx_1.Utils.nextUID;
 var hasOwn = Object.prototype.hasOwnProperty;
 var KEY_UID = cellx_1.JS.Symbol('uid');
-var getUID;
 if (typeof KEY_UID == 'symbol') {
-    getUID = function getUID(obj) {
+    exports.getUID = function getUID(obj) {
         return hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : (obj[KEY_UID] = nextUID());
     };
 }
 else {
-    getUID = function getUID(obj) {
+    exports.getUID = function getUID(obj) {
         if (!hasOwn.call(obj, KEY_UID)) {
             Object.defineProperty(obj, KEY_UID, { value: nextUID() });
         }
         return obj[KEY_UID];
     };
 }
-exports.default = getUID;
 
 
 /***/ }),
@@ -889,7 +876,7 @@ function moveContent(target, source) {
     }
     return target;
 }
-exports.default = moveContent;
+exports.moveContent = moveContent;
 
 
 /***/ }),
@@ -900,7 +887,7 @@ exports.default = moveContent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var namePattern_1 = __webpack_require__(16);
-exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\.(?:" + namePattern_1.default + "|\\d+))*";
+exports.keypathPattern = "(?:" + namePattern_1.namePattern + "|\\d+)(?:\\.(?:" + namePattern_1.namePattern + "|\\d+))*";
 
 
 /***/ }),
@@ -910,7 +897,7 @@ exports.default = "(?:" + namePattern_1.default + "|\\d+)(?:\\.(?:" + namePatter
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = '[$_a-zA-Z][$\\w]*';
+exports.namePattern = '[$_a-zA-Z][$\\w]*';
 
 
 /***/ }),
@@ -944,8 +931,8 @@ function initComponentInputProperty(componentInput, name, el) {
         if (type === undefined) {
             type = typeof defaultValue;
         }
-        else if (defaultValue !== undefined && componentInputTypeMap_1.default.has(type) &&
-            componentInputTypeMap_1.default.get(type) != typeof defaultValue) {
+        else if (defaultValue !== undefined && componentInputTypeMap_1.componentInputTypeMap.has(type) &&
+            componentInputTypeMap_1.componentInputTypeMap.get(type) != typeof defaultValue) {
             throw new TypeError('Specified type does not match defaultValue type');
         }
         required = cipc.required;
@@ -955,11 +942,11 @@ function initComponentInputProperty(componentInput, name, el) {
         defaultValue = cipc;
         required = readonly = false;
     }
-    var typeSerializer = componentInputTypeSerializerMap_1.default.get(type);
+    var typeSerializer = componentInputTypeSerializerMap_1.componentInputTypeSerializerMap.get(type);
     if (!typeSerializer) {
         throw new TypeError('Unsupported component input type');
     }
-    var hyphenizedName = hyphenize_1.default(name);
+    var hyphenizedName = hyphenize_1.hyphenize(name);
     var rawValue = el.getAttribute(hyphenizedName);
     if (required && rawValue === null) {
         throw new TypeError("Input property \"" + name + "\" is required");
@@ -1041,7 +1028,7 @@ function initComponentInputProperty(componentInput, name, el) {
     }
     Object.defineProperty(componentInput, name, descriptor);
 }
-var ComponentInput = {
+exports.ComponentInput = {
     init: function (component) {
         var componentInputConfig = component.constructor.input;
         var el = component.element;
@@ -1054,7 +1041,6 @@ var ComponentInput = {
         return componentInput;
     }
 };
-exports.default = ComponentInput;
 
 
 /***/ }),
@@ -1081,18 +1067,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var Component_1 = __webpack_require__(1);
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
-var ElementProtoMixin_1 = __webpack_require__(3);
-var compileKeypath_1 = __webpack_require__(28);
-var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var keypathPattern_1 = __webpack_require__(15);
+var bindContent_1 = __webpack_require__(5);
+var compileKeypath_1 = __webpack_require__(28);
+var Component_1 = __webpack_require__(1);
+var ComponentDecorator_1 = __webpack_require__(2);
+var ElementProtoMixin_1 = __webpack_require__(3);
 var Features_1 = __webpack_require__(7);
-var d_1 = __webpack_require__(2);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
+var keypathPattern_1 = __webpack_require__(15);
 var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
-var reKeypath = RegExp("^" + keypathPattern_1.default + "$");
+var reKeypath = RegExp("^" + keypathPattern_1.keypathPattern + "$");
 var RtIfThen = (function (_super) {
     __extends(RtIfThen, _super);
     function RtIfThen() {
@@ -1111,7 +1097,7 @@ var RtIfThen = (function (_super) {
             if (!reKeypath.test(if_)) {
                 throw new SyntaxError("Invalid value of attribute \"if\" (" + if_ + ")");
             }
-            var getIfValue_1 = compileKeypath_1.default(if_);
+            var getIfValue_1 = compileKeypath_1.compileKeypath(if_);
             this._if = new cellx_1.Cell(function () {
                 return !!getIfValue_1.call(this);
             }, { owner: this.input.$context });
@@ -1123,7 +1109,7 @@ var RtIfThen = (function (_super) {
     RtIfThen.prototype.elementDisconnected = function () {
         var _this = this;
         nextTick(function () {
-            if (!_this.element[KEY_ELEMENT_CONNECTED_1.default]) {
+            if (!_this.element[KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED]) {
                 _this._deactivate();
             }
         });
@@ -1149,14 +1135,14 @@ var RtIfThen = (function (_super) {
                     i += templates[i].content.querySelectorAll('template').length + 1;
                 }
             }
-            var _a = bindContent_1.default(content, this.ownerComponent, this.input.$context, { 0: null, 1: null }), bindings = _a[0], childComponents = _a[1];
+            var _a = bindContent_1.bindContent(content, this.ownerComponent, this.input.$context, { 0: null, 1: null }), bindings = _a[0], childComponents = _a[1];
             this._nodes = slice.call(content.childNodes);
             this._bindings = bindings;
             ElementProtoMixin_1.suppressConnectionStatusCallbacks();
             this.element.parentNode.insertBefore(content, this.element.nextSibling);
             ElementProtoMixin_1.resumeConnectionStatusCallbacks();
             if (childComponents) {
-                attachChildComponentElements_1.default(childComponents);
+                attachChildComponentElements_1.attachChildComponentElements(childComponents);
             }
         }
         else {
@@ -1198,7 +1184,7 @@ var RtIfThen = (function (_super) {
         }
     };
     RtIfThen = __decorate([
-        d_1.default.Component({
+        ComponentDecorator_1.ComponentDecorator({
             elementIs: 'rt-if-then',
             elementExtends: 'template',
             input: {
@@ -1207,8 +1193,8 @@ var RtIfThen = (function (_super) {
         })
     ], RtIfThen);
     return RtIfThen;
-}(Component_1.default));
-exports.default = RtIfThen;
+}(Component_1.Component));
+exports.RtIfThen = RtIfThen;
 
 
 /***/ }),
@@ -1375,7 +1361,7 @@ var DisposableMixin = (function () {
     };
     return DisposableMixin;
 }());
-exports.default = DisposableMixin;
+exports.DisposableMixin = DisposableMixin;
 
 
 /***/ }),
@@ -1392,7 +1378,7 @@ function camelize(str) {
         return chr.toUpperCase();
     }));
 }
-exports.default = camelize;
+exports.camelize = camelize;
 
 
 /***/ }),
@@ -1426,7 +1412,7 @@ function defer(cb, context) {
         setTimeout(run, 1);
     }
 }
-exports.default = defer;
+exports.defer = defer;
 
 
 /***/ }),
@@ -1440,7 +1426,7 @@ var toString = Object.prototype.toString;
 function isRegExp(value) {
     return toString.call(value) == '[object RegExp]';
 }
-exports.default = isRegExp;
+exports.isRegExp = isRegExp;
 
 
 /***/ }),
@@ -1451,7 +1437,7 @@ exports.default = isRegExp;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var getText_1 = __webpack_require__(24);
-exports.default = {
+exports.formatters = {
     or: function or(value, arg) {
         return value || arg;
     },
@@ -1483,15 +1469,15 @@ exports.default = {
         if (separator === void 0) { separator = ', '; }
         return arr && arr.join(separator);
     },
-    t: getText_1.default.t,
-    pt: getText_1.default.pt,
+    t: getText_1.getText.t,
+    pt: getText_1.getText.pt,
     nt: function nt(count, key) {
         var args = [];
         for (var _i = 2; _i < arguments.length; _i++) {
             args[_i - 2] = arguments[_i];
         }
         args.unshift(count);
-        return getText_1.default('', key, true, args);
+        return getText_1.getText('', key, true, args);
     },
     npt: function npt(count, key, context) {
         var args = [];
@@ -1499,7 +1485,7 @@ exports.default = {
             args[_i - 3] = arguments[_i];
         }
         args.unshift(count);
-        return getText_1.default(context, key, true, args);
+        return getText_1.getText(context, key, true, args);
     },
     // Safary: "Cannot declare a parameter named 'key' as it shadows the name of a strict mode function."
     key: function key_(obj, key) {
@@ -1522,7 +1508,7 @@ var hasOwn = Object.prototype.hasOwnProperty;
 var reInsert = /\{([1-9]\d*|n)(?::((?:[^|]*\|)+?[^}]*))?\}/;
 var texts;
 var getPluralIndex;
-var getText = function getText(context, key, plural, args) {
+exports.getText = function getText(context, key, plural, args) {
     var rawText;
     if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
         rawText = (plural ? texts[context][key][getPluralIndex(+args[0])] : texts[context][key]);
@@ -1556,42 +1542,41 @@ var getText = function getText(context, key, plural, args) {
 function configure(config) {
     texts = config.texts;
     getPluralIndex = Function('n', "return " + config.localeSettings.plural + ";");
-    getText.localeSettings = config.localeSettings;
+    exports.getText.localeSettings = config.localeSettings;
 }
 function t(key) {
     var args = [];
     for (var _i = 1; _i < arguments.length; _i++) {
         args[_i - 1] = arguments[_i];
     }
-    return getText('', key, false, args);
+    return exports.getText('', key, false, args);
 }
 function pt(key, context) {
     var args = [];
     for (var _i = 2; _i < arguments.length; _i++) {
         args[_i - 2] = arguments[_i];
     }
-    return getText(context, key, false, args);
+    return exports.getText(context, key, false, args);
 }
 function nt(key) {
     var args = [];
     for (var _i = 1; _i < arguments.length; _i++) {
         args[_i - 1] = arguments[_i];
     }
-    return getText('', key, true, args);
+    return exports.getText('', key, true, args);
 }
 function npt(key, context) {
     var args = [];
     for (var _i = 2; _i < arguments.length; _i++) {
         args[_i - 2] = arguments[_i];
     }
-    return getText(context, key, true, args);
+    return exports.getText(context, key, true, args);
 }
-getText.configure = configure;
-getText.t = t;
-getText.pt = pt;
-getText.nt = nt;
-getText.npt = npt;
-exports.default = getText;
+exports.getText.configure = configure;
+exports.getText.t = t;
+exports.getText.pt = pt;
+exports.getText.nt = nt;
+exports.getText.npt = npt;
 configure({
     localeSettings: {
         code: 'ru',
@@ -1641,9 +1626,9 @@ exports.default = htmlToFragment;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var keypathPattern_1 = __webpack_require__(15);
 var keypathToJSExpression_1 = __webpack_require__(30);
 var namePattern_1 = __webpack_require__(16);
-var keypathPattern_1 = __webpack_require__(15);
 var ContentTextNodeType;
 (function (ContentTextNodeType) {
     ContentTextNodeType[ContentTextNodeType["TEXT"] = 1] = "TEXT";
@@ -1653,8 +1638,8 @@ var ContentTextNodeType;
     ContentTextNodeType[ContentTextNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
 })(ContentTextNodeType = exports.ContentTextNodeType || (exports.ContentTextNodeType = {}));
 ;
-var reNameOrNothing = RegExp(namePattern_1.default + '|', 'g');
-var reKeypathOrNothing = RegExp(keypathPattern_1.default + '|', 'g');
+var reNameOrNothing = RegExp(namePattern_1.namePattern + '|', 'g');
+var reKeypathOrNothing = RegExp(keypathPattern_1.keypathPattern + '|', 'g');
 var reBooleanOrNothing = /false|true|/g;
 var reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 var reVacuumOrNothing = /null|undefined|void 0|/g;
@@ -1927,7 +1912,7 @@ var ContentTextParser = (function () {
         var keypath = reKeypathOrNothing.exec(this.contentText)[0];
         if (keypath) {
             this.chr = this.contentText.charAt((this.at += keypath.length));
-            return keypathToJSExpression_1.default(keypath);
+            return keypathToJSExpression_1.keypathToJSExpression(keypath);
         }
         return NOT_VALUE_AND_NOT_KEYPATH;
     };
@@ -1961,7 +1946,7 @@ var ContentTextParser = (function () {
     ContentTextParser.ContentTextNodeType = ContentTextNodeType;
     return ContentTextParser;
 }());
-exports.default = ContentTextParser;
+exports.ContentTextParser = ContentTextParser;
 
 
 /***/ }),
@@ -1977,7 +1962,7 @@ function clearNode(node) {
     }
     return node;
 }
-exports.default = clearNode;
+exports.clearNode = clearNode;
 
 
 /***/ }),
@@ -1990,9 +1975,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var keypathToJSExpression_1 = __webpack_require__(30);
 var cache = Object.create(null);
 function compileKeypath(keypath) {
-    return cache[keypath] || (cache[keypath] = Function("var temp; return " + keypathToJSExpression_1.default(keypath) + ";"));
+    return cache[keypath] || (cache[keypath] = Function("var temp; return " + keypathToJSExpression_1.keypathToJSExpression(keypath) + ";"));
 }
-exports.default = compileKeypath;
+exports.compileKeypath = compileKeypath;
 
 
 /***/ }),
@@ -2003,8 +1988,7 @@ exports.default = compileKeypath;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var componentConstructorMap = new cellx_1.JS.Map();
-exports.default = componentConstructorMap;
+exports.componentConstructorMap = new cellx_1.JS.Map();
 
 
 /***/ }),
@@ -2031,7 +2015,7 @@ function keypathToJSExpression(keypath) {
     }
     return (cache[keypath] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && temp['" + keys[keyCount - 1] + "']");
 }
-exports.default = keypathToJSExpression;
+exports.keypathToJSExpression = keypathToJSExpression;
 
 
 /***/ }),
@@ -2043,7 +2027,7 @@ exports.default = keypathToJSExpression;
 Object.defineProperty(exports, "__esModule", { value: true });
 var Parser_1 = __webpack_require__(52);
 exports.NodeType = Parser_1.NodeType;
-exports.Parser = Parser_1.default;
+exports.Parser = Parser_1.Parser;
 
 
 /***/ }),
@@ -2070,14 +2054,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var Component_1 = __webpack_require__(1);
-var ElementProtoMixin_1 = __webpack_require__(3);
-var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
+var bindContent_1 = __webpack_require__(5);
+var Component_1 = __webpack_require__(1);
+var ComponentDecorator_1 = __webpack_require__(2);
+var ElementProtoMixin_1 = __webpack_require__(3);
+var clearNode_1 = __webpack_require__(27);
 var getUID_1 = __webpack_require__(13);
 var moveContent_1 = __webpack_require__(14);
-var clearNode_1 = __webpack_require__(27);
-var d_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var KEY_CONTENT_MAP = cellx_1.JS.Symbol('contentMap');
 var RtContent = (function (_super) {
@@ -2102,7 +2086,7 @@ var RtContent = (function (_super) {
             var childComponents = void 0;
             if (!clone || ownerComponentContent.firstChild) {
                 var selector = input.select;
-                var key = getUID_1.default(ownerComponent) + '/' + (selector || '');
+                var key = getUID_1.getUID(ownerComponent) + '/' + (selector || '');
                 if (selector) {
                     var contentMap = void 0;
                     if (!clone &&
@@ -2111,7 +2095,7 @@ var RtContent = (function (_super) {
                         contentMap.has(key)) {
                         var c = contentMap.get(key);
                         if (c.firstChild) {
-                            content = moveContent_1.default(document.createDocumentFragment(), c);
+                            content = moveContent_1.moveContent(document.createDocumentFragment(), c);
                             contentMap.set(key, el);
                             bindings = c.$component._bindings;
                             childComponents = c.$component._childComponents;
@@ -2137,7 +2121,7 @@ var RtContent = (function (_super) {
                     var contentMap = contentOwnerComponent[KEY_CONTENT_MAP];
                     if (contentMap && contentMap.has(key)) {
                         var c = contentMap.get(key);
-                        content = moveContent_1.default(document.createDocumentFragment(), c);
+                        content = moveContent_1.moveContent(document.createDocumentFragment(), c);
                         contentMap.set(key, el);
                         bindings = c.$component._bindings;
                         childComponents = c.$component._childComponents;
@@ -2155,10 +2139,10 @@ var RtContent = (function (_super) {
                 if (content || el.firstChild) {
                     var getContext = input.getContext;
                     _a = content ?
-                        bindContent_1.default(content, contentOwnerComponent, getContext ?
+                        bindContent_1.bindContent(content, contentOwnerComponent, getContext ?
                             ownerComponent[getContext](ownerComponent.input.$context, this) :
                             ownerComponent.input.$context, { 0: null, 1: null }) :
-                        bindContent_1.default(el, ownerComponent, input.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
+                        bindContent_1.bindContent(el, ownerComponent, input.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
                     this._childComponents = childComponents;
                 }
                 else {
@@ -2174,13 +2158,13 @@ var RtContent = (function (_super) {
             if (content) {
                 ElementProtoMixin_1.suppressConnectionStatusCallbacks();
                 if (el.firstChild) {
-                    clearNode_1.default(el);
+                    clearNode_1.clearNode(el);
                 }
                 el.appendChild(content);
                 ElementProtoMixin_1.resumeConnectionStatusCallbacks();
             }
             if (childComponents) {
-                attachChildComponentElements_1.default(childComponents);
+                attachChildComponentElements_1.attachChildComponentElements(childComponents);
             }
             this.isReady = true;
         }
@@ -2191,7 +2175,7 @@ var RtContent = (function (_super) {
         this._freezeBindings();
     };
     RtContent = __decorate([
-        d_1.default.Component({
+        ComponentDecorator_1.ComponentDecorator({
             elementIs: 'rt-content',
             input: {
                 select: { type: String, readonly: true },
@@ -2202,8 +2186,8 @@ var RtContent = (function (_super) {
         })
     ], RtContent);
     return RtContent;
-}(Component_1.default));
-exports.default = RtContent;
+}(Component_1.Component));
+exports.RtContent = RtContent;
 
 
 /***/ }),
@@ -2229,7 +2213,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var d_1 = __webpack_require__(2);
+var ComponentDecorator_1 = __webpack_require__(2);
 var rt_if_then_1 = __webpack_require__(18);
 var RtIfElse = (function (_super) {
     __extends(RtIfElse, _super);
@@ -2239,14 +2223,14 @@ var RtIfElse = (function (_super) {
         return _this;
     }
     RtIfElse = __decorate([
-        d_1.default.Component({
+        ComponentDecorator_1.ComponentDecorator({
             elementIs: 'rt-if-else',
             elementExtends: 'template'
         })
     ], RtIfElse);
     return RtIfElse;
-}(rt_if_then_1.default));
-exports.default = RtIfElse;
+}(rt_if_then_1.RtIfThen));
+exports.RtIfElse = RtIfElse;
 
 
 /***/ }),
@@ -2273,21 +2257,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var Component_1 = __webpack_require__(1);
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
-var ElementProtoMixin_1 = __webpack_require__(3);
-var compileKeypath_1 = __webpack_require__(28);
-var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
-var namePattern_1 = __webpack_require__(16);
-var keypathPattern_1 = __webpack_require__(15);
+var bindContent_1 = __webpack_require__(5);
+var compileKeypath_1 = __webpack_require__(28);
+var Component_1 = __webpack_require__(1);
+var ComponentDecorator_1 = __webpack_require__(2);
+var ElementProtoMixin_1 = __webpack_require__(3);
 var Features_1 = __webpack_require__(7);
-var d_1 = __webpack_require__(2);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
+var keypathPattern_1 = __webpack_require__(15);
+var namePattern_1 = __webpack_require__(16);
 var Map = cellx_1.JS.Map;
 var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
 ;
-var reForAttrValue = RegExp("^\\s*(" + namePattern_1.default + ")\\s+of\\s+(" + keypathPattern_1.default + ")\\s*$");
+var reForAttrValue = RegExp("^\\s*(" + namePattern_1.namePattern + ")\\s+of\\s+(" + keypathPattern_1.keypathPattern + ")\\s*$");
 var RtRepeat = (function (_super) {
     __extends(RtRepeat, _super);
     function RtRepeat() {
@@ -2307,7 +2291,7 @@ var RtRepeat = (function (_super) {
                 throw new SyntaxError("Invalid value of attribute \"for\" (" + input['for'] + ")");
             }
             this._itemName = forAttrValue[1];
-            this._list = new cellx_1.Cell(compileKeypath_1.default(forAttrValue[2]), { owner: input.$context });
+            this._list = new cellx_1.Cell(compileKeypath_1.compileKeypath(forAttrValue[2]), { owner: input.$context });
             this._trackBy = input.trackBy;
             var rawItemContent = this._rawItemContent =
                 document.importNode(this.element.content, true);
@@ -2341,7 +2325,7 @@ var RtRepeat = (function (_super) {
     RtRepeat.prototype.elementDisconnected = function () {
         var _this = this;
         nextTick(function () {
-            if (!_this.element[KEY_ELEMENT_CONNECTED_1.default]) {
+            if (!_this.element[KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED]) {
                 _this._deactivate();
             }
         });
@@ -2436,7 +2420,7 @@ var RtRepeat = (function (_super) {
                 i += templates[i].content.querySelectorAll('template').length + 1;
             }
         }
-        var _a = bindContent_1.default(content, this.ownerComponent, Object.create(this.input.$context, (_b = {},
+        var _a = bindContent_1.bindContent(content, this.ownerComponent, Object.create(this.input.$context, (_b = {},
             _b[this._itemName + 'Cell'] = itemCell,
             _b[this._itemName] = {
                 get: function () {
@@ -2468,7 +2452,7 @@ var RtRepeat = (function (_super) {
         ElementProtoMixin_1.resumeConnectionStatusCallbacks();
         this._lastNode = newLastNode;
         if (childComponents) {
-            attachChildComponentElements_1.default(childComponents);
+            attachChildComponentElements_1.attachChildComponentElements(childComponents);
         }
         return true;
         var _b;
@@ -2505,7 +2489,7 @@ var RtRepeat = (function (_super) {
         this._clearByItemMap(this._itemMap);
     };
     RtRepeat = __decorate([
-        d_1.default.Component({
+        ComponentDecorator_1.ComponentDecorator({
             elementIs: 'rt-repeat',
             elementExtends: 'template',
             input: {
@@ -2516,8 +2500,8 @@ var RtRepeat = (function (_super) {
         })
     ], RtRepeat);
     return RtRepeat;
-}(Component_1.default));
-exports.default = RtRepeat;
+}(Component_1.Component));
+exports.RtRepeat = RtRepeat;
 
 
 /***/ }),
@@ -2544,14 +2528,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var Component_1 = __webpack_require__(1);
-var ElementProtoMixin_1 = __webpack_require__(3);
-var bindContent_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(4);
+var bindContent_1 = __webpack_require__(5);
+var Component_1 = __webpack_require__(1);
+var ComponentDecorator_1 = __webpack_require__(2);
+var ElementProtoMixin_1 = __webpack_require__(3);
+var clearNode_1 = __webpack_require__(27);
 var getUID_1 = __webpack_require__(13);
 var moveContent_1 = __webpack_require__(14);
-var clearNode_1 = __webpack_require__(27);
-var d_1 = __webpack_require__(2);
 var Map = cellx_1.JS.Map;
 var KEY_SLOT_CONTENT_MAP = cellx_1.JS.Symbol('slotContentMap');
 var RtSlot = (function (_super) {
@@ -2576,7 +2560,7 @@ var RtSlot = (function (_super) {
             var childComponents = void 0;
             if (!cloneContent || ownerComponentContent.firstChild) {
                 var name_1 = input.name;
-                var key = getUID_1.default(ownerComponent) + '/' + (name_1 || '');
+                var key = getUID_1.getUID(ownerComponent) + '/' + (name_1 || '');
                 if (name_1) {
                     var contentMap = void 0;
                     if (!cloneContent &&
@@ -2585,7 +2569,7 @@ var RtSlot = (function (_super) {
                         contentMap.has(key)) {
                         var c = contentMap.get(key);
                         if (c.firstChild) {
-                            content = moveContent_1.default(document.createDocumentFragment(), c);
+                            content = moveContent_1.moveContent(document.createDocumentFragment(), c);
                             contentMap.set(key, el);
                             bindings = c.$component._bindings;
                             childComponents = c.$component._childComponents;
@@ -2611,7 +2595,7 @@ var RtSlot = (function (_super) {
                     var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
                     if (contentMap && contentMap.has(key)) {
                         var c = contentMap.get(key);
-                        content = moveContent_1.default(document.createDocumentFragment(), c);
+                        content = moveContent_1.moveContent(document.createDocumentFragment(), c);
                         contentMap.set(key, el);
                         bindings = c.$component._bindings;
                         childComponents = c.$component._childComponents;
@@ -2631,10 +2615,10 @@ var RtSlot = (function (_super) {
                 if (content || el.firstChild) {
                     var getContext = input.getContext;
                     _a = content ?
-                        bindContent_1.default(content, contentOwnerComponent, getContext ?
+                        bindContent_1.bindContent(content, contentOwnerComponent, getContext ?
                             ownerComponent[getContext](ownerComponent.input.$context, this) :
                             ownerComponent.input.$context, { 0: null, 1: null }) :
-                        bindContent_1.default(el, ownerComponent, input.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
+                        bindContent_1.bindContent(el, ownerComponent, input.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
                     this._childComponents = childComponents;
                 }
                 else {
@@ -2650,13 +2634,13 @@ var RtSlot = (function (_super) {
             if (content) {
                 ElementProtoMixin_1.suppressConnectionStatusCallbacks();
                 if (el.firstChild) {
-                    clearNode_1.default(el);
+                    clearNode_1.clearNode(el);
                 }
                 el.appendChild(content);
                 ElementProtoMixin_1.resumeConnectionStatusCallbacks();
             }
             if (childComponents) {
-                attachChildComponentElements_1.default(childComponents);
+                attachChildComponentElements_1.attachChildComponentElements(childComponents);
             }
             this.isReady = true;
         }
@@ -2667,7 +2651,7 @@ var RtSlot = (function (_super) {
         this._freezeBindings();
     };
     RtSlot = __decorate([
-        d_1.default.Component({
+        ComponentDecorator_1.ComponentDecorator({
             elementIs: 'rt-slot',
             input: {
                 name: { type: String, readonly: true },
@@ -2678,8 +2662,8 @@ var RtSlot = (function (_super) {
         })
     ], RtSlot);
     return RtSlot;
-}(Component_1.default));
-exports.default = RtSlot;
+}(Component_1.Component));
+exports.RtSlot = RtSlot;
 
 
 /***/ }),
@@ -2704,7 +2688,7 @@ nelm_1.Template.helpers['if-then'] = nelm_1.Template.helpers['if-else'] = nelm_1
             nodeType: nelm_1.NodeType.ELEMENT,
             isHelper: false,
             tagName: 'template',
-            names: el.names,
+            names: el.names && el.names[0] ? ['$' + el.names[0]].concat(el.names) : el.names,
             attributes: attrs,
             content: el.content
         }];
@@ -2808,7 +2792,7 @@ function setAttribute(el, name, value) {
         el.setAttribute(name, value === true ? '' : value);
     }
 }
-exports.default = setAttribute;
+exports.setAttribute = setAttribute;
 
 
 /***/ }),
@@ -2839,7 +2823,7 @@ function bindEvents(component, events) {
         }
     }
 }
-exports.default = bindEvents;
+exports.bindEvents = bindEvents;
 
 
 /***/ }),
@@ -2875,7 +2859,7 @@ function bindingToJSExpression(binding) {
     var jsExpr = "(temp = this['" + keys[0] + "'])" + jsExprArr.join('') + " && temp['" + keys[keyCount - 1] + "']";
     return (cache[bindingRaw] = formatters ? formatters.reduce(formattersReducer, jsExpr) : jsExpr);
 }
-exports.default = bindingToJSExpression;
+exports.bindingToJSExpression = bindingToJSExpression;
 
 
 /***/ }),
@@ -2886,11 +2870,11 @@ exports.default = bindingToJSExpression;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var escape_string_1 = __webpack_require__(11);
+var bindingToJSExpression_1 = __webpack_require__(42);
 var componentInputValueMap_1 = __webpack_require__(10);
 var ContentTextParser_1 = __webpack_require__(26);
-var bindingToJSExpression_1 = __webpack_require__(42);
 var formatters_1 = __webpack_require__(23);
-var ContentTextNodeType = ContentTextParser_1.default.ContentTextNodeType;
+var ContentTextNodeType = ContentTextParser_1.ContentTextParser.ContentTextNodeType;
 var keyCounter = 0;
 var cache = Object.create(null);
 function compileContentText(contentText, contentTextString, c) {
@@ -2902,7 +2886,7 @@ function compileContentText(contentText, contentTextString, c) {
     if (contentText.length == 1) {
         inner = Function('formatters', "var temp; return " + (contentText[0].nodeType == ContentTextNodeType.TEXT ?
             "'" + escape_string_1.default(contentText[0].value) + "'" :
-            bindingToJSExpression_1.default(contentText[0])) + ";");
+            bindingToJSExpression_1.bindingToJSExpression(contentText[0])) + ";");
     }
     else {
         var jsExpr = [];
@@ -2910,23 +2894,23 @@ function compileContentText(contentText, contentTextString, c) {
             var node = contentText_1[_i];
             jsExpr.push(node.nodeType == ContentTextNodeType.TEXT ?
                 "'" + escape_string_1.default(node.value) + "'" :
-                bindingToJSExpression_1.default(node));
+                bindingToJSExpression_1.bindingToJSExpression(node));
         }
         inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
     }
     return (cache[key] = c ? function () {
-        var value = inner.call(this, formatters_1.default);
+        var value = inner.call(this, formatters_1.formatters);
         if (value && typeof value == 'object') {
             var key_1 = String(++keyCounter);
-            componentInputValueMap_1.default.set(key_1, value);
+            componentInputValueMap_1.componentInputValueMap.set(key_1, value);
             return key_1;
         }
         return value;
     } : function () {
-        return inner.call(this, formatters_1.default);
+        return inner.call(this, formatters_1.formatters);
     });
 }
-exports.default = compileContentText;
+exports.compileContentText = compileContentText;
 
 
 /***/ }),
@@ -2990,7 +2974,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-exports.default = new cellx_1.JS.Map([
+exports.componentInputTypeMap = new cellx_1.JS.Map([
     [Boolean, 'boolean'],
     ['boolean', 'boolean'],
     [Number, 'number'],
@@ -3009,11 +2993,11 @@ exports.default = new cellx_1.JS.Map([
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var cellx_1 = __webpack_require__(0);
 var escape_html_1 = __webpack_require__(8);
+var cellx_1 = __webpack_require__(0);
 var componentInputValueMap_1 = __webpack_require__(10);
 var isRegExp_1 = __webpack_require__(22);
-var componentInputTypeSerializerMap = new cellx_1.JS.Map([
+exports.componentInputTypeSerializerMap = new cellx_1.JS.Map([
     [Boolean, {
             read: function (value, defaultValue) {
                 return value !== null ? value != 'no' : !!defaultValue;
@@ -3043,11 +3027,11 @@ var componentInputTypeSerializerMap = new cellx_1.JS.Map([
                 if (value === null) {
                     return defaultValue || null;
                 }
-                if (!componentInputValueMap_1.default.has(value)) {
+                if (!componentInputValueMap_1.componentInputValueMap.has(value)) {
                     throw new TypeError('Value is not an object');
                 }
-                var val = componentInputValueMap_1.default.get(value);
-                componentInputValueMap_1.default.delete(value);
+                var val = componentInputValueMap_1.componentInputValueMap.get(value);
+                componentInputValueMap_1.componentInputValueMap.delete(value);
                 return val;
             },
             write: function (value) {
@@ -3061,15 +3045,14 @@ var componentInputTypeSerializerMap = new cellx_1.JS.Map([
                     (defaultValue !== undefined ? defaultValue : null);
             },
             write: function (value) {
-                return value != null ? escape_html_1.escapeHTML(isRegExp_1.default(value) ? value.toString() : JSON.stringify(value)) : null;
+                return value != null ? escape_html_1.escapeHTML(isRegExp_1.isRegExp(value) ? value.toString() : JSON.stringify(value)) : null;
             }
         }]
 ]);
-componentInputTypeSerializerMap.set('boolean', componentInputTypeSerializerMap.get(Boolean));
-componentInputTypeSerializerMap.set('number', componentInputTypeSerializerMap.get(Number));
-componentInputTypeSerializerMap.set('string', componentInputTypeSerializerMap.get(String));
-componentInputTypeSerializerMap.set('object', componentInputTypeSerializerMap.get(Object));
-exports.default = componentInputTypeSerializerMap;
+exports.componentInputTypeSerializerMap.set('boolean', exports.componentInputTypeSerializerMap.get(Boolean));
+exports.componentInputTypeSerializerMap.set('number', exports.componentInputTypeSerializerMap.get(Number));
+exports.componentInputTypeSerializerMap.set('string', exports.componentInputTypeSerializerMap.get(String));
+exports.componentInputTypeSerializerMap.set('object', exports.componentInputTypeSerializerMap.get(Object));
 
 
 /***/ }),
@@ -3080,7 +3063,7 @@ exports.default = componentInputTypeSerializerMap;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
-var elementConstructorMap = new cellx_1.JS.Map([
+exports.elementConstructorMap = new cellx_1.JS.Map([
     ['a', window.HTMLAnchorElement],
     ['blockquote', window.HTMLQuoteElement],
     ['br', window.HTMLBRElement],
@@ -3123,7 +3106,6 @@ var elementConstructorMap = new cellx_1.JS.Map([
     ['vhgroupv', window.HTMLUnknownElement],
     ['vkeygen', window.HTMLUnknownElement]
 ]);
-exports.default = elementConstructorMap;
 
 
 /***/ }),
@@ -3133,7 +3115,7 @@ exports.default = elementConstructorMap;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = [
+exports.eventTypes = [
     'change',
     'click',
     'dblclick',
@@ -3166,7 +3148,7 @@ function handleEvent(evt, stopElement) {
     else {
         el = evt.target.element;
         attrName = 'oncomponent-' + evt.type;
-        eventsName = 'events2';
+        eventsName = 'events';
     }
     for (;;) {
         var parentEl = el.parentNode;
@@ -3204,7 +3186,7 @@ function handleEvent(evt, stopElement) {
         }
     }
 }
-exports.default = handleEvent;
+exports.handleEvent = handleEvent;
 
 
 /***/ }),
@@ -3214,55 +3196,58 @@ exports.default = handleEvent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var escape_html_1 = __webpack_require__(8);
+var escape_string_1 = __webpack_require__(11);
+var html_to_fragment_1 = __webpack_require__(25);
 var nelm_1 = __webpack_require__(12);
 exports.NelmNodeType = nelm_1.NodeType;
 exports.NelmParser = nelm_1.Parser;
 exports.Template = nelm_1.Template;
-var escape_string_1 = __webpack_require__(11);
-var escape_html_1 = __webpack_require__(8);
-var html_to_fragment_1 = __webpack_require__(25);
-var DisposableMixin_1 = __webpack_require__(19);
-exports.DisposableMixin = DisposableMixin_1.default;
-var formatters_1 = __webpack_require__(23);
-exports.formatters = formatters_1.default;
-var getText_1 = __webpack_require__(24);
-exports.getText = getText_1.default;
 var Component_1 = __webpack_require__(1);
-exports.Component = Component_1.default;
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
-exports.KEY_ELEMENT_CONNECTED = KEY_ELEMENT_CONNECTED_1.default;
+exports.Component = Component_1.Component;
+var ComponentDecorator_1 = __webpack_require__(2);
 var ComponentInput_1 = __webpack_require__(17);
-exports.ComponentInput = ComponentInput_1.default;
+exports.ComponentInput = ComponentInput_1.ComponentInput;
 var componentInputValueMap_1 = __webpack_require__(10);
-exports.componentInputValueMap = componentInputValueMap_1.default;
+exports.componentInputValueMap = componentInputValueMap_1.componentInputValueMap;
 var rt_content_1 = __webpack_require__(32);
-var rt_slot_1 = __webpack_require__(35);
-var rt_if_then_1 = __webpack_require__(18);
 var rt_if_else_1 = __webpack_require__(33);
+var rt_if_then_1 = __webpack_require__(18);
 var rt_repeat_1 = __webpack_require__(34);
-var d_1 = __webpack_require__(2);
-exports.d = d_1.default;
+var rt_slot_1 = __webpack_require__(35);
+var DisposableMixin_1 = __webpack_require__(19);
+exports.DisposableMixin = DisposableMixin_1.DisposableMixin;
+var formatters_1 = __webpack_require__(23);
+exports.formatters = formatters_1.formatters;
+var getText_1 = __webpack_require__(24);
+exports.getText = getText_1.getText;
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(6);
+exports.KEY_ELEMENT_CONNECTED = KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED;
+__webpack_require__(36);
 var camelize_1 = __webpack_require__(20);
+var defer_1 = __webpack_require__(21);
 var hyphenize_1 = __webpack_require__(9);
 var isRegExp_1 = __webpack_require__(22);
-var defer_1 = __webpack_require__(21);
-__webpack_require__(36);
 var Components = {
-    RtContent: rt_content_1.default,
-    RtSlot: rt_slot_1.default,
-    RtIfThen: rt_if_then_1.default,
-    RtIfElse: rt_if_else_1.default,
-    RtRepeat: rt_repeat_1.default
+    RtContent: rt_content_1.RtContent,
+    RtSlot: rt_slot_1.RtSlot,
+    RtIfThen: rt_if_then_1.RtIfThen,
+    RtIfElse: rt_if_else_1.RtIfElse,
+    RtRepeat: rt_repeat_1.RtRepeat
 };
 exports.Components = Components;
+var d = {
+    Component: ComponentDecorator_1.ComponentDecorator
+};
+exports.d = d;
 var Utils = {
-    camelize: camelize_1.default,
-    hyphenize: hyphenize_1.default,
+    camelize: camelize_1.camelize,
+    hyphenize: hyphenize_1.hyphenize,
     escapeString: escape_string_1.default,
     escapeHTML: escape_html_1.escapeHTML,
     unescapeHTML: escape_html_1.unescapeHTML,
-    isRegExp: isRegExp_1.default,
-    defer: defer_1.default,
+    isRegExp: isRegExp_1.isRegExp,
+    defer: defer_1.defer,
     htmlToFragment: html_to_fragment_1.default
 };
 exports.Utils = Utils;
@@ -3301,7 +3286,7 @@ function registerComponent(componentConstr) {
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
-    if (componentConstructorMap_1.default.has(elIs)) {
+    if (componentConstructorMap_1.componentConstructorMap.has(elIs)) {
         throw new TypeError("Component \"" + elIs + "\" already registered");
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype).constructor;
@@ -3325,12 +3310,12 @@ function registerComponent(componentConstr) {
     }
     componentConstr._rawContent = undefined;
     componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
+    inheritProperty(componentConstr, parentComponentConstr, 'oevents', 1);
     inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
-    inheritProperty(componentConstr, parentComponentConstr, 'events2', 1);
     inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
     var elExtends = componentConstr.elementExtends;
     var parentElConstr = elExtends ?
-        elementConstructorMap_1.default.get(elExtends) ||
+        elementConstructorMap_1.elementConstructorMap.get(elExtends) ||
             window["HTML" + (elExtends.charAt(0).toUpperCase() + elExtends.slice(1)) + "Element"] :
         HTMLElement;
     var elConstr = function (self) {
@@ -3347,21 +3332,21 @@ function registerComponent(componentConstr) {
             }
             var observedAttrs = [];
             for (var name_1 in inputConfig) {
-                observedAttrs.push(hyphenize_1.default(name_1));
+                observedAttrs.push(hyphenize_1.hyphenize(name_1));
             }
             return observedAttrs;
         }
     });
     var elProto = elConstr.prototype = Object.create(parentElConstr.prototype);
     elProto.constructor = elConstr;
-    mixin(elProto, ElementProtoMixin_1.default);
+    mixin(elProto, ElementProtoMixin_1.ElementProtoMixin);
     window.customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
-    componentConstructorMap_1.default.set(elIs, componentConstr);
-    componentConstructorMap_1.default.set(elIs.toUpperCase(), componentConstr);
-    elementConstructorMap_1.default.set(elIs, elConstr);
+    componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr);
+    componentConstructorMap_1.componentConstructorMap.set(elIs.toUpperCase(), componentConstr);
+    elementConstructorMap_1.elementConstructorMap.set(elIs, elConstr);
     return componentConstr;
 }
-exports.default = registerComponent;
+exports.registerComponent = registerComponent;
 
 
 /***/ }),
@@ -3789,7 +3774,7 @@ var Parser = (function () {
     };
     return Parser;
 }());
-exports.default = Parser;
+exports.Parser = Parser;
 
 
 /***/ }),
@@ -3799,10 +3784,10 @@ exports.default = Parser;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var nelm_parser_1 = __webpack_require__(31);
-var escape_string_1 = __webpack_require__(11);
 var escape_html_1 = __webpack_require__(8);
 var self_closing_tags_1 = __webpack_require__(39);
+var escape_string_1 = __webpack_require__(11);
+var nelm_parser_1 = __webpack_require__(31);
 var join = Array.prototype.join;
 var elNameDelimiter = '__';
 var Template = (function () {
@@ -3975,7 +3960,7 @@ var Template = (function () {
                 }
                 if (isHelper) {
                     if (!tagName) {
-                        throw new TypeError('tagName is required');
+                        throw new TypeError('"tagName" is required');
                     }
                     var helper = Template.helpers[tagName];
                     if (!helper) {

@@ -1,19 +1,19 @@
 import { JS } from 'cellx';
-import { IComponentElement, default as Component } from '../Component';
-import { suppressConnectionStatusCallbacks, resumeConnectionStatusCallbacks } from '../ElementProtoMixin';
-import bindContent from '../bindContent';
+import { attachChildComponentElements } from '../attachChildComponentElements';
+import { bindContent } from '../bindContent';
+import { Component, IComponentElement } from '../Component';
 import { IFreezableCell } from '../componentBinding';
-import attachChildComponentElements from '../attachChildComponentElements';
-import getUID from '../Utils/getUID';
-import moveContent from '../Utils/moveContent';
-import clearNode from '../Utils/clearNode';
-import d from '../d';
+import { ComponentDecorator } from '../ComponentDecorator';
+import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
+import { clearNode } from '../Utils/clearNode';
+import { getUID } from '../Utils/getUID';
+import { moveContent } from '../Utils/moveContent';
 
 let Map = JS.Map;
 
 let KEY_CONTENT_MAP = JS.Symbol('contentMap');
 
-@d.Component({
+@ComponentDecorator({
 	elementIs: 'rt-content',
 
 	input: {
@@ -24,7 +24,7 @@ let KEY_CONTENT_MAP = JS.Symbol('contentMap');
 
 	template: ''
 })
-export default class RtContent extends Component {
+export class RtContent extends Component {
 	ownerComponent: Component;
 
 	_childComponents: Array<Component> | null;
@@ -54,9 +54,9 @@ export default class RtContent extends Component {
 
 					if (
 						!clone &&
-							contentOwnerComponent &&
-							(contentMap = contentOwnerComponent[KEY_CONTENT_MAP]) &&
-							contentMap.has(key)
+						contentOwnerComponent &&
+						(contentMap = contentOwnerComponent[KEY_CONTENT_MAP]) &&
+						contentMap.has(key)
 					) {
 						let c = contentMap.get(key) as IComponentElement;
 
@@ -112,15 +112,15 @@ export default class RtContent extends Component {
 					let getContext = input.getContext;
 
 					[this._bindings, childComponents] = content ?
-						bindContent(
-							content,
-							contentOwnerComponent as Component,
-							getContext ?
-								ownerComponent[getContext](ownerComponent.input.$context, this) :
-								ownerComponent.input.$context,
-							{ 0: null, 1: null } as any
-						) :
-						bindContent(el, ownerComponent, input.$context as Object, { 0: null, 1: null } as any);
+					bindContent(
+						content,
+						contentOwnerComponent as Component,
+						getContext ?
+							ownerComponent[getContext](ownerComponent.input.$context, this) :
+							ownerComponent.input.$context,
+						{ 0: null, 1: null } as any
+					) :
+					bindContent(el, ownerComponent, input.$context as Object, { 0: null, 1: null } as any);
 
 					this._childComponents = childComponents;
 				} else {

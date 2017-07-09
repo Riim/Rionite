@@ -1,14 +1,14 @@
-import { JS } from 'cellx';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
-import componentInputValueMap from './componentInputValueMap';
-import isRegExp from './Utils/isRegExp';
+import { JS } from 'cellx';
+import { componentInputValueMap } from './componentInputValueMap';
+import { isRegExp } from './Utils/isRegExp';
 
 export interface IComponentInputTypeSerializer {
 	read: (value: string | null, defaultValue: any) => any;
 	write: (value: any, defaultValue?: any) => string | null;
 }
 
-let componentInputTypeSerializerMap = new JS.Map<any, IComponentInputTypeSerializer>([
+export let componentInputTypeSerializerMap = new JS.Map<any, IComponentInputTypeSerializer>([
 	[Boolean, {
 		read: (value: string | null, defaultValue: boolean | undefined): boolean => {
 			return value !== null ? value != 'no' : !!defaultValue;
@@ -83,5 +83,3 @@ componentInputTypeSerializerMap.set(
 	'object',
 	componentInputTypeSerializerMap.get(Object) as IComponentInputTypeSerializer
 );
-
-export default componentInputTypeSerializerMap;

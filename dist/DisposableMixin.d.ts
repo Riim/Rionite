@@ -1,4 +1,4 @@
-import { IEvent, EventEmitter } from 'cellx';
+import { EventEmitter, IEvent } from 'cellx';
 export interface IDisposable {
     dispose(): any;
     [key: string]: any;
@@ -20,7 +20,7 @@ export declare type TListeningTarget = EventEmitter | EventTarget | Array<EventE
 export interface IListener {
     (evt: IEvent | Event): boolean | void;
 }
-export default class DisposableMixin implements IDisposable {
+export declare class DisposableMixin implements IDisposable {
     _disposables: {
         [id: string]: IDisposable;
     };

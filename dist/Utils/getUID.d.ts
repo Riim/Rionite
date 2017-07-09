@@ -1,2 +1,1 @@
-declare let getUID: (obj: Object) => string;
-export default getUID;
+export declare let getUID: (obj: Object) => string;

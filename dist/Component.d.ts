@@ -1,9 +1,9 @@
-import { IEvent, IEventEmitterListener, EventEmitter } from 'cellx';
+import { EventEmitter, IEvent, IEventEmitterListener } from 'cellx';
 import { IBlock, Template } from 'nelm';
-import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
-import registerComponent from './registerComponent';
-import { IComponentInput } from './ComponentInput';
 import { IFreezableCell } from './componentBinding';
+import { IComponentInput } from './ComponentInput';
+import { DisposableMixin, IDisposableListening, IListener } from './DisposableMixin';
+import { registerComponent } from './registerComponent';
 export interface IPossiblyComponentElement extends HTMLElement {
     rioniteComponent?: Component | null;
     $component?: Component;
@@ -15,20 +15,19 @@ export interface IComponentElement extends HTMLElement {
 export interface IComponentElementClassNameMap {
     [elName: string]: string;
 }
-export declare type TEventHandler<T extends Component> = (this: T, evt: IEvent | Event) => boolean | void;
+export declare type TOEventHandler<T extends Component> = (this: T, evt: IEvent | Event) => boolean | void;
+export interface IComponentOEvents<T extends Component> {
+    [elName: string]: {
+        [eventName: string]: TOEventHandler<T>;
+    };
+}
+export declare type TEventHandler<T extends Component> = (this: T, evt: IEvent | Event, receiver: Element) => boolean | void;
 export interface IComponentEvents<T extends Component> {
     [elName: string]: {
         [eventName: string]: TEventHandler<T>;
     };
 }
-export declare type TEventHandler2<T extends Component> = (this: T, evt: IEvent | Event, receiver: Element) => boolean | void;
-export interface IComponentEvents2<T extends Component> {
-    [elName: string]: {
-        [eventName: string]: TEventHandler2<T>;
-    };
-}
-export default class Component extends EventEmitter implements DisposableMixin {
-    static extend(elIs: string, description: any): typeof Component;
+export declare class Component extends EventEmitter implements DisposableMixin {
     static register: typeof registerComponent;
     static elementIs: string;
     static elementExtends: string | null;
@@ -43,9 +42,9 @@ export default class Component extends EventEmitter implements DisposableMixin {
     static _contentBlockNames: Array<string>;
     static _rawContent: DocumentFragment | undefined;
     static _elementClassNameMap: IComponentElementClassNameMap;
+    static oevents: IComponentOEvents<Component> | null;
     static events: IComponentEvents<Component> | null;
-    static events2: IComponentEvents2<Component> | null;
-    static domEvents: IComponentEvents2<Component> | null;
+    static domEvents: IComponentEvents<Component> | null;
     _disposables: typeof DisposableMixin.prototype._disposables;
     ownerComponent: Component | null;
     _parentComponent: Component | null | undefined;

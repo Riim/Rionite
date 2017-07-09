@@ -1,4 +1,9 @@
-import { NodeType, TContent, IElement, Template } from 'nelm';
+import {
+	IElement,
+	NodeType,
+	TContent,
+	Template
+	} from 'nelm';
 
 Template.helpers['if-then'] = Template.helpers['if-else'] = Template.helpers['repeat'] = (el: IElement): TContent => {
 	let origAttrs = el.attributes;
@@ -16,7 +21,7 @@ Template.helpers['if-then'] = Template.helpers['if-else'] = Template.helpers['re
 		nodeType: NodeType.ELEMENT,
 		isHelper: false,
 		tagName: 'template',
-		names: el.names,
+		names: el.names && el.names[0] ? ['$' + el.names[0], ...el.names] : el.names,
 		attributes: attrs,
 		content: el.content
 	} as IElement];

@@ -1,11 +1,8 @@
-import { EventEmitter, Cell } from 'cellx';
-import { IComponentElement, default as Component } from './Component';
-import componentInputTypeMap from './componentInputTypeMap';
-import {
-	IComponentInputTypeSerializer,
-	default as componentInputTypeSerializerMap
-} from './componentInputTypeSerializerMap';
-import hyphenize from './Utils/hyphenize';
+import { Cell, EventEmitter } from 'cellx';
+import { Component, IComponentElement } from './Component';
+import { componentInputTypeMap } from './componentInputTypeMap';
+import { componentInputTypeSerializerMap, IComponentInputTypeSerializer } from './componentInputTypeSerializerMap';
+import { hyphenize } from './Utils/hyphenize';
 
 export interface IComponentInput extends Object {
 	$content: DocumentFragment | null;
@@ -154,7 +151,7 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 	Object.defineProperty(componentInput, name, descriptor);
 }
 
-let ComponentInput = {
+export let ComponentInput = {
 	init(component: Component): IComponentInput {
 		let componentInputConfig = (component.constructor as typeof Component).input;
 		let el = component.element;
@@ -169,5 +166,3 @@ let ComponentInput = {
 		return componentInput;
 	}
 };
-
-export default ComponentInput;

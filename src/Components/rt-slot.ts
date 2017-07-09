@@ -1,19 +1,19 @@
 import { JS } from 'cellx';
-import { IComponentElement, default as Component } from '../Component';
-import { suppressConnectionStatusCallbacks, resumeConnectionStatusCallbacks } from '../ElementProtoMixin';
-import bindContent from '../bindContent';
+import { attachChildComponentElements } from '../attachChildComponentElements';
+import { bindContent } from '../bindContent';
+import { Component, IComponentElement } from '../Component';
 import { IFreezableCell } from '../componentBinding';
-import attachChildComponentElements from '../attachChildComponentElements';
-import getUID from '../Utils/getUID';
-import moveContent from '../Utils/moveContent';
-import clearNode from '../Utils/clearNode';
-import d from '../d';
+import { ComponentDecorator } from '../ComponentDecorator';
+import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
+import { clearNode } from '../Utils/clearNode';
+import { getUID } from '../Utils/getUID';
+import { moveContent } from '../Utils/moveContent';
 
 let Map = JS.Map;
 
 let KEY_SLOT_CONTENT_MAP = JS.Symbol('slotContentMap');
 
-@d.Component({
+@ComponentDecorator({
 	elementIs: 'rt-slot',
 
 	input: {
@@ -24,7 +24,7 @@ let KEY_SLOT_CONTENT_MAP = JS.Symbol('slotContentMap');
 
 	template: ''
 })
-export default class RtSlot extends Component {
+export class RtSlot extends Component {
 	ownerComponent: Component;
 
 	_childComponents: Array<Component> | null;
@@ -54,9 +54,9 @@ export default class RtSlot extends Component {
 
 					if (
 						!cloneContent &&
-							contentOwnerComponent &&
-							(contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
-							contentMap.has(key)
+						contentOwnerComponent &&
+						(contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
+						contentMap.has(key)
 					) {
 						let c = contentMap.get(key) as IComponentElement;
 

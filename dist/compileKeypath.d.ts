@@ -1,1 +1,1 @@
-export default function compileKeypath(keypath: string): () => any;
+export declare function compileKeypath(keypath: string): () => any;

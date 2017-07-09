@@ -55,7 +55,7 @@ import { Component, d } from 'rionite';
 
     template: 'Hello, {input.name}!'
 })
-export default class HelloUser extends Component {
+export class HelloUser extends Component {
     elementAttached() {}
     elementDetached() {}
 }

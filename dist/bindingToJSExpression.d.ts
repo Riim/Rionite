@@ -1,2 +1,2 @@
 import { IContentTextBinding } from './ContentTextParser';
-export default function bindingToJSExpression(binding: IContentTextBinding): string;
+export declare function bindingToJSExpression(binding: IContentTextBinding): string;

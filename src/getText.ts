@@ -31,7 +31,12 @@ export interface IGetText {
 let texts: ILocalizationTexts;
 let getPluralIndex: (n: number) => number;
 
-let getText = <IGetText>function getText(context: string, key: string, plural: boolean, args: Array<any>): string {
+export let getText = <IGetText>function getText(
+	context: string,
+	key: string,
+	plural: boolean,
+	args: Array<any>
+): string {
 	let rawText: string;
 
 	if (hasOwn.call(texts, context) && hasOwn.call(texts[context], key)) {
@@ -99,8 +104,6 @@ getText.t = t;
 getText.pt = pt;
 getText.nt = nt;
 getText.npt = npt;
-
-export default getText;
 
 configure({
 	localeSettings: {

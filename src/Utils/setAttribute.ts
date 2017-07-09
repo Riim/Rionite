@@ -1,4 +1,4 @@
-export default function setAttribute(el: Element, name: string, value: any) {
+export function setAttribute(el: Element, name: string, value: any) {
 	if (value === false || value == null) {
 		el.removeAttribute(name);
 	} else {

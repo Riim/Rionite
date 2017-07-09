@@ -18,7 +18,7 @@ function run() {
 	}
 }
 
-export default function defer(cb: () => void, context?: any) {
+export function defer(cb: () => void, context?: any) {
 	if (queue) {
 		queue.push({ callback: cb, context });
 	} else {

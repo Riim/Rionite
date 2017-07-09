@@ -1,7 +1,7 @@
-import keypathToJSExpression from './keypathToJSExpression';
+import { keypathToJSExpression } from './keypathToJSExpression';
 
 let cache = Object.create(null);
 
-export default function compileKeypath(keypath: string): () => any {
+export function compileKeypath(keypath: string): () => any {
 	return cache[keypath] || (cache[keypath] = Function(`var temp; return ${ keypathToJSExpression(keypath) };`));
 }

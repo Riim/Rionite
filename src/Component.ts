@@ -1,24 +1,28 @@
-import { IEvent, IEventEmitterListener, EventEmitter, JS, Utils } from 'cellx';
-import { IBlock, Template } from 'nelm';
+import {
+	EventEmitter,
+	IEvent,
+	IEventEmitterListener,
+	JS
+	} from 'cellx';
 import htmlToFragment from 'html-to-fragment';
-import { IDisposableListening, IListener, default as DisposableMixin } from './DisposableMixin';
-import componentConstructorMap from './componentConstructorMap';
-import registerComponent from './registerComponent';
-import { suppressConnectionStatusCallbacks, resumeConnectionStatusCallbacks } from './ElementProtoMixin';
-import { IComponentInput, default as ComponentInput } from './ComponentInput';
-import bindContent from './bindContent';
-import { IFreezableCell, freezeBindings, unfreezeBindings } from './componentBinding';
-import attachChildComponentElements from './attachChildComponentElements';
-import bindEvents from './bindEvents';
-import eventTypes from './eventTypes';
-import handleEvent from './handleEvent';
-import camelize from './Utils/camelize';
-import getUID from './Utils/getUID';
-import moveContent from './Utils/moveContent';
+import { IBlock, Template } from 'nelm';
+import { attachChildComponentElements } from './attachChildComponentElements';
+import { bindContent } from './bindContent';
+import { bindEvents } from './bindEvents';
+import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
+import { componentConstructorMap } from './componentConstructorMap';
+import { ComponentInput, IComponentInput } from './ComponentInput';
+import { DisposableMixin, IDisposableListening, IListener } from './DisposableMixin';
+import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
+import { eventTypes } from './eventTypes';
 import { templateTag as templateTagFeature } from './Features';
+import { handleEvent } from './handleEvent';
+import { registerComponent } from './registerComponent';
+import { camelize } from './Utils/camelize';
+import { getUID } from './Utils/getUID';
+import { moveContent } from './Utils/moveContent';
 
 let Map = JS.Map;
-let createClass = (Utils as any).createClass;
 
 let map = Array.prototype.map;
 
@@ -36,20 +40,19 @@ export interface IComponentElementClassNameMap {
 	[elName: string]: string;
 }
 
-export type TEventHandler<T extends Component> = (this: T, evt: IEvent | Event) => boolean | void;
+export type TOEventHandler<T extends Component> = (this: T, evt: IEvent | Event) => boolean | void;
+
+export interface IComponentOEvents<T extends Component> {
+	[elName: string]: {
+		[eventName: string]: TOEventHandler<T>;
+	};
+}
+
+export type TEventHandler<T extends Component> = (this: T, evt: IEvent | Event, receiver: Element) => boolean | void;
 
 export interface IComponentEvents<T extends Component> {
 	[elName: string]: {
 		[eventName: string]: TEventHandler<T>;
-	};
-}
-
-export type TEventHandler2<T extends Component> = (this: T, evt: IEvent | Event, receiver: Element) =>
-	boolean | void;
-
-export interface IComponentEvents2<T extends Component> {
-	[elName: string]: {
-		[eventName: string]: TEventHandler2<T>;
 	};
 }
 
@@ -58,16 +61,13 @@ let reInputChangeEventName = /input\-([\-0-9a-z]*)\-change/;
 
 function createClassBlockElementReplacer(
 	contentBlockName: string,
-	events: IComponentEvents2<Component>,
+	events: IComponentEvents<Component>,
 	evtPrefix: string
 ): (match: string, blockName: string, elName: string) => string {
 	return function(match: string, blockName: string, elName: string): string {
-		let elEvents: { [eventName: string]: TEventHandler2<Component> };
+		let elEvents: { [eventName: string]: TEventHandler<Component> };
 
-		if (
-			blockName == contentBlockName &&
-				(elEvents = (events as IComponentEvents2<Component>)[elName])
-		) {
+		if (blockName == contentBlockName && (elEvents = (events as IComponentEvents<Component>)[elName])) {
 			let eventAttrs = [];
 
 			for (let type in elEvents) {
@@ -119,13 +119,7 @@ let elementAttached: any;
 let elementDetached: any;
 let elementMoved: any;
 
-export default class Component extends EventEmitter implements DisposableMixin {
-	static extend(elIs: string, description: any): typeof Component {
-		description.Extends = this;
-		(description.Static || (description.Static = {})).elementIs = elIs;
-		return registerComponent(createClass(description));
-	}
-
+export class Component extends EventEmitter implements DisposableMixin {
 	static register = registerComponent;
 
 	static elementIs: string;
@@ -144,9 +138,9 @@ export default class Component extends EventEmitter implements DisposableMixin {
 
 	static _elementClassNameMap: IComponentElementClassNameMap;
 
+	static oevents: IComponentOEvents<Component> | null = null;
 	static events: IComponentEvents<Component> | null = null;
-	static events2: IComponentEvents2<Component> | null = null;
-	static domEvents: IComponentEvents2<Component> | null = null;
+	static domEvents: IComponentEvents<Component> | null = null;
 
 	_disposables: typeof DisposableMixin.prototype._disposables;
 
@@ -307,8 +301,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 		if (this.isReady) {
 			this._unfreezeBindings();
 
-			if (constr.events) {
-				bindEvents(this, constr.events);
+			if (constr.oevents) {
+				bindEvents(this, constr.oevents);
 			}
 		} else {
 			let el = this.element;
@@ -326,8 +320,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 					attachChildComponentElements(childComponents);
 				}
 
-				if (constr.events) {
-					bindEvents(this, constr.events);
+				if (constr.oevents) {
+					bindEvents(this, constr.oevents);
 				}
 			} else {
 				if (el.firstChild) {
@@ -343,12 +337,12 @@ export default class Component extends EventEmitter implements DisposableMixin {
 				if (!rawContent) {
 					let contentHTML = (constr.template as Template).render();
 
-					if (constr.events2) {
+					if (constr.events) {
 						contentHTML = contentHTML.replace(
 							reClassBlockElement,
 							createClassBlockElementReplacer(
 								constr._contentBlockNames[0],
-								constr.events2,
+								constr.events,
 								'oncomponent-'
 							)
 						);
@@ -384,8 +378,8 @@ export default class Component extends EventEmitter implements DisposableMixin {
 					attachChildComponentElements(childComponents);
 				}
 
-				if (constr.events) {
-					bindEvents(this, constr.events);
+				if (constr.oevents) {
+					bindEvents(this, constr.oevents);
 				}
 			}
 

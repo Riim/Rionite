@@ -1,4 +1,4 @@
-import { IEvent, EventEmitter, Utils } from 'cellx';
+import { EventEmitter, IEvent, Utils } from 'cellx';
 
 let nextUID = Utils.nextUID;
 
@@ -31,7 +31,7 @@ export interface IListener {
 	(evt: IEvent | Event): boolean | void;
 }
 
-export default class DisposableMixin implements IDisposable {
+export class DisposableMixin implements IDisposable {
 	_disposables: { [id: string]: IDisposable } = {};
 
 	listenTo(

@@ -1,2 +1,1 @@
-declare const _default: Map<any, string>;
-export default _default;
+export declare let componentInputTypeMap: Map<any, string>;

@@ -1,9 +1,14 @@
-import { IEvent, ICellPull, ICellOptions, Cell } from 'cellx';
-import { IPossiblyComponentElement, default as Component } from './Component';
-import ContentTextParser from './ContentTextParser';
-import compileContentText from './compileContentText';
+import {
+	Cell,
+	ICellOptions,
+	ICellPull,
+	IEvent
+	} from 'cellx';
+import { compileContentText } from './compileContentText';
+import { Component, IPossiblyComponentElement } from './Component';
 import { IFreezableCell } from './componentBinding';
-import setAttribute from './Utils/setAttribute';
+import { ContentTextParser } from './ContentTextParser';
+import { setAttribute } from './Utils/setAttribute';
 
 class AttributeBindingCell extends Cell {
 	element: Element;
@@ -39,7 +44,7 @@ function onTextNodeBindingCellChange(evt: IEvent) {
 
 let ContentTextNodeType = ContentTextParser.ContentTextNodeType;
 
-export default function bindContent(
+export function bindContent(
 	node: Element | DocumentFragment,
 	ownerComponent: Component,
 	context: Object,

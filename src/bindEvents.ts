@@ -1,6 +1,6 @@
-import { IComponentEvents, default as Component } from './Component';
+import { Component, IComponentOEvents } from './Component';
 
-export default function bindEvents(component: Component, events: IComponentEvents<Component>) {
+export function bindEvents(component: Component, events: IComponentOEvents<Component>) {
 	for (let elName in events) {
 		let asset: Component | Element | null;
 

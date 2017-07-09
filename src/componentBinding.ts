@@ -1,4 +1,4 @@
-import { IEvent, IEventEmitterListener, Cell } from 'cellx';
+import { Cell, IEvent, IEventEmitterListener } from 'cellx';
 
 export interface IFrozenState {
 	changeEventListener: IEventEmitterListener;

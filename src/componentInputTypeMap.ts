@@ -1,6 +1,6 @@
 import { JS } from 'cellx';
 
-export default new JS.Map<any, string>([
+export let componentInputTypeMap = new JS.Map<any, string>([
 	[Boolean, 'boolean'],
 	['boolean', 'boolean'],
 	[Number, 'number'],

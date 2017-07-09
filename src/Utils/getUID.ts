@@ -5,7 +5,8 @@ let nextUID = Utils.nextUID;
 let hasOwn = Object.prototype.hasOwnProperty;
 
 let KEY_UID = JS.Symbol('uid');
-let getUID: (obj: Object) => string;
+
+export let getUID: (obj: Object) => string;
 
 if (typeof KEY_UID == 'symbol') {
 	getUID = function getUID(obj) {
@@ -20,5 +21,3 @@ if (typeof KEY_UID == 'symbol') {
 		return obj[KEY_UID];
 	};
 }
-
-export default getUID;

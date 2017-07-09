@@ -1,1 +1,1 @@
-export default function defer(cb: () => void, context?: any): void;
+export declare function defer(cb: () => void, context?: any): void;

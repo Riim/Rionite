@@ -1,1 +1,1 @@
-export default function keypathToJSExpression(keypath: string): string;
+export declare function keypathToJSExpression(keypath: string): string;

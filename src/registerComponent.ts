@@ -1,10 +1,10 @@
 import { Utils } from 'cellx';
 import { Template } from 'nelm';
-import { IComponentElement, default as Component } from './Component';
-import componentConstructorMap from './componentConstructorMap';
-import elementConstructorMap from './elementConstructorMap';
-import ElementProtoMixin from './ElementProtoMixin';
-import hyphenize from './Utils/hyphenize';
+import { Component, IComponentElement } from './Component';
+import { componentConstructorMap } from './componentConstructorMap';
+import { elementConstructorMap } from './elementConstructorMap';
+import { ElementProtoMixin } from './ElementProtoMixin';
+import { hyphenize } from './Utils/hyphenize';
 
 let mixin = Utils.mixin;
 
@@ -27,7 +27,7 @@ function inheritProperty(target: Object, source: Object, name: string, depth: nu
 	}
 }
 
-export default function registerComponent(componentConstr: typeof Component) {
+export function registerComponent(componentConstr: typeof Component) {
 	let elIs = componentConstr.elementIs;
 
 	if (!elIs) {
@@ -67,8 +67,8 @@ export default function registerComponent(componentConstr: typeof Component) {
 
 	componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
 
+	inheritProperty(componentConstr, parentComponentConstr, 'oevents', 1);
 	inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
-	inheritProperty(componentConstr, parentComponentConstr, 'events2', 1);
 	inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
 
 	let elExtends = componentConstr.elementExtends;

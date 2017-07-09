@@ -1,2 +1,2 @@
-import namePattern from './namePattern';
-export default `(?:${ namePattern }|\\d+)(?:\\.(?:${ namePattern }|\\d+))*`;
+import { namePattern } from './namePattern';
+export let keypathPattern = `(?:${ namePattern }|\\d+)(?:\\.(?:${ namePattern }|\\d+))*`;

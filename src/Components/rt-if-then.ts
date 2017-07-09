@@ -1,13 +1,13 @@
 import { Cell, Utils } from 'cellx';
-import Component from '../Component';
-import KEY_ELEMENT_CONNECTED from '../KEY_ELEMENT_CONNECTED';
-import { suppressConnectionStatusCallbacks, resumeConnectionStatusCallbacks } from '../ElementProtoMixin';
-import compileKeypath from '../compileKeypath';
-import bindContent from '../bindContent';
-import attachChildComponentElements from '../attachChildComponentElements';
-import keypathPattern from '../keypathPattern';
+import { attachChildComponentElements } from '../attachChildComponentElements';
+import { bindContent } from '../bindContent';
+import { compileKeypath } from '../compileKeypath';
+import { Component } from '../Component';
+import { ComponentDecorator } from '../ComponentDecorator';
+import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { templateTag as templateTagFeature } from '../Features';
-import d from '../d';
+import { KEY_ELEMENT_CONNECTED } from '../KEY_ELEMENT_CONNECTED';
+import { keypathPattern } from '../keypathPattern';
 
 let nextTick = Utils.nextTick;
 
@@ -17,7 +17,7 @@ export type TIfCell = Cell<boolean>;
 
 let reKeypath = RegExp(`^${ keypathPattern }$`);
 
-@d.Component({
+@ComponentDecorator({
 	elementIs: 'rt-if-then',
 	elementExtends: 'template',
 
@@ -25,7 +25,7 @@ let reKeypath = RegExp(`^${ keypathPattern }$`);
 		if: { type: String, required: true, readonly: true }
 	}
 })
-export default class RtIfThen extends Component {
+export class RtIfThen extends Component {
 	ownerComponent: Component;
 
 	_elseMode = false;

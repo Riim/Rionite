@@ -1,6 +1,4 @@
 import { JS } from 'cellx';
-import Component from './Component';
+import { Component } from './Component';
 
-let componentConstructorMap = new JS.Map<string, typeof Component>();
-
-export default componentConstructorMap;
+export let componentConstructorMap = new JS.Map<string, typeof Component>();

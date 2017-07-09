@@ -28,7 +28,7 @@ export interface IContentTextBinding extends IContentTextNode {
     raw: string;
 }
 export declare type TContentText = Array<IContentTextTextNode | IContentTextBinding>;
-export default class ContentTextParser {
+export declare class ContentTextParser {
     static ContentTextNodeType: typeof ContentTextNodeType;
     contentText: string;
     at: number;

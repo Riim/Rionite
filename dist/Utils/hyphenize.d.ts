@@ -1,1 +1,1 @@
-export default function hyphenize(str: string): string;
+export declare function hyphenize(str: string): string;

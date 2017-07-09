@@ -1,49 +1,60 @@
-import { NodeType as NelmNodeType, Parser as NelmParser, Template } from 'nelm';
-import escapeString from 'escape-string';
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
+import escapeString from 'escape-string';
 import htmlToFragment from 'html-to-fragment';
 import {
-	IDisposable,
-	IDisposableListening,
-	IDisposableTimeout,
-	IDisposableInterval,
-	IDisposableCallback,
-	TListeningTarget,
-	IListener,
-	default as DisposableMixin
-} from './DisposableMixin';
-import formatters from './formatters';
-import { ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, default as getText } from './getText';
+	IBlock as INelmBlock,
+	NodeType as NelmNodeType,
+	Parser as NelmParser,
+	Template
+	} from 'nelm';
 import {
-	IPossiblyComponentElement,
+	Component,
 	IComponentElement,
 	IComponentElementClassNameMap,
-	TEventHandler,
-	TEventHandler2,
 	IComponentEvents,
-	IComponentEvents2,
-	default as Component
-} from './Component';
-import KEY_ELEMENT_CONNECTED from './KEY_ELEMENT_CONNECTED';
-import { IComponentInput, default as ComponentInput } from './ComponentInput';
-import componentInputValueMap from './componentInputValueMap';
-import RtContent from './Components/rt-content';
-import RtSlot from './Components/rt-slot';
-import { TIfCell as TRtIfThenIfCell, default as RtIfThen } from './Components/rt-if-then';
-import RtIfElse from './Components/rt-if-else';
+	IComponentOEvents,
+	IPossiblyComponentElement,
+	TEventHandler,
+	TOEventHandler
+	} from './Component';
+import { ComponentDecorator } from './ComponentDecorator';
+import { ComponentInput, IComponentInput } from './ComponentInput';
+import { componentInputValueMap } from './componentInputValueMap';
+import { RtContent } from './Components/rt-content';
+import { RtIfElse } from './Components/rt-if-else';
+import { RtIfThen, TIfCell as TRtIfThenIfCell } from './Components/rt-if-then';
 import {
-	TListCell as TRtRepeatListCell,
 	IItem as IRtRepeatItem,
+	RtRepeat,
 	TItemList as TRtRepeatItemList,
 	TItemMap as TRtRepeatItemMap,
-	default as RtRepeat
-} from './Components/rt-repeat';
-import d from './d';
-import camelize from './Utils/camelize';
-import hyphenize from './Utils/hyphenize';
-import isRegExp from './Utils/isRegExp';
-import defer from './Utils/defer';
+	TListCell as TRtRepeatListCell
+	} from './Components/rt-repeat';
+import { RtSlot } from './Components/rt-slot';
+import {
+	DisposableMixin,
+	IDisposable,
+	IDisposableCallback,
+	IDisposableInterval,
+	IDisposableListening,
+	IDisposableTimeout,
+	IListener,
+	TListeningTarget
+	} from './DisposableMixin';
+import { formatters } from './formatters';
+import {
+	getText,
+	IGetText,
+	IGetTextConfig,
+	ILocaleSettings,
+	ILocalizationTexts
+	} from './getText';
+import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
 import './nelmTemplateHelpers';
+import { camelize } from './Utils/camelize';
+import { defer } from './Utils/defer';
+import { hyphenize } from './Utils/hyphenize';
+import { isRegExp } from './Utils/isRegExp';
 
 let Components = {
 	RtContent,
@@ -51,6 +62,10 @@ let Components = {
 	RtIfThen,
 	RtIfElse,
 	RtRepeat
+};
+
+let d = {
+	Component: ComponentDecorator
 };
 
 let Utils = {
@@ -66,6 +81,7 @@ let Utils = {
 
 export {
 	NelmNodeType,
+	INelmBlock,
 	NelmParser,
 	Template,
 	IDisposable,
@@ -88,10 +104,10 @@ export {
 	IPossiblyComponentElement,
 	IComponentElement,
 	IComponentElementClassNameMap,
+	TOEventHandler,
 	TEventHandler,
-	TEventHandler2,
+	IComponentOEvents,
 	IComponentEvents,
-	IComponentEvents2,
 	Component,
 
 	KEY_ELEMENT_CONNECTED,

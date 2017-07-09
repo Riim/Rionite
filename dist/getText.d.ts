@@ -20,5 +20,4 @@ export interface IGetText {
     nt(key: string, ...args: Array<any>): string;
     npt(key: string, context: string, ...args: Array<any>): string;
 }
-declare let getText: IGetText;
-export default getText;
+export declare let getText: IGetText;

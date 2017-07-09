@@ -1,13 +1,13 @@
 import escapeString from 'escape-string';
-import componentInputValueMap from './componentInputValueMap';
+import { bindingToJSExpression } from './bindingToJSExpression';
+import { componentInputValueMap } from './componentInputValueMap';
 import {
-	IContentTextTextNode,
+	ContentTextParser,
 	IContentTextBinding,
-	TContentText,
-	default as ContentTextParser
-} from './ContentTextParser';
-import bindingToJSExpression from './bindingToJSExpression';
-import formatters from './formatters';
+	IContentTextTextNode,
+	TContentText
+	} from './ContentTextParser';
+import { formatters } from './formatters';
 
 let ContentTextNodeType = ContentTextParser.ContentTextNodeType;
 
@@ -15,7 +15,7 @@ let keyCounter = 0;
 
 let cache = Object.create(null);
 
-export default function compileContentText(
+export function compileContentText(
 	contentText: TContentText,
 	contentTextString: string,
 	c: boolean

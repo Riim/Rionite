@@ -1,5 +1,2 @@
 import { JS } from 'cellx';
-
-let componentInputValueMap = new JS.Map<string, any>();
-
-export default componentInputValueMap;
+export let componentInputValueMap = new JS.Map<string, any>();

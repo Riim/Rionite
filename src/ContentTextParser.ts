@@ -1,6 +1,6 @@
-import keypathToJSExpression from './keypathToJSExpression';
-import namePattern from './namePattern';
-import keypathPattern from './keypathPattern';
+import { keypathPattern } from './keypathPattern';
+import { keypathToJSExpression } from './keypathToJSExpression';
+import { namePattern } from './namePattern';
 
 export enum ContentTextNodeType {
 	TEXT = 1,
@@ -48,7 +48,7 @@ let reVacuumOrNothing = /null|undefined|void 0|/g;
 
 let NOT_VALUE_AND_NOT_KEYPATH = {};
 
-export default class ContentTextParser {
+export class ContentTextParser {
 	static ContentTextNodeType = ContentTextNodeType;
 
 	contentText: string;

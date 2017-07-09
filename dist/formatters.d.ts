@@ -1,4 +1,4 @@
-declare const _default: {
+export declare let formatters: {
     or: (value: any, arg: any) => any;
     default: (value: any, arg: any) => any;
     not: (value: any) => boolean;
@@ -16,4 +16,3 @@ declare const _default: {
     key: (obj: Object, key: string) => any;
     json: (value: any) => string;
 };
-export default _default;

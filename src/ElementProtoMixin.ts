@@ -1,7 +1,7 @@
-import { IComponentElement, default as Component } from './Component';
-import KEY_ELEMENT_CONNECTED from './KEY_ELEMENT_CONNECTED';
-import defer from './Utils/defer';
+import { Component, IComponentElement } from './Component';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
+import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
+import { defer } from './Utils/defer';
 
 let isConnectionStatusCallbacksSuppressed = false;
 
@@ -13,7 +13,7 @@ export function resumeConnectionStatusCallbacks() {
 	isConnectionStatusCallbacksSuppressed = false;
 }
 
-let ElementProtoMixin = {
+export let ElementProtoMixin = {
 	rioniteComponent: null,
 
 	get $component(): Component {
@@ -96,5 +96,3 @@ let ElementProtoMixin = {
 		}
 	}
 };
-
-export default ElementProtoMixin;
