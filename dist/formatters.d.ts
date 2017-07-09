@@ -13,6 +13,8 @@ export declare let formatters: {
     pt: (key: string, context: string, ...args: any[]) => string;
     nt: (count: number, key: string, ...args: any[]) => string;
     npt: (count: number, key: string, context: string, ...args: any[]) => string;
-    key: (obj: Object, key: string) => any;
+    key: (obj: {
+        [name: string]: any;
+    }, key: string) => any;
     json: (value: any) => string;
 };

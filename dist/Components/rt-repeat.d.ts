@@ -25,7 +25,9 @@ export declare class RtRepeat extends Component {
     _attach(): void;
     _detach(): void;
     _render(changed: boolean): void;
-    _renderItem(item: Object, index: number): boolean;
+    _renderItem(item: {
+        [name: string]: any;
+    }, index: number): boolean;
     _clearByItemMap(itemMap: TItemMap): void;
     _clearByItems(items: TItemList): void;
     _deactivate(): void;

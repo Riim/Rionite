@@ -55,7 +55,7 @@ export class RtSlot extends Component {
 					if (
 						!cloneContent &&
 						contentOwnerComponent &&
-						(contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
+						(contentMap = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP]) &&
 						contentMap.has(key)
 					) {
 						let c = contentMap.get(key) as IComponentElement;
@@ -82,14 +82,14 @@ export class RtSlot extends Component {
 						if (!cloneContent && contentOwnerComponent) {
 							(
 								contentMap ||
-									contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
-									(contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())
+									(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] ||
+									((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())
 							).set(key, el);
 						}
 					}
 				} else if (!cloneContent && contentOwnerComponent) {
 					let contentMap: Map<string, IComponentElement> | undefined =
-						contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
+						(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
 						let c = contentMap.get(key) as IComponentElement;
@@ -101,7 +101,7 @@ export class RtSlot extends Component {
 						childComponents = (c.$component as RtSlot)._childComponents;
 					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
-						(contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())).set(key, el);
+						(contentMap || ((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())).set(key, el);
 					}
 				} else if (ownerComponentContent.firstChild) {
 					content = cloneContent ?
@@ -119,7 +119,7 @@ export class RtSlot extends Component {
 							content,
 							contentOwnerComponent as Component,
 							getContext ?
-								ownerComponent[getContext](ownerComponent.input.$context, this) :
+								(contentOwnerComponent as any)[getContext](ownerComponent.input.$context, this) :
 								ownerComponent.input.$context,
 							{ 0: null, 1: null } as any
 						) :

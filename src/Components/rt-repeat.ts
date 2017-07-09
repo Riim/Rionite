@@ -114,7 +114,7 @@ export class RtRepeat extends Component {
 
 	elementDisconnected() {
 		nextTick(() => {
-			if (!this.element[KEY_ELEMENT_CONNECTED]) {
+			if (!(this.element as any)[KEY_ELEMENT_CONNECTED]) {
 				this._deactivate();
 			}
 		});
@@ -158,7 +158,7 @@ export class RtRepeat extends Component {
 		}
 	}
 
-	_renderItem(item: Object, index: number): boolean {
+	_renderItem(item: { [name: string]: any }, index: number): boolean {
 		let trackBy = this._trackBy;
 		let value = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
 		let prevItems = this._prevItemMap.get(value);

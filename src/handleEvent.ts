@@ -43,10 +43,10 @@ export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 				let handler: TEventHandler<Component> | undefined;
 
 				if (attrValue.charAt(0) == ':') {
-					handler = ((component.constructor as typeof Component)[eventsName] as IComponentEvents<Component>)
+					handler = ((component.constructor as any)[eventsName] as IComponentEvents<Component>)
 						[attrValue.slice(1)][evt.type];
 				} else {
-					handler = component[attrValue];
+					handler = (component as any)[attrValue];
 				}
 
 				if (handler) {

@@ -10,12 +10,17 @@ let mixin = Utils.mixin;
 
 let push = Array.prototype.push;
 
-function inheritProperty(target: Object, source: Object, name: string, depth: number) {
-	let obj = target[name] as Object | null | undefined;
-	let parentObj = source[name] as Object | null | undefined;
+function inheritProperty(
+	target: { [name: string]: any },
+	source: { [name: string]: any },
+	name: string,
+	depth: number
+) {
+	let obj = target[name] as { [name: string]: any } | null | undefined;
+	let parentObj = source[name] as { [name: string]: any } | null | undefined;
 
 	if (obj && parentObj && obj != parentObj) {
-		let o = target[name] = { __proto__: parentObj };
+		let o = target[name] = { __proto__: parentObj } as { [name: string]: any };
 
 		for (let key in obj) {
 			o[key] = obj[key];
@@ -75,7 +80,7 @@ export function registerComponent(componentConstr: typeof Component) {
 
 	let parentElConstr = elExtends ?
 		elementConstructorMap.get(elExtends) ||
-			window[`HTML${ elExtends.charAt(0).toUpperCase() + elExtends.slice(1) }Element`] :
+			(window as any)[`HTML${ elExtends.charAt(0).toUpperCase() + elExtends.slice(1) }Element`] :
 		HTMLElement;
 
 	let elConstr = function(self: HTMLElement | undefined): IComponentElement {

@@ -6,7 +6,7 @@ let hasOwn = Object.prototype.hasOwnProperty;
 
 let KEY_UID = JS.Symbol('uid');
 
-export let getUID: (obj: Object) => string;
+export let getUID: (obj: { [name: string]: any }) => string;
 
 if (typeof KEY_UID == 'symbol') {
 	getUID = function getUID(obj) {

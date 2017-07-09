@@ -49,7 +49,7 @@ export let formatters = {
 	},
 
 	// Safary: "Cannot declare a parameter named 'key' as it shadows the name of a strict mode function."
-	key: function key_(obj: Object, key: string): any {
+	key: function key_(obj: { [name: string]: any }, key: string): any {
 		return obj && obj[key];
 	},
 

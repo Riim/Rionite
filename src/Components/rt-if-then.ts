@@ -65,7 +65,7 @@ export class RtIfThen extends Component {
 
 	elementDisconnected() {
 		nextTick(() => {
-			if (!this.element[KEY_ELEMENT_CONNECTED]) {
+			if (!(this.element as any)[KEY_ELEMENT_CONNECTED]) {
 				this._deactivate();
 			}
 		});

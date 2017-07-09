@@ -4107,7 +4107,7 @@ var RtSlot = (function (_super) {
                     var getContext = input.getContext;
                     _a = content ?
                         bindContent_1.bindContent(content, contentOwnerComponent, getContext ?
-                            ownerComponent[getContext](ownerComponent.input.$context, this) :
+                            contentOwnerComponent[getContext](ownerComponent.input.$context, this) :
                             ownerComponent.input.$context, { 0: null, 1: null }) :
                         bindContent_1.bindContent(el, ownerComponent, input.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
                     this._childComponents = childComponents;

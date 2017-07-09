@@ -23,7 +23,7 @@ export let ElementProtoMixin = {
 	[KEY_ELEMENT_CONNECTED]: false,
 
 	connectedCallback(this: IComponentElement) {
-		this[KEY_ELEMENT_CONNECTED] = true;
+		(this as any)[KEY_ELEMENT_CONNECTED] = true;
 
 		if (isConnectionStatusCallbacksSuppressed) {
 			return;
@@ -45,7 +45,7 @@ export let ElementProtoMixin = {
 			}
 		} else {
 			defer(function(this: IComponentElement) {
-				if (this[KEY_ELEMENT_CONNECTED]) {
+				if ((this as any)[KEY_ELEMENT_CONNECTED]) {
 					let component = this.$component;
 
 					component._parentComponent = undefined;
@@ -60,7 +60,7 @@ export let ElementProtoMixin = {
 	},
 
 	disconnectedCallback(this: IComponentElement) {
-		this[KEY_ELEMENT_CONNECTED] = false;
+		(this as any)[KEY_ELEMENT_CONNECTED] = false;
 
 		if (isConnectionStatusCallbacksSuppressed) {
 			return;

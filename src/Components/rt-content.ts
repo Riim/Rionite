@@ -54,9 +54,9 @@ export class RtContent extends Component {
 
 					if (
 						!clone &&
-						contentOwnerComponent &&
-						(contentMap = contentOwnerComponent[KEY_CONTENT_MAP]) &&
-						contentMap.has(key)
+							contentOwnerComponent &&
+							(contentMap = (contentOwnerComponent as any)[KEY_CONTENT_MAP]) &&
+							contentMap.has(key)
 					) {
 						let c = contentMap.get(key) as IComponentElement;
 
@@ -82,13 +82,14 @@ export class RtContent extends Component {
 						if (!clone && contentOwnerComponent) {
 							(
 								contentMap ||
-									contentOwnerComponent[KEY_CONTENT_MAP] ||
-									(contentOwnerComponent[KEY_CONTENT_MAP] = new Map())
+									(contentOwnerComponent as any)[KEY_CONTENT_MAP] ||
+									((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
 							).set(key, el);
 						}
 					}
 				} else if (!clone && contentOwnerComponent) {
-					let contentMap: Map<string, IComponentElement> | undefined = contentOwnerComponent[KEY_CONTENT_MAP];
+					let contentMap: Map<string, IComponentElement> | undefined =
+						(contentOwnerComponent as any)[KEY_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
 						let c = contentMap.get(key) as IComponentElement;
@@ -100,7 +101,7 @@ export class RtContent extends Component {
 						childComponents = (c.$component as RtContent)._childComponents;
 					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
-						(contentMap || (contentOwnerComponent[KEY_CONTENT_MAP] = new Map())).set(key, el);
+						(contentMap || ((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())).set(key, el);
 					}
 				} else if (ownerComponentContent.firstChild) {
 					content = clone ? ownerComponentContent.cloneNode(true) as DocumentFragment : ownerComponentContent;
@@ -116,7 +117,7 @@ export class RtContent extends Component {
 						content,
 						contentOwnerComponent as Component,
 						getContext ?
-							ownerComponent[getContext](ownerComponent.input.$context, this) :
+							(ownerComponent as any)[getContext](ownerComponent.input.$context, this) :
 							ownerComponent.input.$context,
 						{ 0: null, 1: null } as any
 					) :

@@ -244,7 +244,7 @@ export class ContentTextParser {
 		let readers = ['_readBoolean', '_readNumber', '_readVacuum'];
 
 		for (let reader of readers) {
-			let value = this[reader]();
+			let value = (this as any)[reader]();
 
 			if (value !== NOT_VALUE_AND_NOT_KEYPATH) {
 				return value;
