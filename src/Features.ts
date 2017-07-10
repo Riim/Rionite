@@ -21,7 +21,7 @@ TestNativeCustomElementsFeature.prototype = Object.create(HTMLElement.prototype,
 		value: TestNativeCustomElementsFeature
 	}
 });
-TestNativeCustomElementsFeature.prototype.attributeChangedCallback = function() {
+TestNativeCustomElementsFeature.prototype.attributeChangedCallback = () => {
 	nativeCustomElementsFeature = true;
 };
 

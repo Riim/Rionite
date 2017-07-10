@@ -53,7 +53,7 @@ export class RtIfThen extends Component {
 			let getIfValue = compileKeypath(if_);
 			this._if = new Cell<boolean>(function() {
 				return !!getIfValue.call(this);
-			}, { owner: this.input.$context as Object });
+			}, { owner: this.input.$context as object });
 
 			this.initialized = true;
 		}
@@ -90,14 +90,14 @@ export class RtIfThen extends Component {
 			if (!templateTagFeature) {
 				let templates = content.querySelectorAll('template');
 
-				for (let i = 0, l = templates.length; i < l;) {
+				for (let i = 0, l = templates.length; i < l; ) {
 					i += templates[i].content.querySelectorAll('template').length + 1;
 				}
 			}
 			let [bindings, childComponents] = bindContent(
 				content,
 				this.ownerComponent,
-				this.input.$context as Object,
+				this.input.$context as object,
 				{ 0: null, 1: null } as any
 			);
 
@@ -117,7 +117,7 @@ export class RtIfThen extends Component {
 			if (nodes) {
 				this._destroyBindings();
 
-				for (let i = nodes.length; i;) {
+				for (let i = nodes.length; i; ) {
 					let node = nodes[--i];
 					let parentNode = node.parentNode;
 
@@ -151,7 +151,7 @@ export class RtIfThen extends Component {
 		if (nodes) {
 			this._destroyBindings();
 
-			for (let i = nodes.length; i;) {
+			for (let i = nodes.length; i; ) {
 				let node = nodes[--i];
 				let parentNode = node.parentNode;
 

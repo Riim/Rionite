@@ -20,13 +20,13 @@ let nextTick = Utils.nextTick;
 
 let slice = Array.prototype.slice;
 
-export type TListCell = Cell<ObservableList<Object>>;
+export type TListCell = Cell<ObservableList<any>>;
 export interface IItem {
-	item: Cell<Object>;
+	item: Cell<any>;
 	index: Cell<number>;
 	nodes: Array<Node>;
-	bindings: Cell[] | null;
-};
+	bindings: Array<Cell> | null;
+}
 export type TItemList = Array<IItem>;
 export type TItemMap = Map<any, TItemList>;
 
@@ -74,7 +74,7 @@ export class RtRepeat extends Component {
 			}
 
 			this._itemName = forAttrValue[1];
-			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: input.$context as Object });
+			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: input.$context as object });
 			this._trackBy = input.trackBy;
 
 			let rawItemContent = this._rawItemContent =
@@ -158,7 +158,7 @@ export class RtRepeat extends Component {
 		}
 	}
 
-	_renderItem(item: { [name: string]: any }, index: number): boolean {
+	_renderItem(item: any, index: number): boolean {
 		let trackBy = this._trackBy;
 		let value = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
 		let prevItems = this._prevItemMap.get(value);
@@ -226,7 +226,7 @@ export class RtRepeat extends Component {
 		if (!templateTagFeature) {
 			let templates = content.querySelectorAll('template');
 
-			for (let i = 0, l = templates.length; i < l;) {
+			for (let i = 0, l = templates.length; i < l; ) {
 				i += templates[i].content.querySelectorAll('template').length + 1;
 			}
 		}
@@ -278,19 +278,19 @@ export class RtRepeat extends Component {
 	}
 
 	_clearByItems(items: TItemList) {
-		for (let i = items.length; i;) {
+		for (let i = items.length; i; ) {
 			let item = items[--i];
 			let bindings = item.bindings;
 
 			if (bindings) {
-				for (let i = bindings.length; i;) {
+				for (let i = bindings.length; i; ) {
 					bindings[--i].off();
 				}
 			}
 
 			let nodes = item.nodes;
 
-			for (let i = nodes.length; i;) {
+			for (let i = nodes.length; i; ) {
 				let node = nodes[--i];
 				let parentNode = node.parentNode;
 

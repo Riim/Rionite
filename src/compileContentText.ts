@@ -26,6 +26,7 @@ export function compileContentText(
 		return cache[key];
 	}
 
+	// tslint:disable-next-line
 	let inner: Function;
 
 	if (contentText.length == 1) {

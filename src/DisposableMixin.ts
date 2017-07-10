@@ -27,9 +27,7 @@ export interface IDisposableCallback extends IDisposable {
 export type TListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList |
 	HTMLCollection;
 
-export interface IListener {
-	(evt: IEvent | Event): boolean | void;
-}
+export type TListener = (evt: IEvent | Event) => boolean | void;
 
 export class DisposableMixin implements IDisposable {
 	_disposables: { [id: string]: IDisposable } = {};
@@ -37,20 +35,20 @@ export class DisposableMixin implements IDisposable {
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
 		type: string | Array<string>,
-		listener: IListener | Array<IListener>,
+		listener: TListener | Array<TListener>,
 		context?: any,
 		useCapture?: boolean
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
-		listeners: { [type: string]: IListener | Array<IListener> },
+		listeners: { [type: string]: TListener | Array<TListener> },
 		context?: any,
 		useCapture?: boolean
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
-		typeOrListeners: string | Array<string> | { [type: string]: IListener | Array<IListener> },
-		listenerOrContext?: IListener | Array<IListener> | any,
+		typeOrListeners: string | Array<string> | { [type: string]: TListener | Array<TListener> },
+		listenerOrContext?: TListener | Array<TListener> | any,
 		contextOrUseCapture?: any,
 		useCapture?: boolean
 	): IDisposableListening {
@@ -139,7 +137,7 @@ export class DisposableMixin implements IDisposable {
 		let id = nextUID();
 
 		let stopListening = () => {
-			for (let i = listenings.length; i;) {
+			for (let i = listenings.length; i; ) {
 				listenings[--i].stop();
 			}
 
@@ -157,7 +155,7 @@ export class DisposableMixin implements IDisposable {
 	_listenTo(
 		target: EventEmitter | EventTarget,
 		type: string,
-		listener: IListener,
+		listener: TListener,
 		context: any,
 		useCapture: boolean
 	): IDisposableListening {
@@ -195,12 +193,13 @@ export class DisposableMixin implements IDisposable {
 		return listening;
 	}
 
-	setTimeout(cb: Function, delay: number): IDisposableTimeout {
+	// tslint:disable-next-line
+	setTimeout(callback: Function, delay: number): IDisposableTimeout {
 		let id = nextUID();
 
 		let timeoutId = setTimeout(() => {
 			delete this._disposables[id];
-			cb.call(this);
+			callback.call(this);
 		}, delay);
 
 		let clearTimeout_ = () => {
@@ -218,11 +217,12 @@ export class DisposableMixin implements IDisposable {
 		return timeout;
 	}
 
-	setInterval(cb: Function, delay: number): IDisposableInterval {
+	// tslint:disable-next-line
+	setInterval(callback: Function, delay: number): IDisposableInterval {
 		let id = nextUID();
 
 		let intervalId = setInterval(() => {
-			cb.call(this);
+			callback.call(this);
 		}, delay);
 
 		let clearInterval_ = () => {
@@ -240,7 +240,8 @@ export class DisposableMixin implements IDisposable {
 		return interval;
 	}
 
-	registerCallback(cb: Function): IDisposableCallback {
+	// tslint:disable-next-line
+	registerCallback(callback: Function): IDisposableCallback {
 		let id = nextUID();
 		let disposable = this;
 
@@ -248,18 +249,18 @@ export class DisposableMixin implements IDisposable {
 			delete this._disposables[id];
 		};
 
-		let callback = function callback() {
+		let registeredCallback = function registeredCallback() {
 			if (disposable._disposables[id]) {
 				delete disposable._disposables[id];
-				return cb.apply(disposable, arguments);
+				return callback.apply(disposable, arguments);
 			}
 		} as IDisposableCallback;
-		callback.cancel = cancelCallback;
-		callback.dispose = cancelCallback;
+		registeredCallback.cancel = cancelCallback;
+		registeredCallback.dispose = cancelCallback;
 
-		this._disposables[id] = callback;
+		this._disposables[id] = registeredCallback;
 
-		return callback;
+		return registeredCallback;
 	}
 
 	dispose(): DisposableMixin {

@@ -1,11 +1,11 @@
 import { Cell, ObservableList } from 'cellx';
 import { Component } from '../Component';
-export declare type TListCell = Cell<ObservableList<Object>>;
+export declare type TListCell = Cell<ObservableList<any>>;
 export interface IItem {
-    item: Cell<Object>;
+    item: Cell<any>;
     index: Cell<number>;
     nodes: Array<Node>;
-    bindings: Cell[] | null;
+    bindings: Array<Cell> | null;
 }
 export declare type TItemList = Array<IItem>;
 export declare type TItemMap = Map<any, TItemList>;
@@ -25,9 +25,7 @@ export declare class RtRepeat extends Component {
     _attach(): void;
     _detach(): void;
     _render(changed: boolean): void;
-    _renderItem(item: {
-        [name: string]: any;
-    }, index: number): boolean;
+    _renderItem(item: any, index: number): boolean;
     _clearByItemMap(itemMap: TItemMap): void;
     _clearByItems(items: TItemList): void;
     _deactivate(): void;

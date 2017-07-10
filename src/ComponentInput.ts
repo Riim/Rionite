@@ -6,7 +6,7 @@ import { hyphenize } from './Utils/hyphenize';
 
 export interface IComponentInput extends Object {
 	$content: DocumentFragment | null;
-	$context: Object | null;
+	$context: object | null;
 	[name: string]: any;
 }
 
@@ -64,7 +64,7 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 	}
 
 	let value = typeSerializer.read(rawValue, defaultValue);
-	let descriptor: Object;
+	let descriptor: PropertyDescriptor;
 
 	if (readonly) {
 		descriptor = {

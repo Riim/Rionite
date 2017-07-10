@@ -20,7 +20,7 @@
 			if (this.tagName == 'TEMPLATE') {
 				var df = this.__$$content__ = d.createDocumentFragment();
 
-				for (var child; (child = this.firstChild);) {
+				for (var child; (child = this.firstChild); ) {
 					df.appendChild(child);
 				}
 

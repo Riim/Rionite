@@ -28,6 +28,7 @@ export interface IContentTextBinding extends IContentTextNode {
     raw: string;
 }
 export declare type TContentText = Array<IContentTextTextNode | IContentTextBinding>;
+export declare type TNotValueAndNotKeypath = Object;
 export declare class ContentTextParser {
     static ContentTextNodeType: typeof ContentTextNodeType;
     contentText: string;
@@ -41,16 +42,16 @@ export declare class ContentTextParser {
     _readBindingKeypath(): string | null;
     _readFormatter(): IContentTextBindingFormatter | null;
     _readFormatterArguments(): IContentTextBindingFormatterArguments | null;
-    _readValueOrKeypath(): string | Object;
-    _readValue(): string | Object;
-    _readObject(): string | Object;
+    _readValueOrKeypath(): string | TNotValueAndNotKeypath;
+    _readValue(): string | TNotValueAndNotKeypath;
+    _readObject(): string | TNotValueAndNotKeypath;
     _readObjectKey(): string | null;
-    _readArray(): string | Object;
-    _readBoolean(): string | Object;
-    _readNumber(): string | Object;
-    _readString(): string | Object;
-    _readVacuum(): string | Object;
-    _readKeypath(): string | Object;
+    _readArray(): string | TNotValueAndNotKeypath;
+    _readBoolean(): string | TNotValueAndNotKeypath;
+    _readNumber(): string | TNotValueAndNotKeypath;
+    _readString(): string | TNotValueAndNotKeypath;
+    _readVacuum(): string | TNotValueAndNotKeypath;
+    _readKeypath(): string | TNotValueAndNotKeypath;
     _readName(): string | null;
     _skipWhitespaces(): string;
     _next(current?: string): string;

@@ -47,7 +47,7 @@ let ContentTextNodeType = ContentTextParser.ContentTextNodeType;
 export function bindContent(
 	node: Element | DocumentFragment,
 	ownerComponent: Component,
-	context: Object,
+	context: object,
 	result: [Array<IFreezableCell> | null, Array<Component> | null]
 ): [Array<IFreezableCell> | null, Array<Component> | null] {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
@@ -55,7 +55,7 @@ export function bindContent(
 			case Node.ELEMENT_NODE: {
 				let attrs = child.attributes;
 
-				for (let i = attrs.length; i;) {
+				for (let i = attrs.length; i; ) {
 					let attr = attrs.item(--i);
 					let value = attr.value;
 
@@ -105,7 +105,7 @@ export function bindContent(
 				break;
 			}
 			case Node.TEXT_NODE: {
-				for (let nextChild; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE;) {
+				for (let nextChild; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE; ) {
 					child.nodeValue += nextChild.nodeValue as string;
 					node.removeChild(nextChild);
 				}

@@ -37,7 +37,7 @@ export let componentInputTypeSerializerMap = new JS.Map<any, IComponentInputType
 	}],
 
 	[Object, {
-		read: (value: string | null, defaultValue: Object | null | undefined): Object | null => {
+		read: (value: string | null, defaultValue: object | null | undefined): object | null => {
 			if (value === null) {
 				return defaultValue || null;
 			}
@@ -46,7 +46,7 @@ export let componentInputTypeSerializerMap = new JS.Map<any, IComponentInputType
 				throw new TypeError('Value is not an object');
 			}
 
-			let val = componentInputValueMap.get(value) as Object;
+			let val = componentInputValueMap.get(value) as object;
 			componentInputValueMap.delete(value);
 			return val;
 		},

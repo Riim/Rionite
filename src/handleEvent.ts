@@ -22,7 +22,7 @@ export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 		eventsName = 'events';
 	}
 
-	for (;;) {
+	for (; ; ) {
 		let parentEl: Element | null = (el as Element).parentNode as Element | null;
 
 		if (!parentEl || parentEl == stopElement) {
@@ -38,7 +38,7 @@ export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 		let component = (el as IPossiblyComponentElement).$component;
 
 		if (component && receivers && receivers.length) {
-			for (let i = 0; ;) {
+			for (let i = 0; ; ) {
 				let attrValue = receivers[i].getAttribute(attrName) as string;
 				let handler: TEventHandler<Component> | undefined;
 

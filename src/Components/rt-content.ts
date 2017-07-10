@@ -121,7 +121,7 @@ export class RtContent extends Component {
 							ownerComponent.input.$context,
 						{ 0: null, 1: null } as any
 					) :
-					bindContent(el, ownerComponent, input.$context as Object, { 0: null, 1: null } as any);
+					bindContent(el, ownerComponent, input.$context as object, { 0: null, 1: null } as any);
 
 					this._childComponents = childComponents;
 				} else {

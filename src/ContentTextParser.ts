@@ -8,7 +8,7 @@ export enum ContentTextNodeType {
 	BINDING_KEYPATH,
 	BINDING_FORMATTER,
 	BINDING_FORMATTER_ARGUMENTS
-};
+}
 
 export interface IContentTextNode {
 	nodeType: ContentTextNodeType;
@@ -38,6 +38,9 @@ export interface IContentTextBinding extends IContentTextNode {
 }
 
 export type TContentText = Array<IContentTextTextNode | IContentTextBinding>;
+
+// tslint:disable-next-line
+export type TNotValueAndNotKeypath = Object;
 
 let reNameOrNothing = RegExp(namePattern + '|', 'g');
 let reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
@@ -71,7 +74,7 @@ export class ContentTextParser {
 
 		let result: TContentText = this.result = [];
 
-		for (let index: number; (index = contentText.indexOf('{', this.at)) != -1;) {
+		for (let index: number; (index = contentText.indexOf('{', this.at)) != -1; ) {
 			this._pushText(contentText.slice(this.at, index));
 
 			this.at = index;
@@ -190,7 +193,7 @@ export class ContentTextParser {
 		let args: Array<string> = [];
 
 		if (this._skipWhitespaces() != ')') {
-			for (;;) {
+			for (; ; ) {
 				let arg = this._readValueOrKeypath();
 
 				if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
@@ -222,12 +225,12 @@ export class ContentTextParser {
 		};
 	}
 
-	_readValueOrKeypath(): string | Object {
+	_readValueOrKeypath(): string | TNotValueAndNotKeypath {
 		let value = this._readValue();
 		return value === NOT_VALUE_AND_NOT_KEYPATH ? this._readKeypath() : value;
 	}
 
-	_readValue(): string | Object {
+	_readValue(): string | TNotValueAndNotKeypath {
 		switch (this.chr) {
 			case '{': {
 				return this._readObject();
@@ -254,7 +257,7 @@ export class ContentTextParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	_readObject(): string | Object {
+	_readObject(): string | TNotValueAndNotKeypath {
 		let at = this.at;
 
 		this._next('{');
@@ -297,7 +300,7 @@ export class ContentTextParser {
 		return this._readName();
 	}
 
-	_readArray(): string | Object {
+	_readArray(): string | TNotValueAndNotKeypath {
 		let at = this.at;
 
 		this._next('[');
@@ -327,7 +330,7 @@ export class ContentTextParser {
 		return arr + ']';
 	}
 
-	_readBoolean(): string | Object {
+	_readBoolean(): string | TNotValueAndNotKeypath {
 		reBooleanOrNothing.lastIndex = this.at;
 		let bool = (reBooleanOrNothing.exec(this.contentText) as RegExpExecArray)[0];
 
@@ -339,7 +342,7 @@ export class ContentTextParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	_readNumber(): string | Object {
+	_readNumber(): string | TNotValueAndNotKeypath {
 		reNumberOrNothing.lastIndex = this.at;
 		let num = (reNumberOrNothing.exec(this.contentText) as RegExpExecArray)[0];
 
@@ -351,7 +354,7 @@ export class ContentTextParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	_readString(): string | Object {
+	_readString(): string | TNotValueAndNotKeypath {
 		let quoteChar = this.chr;
 
 		if (quoteChar != "'" && quoteChar != '"') {
@@ -366,7 +369,7 @@ export class ContentTextParser {
 		let at = this.at;
 		let str = '';
 
-		for (let next; (next = this._next());) {
+		for (let next; (next = this._next()); ) {
 			if (next == quoteChar) {
 				this._next();
 				return quoteChar + str + quoteChar;
@@ -389,7 +392,7 @@ export class ContentTextParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	_readVacuum(): string | Object {
+	_readVacuum(): string | TNotValueAndNotKeypath {
 		reVacuumOrNothing.lastIndex = this.at;
 		let vacuum = (reVacuumOrNothing.exec(this.contentText) as RegExpExecArray)[0];
 
@@ -401,7 +404,7 @@ export class ContentTextParser {
 		return NOT_VALUE_AND_NOT_KEYPATH;
 	}
 
-	_readKeypath(): string | Object {
+	_readKeypath(): string | TNotValueAndNotKeypath {
 		reKeypathOrNothing.lastIndex = this.at;
 		let keypath = (reKeypathOrNothing.exec(this.contentText) as RegExpExecArray)[0];
 

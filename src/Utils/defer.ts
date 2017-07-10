@@ -18,11 +18,11 @@ function run() {
 	}
 }
 
-export function defer(cb: () => void, context?: any) {
+export function defer(callback: () => void, context?: any) {
 	if (queue) {
-		queue.push({ callback: cb, context });
+		queue.push({ callback, context });
 	} else {
-		queue = [{ callback: cb, context }];
+		queue = [{ callback, context }];
 		setTimeout(run, 1);
 	}
 }

@@ -8,7 +8,7 @@ import { RtIfElse } from './Components/rt-if-else';
 import { RtIfThen, TIfCell as TRtIfThenIfCell } from './Components/rt-if-then';
 import { IItem as IRtRepeatItem, RtRepeat, TItemList as TRtRepeatItemList, TItemMap as TRtRepeatItemMap, TListCell as TRtRepeatListCell } from './Components/rt-repeat';
 import { RtSlot } from './Components/rt-slot';
-import { DisposableMixin, IDisposable, IDisposableCallback, IDisposableInterval, IDisposableListening, IDisposableTimeout, IListener, TListeningTarget } from './DisposableMixin';
+import { DisposableMixin, IDisposable, IDisposableCallback, IDisposableInterval, IDisposableListening, IDisposableTimeout, TListener, TListeningTarget } from './DisposableMixin';
 import { formatters } from './formatters';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
 import './nelmTemplateHelpers';
@@ -42,7 +42,7 @@ declare let Utils: {
     escapeHTML: (str: string) => string;
     unescapeHTML: (str: string) => string;
     isRegExp: (value: any) => boolean;
-    defer: (cb: () => void, context?: any) => void;
+    defer: (callback: () => void, context?: any) => void;
     htmlToFragment: (html: string) => DocumentFragment;
 };
-export { NelmNodeType, INelmBlock, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, IListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TOEventHandler, TEventHandler, IComponentOEvents, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, IComponentInput, ComponentInput, componentInputValueMap, TRtIfThenIfCell, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, d, Utils };
+export { NelmNodeType, INelmBlock, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TOEventHandler, TEventHandler, IComponentOEvents, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, IComponentInput, ComponentInput, componentInputValueMap, TRtIfThenIfCell, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, d, Utils };

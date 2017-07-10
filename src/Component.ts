@@ -12,7 +12,7 @@ import { bindEvents } from './bindEvents';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructorMap } from './componentConstructorMap';
 import { ComponentInput, IComponentInput } from './ComponentInput';
-import { DisposableMixin, IDisposableListening, IListener } from './DisposableMixin';
+import { DisposableMixin, IDisposableListening, TListener } from './DisposableMixin';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { eventTypes } from './eventTypes';
 import { templateTag as templateTagFeature } from './Features';
@@ -64,7 +64,7 @@ function createClassBlockElementReplacer(
 	events: IComponentEvents<Component>,
 	evtPrefix: string
 ): (match: string, blockName: string, elName: string) => string {
-	return function(match: string, blockName: string, elName: string): string {
+	return (match: string, blockName: string, elName: string): string => {
 		let elEvents: { [eventName: string]: TEventHandler<Component> };
 
 		if (blockName == contentBlockName && (elEvents = (events as IComponentEvents<Component>)[elName])) {
@@ -84,7 +84,7 @@ function createClassBlockElementReplacer(
 function findChildComponents(
 	node: Node,
 	ownerComponent: Component | null,
-	context: Object | null,
+	context: object | null,
 	childComponents?: Array<Component> | null | undefined
 ): Array<Component> | null {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
@@ -153,7 +153,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 			return this._parentComponent;
 		}
 
-		for (let node: any; (node = (node || this.element).parentNode);) {
+		for (let node: any; (node = (node || this.element).parentNode); ) {
 			if (node.$component) {
 				return (this._parentComponent = node.$component);
 			}
@@ -243,7 +243,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 	_listenTo(
 		target: EventEmitter | EventTarget,
 		type: string,
-		listener: IListener,
+		listener: TListener,
 		context: any,
 		useCapture: boolean
 	): IDisposableListening {
@@ -362,7 +362,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 				if (!templateTagFeature) {
 					let templates = content.querySelectorAll('template');
 
-					for (let i = 0, l = templates.length; i < l;) {
+					for (let i = 0, l = templates.length; i < l; ) {
 						i += templates[i].content.querySelectorAll('template').length + 1;
 					}
 				}
@@ -418,7 +418,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 		let bindings = this._bindings;
 
 		if (bindings) {
-			for (let i = bindings.length; i;) {
+			for (let i = bindings.length; i; ) {
 				bindings[--i].off();
 			}
 
@@ -493,29 +493,29 @@ export class Component extends EventEmitter implements DisposableMixin {
 	}
 }
 
-let DisposableMixinProto = DisposableMixin.prototype;
-let ComponentProto = Component.prototype;
+let disposableMixinProto = DisposableMixin.prototype;
+let componentProto = Component.prototype;
 
-Object.getOwnPropertyNames(DisposableMixinProto).forEach(name => {
-	if (!(name in ComponentProto)) {
-		Object.defineProperty(ComponentProto, name, Object.getOwnPropertyDescriptor(DisposableMixinProto, name));
+Object.getOwnPropertyNames(disposableMixinProto).forEach((name) => {
+	if (!(name in componentProto)) {
+		Object.defineProperty(componentProto, name, Object.getOwnPropertyDescriptor(disposableMixinProto, name));
 	}
 });
 
-created = ComponentProto.created;
-initialize = ComponentProto.initialize;
-ready = ComponentProto.ready;
-elementConnected = ComponentProto.elementConnected;
-elementDisconnected = ComponentProto.elementDisconnected;
-elementAttached = ComponentProto.elementAttached;
-elementDetached = ComponentProto.elementDetached;
-elementMoved = ComponentProto.elementMoved;
+created = componentProto.created;
+initialize = componentProto.initialize;
+ready = componentProto.ready;
+elementConnected = componentProto.elementConnected;
+elementDisconnected = componentProto.elementDisconnected;
+elementAttached = componentProto.elementAttached;
+elementDetached = componentProto.elementDetached;
+elementMoved = componentProto.elementMoved;
 
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
-	eventTypes.forEach(type => {
-		document.documentElement.addEventListener(type, function(evt) {
+	eventTypes.forEach((type) => {
+		document.documentElement.addEventListener(type, (evt) => {
 			if (evt.target != document.documentElement) {
 				handleEvent(evt, document.documentElement);
 			}

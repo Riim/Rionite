@@ -13,7 +13,7 @@ export function ComponentDecorator<T extends Component>(config: {
 	events?: IComponentEvents<T> | null;
 	domEvents?: IComponentEvents<T> | null;
 }) {
-	return function(componentConstr: typeof Component) {
+	return (componentConstr: typeof Component) => {
 		componentConstr.elementIs = config.elementIs;
 
 		if (config.elementExtends !== undefined) {

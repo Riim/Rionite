@@ -30,7 +30,7 @@ function keypathToJSExpression3(keypath) {
 	var last = jsExpr.pop();
 	var first = jsExpr.shift();
 
-	for (var i = jsExpr.length; i;) {
+	for (var i = jsExpr.length; i; ) {
 		jsExpr[--i] = ' && (temp = temp' + jsExpr[i] + ')';
 	}
 

@@ -45,7 +45,7 @@ import {
 	IDisposableInterval,
 	IDisposableListening,
 	IDisposableTimeout,
-	IListener,
+	TListener,
 	TListeningTarget
 	} from './DisposableMixin';
 import { formatters } from './formatters';
@@ -90,7 +90,7 @@ export {
 	IDisposableInterval,
 	IDisposableCallback,
 	TListeningTarget,
-	IListener,
+	TListener,
 	DisposableMixin,
 
 	formatters,

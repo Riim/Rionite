@@ -17,20 +17,18 @@ export interface IDisposableCallback extends IDisposable {
     cancel(): void;
 }
 export declare type TListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList | HTMLCollection;
-export interface IListener {
-    (evt: IEvent | Event): boolean | void;
-}
+export declare type TListener = (evt: IEvent | Event) => boolean | void;
 export declare class DisposableMixin implements IDisposable {
     _disposables: {
         [id: string]: IDisposable;
     };
-    listenTo(target: TListeningTarget | Array<TListeningTarget>, type: string | Array<string>, listener: IListener | Array<IListener>, context?: any, useCapture?: boolean): IDisposableListening;
+    listenTo(target: TListeningTarget | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
     listenTo(target: TListeningTarget | Array<TListeningTarget>, listeners: {
-        [type: string]: IListener | Array<IListener>;
+        [type: string]: TListener | Array<TListener>;
     }, context?: any, useCapture?: boolean): IDisposableListening;
-    _listenTo(target: EventEmitter | EventTarget, type: string, listener: IListener, context: any, useCapture: boolean): IDisposableListening;
-    setTimeout(cb: Function, delay: number): IDisposableTimeout;
-    setInterval(cb: Function, delay: number): IDisposableInterval;
-    registerCallback(cb: Function): IDisposableCallback;
+    _listenTo(target: EventEmitter | EventTarget, type: string, listener: TListener, context: any, useCapture: boolean): IDisposableListening;
+    setTimeout(callback: Function, delay: number): IDisposableTimeout;
+    setInterval(callback: Function, delay: number): IDisposableInterval;
+    registerCallback(callback: Function): IDisposableCallback;
     dispose(): DisposableMixin;
 }

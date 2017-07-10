@@ -424,21 +424,21 @@ var Component = (function (_super) {
     return Component;
 }(cellx_1.EventEmitter));
 exports.Component = Component;
-var DisposableMixinProto = DisposableMixin_1.DisposableMixin.prototype;
-var ComponentProto = Component.prototype;
-Object.getOwnPropertyNames(DisposableMixinProto).forEach(function (name) {
-    if (!(name in ComponentProto)) {
-        Object.defineProperty(ComponentProto, name, Object.getOwnPropertyDescriptor(DisposableMixinProto, name));
+var disposableMixinProto = DisposableMixin_1.DisposableMixin.prototype;
+var componentProto = Component.prototype;
+Object.getOwnPropertyNames(disposableMixinProto).forEach(function (name) {
+    if (!(name in componentProto)) {
+        Object.defineProperty(componentProto, name, Object.getOwnPropertyDescriptor(disposableMixinProto, name));
     }
 });
-created = ComponentProto.created;
-initialize = ComponentProto.initialize;
-ready = ComponentProto.ready;
-elementConnected = ComponentProto.elementConnected;
-elementDisconnected = ComponentProto.elementDisconnected;
-elementAttached = ComponentProto.elementAttached;
-elementDetached = ComponentProto.elementDetached;
-elementMoved = ComponentProto.elementMoved;
+created = componentProto.created;
+initialize = componentProto.initialize;
+ready = componentProto.ready;
+elementConnected = componentProto.elementConnected;
+elementDisconnected = componentProto.elementDisconnected;
+elementAttached = componentProto.elementAttached;
+elementDetached = componentProto.elementDetached;
+elementMoved = componentProto.elementMoved;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
     eventTypes_1.eventTypes.forEach(function (type) {
@@ -1388,12 +1388,13 @@ var DisposableMixin = (function () {
         };
         return listening;
     };
-    DisposableMixin.prototype.setTimeout = function (cb, delay) {
+    // tslint:disable-next-line
+    DisposableMixin.prototype.setTimeout = function (callback, delay) {
         var _this = this;
         var id = nextUID();
         var timeoutId = setTimeout(function () {
             delete _this._disposables[id];
-            cb.call(_this);
+            callback.call(_this);
         }, delay);
         var clearTimeout_ = function () {
             if (_this._disposables[id]) {
@@ -1407,11 +1408,12 @@ var DisposableMixin = (function () {
         };
         return timeout;
     };
-    DisposableMixin.prototype.setInterval = function (cb, delay) {
+    // tslint:disable-next-line
+    DisposableMixin.prototype.setInterval = function (callback, delay) {
         var _this = this;
         var id = nextUID();
         var intervalId = setInterval(function () {
-            cb.call(_this);
+            callback.call(_this);
         }, delay);
         var clearInterval_ = function () {
             if (_this._disposables[id]) {
@@ -1425,23 +1427,24 @@ var DisposableMixin = (function () {
         };
         return interval;
     };
-    DisposableMixin.prototype.registerCallback = function (cb) {
+    // tslint:disable-next-line
+    DisposableMixin.prototype.registerCallback = function (callback) {
         var _this = this;
         var id = nextUID();
         var disposable = this;
         var cancelCallback = function () {
             delete _this._disposables[id];
         };
-        var callback = function callback() {
+        var registeredCallback = function registeredCallback() {
             if (disposable._disposables[id]) {
                 delete disposable._disposables[id];
-                return cb.apply(disposable, arguments);
+                return callback.apply(disposable, arguments);
             }
         };
-        callback.cancel = cancelCallback;
-        callback.dispose = cancelCallback;
-        this._disposables[id] = callback;
-        return callback;
+        registeredCallback.cancel = cancelCallback;
+        registeredCallback.dispose = cancelCallback;
+        this._disposables[id] = registeredCallback;
+        return registeredCallback;
     };
     DisposableMixin.prototype.dispose = function () {
         var disposables = this._disposables;
@@ -1494,12 +1497,12 @@ function run() {
         }
     }
 }
-function defer(cb, context) {
+function defer(callback, context) {
     if (queue) {
-        queue.push({ callback: cb, context: context });
+        queue.push({ callback: callback, context: context });
     }
     else {
-        queue = [{ callback: cb, context: context }];
+        queue = [{ callback: callback, context: context }];
         setTimeout(run, 1);
     }
 }
@@ -1639,7 +1642,6 @@ var ContentTextNodeType;
     ContentTextNodeType[ContentTextNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
     ContentTextNodeType[ContentTextNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
 })(ContentTextNodeType = exports.ContentTextNodeType || (exports.ContentTextNodeType = {}));
-;
 var reNameOrNothing = RegExp(namePattern_1.namePattern + '|', 'g');
 var reKeypathOrNothing = RegExp(keypathPattern_1.keypathPattern + '|', 'g');
 var reBooleanOrNothing = /false|true|/g;
@@ -2272,7 +2274,6 @@ var namePattern_1 = __webpack_require__(16);
 var Map = cellx_1.JS.Map;
 var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
-;
 var reForAttrValue = RegExp("^\\s*(" + namePattern_1.namePattern + ")\\s+of\\s+(" + keypathPattern_1.keypathPattern + ")\\s*$");
 var RtRepeat = (function (_super) {
     __extends(RtRepeat, _super);
@@ -2884,6 +2885,7 @@ function compileContentText(contentText, contentTextString, c) {
     if (cache[key]) {
         return cache[key];
     }
+    // tslint:disable-next-line
     var inner;
     if (contentText.length == 1) {
         inner = Function('formatters', "var temp; return " + (contentText[0].nodeType == ContentTextNodeType.TEXT ?
