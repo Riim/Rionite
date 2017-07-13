@@ -17,13 +17,13 @@ export interface IComponentElementClassNameMap {
 }
 export declare type TOEventHandler<T extends Component> = (this: T, evt: IEvent | Event) => boolean | void;
 export interface IComponentOEvents<T extends Component> {
-    [elName: string]: {
+    [name: string]: {
         [eventName: string]: TOEventHandler<T>;
     };
 }
 export declare type TEventHandler<T extends Component> = (this: T, evt: IEvent | Event, receiver: Element) => boolean | void;
 export interface IComponentEvents<T extends Component> {
-    [elName: string]: {
+    [name: string]: {
         [eventName: string]: TEventHandler<T>;
     };
 }

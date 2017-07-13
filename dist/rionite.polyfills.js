@@ -4660,7 +4660,13 @@ function handleEvent(evt, stopElement) {
                 var attrValue = receivers[i].getAttribute(attrName);
                 var handler = void 0;
                 if (attrValue.charAt(0) == ':') {
-                    handler = component.constructor[eventsName][attrValue.slice(1)][evt.type];
+                    var events = component.constructor[eventsName];
+                    if (events) {
+                        events = events[attrValue.slice(1)];
+                        if (events) {
+                            handler = events[evt.type];
+                        }
+                    }
                 }
                 else {
                     handler = component[attrValue];

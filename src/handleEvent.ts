@@ -1,10 +1,5 @@
 import { IEvent } from 'cellx';
-import {
-	Component,
-	IComponentEvents,
-	IPossiblyComponentElement,
-	TEventHandler
-	} from './Component';
+import { Component, IPossiblyComponentElement, TEventHandler } from './Component';
 
 export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 	let el: Element | null;
@@ -43,8 +38,15 @@ export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 				let handler: TEventHandler<Component> | undefined;
 
 				if (attrValue.charAt(0) == ':') {
-					handler = ((component.constructor as any)[eventsName] as IComponentEvents<Component>)
-						[attrValue.slice(1)][evt.type];
+					let events = (component.constructor as any)[eventsName];
+
+					if (events) {
+						events = events[attrValue.slice(1)];
+
+						if (events) {
+							handler = events[evt.type];
+						}
+					}
 				} else {
 					handler = (component as any)[attrValue];
 				}
