@@ -4795,14 +4795,19 @@ function registerComponent(componentConstr) {
     inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
     componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
     var template = componentConstr.template;
-    if (template !== null && template !== parentComponentConstr.template) {
-        if (template instanceof nelm_1.Template) {
-            template.setBlockName(elIs);
+    if (template !== null) {
+        if (template === parentComponentConstr.template) {
+            componentConstr.template = template.extend('', { blockName: elIs });
         }
         else {
-            componentConstr.template = parentComponentConstr.template ?
-                parentComponentConstr.template.extend(template, { blockName: elIs }) :
-                new nelm_1.Template(template, { blockName: elIs });
+            if (template instanceof nelm_1.Template) {
+                template.setBlockName(elIs);
+            }
+            else {
+                componentConstr.template = parentComponentConstr.template ?
+                    parentComponentConstr.template.extend(template, { blockName: elIs }) :
+                    new nelm_1.Template(template, { blockName: elIs });
+            }
         }
     }
     componentConstr._contentBlockNames = [elIs];

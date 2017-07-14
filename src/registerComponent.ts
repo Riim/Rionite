@@ -52,13 +52,17 @@ export function registerComponent(componentConstr: typeof Component) {
 
 	let template = componentConstr.template;
 
-	if (template !== null && template !== parentComponentConstr.template) {
-		if (template instanceof Template) {
-			template.setBlockName(elIs);
+	if (template !== null) {
+		if (template === parentComponentConstr.template) {
+			componentConstr.template = (template as Template).extend('', { blockName: elIs });
 		} else {
-			componentConstr.template = parentComponentConstr.template ?
-				(parentComponentConstr.template as Template).extend(template, { blockName: elIs }) :
-				new Template(template, { blockName: elIs });
+			if (template instanceof Template) {
+				template.setBlockName(elIs);
+			} else {
+				componentConstr.template = parentComponentConstr.template ?
+					(parentComponentConstr.template as Template).extend(template, { blockName: elIs }) :
+					new Template(template, { blockName: elIs });
+			}
 		}
 	}
 
