@@ -235,7 +235,7 @@ var Component = (function (_super) {
         if (typeof target == 'string') {
             target = this.$(target);
         }
-        return DisposableMixin_1.DisposableMixin.prototype.listenTo.call(this, target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture);
+        return DisposableMixin_1.DisposableMixin.prototype.listenTo.apply(this, arguments);
     };
     Component.prototype._listenTo = function (target, type, listener, context, useCapture) {
         if (target instanceof Component) {
@@ -378,7 +378,7 @@ var Component = (function (_super) {
     // Utils
     Component.prototype.$ = function (name, container) {
         var elList = this._getElementList(name, container);
-        return elList && elList.length ? elList[0].$component || elList[0] : null;
+        return (elList && elList.length ? elList[0].$component || elList[0] : null);
     };
     Component.prototype.$$ = function (name, container) {
         var elList = this._getElementList(name, container);

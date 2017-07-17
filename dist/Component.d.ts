@@ -81,7 +81,7 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     elementAttached(): void;
     elementDetached(): void;
     elementMoved(): void;
-    $(name: string, container?: Component | Element): Component | Element | null;
-    $$(name: string, container?: Component | Element): Array<Component | Element>;
+    $<R = Component | Element | null>(name: string, container?: Component | Element): R;
+    $$<R = Component | Element>(name: string, container?: Component | Element): Array<R>;
     _getElementList(name: string, container?: Component | Element): NodeListOf<Element> | undefined;
 }

@@ -264,17 +264,10 @@ export class Component extends EventEmitter implements DisposableMixin {
 		useCapture?: boolean
 	): IDisposableListening {
 		if (typeof target == 'string') {
-			target = this.$(target) as any;
+			target = this.$<any>(target);
 		}
 
-		return DisposableMixin.prototype.listenTo.call(
-			this,
-			target,
-			typeOrListeners,
-			listenerOrContext,
-			contextOrUseCapture,
-			useCapture
-		);
+		return DisposableMixin.prototype.listenTo.apply(this, arguments);
 	}
 
 	_listenTo(
@@ -476,12 +469,13 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	// Utils
 
-	$(name: string, container?: Component | Element): Component | Element | null {
+	$<R = Component | Element | null>(name: string, container?: Component | Element): R {
 		let elList = this._getElementList(name, container);
-		return elList && elList.length ? (elList[0] as IPossiblyComponentElement).$component || elList[0] : null;
+		return (elList && elList.length ? (elList[0] as IPossiblyComponentElement).$component || elList[0] : null) as
+			any;
 	}
 
-	$$(name: string, container?: Component | Element): Array<Component | Element> {
+	$$<R = Component | Element>(name: string, container?: Component | Element): Array<R> {
 		let elList = this._getElementList(name, container);
 		return elList ? map.call(elList, (el: IPossiblyComponentElement) => el.$component || el) : [];
 	}
