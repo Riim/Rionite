@@ -235,7 +235,8 @@ var Component = (function (_super) {
         if (typeof target == 'string') {
             target = this.$(target);
         }
-        return DisposableMixin_1.DisposableMixin.prototype.listenTo.apply(this, arguments);
+        return DisposableMixin_1.DisposableMixin.prototype
+            .listenTo.call(this, target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture);
     };
     Component.prototype._listenTo = function (target, type, listener, context, useCapture) {
         if (target instanceof Component) {
@@ -1313,40 +1314,31 @@ var DisposableMixin = (function () {
         if (typeof typeOrListeners == 'object') {
             listenings = [];
             if (Array.isArray(typeOrListeners)) {
-                if (arguments.length < 4) {
-                    contextOrUseCapture = this;
-                }
                 for (var i = 0, l = typeOrListeners.length; i < l; i++) {
-                    listenings.push(this.listenTo(target, typeOrListeners[i], listenerOrContext, contextOrUseCapture, useCapture || false));
+                    listenings.push(this.listenTo(target, typeOrListeners[i], listenerOrContext, contextOrUseCapture, useCapture));
                 }
             }
             else {
-                if (arguments.length < 3) {
-                    listenerOrContext = this;
-                }
                 for (var type in typeOrListeners) {
-                    listenings.push(this.listenTo(target, type, typeOrListeners[type], listenerOrContext, contextOrUseCapture || false));
+                    listenings.push(this.listenTo(target, type, typeOrListeners[type], listenerOrContext, contextOrUseCapture));
                 }
             }
         }
         else {
-            if (arguments.length < 4) {
-                contextOrUseCapture = this;
-            }
             if (Array.isArray(target) || target instanceof NodeList || target instanceof HTMLCollection) {
                 listenings = [];
                 for (var i = 0, l = target.length; i < l; i++) {
-                    listenings.push(this.listenTo(target[i], typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture || false));
+                    listenings.push(this.listenTo(target[i], typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture));
                 }
             }
             else if (Array.isArray(listenerOrContext)) {
                 listenings = [];
                 for (var i = 0, l = listenerOrContext.length; i < l; i++) {
-                    listenings.push(this.listenTo(target, typeOrListeners, listenerOrContext[i], contextOrUseCapture, useCapture || false));
+                    listenings.push(this.listenTo(target, typeOrListeners, listenerOrContext[i], contextOrUseCapture, useCapture));
                 }
             }
             else {
-                return this._listenTo(target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture || false);
+                return this._listenTo(target, typeOrListeners, listenerOrContext, contextOrUseCapture !== undefined ? contextOrUseCapture : this, useCapture || false);
             }
         }
         var id = nextUID();

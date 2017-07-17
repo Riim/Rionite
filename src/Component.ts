@@ -267,7 +267,8 @@ export class Component extends EventEmitter implements DisposableMixin {
 			target = this.$<any>(target);
 		}
 
-		return DisposableMixin.prototype.listenTo.apply(this, arguments);
+		return DisposableMixin.prototype
+			.listenTo.call(this, target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture);
 	}
 
 	_listenTo(

@@ -58,10 +58,6 @@ export class DisposableMixin implements IDisposable {
 			listenings = [];
 
 			if (Array.isArray(typeOrListeners)) {
-				if (arguments.length < 4) {
-					contextOrUseCapture = this;
-				}
-
 				for (let i = 0, l = typeOrListeners.length; i < l; i++) {
 					listenings.push(
 						this.listenTo(
@@ -69,15 +65,11 @@ export class DisposableMixin implements IDisposable {
 							typeOrListeners[i],
 							listenerOrContext,
 							contextOrUseCapture,
-							useCapture || false
+							useCapture
 						)
 					);
 				}
 			} else {
-				if (arguments.length < 3) {
-					listenerOrContext = this;
-				}
-
 				for (let type in typeOrListeners) {
 					listenings.push(
 						this.listenTo(
@@ -85,16 +77,12 @@ export class DisposableMixin implements IDisposable {
 							type,
 							typeOrListeners[type],
 							listenerOrContext,
-							contextOrUseCapture || false
+							contextOrUseCapture
 						)
 					);
 				}
 			}
 		} else {
-			if (arguments.length < 4) {
-				contextOrUseCapture = this;
-			}
-
 			if (Array.isArray(target) || target instanceof NodeList || target instanceof HTMLCollection) {
 				listenings = [];
 
@@ -105,7 +93,7 @@ export class DisposableMixin implements IDisposable {
 							typeOrListeners,
 							listenerOrContext,
 							contextOrUseCapture,
-							useCapture || false
+							useCapture
 						)
 					);
 				}
@@ -119,7 +107,7 @@ export class DisposableMixin implements IDisposable {
 							typeOrListeners,
 							listenerOrContext[i],
 							contextOrUseCapture,
-							useCapture || false
+							useCapture
 						)
 					);
 				}
@@ -128,7 +116,7 @@ export class DisposableMixin implements IDisposable {
 					target,
 					typeOrListeners,
 					listenerOrContext,
-					contextOrUseCapture,
+					contextOrUseCapture !== undefined ? contextOrUseCapture : this,
 					useCapture || false
 				);
 			}
