@@ -231,6 +231,12 @@ var Component = (function (_super) {
             }
         }
     };
+    Component.prototype.listenTo = function (target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture) {
+        if (typeof target == 'string') {
+            target = this.$(target);
+        }
+        return DisposableMixin_1.DisposableMixin.prototype.listenTo.call(this, target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture);
+    };
     Component.prototype._listenTo = function (target, type, listener, context, useCapture) {
         if (target instanceof Component) {
             var index = void 0;
@@ -2097,21 +2103,21 @@ var RtContent = (function (_super) {
                         contentOwnerComponent &&
                         (contentMap = contentOwnerComponent[KEY_CONTENT_MAP]) &&
                         contentMap.has(key)) {
-                        var c = contentMap.get(key);
-                        if (c.firstChild) {
-                            content = moveContent_1.moveContent(document.createDocumentFragment(), c);
+                        var container = contentMap.get(key);
+                        if (container.firstChild) {
+                            content = moveContent_1.moveContent(document.createDocumentFragment(), container);
                             contentMap.set(key, el);
-                            bindings = c.$component._bindings;
-                            childComponents = c.$component._childComponents;
+                            bindings = container.$component._bindings;
+                            childComponents = container.$component._childComponents;
                         }
                     }
                     else if (ownerComponentContent.firstChild) {
-                        var selectedEls = ownerComponentContent.querySelectorAll(selector);
-                        var selectedElCount = selectedEls.length;
-                        if (selectedElCount) {
+                        var selectedElements = ownerComponentContent.querySelectorAll(selector);
+                        var selectedElementCount = selectedElements.length;
+                        if (selectedElementCount) {
                             content = document.createDocumentFragment();
-                            for (var i = 0; i < selectedElCount; i++) {
-                                content.appendChild(clone ? selectedEls[i].cloneNode(true) : selectedEls[i]);
+                            for (var i = 0; i < selectedElementCount; i++) {
+                                content.appendChild(clone ? selectedElements[i].cloneNode(true) : selectedElements[i]);
                             }
                         }
                         if (!clone && contentOwnerComponent) {
@@ -2124,11 +2130,11 @@ var RtContent = (function (_super) {
                 else if (!clone && contentOwnerComponent) {
                     var contentMap = contentOwnerComponent[KEY_CONTENT_MAP];
                     if (contentMap && contentMap.has(key)) {
-                        var c = contentMap.get(key);
-                        content = moveContent_1.moveContent(document.createDocumentFragment(), c);
+                        var container = contentMap.get(key);
+                        content = moveContent_1.moveContent(document.createDocumentFragment(), container);
                         contentMap.set(key, el);
-                        bindings = c.$component._bindings;
-                        childComponents = c.$component._childComponents;
+                        bindings = container.$component._bindings;
+                        childComponents = container.$component._childComponents;
                     }
                     else if (ownerComponentContent.firstChild) {
                         content = ownerComponentContent;
@@ -2570,21 +2576,25 @@ var RtSlot = (function (_super) {
                         contentOwnerComponent &&
                         (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
                         contentMap.has(key)) {
-                        var c = contentMap.get(key);
-                        if (c.firstChild) {
-                            content = moveContent_1.moveContent(document.createDocumentFragment(), c);
+                        var container = contentMap.get(key);
+                        if (container.firstChild) {
+                            content = moveContent_1.moveContent(document.createDocumentFragment(), container);
                             contentMap.set(key, el);
-                            bindings = c.$component._bindings;
-                            childComponents = c.$component._childComponents;
+                            bindings = container.$component._bindings;
+                            childComponents = container.$component._childComponents;
                         }
                     }
                     else if (ownerComponentContent.firstChild) {
-                        var selectedEls = ownerComponentContent.querySelectorAll("[rt-slot=" + name_1 + "]");
-                        var selectedElCount = selectedEls.length;
-                        if (selectedElCount) {
+                        var selectedElements = ownerComponentContent.querySelectorAll("[rt-slot=" + name_1 + "]");
+                        var selectedElementCount = selectedElements.length;
+                        if (selectedElementCount) {
                             content = document.createDocumentFragment();
-                            for (var i = 0; i < selectedElCount; i++) {
-                                content.appendChild(cloneContent ? selectedEls[i].cloneNode(true) : selectedEls[i]);
+                            for (var i = 0; i < selectedElementCount; i++) {
+                                var selectedElement = (cloneContent ? selectedElements[i].cloneNode(true) : selectedElements[i]);
+                                selectedElement.className += ' ' + ownerComponent.constructor
+                                    ._contentBlockNames.join('__' + name_1 + ' ') +
+                                    '__' + name_1;
+                                content.appendChild(selectedElement);
                             }
                         }
                         if (!cloneContent && contentOwnerComponent) {
@@ -2597,11 +2607,11 @@ var RtSlot = (function (_super) {
                 else if (!cloneContent && contentOwnerComponent) {
                     var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
                     if (contentMap && contentMap.has(key)) {
-                        var c = contentMap.get(key);
-                        content = moveContent_1.moveContent(document.createDocumentFragment(), c);
+                        var container = contentMap.get(key);
+                        content = moveContent_1.moveContent(document.createDocumentFragment(), container);
                         contentMap.set(key, el);
-                        bindings = c.$component._bindings;
-                        childComponents = c.$component._childComponents;
+                        bindings = container.$component._bindings;
+                        childComponents = container.$component._childComponents;
                     }
                     else if (ownerComponentContent.firstChild) {
                         content = ownerComponentContent;

@@ -12,7 +12,12 @@ import { bindEvents } from './bindEvents';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructorMap } from './componentConstructorMap';
 import { ComponentInput, IComponentInput } from './ComponentInput';
-import { DisposableMixin, IDisposableListening, TListener } from './DisposableMixin';
+import {
+	DisposableMixin,
+	IDisposableListening,
+	TListener,
+	TListeningTarget
+	} from './DisposableMixin';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { eventTypes } from './eventTypes';
 import { templateTag as templateTagFeature } from './Features';
@@ -238,7 +243,39 @@ export class Component extends EventEmitter implements DisposableMixin {
 		}
 	}
 
-	listenTo: typeof DisposableMixin.prototype.listenTo;
+	listenTo(
+		target: TListeningTarget | string | Array<TListeningTarget>,
+		type: string | Array<string>,
+		listener: TListener | Array<TListener>,
+		context?: any,
+		useCapture?: boolean
+	): IDisposableListening;
+	listenTo(
+		target: TListeningTarget | string | Array<TListeningTarget>,
+		listeners: { [type: string]: TListener | Array<TListener> },
+		context?: any,
+		useCapture?: boolean
+	): IDisposableListening;
+	listenTo(
+		target: TListeningTarget | string | Array<TListeningTarget>,
+		typeOrListeners: string | Array<string> | { [type: string]: TListener | Array<TListener> },
+		listenerOrContext?: TListener | Array<TListener> | any,
+		contextOrUseCapture?: any,
+		useCapture?: boolean
+	): IDisposableListening {
+		if (typeof target == 'string') {
+			target = this.$(target) as any;
+		}
+
+		return DisposableMixin.prototype.listenTo.call(
+			this,
+			target,
+			typeOrListeners,
+			listenerOrContext,
+			contextOrUseCapture,
+			useCapture
+		);
+	}
 
 	_listenTo(
 		target: EventEmitter | EventTarget,

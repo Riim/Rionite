@@ -58,24 +58,32 @@ export class RtSlot extends Component {
 						(contentMap = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP]) &&
 						contentMap.has(key)
 					) {
-						let c = contentMap.get(key) as IComponentElement;
+						let container = contentMap.get(key) as IComponentElement;
 
-						if (c.firstChild) {
-							content = moveContent(document.createDocumentFragment(), c);
+						if (container.firstChild) {
+							content = moveContent(document.createDocumentFragment(), container);
 							contentMap.set(key, el);
 
-							bindings = c.$component._bindings;
-							childComponents = (c.$component as RtSlot)._childComponents;
+							bindings = container.$component._bindings;
+							childComponents = (container.$component as RtSlot)._childComponents;
 						}
 					} else if (ownerComponentContent.firstChild) {
-						let selectedEls = ownerComponentContent.querySelectorAll(`[rt-slot=${ name }]`);
-						let selectedElCount = selectedEls.length;
+						let selectedElements = ownerComponentContent.querySelectorAll(`[rt-slot=${ name }]`);
+						let selectedElementCount = selectedElements.length;
 
-						if (selectedElCount) {
+						if (selectedElementCount) {
 							content = document.createDocumentFragment();
 
-							for (let i = 0; i < selectedElCount; i++) {
-								content.appendChild(cloneContent ? selectedEls[i].cloneNode(true) : selectedEls[i]);
+							for (let i = 0; i < selectedElementCount; i++) {
+								let selectedElement = (
+									cloneContent ? selectedElements[i].cloneNode(true) : selectedElements[i]
+								) as Element;
+
+								selectedElement.className += ' ' + (ownerComponent.constructor as typeof Component)
+										._contentBlockNames.join('__' + name + ' ') +
+									'__' + name;
+
+								content.appendChild(selectedElement);
 							}
 						}
 
@@ -92,13 +100,13 @@ export class RtSlot extends Component {
 						(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
-						let c = contentMap.get(key) as IComponentElement;
+						let container = contentMap.get(key) as IComponentElement;
 
-						content = moveContent(document.createDocumentFragment(), c);
+						content = moveContent(document.createDocumentFragment(), container);
 						contentMap.set(key, el);
 
-						bindings = c.$component._bindings;
-						childComponents = (c.$component as RtSlot)._childComponents;
+						bindings = container.$component._bindings;
+						childComponents = (container.$component as RtSlot)._childComponents;
 					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
 						(contentMap || ((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())).set(key, el);

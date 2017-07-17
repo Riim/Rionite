@@ -2,7 +2,7 @@ import { EventEmitter, IEvent, IEventEmitterListener } from 'cellx';
 import { IBlock, Template } from 'nelm';
 import { IFreezableCell } from './componentBinding';
 import { IComponentInput } from './ComponentInput';
-import { DisposableMixin, IDisposableListening, TListener } from './DisposableMixin';
+import { DisposableMixin, IDisposableListening, TListener, TListeningTarget } from './DisposableMixin';
 import { registerComponent } from './registerComponent';
 export interface IPossiblyComponentElement extends HTMLElement {
     rioniteComponent?: Component | null;
@@ -59,7 +59,10 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     constructor(el?: HTMLElement);
     _on(type: string, listener: IEventEmitterListener, context: any): void;
     _handleEvent(evt: IEvent): void;
-    listenTo: typeof DisposableMixin.prototype.listenTo;
+    listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
+    listenTo(target: TListeningTarget | string | Array<TListeningTarget>, listeners: {
+        [type: string]: TListener | Array<TListener>;
+    }, context?: any, useCapture?: boolean): IDisposableListening;
     _listenTo(target: EventEmitter | EventTarget, type: string, listener: TListener, context: any, useCapture: boolean): IDisposableListening;
     setTimeout: typeof DisposableMixin.prototype.setTimeout;
     setInterval: typeof DisposableMixin.prototype.setInterval;
