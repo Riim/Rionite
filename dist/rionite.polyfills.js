@@ -1600,9 +1600,9 @@ var componentConstructorMap_1 = __webpack_require__(29);
 var ComponentInput_1 = __webpack_require__(18);
 var DisposableMixin_1 = __webpack_require__(20);
 var ElementProtoMixin_1 = __webpack_require__(3);
-var eventTypes_1 = __webpack_require__(48);
 var Features_1 = __webpack_require__(7);
-var handleEvent_1 = __webpack_require__(49);
+var handledEvents_1 = __webpack_require__(49);
+var handleEvent_1 = __webpack_require__(48);
 var registerComponent_1 = __webpack_require__(51);
 var camelize_1 = __webpack_require__(21);
 var getUID_1 = __webpack_require__(13);
@@ -1939,7 +1939,7 @@ elementDetached = componentProto.elementDetached;
 elementMoved = componentProto.elementMoved;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
-    eventTypes_1.eventTypes.forEach(function (type) {
+    handledEvents_1.handledEvents.forEach(function (type) {
         document.documentElement.addEventListener(type, function (evt) {
             if (evt.target != document.documentElement) {
                 handleEvent_1.handleEvent(evt, document.documentElement);
@@ -4612,26 +4612,6 @@ exports.elementConstructorMap = new cellx_1.JS.Map([
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.eventTypes = [
-    'change',
-    'click',
-    'dblclick',
-    'focusin',
-    'focusout',
-    'input',
-    'mousedown',
-    'mouseup',
-    'submit'
-];
-
-
-/***/ }),
-/* 49 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
 function handleEvent(evt, stopElement) {
     var el;
     var attrName;
@@ -4690,6 +4670,26 @@ function handleEvent(evt, stopElement) {
     }
 }
 exports.handleEvent = handleEvent;
+
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.handledEvents = [
+    'change',
+    'click',
+    'dblclick',
+    'focusin',
+    'focusout',
+    'input',
+    'mousedown',
+    'mouseup',
+    'submit'
+];
 
 
 /***/ }),

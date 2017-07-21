@@ -19,8 +19,8 @@ import {
 	TListeningTarget
 	} from './DisposableMixin';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
-import { eventTypes } from './eventTypes';
 import { templateTag as templateTagFeature } from './Features';
+import { handledEvents } from './handledEvents';
 import { handleEvent } from './handleEvent';
 import { registerComponent } from './registerComponent';
 import { camelize } from './Utils/camelize';
@@ -371,11 +371,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 					if (constr.events) {
 						contentHTML = contentHTML.replace(
 							reClassBlockElement,
-							createClassBlockElementReplacer(
-								constr._contentBlockNames[0],
-								constr.events,
-								'oncomponent-'
-							)
+							createClassBlockElementReplacer(constr._contentBlockNames[0], constr.events, 'oncomponent-')
 						);
 					}
 
@@ -546,7 +542,7 @@ elementMoved = componentProto.elementMoved;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
-	eventTypes.forEach((type) => {
+	handledEvents.forEach((type) => {
 		document.documentElement.addEventListener(type, (evt) => {
 			if (evt.target != document.documentElement) {
 				handleEvent(evt, document.documentElement);

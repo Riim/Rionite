@@ -1,4 +1,4 @@
-export let eventTypes = [
+export let handledEvents = [
 	'change',
 	'click',
 	'dblclick',
