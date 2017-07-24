@@ -434,9 +434,8 @@ THE SOFTWARE.
   
   
     
-  // passed at runtime, configurable
-  // via nodejs module
-  if (!polyfill) polyfill = 'auto';
+  // passed at runtime, configurable via nodejs module
+  if (typeof polyfill !== 'object') polyfill = {type: polyfill || 'auto'};
   
   var
     // V0 polyfill entry
@@ -518,7 +517,7 @@ THE SOFTWARE.
     fixGetClass = false,
     DRECEV1 = '__dreCEv1',
     customElements = window.customElements,
-    usableCustomElements = polyfill !== 'force' && !!(
+    usableCustomElements = polyfill.type !== 'force' && !!(
       customElements &&
       customElements.define &&
       customElements.get &&
@@ -948,7 +947,7 @@ THE SOFTWARE.
   
         [HTMLElementPrototype, DocumentFragment.prototype].forEach(function(proto) {
           var origCloneNode = proto.cloneNode;
-
+  
           proto.cloneNode = function (deep) {
             var
               node = origCloneNode.call(this, !!deep),
@@ -962,9 +961,9 @@ THE SOFTWARE.
             return node;
           };
         });
-
+  
         var origImportNode = document.importNode;
-
+  
         document.importNode = function (node, deep) {
           var
             importedNode = origImportNode.call(this, node, !!deep),
@@ -978,9 +977,9 @@ THE SOFTWARE.
           return importedNode;
         };
       }
-
+  
       if (justSetup) return (justSetup = false);
-
+  
       if (-2 < (
         indexOf.call(types, PREFIX_IS + upperType) +
         indexOf.call(types, PREFIX_TAG + upperType)
@@ -1349,7 +1348,7 @@ THE SOFTWARE.
       );
     }
   }
-
+  
   function whenDefined(name) {
     name = name.toUpperCase();
     if (!(name in waitingList)) {
@@ -1418,8 +1417,8 @@ THE SOFTWARE.
   }
   
   // if customElements is not there at all
-  if (!customElements || polyfill === 'force') polyfillV1();
-  else {
+  if (!customElements || polyfill.type === 'force') polyfillV1();
+  else if(!polyfill.noBuiltIn) {
     // if available test extends work as expected
     try {
       (function (DRE, options, name) {
@@ -1446,13 +1445,16 @@ THE SOFTWARE.
       polyfillV1();
     }
   }
-  
-  try {
-    createElement.call(document, 'a', 'a');
-  } catch(FireFox) {
-    secondArgument = function (is) {
-      return {is: is.toLowerCase()};
-    };
+
+  // FireFox only issue
+  if(!polyfill.noBuiltIn) {
+    try {
+      createElement.call(document, 'a', 'a');
+    } catch(FireFox) {
+      secondArgument = function (is) {
+        return {is: is.toLowerCase()};
+      };
+    }
   }
   
 }(window));

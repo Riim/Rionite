@@ -1,12 +1,12 @@
 {
   "name": "rionite",
-  "version": "0.27.17",
+  "version": "0.27.19",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
   "scripts": {
-    "build": "rm -rf ./dist && ./node_modules/.bin/webpack && ./node_modules/.bin/gulp",
-    "test": "./node_modules/.bin/jest"
+    "build": "rm -rf dist && node_modules/.bin/webpack && node_modules/.bin/gulp",
+    "test": "node_modules/.bin/jest"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
   "devDependencies": {
     "awesome-typescript-loader": "^3.2.1",
     "benchmark": "^2.1.4",
-    "document-register-element": "^1.5.0",
+    "document-register-element": "^1.6.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.2",
@@ -30,7 +30,7 @@
     "jest": "^20.0.4",
     "pump": "^1.0.2",
     "require-dir": "^0.3.2",
-    "run-sequence": "^2.0.0",
+    "run-sequence": "^2.1.0",
     "tslint": "^5.5.0",
     "tslint-loader": "^3.5.3",
     "webpack": "^2.7.0"
@@ -38,7 +38,7 @@
   "dependencies": {
     "@riim/escape-html": "^1.1.0",
     "@riim/gettext": "^1.1.0",
-    "cellx": "^1.7.22",
+    "cellx": "^1.7.26",
     "escape-string": "^1.0.1",
     "html-to-fragment": "^1.0.0",
     "nelm": "^0.4.9"

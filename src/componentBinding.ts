@@ -18,12 +18,12 @@ export interface IFreezableCell extends Cell {
 }
 
 function freezeBinding(binding: IFreezableCell) {
-	let changeEvent = binding._events.get('change') as any as {
+	let changeEvent = (binding as any)._events.get('change') as any as {
 		listener: IEventEmitterListener;
 		context: any;
 	};
 
-	binding._events.delete('change');
+	(binding as any)._events.delete('change');
 
 	binding._frozenState = {
 		changeEventListener: changeEvent.listener,
