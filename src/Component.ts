@@ -466,7 +466,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	// Utils
 
-	$<R = Component | Element | null>(name: string, container?: Component | Element): R {
+	$<R = Component | Element>(name: string, container?: Component | Element): R | null {
 		let elList = this._getElementList(name, container);
 		return (elList && elList.length ? (elList[0] as IPossiblyComponentElement).$component || elList[0] : null) as
 			any;
