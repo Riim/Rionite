@@ -39,7 +39,7 @@ export class RtSlot extends Component {
 			let el = this.element;
 			let input = this.input;
 			let contentOwnerComponent = ownerComponent.ownerComponent;
-			let ownerComponentContent = ownerComponent.input.$content as DocumentFragment;
+			let ownerComponentContent = ownerComponent.input.$content!;
 			let cloneContent = input.cloneContent;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
@@ -58,7 +58,7 @@ export class RtSlot extends Component {
 						(contentMap = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP]) &&
 						contentMap.has(key)
 					) {
-						let container = contentMap.get(key) as IComponentElement;
+						let container = contentMap.get(key)!;
 
 						if (container.firstChild) {
 							content = moveContent(document.createDocumentFragment(), container);
@@ -100,7 +100,7 @@ export class RtSlot extends Component {
 						(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
-						let container = contentMap.get(key) as IComponentElement;
+						let container = contentMap.get(key)!;
 
 						content = moveContent(document.createDocumentFragment(), container);
 						contentMap.set(key, el);
@@ -125,13 +125,13 @@ export class RtSlot extends Component {
 					[this._bindings, childComponents] = content ?
 						bindContent(
 							content,
-							contentOwnerComponent as Component,
+							contentOwnerComponent!,
 							getContext ?
 								(contentOwnerComponent as any)[getContext](ownerComponent.input.$context, this) :
 								ownerComponent.input.$context,
 							{ 0: null, 1: null } as any
 						) :
-						bindContent(el, ownerComponent, input.$context as object, { 0: null, 1: null } as any);
+						bindContent(el, ownerComponent, input.$context!, { 0: null, 1: null } as any);
 
 					this._childComponents = childComponents;
 				} else {

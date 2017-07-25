@@ -1,4 +1,1 @@
-export declare let elementConstructorMap: Map<string, {
-    new (): Element;
-    prototype: Element;
-}>;
+export declare let elementConstructorMap: Map<string, Function>;

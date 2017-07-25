@@ -1,6 +1,7 @@
 import { JS } from 'cellx';
 
-export let elementConstructorMap = new JS.Map<string, typeof Element>([
+// tslint:disable-next-line
+export let elementConstructorMap = new JS.Map<string, Function>([
 	['a', (window as any).HTMLAnchorElement],
 	['blockquote', (window as any).HTMLQuoteElement],
 	['br', (window as any).HTMLBRElement],

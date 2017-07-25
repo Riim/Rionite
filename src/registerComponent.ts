@@ -123,7 +123,7 @@ export function registerComponent(componentConstr: typeof Component) {
 
 	componentConstructorMap.set(elIs, componentConstr);
 	componentConstructorMap.set(elIs.toUpperCase(), componentConstr);
-	elementConstructorMap.set(elIs, elConstr as any);
+	elementConstructorMap.set(elIs, elConstr);
 
 	return componentConstr;
 }

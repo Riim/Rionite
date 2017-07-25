@@ -74,28 +74,28 @@ export class RtRepeat extends Component {
 			}
 
 			this._itemName = forAttrValue[1];
-			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: input.$context as object });
+			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: input.$context! });
 			this._trackBy = input.trackBy;
 
 			let rawItemContent = this._rawItemContent =
-				document.importNode((this.element as any as HTMLTemplateElement).content, true);
+				document.importNode(((this.element as any) as HTMLTemplateElement).content, true);
 
 			if (input.strip) {
-				let firstChild = rawItemContent.firstChild as Node;
-				let lastChild = rawItemContent.lastChild as Node;
+				let firstChild = rawItemContent.firstChild!;
+				let lastChild = rawItemContent.lastChild!;
 
 				if (firstChild == lastChild) {
 					if (firstChild.nodeType == Node.TEXT_NODE) {
-						firstChild.nodeValue = (firstChild.nodeValue as string).trim();
+						firstChild.nodeValue = firstChild.nodeValue!.trim();
 					}
 				} else {
 					if (firstChild.nodeType == Node.TEXT_NODE) {
-						if (!(firstChild.nodeValue = (firstChild.nodeValue as string).replace(/^\s+/, ''))) {
+						if (!(firstChild.nodeValue = firstChild.nodeValue!.replace(/^\s+/, ''))) {
 							rawItemContent.removeChild(firstChild);
 						}
 					}
 					if (lastChild.nodeType == Node.TEXT_NODE) {
-						if (!(lastChild.nodeValue = (lastChild.nodeValue as string).replace(/\s+$/, ''))) {
+						if (!(lastChild.nodeValue = lastChild.nodeValue!.replace(/\s+$/, ''))) {
 							rawItemContent.removeChild(lastChild);
 						}
 					}
@@ -171,7 +171,7 @@ export class RtRepeat extends Component {
 				prevItem = prevItems[0];
 				this._prevItemMap.delete(value);
 			} else {
-				prevItem = prevItems.shift() as IItem;
+				prevItem = prevItems.shift()!;
 			}
 
 			if (items) {
@@ -198,7 +198,7 @@ export class RtRepeat extends Component {
 				let nextNode = this._lastNode.nextSibling;
 
 				if (node !== nextNode) {
-					(this._lastNode.parentNode as Node).insertBefore(node, nextNode);
+					this._lastNode.parentNode!.insertBefore(node, nextNode);
 				}
 
 				this._lastNode = node;
@@ -210,7 +210,7 @@ export class RtRepeat extends Component {
 						df.appendChild(nodes[i]);
 					}
 
-					(this._lastNode.parentNode as Node).insertBefore(df, this._lastNode.nextSibling);
+					this._lastNode.parentNode!.insertBefore(df, this._lastNode.nextSibling);
 				}
 
 				this._lastNode = nodes[nodeCount - 1];
@@ -259,9 +259,9 @@ export class RtRepeat extends Component {
 			this._itemMap.set(value, [newItem]);
 		}
 
-		let newLastNode = content.lastChild as Node;
+		let newLastNode = content.lastChild!;
 		suppressConnectionStatusCallbacks();
-		(this._lastNode.parentNode as Node).insertBefore(content, this._lastNode.nextSibling);
+		this._lastNode.parentNode!.insertBefore(content, this._lastNode.nextSibling);
 		resumeConnectionStatusCallbacks();
 		this._lastNode = newLastNode;
 

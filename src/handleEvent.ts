@@ -18,7 +18,7 @@ export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 	}
 
 	for (; ; ) {
-		let parentEl: Element | null = (el as Element).parentNode as Element | null;
+		let parentEl: Element | null = el.parentNode as Element | null;
 
 		if (!parentEl || parentEl == stopElement) {
 			break;
@@ -34,7 +34,7 @@ export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 
 		if (component && receivers && receivers.length) {
 			for (let i = 0; ; ) {
-				let attrValue = receivers[i].getAttribute(attrName) as string;
+				let attrValue = receivers[i].getAttribute(attrName)!;
 				let handler: TEventHandler<Component> | undefined;
 
 				if (attrValue.charAt(0) == ':') {

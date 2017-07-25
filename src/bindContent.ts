@@ -81,7 +81,7 @@ export function bindContent(
 
 							setAttribute(child as Element, name, cell.get());
 
-							(result[0] || (result[0] = [])).push(cell as any as IFreezableCell);
+							(result[0] || (result[0] = [])).push((cell as any) as IFreezableCell);
 						}
 					}
 				}
@@ -106,11 +106,11 @@ export function bindContent(
 			}
 			case Node.TEXT_NODE: {
 				for (let nextChild; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE; ) {
-					child.nodeValue += nextChild.nodeValue as string;
+					child.nodeValue += nextChild.nodeValue!;
 					node.removeChild(nextChild);
 				}
 
-				let value = child.nodeValue as string;
+				let value = child.nodeValue!;
 
 				if (value.indexOf('{') != -1) {
 					let contentText = (new ContentTextParser(value)).parse();
@@ -127,7 +127,7 @@ export function bindContent(
 
 						child.nodeValue = cell.get();
 
-						(result[0] || (result[0] = [])).push(cell as any as IFreezableCell);
+						(result[0] || (result[0] = [])).push((cell as any) as IFreezableCell);
 					}
 				}
 

@@ -74,8 +74,8 @@ export let ElementProtoMixin = {
 			component.elementDisconnected();
 
 			defer(() => {
-				if ((component as Component)._parentComponent === null && (component as Component)._attached) {
-					(component as Component)._detach();
+				if (component!._parentComponent === null && component!._attached) {
+					component!._detach();
 				}
 			});
 		}

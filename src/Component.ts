@@ -72,7 +72,7 @@ function createClassBlockElementReplacer(
 	return (match: string, blockName: string, elName: string): string => {
 		let elEvents: { [eventName: string]: TEventHandler<Component> };
 
-		if (blockName == contentBlockName && (elEvents = (events as IComponentEvents<Component>)[elName])) {
+		if (blockName == contentBlockName && (elEvents = events[elName])) {
 			let eventAttrs = [];
 
 			for (let type in elEvents) {
@@ -223,7 +223,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 		super._on(type, listener, context);
 	}
 
-	_handleEvent(evt: IEvent) {
+	_handleEvent(evt: IEvent<Component>) {
 		super._handleEvent(evt);
 
 		if (evt.bubbles !== false && !evt.isPropagationStopped) {
@@ -232,7 +232,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 			if (parentComponent) {
 				parentComponent._handleEvent(evt);
 			} else {
-				let targetOwnerComponent = (evt.target as Component).ownerComponent;
+				let targetOwnerComponent = evt.target.ownerComponent;
 
 				handleEvent(
 					evt,
@@ -511,7 +511,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 					}
 				}
 
-				if (!(elList as NodeListOf<Element>).length) {
+				if (!elList.length) {
 					return;
 				}
 			}

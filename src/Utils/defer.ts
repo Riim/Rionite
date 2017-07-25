@@ -5,7 +5,7 @@ type TQueue = Array<{ callback: () => void; context: any }>;
 let queue: TQueue | null;
 
 function run() {
-	let track = queue as TQueue;
+	let track = queue!;
 
 	queue = null;
 

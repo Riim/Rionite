@@ -151,7 +151,7 @@ export class ContentTextParser {
 		let contentText = this.contentText;
 
 		reKeypathOrNothing.lastIndex = this.at;
-		let keypath = (reKeypathOrNothing.exec(contentText) as RegExpExecArray)[0];
+		let keypath = reKeypathOrNothing.exec(contentText)![0];
 
 		if (keypath) {
 			this.chr = contentText.charAt((this.at += keypath.length));
@@ -332,7 +332,7 @@ export class ContentTextParser {
 
 	_readBoolean(): string | TNotValueAndNotKeypath {
 		reBooleanOrNothing.lastIndex = this.at;
-		let bool = (reBooleanOrNothing.exec(this.contentText) as RegExpExecArray)[0];
+		let bool = reBooleanOrNothing.exec(this.contentText)![0];
 
 		if (bool) {
 			this.chr = this.contentText.charAt((this.at += bool.length));
@@ -344,7 +344,7 @@ export class ContentTextParser {
 
 	_readNumber(): string | TNotValueAndNotKeypath {
 		reNumberOrNothing.lastIndex = this.at;
-		let num = (reNumberOrNothing.exec(this.contentText) as RegExpExecArray)[0];
+		let num = reNumberOrNothing.exec(this.contentText)![0];
 
 		if (num) {
 			this.chr = this.contentText.charAt((this.at += num.length));
@@ -394,7 +394,7 @@ export class ContentTextParser {
 
 	_readVacuum(): string | TNotValueAndNotKeypath {
 		reVacuumOrNothing.lastIndex = this.at;
-		let vacuum = (reVacuumOrNothing.exec(this.contentText) as RegExpExecArray)[0];
+		let vacuum = reVacuumOrNothing.exec(this.contentText)![0];
 
 		if (vacuum) {
 			this.chr = this.contentText.charAt((this.at += vacuum.length));
@@ -406,7 +406,7 @@ export class ContentTextParser {
 
 	_readKeypath(): string | TNotValueAndNotKeypath {
 		reKeypathOrNothing.lastIndex = this.at;
-		let keypath = (reKeypathOrNothing.exec(this.contentText) as RegExpExecArray)[0];
+		let keypath = reKeypathOrNothing.exec(this.contentText)![0];
 
 		if (keypath) {
 			this.chr = this.contentText.charAt((this.at += keypath.length));
@@ -418,7 +418,7 @@ export class ContentTextParser {
 
 	_readName(): string | null {
 		reNameOrNothing.lastIndex = this.at;
-		let name = (reNameOrNothing.exec(this.contentText) as RegExpExecArray)[0];
+		let name = reNameOrNothing.exec(this.contentText)![0];
 
 		if (name) {
 			this.chr = this.contentText.charAt((this.at += name.length));

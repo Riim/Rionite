@@ -1,7 +1,7 @@
 import { Cell, EventEmitter } from 'cellx';
 import { Component, IComponentElement } from './Component';
 import { componentInputTypeMap } from './componentInputTypeMap';
-import { componentInputTypeSerializerMap, IComponentInputTypeSerializer } from './componentInputTypeSerializerMap';
+import { componentInputTypeSerializerMap } from './componentInputTypeSerializerMap';
 import { hyphenize } from './Utils/hyphenize';
 
 export interface IComponentInput extends Object {
@@ -12,7 +12,7 @@ export interface IComponentInput extends Object {
 
 function initComponentInputProperty(componentInput: IComponentInput, name: string, el: IComponentElement) {
 	let component = el.$component;
-	let cipc = ((component.constructor as typeof Component).input as { [name: string]: any })[name];
+	let cipc = (component.constructor as typeof Component).input![name];
 
 	if (cipc == null) {
 		return;
@@ -60,7 +60,7 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 	}
 
 	if (rawValue === null && defaultValue != null && defaultValue !== false) {
-		el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue) as string);
+		el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue)!);
 	}
 
 	let value = typeSerializer.read(rawValue, defaultValue);
@@ -85,7 +85,7 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 		let valueCell: Cell | undefined;
 
 		let setRawValue = (rawValue: string | null) => {
-			let val = (typeSerializer as IComponentInputTypeSerializer).read(rawValue, defaultValue);
+			let val = typeSerializer!.read(rawValue, defaultValue);
 
 			if (valueCell) {
 				valueCell.set(val);
@@ -131,7 +131,7 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 			},
 
 			set(val: any) {
-				let rawValue = (typeSerializer as IComponentInputTypeSerializer).write(val, defaultValue);
+				let rawValue = typeSerializer!.write(val, defaultValue);
 
 				if (rawValue === null) {
 					el.removeAttribute(hyphenizedName);

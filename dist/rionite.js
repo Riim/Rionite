@@ -3069,6 +3069,7 @@ exports.componentInputTypeSerializerMap.set('object', exports.componentInputType
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(0);
+// tslint:disable-next-line
 exports.elementConstructorMap = new cellx_1.JS.Map([
     ['a', window.HTMLAnchorElement],
     ['blockquote', window.HTMLQuoteElement],

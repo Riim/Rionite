@@ -53,7 +53,7 @@ export class RtIfThen extends Component {
 			let getIfValue = compileKeypath(if_);
 			this._if = new Cell<boolean>(function() {
 				return !!getIfValue.call(this);
-			}, { owner: this.input.$context as object });
+			}, { owner: this.input.$context! });
 
 			this.initialized = true;
 		}
@@ -86,7 +86,7 @@ export class RtIfThen extends Component {
 
 	_render(changed: boolean) {
 		if (this._elseMode ? !this._if.get() : this._if.get()) {
-			let content = document.importNode((this.element as any as HTMLTemplateElement).content, true);
+			let content = document.importNode(((this.element as any) as HTMLTemplateElement).content, true);
 			if (!templateTagFeature) {
 				let templates = content.querySelectorAll('template');
 
@@ -97,7 +97,7 @@ export class RtIfThen extends Component {
 			let [bindings, childComponents] = bindContent(
 				content,
 				this.ownerComponent,
-				this.input.$context as object,
+				this.input.$context!,
 				{ 0: null, 1: null } as any
 			);
 
@@ -105,7 +105,7 @@ export class RtIfThen extends Component {
 			this._bindings = bindings;
 
 			suppressConnectionStatusCallbacks();
-			(this.element.parentNode as Node).insertBefore(content, this.element.nextSibling);
+			this.element.parentNode!.insertBefore(content, this.element.nextSibling);
 			resumeConnectionStatusCallbacks();
 
 			if (childComponents) {
