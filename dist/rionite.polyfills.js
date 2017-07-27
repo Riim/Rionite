@@ -1720,7 +1720,9 @@ var Component = (function (_super) {
             }
             else {
                 var targetOwnerComponent = evt.target.ownerComponent;
-                handleEvent_1.handleEvent(evt, (targetOwnerComponent ? targetOwnerComponent.element.parentNode : this.element.parentNode));
+                if (targetOwnerComponent) {
+                    handleEvent_1.handleEvent(evt, targetOwnerComponent.element);
+                }
             }
         }
     };
@@ -4632,7 +4634,7 @@ function handleEvent(evt, stopElement) {
     }
     for (;;) {
         var parentEl = el.parentNode;
-        if (!parentEl || parentEl == stopElement) {
+        if (!parentEl) {
             break;
         }
         if (el.hasAttribute(attrName)) {
@@ -4669,6 +4671,9 @@ function handleEvent(evt, stopElement) {
                     break;
                 }
             }
+        }
+        if (parentEl == stopElement) {
+            break;
         }
     }
 }

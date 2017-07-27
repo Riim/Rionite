@@ -20,7 +20,7 @@ export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 	for (; ; ) {
 		let parentEl: Element | null = el.parentNode as Element | null;
 
-		if (!parentEl || parentEl == stopElement) {
+		if (!parentEl) {
 			break;
 		}
 
@@ -65,6 +65,10 @@ export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 					break;
 				}
 			}
+		}
+
+		if (parentEl == stopElement) {
+			break;
 		}
 	}
 }
