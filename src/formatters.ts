@@ -1,6 +1,7 @@
 import { getText } from '@riim/gettext';
 
-export let formatters = {
+// tslint:disable-next-line
+export let formatters: { [name: string]: Function } = {
 	or: function or(value: any, arg: any): any {
 		return value || arg;
 	},

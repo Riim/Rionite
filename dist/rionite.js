@@ -1531,6 +1531,7 @@ exports.isRegExp = isRegExp;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var gettext_1 = __webpack_require__(17);
+// tslint:disable-next-line
 exports.formatters = {
     or: function or(value, arg) {
         return value || arg;
