@@ -271,9 +271,17 @@ var Component = (function (_super) {
         return DisposableMixin_1.DisposableMixin.prototype._listenTo.call(this, target, type, listener, context, useCapture);
     };
     Component.prototype._attach = function () {
+        var _this = this;
         this._attached = true;
         if (!this.initialized) {
-            this.initialize();
+            var result = this.initialize();
+            if (result) {
+                result.then(function () {
+                    _this.initialized = true;
+                    _this._attach();
+                });
+                return;
+            }
             this.initialized = true;
         }
         var constr = this.constructor;

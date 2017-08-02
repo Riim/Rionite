@@ -74,7 +74,7 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     _unfreezeBindings(): void;
     _destroyBindings(): void;
     created(): void;
-    initialize(): void;
+    initialize(): Promise<any> | void;
     ready(): void;
     elementConnected(): void;
     elementDisconnected(): void;

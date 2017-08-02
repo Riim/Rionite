@@ -321,7 +321,17 @@ export class Component extends EventEmitter implements DisposableMixin {
 		this._attached = true;
 
 		if (!this.initialized) {
-			this.initialize();
+			let result = this.initialize();
+
+			if (result) {
+				result.then(() => {
+					this.initialized = true;
+					this._attach();
+				});
+
+				return;
+			}
+
 			this.initialized = true;
 		}
 
@@ -454,7 +464,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 	// Callbacks
 
 	created() {}
-	initialize() {}
+	initialize(): Promise<any> | void {}
 	ready() {}
 	elementConnected() {}
 	elementDisconnected() {}
