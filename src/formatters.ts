@@ -58,3 +58,5 @@ export let formatters: { [name: string]: Function } = {
 		return JSON.stringify(value);
 	}
 };
+
+formatters.seq = formatters.identical;

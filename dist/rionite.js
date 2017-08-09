@@ -1598,6 +1598,7 @@ exports.formatters = {
         return JSON.stringify(value);
     }
 };
+exports.formatters.seq = exports.formatters.identical;
 
 
 /***/ }),

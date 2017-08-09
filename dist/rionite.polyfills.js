@@ -517,7 +517,7 @@ THE SOFTWARE.
     fixGetClass = false,
     DRECEV1 = '__dreCEv1',
     customElements = window.customElements,
-    usableCustomElements = polyfill.type !== 'force' && !!(
+    usableCustomElements = !/^force/.test(polyfill.type) && !!(
       customElements &&
       customElements.define &&
       customElements.get &&
@@ -671,7 +671,8 @@ THE SOFTWARE.
     asapTimer = 0,
   
     // internal flags
-    V0 = REGISTER_ELEMENT in document,
+    V0 = REGISTER_ELEMENT in document &&
+         !/^force-all/.test(polyfill.type),
     setListener = true,
     justSetup = false,
     doesNotSupportDOMAttrModified = true,
@@ -947,7 +948,7 @@ THE SOFTWARE.
   
         [HTMLElementPrototype, DocumentFragment.prototype].forEach(function(proto) {
           var origCloneNode = proto.cloneNode;
-  
+
           proto.cloneNode = function (deep) {
             var
               node = origCloneNode.call(this, !!deep),
@@ -961,9 +962,9 @@ THE SOFTWARE.
             return node;
           };
         });
-  
+
         var origImportNode = document.importNode;
-  
+
         document.importNode = function (node, deep) {
           var
             importedNode = origImportNode.call(this, node, !!deep),
@@ -977,7 +978,7 @@ THE SOFTWARE.
           return importedNode;
         };
       }
-  
+
       if (justSetup) return (justSetup = false);
   
       if (-2 < (
@@ -1209,7 +1210,8 @@ THE SOFTWARE.
   function verifyAndSetupAndAction(node, action) {
     var
       fn,
-      i = getTypeIndex(node)
+      i = getTypeIndex(node),
+      counterAction
     ;
     if (-1 < i) {
       patchIfNotAlready(node, protos[i]);
@@ -1217,6 +1219,7 @@ THE SOFTWARE.
       if (action === ATTACHED && !node[ATTACHED]) {
         node[DETACHED] = false;
         node[ATTACHED] = true;
+        counterAction = 'connected';
         i = 1;
         if (IE8 && indexOf.call(targets, node) < 0) {
           targets.push(node);
@@ -1224,9 +1227,13 @@ THE SOFTWARE.
       } else if (action === DETACHED && !node[DETACHED]) {
         node[ATTACHED] = false;
         node[DETACHED] = true;
+        counterAction = 'disconnected';
         i = 1;
       }
-      if (i && (fn = node[action + CALLBACK])) fn.call(node);
+      if (i && (fn = (
+        node[action + CALLBACK] ||
+        node[counterAction + CALLBACK]
+      ))) fn.call(node);
     }
   }
   
@@ -1417,7 +1424,7 @@ THE SOFTWARE.
   }
   
   // if customElements is not there at all
-  if (!customElements || polyfill.type === 'force') polyfillV1();
+  if (!customElements || /^force/.test(polyfill.type)) polyfillV1();
   else if(!polyfill.noBuiltIn) {
     // if available test extends work as expected
     try {
@@ -1445,7 +1452,7 @@ THE SOFTWARE.
       polyfillV1();
     }
   }
-
+  
   // FireFox only issue
   if(!polyfill.noBuiltIn) {
     try {
@@ -3091,6 +3098,7 @@ exports.formatters = {
         return JSON.stringify(value);
     }
 };
+exports.formatters.seq = exports.formatters.identical;
 
 
 /***/ }),
