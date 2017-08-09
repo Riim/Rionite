@@ -6,7 +6,7 @@ import { hyphenize } from './Utils/hyphenize';
 
 export interface IComponentInput extends Object {
 	$content: DocumentFragment | null;
-	$context: object | null;
+	$context: { [name: string]: any } | null;
 	[name: string]: any;
 }
 

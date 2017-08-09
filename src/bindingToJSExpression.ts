@@ -5,7 +5,7 @@ let cache: { [key: string]: string } = Object.create(null);
 function formattersReducer(jsExpr: string, formatter: IContentTextBindingFormatter): string {
 	let args = formatter.arguments;
 
-	return `(this.${ formatter.name } || formatters.${ formatter.name }).call(this, ${ jsExpr }${
+	return `(this.${ formatter.name } || formatters.${ formatter.name }).call(this.$component, ${ jsExpr }${
 		args && args.value.length ? ', ' + args.value.join(', ') : ''
 	})`;
 }

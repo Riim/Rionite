@@ -74,7 +74,7 @@ export function bindContent(
 								child as Element,
 								name,
 								{
-									owner: context,
+									context,
 									onChange: onAttributeBindingCellChange
 								}
 							);
@@ -120,7 +120,7 @@ export function bindContent(
 							compileContentText(contentText, value, false),
 							child as Text,
 							{
-								owner: context,
+								context,
 								onChange: onTextNodeBindingCellChange
 							}
 						);

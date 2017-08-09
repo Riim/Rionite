@@ -74,7 +74,7 @@ export class RtRepeat extends Component {
 			}
 
 			this._itemName = forAttrValue[1];
-			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { owner: input.$context! });
+			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { context: input.$context! });
 			this._trackBy = input.trackBy;
 
 			let rawItemContent = this._rawItemContent =
@@ -230,16 +230,40 @@ export class RtRepeat extends Component {
 				i += templates[i].content.querySelectorAll('template').length + 1;
 			}
 		}
-		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(this.input.$context, {
-			[this._itemName + 'Cell']: itemCell,
+		let context = this.input.$context!;
+		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(context, {
+			$component: {
+				configurable: false,
+				enumerable: false,
+				writable: false,
+				value: context.$component || context
+			},
+
+			[this._itemName + 'Cell']: {
+				configurable: true,
+				enumerable: false,
+				writable: true,
+				value: itemCell
+			},
 			[this._itemName]: {
+				configurable: true,
+				enumerable: true,
+
 				get() {
 					return itemCell.get();
 				}
 			},
 
-			$indexCell: indexCell,
+			$indexCell: {
+				configurable: true,
+				enumerable: false,
+				writable: true,
+				value: indexCell
+			},
 			$index: {
+				configurable: true,
+				enumerable: true,
+
 				get() {
 					return indexCell.get();
 				}

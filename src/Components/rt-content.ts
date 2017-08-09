@@ -110,18 +110,16 @@ export class RtContent extends Component {
 
 			if (bindings === undefined) {
 				if (content || el.firstChild) {
-					let getContext = input.getContext;
-
 					[this._bindings, childComponents] = content ?
-					bindContent(
-						content,
-						contentOwnerComponent!,
-						getContext ?
-							(ownerComponent as any)[getContext](ownerComponent.input.$context, this) :
-							ownerComponent.input.$context,
-						{ 0: null, 1: null } as any
-					) :
-					bindContent(el, ownerComponent, input.$context!, { 0: null, 1: null } as any);
+						bindContent(
+							content,
+							contentOwnerComponent!,
+							input.getContext ?
+								(ownerComponent as any)[input.getContext](ownerComponent.input.$context, this) :
+								ownerComponent.input.$context,
+							{ 0: null, 1: null } as any
+						) :
+						bindContent(el, ownerComponent, input.$context!, { 0: null, 1: null } as any);
 
 					this._childComponents = childComponents;
 				} else {

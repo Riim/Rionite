@@ -120,14 +120,12 @@ export class RtSlot extends Component {
 
 			if (bindings === undefined) {
 				if (content || el.firstChild) {
-					let getContext = input.getContext;
-
 					[this._bindings, childComponents] = content ?
 						bindContent(
 							content,
 							contentOwnerComponent!,
-							getContext ?
-								(contentOwnerComponent as any)[getContext](ownerComponent.input.$context, this) :
+							input.getContext ?
+								(ownerComponent as any)[input.getContext](ownerComponent.input.$context, this) :
 								ownerComponent.input.$context,
 							{ 0: null, 1: null } as any
 						) :
