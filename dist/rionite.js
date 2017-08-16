@@ -1583,11 +1583,17 @@ function initComponentInputProperty(componentInput, name, el) {
                 if (currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
                     valueCell_1 = new cellx_1.Cell(value, {
                         onChange: function (evt) {
-                            component.emit({
-                                type: "input-" + hyphenizedName + "-change",
-                                oldValue: evt.oldValue,
-                                value: evt.value
-                            });
+                            component.emit(evt.target == valueCell_1 ?
+                                {
+                                    type: "input-" + hyphenizedName + "-change",
+                                    oldValue: evt.oldValue,
+                                    value: evt.value
+                                } :
+                                {
+                                    type: "input-" + hyphenizedName + "-change",
+                                    oldValue: evt.target,
+                                    value: evt.target
+                                });
                         }
                     });
                     if (currentlyPulling) {

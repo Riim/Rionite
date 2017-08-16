@@ -114,11 +114,19 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 				if (currentlyPulling || EventEmitter.currentlySubscribing) {
 					valueCell = new Cell(value, {
 						onChange(evt) {
-							component.emit({
-								type: `input-${ hyphenizedName }-change`,
-								oldValue: evt.oldValue,
-								value: evt.value
-							});
+							component.emit(
+								evt.target == valueCell ?
+									{
+										type: `input-${ hyphenizedName }-change`,
+										oldValue: evt.oldValue,
+										value: evt.value
+									} :
+									{
+										type: `input-${ hyphenizedName }-change`,
+										oldValue: evt.target,
+										value: evt.target
+									}
+							);
 						}
 					});
 
