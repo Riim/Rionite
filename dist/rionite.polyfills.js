@@ -2998,6 +2998,7 @@ var cellx_1 = __webpack_require__(0);
 var componentInputTypeMap_1 = __webpack_require__(43);
 var componentInputTypeSerializerMap_1 = __webpack_require__(44);
 var hyphenize_1 = __webpack_require__(14);
+var Map = cellx_1.JS.Map;
 function initComponentInputProperty(componentInput, name, el) {
     var component = el.$component;
     var cipc = component.constructor.input[name];
@@ -3035,8 +3036,13 @@ function initComponentInputProperty(componentInput, name, el) {
     }
     var hyphenizedName = hyphenize_1.hyphenize(name);
     var rawValue = el.getAttribute(hyphenizedName);
-    if (required && rawValue === null) {
-        throw new TypeError("Input property \"" + name + "\" is required");
+    if (rawValue === null) {
+        if (required) {
+            throw new TypeError("Input property \"" + name + "\" is required");
+        }
+    }
+    else {
+        componentInput.$specified.set(name, true);
     }
     if (rawValue === null && defaultValue != null && defaultValue !== false) {
         el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue));
@@ -3125,7 +3131,7 @@ exports.ComponentInput = {
     init: function (component) {
         var componentInputConfig = component.constructor.input;
         var el = component.element;
-        var componentInput = { $content: null, $context: null };
+        var componentInput = { $content: null, $context: null, $specified: new Map() };
         if (componentInputConfig) {
             for (var name_1 in componentInputConfig) {
                 initComponentInputProperty(componentInput, name_1, el);

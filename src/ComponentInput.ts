@@ -1,12 +1,15 @@
-import { Cell, EventEmitter } from 'cellx';
+import { Cell, EventEmitter, JS } from 'cellx';
 import { Component, IComponentElement } from './Component';
 import { componentInputTypeMap } from './componentInputTypeMap';
 import { componentInputTypeSerializerMap } from './componentInputTypeSerializerMap';
 import { hyphenize } from './Utils/hyphenize';
 
+let Map = JS.Map;
+
 export interface IComponentInput extends Object {
 	$content: DocumentFragment | null;
 	$context: { [name: string]: any } | null;
+	$specified: Map<string, true>;
 	[name: string]: any;
 }
 
@@ -55,8 +58,12 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 	let hyphenizedName = hyphenize(name);
 	let rawValue = el.getAttribute(hyphenizedName);
 
-	if (required && rawValue === null) {
-		throw new TypeError(`Input property "${ name }" is required`);
+	if (rawValue === null) {
+		if (required) {
+			throw new TypeError(`Input property "${ name }" is required`);
+		}
+	} else {
+		componentInput.$specified.set(name, true);
 	}
 
 	if (rawValue === null && defaultValue != null && defaultValue !== false) {
@@ -163,7 +170,7 @@ export let ComponentInput = {
 	init(component: Component): IComponentInput {
 		let componentInputConfig = (component.constructor as typeof Component).input;
 		let el = component.element;
-		let componentInput = { $content: null, $context: null };
+		let componentInput = { $content: null, $context: null, $specified: new Map() };
 
 		if (componentInputConfig) {
 			for (let name in componentInputConfig) {

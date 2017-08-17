@@ -1,1 +1,1 @@
-export declare let componentInputValueMap: Map<string, any>;
+export declare let componentInputValueMap: Map<string, object>;

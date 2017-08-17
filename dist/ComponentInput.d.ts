@@ -4,6 +4,7 @@ export interface IComponentInput extends Object {
     $context: {
         [name: string]: any;
     } | null;
+    $specified: Map<string, true>;
     [name: string]: any;
 }
 export declare let ComponentInput: {
