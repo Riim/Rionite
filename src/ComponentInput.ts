@@ -1,4 +1,4 @@
-import { Map } from '@riim/map-set-polyfill';
+import { Set } from '@riim/map-set-polyfill';
 import { Cell, EventEmitter } from 'cellx';
 import { Component, IComponentElement } from './Component';
 import { componentInputTypeMap } from './componentInputTypeMap';
@@ -8,7 +8,7 @@ import { hyphenize } from './Utils/hyphenize';
 export interface IComponentInput extends Object {
 	$content: DocumentFragment | null;
 	$context: { [name: string]: any } | null;
-	$specified: Map<string, true>;
+	$specified: Set<string>;
 	[name: string]: any;
 }
 
@@ -62,7 +62,7 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 			throw new TypeError(`Input property "${ name }" is required`);
 		}
 	} else {
-		componentInput.$specified.set(name, true);
+		componentInput.$specified.add(name);
 	}
 
 	if (rawValue === null && defaultValue != null && defaultValue !== false) {
@@ -169,7 +169,7 @@ export let ComponentInput = {
 	init(component: Component): IComponentInput {
 		let componentInputConfig = (component.constructor as typeof Component).input;
 		let el = component.element;
-		let componentInput = { $content: null, $context: null, $specified: new Map() };
+		let componentInput = { $content: null, $context: null, $specified: new Set() };
 
 		if (componentInputConfig) {
 			for (let name in componentInputConfig) {
