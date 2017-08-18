@@ -1,10 +1,9 @@
-import { Cell, EventEmitter, JS } from 'cellx';
+import { Map } from '@riim/map-set-polyfill';
+import { Cell, EventEmitter } from 'cellx';
 import { Component, IComponentElement } from './Component';
 import { componentInputTypeMap } from './componentInputTypeMap';
 import { componentInputTypeSerializerMap } from './componentInputTypeSerializerMap';
 import { hyphenize } from './Utils/hyphenize';
-
-let Map = JS.Map;
 
 export interface IComponentInput extends Object {
 	$content: DocumentFragment | null;

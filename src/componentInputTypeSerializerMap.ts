@@ -1,9 +1,9 @@
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
-import { JS } from 'cellx';
+import { Map } from '@riim/map-set-polyfill';
 import { componentInputValueMap } from './componentInputValueMap';
 import { isRegExp } from './Utils/isRegExp';
 
-export let componentInputTypeSerializerMap = new JS.Map<any, {
+export let componentInputTypeSerializerMap = new Map<any, {
 	read: (value: string | null, defaultValue: any) => any;
 	write: (value: any, defaultValue?: any) => string | null;
 }>([

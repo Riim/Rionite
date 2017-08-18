@@ -1,10 +1,11 @@
-import { JS, Utils } from 'cellx';
+import { Symbol } from '@riim/symbol-polyfill';
+import { Utils } from 'cellx';
 
 let nextUID = Utils.nextUID;
 
 let hasOwn = Object.prototype.hasOwnProperty;
 
-let KEY_UID = JS.Symbol('uid');
+let KEY_UID = Symbol('uid');
 
 export let getUID: (obj: { [name: string]: any }) => string;
 

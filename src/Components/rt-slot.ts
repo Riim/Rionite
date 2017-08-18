@@ -1,4 +1,5 @@
-import { JS } from 'cellx';
+import { Map } from '@riim/map-set-polyfill';
+import { Symbol } from '@riim/symbol-polyfill';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { Component, IComponentElement } from '../Component';
@@ -9,9 +10,7 @@ import { clearNode } from '../Utils/clearNode';
 import { getUID } from '../Utils/getUID';
 import { moveContent } from '../Utils/moveContent';
 
-let Map = JS.Map;
-
-let KEY_SLOT_CONTENT_MAP = JS.Symbol('slotContentMap');
+let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 
 @ComponentDecorator({
 	elementIs: 'rt-slot',

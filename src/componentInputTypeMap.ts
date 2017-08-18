@@ -1,6 +1,6 @@
-import { JS } from 'cellx';
+import { Map } from '@riim/map-set-polyfill';
 
-export let componentInputTypeMap = new JS.Map<any, string>([
+export let componentInputTypeMap = new Map<any, string>([
 	[Boolean, 'boolean'],
 	['boolean', 'boolean'],
 	[Number, 'number'],

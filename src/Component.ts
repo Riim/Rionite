@@ -1,9 +1,5 @@
-import {
-	EventEmitter,
-	IEvent,
-	IEventEmitterListener,
-	JS
-	} from 'cellx';
+import { Map } from '@riim/map-set-polyfill';
+import { EventEmitter, IEvent, IEventEmitterListener } from 'cellx';
 import htmlToFragment from 'html-to-fragment';
 import { IBlock, Template } from 'nelm';
 import { attachChildComponentElements } from './attachChildComponentElements';
@@ -26,8 +22,6 @@ import { registerComponent } from './registerComponent';
 import { camelize } from './Utils/camelize';
 import { getUID } from './Utils/getUID';
 import { moveContent } from './Utils/moveContent';
-
-let Map = JS.Map;
 
 let map = Array.prototype.map;
 

@@ -1,9 +1,5 @@
-import {
-	Cell,
-	JS,
-	ObservableList,
-	Utils
-	} from 'cellx';
+import { Map } from '@riim/map-set-polyfill';
+import { Cell, ObservableList, Utils } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { compileKeypath } from '../compileKeypath';
@@ -15,7 +11,6 @@ import { KEY_ELEMENT_CONNECTED } from '../KEY_ELEMENT_CONNECTED';
 import { keypathPattern } from '../keypathPattern';
 import { namePattern } from '../namePattern';
 
-let Map = JS.Map;
 let nextTick = Utils.nextTick;
 
 let slice = Array.prototype.slice;

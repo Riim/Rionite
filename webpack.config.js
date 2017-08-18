@@ -1,8 +1,8 @@
-var path = require('path');
-var webpack = require('webpack');
+let path = require('path');
+let webpack = require('webpack');
 
-module.exports = function() {
-	var plugins = [
+module.exports = () => {
+	let plugins = [
 		new webpack.DefinePlugin({
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		})
@@ -42,7 +42,7 @@ module.exports = function() {
 
 		externals: ['cellx'],
 
-		plugins: plugins,
+		plugins,
 
 		node: {
 			console: false,

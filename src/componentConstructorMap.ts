@@ -1,4 +1,4 @@
-import { JS } from 'cellx';
+import { Map } from '@riim/map-set-polyfill';
 import { Component } from './Component';
 
-export let componentConstructorMap = new JS.Map<string, typeof Component>();
+export let componentConstructorMap = new Map<string, typeof Component>();

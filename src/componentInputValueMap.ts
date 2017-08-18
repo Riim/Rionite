@@ -1,2 +1,2 @@
-import { JS } from 'cellx';
-export let componentInputValueMap = new JS.Map<string, object>();
+import { Map } from '@riim/map-set-polyfill';
+export let componentInputValueMap = new Map<string, object>();

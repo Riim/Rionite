@@ -1,7 +1,7 @@
-import { JS } from 'cellx';
+import { Map } from '@riim/map-set-polyfill';
 
 // tslint:disable-next-line
-export let elementConstructorMap = new JS.Map<string, Function>([
+export let elementConstructorMap = new Map<string, Function>([
 	['a', (window as any).HTMLAnchorElement],
 	['blockquote', (window as any).HTMLQuoteElement],
 	['br', (window as any).HTMLBRElement],
