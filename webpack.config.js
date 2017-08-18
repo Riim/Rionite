@@ -40,7 +40,11 @@ module.exports = () => {
 			extensions: ['.ts', '.tsx', '.js', '.jsx']
 		},
 
-		externals: ['cellx'],
+		externals: [
+			'@riim/symbol-polyfill',
+			'@riim/map-set-polyfill',
+			'cellx'
+		],
 
 		plugins,
 

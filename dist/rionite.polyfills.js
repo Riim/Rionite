@@ -1500,14 +1500,14 @@ THE SOFTWARE.
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("cellx"));
+		module.exports = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"));
 	else if(typeof define === 'function' && define.amd)
-		define(["cellx"], factory);
+		define(["@riim/map-set-polyfill", "cellx", "@riim/symbol-polyfill"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("cellx"));
+		exports["rionite"] = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"));
 	else
-		root["Rionite"] = root["rionite"] = factory(root["cellx"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_1__) {
+		root["rionite"] = factory(root["@riim/map-set-polyfill"], root["cellx"], root["@riim/symbol-polyfill"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_1__, __WEBPACK_EXTERNAL_MODULE_9__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1575,311 +1575,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-var global = Function('return this;')();
-var Symbol =  true ? __webpack_require__(5).Symbol : global.Symbol;
-
-var hasOwn = Object.prototype.hasOwnProperty;
-
-var KEY_MAP_ID = Symbol('map-id');
-var mapIdCounter = 0;
-
-var Map = global.Map;
-
-if (!Map || Map.toString().indexOf('[native code]') == -1 || !new Map([[1, 1]]).size) {
-	var entryStub = {
-		value: undefined
-	};
-
-	Map = function Map(entries) {
-		this._entries = Object.create(null);
-		this._objectStamps = {};
-
-		this._first = null;
-		this._last = null;
-
-		this.size = 0;
-
-		if (entries) {
-			for (var i = 0, l = entries.length; i < l; i++) {
-				this.set(entries[i][0], entries[i][1]);
-			}
-		}
-	};
-
-	Map.prototype = {
-		constructor: Map,
-
-		has: function has(key) {
-			return !!this._entries[this._getValueStamp(key)];
-		},
-
-		get: function get(key) {
-			return (this._entries[this._getValueStamp(key)] || entryStub).value;
-		},
-
-		set: function set(key, value) {
-			var entries = this._entries;
-			var keyStamp = this._getValueStamp(key);
-
-			if (entries[keyStamp]) {
-				entries[keyStamp].value = value;
-			} else {
-				var entry = entries[keyStamp] = {
-					key: key,
-					keyStamp: keyStamp,
-					value: value,
-					prev: this._last,
-					next: null
-				};
-
-				if (this.size++) {
-					this._last.next = entry;
-				} else {
-					this._first = entry;
-				}
-
-				this._last = entry;
-			}
-
-			return this;
-		},
-
-		delete: function delete_(key) {
-			var keyStamp = this._getValueStamp(key);
-			var entry = this._entries[keyStamp];
-
-			if (!entry) {
-				return false;
-			}
-
-			if (--this.size) {
-				var prev = entry.prev;
-				var next = entry.next;
-
-				if (prev) {
-					prev.next = next;
-				} else {
-					this._first = next;
-				}
-
-				if (next) {
-					next.prev = prev;
-				} else {
-					this._last = prev;
-				}
-			} else {
-				this._first = null;
-				this._last = null;
-			}
-
-			delete this._entries[keyStamp];
-			delete this._objectStamps[keyStamp];
-
-			return true;
-		},
-
-		clear: function clear() {
-			var entries = this._entries;
-
-			for (var stamp in entries) {
-				delete entries[stamp];
-			}
-
-			this._objectStamps = {};
-
-			this._first = null;
-			this._last = null;
-
-			this.size = 0;
-		},
-
-		forEach: function forEach(callback, context) {
-			var entry = this._first;
-
-			while (entry) {
-				callback.call(context, entry.value, entry.key, this);
-
-				do {
-					entry = entry.next;
-				} while (entry && !this._entries[entry.keyStamp]);
-			}
-		},
-
-		toString: function toString() {
-			return '[object Map]';
-		},
-
-		_getValueStamp: function _getValueStamp(value) {
-			switch (typeof value) {
-				case 'undefined': {
-					return 'undefined';
-				}
-				case 'object': {
-					if (value === null) {
-						return 'null';
-					}
-
-					break;
-				}
-				case 'boolean': {
-					return '?' + value;
-				}
-				case 'number': {
-					return '+' + value;
-				}
-				case 'string': {
-					return ',' + value;
-				}
-			}
-
-			return this._getObjectStamp(value);
-		},
-
-		_getObjectStamp: function _getObjectStamp(obj) {
-			if (!hasOwn.call(obj, KEY_MAP_ID)) {
-				if (!Object.isExtensible(obj)) {
-					var stamps = this._objectStamps;
-					var stamp;
-
-					for (stamp in stamps) {
-						if (hasOwn.call(stamps, stamp) && stamps[stamp] == obj) {
-							return stamp;
-						}
-					}
-
-					stamp = String(++mapIdCounter);
-					stamps[stamp] = obj;
-
-					return stamp;
-				}
-
-				Object.defineProperty(obj, KEY_MAP_ID, {
-					value: String(++mapIdCounter)
-				});
-			}
-
-			return obj[KEY_MAP_ID];
-		}
-	};
-
-	[
-		['keys', function keys(entry) {
-			return entry.key;
-		}],
-		['values', function values(entry) {
-			return entry.value;
-		}],
-		['entries', function entries(entry) {
-			return [entry.key, entry.value];
-		}]
-	].forEach(function(settings) {
-		var getStepValue = settings[1];
-
-		Map.prototype[settings[0]] = function() {
-			var entries = this._entries;
-			var entry;
-			var done = false;
-			var map = this;
-
-			return {
-				next: function() {
-					if (!done) {
-						if (entry) {
-							do {
-								entry = entry.next;
-							} while (entry && !entries[entry.keyStamp]);
-						} else {
-							entry = map._first;
-						}
-
-						if (entry) {
-							return {
-								value: getStepValue(entry),
-								done: false
-							};
-						}
-
-						done = true;
-					}
-
-					return {
-						value: undefined,
-						done: true
-					};
-				}
-			};
-		};
-	});
-}
-
-if (!Map.prototype[Symbol.iterator]) {
-	Map.prototype[Symbol.iterator] = Map.prototype.entries;
-}
-
-var Set = global.Set;
-
-if (!Set || Set.toString().indexOf('[native code]') == -1 || !new Set([1]).size) {
-	Set = function Set(values) {
-		this._values = new Map(values.map(function(value) {
-			return [value, value];
-		}));
-
-		this.size = 0;
-	};
-
-	Set.prototype = {
-		constructor: Set,
-
-		has: function has(value) {
-			return this._values.has(value);
-		},
-
-		add: function add(value) {
-			this._values.set(value, value);
-			this.size = this._values.size;
-			return this;
-		},
-
-		delete: function _delete(value) {
-			if (this._values.delete(value)) {
-				this.size--;
-				return true;
-			}
-
-			return false;
-		},
-
-		clear: function clear() {
-			this._values.clear();
-			this.size = 0;
-		},
-
-		forEach: function forEach(callback, context) {
-			this._values.forEach(function(value) {
-				callback.call(context, value, value, this);
-			}, this);
-		},
-
-		keys: Map.prototype.keys,
-		values: Map.prototype.values,
-		entries: Map.prototype.entries
-	};
-}
-
-if (!Set.prototype[Symbol.iterator]) {
-	Set.prototype[Symbol.iterator] = Set.prototype.values;
-}
-
-if (true) {
-	exports.Map = Map;
-	exports.Set = Set;
-} else {
-	global.Map = Map;
-	global.Set = Set;
-}
-
+module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
 
 /***/ }),
 /* 1 */
@@ -1907,15 +1605,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
 var cellx_1 = __webpack_require__(1);
 var html_to_fragment_1 = __webpack_require__(20);
-var attachChildComponentElements_1 = __webpack_require__(6);
-var bindContent_1 = __webpack_require__(7);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var bindContent_1 = __webpack_require__(6);
 var bindEvents_1 = __webpack_require__(43);
 var componentBinding_1 = __webpack_require__(44);
 var componentConstructorMap_1 = __webpack_require__(25);
 var ComponentInput_1 = __webpack_require__(26);
 var DisposableMixin_1 = __webpack_require__(28);
 var ElementProtoMixin_1 = __webpack_require__(3);
-var Features_1 = __webpack_require__(8);
+var Features_1 = __webpack_require__(7);
 var handledEvents_1 = __webpack_require__(47);
 var handleEvent_1 = __webpack_require__(48);
 var registerComponent_1 = __webpack_require__(49);
@@ -2280,8 +1978,8 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Features_1 = __webpack_require__(8);
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(9);
+var Features_1 = __webpack_require__(7);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
 var defer_1 = __webpack_require__(29);
 var isConnectionStatusCallbacksSuppressed = false;
 function suppressConnectionStatusCallbacks() {
@@ -2407,26 +2105,6 @@ exports.ComponentDecorator = ComponentDecorator;
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var global = Function('return this;')();
-var Symbol = global.Symbol;
-
-var idCounter = 0;
-
-if (!Symbol) {
-	Symbol = function Symbol(key) {
-		return '__' + key + '_' + Math.floor(Math.random() * 1e9) + '_' + (++idCounter) + '__';
-	};
-
-	Symbol.iterator = Symbol('Symbol.iterator');
-}
-
-( true ? exports : global).Symbol = Symbol;
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -2444,7 +2122,7 @@ exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2553,7 +2231,7 @@ exports.bindContent = bindContent;
 
 
 /***/ }),
-/* 8 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2589,15 +2267,21 @@ exports.nativeCustomElements = nativeCustomElementsFeature;
 
 
 /***/ }),
-/* 9 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var symbol_polyfill_1 = __webpack_require__(5);
+var symbol_polyfill_1 = __webpack_require__(9);
 exports.KEY_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite.KEY_ELEMENT_CONNECTED');
 
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_9__;
 
 /***/ }),
 /* 10 */
@@ -2707,7 +2391,7 @@ exports.hyphenize = hyphenize;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var symbol_polyfill_1 = __webpack_require__(5);
+var symbol_polyfill_1 = __webpack_require__(9);
 var cellx_1 = __webpack_require__(1);
 var nextUID = cellx_1.Utils.nextUID;
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -3737,14 +3421,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(1);
-var attachChildComponentElements_1 = __webpack_require__(6);
-var bindContent_1 = __webpack_require__(7);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var bindContent_1 = __webpack_require__(6);
 var compileKeypath_1 = __webpack_require__(33);
 var Component_1 = __webpack_require__(2);
 var ComponentDecorator_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(3);
-var Features_1 = __webpack_require__(8);
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(9);
+var Features_1 = __webpack_require__(7);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
 var keypathPattern_1 = __webpack_require__(14);
 var nextTick = cellx_1.Utils.nextTick;
 var slice = Array.prototype.slice;
@@ -3914,7 +3598,7 @@ var DisposableMixin_1 = __webpack_require__(28);
 exports.DisposableMixin = DisposableMixin_1.DisposableMixin;
 var formatters_1 = __webpack_require__(24);
 exports.formatters = formatters_1.formatters;
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(9);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
 exports.KEY_ELEMENT_CONNECTED = KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED;
 __webpack_require__(55);
 var camelize_1 = __webpack_require__(30);
@@ -5244,9 +4928,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
-var symbol_polyfill_1 = __webpack_require__(5);
-var attachChildComponentElements_1 = __webpack_require__(6);
-var bindContent_1 = __webpack_require__(7);
+var symbol_polyfill_1 = __webpack_require__(9);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var bindContent_1 = __webpack_require__(6);
 var Component_1 = __webpack_require__(2);
 var ComponentDecorator_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(3);
@@ -5447,14 +5131,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
 var cellx_1 = __webpack_require__(1);
-var attachChildComponentElements_1 = __webpack_require__(6);
-var bindContent_1 = __webpack_require__(7);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var bindContent_1 = __webpack_require__(6);
 var compileKeypath_1 = __webpack_require__(33);
 var Component_1 = __webpack_require__(2);
 var ComponentDecorator_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(3);
-var Features_1 = __webpack_require__(8);
-var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(9);
+var Features_1 = __webpack_require__(7);
+var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
 var keypathPattern_1 = __webpack_require__(14);
 var namePattern_1 = __webpack_require__(15);
 var nextTick = cellx_1.Utils.nextTick;
@@ -5738,9 +5422,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
-var symbol_polyfill_1 = __webpack_require__(5);
-var attachChildComponentElements_1 = __webpack_require__(6);
-var bindContent_1 = __webpack_require__(7);
+var symbol_polyfill_1 = __webpack_require__(9);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var bindContent_1 = __webpack_require__(6);
 var Component_1 = __webpack_require__(2);
 var ComponentDecorator_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(3);
