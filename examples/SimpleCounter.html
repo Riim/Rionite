@@ -8,6 +8,20 @@
 
 <simple-counter></simple-counter>
 
+<script src="../node_modules/@riim/symbol-polyfill/index.js"></script>
+<script src="../node_modules/@riim/map-set-polyfill/index.js"></script>
+<script>
+
+var _riim_symbolPolyfill = window['@riim/symbol-polyfill'] = {
+	Symbol: Symbol
+};
+
+var _riim_mapSetPolyfill = window['@riim/map-set-polyfill'] = {
+	Map: Map,
+	Set: Set
+};
+
+</script>
 <script src="../node_modules/cellx/dist/cellx.js"></script>
 <script src="../dist/rionite.polyfills.js"></script>
 <script>

@@ -4,10 +4,10 @@ import {
 	ICellPull,
 	IEvent
 	} from 'cellx';
-import { compileContentText } from './compileContentText';
+import { compileContentTextFragment } from './compileContentTextFragment';
 import { Component, IPossiblyComponentElement } from './Component';
 import { IFreezableCell } from './componentBinding';
-import { ContentTextParser } from './ContentTextParser';
+import { ContentTextFragmentParser } from './ContentTextFragmentParser';
 import { setAttribute } from './Utils/setAttribute';
 
 class AttributeBindingCell extends Cell {
@@ -30,19 +30,15 @@ class TextNodeBindingCell extends Cell {
 	}
 }
 
-function onAttributeBindingCellChange(evt: IEvent) {
-	setAttribute(
-		(evt.target as AttributeBindingCell).element,
-		(evt.target as AttributeBindingCell).attributeName,
-		evt.value
-	);
+function onAttributeBindingCellChange(evt: IEvent<AttributeBindingCell>) {
+	setAttribute(evt.target.element, evt.target.attributeName, evt.value);
 }
 
-function onTextNodeBindingCellChange(evt: IEvent) {
-	(evt.target as TextNodeBindingCell).textNode.nodeValue = evt.value;
+function onTextNodeBindingCellChange(evt: IEvent<TextNodeBindingCell>) {
+	evt.target.textNode.nodeValue = evt.value;
 }
 
-let ContentTextNodeType = ContentTextParser.ContentTextNodeType;
+let ContentTextFragmentNodeType = ContentTextFragmentParser.ContentTextFragmentNodeType;
 
 export function bindContent(
 	node: Element | DocumentFragment,
@@ -60,9 +56,12 @@ export function bindContent(
 					let value = attr.value;
 
 					if (value.indexOf('{') != -1) {
-						let contentText = (new ContentTextParser(value)).parse();
+						let contentTextFragment = (new ContentTextFragmentParser(value)).parse();
 
-						if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
+						if (
+							contentTextFragment.length > 1 ||
+								contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING
+						) {
 							let name = attr.name;
 
 							if (name.charAt(0) == '_') {
@@ -70,7 +69,7 @@ export function bindContent(
 							}
 
 							let cell = new AttributeBindingCell(
-								compileContentText(contentText, value, contentText.length == 1),
+								compileContentTextFragment(contentTextFragment, value, contentTextFragment.length == 1),
 								child as Element,
 								name,
 								{
@@ -113,11 +112,14 @@ export function bindContent(
 				let value = child.nodeValue!;
 
 				if (value.indexOf('{') != -1) {
-					let contentText = (new ContentTextParser(value)).parse();
+					let contentTextFragment = (new ContentTextFragmentParser(value)).parse();
 
-					if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
+					if (
+						contentTextFragment.length > 1 ||
+							contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING
+					) {
 						let cell = new TextNodeBindingCell(
-							compileContentText(contentText, value, false),
+							compileContentTextFragment(contentTextFragment, value, false),
 							child as Text,
 							{
 								context,

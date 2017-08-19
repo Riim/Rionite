@@ -2139,8 +2139,8 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var cellx_1 = __webpack_require__(1);
-var compileContentText_1 = __webpack_require__(40);
-var ContentTextParser_1 = __webpack_require__(22);
+var compileContentTextFragment_1 = __webpack_require__(40);
+var ContentTextFragmentParser_1 = __webpack_require__(22);
 var setAttribute_1 = __webpack_require__(42);
 var AttributeBindingCell = (function (_super) {
     __extends(AttributeBindingCell, _super);
@@ -2167,7 +2167,7 @@ function onAttributeBindingCellChange(evt) {
 function onTextNodeBindingCellChange(evt) {
     evt.target.textNode.nodeValue = evt.value;
 }
-var ContentTextNodeType = ContentTextParser_1.ContentTextParser.ContentTextNodeType;
+var ContentTextFragmentNodeType = ContentTextFragmentParser_1.ContentTextFragmentParser.ContentTextFragmentNodeType;
 function bindContent(node, ownerComponent, context, result) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         switch (child.nodeType) {
@@ -2177,13 +2177,14 @@ function bindContent(node, ownerComponent, context, result) {
                     var attr = attrs.item(--i);
                     var value = attr.value;
                     if (value.indexOf('{') != -1) {
-                        var contentText = (new ContentTextParser_1.ContentTextParser(value)).parse();
-                        if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
+                        var contentTextFragment = (new ContentTextFragmentParser_1.ContentTextFragmentParser(value)).parse();
+                        if (contentTextFragment.length > 1 ||
+                            contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING) {
                             var name_1 = attr.name;
                             if (name_1.charAt(0) == '_') {
                                 name_1 = name_1.slice(1);
                             }
-                            var cell = new AttributeBindingCell(compileContentText_1.compileContentText(contentText, value, contentText.length == 1), child, name_1, {
+                            var cell = new AttributeBindingCell(compileContentTextFragment_1.compileContentTextFragment(contentTextFragment, value, contentTextFragment.length == 1), child, name_1, {
                                 context: context,
                                 onChange: onAttributeBindingCellChange
                             });
@@ -2211,9 +2212,10 @@ function bindContent(node, ownerComponent, context, result) {
                 }
                 var value = child.nodeValue;
                 if (value.indexOf('{') != -1) {
-                    var contentText = (new ContentTextParser_1.ContentTextParser(value)).parse();
-                    if (contentText.length > 1 || contentText[0].nodeType == ContentTextNodeType.BINDING) {
-                        var cell = new TextNodeBindingCell(compileContentText_1.compileContentText(contentText, value, false), child, {
+                    var contentTextFragment = (new ContentTextFragmentParser_1.ContentTextFragmentParser(value)).parse();
+                    if (contentTextFragment.length > 1 ||
+                        contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING) {
+                        var cell = new TextNodeBindingCell(compileContentTextFragment_1.compileContentTextFragment(contentTextFragment, value, false), child, {
                             context: context,
                             onChange: onTextNodeBindingCellChange
                         });
@@ -2573,35 +2575,34 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var keypathPattern_1 = __webpack_require__(14);
 var keypathToJSExpression_1 = __webpack_require__(23);
 var namePattern_1 = __webpack_require__(15);
-var ContentTextNodeType;
-(function (ContentTextNodeType) {
-    ContentTextNodeType[ContentTextNodeType["TEXT"] = 1] = "TEXT";
-    ContentTextNodeType[ContentTextNodeType["BINDING"] = 2] = "BINDING";
-    ContentTextNodeType[ContentTextNodeType["BINDING_KEYPATH"] = 3] = "BINDING_KEYPATH";
-    ContentTextNodeType[ContentTextNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
-    ContentTextNodeType[ContentTextNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
-})(ContentTextNodeType = exports.ContentTextNodeType || (exports.ContentTextNodeType = {}));
+var ContentTextFragmentNodeType;
+(function (ContentTextFragmentNodeType) {
+    ContentTextFragmentNodeType[ContentTextFragmentNodeType["TEXT"] = 1] = "TEXT";
+    ContentTextFragmentNodeType[ContentTextFragmentNodeType["BINDING"] = 2] = "BINDING";
+    ContentTextFragmentNodeType[ContentTextFragmentNodeType["BINDING_KEYPATH"] = 3] = "BINDING_KEYPATH";
+    ContentTextFragmentNodeType[ContentTextFragmentNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
+    ContentTextFragmentNodeType[ContentTextFragmentNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
+})(ContentTextFragmentNodeType = exports.ContentTextFragmentNodeType || (exports.ContentTextFragmentNodeType = {}));
 var reNameOrNothing = RegExp(namePattern_1.namePattern + '|', 'g');
 var reKeypathOrNothing = RegExp(keypathPattern_1.keypathPattern + '|', 'g');
 var reBooleanOrNothing = /false|true|/g;
 var reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 var reVacuumOrNothing = /null|undefined|void 0|/g;
-var NOT_VALUE_AND_NOT_KEYPATH = {};
-var ContentTextParser = (function () {
-    function ContentTextParser(contentText) {
-        this.contentText = contentText;
+var ContentTextFragmentParser = (function () {
+    function ContentTextFragmentParser(contentTextFragment) {
+        this.contentTextFragment = contentTextFragment;
     }
-    ContentTextParser.prototype.parse = function () {
-        var contentText = this.contentText;
-        if (!contentText) {
+    ContentTextFragmentParser.prototype.parse = function () {
+        var contentTextFragment = this.contentTextFragment;
+        if (!contentTextFragment) {
             return [];
         }
         this.at = 0;
         var result = this.result = [];
-        for (var index = void 0; (index = contentText.indexOf('{', this.at)) != -1;) {
-            this._pushText(contentText.slice(this.at, index));
+        for (var index = void 0; (index = contentTextFragment.indexOf('{', this.at)) != -1;) {
+            this._pushText(contentTextFragment.slice(this.at, index));
             this.at = index;
-            this.chr = contentText.charAt(index);
+            this.chr = contentTextFragment.charAt(index);
             var binding = this._readBinding();
             if (binding) {
                 result.push(binding);
@@ -2611,30 +2612,35 @@ var ContentTextParser = (function () {
                 this._next('{');
             }
         }
-        this._pushText(contentText.slice(this.at));
+        this._pushText(contentTextFragment.slice(this.at));
         return result;
     };
-    ContentTextParser.prototype._pushText = function (value) {
+    ContentTextFragmentParser.prototype._pushText = function (value) {
         if (value) {
             var result = this.result;
             var resultLen = result.length;
-            if (resultLen && result[resultLen - 1].nodeType == ContentTextNodeType.TEXT) {
+            if (resultLen && result[resultLen - 1].nodeType == ContentTextFragmentNodeType.TEXT) {
                 result[resultLen - 1].value = value;
             }
             else {
                 result.push({
-                    nodeType: ContentTextNodeType.TEXT,
+                    nodeType: ContentTextFragmentNodeType.TEXT,
                     value: value
                 });
             }
         }
     };
-    ContentTextParser.prototype._readBinding = function () {
+    ContentTextFragmentParser.prototype._readBinding = function () {
         var at = this.at;
         this._next('{');
         this._skipWhitespaces();
-        var keypath = this._readBindingKeypath();
-        if (keypath) {
+        var argument = this._readValue();
+        var isArgumentKeypath;
+        if (!argument) {
+            argument = this._readKeypath();
+            isArgumentKeypath = true;
+        }
+        if (argument) {
             var formatters = void 0;
             for (var formatter = void 0; this._skipWhitespaces() == '|' && (formatter = this._readFormatter());) {
                 (formatters || (formatters = [])).push(formatter);
@@ -2642,28 +2648,19 @@ var ContentTextParser = (function () {
             if (this.chr == '}') {
                 this._next();
                 return {
-                    nodeType: ContentTextNodeType.BINDING,
-                    keypath: keypath,
+                    nodeType: ContentTextFragmentNodeType.BINDING,
+                    argument: argument,
+                    isArgumentKeypath: isArgumentKeypath || false,
                     formatters: formatters || null,
-                    raw: this.contentText.slice(at, this.at)
+                    raw: this.contentTextFragment.slice(at, this.at)
                 };
             }
         }
         this.at = at;
-        this.chr = this.contentText.charAt(at);
+        this.chr = this.contentTextFragment.charAt(at);
         return null;
     };
-    ContentTextParser.prototype._readBindingKeypath = function () {
-        var contentText = this.contentText;
-        reKeypathOrNothing.lastIndex = this.at;
-        var keypath = reKeypathOrNothing.exec(contentText)[0];
-        if (keypath) {
-            this.chr = contentText.charAt((this.at += keypath.length));
-            return keypath;
-        }
-        return null;
-    };
-    ContentTextParser.prototype._readFormatter = function () {
+    ContentTextFragmentParser.prototype._readFormatter = function () {
         var at = this.at;
         this._next('|');
         this._skipWhitespaces();
@@ -2671,23 +2668,23 @@ var ContentTextParser = (function () {
         if (name) {
             var args = this.chr == '(' ? this._readFormatterArguments() : null;
             return {
-                nodeType: ContentTextNodeType.BINDING_FORMATTER,
+                nodeType: ContentTextFragmentNodeType.BINDING_FORMATTER,
                 name: name,
                 arguments: args
             };
         }
         this.at = at;
-        this.chr = this.contentText.charAt(at);
+        this.chr = this.contentTextFragment.charAt(at);
         return null;
     };
-    ContentTextParser.prototype._readFormatterArguments = function () {
+    ContentTextFragmentParser.prototype._readFormatterArguments = function () {
         var at = this.at;
         this._next('(');
         var args = [];
         if (this._skipWhitespaces() != ')') {
             for (;;) {
-                var arg = this._readValueOrKeypath();
-                if (arg !== NOT_VALUE_AND_NOT_KEYPATH) {
+                var arg = this._readValue() || this._readKeypath(true);
+                if (arg) {
                     if (this._skipWhitespaces() == ',' || this.chr == ')') {
                         args.push(arg);
                         if (this.chr == ',') {
@@ -2699,21 +2696,17 @@ var ContentTextParser = (function () {
                     }
                 }
                 this.at = at;
-                this.chr = this.contentText.charAt(at);
+                this.chr = this.contentTextFragment.charAt(at);
                 return null;
             }
         }
         this._next();
         return {
-            nodeType: ContentTextNodeType.BINDING_FORMATTER_ARGUMENTS,
+            nodeType: ContentTextFragmentNodeType.BINDING_FORMATTER_ARGUMENTS,
             value: args
         };
     };
-    ContentTextParser.prototype._readValueOrKeypath = function () {
-        var value = this._readValue();
-        return value === NOT_VALUE_AND_NOT_KEYPATH ? this._readKeypath() : value;
-    };
-    ContentTextParser.prototype._readValue = function () {
+    ContentTextFragmentParser.prototype._readValue = function () {
         switch (this.chr) {
             case '{': {
                 return this._readObject();
@@ -2730,23 +2723,23 @@ var ContentTextParser = (function () {
         for (var _i = 0, readers_1 = readers; _i < readers_1.length; _i++) {
             var reader = readers_1[_i];
             var value = this[reader]();
-            if (value !== NOT_VALUE_AND_NOT_KEYPATH) {
+            if (value) {
                 return value;
             }
         }
-        return NOT_VALUE_AND_NOT_KEYPATH;
+        return null;
     };
-    ContentTextParser.prototype._readObject = function () {
+    ContentTextFragmentParser.prototype._readObject = function () {
         var at = this.at;
         this._next('{');
         var obj = '{';
         while (this._skipWhitespaces() != '}') {
             var key = this.chr == "'" || this.chr == '"' ? this._readString() : this._readObjectKey();
-            if (key !== NOT_VALUE_AND_NOT_KEYPATH && key !== null && this._skipWhitespaces() == ':') {
+            if (key && this._skipWhitespaces() == ':') {
                 this._next();
                 this._skipWhitespaces();
-                var valueOrKeypath = this._readValueOrKeypath();
-                if (valueOrKeypath !== NOT_VALUE_AND_NOT_KEYPATH) {
+                var valueOrKeypath = this._readValue() || this._readKeypath(true);
+                if (valueOrKeypath) {
                     if (this._skipWhitespaces() == ',') {
                         obj += key + ':' + valueOrKeypath + ',';
                         this._next();
@@ -2759,16 +2752,16 @@ var ContentTextParser = (function () {
                 }
             }
             this.at = at;
-            this.chr = this.contentText.charAt(at);
-            return NOT_VALUE_AND_NOT_KEYPATH;
+            this.chr = this.contentTextFragment.charAt(at);
+            return null;
         }
         this._next();
         return obj;
     };
-    ContentTextParser.prototype._readObjectKey = function () {
+    ContentTextFragmentParser.prototype._readObjectKey = function () {
         return this._readName();
     };
-    ContentTextParser.prototype._readArray = function () {
+    ContentTextFragmentParser.prototype._readArray = function () {
         var at = this.at;
         this._next('[');
         var arr = '[';
@@ -2778,46 +2771,46 @@ var ContentTextParser = (function () {
                 this._next();
             }
             else {
-                var valueOrKeypath = this._readValueOrKeypath();
-                if (valueOrKeypath === NOT_VALUE_AND_NOT_KEYPATH) {
-                    this.at = at;
-                    this.chr = this.contentText.charAt(at);
-                    return NOT_VALUE_AND_NOT_KEYPATH;
+                var valueOrKeypath = this._readValue() || this._readKeypath(true);
+                if (valueOrKeypath) {
+                    arr += valueOrKeypath;
                 }
                 else {
-                    arr += valueOrKeypath;
+                    this.at = at;
+                    this.chr = this.contentTextFragment.charAt(at);
+                    return null;
                 }
             }
         }
         this._next();
         return arr + ']';
     };
-    ContentTextParser.prototype._readBoolean = function () {
+    ContentTextFragmentParser.prototype._readBoolean = function () {
         reBooleanOrNothing.lastIndex = this.at;
-        var bool = reBooleanOrNothing.exec(this.contentText)[0];
+        var bool = reBooleanOrNothing.exec(this.contentTextFragment)[0];
         if (bool) {
-            this.chr = this.contentText.charAt((this.at += bool.length));
+            this.chr = this.contentTextFragment.charAt((this.at += bool.length));
             return bool;
         }
-        return NOT_VALUE_AND_NOT_KEYPATH;
+        return null;
     };
-    ContentTextParser.prototype._readNumber = function () {
+    ContentTextFragmentParser.prototype._readNumber = function () {
         reNumberOrNothing.lastIndex = this.at;
-        var num = reNumberOrNothing.exec(this.contentText)[0];
+        var num = reNumberOrNothing.exec(this.contentTextFragment)[0];
         if (num) {
-            this.chr = this.contentText.charAt((this.at += num.length));
+            this.chr = this.contentTextFragment.charAt((this.at += num.length));
             return num;
         }
-        return NOT_VALUE_AND_NOT_KEYPATH;
+        return null;
     };
-    ContentTextParser.prototype._readString = function () {
+    ContentTextFragmentParser.prototype._readString = function () {
         var quoteChar = this.chr;
         if (quoteChar != "'" && quoteChar != '"') {
             throw {
                 name: 'SyntaxError',
                 message: "Expected \"'\" instead of \"" + this.chr + "\"",
                 at: this.at,
-                contentText: this.contentText
+                contentTextFragment: this.contentTextFragment
             };
         }
         var at = this.at;
@@ -2838,58 +2831,58 @@ var ContentTextParser = (function () {
             }
         }
         this.at = at;
-        this.chr = this.contentText.charAt(at);
-        return NOT_VALUE_AND_NOT_KEYPATH;
+        this.chr = this.contentTextFragment.charAt(at);
+        return null;
     };
-    ContentTextParser.prototype._readVacuum = function () {
+    ContentTextFragmentParser.prototype._readVacuum = function () {
         reVacuumOrNothing.lastIndex = this.at;
-        var vacuum = reVacuumOrNothing.exec(this.contentText)[0];
+        var vacuum = reVacuumOrNothing.exec(this.contentTextFragment)[0];
         if (vacuum) {
-            this.chr = this.contentText.charAt((this.at += vacuum.length));
+            this.chr = this.contentTextFragment.charAt((this.at += vacuum.length));
             return vacuum;
         }
-        return NOT_VALUE_AND_NOT_KEYPATH;
+        return null;
     };
-    ContentTextParser.prototype._readKeypath = function () {
+    ContentTextFragmentParser.prototype._readKeypath = function (toJSExpression) {
         reKeypathOrNothing.lastIndex = this.at;
-        var keypath = reKeypathOrNothing.exec(this.contentText)[0];
+        var keypath = reKeypathOrNothing.exec(this.contentTextFragment)[0];
         if (keypath) {
-            this.chr = this.contentText.charAt((this.at += keypath.length));
-            return keypathToJSExpression_1.keypathToJSExpression(keypath);
+            this.chr = this.contentTextFragment.charAt((this.at += keypath.length));
+            return toJSExpression ? keypathToJSExpression_1.keypathToJSExpression(keypath) : keypath;
         }
-        return NOT_VALUE_AND_NOT_KEYPATH;
+        return null;
     };
-    ContentTextParser.prototype._readName = function () {
+    ContentTextFragmentParser.prototype._readName = function () {
         reNameOrNothing.lastIndex = this.at;
-        var name = reNameOrNothing.exec(this.contentText)[0];
+        var name = reNameOrNothing.exec(this.contentTextFragment)[0];
         if (name) {
-            this.chr = this.contentText.charAt((this.at += name.length));
+            this.chr = this.contentTextFragment.charAt((this.at += name.length));
             return name;
         }
         return null;
     };
-    ContentTextParser.prototype._skipWhitespaces = function () {
+    ContentTextFragmentParser.prototype._skipWhitespaces = function () {
         var chr = this.chr;
         while (chr && chr <= ' ') {
             chr = this._next();
         }
         return chr;
     };
-    ContentTextParser.prototype._next = function (current) {
+    ContentTextFragmentParser.prototype._next = function (current) {
         if (current && current != this.chr) {
             throw {
                 name: 'SyntaxError',
                 message: "Expected \"" + current + "\" instead of \"" + this.chr + "\"",
                 at: this.at,
-                contentText: this.contentText
+                contentTextFragment: this.contentTextFragment
             };
         }
-        return (this.chr = this.contentText.charAt(++this.at));
+        return (this.chr = this.contentTextFragment.charAt(++this.at));
     };
-    ContentTextParser.ContentTextNodeType = ContentTextNodeType;
-    return ContentTextParser;
+    ContentTextFragmentParser.ContentTextFragmentNodeType = ContentTextFragmentNodeType;
+    return ContentTextFragmentParser;
 }());
-exports.ContentTextParser = ContentTextParser;
+exports.ContentTextFragmentParser = ContentTextFragmentParser;
 
 
 /***/ }),
@@ -4390,28 +4383,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var escape_string_1 = __webpack_require__(11);
 var bindingToJSExpression_1 = __webpack_require__(41);
 var componentInputValueMap_1 = __webpack_require__(13);
-var ContentTextParser_1 = __webpack_require__(22);
+var ContentTextFragmentParser_1 = __webpack_require__(22);
 var formatters_1 = __webpack_require__(24);
-var ContentTextNodeType = ContentTextParser_1.ContentTextParser.ContentTextNodeType;
+var ContentTextFragmentNodeType = ContentTextFragmentParser_1.ContentTextFragmentParser.ContentTextFragmentNodeType;
 var keyCounter = 0;
 var cache = Object.create(null);
-function compileContentText(contentText, contentTextString, c) {
-    var key = contentTextString + (c ? ',' : '.');
+function compileContentTextFragment(contentTextFragment, contentTextFragmentString, c) {
+    var key = contentTextFragmentString + (c ? ',' : '.');
     if (cache[key]) {
         return cache[key];
     }
     // tslint:disable-next-line
     var inner;
-    if (contentText.length == 1) {
-        inner = Function('formatters', "var temp; return " + (contentText[0].nodeType == ContentTextNodeType.TEXT ?
-            "'" + escape_string_1.default(contentText[0].value) + "'" :
-            bindingToJSExpression_1.bindingToJSExpression(contentText[0])) + ";");
+    if (contentTextFragment.length == 1) {
+        inner = Function('formatters', "var temp; return " + (contentTextFragment[0].nodeType == ContentTextFragmentNodeType.TEXT ?
+            "'" + escape_string_1.default(contentTextFragment[0].value) + "'" :
+            bindingToJSExpression_1.bindingToJSExpression(contentTextFragment[0])) + ";");
     }
     else {
         var jsExpr = [];
-        for (var _i = 0, contentText_1 = contentText; _i < contentText_1.length; _i++) {
-            var node = contentText_1[_i];
-            jsExpr.push(node.nodeType == ContentTextNodeType.TEXT ?
+        for (var _i = 0, contentTextFragment_1 = contentTextFragment; _i < contentTextFragment_1.length; _i++) {
+            var node = contentTextFragment_1[_i];
+            jsExpr.push(node.nodeType == ContentTextFragmentNodeType.TEXT ?
                 "'" + escape_string_1.default(node.value) + "'" :
                 bindingToJSExpression_1.bindingToJSExpression(node));
         }
@@ -4429,7 +4422,7 @@ function compileContentText(contentText, contentTextString, c) {
         return inner.call(this, formatters_1.formatters);
     });
 }
-exports.compileContentText = compileContentText;
+exports.compileContentTextFragment = compileContentTextFragment;
 
 
 /***/ }),
@@ -4449,9 +4442,12 @@ function bindingToJSExpression(binding) {
     if (cache[bindingRaw]) {
         return cache[bindingRaw];
     }
-    var keys = binding.keypath.split('.');
-    var keyCount = keys.length;
     var formatters = binding.formatters;
+    if (!binding.isArgumentKeypath) {
+        return (cache[bindingRaw] = formatters ? formatters.reduce(formattersReducer, binding.argument) : binding.argument);
+    }
+    var keys = binding.argument.split('.');
+    var keyCount = keys.length;
     if (keyCount == 1) {
         return (cache[bindingRaw] = formatters ?
             formatters.reduce(formattersReducer, "this['" + keys[0] + "']") :

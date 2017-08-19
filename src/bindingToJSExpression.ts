@@ -1,8 +1,8 @@
-import { IContentTextBinding, IContentTextBindingFormatter } from './ContentTextParser';
+import { IContentTextFragmentBinding, IContentTextFragmentBindingFormatter } from './ContentTextFragmentParser';
 
 let cache: { [key: string]: string } = Object.create(null);
 
-function formattersReducer(jsExpr: string, formatter: IContentTextBindingFormatter): string {
+function formattersReducer(jsExpr: string, formatter: IContentTextFragmentBindingFormatter): string {
 	let args = formatter.arguments;
 
 	return `(this.${ formatter.name } || formatters.${ formatter.name }).call(this.$component, ${ jsExpr }${
@@ -10,16 +10,23 @@ function formattersReducer(jsExpr: string, formatter: IContentTextBindingFormatt
 	})`;
 }
 
-export function bindingToJSExpression(binding: IContentTextBinding): string {
+export function bindingToJSExpression(binding: IContentTextFragmentBinding): string {
 	let bindingRaw = binding.raw;
 
 	if (cache[bindingRaw]) {
 		return cache[bindingRaw];
 	}
 
-	let keys = binding.keypath.split('.');
-	let keyCount = keys.length;
 	let formatters = binding.formatters;
+
+	if (!binding.isArgumentKeypath) {
+		return (
+			cache[bindingRaw] = formatters ? formatters.reduce(formattersReducer, binding.argument) : binding.argument
+		);
+	}
+
+	let keys = binding.argument.split('.');
+	let keyCount = keys.length;
 
 	if (keyCount == 1) {
 		return (
