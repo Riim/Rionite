@@ -4412,10 +4412,13 @@ function compileContentTextFragment(contentTextFragment, contentTextFragmentStri
     }
     return (cache[key] = c ? function () {
         var value = inner.call(this, formatters_1.formatters);
-        if (value && typeof value == 'object') {
-            var key_1 = String(++keyCounter);
-            componentInputValueMap_1.componentInputValueMap.set(key_1, value);
-            return key_1;
+        if (value) {
+            var valueType = typeof value;
+            if (valueType == 'object' || valueType == 'function') {
+                var key_1 = String(++keyCounter);
+                componentInputValueMap_1.componentInputValueMap.set(key_1, value);
+                return key_1;
+            }
         }
         return value;
     } : function () {

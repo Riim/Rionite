@@ -55,10 +55,14 @@ export function compileContentTextFragment(
 	return (cache[key] = c ? function() {
 		let value = inner.call(this, formatters);
 
-		if (value && typeof value == 'object') {
-			let key = String(++keyCounter);
-			componentInputValueMap.set(key, value);
-			return key;
+		if (value) {
+			let valueType = typeof value;
+
+			if (valueType == 'object' || valueType == 'function') {
+				let key = String(++keyCounter);
+				componentInputValueMap.set(key, value);
+				return key;
+			}
 		}
 
 		return value;
