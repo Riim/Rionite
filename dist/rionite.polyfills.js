@@ -2971,6 +2971,12 @@ exports.formatters = {
         args.unshift(count);
         return gettext_1.getText(context, key, true, args);
     },
+    has: function has(obj, key) {
+        return !!obj && (typeof obj.has == 'function' ? obj.has(key) : obj.hasOwnProperty(key));
+    },
+    get: function get(obj, key) {
+        return obj && (typeof obj.get == 'function' ? obj.get(key) : obj[key]);
+    },
     // Safary: "Cannot declare a parameter named 'key' as it shadows the name of a strict mode function."
     key: function key_(obj, key) {
         return obj && obj[key];
