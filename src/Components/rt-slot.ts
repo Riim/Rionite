@@ -18,7 +18,7 @@ let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 	input: {
 		name: { type: String, readonly: true },
 		cloneContent: { default: false, readonly: true },
-		getContext: { type: String, readonly: true }
+		getContext: { type: Object, readonly: true }
 	},
 
 	template: ''
@@ -78,7 +78,8 @@ export class RtSlot extends Component {
 									cloneContent ? selectedElements[i].cloneNode(true) : selectedElements[i]
 								) as Element;
 
-								selectedElement.className += ' ' + (ownerComponent.constructor as typeof Component)
+								selectedElement.className += ' ' +
+									(ownerComponent.constructor as typeof Component)
 										._contentBlockNames.join('__' + name + ' ') +
 									'__' + name;
 
@@ -124,11 +125,18 @@ export class RtSlot extends Component {
 							content,
 							contentOwnerComponent!,
 							input.getContext ?
-								(ownerComponent as any)[input.getContext](ownerComponent.input.$context, this) :
+								input.getContext.call(ownerComponent, ownerComponent.input.$context, this) :
 								ownerComponent.input.$context,
 							{ 0: null, 1: null } as any
 						) :
-						bindContent(el, ownerComponent, input.$context!, { 0: null, 1: null } as any);
+						bindContent(
+							el,
+							ownerComponent,
+							input.getContext ?
+								input.getContext.call(ownerComponent, input.$context, this) :
+								input.$context,
+							{ 0: null, 1: null } as any
+						);
 
 					this._childComponents = childComponents;
 				} else {
