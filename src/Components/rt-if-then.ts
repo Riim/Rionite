@@ -53,7 +53,7 @@ export class RtIfThen extends Component {
 			let getIfValue = compileKeypath(if_);
 			this._if = new Cell<boolean>(function() {
 				return !!getIfValue.call(this);
-			}, { context: this.input.$context! });
+			}, { context: this.input.$context });
 
 			this.initialized = true;
 		}
@@ -97,7 +97,7 @@ export class RtIfThen extends Component {
 			let [bindings, childComponents] = bindContent(
 				content,
 				this.ownerComponent,
-				this.input.$context!,
+				this.input.$context,
 				{ 0: null, 1: null } as any
 			);
 

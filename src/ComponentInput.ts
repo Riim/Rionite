@@ -1,4 +1,3 @@
-import { Set } from '@riim/map-set-polyfill';
 import { Cell, EventEmitter } from 'cellx';
 import { Component, IComponentElement } from './Component';
 import { componentInputTypeMap } from './componentInputTypeMap';
@@ -7,7 +6,7 @@ import { hyphenize } from './Utils/hyphenize';
 
 export interface IComponentInput extends Object {
 	$content: DocumentFragment | null;
-	$context: { [name: string]: any } | null;
+	$context: { [name: string]: any };
 	$specified: Set<string>;
 	[name: string]: any;
 }
@@ -57,12 +56,8 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 	let hyphenizedName = hyphenize(name);
 	let rawValue = el.getAttribute(hyphenizedName);
 
-	if (rawValue === null) {
-		if (required) {
-			throw new TypeError(`Input property "${ name }" is required`);
-		}
-	} else {
-		componentInput.$specified.add(name);
+	if (required && rawValue === null) {
+		throw new TypeError(`Input property "${ name }" is required`);
 	}
 
 	if (rawValue === null && defaultValue != null && defaultValue !== false) {
@@ -169,7 +164,7 @@ export let ComponentInput = {
 	init(component: Component): IComponentInput {
 		let componentInputConfig = (component.constructor as typeof Component).input;
 		let el = component.element;
-		let componentInput = { $content: null, $context: null, $specified: new Set() };
+		let componentInput = { $content: null, $context: null as any, $specified: null as any };
 
 		if (componentInputConfig) {
 			for (let name in componentInputConfig) {

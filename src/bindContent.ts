@@ -1,3 +1,4 @@
+import { Set } from '@riim/map-set-polyfill';
 import {
 	Cell,
 	ICellOptions,
@@ -8,6 +9,7 @@ import { compileContentTextFragment } from './compileContentTextFragment';
 import { Component, IPossiblyComponentElement } from './Component';
 import { IFreezableCell } from './componentBinding';
 import { ContentTextFragmentParser } from './ContentTextFragmentParser';
+import { camelize } from './Utils/camelize';
 import { setAttribute } from './Utils/setAttribute';
 
 class AttributeBindingCell extends Cell {
@@ -49,10 +51,22 @@ export function bindContent(
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		switch (child.nodeType) {
 			case Node.ELEMENT_NODE: {
+				let childComponent = (child as IPossiblyComponentElement).$component;
+				let $specified;
+
+				if (childComponent) {
+					$specified = new Set<string>();
+				}
+
 				let attrs = child.attributes;
 
 				for (let i = attrs.length; i; ) {
 					let attr = attrs.item(--i);
+
+					if ($specified) {
+						$specified.add(camelize(attr.name));
+					}
+
 					let value = attr.value;
 
 					if (value.indexOf('{') != -1) {
@@ -85,11 +99,10 @@ export function bindContent(
 					}
 				}
 
-				let childComponent = (child as IPossiblyComponentElement).$component;
-
 				if (childComponent) {
 					childComponent.ownerComponent = ownerComponent;
 					childComponent.input.$context = context;
+					childComponent.input.$specified = $specified as Set<string>;
 
 					(result[1] || (result[1] = [])).push(childComponent);
 				}

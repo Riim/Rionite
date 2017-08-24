@@ -3,7 +3,7 @@ export interface IComponentInput extends Object {
     $content: DocumentFragment | null;
     $context: {
         [name: string]: any;
-    } | null;
+    };
     $specified: Set<string>;
     [name: string]: any;
 }

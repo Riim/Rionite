@@ -69,7 +69,7 @@ export class RtRepeat extends Component {
 			}
 
 			this._itemName = forAttrValue[1];
-			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { context: input.$context! });
+			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { context: input.$context });
 			this._trackBy = input.trackBy;
 
 			let rawItemContent = this._rawItemContent =
@@ -225,7 +225,7 @@ export class RtRepeat extends Component {
 				i += templates[i].content.querySelectorAll('template').length + 1;
 			}
 		}
-		let context = this.input.$context!;
+		let context = this.input.$context;
 		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(context, {
 			$component: {
 				configurable: false,

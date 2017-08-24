@@ -83,7 +83,7 @@ function createClassBlockElementReplacer(
 function findChildComponents(
 	node: Node,
 	ownerComponent: Component | null,
-	context: object | null,
+	context: object,
 	childComponents?: Array<Component> | null | undefined
 ): Array<Component> | null {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
