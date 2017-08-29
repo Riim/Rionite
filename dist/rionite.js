@@ -2204,7 +2204,7 @@ var reSuperCallOrNothing = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
 function normalizeMultilineText(text) {
     return text.trim().replace(/\s*(?:\r\n?|\n)/g, '\n').replace(/\n\s+/g, '\n');
 }
-var Parser = (function () {
+var Parser = /** @class */ (function () {
     function Parser(nelm) {
         this.nelm = nelm;
     }
@@ -2227,12 +2227,8 @@ var Parser = (function () {
         this._next('#');
         var blockName = this._readName(reBlockNameOrNothing);
         if (!blockName) {
-            throw {
-                name: 'SyntaxError',
-                message: 'Invalid block declaration',
-                at: this.at,
-                nelm: this.nelm
-            };
+            this._throwError('Invalid block declaration');
+            throw 1;
         }
         return blockName;
     };
@@ -2251,12 +2247,7 @@ var Parser = (function () {
                 }
                 case '': {
                     if (brackets) {
-                        throw {
-                            name: 'SyntaxError',
-                            message: 'Missing "}" in compound statement',
-                            at: this.at,
-                            nelm: this.nelm
-                        };
+                        this._throwError('Missing "}" in compound statement');
                     }
                     return content;
                 }
@@ -2297,16 +2288,21 @@ var Parser = (function () {
             this._next();
         }
         var tagName = this._readName(reTagNameOrNothing);
-        var elNames = (tagName ? this._skipWhitespaces() : this.chr) == '/' ?
-            (this._next(), this._skipWhitespaces(), this._readElementNames()) :
-            null;
+        var elNames;
+        if ((tagName ? this._skipWhitespaces() : this.chr) == '/') {
+            var at_1 = this.at;
+            this._next();
+            this._skipWhitespaces();
+            elNames = this._readElementNames();
+            if (!elNames) {
+                this.at = at_1;
+            }
+        }
+        else {
+            elNames = null;
+        }
         if (!tagName && !elNames) {
-            throw {
-                name: 'SyntaxError',
-                message: 'Expected element',
-                at: at,
-                nelm: this.nelm
-            };
+            this._throwError('Expected element', at);
         }
         var attrs = this.chr == '(' ? this._readAttributes() : null;
         if (attrs) {
@@ -2340,12 +2336,8 @@ var Parser = (function () {
             else {
                 var name_1 = this._readName(reAttributeNameOrNothing);
                 if (!name_1) {
-                    throw {
-                        name: 'SyntaxError',
-                        message: 'Invalid attribute name',
-                        at: this.at,
-                        nelm: this.nelm
-                    };
+                    this._throwError('Invalid attribute name');
+                    throw 1;
                 }
                 if (this._skipWhitespacesAndComments() == '=') {
                     this._next();
@@ -2361,12 +2353,7 @@ var Parser = (function () {
                         var value = '';
                         for (;;) {
                             if (!chr) {
-                                throw {
-                                    name: 'SyntaxError',
-                                    message: 'Invalid attribute',
-                                    at: this.at,
-                                    nelm: this.nelm
-                                };
+                                this._throwError('Invalid attribute');
                             }
                             if (chr == '\r' || chr == '\n' || chr == ',' || chr == ')') {
                                 list.push({ name: name_1, value: value.trim() });
@@ -2391,12 +2378,7 @@ var Parser = (function () {
                 this._skipWhitespacesAndComments();
             }
             else {
-                throw {
-                    name: 'SyntaxError',
-                    message: 'Invalid attributes',
-                    at: this.at,
-                    nelm: this.nelm
-                };
+                this._throwError('Invalid attributes');
             }
         }
         return {
@@ -2443,12 +2425,7 @@ var Parser = (function () {
     Parser.prototype._readString = function () {
         var quoteChar = this.chr;
         if (quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
-            throw {
-                name: 'SyntaxError',
-                message: "Expected \"'\" instead of \"" + this.chr + "\"",
-                at: this.at,
-                nelm: this.nelm
-            };
+            this._throwError("Expected \"'\" instead of \"" + this.chr + "\"");
         }
         var str = '';
         for (var chr = this._next(); chr;) {
@@ -2466,12 +2443,7 @@ var Parser = (function () {
                     var hexadecimal = chr == 'x';
                     var code = parseInt(this.nelm.slice(at + 1, at + (hexadecimal ? 3 : 5)), 16);
                     if (!isFinite(code)) {
-                        throw {
-                            name: 'SyntaxError',
-                            message: "Malformed " + (hexadecimal ? 'hexadecimal' : 'unicode') + " escape sequence",
-                            at: at - 1,
-                            nelm: this.nelm
-                        };
+                        this._throwError("Malformed " + (hexadecimal ? 'hexadecimal' : 'unicode') + " escape sequence", at - 1);
                     }
                     str += String.fromCharCode(code);
                     chr = this.chr = this.nelm.charAt((this.at = at + (hexadecimal ? 3 : 5)));
@@ -2492,12 +2464,8 @@ var Parser = (function () {
                 chr = this._next();
             }
         }
-        throw {
-            name: 'SyntaxError',
-            message: 'Invalid string',
-            at: this.at,
-            nelm: this.nelm
-        };
+        this._throwError('Invalid string');
+        throw 1;
     };
     Parser.prototype._readComment = function () {
         var value = '';
@@ -2525,12 +2493,7 @@ var Parser = (function () {
                             break;
                         }
                         case '': {
-                            throw {
-                                name: 'SyntaxError',
-                                message: 'Missing "*/" in compound statement',
-                                at: this.at,
-                                nelm: this.nelm
-                            };
+                            this._throwError('Missing "*/" in compound statement');
                         }
                         default: {
                             value += this.chr;
@@ -2541,12 +2504,8 @@ var Parser = (function () {
                 break;
             }
             default: {
-                throw {
-                    name: 'SyntaxError',
-                    message: "Expected \"/\" instead of \"" + this.chr + "\"",
-                    at: this.at,
-                    nelm: this.nelm
-                };
+                this._throwError("Expected \"/\" instead of \"" + this.chr + "\"");
+                throw 1;
             }
         }
         return {
@@ -2585,14 +2544,19 @@ var Parser = (function () {
     };
     Parser.prototype._next = function (current) {
         if (current && current != this.chr) {
-            throw {
-                name: 'SyntaxError',
-                message: "Expected \"" + current + "\" instead of \"" + this.chr + "\"",
-                at: this.at,
-                nelm: this.nelm
-            };
+            this._throwError("Expected \"" + current + "\" instead of \"" + this.chr + "\"");
         }
         return (this.chr = this.nelm.charAt(++this.at));
+    };
+    Parser.prototype._throwError = function (msg, at) {
+        if (at === void 0) { at = this.at; }
+        var crlfCount = 0;
+        throw new SyntaxError(msg + '\n' + this.nelm.slice(at - 40, at + 20).replace(/\r\n|\r|\n/g, function (match) {
+            if (match.length == 2) {
+                crlfCount++;
+            }
+            return '↵';
+        }) + '\n' + '----------------------------------------'.slice(crlfCount) + '↑');
     };
     return Parser;
 }());
@@ -2612,7 +2576,7 @@ var escape_string_1 = __webpack_require__(11);
 var nelm_parser_1 = __webpack_require__(22);
 var join = Array.prototype.join;
 var elNameDelimiter = '__';
-var Template = (function () {
+var Template = /** @class */ (function () {
     function Template(nelm, opts) {
         this.parent = opts && opts.parent || null;
         this.nelm = typeof nelm == 'string' ? new nelm_parser_1.Parser(nelm).parse() : nelm;
