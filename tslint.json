@@ -2,6 +2,7 @@
   "extends": "tslint:recommended",
   "rules": {
     "array-type": [true, "generic"],
+    "ban-types": false,
     "forin": false,
     "indent": [true, "tabs", 4],
     "max-classes-per-file": false,

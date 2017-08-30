@@ -1,6 +1,5 @@
 import { Map } from '@riim/map-set-polyfill';
 
-// tslint:disable-next-line
 export let elementConstructorMap = new Map<string, Function>([
 	['a', (window as any).HTMLAnchorElement],
 	['blockquote', (window as any).HTMLQuoteElement],

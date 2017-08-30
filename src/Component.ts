@@ -250,17 +250,19 @@ export class Component extends EventEmitter implements DisposableMixin {
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | string | Array<TListeningTarget>,
-		typeOrListeners: string | Array<string> | { [type: string]: TListener | Array<TListener> },
-		listenerOrContext?: TListener | Array<TListener> | any,
-		contextOrUseCapture?: any,
+		type: string | Array<string> | { [type: string]: TListener | Array<TListener> },
+		listener?: TListener | Array<TListener> | any,
+		context?: any,
 		useCapture?: boolean
 	): IDisposableListening {
-		if (typeof target == 'string') {
-			target = this.$<any>(target);
-		}
-
-		return DisposableMixin.prototype
-			.listenTo.call(this, target, typeOrListeners, listenerOrContext, contextOrUseCapture, useCapture);
+		return DisposableMixin.prototype.listenTo.call(
+			this,
+			typeof target == 'string' ? this.$<any>(target) : target,
+			type,
+			listener,
+			context,
+			useCapture
+		);
 	}
 
 	_listenTo(

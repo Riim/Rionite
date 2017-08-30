@@ -40,7 +40,6 @@ export interface IContentTextFragmentBinding extends IContentTextFragmentNode {
 
 export type TContentTextFragment = Array<IContentTextFragmentTextNode | IContentTextFragmentBinding>;
 
-// tslint:disable-next-line
 export type TNotValueAndNotKeypath = Object;
 
 let reNameOrNothing = RegExp(namePattern + '|', 'g');

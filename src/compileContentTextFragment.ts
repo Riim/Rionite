@@ -26,7 +26,6 @@ export function compileContentTextFragment(
 		return cache[key];
 	}
 
-	// tslint:disable-next-line
 	let inner: (formatters: { [name: string]: Function }) => any;
 
 	if (contentTextFragment.length == 1) {

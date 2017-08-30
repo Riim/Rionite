@@ -47,37 +47,37 @@ export class DisposableMixin implements IDisposable {
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | Array<TListeningTarget>,
-		typeOrListeners: string | Array<string> | { [type: string]: TListener | Array<TListener> },
-		listenerOrContext?: TListener | Array<TListener> | any,
-		contextOrUseCapture?: any,
+		type: string | Array<string> | { [type: string]: TListener | Array<TListener> },
+		listener?: TListener | Array<TListener> | any,
+		context?: any,
 		useCapture?: boolean
 	): IDisposableListening {
 		let listenings: Array<IDisposableListening>;
 
-		if (typeof typeOrListeners == 'object') {
+		if (typeof type == 'object') {
 			listenings = [];
 
-			if (Array.isArray(typeOrListeners)) {
-				for (let i = 0, l = typeOrListeners.length; i < l; i++) {
+			if (Array.isArray(type)) {
+				for (let i = 0, l = type.length; i < l; i++) {
 					listenings.push(
 						this.listenTo(
 							target,
-							typeOrListeners[i],
-							listenerOrContext,
-							contextOrUseCapture,
+							type[i],
+							listener,
+							context,
 							useCapture
 						)
 					);
 				}
 			} else {
-				for (let type in typeOrListeners) {
+				for (let name in type) {
 					listenings.push(
 						this.listenTo(
 							target,
-							type,
-							typeOrListeners[type],
-							listenerOrContext,
-							contextOrUseCapture
+							name,
+							type[name],
+							listener,
+							context
 						)
 					);
 				}
@@ -90,23 +90,23 @@ export class DisposableMixin implements IDisposable {
 					listenings.push(
 						this.listenTo(
 							target[i],
-							typeOrListeners,
-							listenerOrContext,
-							contextOrUseCapture,
+							type,
+							listener,
+							context,
 							useCapture
 						)
 					);
 				}
-			} else if (Array.isArray(listenerOrContext)) {
+			} else if (Array.isArray(listener)) {
 				listenings = [];
 
-				for (let i = 0, l = listenerOrContext.length; i < l; i++) {
+				for (let i = 0, l = listener.length; i < l; i++) {
 					listenings.push(
 						this.listenTo(
 							target,
-							typeOrListeners,
-							listenerOrContext[i],
-							contextOrUseCapture,
+							type,
+							listener[i],
+							context,
 							useCapture
 						)
 					);
@@ -114,9 +114,9 @@ export class DisposableMixin implements IDisposable {
 			} else {
 				return this._listenTo(
 					target,
-					typeOrListeners,
-					listenerOrContext,
-					contextOrUseCapture !== undefined ? contextOrUseCapture : this,
+					type,
+					listener,
+					context !== undefined ? context : this,
 					useCapture || false
 				);
 			}
@@ -181,7 +181,6 @@ export class DisposableMixin implements IDisposable {
 		return listening;
 	}
 
-	// tslint:disable-next-line
 	setTimeout(callback: Function, delay: number): IDisposableTimeout {
 		let id = nextUID();
 
@@ -205,7 +204,6 @@ export class DisposableMixin implements IDisposable {
 		return timeout;
 	}
 
-	// tslint:disable-next-line
 	setInterval(callback: Function, delay: number): IDisposableInterval {
 		let id = nextUID();
 
@@ -228,7 +226,6 @@ export class DisposableMixin implements IDisposable {
 		return interval;
 	}
 
-	// tslint:disable-next-line
 	registerCallback(callback: Function): IDisposableCallback {
 		let id = nextUID();
 		let disposable = this;
