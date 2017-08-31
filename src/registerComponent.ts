@@ -1,12 +1,10 @@
-import { Utils } from 'cellx';
+import { mixin } from '@riim/mixin';
 import { Template } from 'nelm';
 import { Component, IComponentElement } from './Component';
 import { componentConstructorMap } from './componentConstructorMap';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
 import { hyphenize } from './Utils/hyphenize';
-
-let mixin = Utils.mixin;
 
 let push = Array.prototype.push;
 

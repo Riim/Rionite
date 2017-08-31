@@ -1,4 +1,5 @@
-import { Cell, Utils } from 'cellx';
+import { nextTick } from '@riim/next-tick';
+import { Cell } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { compileKeypath } from '../compileKeypath';
@@ -8,8 +9,6 @@ import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } fr
 import { templateTag as templateTagFeature } from '../Features';
 import { KEY_ELEMENT_CONNECTED } from '../KEY_ELEMENT_CONNECTED';
 import { keypathPattern } from '../keypathPattern';
-
-let nextTick = Utils.nextTick;
 
 let slice = Array.prototype.slice;
 

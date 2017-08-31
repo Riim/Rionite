@@ -1,4 +1,4 @@
-import { ErrorLogger } from 'cellx';
+import { logError } from '@riim/error-logger';
 
 type TQueue = Array<{ callback: () => void; context: any }>;
 
@@ -13,7 +13,7 @@ function run() {
 		try {
 			item.callback.call(item.context);
 		} catch (err) {
-			ErrorLogger.log(err);
+			logError(err);
 		}
 	}
 }

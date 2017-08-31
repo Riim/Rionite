@@ -1,5 +1,6 @@
 import { Map } from '@riim/map-set-polyfill';
-import { Cell, ObservableList, Utils } from 'cellx';
+import { nextTick } from '@riim/next-tick';
+import { Cell, ObservableList } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { compileKeypath } from '../compileKeypath';
@@ -10,8 +11,6 @@ import { templateTag as templateTagFeature } from '../Features';
 import { KEY_ELEMENT_CONNECTED } from '../KEY_ELEMENT_CONNECTED';
 import { keypathPattern } from '../keypathPattern';
 import { namePattern } from '../namePattern';
-
-let nextTick = Utils.nextTick;
 
 let slice = Array.prototype.slice;
 

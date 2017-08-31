@@ -41,9 +41,17 @@ module.exports = () => {
 		},
 
 		externals: [
-			'@riim/symbol-polyfill',
+			'@riim/error-logger',
+			'@riim/escape-html',
+			'@riim/gettext',
 			'@riim/map-set-polyfill',
-			'cellx'
+			'@riim/mixin',
+			'@riim/next-tick',
+			'@riim/symbol-polyfill',
+			'cellx',
+			'escape-string',
+			'html-to-fragment',
+			'nelm'
 		],
 
 		plugins,
