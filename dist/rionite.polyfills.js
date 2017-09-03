@@ -4125,9 +4125,11 @@ var RtContent = (function (_super) {
                 if (content || el.firstChild) {
                     _a = content ?
                         bindContent_1.bindContent(content, contentOwnerComponent, input.getContext ?
-                            ownerComponent[input.getContext](ownerComponent.input.$context, this) :
+                            input.getContext.call(ownerComponent, ownerComponent.input.$context, this) :
                             ownerComponent.input.$context, { 0: null, 1: null }) :
-                        bindContent_1.bindContent(el, ownerComponent, input.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
+                        bindContent_1.bindContent(el, ownerComponent, input.getContext ?
+                            input.getContext.call(ownerComponent, input.$context, this) :
+                            input.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
                     this._childComponents = childComponents;
                 }
                 else {
@@ -4165,7 +4167,7 @@ var RtContent = (function (_super) {
             input: {
                 select: { type: String, readonly: true },
                 clone: { default: false, readonly: true },
-                getContext: { type: String, readonly: true }
+                getContext: { type: Object, readonly: true }
             },
             template: ''
         })

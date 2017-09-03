@@ -18,7 +18,7 @@ let KEY_CONTENT_MAP = Symbol('contentMap');
 	input: {
 		select: { type: String, readonly: true },
 		clone: { default: false, readonly: true },
-		getContext: { type: String, readonly: true }
+		getContext: { type: Object, readonly: true }
 	},
 
 	template: ''
@@ -114,11 +114,18 @@ export class RtContent extends Component {
 							content,
 							contentOwnerComponent!,
 							input.getContext ?
-								(ownerComponent as any)[input.getContext](ownerComponent.input.$context, this) :
+								input.getContext.call(ownerComponent, ownerComponent.input.$context, this) :
 								ownerComponent.input.$context,
 							{ 0: null, 1: null } as any
 						) :
-						bindContent(el, ownerComponent, input.$context, { 0: null, 1: null } as any);
+						bindContent(
+							el,
+							ownerComponent,
+							input.getContext ?
+								input.getContext.call(ownerComponent, input.$context, this) :
+								input.$context,
+							{ 0: null, 1: null } as any
+						);
 
 					this._childComponents = childComponents;
 				} else {
