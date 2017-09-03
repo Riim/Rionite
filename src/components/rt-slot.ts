@@ -78,10 +78,20 @@ export class RtSlot extends Component {
 									cloneContent ? selectedElements[i].cloneNode(true) : selectedElements[i]
 								) as Element;
 
-								selectedElement.className += ' ' +
-									(ownerComponent.constructor as typeof Component)
-										._contentBlockNames.join('__' + name + ' ') +
-									'__' + name;
+								if (selectedElement instanceof HTMLElement) {
+									selectedElement.className += ' ' +
+										(ownerComponent.constructor as typeof Component)
+											._contentBlockNames.join('__' + name + ' ') +
+										'__' + name;
+								} else {
+									selectedElement.setAttribute(
+										'class',
+										(selectedElement.getAttribute('class') || '') + ' ' +
+											(ownerComponent.constructor as typeof Component)
+												._contentBlockNames.join('__' + name + ' ') +
+											'__' + name
+									);
+								}
 
 								content.appendChild(selectedElement);
 							}

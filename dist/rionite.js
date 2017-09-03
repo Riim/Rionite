@@ -3090,10 +3090,18 @@ var RtSlot = (function (_super) {
                             content = document.createDocumentFragment();
                             for (var i = 0; i < selectedElementCount; i++) {
                                 var selectedElement = (cloneContent ? selectedElements[i].cloneNode(true) : selectedElements[i]);
-                                selectedElement.className += ' ' +
-                                    ownerComponent.constructor
-                                        ._contentBlockNames.join('__' + name_1 + ' ') +
-                                    '__' + name_1;
+                                if (selectedElement instanceof HTMLElement) {
+                                    selectedElement.className += ' ' +
+                                        ownerComponent.constructor
+                                            ._contentBlockNames.join('__' + name_1 + ' ') +
+                                        '__' + name_1;
+                                }
+                                else {
+                                    selectedElement.setAttribute('class', (selectedElement.getAttribute('class') || '') + ' ' +
+                                        ownerComponent.constructor
+                                            ._contentBlockNames.join('__' + name_1 + ' ') +
+                                        '__' + name_1);
+                                }
                                 content.appendChild(selectedElement);
                             }
                         }
