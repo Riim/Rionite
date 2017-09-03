@@ -4,7 +4,7 @@ import { Component, IComponentElement } from './Component';
 import { componentConstructorMap } from './componentConstructorMap';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
-import { hyphenize } from './Utils/hyphenize';
+import { hyphenize } from './utils/hyphenize';
 
 let push = Array.prototype.push;
 

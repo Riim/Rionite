@@ -6,24 +6,24 @@ import { Component, IComponentElement } from '../Component';
 import { IFreezableCell } from '../componentBinding';
 import { ComponentDecorator } from '../ComponentDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
-import { clearNode } from '../Utils/clearNode';
-import { getUID } from '../Utils/getUID';
-import { moveContent } from '../Utils/moveContent';
+import { clearNode } from '../utils/clearNode';
+import { getUID } from '../utils/getUID';
+import { moveContent } from '../utils/moveContent';
 
-let KEY_CONTENT_MAP = Symbol('contentMap');
+let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 
 @ComponentDecorator({
-	elementIs: 'rt-content',
+	elementIs: 'rt-slot',
 
 	input: {
-		select: { type: String, readonly: true },
-		clone: { default: false, readonly: true },
-		getContext: { type: String, readonly: true }
+		name: { type: String, readonly: true },
+		cloneContent: { default: false, readonly: true },
+		getContext: { type: Object, readonly: true }
 	},
 
 	template: ''
 })
-export class RtContent extends Component {
+export class RtSlot extends Component {
 	ownerComponent: Component;
 
 	_childComponents: Array<Component> | null;
@@ -39,23 +39,23 @@ export class RtContent extends Component {
 			let input = this.input;
 			let contentOwnerComponent = ownerComponent.ownerComponent;
 			let ownerComponentContent = ownerComponent.input.$content!;
-			let clone = input.clone;
+			let cloneContent = input.cloneContent;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
 			let childComponents: Array<Component> | null | undefined;
 
-			if (!clone || ownerComponentContent.firstChild) {
-				let selector = input.select;
-				let key = getUID(ownerComponent) + '/' + (selector || '');
+			if (!cloneContent || ownerComponentContent.firstChild) {
+				let name = input.name;
+				let key = getUID(ownerComponent) + '/' + (name || '');
 
-				if (selector) {
+				if (name) {
 					let contentMap: Map<string, IComponentElement> | undefined;
 
 					if (
-						!clone &&
-							contentOwnerComponent &&
-							(contentMap = (contentOwnerComponent as any)[KEY_CONTENT_MAP]) &&
-							contentMap.has(key)
+						!cloneContent &&
+						contentOwnerComponent &&
+						(contentMap = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP]) &&
+						contentMap.has(key)
 					) {
 						let container = contentMap.get(key)!;
 
@@ -64,31 +64,40 @@ export class RtContent extends Component {
 							contentMap.set(key, el);
 
 							bindings = container.$component._bindings;
-							childComponents = (container.$component as RtContent)._childComponents;
+							childComponents = (container.$component as RtSlot)._childComponents;
 						}
 					} else if (ownerComponentContent.firstChild) {
-						let selectedElements = ownerComponentContent.querySelectorAll(selector);
+						let selectedElements = ownerComponentContent.querySelectorAll(`[rt-slot=${ name }]`);
 						let selectedElementCount = selectedElements.length;
 
 						if (selectedElementCount) {
 							content = document.createDocumentFragment();
 
 							for (let i = 0; i < selectedElementCount; i++) {
-								content.appendChild(clone ? selectedElements[i].cloneNode(true) : selectedElements[i]);
+								let selectedElement = (
+									cloneContent ? selectedElements[i].cloneNode(true) : selectedElements[i]
+								) as Element;
+
+								selectedElement.className += ' ' +
+									(ownerComponent.constructor as typeof Component)
+										._contentBlockNames.join('__' + name + ' ') +
+									'__' + name;
+
+								content.appendChild(selectedElement);
 							}
 						}
 
-						if (!clone && contentOwnerComponent) {
+						if (!cloneContent && contentOwnerComponent) {
 							(
 								contentMap ||
-									(contentOwnerComponent as any)[KEY_CONTENT_MAP] ||
-									((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
+									(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] ||
+									((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())
 							).set(key, el);
 						}
 					}
-				} else if (!clone && contentOwnerComponent) {
+				} else if (!cloneContent && contentOwnerComponent) {
 					let contentMap: Map<string, IComponentElement> | undefined =
-						(contentOwnerComponent as any)[KEY_CONTENT_MAP];
+						(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
 						let container = contentMap.get(key)!;
@@ -97,13 +106,15 @@ export class RtContent extends Component {
 						contentMap.set(key, el);
 
 						bindings = container.$component._bindings;
-						childComponents = (container.$component as RtContent)._childComponents;
+						childComponents = (container.$component as RtSlot)._childComponents;
 					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
-						(contentMap || ((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())).set(key, el);
+						(contentMap || ((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())).set(key, el);
 					}
 				} else if (ownerComponentContent.firstChild) {
-					content = clone ? ownerComponentContent.cloneNode(true) as DocumentFragment : ownerComponentContent;
+					content = cloneContent ?
+						ownerComponentContent.cloneNode(true) as DocumentFragment :
+						ownerComponentContent;
 				}
 			}
 
@@ -114,11 +125,18 @@ export class RtContent extends Component {
 							content,
 							contentOwnerComponent!,
 							input.getContext ?
-								(ownerComponent as any)[input.getContext](ownerComponent.input.$context, this) :
+								input.getContext.call(ownerComponent, ownerComponent.input.$context, this) :
 								ownerComponent.input.$context,
 							{ 0: null, 1: null } as any
 						) :
-						bindContent(el, ownerComponent, input.$context, { 0: null, 1: null } as any);
+						bindContent(
+							el,
+							ownerComponent,
+							input.getContext ?
+								input.getContext.call(ownerComponent, input.$context, this) :
+								input.$context,
+							{ 0: null, 1: null } as any
+						);
 
 					this._childComponents = childComponents;
 				} else {

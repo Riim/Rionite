@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.27.52",
+  "version": "0.27.53",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -44,7 +44,7 @@
     "@riim/mixin": "^1.0.0",
     "@riim/next-tick": "^1.0.0",
     "@riim/symbol-polyfill": "^1.0.0",
-    "cellx": "^1.7.40",
+    "cellx": "^1.7.42",
     "escape-string": "^1.0.1",
     "html-to-fragment": "^1.0.0",
     "nelm": "^0.4.15"

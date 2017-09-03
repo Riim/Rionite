@@ -19,9 +19,9 @@ import { templateTag as templateTagFeature } from './Features';
 import { handledEvents } from './handledEvents';
 import { handleEvent } from './handleEvent';
 import { registerComponent } from './registerComponent';
-import { camelize } from './Utils/camelize';
-import { getUID } from './Utils/getUID';
-import { moveContent } from './Utils/moveContent';
+import { camelize } from './utils/camelize';
+import { getUID } from './utils/getUID';
+import { moveContent } from './utils/moveContent';
 
 let map = Array.prototype.map;
 

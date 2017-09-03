@@ -27,17 +27,17 @@ import {
 import { ComponentDecorator } from './ComponentDecorator';
 import { ComponentInput, IComponentInput } from './ComponentInput';
 import { componentInputValueMap } from './componentInputValueMap';
-import { RtContent } from './Components/rt-content';
-import { RtIfElse } from './Components/rt-if-else';
-import { RtIfThen, TIfCell as TRtIfThenIfCell } from './Components/rt-if-then';
+import { RtContent } from './components/rt-content';
+import { RtIfElse } from './components/rt-if-else';
+import { RtIfThen, TIfCell as TRtIfThenIfCell } from './components/rt-if-then';
 import {
 	IItem as IRtRepeatItem,
 	RtRepeat,
 	TItemList as TRtRepeatItemList,
 	TItemMap as TRtRepeatItemMap,
 	TListCell as TRtRepeatListCell
-	} from './Components/rt-repeat';
-import { RtSlot } from './Components/rt-slot';
+	} from './components/rt-repeat';
+import { RtSlot } from './components/rt-slot';
 import {
 	DisposableMixin,
 	IDisposable,
@@ -51,10 +51,10 @@ import {
 import { formatters } from './formatters';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
 import './nelmTemplateHelpers';
-import { camelize } from './Utils/camelize';
-import { defer } from './Utils/defer';
-import { hyphenize } from './Utils/hyphenize';
-import { isRegExp } from './Utils/isRegExp';
+import { camelize } from './utils/camelize';
+import { defer } from './utils/defer';
+import { hyphenize } from './utils/hyphenize';
+import { isRegExp } from './utils/isRegExp';
 
 let Components = {
 	RtContent,

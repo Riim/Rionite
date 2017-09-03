@@ -9,8 +9,8 @@ import { compileContentTextFragment } from './compileContentTextFragment';
 import { Component, IPossiblyComponentElement } from './Component';
 import { IFreezableCell } from './componentBinding';
 import { ContentTextFragmentParser } from './ContentTextFragmentParser';
-import { camelize } from './Utils/camelize';
-import { setAttribute } from './Utils/setAttribute';
+import { camelize } from './utils/camelize';
+import { setAttribute } from './utils/setAttribute';
 
 class AttributeBindingCell extends Cell {
 	element: Element;

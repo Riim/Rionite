@@ -2,7 +2,7 @@ import { Cell, EventEmitter } from 'cellx';
 import { Component, IComponentElement } from './Component';
 import { componentInputTypeMap } from './componentInputTypeMap';
 import { componentInputTypeSerializerMap } from './componentInputTypeSerializerMap';
-import { hyphenize } from './Utils/hyphenize';
+import { hyphenize } from './utils/hyphenize';
 
 export interface IComponentInput extends Object {
 	$content: DocumentFragment | null;

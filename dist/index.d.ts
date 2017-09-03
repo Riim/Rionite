@@ -3,11 +3,11 @@ import { IBlock as INelmBlock, NodeType as NelmNodeType, Parser as NelmParser, T
 import { Component, IComponentElement, IComponentElementClassNameMap, IComponentEvents, IComponentOEvents, IPossiblyComponentElement, TEventHandler, TOEventHandler } from './Component';
 import { ComponentInput, IComponentInput } from './ComponentInput';
 import { componentInputValueMap } from './componentInputValueMap';
-import { RtContent } from './Components/rt-content';
-import { RtIfElse } from './Components/rt-if-else';
-import { RtIfThen, TIfCell as TRtIfThenIfCell } from './Components/rt-if-then';
-import { IItem as IRtRepeatItem, RtRepeat, TItemList as TRtRepeatItemList, TItemMap as TRtRepeatItemMap, TListCell as TRtRepeatListCell } from './Components/rt-repeat';
-import { RtSlot } from './Components/rt-slot';
+import { RtContent } from './components/rt-content';
+import { RtIfElse } from './components/rt-if-else';
+import { RtIfThen, TIfCell as TRtIfThenIfCell } from './components/rt-if-then';
+import { IItem as IRtRepeatItem, RtRepeat, TItemList as TRtRepeatItemList, TItemMap as TRtRepeatItemMap, TListCell as TRtRepeatListCell } from './components/rt-repeat';
+import { RtSlot } from './components/rt-slot';
 import { DisposableMixin, IDisposable, IDisposableCallback, IDisposableInterval, IDisposableListening, IDisposableTimeout, TListener, TListeningTarget } from './DisposableMixin';
 import { formatters } from './formatters';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';

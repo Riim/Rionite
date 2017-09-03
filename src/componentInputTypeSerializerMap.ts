@@ -1,7 +1,7 @@
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import { Map } from '@riim/map-set-polyfill';
 import { componentInputValueMap } from './componentInputValueMap';
-import { isRegExp } from './Utils/isRegExp';
+import { isRegExp } from './utils/isRegExp';
 
 export let componentInputTypeSerializerMap = new Map<any, {
 	read: (value: string | null, defaultValue: any) => any;
