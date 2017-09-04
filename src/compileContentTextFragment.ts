@@ -1,4 +1,4 @@
-import escapeString from 'escape-string';
+import { escapeString } from 'escape-string';
 import { bindingToJSExpression } from './bindingToJSExpression';
 import { componentInputValueMap } from './componentInputValueMap';
 import {

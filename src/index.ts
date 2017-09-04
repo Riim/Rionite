@@ -1,13 +1,3 @@
-import { escapeHTML, unescapeHTML } from '@riim/escape-html';
-import {
-	getText,
-	IGetText,
-	IGetTextConfig,
-	ILocaleSettings,
-	ILocalizationTexts
-	} from '@riim/gettext';
-import escapeString from 'escape-string';
-import htmlToFragment from 'html-to-fragment';
 import {
 	IBlock as INelmBlock,
 	NodeType as NelmNodeType,
@@ -71,12 +61,8 @@ let d = {
 let Utils = {
 	camelize,
 	hyphenize,
-	escapeString,
-	escapeHTML,
-	unescapeHTML,
 	isRegExp,
-	defer,
-	htmlToFragment
+	defer
 };
 
 export {
@@ -94,12 +80,6 @@ export {
 	DisposableMixin,
 
 	formatters,
-
-	ILocaleSettings,
-	ILocalizationTexts,
-	IGetTextConfig,
-	IGetText,
-	getText,
 
 	IPossiblyComponentElement,
 	IComponentElement,

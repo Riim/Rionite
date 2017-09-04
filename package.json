@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.27.56",
+  "version": "0.27.61",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -26,27 +26,27 @@
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.2",
-    "gulp-replace": "^0.6.1",
     "gulp-uglify": "^3.0.0",
-    "jest": "^20.0.4",
     "pump": "^1.0.2",
     "require-dir": "^0.3.2",
     "run-sequence": "^2.1.0",
     "tslint": "^5.7.0",
     "tslint-loader": "^3.5.3",
+    "typescript": "^2.5.2",
     "webpack": "^3.5.5"
   },
   "dependencies": {
     "@riim/error-logger": "^1.0.1",
-    "@riim/escape-html": "^1.1.0",
-    "@riim/gettext": "^1.1.0",
+    "@riim/escape-html": "^1.1.1",
+    "@riim/gettext": "^1.1.1",
     "@riim/map-set-polyfill": "^1.0.0",
     "@riim/mixin": "^1.0.0",
     "@riim/next-tick": "^1.0.0",
+    "@riim/next-uid": "^1.0.0",
     "@riim/symbol-polyfill": "^1.0.0",
-    "cellx": "^1.7.42",
-    "escape-string": "^1.0.1",
-    "html-to-fragment": "^1.0.0",
-    "nelm": "^0.4.15"
+    "cellx": "^1.7.43",
+    "escape-string": "^1.0.2",
+    "html-to-fragment": "^1.0.1",
+    "nelm": "^0.4.17"
   }
 }

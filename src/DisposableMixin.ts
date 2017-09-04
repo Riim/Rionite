@@ -1,6 +1,5 @@
-import { EventEmitter, IEvent, Utils } from 'cellx';
-
-let nextUID = Utils.nextUID;
+import { nextUID } from '@riim/next-uid';
+import { EventEmitter, IEvent } from 'cellx';
 
 export interface IDisposable {
 	dispose(): any;

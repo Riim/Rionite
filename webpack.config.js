@@ -47,6 +47,7 @@ module.exports = () => {
 			'@riim/map-set-polyfill',
 			'@riim/mixin',
 			'@riim/next-tick',
+			'@riim/next-uid',
 			'@riim/symbol-polyfill',
 			'cellx',
 			'escape-string',

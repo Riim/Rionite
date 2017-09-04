@@ -1,7 +1,5 @@
+import { nextUID } from '@riim/next-uid';
 import { Symbol } from '@riim/symbol-polyfill';
-import { Utils } from 'cellx';
-
-let nextUID = Utils.nextUID;
 
 let hasOwn = Object.prototype.hasOwnProperty;
 

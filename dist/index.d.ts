@@ -1,4 +1,3 @@
-import { getText, IGetText, IGetTextConfig, ILocaleSettings, ILocalizationTexts } from '@riim/gettext';
 import { IBlock as INelmBlock, NodeType as NelmNodeType, Parser as NelmParser, Template } from 'nelm';
 import { Component, IComponentElement, IComponentElementClassNameMap, IComponentEvents, IComponentOEvents, IPossiblyComponentElement, TEventHandler, TOEventHandler } from './Component';
 import { ComponentInput, IComponentInput } from './ComponentInput';
@@ -38,11 +37,7 @@ declare let d: {
 declare let Utils: {
     camelize: (str: string) => string;
     hyphenize: (str: string) => string;
-    escapeString: (str: string) => string;
-    escapeHTML: (str: string) => string;
-    unescapeHTML: (str: string) => string;
     isRegExp: (value: any) => boolean;
     defer: (callback: () => void, context?: any) => void;
-    htmlToFragment: (html: string) => DocumentFragment;
 };
-export { NelmNodeType, INelmBlock, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin, formatters, ILocaleSettings, ILocalizationTexts, IGetTextConfig, IGetText, getText, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TOEventHandler, TEventHandler, IComponentOEvents, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, IComponentInput, ComponentInput, componentInputValueMap, TRtIfThenIfCell, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, d, Utils };
+export { NelmNodeType, INelmBlock, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin, formatters, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TOEventHandler, TEventHandler, IComponentOEvents, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, IComponentInput, ComponentInput, componentInputValueMap, TRtIfThenIfCell, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, Components, d, Utils };

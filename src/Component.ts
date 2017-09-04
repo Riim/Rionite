@@ -1,6 +1,6 @@
 import { Map } from '@riim/map-set-polyfill';
 import { EventEmitter, IEvent, IEventEmitterListener } from 'cellx';
-import htmlToFragment from 'html-to-fragment';
+import { htmlToFragment } from 'html-to-fragment';
 import { IBlock, Template } from 'nelm';
 import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
