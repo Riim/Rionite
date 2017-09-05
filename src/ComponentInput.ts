@@ -1,8 +1,8 @@
+import { hyphenize } from '@riim/hyphenize';
 import { Cell, EventEmitter } from 'cellx';
 import { Component, IComponentElement } from './Component';
 import { componentInputTypeMap } from './componentInputTypeMap';
 import { componentInputTypeSerializerMap } from './componentInputTypeSerializerMap';
-import { hyphenize } from './utils/hyphenize';
 
 export interface IComponentInput extends Object {
 	$content: DocumentFragment | null;
@@ -53,7 +53,7 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 		throw new TypeError('Unsupported component input type');
 	}
 
-	let hyphenizedName = hyphenize(name);
+	let hyphenizedName = hyphenize(name, true);
 	let rawValue = el.getAttribute(hyphenizedName);
 
 	if (required && rawValue === null) {

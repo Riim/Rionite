@@ -41,10 +41,6 @@ import {
 import { formatters } from './formatters';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
 import './nelmTemplateHelpers';
-import { camelize } from './utils/camelize';
-import { defer } from './utils/defer';
-import { hyphenize } from './utils/hyphenize';
-import { isRegExp } from './utils/isRegExp';
 
 let Components = {
 	RtContent,
@@ -56,13 +52,6 @@ let Components = {
 
 let d = {
 	Component: ComponentDecorator
-};
-
-let Utils = {
-	camelize,
-	hyphenize,
-	isRegExp,
-	defer
 };
 
 export {
@@ -103,7 +92,5 @@ export {
 	TRtRepeatItemMap,
 	Components,
 
-	d,
-
-	Utils
+	d
 };

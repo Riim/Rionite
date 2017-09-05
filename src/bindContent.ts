@@ -1,4 +1,6 @@
+import { camelize } from '@riim/camelize';
 import { Set } from '@riim/map-set-polyfill';
+import { setAttribute } from '@riim/set-attribute';
 import {
 	Cell,
 	ICellOptions,
@@ -9,8 +11,6 @@ import { compileContentTextFragment } from './compileContentTextFragment';
 import { Component, IPossiblyComponentElement } from './Component';
 import { IFreezableCell } from './componentBinding';
 import { ContentTextFragmentParser } from './ContentTextFragmentParser';
-import { camelize } from './utils/camelize';
-import { setAttribute } from './utils/setAttribute';
 
 class AttributeBindingCell extends Cell {
 	element: Element;
@@ -64,7 +64,7 @@ export function bindContent(
 					let attr = attrs.item(--i);
 
 					if ($specified) {
-						$specified.add(camelize(attr.name));
+						$specified.add(camelize(attr.name, true));
 					}
 
 					let value = attr.value;

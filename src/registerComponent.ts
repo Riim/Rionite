@@ -1,10 +1,10 @@
+import { hyphenize } from '@riim/hyphenize';
 import { mixin } from '@riim/mixin';
 import { Template } from 'nelm';
 import { Component, IComponentElement } from './Component';
 import { componentConstructorMap } from './componentConstructorMap';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
-import { hyphenize } from './utils/hyphenize';
 
 let push = Array.prototype.push;
 
@@ -105,7 +105,7 @@ export function registerComponent(componentConstr: typeof Component) {
 			let observedAttrs: Array<string> = [];
 
 			for (let name in inputConfig) {
-				observedAttrs.push(hyphenize(name));
+				observedAttrs.push(hyphenize(name, true));
 			}
 
 			return observedAttrs;

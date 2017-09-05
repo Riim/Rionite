@@ -1,7 +1,7 @@
+import { defer } from '@riim/defer';
 import { Component, IComponentElement } from './Component';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
-import { defer } from './utils/defer';
 
 let isConnectionStatusCallbacksSuppressed = false;
 

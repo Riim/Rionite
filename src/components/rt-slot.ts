@@ -1,4 +1,7 @@
+import { clearNode } from '@riim/clear-node';
+import { getUID } from '@riim/get-uid';
 import { Map } from '@riim/map-set-polyfill';
+import { moveContent } from '@riim/move-content';
 import { Symbol } from '@riim/symbol-polyfill';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
@@ -6,9 +9,6 @@ import { Component, IComponentElement } from '../Component';
 import { IFreezableCell } from '../componentBinding';
 import { ComponentDecorator } from '../ComponentDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
-import { clearNode } from '../utils/clearNode';
-import { getUID } from '../utils/getUID';
-import { moveContent } from '../utils/moveContent';
 
 let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 
