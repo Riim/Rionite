@@ -4,13 +4,13 @@ import { IFreezableCell } from './componentBinding';
 import { IComponentInput } from './ComponentInput';
 import { DisposableMixin, IDisposableListening, TListener, TListeningTarget } from './DisposableMixin';
 import { registerComponent } from './registerComponent';
-export interface IPossiblyComponentElement extends HTMLElement {
-    rioniteComponent?: Component | null;
-    $component?: Component;
+export interface IPossiblyComponentElement<T extends Component = Component> extends HTMLElement {
+    rioniteComponent?: T | null;
+    $component?: T;
 }
-export interface IComponentElement extends HTMLElement {
-    rioniteComponent: Component | null;
-    $component: Component;
+export interface IComponentElement<T extends Component = Component> extends HTMLElement {
+    rioniteComponent: T | null;
+    $component: T;
 }
 export interface IComponentElementClassNameMap {
     [elName: string]: string;

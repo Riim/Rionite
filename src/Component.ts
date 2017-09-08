@@ -25,14 +25,14 @@ import { registerComponent } from './registerComponent';
 
 let map = Array.prototype.map;
 
-export interface IPossiblyComponentElement extends HTMLElement {
-	rioniteComponent?: Component | null;
-	$component?: Component;
+export interface IPossiblyComponentElement<T extends Component = Component> extends HTMLElement {
+	rioniteComponent?: T | null;
+	$component?: T;
 }
 
-export interface IComponentElement extends HTMLElement {
-	rioniteComponent: Component | null;
-	$component: Component;
+export interface IComponentElement<T extends Component = Component> extends HTMLElement {
+	rioniteComponent: T | null;
+	$component: T;
 }
 
 export interface IComponentElementClassNameMap {
