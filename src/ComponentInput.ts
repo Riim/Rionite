@@ -119,13 +119,14 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 								evt.target == valueCell ?
 									{
 										type: `input-${ hyphenizedName }-change`,
-										oldValue: evt.oldValue,
-										value: evt.value
+										data: evt.data
 									} :
 									{
 										type: `input-${ hyphenizedName }-change`,
-										oldValue: evt.target,
-										value: evt.target
+										data: {
+											oldValue: evt.target,
+											value: evt.target
+										}
 									}
 							);
 						}

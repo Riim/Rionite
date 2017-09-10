@@ -33,11 +33,11 @@ class TextNodeBindingCell extends Cell {
 }
 
 function onAttributeBindingCellChange(evt: IEvent<AttributeBindingCell>) {
-	setAttribute(evt.target.element, evt.target.attributeName, evt.value);
+	setAttribute(evt.target.element, evt.target.attributeName, evt.data.value);
 }
 
 function onTextNodeBindingCellChange(evt: IEvent<TextNodeBindingCell>) {
-	evt.target.textNode.nodeValue = evt.value;
+	evt.target.textNode.nodeValue = evt.data.value;
 }
 
 let ContentTextFragmentNodeType = ContentTextFragmentParser.ContentTextFragmentNodeType;

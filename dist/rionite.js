@@ -660,10 +660,10 @@ var TextNodeBindingCell = /** @class */ (function (_super) {
     return TextNodeBindingCell;
 }(cellx_1.Cell));
 function onAttributeBindingCellChange(evt) {
-    set_attribute_1.setAttribute(evt.target.element, evt.target.attributeName, evt.value);
+    set_attribute_1.setAttribute(evt.target.element, evt.target.attributeName, evt.data.value);
 }
 function onTextNodeBindingCellChange(evt) {
-    evt.target.textNode.nodeValue = evt.value;
+    evt.target.textNode.nodeValue = evt.data.value;
 }
 var ContentTextFragmentNodeType = ContentTextFragmentParser_1.ContentTextFragmentParser.ContentTextFragmentNodeType;
 function bindContent(node, ownerComponent, context, result) {
@@ -1230,6 +1230,16 @@ exports.formatters = {
     gte: function gte(value, arg) {
         return value >= arg;
     },
+    has: function has(obj, key) {
+        return !!obj && (typeof obj.has == 'function' ? obj.has(key) : obj.hasOwnProperty(key));
+    },
+    get: function get(obj, key) {
+        return obj && (typeof obj.get == 'function' ? obj.get(key) : obj[key]);
+    },
+    // Safary: "Cannot declare a parameter named 'key' as it shadows the name of a strict mode function."
+    key: function key_(obj, key) {
+        return obj && obj[key];
+    },
     join: function join(arr, separator) {
         if (separator === void 0) { separator = ', '; }
         return arr && arr.join(separator);
@@ -1251,16 +1261,6 @@ exports.formatters = {
         }
         args.unshift(count);
         return gettext_1.getText(context, key, true, args);
-    },
-    has: function has(obj, key) {
-        return !!obj && (typeof obj.has == 'function' ? obj.has(key) : obj.hasOwnProperty(key));
-    },
-    get: function get(obj, key) {
-        return obj && (typeof obj.get == 'function' ? obj.get(key) : obj[key]);
-    },
-    // Safary: "Cannot declare a parameter named 'key' as it shadows the name of a strict mode function."
-    key: function key_(obj, key) {
-        return obj && obj[key];
     },
     json: function json(value) {
         return JSON.stringify(value);
@@ -1379,13 +1379,14 @@ function initComponentInputProperty(componentInput, name, el) {
                             component.emit(evt.target == valueCell_1 ?
                                 {
                                     type: "input-" + hyphenizedName + "-change",
-                                    oldValue: evt.oldValue,
-                                    value: evt.value
+                                    data: evt.data
                                 } :
                                 {
                                     type: "input-" + hyphenizedName + "-change",
-                                    oldValue: evt.target,
-                                    value: evt.target
+                                    data: {
+                                        oldValue: evt.target,
+                                        value: evt.target
+                                    }
                                 });
                         }
                     });
@@ -1991,9 +1992,11 @@ function unfreezeBinding(binding) {
         binding._changeEvent = {
             target: binding,
             type: 'change',
-            oldValue: frozenState.value,
-            value: binding._value,
-            prev: null
+            data: {
+                oldValue: frozenState.value,
+                value: binding._value,
+                prev: null
+            }
         };
         binding._canCancelChange = true;
         binding._addToRelease();

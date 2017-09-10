@@ -2,7 +2,7 @@ import { camelize } from '@riim/camelize';
 import { getUID } from '@riim/get-uid';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
-import { EventEmitter, IEvent, IEventEmitterListener } from 'cellx';
+import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
 import { htmlToFragment } from 'html-to-fragment';
 import { IBlock, Template } from 'nelm';
 import { attachChildComponentElements } from './attachChildComponentElements';
@@ -207,7 +207,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 		this.created();
 	}
 
-	_on(type: string, listener: IEventEmitterListener, context: any) {
+	_on(type: string, listener: TEventEmitterListener, context: any) {
 		if (!type.lastIndexOf('input-', 0) && reInputChangeEventName.test(type)) {
 			EventEmitter.currentlySubscribing = true;
 			this.input[camelize(RegExp.$1, true)];

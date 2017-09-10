@@ -1,7 +1,7 @@
-import { Cell, IEvent, IEventEmitterListener } from 'cellx';
+import { Cell, IEvent, TListener } from 'cellx';
 
 export interface IFrozenState {
-	changeEventListener: IEventEmitterListener;
+	changeEventListener: TListener;
 	changeEventContext: any;
 	value: any;
 }
@@ -19,7 +19,7 @@ export interface IFreezableCell extends Cell {
 
 function freezeBinding(binding: IFreezableCell) {
 	let changeEvent = ((binding as any)._events.get('change') as any) as {
-		listener: IEventEmitterListener;
+		listener: TListener;
 		context: any;
 	};
 
@@ -43,9 +43,11 @@ function unfreezeBinding(binding: IFreezableCell) {
 		binding._changeEvent = {
 			target: binding,
 			type: 'change',
-			oldValue: frozenState.value,
-			value: binding._value,
-			prev: null
+			data: {
+				oldValue: frozenState.value,
+				value: binding._value,
+				prev: null
+			}
 		};
 		binding._canCancelChange = true;
 
