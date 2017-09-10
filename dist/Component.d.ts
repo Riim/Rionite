@@ -1,3 +1,4 @@
+import { Logger } from '@riim/logger';
 import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
 import { IBlock, Template } from 'nelm';
 import { IFreezableCell } from './componentBinding';
@@ -28,6 +29,7 @@ export interface IComponentEvents<T extends Component> {
     };
 }
 export declare class Component extends EventEmitter implements DisposableMixin {
+    logger: Logger;
     static register: typeof registerComponent;
     static elementIs: string;
     static elementExtends: string | null;
@@ -56,7 +58,7 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;
-    constructor(el?: HTMLElement);
+    constructor(logger: Logger, el?: HTMLElement);
     _on(type: string, listener: TEventEmitterListener, context: any): void;
     _handleEvent(evt: IEvent<Component>): void;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;

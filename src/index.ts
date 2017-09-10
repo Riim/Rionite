@@ -1,3 +1,5 @@
+import { container } from '@riim/di';
+import { logger } from '@riim/logger';
 import {
 	IBlock as INelmBlock,
 	NodeType as NelmNodeType,
@@ -94,3 +96,5 @@ export {
 
 	d
 };
+
+container.register('logger', logger);

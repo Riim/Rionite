@@ -1,5 +1,7 @@
 import { camelize } from '@riim/camelize';
+import { inject } from '@riim/di';
 import { getUID } from '@riim/get-uid';
+import { Logger } from '@riim/logger';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
 import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
@@ -118,6 +120,7 @@ let elementAttached: any;
 let elementDetached: any;
 let elementMoved: any;
 
+@inject('logger')
 export class Component extends EventEmitter implements DisposableMixin {
 	static register = registerComponent;
 
@@ -185,7 +188,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 	initialized = false;
 	isReady = false;
 
-	constructor(el?: HTMLElement) {
+	constructor(public logger: Logger, el?: HTMLElement) {
 		super();
 		DisposableMixin.call(this);
 
