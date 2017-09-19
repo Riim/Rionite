@@ -45,7 +45,7 @@ export let ElementProtoMixin = {
 				component._attach();
 			}
 		} else {
-			defer(function(this: IComponentElement) {
+			defer(() => {
 				if ((this as any)[KEY_ELEMENT_CONNECTED]) {
 					let component = this.$component;
 
@@ -56,7 +56,7 @@ export let ElementProtoMixin = {
 						component._attach();
 					}
 				}
-			}, this);
+			});
 		}
 	},
 
