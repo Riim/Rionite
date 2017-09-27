@@ -130,9 +130,8 @@ export class RtIfThen extends Component {
 		}
 
 		if (changed) {
-			Cell.afterRelease(() => {
-				this.emit('change');
-			});
+			Cell.forceRelease();
+			this.emit('change');
 		}
 	}
 

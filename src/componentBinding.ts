@@ -64,11 +64,9 @@ export function freezeBindings(bindings: Array<IFreezableCell>) {
 }
 
 export function unfreezeBindings(bindings: Array<IFreezableCell>) {
-	Cell.afterRelease(() => {
-		for (let binding of bindings) {
-			unfreezeBinding(binding);
-		}
+	for (let binding of bindings) {
+		unfreezeBinding(binding);
+	}
 
-		Cell.forceRelease();
-	});
+	Cell.forceRelease();
 }

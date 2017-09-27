@@ -1713,7 +1713,6 @@ var RtIfThen = /** @class */ (function (_super) {
         this._attached = false;
     };
     RtIfThen.prototype._render = function (changed) {
-        var _this = this;
         if (this._elseMode ? !this._if.get() : this._if.get()) {
             var content = document.importNode(this.element.content, true);
             if (!Features_1.templateTag) {
@@ -1747,9 +1746,8 @@ var RtIfThen = /** @class */ (function (_super) {
             }
         }
         if (changed) {
-            cellx_1.Cell.afterRelease(function () {
-                _this.emit('change');
-            });
+            cellx_1.Cell.forceRelease();
+            this.emit('change');
         }
     };
     RtIfThen.prototype._deactivate = function () {
@@ -2107,13 +2105,11 @@ function freezeBindings(bindings) {
 }
 exports.freezeBindings = freezeBindings;
 function unfreezeBindings(bindings) {
-    cellx_1.Cell.afterRelease(function () {
-        for (var _i = 0, bindings_2 = bindings; _i < bindings_2.length; _i++) {
-            var binding = bindings_2[_i];
-            unfreezeBinding(binding);
-        }
-        cellx_1.Cell.forceRelease();
-    });
+    for (var _i = 0, bindings_2 = bindings; _i < bindings_2.length; _i++) {
+        var binding = bindings_2[_i];
+        unfreezeBinding(binding);
+    }
+    cellx_1.Cell.forceRelease();
 }
 exports.unfreezeBindings = unfreezeBindings;
 
@@ -2808,9 +2804,8 @@ var RtRepeat = /** @class */ (function (_super) {
             return;
         }
         if (changed) {
-            cellx_1.Cell.afterRelease(function () {
-                _this.emit('change');
-            });
+            cellx_1.Cell.forceRelease();
+            this.emit('change');
         }
     };
     RtRepeat.prototype._renderItem = function (item, index) {

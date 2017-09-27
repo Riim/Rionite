@@ -146,9 +146,8 @@ export class RtRepeat extends Component {
 		}
 
 		if (changed) {
-			Cell.afterRelease(() => {
-				this.emit('change');
-			});
+			Cell.forceRelease();
+			this.emit('change');
 		}
 	}
 
