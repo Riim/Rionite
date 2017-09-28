@@ -3155,25 +3155,27 @@ exports.RtSlot = RtSlot;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var nelm_1 = __webpack_require__(10);
-nelm_1.Template.helpers['if-then'] = nelm_1.Template.helpers['if-else'] = nelm_1.Template.helpers['repeat'] = function (el) {
-    var origAttrs = el.attributes;
-    var attrs = {
-        superCall: origAttrs && origAttrs.superCall,
-        list: origAttrs ? origAttrs.list.slice() : []
+['if-then', 'if-else', 'repeat'].forEach(function (tagName) {
+    nelm_1.Template.helpers[tagName] = function (el) {
+        var origAttrs = el.attributes;
+        var attrs = {
+            superCall: origAttrs && origAttrs.superCall,
+            list: origAttrs ? origAttrs.list.slice() : []
+        };
+        attrs.list.push({
+            name: 'is',
+            value: 'rt-' + tagName
+        });
+        return [{
+                nodeType: nelm_1.NodeType.ELEMENT,
+                isHelper: false,
+                tagName: 'template',
+                names: el.names && el.names[0] ? ['$' + el.names[0]].concat(el.names) : el.names,
+                attributes: attrs,
+                content: el.content
+            }];
     };
-    attrs.list.push({
-        name: 'is',
-        value: 'rt-' + el.tagName
-    });
-    return [{
-            nodeType: nelm_1.NodeType.ELEMENT,
-            isHelper: false,
-            tagName: 'template',
-            names: el.names && el.names[0] ? ['$' + el.names[0]].concat(el.names) : el.names,
-            attributes: attrs,
-            content: el.content
-        }];
-};
+});
 
 
 /***/ })
