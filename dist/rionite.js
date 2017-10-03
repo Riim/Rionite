@@ -230,12 +230,12 @@ var Component = /** @class */ (function (_super) {
         }
         _super.prototype._on.call(this, type, listener, context);
     };
-    Component.prototype._handleEvent = function (evt) {
-        _super.prototype._handleEvent.call(this, evt);
+    Component.prototype.handleEvent = function (evt) {
+        _super.prototype.handleEvent.call(this, evt);
         if (evt.bubbles !== false && !evt.isPropagationStopped) {
             var parentComponent = this.parentComponent;
             if (parentComponent) {
-                parentComponent._handleEvent(evt);
+                parentComponent.handleEvent(evt);
             }
             else {
                 var targetOwnerComponent = evt.target.ownerComponent;

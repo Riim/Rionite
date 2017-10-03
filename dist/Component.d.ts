@@ -60,7 +60,7 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     isReady: boolean;
     constructor(logger: Logger, el?: HTMLElement);
     _on(type: string, listener: TEventEmitterListener, context: any): void;
-    _handleEvent(evt: IEvent<Component>): void;
+    handleEvent(evt: IEvent<Component>): void;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, listeners: {
         [type: string]: TListener | Array<TListener>;

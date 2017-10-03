@@ -4,8 +4,8 @@ import { setAttribute } from '@riim/set-attribute';
 import {
 	Cell,
 	ICellOptions,
-	ICellPull,
-	IEvent
+	IEvent,
+	TCellPull
 	} from 'cellx';
 import { compileContentTextFragment } from './compileContentTextFragment';
 import { Component, IPossiblyComponentElement } from './Component';
@@ -16,7 +16,7 @@ class AttributeBindingCell extends Cell {
 	element: Element;
 	attributeName: string;
 
-	constructor(pull: ICellPull<any>, el: Element, attrName: string, opts?: ICellOptions<any>) {
+	constructor(pull: TCellPull<any>, el: Element, attrName: string, opts?: ICellOptions<any>) {
 		super(pull, opts);
 		this.element = el;
 		this.attributeName = attrName;
@@ -26,7 +26,7 @@ class AttributeBindingCell extends Cell {
 class TextNodeBindingCell extends Cell {
 	textNode: Text;
 
-	constructor(pull: ICellPull<any>, textNode: Text, opts?: ICellOptions<any>) {
+	constructor(pull: TCellPull<any>, textNode: Text, opts?: ICellOptions<any>) {
 		super(pull, opts);
 		this.textNode = textNode;
 	}
