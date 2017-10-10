@@ -44,18 +44,6 @@ import { formatters } from './formatters';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
 import './nelmTemplateHelpers';
 
-let Components = {
-	RtContent,
-	RtSlot,
-	RtIfThen,
-	RtIfElse,
-	RtRepeat
-};
-
-let d = {
-	Component: ComponentDecorator
-};
-
 export {
 	NelmNodeType,
 	INelmBlock,
@@ -72,6 +60,8 @@ export {
 
 	formatters,
 
+	ComponentDecorator as ComponentConfig,
+
 	IPossiblyComponentElement,
 	IComponentElement,
 	IComponentElementClassNameMap,
@@ -87,14 +77,20 @@ export {
 	ComponentInput,
 	componentInputValueMap,
 
+	RtContent,
+
+	RtSlot,
+
 	TRtIfThenIfCell,
+	RtIfThen,
+
+	RtIfElse,
+
 	TRtRepeatListCell,
 	IRtRepeatItem,
 	TRtRepeatItemList,
 	TRtRepeatItemMap,
-	Components,
-
-	d
+	RtRepeat
 };
 
 container.register('logger', logger);

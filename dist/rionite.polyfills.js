@@ -3319,15 +3319,21 @@ exports.Template = nelm_1.Template;
 var Component_1 = __webpack_require__(2);
 exports.Component = Component_1.Component;
 var ComponentDecorator_1 = __webpack_require__(4);
+exports.ComponentConfig = ComponentDecorator_1.ComponentDecorator;
 var ComponentInput_1 = __webpack_require__(22);
 exports.ComponentInput = ComponentInput_1.ComponentInput;
 var componentInputValueMap_1 = __webpack_require__(13);
 exports.componentInputValueMap = componentInputValueMap_1.componentInputValueMap;
 var rt_content_1 = __webpack_require__(52);
+exports.RtContent = rt_content_1.RtContent;
 var rt_if_else_1 = __webpack_require__(53);
+exports.RtIfElse = rt_if_else_1.RtIfElse;
 var rt_if_then_1 = __webpack_require__(26);
+exports.RtIfThen = rt_if_then_1.RtIfThen;
 var rt_repeat_1 = __webpack_require__(54);
+exports.RtRepeat = rt_repeat_1.RtRepeat;
 var rt_slot_1 = __webpack_require__(55);
+exports.RtSlot = rt_slot_1.RtSlot;
 var DisposableMixin_1 = __webpack_require__(24);
 exports.DisposableMixin = DisposableMixin_1.DisposableMixin;
 var formatters_1 = __webpack_require__(20);
@@ -3335,18 +3341,6 @@ exports.formatters = formatters_1.formatters;
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
 exports.KEY_ELEMENT_CONNECTED = KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED;
 __webpack_require__(56);
-var Components = {
-    RtContent: rt_content_1.RtContent,
-    RtSlot: rt_slot_1.RtSlot,
-    RtIfThen: rt_if_then_1.RtIfThen,
-    RtIfElse: rt_if_else_1.RtIfElse,
-    RtRepeat: rt_repeat_1.RtRepeat
-};
-exports.Components = Components;
-var d = {
-    Component: ComponentDecorator_1.ComponentDecorator
-};
-exports.d = d;
 di_1.container.register('logger', logger_1.logger);
 
 

@@ -49,11 +49,12 @@ export interface IComponentOEvents<T extends Component> {
 	};
 }
 
-export type TEventHandler<T extends Component> = (this: T, evt: IEvent | Event, receiver: Element) => boolean | void;
+export type TEventHandler<T extends Component, E = IEvent | Event> =
+	(this: T, evt: E, receiver: Element) => boolean | void;
 
-export interface IComponentEvents<T extends Component> {
+export interface IComponentEvents<T extends Component, E = IEvent | Event> {
 	[name: string]: {
-		[eventName: string]: TEventHandler<T>;
+		[eventName: string]: TEventHandler<T, E>;
 	};
 }
 
@@ -141,8 +142,8 @@ export class Component extends EventEmitter implements DisposableMixin {
 	static _elementClassNameMap: IComponentElementClassNameMap;
 
 	static oevents: IComponentOEvents<Component> | null = null;
-	static events: IComponentEvents<Component> | null = null;
-	static domEvents: IComponentEvents<Component> | null = null;
+	static events: IComponentEvents<Component, IEvent> | null = null;
+	static domEvents: IComponentEvents<Component, Event> | null = null;
 
 	_disposables: typeof DisposableMixin.prototype._disposables;
 
