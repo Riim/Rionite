@@ -1,3 +1,4 @@
+import { IEvent } from 'cellx';
 import { IBlock, Template } from 'nelm';
 import { Component, IComponentEvents, IComponentOEvents } from './Component';
 export declare function ComponentDecorator<T extends Component>(config: {
@@ -11,6 +12,6 @@ export declare function ComponentDecorator<T extends Component>(config: {
     } | null;
     template?: string | IBlock | Template | null;
     oevents?: IComponentOEvents<T> | null;
-    events?: IComponentEvents<T> | null;
-    domEvents?: IComponentEvents<T> | null;
+    events?: IComponentEvents<T, IEvent> | null;
+    domEvents?: IComponentEvents<T, Event> | null;
 }): (componentConstr: typeof Component) => void;
