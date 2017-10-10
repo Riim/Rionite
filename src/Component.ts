@@ -1,5 +1,5 @@
 import { camelize } from '@riim/camelize';
-import { inject } from '@riim/di';
+import { Inject } from '@riim/di';
 import { getUID } from '@riim/get-uid';
 import { Logger } from '@riim/logger';
 import { Map } from '@riim/map-set-polyfill';
@@ -121,7 +121,7 @@ let elementAttached: any;
 let elementDetached: any;
 let elementMoved: any;
 
-@inject('logger')
+@Inject('logger')
 export class Component extends EventEmitter implements DisposableMixin {
 	static register = registerComponent;
 

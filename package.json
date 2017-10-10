@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.28.2",
+  "version": "0.28.4",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -39,7 +39,7 @@
     "@riim/camelize": "^1.0.0",
     "@riim/clear-node": "^1.0.0",
     "@riim/defer": "^1.1.0",
-    "@riim/di": "^0.1.2",
+    "@riim/di": "^0.2.0",
     "@riim/escape-html": "^1.1.1",
     "@riim/get-uid": "^1.0.0",
     "@riim/gettext": "^1.1.1",

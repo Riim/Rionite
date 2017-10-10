@@ -1947,7 +1947,7 @@ var Component = /** @class */ (function (_super) {
     Component.events = null;
     Component.domEvents = null;
     Component = Component_1 = __decorate([
-        di_1.inject('logger')
+        di_1.Inject('logger')
     ], Component);
     return Component;
     var Component_1;
@@ -2309,8 +2309,8 @@ exports.KEY_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite.KEY_ELEMENT_CO
 Object.defineProperty(exports, "__esModule", { value: true });
 var Container_1 = __webpack_require__(30);
 exports.Container = Container_1.Container;
-var injectDecorator_1 = __webpack_require__(31);
-exports.inject = injectDecorator_1.injectDecorator;
+var InjectDecorator_1 = __webpack_require__(31);
+exports.Inject = InjectDecorator_1.InjectDecorator;
 var container = new Container_1.Container();
 exports.container = container;
 
@@ -3389,7 +3389,7 @@ exports.Container = Container;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-function injectDecorator() {
+function InjectDecorator() {
     var keys = [];
     for (var _i = 0; _i < arguments.length; _i++) {
         keys[_i] = arguments[_i];
@@ -3398,7 +3398,7 @@ function injectDecorator() {
         componentConstr.inject = keys;
     };
 }
-exports.injectDecorator = injectDecorator;
+exports.InjectDecorator = InjectDecorator;
 
 
 /***/ }),
