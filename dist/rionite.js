@@ -581,7 +581,6 @@ var _a;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var Component_1 = __webpack_require__(2);
-Component_1.Component.register;
 function ComponentDecorator(config) {
     return function (componentConstr) {
         componentConstr.elementIs = config.elementIs;

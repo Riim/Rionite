@@ -14,4 +14,4 @@ export declare function ComponentDecorator<T extends Component>(config: {
     oevents?: IComponentOEvents<T> | null;
     events?: IComponentEvents<T, IEvent> | null;
     domEvents?: IComponentEvents<T, Event> | null;
-}): (componentConstr: typeof Component) => void;
+}): (componentConstr: Function) => void;

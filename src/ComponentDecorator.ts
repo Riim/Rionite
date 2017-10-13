@@ -2,8 +2,6 @@ import { IEvent } from 'cellx';
 import { IBlock, Template } from 'nelm';
 import { Component, IComponentEvents, IComponentOEvents } from './Component';
 
-Component.register;
-
 export function ComponentDecorator<T extends Component>(config: {
 	elementIs: string;
 	elementExtends?: string | null;
@@ -14,35 +12,34 @@ export function ComponentDecorator<T extends Component>(config: {
 	events?: IComponentEvents<T, IEvent> | null;
 	domEvents?: IComponentEvents<T, Event> | null;
 }) {
-	return (componentConstr: typeof Component) => {
-		componentConstr.elementIs = config.elementIs;
-
+	return (componentConstr: Function) => {
+		(componentConstr as typeof Component).elementIs = config.elementIs;
 		if (config.elementExtends !== undefined) {
-			componentConstr.elementExtends = config.elementExtends;
+			(componentConstr as typeof Component).elementExtends = config.elementExtends;
 		}
 
 		if (config.input !== undefined) {
-			componentConstr.input = config.input;
+			(componentConstr as typeof Component).input = config.input;
 		}
 
 		if (config.i18n !== undefined) {
-			componentConstr.i18n = config.i18n;
+			(componentConstr as typeof Component).i18n = config.i18n;
 		}
 
 		if (config.template !== undefined) {
-			componentConstr.template = config.template;
+			(componentConstr as typeof Component).template = config.template;
 		}
 
 		if (config.oevents !== undefined) {
-			componentConstr.oevents = config.oevents;
+			(componentConstr as typeof Component).oevents = config.oevents;
 		}
 		if (config.events !== undefined) {
-			componentConstr.events = config.events;
+			(componentConstr as typeof Component).events = config.events;
 		}
 		if (config.domEvents !== undefined) {
-			componentConstr.domEvents = config.domEvents;
+			(componentConstr as typeof Component).domEvents = config.domEvents;
 		}
 
-		Component.register(componentConstr);
+		Component.register(componentConstr as typeof Component);
 	};
 }
