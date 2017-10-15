@@ -24,8 +24,6 @@ let KEY_CONTENT_MAP = Symbol('contentMap');
 	template: ''
 })
 export class RtContent extends Component {
-	ownerComponent: Component;
-
 	_childComponents: Array<Component> | null;
 
 	_attach() {
@@ -53,7 +51,6 @@ export class RtContent extends Component {
 
 					if (
 						!clone &&
-							contentOwnerComponent &&
 							(contentMap = (contentOwnerComponent as any)[KEY_CONTENT_MAP]) &&
 							contentMap.has(key)
 					) {
@@ -78,7 +75,7 @@ export class RtContent extends Component {
 							}
 						}
 
-						if (!clone && contentOwnerComponent) {
+						if (!clone) {
 							(
 								contentMap ||
 									(contentOwnerComponent as any)[KEY_CONTENT_MAP] ||
@@ -86,7 +83,7 @@ export class RtContent extends Component {
 							).set(key, el);
 						}
 					}
-				} else if (!clone && contentOwnerComponent) {
+				} else if (!clone) {
 					let contentMap: Map<string, IComponentElement> | undefined =
 						(contentOwnerComponent as any)[KEY_CONTENT_MAP];
 
@@ -102,8 +99,8 @@ export class RtContent extends Component {
 						content = ownerComponentContent;
 						(contentMap || ((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())).set(key, el);
 					}
-				} else if (ownerComponentContent.firstChild) {
-					content = clone ? ownerComponentContent.cloneNode(true) as DocumentFragment : ownerComponentContent;
+				} else {
+					content = ownerComponentContent.cloneNode(true) as DocumentFragment;
 				}
 			}
 
@@ -112,7 +109,7 @@ export class RtContent extends Component {
 					[this._bindings, childComponents] = content ?
 						bindContent(
 							content,
-							contentOwnerComponent!,
+							contentOwnerComponent,
 							input.getContext ?
 								input.getContext.call(ownerComponent, ownerComponent.input.$context, this) :
 								ownerComponent.input.$context,

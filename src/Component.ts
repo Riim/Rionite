@@ -85,7 +85,7 @@ function createClassBlockElementReplacer(
 
 function findChildComponents(
 	node: Node,
-	ownerComponent: Component | null,
+	ownerComponent: Component,
 	context: object,
 	childComponents?: Array<Component> | null | undefined
 ): Array<Component> | null {
@@ -94,7 +94,7 @@ function findChildComponents(
 			let childComponent = (child as IPossiblyComponentElement).$component;
 
 			if (childComponent) {
-				childComponent.ownerComponent = ownerComponent;
+				childComponent._ownerComponent = ownerComponent;
 				childComponent.input.$context = context;
 
 				(childComponents || (childComponents = [])).push(childComponent);
@@ -147,7 +147,28 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	_disposables: typeof DisposableMixin.prototype._disposables;
 
-	ownerComponent: Component | null = null;
+	_ownerComponent: Component | undefined;
+
+	get ownerComponent(): Component {
+		if (this._ownerComponent) {
+			return this._ownerComponent;
+		}
+
+		let component = this.parentComponent;
+
+		if (!component) {
+			return (this._ownerComponent = this);
+		}
+
+		for (let parentComponent; (parentComponent = component.parentComponent); ) {
+			component = parentComponent;
+		}
+
+		return (this._ownerComponent = component);
+	}
+	set ownerComponent(ownerComponent: Component) {
+		this._ownerComponent = ownerComponent;
+	}
 
 	_parentComponent: Component | null | undefined = null;
 
@@ -232,7 +253,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 			} else {
 				let targetOwnerComponent = evt.target.ownerComponent;
 
-				if (targetOwnerComponent) {
+				if (targetOwnerComponent != evt.target) {
 					handleEvent(evt, targetOwnerComponent.element);
 				}
 			}

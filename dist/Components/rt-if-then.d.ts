@@ -2,7 +2,6 @@ import { Cell } from 'cellx';
 import { Component } from '../Component';
 export declare type TIfCell = Cell<boolean>;
 export declare class RtIfThen extends Component {
-    ownerComponent: Component;
     _elseMode: boolean;
     _if: TIfCell;
     _nodes: Array<Node> | null;

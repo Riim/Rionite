@@ -25,8 +25,6 @@ let reKeypath = RegExp(`^${ keypathPattern }$`);
 	}
 })
 export class RtIfThen extends Component {
-	ownerComponent: Component;
-
 	_elseMode = false;
 
 	_if: TIfCell;

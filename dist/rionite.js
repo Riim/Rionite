@@ -148,7 +148,7 @@ function findChildComponents(node, ownerComponent, context, childComponents) {
         if (child.nodeType == Node.ELEMENT_NODE) {
             var childComponent = child.$component;
             if (childComponent) {
-                childComponent.ownerComponent = ownerComponent;
+                childComponent._ownerComponent = ownerComponent;
                 childComponent.input.$context = context;
                 (childComponents || (childComponents = [])).push(childComponent);
             }
@@ -173,7 +173,6 @@ var Component = /** @class */ (function (_super) {
     function Component(logger, el) {
         var _this = _super.call(this) || this;
         _this.logger = logger;
-        _this.ownerComponent = null;
         _this._parentComponent = null;
         _this._attached = false;
         _this.initialized = false;
@@ -193,6 +192,26 @@ var Component = /** @class */ (function (_super) {
         return _this;
     }
     Component_1 = Component;
+    Object.defineProperty(Component.prototype, "ownerComponent", {
+        get: function () {
+            if (this._ownerComponent) {
+                return this._ownerComponent;
+            }
+            var component = this.parentComponent;
+            if (!component) {
+                return (this._ownerComponent = this);
+            }
+            for (var parentComponent = void 0; (parentComponent = component.parentComponent);) {
+                component = parentComponent;
+            }
+            return (this._ownerComponent = component);
+        },
+        set: function (ownerComponent) {
+            this._ownerComponent = ownerComponent;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(Component.prototype, "parentComponent", {
         get: function () {
             if (this._parentComponent !== undefined) {
@@ -239,7 +258,7 @@ var Component = /** @class */ (function (_super) {
             }
             else {
                 var targetOwnerComponent = evt.target.ownerComponent;
-                if (targetOwnerComponent) {
+                if (targetOwnerComponent != evt.target) {
                     handleEvent_1.handleEvent(evt, targetOwnerComponent.element);
                 }
             }
@@ -714,7 +733,7 @@ function bindContent(node, ownerComponent, context, result) {
                     }
                 }
                 if (childComponent) {
-                    childComponent.ownerComponent = ownerComponent;
+                    childComponent._ownerComponent = ownerComponent;
                     childComponent.input.$context = context;
                     childComponent.input.$specified = $specified;
                     (result[1] || (result[1] = [])).push(childComponent);
@@ -2463,7 +2482,6 @@ var RtContent = /** @class */ (function (_super) {
                 if (selector) {
                     var contentMap = void 0;
                     if (!clone &&
-                        contentOwnerComponent &&
                         (contentMap = contentOwnerComponent[KEY_CONTENT_MAP]) &&
                         contentMap.has(key)) {
                         var container = contentMap.get(key);
@@ -2483,14 +2501,14 @@ var RtContent = /** @class */ (function (_super) {
                                 content.appendChild(clone ? selectedElements[i].cloneNode(true) : selectedElements[i]);
                             }
                         }
-                        if (!clone && contentOwnerComponent) {
+                        if (!clone) {
                             (contentMap ||
                                 contentOwnerComponent[KEY_CONTENT_MAP] ||
                                 (contentOwnerComponent[KEY_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
                         }
                     }
                 }
-                else if (!clone && contentOwnerComponent) {
+                else if (!clone) {
                     var contentMap = contentOwnerComponent[KEY_CONTENT_MAP];
                     if (contentMap && contentMap.has(key)) {
                         var container = contentMap.get(key);
@@ -2504,8 +2522,8 @@ var RtContent = /** @class */ (function (_super) {
                         (contentMap || (contentOwnerComponent[KEY_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
                     }
                 }
-                else if (ownerComponentContent.firstChild) {
-                    content = clone ? ownerComponentContent.cloneNode(true) : ownerComponentContent;
+                else {
+                    content = ownerComponentContent.cloneNode(true);
                 }
             }
             if (bindings === undefined) {
@@ -2958,7 +2976,6 @@ var RtSlot = /** @class */ (function (_super) {
                 if (name_1) {
                     var contentMap = void 0;
                     if (!cloneContent &&
-                        contentOwnerComponent &&
                         (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
                         contentMap.has(key)) {
                         var container = contentMap.get(key);
@@ -2991,14 +3008,14 @@ var RtSlot = /** @class */ (function (_super) {
                                 content.appendChild(selectedElement);
                             }
                         }
-                        if (!cloneContent && contentOwnerComponent) {
+                        if (!cloneContent) {
                             (contentMap ||
                                 contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
                                 (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
                         }
                     }
                 }
-                else if (!cloneContent && contentOwnerComponent) {
+                else if (!cloneContent) {
                     var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
                     if (contentMap && contentMap.has(key)) {
                         var container = contentMap.get(key);
@@ -3012,10 +3029,8 @@ var RtSlot = /** @class */ (function (_super) {
                         (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
                     }
                 }
-                else if (ownerComponentContent.firstChild) {
-                    content = cloneContent ?
-                        ownerComponentContent.cloneNode(true) :
-                        ownerComponentContent;
+                else {
+                    content = ownerComponentContent.cloneNode(true);
                 }
             }
             if (bindings === undefined) {

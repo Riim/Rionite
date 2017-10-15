@@ -24,8 +24,6 @@ let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 	template: ''
 })
 export class RtSlot extends Component {
-	ownerComponent: Component;
-
 	_childComponents: Array<Component> | null;
 
 	_attach() {
@@ -53,9 +51,8 @@ export class RtSlot extends Component {
 
 					if (
 						!cloneContent &&
-						contentOwnerComponent &&
-						(contentMap = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP]) &&
-						contentMap.has(key)
+							(contentMap = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP]) &&
+							contentMap.has(key)
 					) {
 						let container = contentMap.get(key)!;
 
@@ -97,7 +94,7 @@ export class RtSlot extends Component {
 							}
 						}
 
-						if (!cloneContent && contentOwnerComponent) {
+						if (!cloneContent) {
 							(
 								contentMap ||
 									(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] ||
@@ -105,7 +102,7 @@ export class RtSlot extends Component {
 							).set(key, el);
 						}
 					}
-				} else if (!cloneContent && contentOwnerComponent) {
+				} else if (!cloneContent) {
 					let contentMap: Map<string, IComponentElement> | undefined =
 						(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP];
 
@@ -121,10 +118,8 @@ export class RtSlot extends Component {
 						content = ownerComponentContent;
 						(contentMap || ((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())).set(key, el);
 					}
-				} else if (ownerComponentContent.firstChild) {
-					content = cloneContent ?
-						ownerComponentContent.cloneNode(true) as DocumentFragment :
-						ownerComponentContent;
+				} else {
+					content = ownerComponentContent.cloneNode(true) as DocumentFragment;
 				}
 			}
 
@@ -133,7 +128,7 @@ export class RtSlot extends Component {
 					[this._bindings, childComponents] = content ?
 						bindContent(
 							content,
-							contentOwnerComponent!,
+							contentOwnerComponent,
 							input.getContext ?
 								input.getContext.call(ownerComponent, ownerComponent.input.$context, this) :
 								ownerComponent.input.$context,

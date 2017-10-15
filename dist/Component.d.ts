@@ -48,7 +48,8 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     static events: IComponentEvents<Component, IEvent> | null;
     static domEvents: IComponentEvents<Component, Event> | null;
     _disposables: typeof DisposableMixin.prototype._disposables;
-    ownerComponent: Component | null;
+    _ownerComponent: Component | undefined;
+    ownerComponent: Component;
     _parentComponent: Component | null | undefined;
     readonly parentComponent: Component | null;
     element: IComponentElement;
