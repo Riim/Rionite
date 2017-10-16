@@ -82,7 +82,7 @@ export let ElementProtoMixin = {
 		}
 	},
 
-	attributeChangedCallback(this: IComponentElement, name: string, oldValue: string | null, value: string | null) {
+	attributeChangedCallback(this: IComponentElement, name: string, prev: string | null, value: string | null) {
 		let component = this.rioniteComponent;
 
 		if (component && component.isReady) {

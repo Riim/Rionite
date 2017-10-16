@@ -124,7 +124,8 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 									{
 										type: `input-${ hyphenizedName }-change`,
 										data: {
-											oldValue: evt.target,
+											prevEvent: null,
+											prevValue: evt.target,
 											value: evt.target
 										}
 									}

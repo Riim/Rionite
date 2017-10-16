@@ -44,9 +44,9 @@ function unfreezeBinding(binding: IFreezableCell) {
 			target: binding,
 			type: 'change',
 			data: {
-				oldValue: frozenState.value,
-				value: binding._value,
-				prev: null
+				prevEvent: null,
+				prevValue: frozenState.value,
+				value: binding._value
 			}
 		};
 		binding._canCancelChange = true;

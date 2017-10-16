@@ -2075,7 +2075,7 @@ exports.ElementProtoMixin = (_a = {
             });
         }
     },
-    _a.attributeChangedCallback = function (name, oldValue, value) {
+    _a.attributeChangedCallback = function (name, prev, value) {
         var component = this.rioniteComponent;
         if (component && component.isReady) {
             var input = component.input;
@@ -2923,7 +2923,8 @@ function initComponentInputProperty(componentInput, name, el) {
                                 {
                                     type: "input-" + hyphenizedName + "-change",
                                     data: {
-                                        oldValue: evt.target,
+                                        prevEvent: null,
+                                        prevValue: evt.target,
                                         value: evt.target
                                     }
                                 });
@@ -3533,9 +3534,9 @@ function unfreezeBinding(binding) {
             target: binding,
             type: 'change',
             data: {
-                oldValue: frozenState.value,
-                value: binding._value,
-                prev: null
+                prevEvent: null,
+                prevValue: frozenState.value,
+                value: binding._value
             }
         };
         binding._canCancelChange = true;
