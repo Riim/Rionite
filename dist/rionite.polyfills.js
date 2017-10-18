@@ -1755,13 +1755,12 @@ var Component = /** @class */ (function (_super) {
             var parentComponent = this.parentComponent;
             if (parentComponent) {
                 parentComponent.handleEvent(evt);
+                return;
             }
-            else {
-                var targetOwnerComponent = evt.target.ownerComponent;
-                if (targetOwnerComponent != evt.target) {
-                    handleEvent_1.handleEvent(evt, targetOwnerComponent.element);
-                }
-            }
+        }
+        var targetOwnerComponent = evt.target.ownerComponent;
+        if (targetOwnerComponent != evt.target) {
+            handleEvent_1.handleEvent(evt, targetOwnerComponent.element);
         }
     };
     Component.prototype.listenTo = function (target, type, listener, context, useCapture) {

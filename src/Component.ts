@@ -250,13 +250,14 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 			if (parentComponent) {
 				parentComponent.handleEvent(evt);
-			} else {
-				let targetOwnerComponent = evt.target.ownerComponent;
-
-				if (targetOwnerComponent != evt.target) {
-					handleEvent(evt, targetOwnerComponent.element);
-				}
+				return;
 			}
+		}
+
+		let targetOwnerComponent = evt.target.ownerComponent;
+
+		if (targetOwnerComponent != evt.target) {
+			handleEvent(evt, targetOwnerComponent.element);
 		}
 	}
 
