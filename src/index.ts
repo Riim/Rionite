@@ -57,11 +57,11 @@ export {
 	TListeningTarget,
 	TListener,
 	DisposableMixin,
-
+	//
 	formatters,
-
+	//
 	ComponentDecorator as ComponentConfig,
-
+	//
 	IPossiblyComponentElement,
 	IComponentElement,
 	IComponentElementClassNameMap,
@@ -70,22 +70,22 @@ export {
 	IComponentOEvents,
 	IComponentEvents,
 	Component,
-
+	//
 	KEY_ELEMENT_CONNECTED,
-
+	//
 	IComponentInput,
 	ComponentInput,
 	componentInputValueMap,
-
+	//
 	RtContent,
-
+	//
 	RtSlot,
-
+	//
 	TRtIfThenIfCell,
 	RtIfThen,
-
+	//
 	RtIfElse,
-
+	//
 	TRtRepeatListCell,
 	IRtRepeatItem,
 	TRtRepeatItemList,

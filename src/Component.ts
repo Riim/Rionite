@@ -49,12 +49,15 @@ export interface IComponentOEvents<T extends Component> {
 	};
 }
 
-export type TEventHandler<T extends Component, E = IEvent | Event> =
-	(this: T, evt: E, receiver: Element) => boolean | void;
+export type TEventHandler<T extends Component, U = IEvent | Event> = (
+	this: T,
+	evt: U,
+	receiver: Element
+) => boolean | void;
 
-export interface IComponentEvents<T extends Component, E = IEvent | Event> {
+export interface IComponentEvents<T extends Component, U = IEvent | Event> {
 	[name: string]: {
-		[eventName: string]: TEventHandler<T, E>;
+		[eventName: string]: TEventHandler<T, U>;
 	};
 }
 
@@ -73,7 +76,7 @@ function createClassBlockElementReplacer(
 			let eventAttrs = [];
 
 			for (let type in elEvents) {
-				eventAttrs.push(` ${ evtPrefix }${ type }=":${ elName }"`);
+				eventAttrs.push(` ${evtPrefix}${type}=":${elName}"`);
 			}
 
 			return match + eventAttrs.join('');
@@ -102,9 +105,15 @@ function findChildComponents(
 
 			if (
 				child.firstChild &&
-					(!childComponent || (childComponent.constructor as typeof Component).template == null)
+				(!childComponent ||
+					(childComponent.constructor as typeof Component).template == null)
 			) {
-				childComponents = findChildComponents(child, ownerComponent, context, childComponents);
+				childComponents = findChildComponents(
+					child,
+					ownerComponent,
+					context,
+					childComponents
+				);
 			}
 		}
 	}
@@ -308,7 +317,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 					let targetConstr = componentConstructorMap.get(targetName);
 
 					if (!targetConstr) {
-						throw new TypeError(`Component "${ targetName }" is not defined`);
+						throw new TypeError(`Component "${targetName}" is not defined`);
 					}
 
 					let inner = listener;
@@ -332,7 +341,14 @@ export class Component extends EventEmitter implements DisposableMixin {
 			}
 		}
 
-		return DisposableMixin.prototype._listenTo.call(this, target, type, listener, context, useCapture);
+		return DisposableMixin.prototype._listenTo.call(
+			this,
+			target,
+			type,
+			listener,
+			context,
+			useCapture
+		);
 	}
 
 	setTimeout: typeof DisposableMixin.prototype.setTimeout;
@@ -375,7 +391,11 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 				this._bindings = null;
 
-				let childComponents = findChildComponents(el, this.ownerComponent, this.input.$context);
+				let childComponents = findChildComponents(
+					el,
+					this.ownerComponent,
+					this.input.$context
+				);
 
 				if (childComponents) {
 					attachChildComponentElements(childComponents);
@@ -401,14 +421,22 @@ export class Component extends EventEmitter implements DisposableMixin {
 					if (constr.events) {
 						contentHTML = contentHTML.replace(
 							reClassBlockElement,
-							createClassBlockElementReplacer(constr._contentBlockNames[0], constr.events, 'oncomponent-')
+							createClassBlockElementReplacer(
+								constr._contentBlockNames[0],
+								constr.events,
+								'oncomponent-'
+							)
 						);
 					}
 
 					if (constr.domEvents) {
 						contentHTML = contentHTML.replace(
 							reClassBlockElement,
-							createClassBlockElementReplacer(constr._contentBlockNames[0], constr.domEvents, 'on-')
+							createClassBlockElementReplacer(
+								constr._contentBlockNames[0],
+								constr.domEvents,
+								'on-'
+							)
 						);
 					}
 
@@ -423,7 +451,10 @@ export class Component extends EventEmitter implements DisposableMixin {
 						i += templates[i].content.querySelectorAll('template').length + 1;
 					}
 				}
-				let [bindings, childComponents] = bindContent(content, this, this, { 0: null, 1: null } as any);
+				let [bindings, childComponents] = bindContent(content, this, this, {
+					0: null,
+					1: null
+				} as any);
 
 				this._bindings = bindings;
 
@@ -498,20 +529,27 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	$<R = Component | Element>(name: string, container?: Component | Element): R | null {
 		let elList = this._getElementList(name, container);
-		return (elList && elList.length ? (elList[0] as IPossiblyComponentElement).$component || elList[0] : null) as
-			any;
+		return (elList && elList.length
+			? (elList[0] as IPossiblyComponentElement).$component || elList[0]
+			: null) as any;
 	}
 
 	$$<R = Component | Element>(name: string, container?: Component | Element): Array<R> {
 		let elList = this._getElementList(name, container);
-		return elList ? map.call(elList, (el: IPossiblyComponentElement) => el.$component || el) : [];
+		return elList
+			? map.call(elList, (el: IPossiblyComponentElement) => el.$component || el)
+			: [];
 	}
 
-	_getElementList(name: string, container?: Component | Element): NodeListOf<Element> | undefined {
-		let elListMap = this._elementListMap || (this._elementListMap = new Map<string, NodeListOf<Element>>());
-		let containerEl: Element = container ?
-			(container instanceof Component ? container.element : container) :
-			this.element;
+	_getElementList(
+		name: string,
+		container?: Component | Element
+	): NodeListOf<Element> | undefined {
+		let elListMap =
+			this._elementListMap || (this._elementListMap = new Map<string, NodeListOf<Element>>());
+		let containerEl: Element = container
+			? container instanceof Component ? container.element : container
+			: this.element;
 		let key = container ? getUID(containerEl) + '/' + name : name;
 		let elList = elListMap.get(key);
 
@@ -554,9 +592,13 @@ export class Component extends EventEmitter implements DisposableMixin {
 let disposableMixinProto = DisposableMixin.prototype;
 let componentProto = Component.prototype;
 
-Object.getOwnPropertyNames(disposableMixinProto).forEach((name) => {
+Object.getOwnPropertyNames(disposableMixinProto).forEach(name => {
 	if (!(name in componentProto)) {
-		Object.defineProperty(componentProto, name, Object.getOwnPropertyDescriptor(disposableMixinProto, name));
+		Object.defineProperty(
+			componentProto,
+			name,
+			Object.getOwnPropertyDescriptor(disposableMixinProto, name)
+		);
 	}
 });
 
@@ -572,8 +614,8 @@ elementMoved = componentProto.elementMoved;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
-	handledEvents.forEach((type) => {
-		document.documentElement.addEventListener(type, (evt) => {
+	handledEvents.forEach(type => {
+		document.documentElement.addEventListener(type, evt => {
 			if (evt.target != document.documentElement) {
 				handleEvent(evt, document.documentElement);
 			}

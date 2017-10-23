@@ -23,8 +23,12 @@ export interface IDisposableCallback extends IDisposable {
 	cancel(): void;
 }
 
-export type TListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList |
-	HTMLCollection;
+export type TListeningTarget =
+	| EventEmitter
+	| EventTarget
+	| Array<EventEmitter | EventTarget>
+	| NodeList
+	| HTMLCollection;
 
 export type TListener = (evt: IEvent | Event) => boolean | void;
 
@@ -58,57 +62,29 @@ export class DisposableMixin implements IDisposable {
 
 			if (Array.isArray(type)) {
 				for (let i = 0, l = type.length; i < l; i++) {
-					listenings.push(
-						this.listenTo(
-							target,
-							type[i],
-							listener,
-							context,
-							useCapture
-						)
-					);
+					listenings.push(this.listenTo(target, type[i], listener, context, useCapture));
 				}
 			} else {
 				for (let name in type) {
-					listenings.push(
-						this.listenTo(
-							target,
-							name,
-							type[name],
-							listener,
-							context
-						)
-					);
+					listenings.push(this.listenTo(target, name, type[name], listener, context));
 				}
 			}
 		} else {
-			if (Array.isArray(target) || target instanceof NodeList || target instanceof HTMLCollection) {
+			if (
+				Array.isArray(target) ||
+				target instanceof NodeList ||
+				target instanceof HTMLCollection
+			) {
 				listenings = [];
 
 				for (let i = 0, l = target.length; i < l; i++) {
-					listenings.push(
-						this.listenTo(
-							target[i],
-							type,
-							listener,
-							context,
-							useCapture
-						)
-					);
+					listenings.push(this.listenTo(target[i], type, listener, context, useCapture));
 				}
 			} else if (Array.isArray(listener)) {
 				listenings = [];
 
 				for (let i = 0, l = listener.length; i < l; i++) {
-					listenings.push(
-						this.listenTo(
-							target,
-							type,
-							listener[i],
-							context,
-							useCapture
-						)
-					);
+					listenings.push(this.listenTo(target, type, listener[i], context, useCapture));
 				}
 			} else {
 				return this._listenTo(
@@ -131,10 +107,10 @@ export class DisposableMixin implements IDisposable {
 			delete this._disposables[id];
 		};
 
-		let listening = this._disposables[id] = {
+		let listening = (this._disposables[id] = {
 			stop: stopListening,
 			dispose: stopListening
-		};
+		});
 
 		return listening;
 	}
@@ -172,10 +148,10 @@ export class DisposableMixin implements IDisposable {
 			}
 		};
 
-		let listening = this._disposables[id] = {
+		let listening = (this._disposables[id] = {
 			stop: stopListening,
 			dispose: stopListening
-		};
+		});
 
 		return listening;
 	}
@@ -195,10 +171,10 @@ export class DisposableMixin implements IDisposable {
 			}
 		};
 
-		let timeout = this._disposables[id] = {
+		let timeout = (this._disposables[id] = {
 			clear: clearTimeout_,
 			dispose: clearTimeout_
-		};
+		});
 
 		return timeout;
 	}
@@ -217,10 +193,10 @@ export class DisposableMixin implements IDisposable {
 			}
 		};
 
-		let interval = this._disposables[id] = {
+		let interval = (this._disposables[id] = {
 			clear: clearInterval_,
 			dispose: clearInterval_
-		};
+		});
 
 		return interval;
 	}

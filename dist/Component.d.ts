@@ -22,10 +22,10 @@ export interface IComponentOEvents<T extends Component> {
         [eventName: string]: TOEventHandler<T>;
     };
 }
-export declare type TEventHandler<T extends Component, E = IEvent | Event> = (this: T, evt: E, receiver: Element) => boolean | void;
-export interface IComponentEvents<T extends Component, E = IEvent | Event> {
+export declare type TEventHandler<T extends Component, U = IEvent | Event> = (this: T, evt: U, receiver: Element) => boolean | void;
+export interface IComponentEvents<T extends Component, U = IEvent | Event> {
     [name: string]: {
-        [eventName: string]: TEventHandler<T, E>;
+        [eventName: string]: TEventHandler<T, U>;
     };
 }
 export declare class Component extends EventEmitter implements DisposableMixin {

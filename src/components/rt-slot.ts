@@ -17,6 +17,7 @@ let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 
 	input: {
 		name: { type: String, readonly: true },
+		extendChildren: { type: String, readonly: true },
 		cloneContent: { default: false, readonly: true },
 		getContext: { type: Object, readonly: true }
 	},
@@ -51,8 +52,8 @@ export class RtSlot extends Component {
 
 					if (
 						!cloneContent &&
-							(contentMap = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP]) &&
-							contentMap.has(key)
+						(contentMap = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP]) &&
+						contentMap.has(key)
 					) {
 						let container = contentMap.get(key)!;
 
@@ -64,30 +65,39 @@ export class RtSlot extends Component {
 							childComponents = (container.$component as RtSlot)._childComponents;
 						}
 					} else if (ownerComponentContent.firstChild) {
-						let selectedElements = ownerComponentContent.querySelectorAll(`[rt-slot=${ name }]`);
+						let selectedElements = ownerComponentContent.querySelectorAll(
+							`[rt-slot=${name}]`
+						);
 						let selectedElementCount = selectedElements.length;
 
 						if (selectedElementCount) {
 							content = document.createDocumentFragment();
 
-							for (let i = 0; i < selectedElementCount; i++) {
-								let selectedElement = (
-									cloneContent ? selectedElements[i].cloneNode(true) : selectedElements[i]
-								) as Element;
+							let extendChildren = input.extendChildren;
 
-								if (selectedElement instanceof HTMLElement) {
-									selectedElement.className += ' ' +
-										(ownerComponent.constructor as typeof Component)
-											._contentBlockNames.join('__' + name + ' ') +
-										'__' + name;
-								} else {
-									selectedElement.setAttribute(
-										'class',
-										(selectedElement.getAttribute('class') || '') + ' ' +
-											(ownerComponent.constructor as typeof Component)
-												._contentBlockNames.join('__' + name + ' ') +
-											'__' + name
-									);
+							for (let i = 0; i < selectedElementCount; i++) {
+								let selectedElement = (cloneContent
+									? selectedElements[i].cloneNode(true)
+									: selectedElements[i]) as Element;
+
+								if (extendChildren) {
+									let classNames =
+										(ownerComponent.constructor as typeof Component)._contentBlockNames.join(
+											'__' + extendChildren + ' '
+										) +
+										'__' +
+										extendChildren;
+
+									if (selectedElement instanceof HTMLElement) {
+										selectedElement.className += ' ' + classNames;
+									} else {
+										selectedElement.setAttribute(
+											'class',
+											(selectedElement.getAttribute('class') || '') +
+												' ' +
+												classNames
+										);
+									}
 								}
 
 								content.appendChild(selectedElement);
@@ -95,16 +105,16 @@ export class RtSlot extends Component {
 						}
 
 						if (!cloneContent) {
-							(
-								contentMap ||
-									(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] ||
-									((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())
+							(contentMap ||
+								(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] ||
+								((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())
 							).set(key, el);
 						}
 					}
 				} else if (!cloneContent) {
-					let contentMap: Map<string, IComponentElement> | undefined =
-						(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP];
+					let contentMap:
+						| Map<string, IComponentElement>
+						| undefined = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
 						let container = contentMap.get(key)!;
@@ -116,7 +126,9 @@ export class RtSlot extends Component {
 						childComponents = (container.$component as RtSlot)._childComponents;
 					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
-						(contentMap || ((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())).set(key, el);
+						(contentMap ||
+							((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())
+						).set(key, el);
 					}
 				} else {
 					content = ownerComponentContent.cloneNode(true) as DocumentFragment;
@@ -125,23 +137,27 @@ export class RtSlot extends Component {
 
 			if (bindings === undefined) {
 				if (content || el.firstChild) {
-					[this._bindings, childComponents] = content ?
-						bindContent(
-							content,
-							contentOwnerComponent,
-							input.getContext ?
-								input.getContext.call(ownerComponent, ownerComponent.input.$context, this) :
-								ownerComponent.input.$context,
-							{ 0: null, 1: null } as any
-						) :
-						bindContent(
-							el,
-							ownerComponent,
-							input.getContext ?
-								input.getContext.call(ownerComponent, input.$context, this) :
-								input.$context,
-							{ 0: null, 1: null } as any
-						);
+					[this._bindings, childComponents] = content
+						? bindContent(
+								content,
+								contentOwnerComponent,
+								input.getContext
+									? input.getContext.call(
+											ownerComponent,
+											ownerComponent.input.$context,
+											this
+										)
+									: ownerComponent.input.$context,
+								{ 0: null, 1: null } as any
+							)
+						: bindContent(
+								el,
+								ownerComponent,
+								input.getContext
+									? input.getContext.call(ownerComponent, input.$context, this)
+									: input.$context,
+								{ 0: null, 1: null } as any
+							);
 
 					this._childComponents = childComponents;
 				} else {

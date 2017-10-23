@@ -45,7 +45,10 @@ export let formatters: { [name: string]: Function } = {
 		return obj && obj[key];
 	},
 
-	join: function join(arr: Array<any> | null | undefined, separator = ', '): string | null | undefined {
+	join: function join(
+		arr: Array<any> | null | undefined,
+		separator = ', '
+	): string | null | undefined {
 		return arr && arr.join(separator);
 	},
 

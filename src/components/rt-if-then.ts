@@ -14,7 +14,7 @@ let slice = Array.prototype.slice;
 
 export type TIfCell = Cell<boolean>;
 
-let reKeypath = RegExp(`^${ keypathPattern }$`);
+let reKeypath = RegExp(`^${keypathPattern}$`);
 
 @ComponentDecorator({
 	elementIs: 'rt-if-then',
@@ -44,13 +44,16 @@ export class RtIfThen extends Component {
 			let if_ = (this.input['if'] || '').trim();
 
 			if (!reKeypath.test(if_)) {
-				throw new SyntaxError(`Invalid value of attribute "if" (${ if_ })`);
+				throw new SyntaxError(`Invalid value of attribute "if" (${if_})`);
 			}
 
 			let getIfValue = compileKeypath(if_);
-			this._if = new Cell<boolean>(function() {
-				return !!getIfValue.call(this);
-			}, { context: this.input.$context });
+			this._if = new Cell<boolean>(
+				function() {
+					return !!getIfValue.call(this);
+				},
+				{ context: this.input.$context }
+			);
 
 			this.initialized = true;
 		}
@@ -83,7 +86,10 @@ export class RtIfThen extends Component {
 
 	_render(changed: boolean) {
 		if (this._elseMode ? !this._if.get() : this._if.get()) {
-			let content = document.importNode(((this.element as any) as HTMLTemplateElement).content, true);
+			let content = document.importNode(
+				((this.element as any) as HTMLTemplateElement).content,
+				true
+			);
 			if (!templateTagFeature) {
 				let templates = content.querySelectorAll('template');
 

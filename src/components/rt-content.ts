@@ -51,8 +51,8 @@ export class RtContent extends Component {
 
 					if (
 						!clone &&
-							(contentMap = (contentOwnerComponent as any)[KEY_CONTENT_MAP]) &&
-							contentMap.has(key)
+						(contentMap = (contentOwnerComponent as any)[KEY_CONTENT_MAP]) &&
+						contentMap.has(key)
 					) {
 						let container = contentMap.get(key)!;
 
@@ -71,21 +71,25 @@ export class RtContent extends Component {
 							content = document.createDocumentFragment();
 
 							for (let i = 0; i < selectedElementCount; i++) {
-								content.appendChild(clone ? selectedElements[i].cloneNode(true) : selectedElements[i]);
+								content.appendChild(
+									clone
+										? selectedElements[i].cloneNode(true)
+										: selectedElements[i]
+								);
 							}
 						}
 
 						if (!clone) {
-							(
-								contentMap ||
-									(contentOwnerComponent as any)[KEY_CONTENT_MAP] ||
-									((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
+							(contentMap ||
+								(contentOwnerComponent as any)[KEY_CONTENT_MAP] ||
+								((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
 							).set(key, el);
 						}
 					}
 				} else if (!clone) {
-					let contentMap: Map<string, IComponentElement> | undefined =
-						(contentOwnerComponent as any)[KEY_CONTENT_MAP];
+					let contentMap:
+						| Map<string, IComponentElement>
+						| undefined = (contentOwnerComponent as any)[KEY_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
 						let container = contentMap.get(key)!;
@@ -97,7 +101,8 @@ export class RtContent extends Component {
 						childComponents = (container.$component as RtContent)._childComponents;
 					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
-						(contentMap || ((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())).set(key, el);
+						(contentMap || ((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
+						).set(key, el);
 					}
 				} else {
 					content = ownerComponentContent.cloneNode(true) as DocumentFragment;
@@ -106,23 +111,27 @@ export class RtContent extends Component {
 
 			if (bindings === undefined) {
 				if (content || el.firstChild) {
-					[this._bindings, childComponents] = content ?
-						bindContent(
-							content,
-							contentOwnerComponent,
-							input.getContext ?
-								input.getContext.call(ownerComponent, ownerComponent.input.$context, this) :
-								ownerComponent.input.$context,
-							{ 0: null, 1: null } as any
-						) :
-						bindContent(
-							el,
-							ownerComponent,
-							input.getContext ?
-								input.getContext.call(ownerComponent, input.$context, this) :
-								input.$context,
-							{ 0: null, 1: null } as any
-						);
+					[this._bindings, childComponents] = content
+						? bindContent(
+								content,
+								contentOwnerComponent,
+								input.getContext
+									? input.getContext.call(
+											ownerComponent,
+											ownerComponent.input.$context,
+											this
+										)
+									: ownerComponent.input.$context,
+								{ 0: null, 1: null } as any
+							)
+						: bindContent(
+								el,
+								ownerComponent,
+								input.getContext
+									? input.getContext.call(ownerComponent, input.$context, this)
+									: input.$context,
+								{ 0: null, 1: null } as any
+							);
 
 					this._childComponents = childComponents;
 				} else {

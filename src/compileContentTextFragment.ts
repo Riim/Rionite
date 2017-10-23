@@ -31,41 +31,43 @@ export function compileContentTextFragment(
 	if (contentTextFragment.length == 1) {
 		inner = Function(
 			'formatters',
-			`var temp; return ${
-				contentTextFragment[0].nodeType == ContentTextFragmentNodeType.TEXT ?
-					`'${ escapeString((contentTextFragment[0] as IContentTextFragmentTextNode).value) }'` :
-					bindingToJSExpression(contentTextFragment[0] as IContentTextFragmentBinding)
-			};`
+			`var temp; return ${contentTextFragment[0].nodeType == ContentTextFragmentNodeType.TEXT
+				? `'${escapeString(
+						(contentTextFragment[0] as IContentTextFragmentTextNode).value
+					)}'`
+				: bindingToJSExpression(contentTextFragment[0] as IContentTextFragmentBinding)};`
 		) as any;
 	} else {
 		let jsExpr: Array<string> = [];
 
 		for (let node of contentTextFragment) {
 			jsExpr.push(
-				node.nodeType == ContentTextFragmentNodeType.TEXT ?
-					`'${ escapeString(node.value) }'` :
-					bindingToJSExpression(node)
+				node.nodeType == ContentTextFragmentNodeType.TEXT
+					? `'${escapeString(node.value)}'`
+					: bindingToJSExpression(node)
 			);
 		}
 
-		inner = Function('formatters', `var temp; return [${ jsExpr.join(', ') }].join('');`) as any;
+		inner = Function('formatters', `var temp; return [${jsExpr.join(', ')}].join('');`) as any;
 	}
 
-	return (cache[key] = c ? function() {
-		let value = inner.call(this, formatters);
+	return (cache[key] = c
+		? function() {
+				let value = inner.call(this, formatters);
 
-		if (value) {
-			let valueType = typeof value;
+				if (value) {
+					let valueType = typeof value;
 
-			if (valueType == 'object' || valueType == 'function') {
-				let key = String(++keyCounter);
-				componentInputValueMap.set(key, value);
-				return key;
+					if (valueType == 'object' || valueType == 'function') {
+						let key = String(++keyCounter);
+						componentInputValueMap.set(key, value);
+						return key;
+					}
+				}
+
+				return value;
 			}
-		}
-
-		return value;
-	} : function() {
-		return inner.call(this, formatters);
-	});
+		: function() {
+				return inner.call(this, formatters);
+			});
 }

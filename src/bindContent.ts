@@ -70,11 +70,11 @@ export function bindContent(
 					let value = attr.value;
 
 					if (value.indexOf('{') != -1) {
-						let contentTextFragment = (new ContentTextFragmentParser(value)).parse();
+						let contentTextFragment = new ContentTextFragmentParser(value).parse();
 
 						if (
 							contentTextFragment.length > 1 ||
-								contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING
+							contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING
 						) {
 							let name = attr.name;
 
@@ -83,7 +83,11 @@ export function bindContent(
 							}
 
 							let cell = new AttributeBindingCell(
-								compileContentTextFragment(contentTextFragment, value, contentTextFragment.length == 1),
+								compileContentTextFragment(
+									contentTextFragment,
+									value,
+									contentTextFragment.length == 1
+								),
 								child as Element,
 								name,
 								{
@@ -109,7 +113,8 @@ export function bindContent(
 
 				if (
 					child.firstChild &&
-						(!childComponent || (childComponent.constructor as typeof Component).template == null)
+					(!childComponent ||
+						(childComponent.constructor as typeof Component).template == null)
 				) {
 					bindContent(child as Element, ownerComponent, context, result);
 				}
@@ -117,7 +122,11 @@ export function bindContent(
 				break;
 			}
 			case Node.TEXT_NODE: {
-				for (let nextChild; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE; ) {
+				for (
+					let nextChild;
+					(nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE;
+
+				) {
 					child.nodeValue += nextChild.nodeValue!;
 					node.removeChild(nextChild);
 				}
@@ -125,11 +134,11 @@ export function bindContent(
 				let value = child.nodeValue!;
 
 				if (value.indexOf('{') != -1) {
-					let contentTextFragment = (new ContentTextFragmentParser(value)).parse();
+					let contentTextFragment = new ContentTextFragmentParser(value).parse();
 
 					if (
 						contentTextFragment.length > 1 ||
-							contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING
+						contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING
 					) {
 						let cell = new TextNodeBindingCell(
 							compileContentTextFragment(contentTextFragment, value, false),

@@ -24,7 +24,7 @@ export interface IItem {
 export type TItemList = Array<IItem>;
 export type TItemMap = Map<any, TItemList>;
 
-let reForAttrValue = RegExp(`^\\s*(${ namePattern })\\s+of\\s+(${ keypathPattern })\\s*$`);
+let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+of\\s+(${keypathPattern})\\s*$`);
 
 @ComponentDecorator({
 	elementIs: 'rt-repeat',
@@ -64,15 +64,19 @@ export class RtRepeat extends Component {
 			let forAttrValue = input['for'].match(reForAttrValue);
 
 			if (!forAttrValue) {
-				throw new SyntaxError(`Invalid value of attribute "for" (${ input['for'] })`);
+				throw new SyntaxError(`Invalid value of attribute "for" (${input['for']})`);
 			}
 
 			this._itemName = forAttrValue[1];
-			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), { context: input.$context });
+			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), {
+				context: input.$context
+			});
 			this._trackBy = input.trackBy;
 
-			let rawItemContent = this._rawItemContent =
-				document.importNode(((this.element as any) as HTMLTemplateElement).content, true);
+			let rawItemContent = (this._rawItemContent = document.importNode(
+				((this.element as any) as HTMLTemplateElement).content,
+				true
+			));
 
 			if (input.strip) {
 				let firstChild = rawItemContent.firstChild!;
@@ -128,15 +132,21 @@ export class RtRepeat extends Component {
 	}
 
 	_render(changed: boolean) {
-		let prevItemMap = this._prevItemMap = this._itemMap;
+		let prevItemMap = (this._prevItemMap = this._itemMap);
 		this._itemMap = new Map<any, TItemList>();
 
 		let list = this._list.get();
-		let c = false;
+		let c: boolean;
 
 		if (list) {
 			this._lastNode = this.element;
-			c = list.reduce((changed: boolean, item, index) => this._renderItem(item, index) || changed, c);
+
+			c = list.reduce(
+				(changed: boolean, item, index) => this._renderItem(item, index) || changed,
+				false
+			);
+		} else {
+			c = false;
 		}
 
 		if (prevItemMap.size) {
@@ -224,44 +234,49 @@ export class RtRepeat extends Component {
 			}
 		}
 		let context = this.input.$context;
-		let [bindings, childComponents] = bindContent(content, this.ownerComponent, Object.create(context, {
-			$component: {
-				configurable: false,
-				enumerable: false,
-				writable: false,
-				value: context.$component || context
-			},
+		let [bindings, childComponents] = bindContent(
+			content,
+			this.ownerComponent,
+			Object.create(context, {
+				$component: {
+					configurable: false,
+					enumerable: false,
+					writable: false,
+					value: context.$component || context
+				},
 
-			[this._itemName + 'Cell']: {
-				configurable: true,
-				enumerable: false,
-				writable: true,
-				value: itemCell
-			},
-			[this._itemName]: {
-				configurable: true,
-				enumerable: true,
+				[this._itemName + 'Cell']: {
+					configurable: true,
+					enumerable: false,
+					writable: true,
+					value: itemCell
+				},
+				[this._itemName]: {
+					configurable: true,
+					enumerable: true,
 
-				get() {
-					return itemCell.get();
+					get() {
+						return itemCell.get();
+					}
+				},
+
+				$indexCell: {
+					configurable: true,
+					enumerable: false,
+					writable: true,
+					value: indexCell
+				},
+				$index: {
+					configurable: true,
+					enumerable: true,
+
+					get() {
+						return indexCell.get();
+					}
 				}
-			},
-
-			$indexCell: {
-				configurable: true,
-				enumerable: false,
-				writable: true,
-				value: indexCell
-			},
-			$index: {
-				configurable: true,
-				enumerable: true,
-
-				get() {
-					return indexCell.get();
-				}
-			}
-		}), { 0: null, 1: null } as any);
+			}),
+			{ 0: null, 1: null } as any
+		);
 
 		let newItem = {
 			item: itemCell,

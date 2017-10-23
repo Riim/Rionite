@@ -18,7 +18,7 @@ function inheritProperty(
 	let parentObj = source[name] as { [name: string]: any } | null | undefined;
 
 	if (obj && parentObj && obj != parentObj) {
-		let o = target[name] = { __proto__: parentObj } as { [name: string]: any };
+		let o = (target[name] = { __proto__: parentObj } as { [name: string]: any });
 
 		for (let key in obj) {
 			o[key] = obj[key];
@@ -38,15 +38,17 @@ export function registerComponent(componentConstr: typeof Component) {
 	}
 
 	if (componentConstructorMap.has(elIs)) {
-		throw new TypeError(`Component "${ elIs }" already registered`);
+		throw new TypeError(`Component "${elIs}" already registered`);
 	}
 
-	let parentComponentConstr = (Object.getPrototypeOf(componentConstr.prototype).constructor as typeof Component);
+	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
+		.constructor as typeof Component;
 
 	inheritProperty(componentConstr, parentComponentConstr, 'input', 0);
 	inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
 
-	componentConstr._blockNamesString = elIs + ' ' + (parentComponentConstr._blockNamesString || '');
+	componentConstr._blockNamesString =
+		elIs + ' ' + (parentComponentConstr._blockNamesString || '');
 
 	let template = componentConstr.template;
 
@@ -57,9 +59,11 @@ export function registerComponent(componentConstr: typeof Component) {
 			if (template instanceof Template) {
 				template.setBlockName(elIs);
 			} else {
-				componentConstr.template = parentComponentConstr.template ?
-					(parentComponentConstr.template as Template).extend(template, { blockName: elIs }) :
-					new Template(template, { blockName: elIs });
+				componentConstr.template = parentComponentConstr.template
+					? (parentComponentConstr.template as Template).extend(template, {
+							blockName: elIs
+						})
+					: new Template(template, { blockName: elIs });
 			}
 		}
 	}
@@ -72,7 +76,9 @@ export function registerComponent(componentConstr: typeof Component) {
 
 	componentConstr._rawContent = undefined;
 
-	componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
+	componentConstr._elementClassNameMap = Object.create(
+		parentComponentConstr._elementClassNameMap || null
+	);
 
 	inheritProperty(componentConstr, parentComponentConstr, 'oevents', 1);
 	inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
@@ -80,10 +86,10 @@ export function registerComponent(componentConstr: typeof Component) {
 
 	let elExtends = componentConstr.elementExtends;
 
-	let parentElConstr = elExtends ?
-		elementConstructorMap.get(elExtends) ||
-			(window as any)[`HTML${ elExtends.charAt(0).toUpperCase() + elExtends.slice(1) }Element`] :
-		HTMLElement;
+	let parentElConstr = elExtends
+		? elementConstructorMap.get(elExtends) ||
+			(window as any)[`HTML${elExtends.charAt(0).toUpperCase() + elExtends.slice(1)}Element`]
+		: HTMLElement;
 
 	let elConstr = function(self: HTMLElement | undefined): IComponentElement {
 		return parentElConstr.call(this, self);
@@ -112,12 +118,16 @@ export function registerComponent(componentConstr: typeof Component) {
 		}
 	});
 
-	let elProto = elConstr.prototype = Object.create(parentElConstr.prototype);
+	let elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
 
 	elProto.constructor = elConstr;
 	mixin(elProto, ElementProtoMixin);
 
-	(window as any).customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
+	(window as any).customElements.define(
+		elIs,
+		elConstr,
+		elExtends ? { extends: elExtends } : null
+	);
 
 	componentConstructorMap.set(elIs, componentConstr);
 	componentConstructorMap.set(elIs.toUpperCase(), componentConstr);

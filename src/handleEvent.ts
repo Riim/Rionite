@@ -17,7 +17,7 @@ export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 		eventsName = 'events';
 	}
 
-	for (; ; ) {
+	for (;;) {
 		let parentEl: Element | null = el.parentNode as Element | null;
 
 		if (!parentEl) {

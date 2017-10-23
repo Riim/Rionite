@@ -11,7 +11,11 @@ export interface IComponentInput extends Object {
 	[name: string]: any;
 }
 
-function initComponentInputProperty(componentInput: IComponentInput, name: string, el: IComponentElement) {
+function initComponentInputProperty(
+	componentInput: IComponentInput,
+	name: string,
+	el: IComponentElement
+) {
 	let component = el.$component;
 	let cipc = (component.constructor as typeof Component).input![name];
 
@@ -34,8 +38,9 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 		if (type === undefined) {
 			type = typeof defaultValue;
 		} else if (
-			defaultValue !== undefined && componentInputTypeMap.has(type) &&
-				componentInputTypeMap.get(type) != typeof defaultValue
+			defaultValue !== undefined &&
+			componentInputTypeMap.has(type) &&
+			componentInputTypeMap.get(type) != typeof defaultValue
 		) {
 			throw new TypeError('Specified type does not match defaultValue type');
 		}
@@ -57,7 +62,7 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 	let rawValue = el.getAttribute(hyphenizedName);
 
 	if (required && rawValue === null) {
-		throw new TypeError(`Input property "${ name }" is required`);
+		throw new TypeError(`Input property "${name}" is required`);
 	}
 
 	if (rawValue === null && defaultValue != null && defaultValue !== false) {
@@ -78,7 +83,7 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 
 			set(val: any) {
 				if (val !== value) {
-					throw new TypeError(`Input property "${ name }" is readonly`);
+					throw new TypeError(`Input property "${name}" is readonly`);
 				}
 			}
 		};
@@ -116,19 +121,19 @@ function initComponentInputProperty(componentInput: IComponentInput, name: strin
 					valueCell = new Cell(value, {
 						onChange(evt) {
 							component.emit(
-								evt.target == valueCell ?
-									{
-										type: `input-${ hyphenizedName }-change`,
-										data: evt.data
-									} :
-									{
-										type: `input-${ hyphenizedName }-change`,
-										data: {
-											prevEvent: null,
-											prevValue: evt.target,
-											value: evt.target
+								evt.target == valueCell
+									? {
+											type: `input-${hyphenizedName}-change`,
+											data: evt.data
 										}
-									}
+									: {
+											type: `input-${hyphenizedName}-change`,
+											data: {
+												prevEvent: null,
+												prevValue: evt.target,
+												value: evt.target
+											}
+										}
 							);
 						}
 					});

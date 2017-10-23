@@ -25,7 +25,10 @@ TestNativeCustomElementsFeature.prototype.attributeChangedCallback = () => {
 	nativeCustomElementsFeature = true;
 };
 
-(window as any).customElements.define('test-native-custom-elements-feature', TestNativeCustomElementsFeature);
+(window as any).customElements.define(
+	'test-native-custom-elements-feature',
+	TestNativeCustomElementsFeature
+);
 
 let testNCEF = document.createElement('test-native-custom-elements-feature');
 testNCEF.setAttribute('test', '');

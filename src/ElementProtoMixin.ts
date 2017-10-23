@@ -18,7 +18,10 @@ export let ElementProtoMixin = {
 	rioniteComponent: null,
 
 	get $component(): Component {
-		return this.rioniteComponent || container.get(this.constructor._rioniteComponentConstructor, [this]);
+		return (
+			this.rioniteComponent ||
+			container.get(this.constructor._rioniteComponentConstructor, [this])
+		);
 	},
 
 	[KEY_ELEMENT_CONNECTED]: false,
@@ -82,7 +85,12 @@ export let ElementProtoMixin = {
 		}
 	},
 
-	attributeChangedCallback(this: IComponentElement, name: string, prev: string | null, value: string | null) {
+	attributeChangedCallback(
+		this: IComponentElement,
+		name: string,
+		prev: string | null,
+		value: string | null
+	) {
 		let component = this.rioniteComponent;
 
 		if (component && component.isReady) {
@@ -92,7 +100,7 @@ export let ElementProtoMixin = {
 			if (input[privateName]) {
 				input[privateName](value);
 			} else if (nativeCustomElementsFeature) {
-				throw new TypeError(`Cannot write to readonly input property "${ name }"`);
+				throw new TypeError(`Cannot write to readonly input property "${name}"`);
 			}
 		}
 	}

@@ -38,15 +38,16 @@ export interface IContentTextFragmentBinding extends IContentTextFragmentNode {
 	raw: string;
 }
 
-export type TContentTextFragment = Array<IContentTextFragmentTextNode | IContentTextFragmentBinding>;
+export type TContentTextFragment = Array<
+	IContentTextFragmentTextNode | IContentTextFragmentBinding
+>;
 
 export type TNotValueAndNotKeypath = Object;
 
 let reNameOrNothing = RegExp(namePattern + '|', 'g');
 let reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
 let reBooleanOrNothing = /false|true|/g;
-let reNumberOrNothing =
-	/(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+let reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 let reVacuumOrNothing = /null|undefined|void 0|/g;
 
 export class ContentTextFragmentParser {
@@ -70,7 +71,7 @@ export class ContentTextFragmentParser {
 
 		this.at = 0;
 
-		let result: TContentTextFragment = this.result = [];
+		let result: TContentTextFragment = (this.result = []);
 
 		for (let index: number; (index = contentTextFragment.indexOf('{', this.at)) != -1; ) {
 			this._pushText(contentTextFragment.slice(this.at, index));
@@ -129,6 +130,7 @@ export class ContentTextFragmentParser {
 			for (
 				let formatter: IContentTextFragmentBindingFormatter | null;
 				this._skipWhitespaces() == '|' && (formatter = this._readFormatter());
+
 			) {
 				(formatters || (formatters = [])).push(formatter);
 			}
@@ -184,7 +186,7 @@ export class ContentTextFragmentParser {
 		let args: Array<string> = [];
 
 		if (this._skipWhitespaces() != ')') {
-			for (; ; ) {
+			for (;;) {
 				let arg = this._readValue() || this._readKeypath(true);
 
 				if (arg) {
@@ -251,7 +253,8 @@ export class ContentTextFragmentParser {
 		let obj = '{';
 
 		while (this._skipWhitespaces() != '}') {
-			let key = this.chr == "'" || this.chr == '"' ? this._readString() : this._readObjectKey();
+			let key =
+				this.chr == "'" || this.chr == '"' ? this._readString() : this._readObjectKey();
 
 			if (key && this._skipWhitespaces() == ':') {
 				this._next();
@@ -346,7 +349,7 @@ export class ContentTextFragmentParser {
 		if (quoteChar != "'" && quoteChar != '"') {
 			throw {
 				name: 'SyntaxError',
-				message: `Expected "'" instead of "${ this.chr }"`,
+				message: `Expected "'" instead of "${this.chr}"`,
 				at: this.at,
 				contentTextFragment: this.contentTextFragment
 			};
@@ -428,7 +431,7 @@ export class ContentTextFragmentParser {
 		if (current && current != this.chr) {
 			throw {
 				name: 'SyntaxError',
-				message: `Expected "${ current }" instead of "${ this.chr }"`,
+				message: `Expected "${current}" instead of "${this.chr}"`,
 				at: this.at,
 				contentTextFragment: this.contentTextFragment
 			};
