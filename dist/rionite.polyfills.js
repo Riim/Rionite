@@ -1671,9 +1671,8 @@ var elementDetached;
 var elementMoved;
 var Component = /** @class */ (function (_super) {
     __extends(Component, _super);
-    function Component(logger, el) {
+    function Component(el) {
         var _this = _super.call(this) || this;
-        _this.logger = logger;
         _this._parentComponent = null;
         _this._attached = false;
         _this.initialized = false;
@@ -1692,7 +1691,6 @@ var Component = /** @class */ (function (_super) {
         _this.created();
         return _this;
     }
-    Component_1 = Component;
     Object.defineProperty(Component.prototype, "ownerComponent", {
         get: function () {
             if (this._ownerComponent) {
@@ -1768,7 +1766,7 @@ var Component = /** @class */ (function (_super) {
         return DisposableMixin_1.DisposableMixin.prototype.listenTo.call(this, typeof target == 'string' ? this.$(target) : target, type, listener, context, useCapture);
     };
     Component.prototype._listenTo = function (target, type, listener, context, useCapture) {
-        if (target instanceof Component_1) {
+        if (target instanceof Component) {
             var index = void 0;
             if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
                 var targetName = type.slice(1, index);
@@ -1932,7 +1930,7 @@ var Component = /** @class */ (function (_super) {
     Component.prototype._getElementList = function (name, container) {
         var elListMap = this._elementListMap || (this._elementListMap = new map_set_polyfill_1.Map());
         var containerEl = container
-            ? container instanceof Component_1 ? container.element : container
+            ? container instanceof Component ? container.element : container
             : this.element;
         var key = container ? get_uid_1.getUID(containerEl) + '/' + name : name;
         var elList = elListMap.get(key);
@@ -1972,11 +1970,10 @@ var Component = /** @class */ (function (_super) {
     Component.oevents = null;
     Component.events = null;
     Component.domEvents = null;
-    Component = Component_1 = __decorate([
+    __decorate([
         di_1.Inject('logger')
-    ], Component);
+    ], Component.prototype, "logger", void 0);
     return Component;
-    var Component_1;
 }(cellx_1.EventEmitter));
 exports.Component = Component;
 var disposableMixinProto = DisposableMixin_1.DisposableMixin.prototype;
@@ -2030,7 +2027,7 @@ exports.ElementProtoMixin = (_a = {
         rioniteComponent: null,
         get $component() {
             return (this.rioniteComponent ||
-                di_1.container.get(this.constructor._rioniteComponentConstructor, [this]));
+                di_1.Container.get(this.constructor._rioniteComponentConstructor, [this]));
         }
     },
     _a[KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED] = false,
@@ -3364,7 +3361,7 @@ exports.formatters = formatters_1.formatters;
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(8);
 exports.KEY_ELEMENT_CONNECTED = KEY_ELEMENT_CONNECTED_1.KEY_ELEMENT_CONNECTED;
 __webpack_require__(54);
-di_1.container.register('logger', logger_1.logger);
+di_1.Container.registerService('logger', logger_1.logger);
 
 
 /***/ }),

@@ -130,7 +130,6 @@ let elementAttached: any;
 let elementDetached: any;
 let elementMoved: any;
 
-@Inject('logger')
 export class Component extends EventEmitter implements DisposableMixin {
 	static register = registerComponent;
 
@@ -153,6 +152,8 @@ export class Component extends EventEmitter implements DisposableMixin {
 	static oevents: IComponentOEvents<Component> | null = null;
 	static events: IComponentEvents<Component, IEvent> | null = null;
 	static domEvents: IComponentEvents<Component, Event> | null = null;
+
+	@Inject('logger') logger: Logger;
 
 	_disposables: typeof DisposableMixin.prototype._disposables;
 
@@ -219,7 +220,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 	initialized = false;
 	isReady = false;
 
-	constructor(public logger: Logger, el?: HTMLElement) {
+	constructor(el?: HTMLElement) {
 		super();
 		DisposableMixin.call(this);
 

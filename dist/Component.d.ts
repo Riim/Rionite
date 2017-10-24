@@ -29,7 +29,6 @@ export interface IComponentEvents<T extends Component, U = IEvent | Event> {
     };
 }
 export declare class Component extends EventEmitter implements DisposableMixin {
-    logger: Logger;
     static register: typeof registerComponent;
     static elementIs: string;
     static elementExtends: string | null;
@@ -47,6 +46,7 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     static oevents: IComponentOEvents<Component> | null;
     static events: IComponentEvents<Component, IEvent> | null;
     static domEvents: IComponentEvents<Component, Event> | null;
+    logger: Logger;
     _disposables: typeof DisposableMixin.prototype._disposables;
     _ownerComponent: Component | undefined;
     ownerComponent: Component;
@@ -59,7 +59,7 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;
-    constructor(logger: Logger, el?: HTMLElement);
+    constructor(el?: HTMLElement);
     _on(type: string, listener: TEventEmitterListener, context: any): void;
     handleEvent(evt: IEvent<Component>): void;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;

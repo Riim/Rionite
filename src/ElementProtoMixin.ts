@@ -1,5 +1,5 @@
 import { defer } from '@riim/defer';
-import { container } from '@riim/di';
+import { Container } from '@riim/di';
 import { Component, IComponentElement } from './Component';
 import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
@@ -20,7 +20,7 @@ export let ElementProtoMixin = {
 	get $component(): Component {
 		return (
 			this.rioniteComponent ||
-			container.get(this.constructor._rioniteComponentConstructor, [this])
+			Container.get(this.constructor._rioniteComponentConstructor, [this])
 		);
 	},
 
