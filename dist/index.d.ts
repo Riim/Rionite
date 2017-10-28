@@ -11,5 +11,5 @@ import { RtSlot } from './components/rt-slot';
 import { DisposableMixin, IDisposable, IDisposableCallback, IDisposableInterval, IDisposableListening, IDisposableTimeout, TListener, TListeningTarget } from './DisposableMixin';
 import { formatters } from './formatters';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
-import './nelmTemplateHelpers';
+import './templateHelpers';
 export { NelmNodeType, INelmBlock, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin, formatters, ComponentDecorator as ComponentConfig, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TOEventHandler, TEventHandler, IComponentOEvents, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, IComponentInput, ComponentInput, componentInputValueMap, RtContent, RtSlot, TRtIfThenIfCell, RtIfThen, RtIfElse, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, RtRepeat };

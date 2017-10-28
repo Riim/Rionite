@@ -42,7 +42,7 @@ import {
 	} from './DisposableMixin';
 import { formatters } from './formatters';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
-import './nelmTemplateHelpers';
+import './templateHelpers';
 
 export {
 	NelmNodeType,

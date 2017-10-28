@@ -4671,31 +4671,6 @@ var nelm_1 = __webpack_require__(10);
         ];
     };
 });
-nelm_1.Template.helpers.slot = function (el) {
-    var name = el.names && el.names[0];
-    if (!name) {
-        throw new TypeError('@slot/name is required');
-    }
-    var attrs = el.attributes;
-    attrs = {
-        superCall: attrs && attrs.superCall,
-        list: attrs ? attrs.list.slice() : []
-    };
-    attrs.list.push({
-        name: 'name',
-        value: name
-    });
-    return [
-        {
-            nodeType: nelm_1.NodeType.ELEMENT,
-            isHelper: false,
-            tagName: 'rt-slot',
-            names: el.names,
-            attributes: attrs,
-            content: el.content
-        }
-    ];
-};
 
 
 /***/ })
