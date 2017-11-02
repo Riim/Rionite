@@ -121,15 +121,6 @@ function findChildComponents(
 	return childComponents || null;
 }
 
-let created: any;
-let initialize: any;
-let ready: any;
-let elementConnected: any;
-let elementDisconnected: any;
-let elementAttached: any;
-let elementDetached: any;
-let elementMoved: any;
-
 export class Component extends EventEmitter implements DisposableMixin {
 	static register = registerComponent;
 
@@ -598,19 +589,10 @@ Object.getOwnPropertyNames(disposableMixinProto).forEach(name => {
 		Object.defineProperty(
 			componentProto,
 			name,
-			Object.getOwnPropertyDescriptor(disposableMixinProto, name)
+			Object.getOwnPropertyDescriptor(disposableMixinProto, name)!
 		);
 	}
 });
-
-created = componentProto.created;
-initialize = componentProto.initialize;
-ready = componentProto.ready;
-elementConnected = componentProto.elementConnected;
-elementDisconnected = componentProto.elementDisconnected;
-elementAttached = componentProto.elementAttached;
-elementDetached = componentProto.elementDetached;
-elementMoved = componentProto.elementMoved;
 
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);

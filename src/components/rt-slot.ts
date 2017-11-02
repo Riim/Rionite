@@ -16,8 +16,7 @@ let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 	elementIs: 'rt-slot',
 
 	input: {
-		name: { type: String, readonly: true },
-		extendChildren: { type: String, readonly: true },
+		for: { type: String, readonly: true },
 		cloneContent: { default: false, readonly: true },
 		getContext: { type: Object, readonly: true }
 	},
@@ -44,10 +43,10 @@ export class RtSlot extends Component {
 			let childComponents: Array<Component> | null | undefined;
 
 			if (!cloneContent || ownerComponentContent.firstChild) {
-				let name = input.name;
-				let key = getUID(ownerComponent) + '/' + (name || '');
+				let for_ = input['for'];
+				let key = getUID(ownerComponent) + '/' + (for_ || '');
 
-				if (name) {
+				if (for_) {
 					let contentMap: Map<string, IComponentElement> | undefined;
 
 					if (
@@ -64,29 +63,31 @@ export class RtSlot extends Component {
 							bindings = container.$component._bindings;
 							childComponents = (container.$component as RtSlot)._childComponents;
 						}
-					} else if (ownerComponentContent.firstChild) {
-						let selectedElements = ownerComponentContent.querySelectorAll(
-							`[rt-slot=${name}]`
-						);
-						let selectedElementCount = selectedElements.length;
+					} else {
+						let child = ownerComponentContent.firstElementChild;
 
-						if (selectedElementCount) {
-							content = document.createDocumentFragment();
+						if (child) {
+							let selectedElements: Array<Element> | undefined;
 
-							let extendChildren = input.extendChildren;
+							do {
+								if (child.getAttribute('rt-element') === for_) {
+									(selectedElements || (selectedElements = [])).push(child);
+								}
+							} while ((child = child.nextElementSibling));
 
-							for (let i = 0; i < selectedElementCount; i++) {
-								let selectedElement = (cloneContent
-									? selectedElements[i].cloneNode(true)
-									: selectedElements[i]) as Element;
+							if (selectedElements) {
+								content = document.createDocumentFragment();
 
-								if (extendChildren) {
+								for (let i = 0, l = selectedElements.length; i < l; i++) {
+									let selectedElement = (cloneContent
+										? selectedElements[i].cloneNode(true)
+										: selectedElements[i]) as Element;
 									let classNames =
 										(ownerComponent.constructor as typeof Component)._contentBlockNames.join(
-											'__' + extendChildren + ' '
+											'__' + for_ + ' '
 										) +
 										'__' +
-										extendChildren;
+										for_;
 
 									if (selectedElement instanceof HTMLElement) {
 										selectedElement.className += ' ' + classNames;
@@ -98,17 +99,19 @@ export class RtSlot extends Component {
 												classNames
 										);
 									}
+
+									content.appendChild(selectedElement);
 								}
-
-								content.appendChild(selectedElement);
 							}
-						}
 
-						if (!cloneContent) {
-							(contentMap ||
-								(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] ||
-								((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())
-							).set(key, el);
+							if (!cloneContent) {
+								(contentMap ||
+									(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] ||
+									((contentOwnerComponent as any)[
+										KEY_SLOT_CONTENT_MAP
+									] = new Map())
+								).set(key, el);
+							}
 						}
 					}
 				} else if (!cloneContent) {

@@ -63,7 +63,7 @@ export class RtContent extends Component {
 							bindings = container.$component._bindings;
 							childComponents = (container.$component as RtContent)._childComponents;
 						}
-					} else if (ownerComponentContent.firstChild) {
+					} else if (ownerComponentContent.firstElementChild) {
 						let selectedElements = ownerComponentContent.querySelectorAll(selector);
 						let selectedElementCount = selectedElements.length;
 

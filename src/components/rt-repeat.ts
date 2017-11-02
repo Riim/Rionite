@@ -61,14 +61,14 @@ export class RtRepeat extends Component {
 
 		if (!this.initialized) {
 			let input = this.input;
-			let forAttrValue = input['for'].match(reForAttrValue);
+			let for_ = input['for'].match(reForAttrValue);
 
-			if (!forAttrValue) {
+			if (!for_) {
 				throw new SyntaxError(`Invalid value of attribute "for" (${input['for']})`);
 			}
 
-			this._itemName = forAttrValue[1];
-			this._list = new Cell<any>(compileKeypath(forAttrValue[2]), {
+			this._itemName = for_[1];
+			this._list = new Cell<any>(compileKeypath(for_[2]), {
 				context: input.$context
 			});
 			this._trackBy = input.trackBy;

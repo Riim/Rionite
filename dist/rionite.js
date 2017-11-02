@@ -161,14 +161,6 @@ function findChildComponents(node, ownerComponent, context, childComponents) {
     }
     return childComponents || null;
 }
-var created;
-var initialize;
-var ready;
-var elementConnected;
-var elementDisconnected;
-var elementAttached;
-var elementDetached;
-var elementMoved;
 var Component = /** @class */ (function (_super) {
     __extends(Component, _super);
     function Component(el) {
@@ -483,14 +475,6 @@ Object.getOwnPropertyNames(disposableMixinProto).forEach(function (name) {
         Object.defineProperty(componentProto, name, Object.getOwnPropertyDescriptor(disposableMixinProto, name));
     }
 });
-created = componentProto.created;
-initialize = componentProto.initialize;
-ready = componentProto.ready;
-elementConnected = componentProto.elementConnected;
-elementDisconnected = componentProto.elementDisconnected;
-elementAttached = componentProto.elementAttached;
-elementDetached = componentProto.elementDetached;
-elementMoved = componentProto.elementMoved;
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
     handledEvents_1.handledEvents.forEach(function (type) {
@@ -2531,7 +2515,7 @@ var RtContent = /** @class */ (function (_super) {
                             childComponents = container.$component._childComponents;
                         }
                     }
-                    else if (ownerComponentContent.firstChild) {
+                    else if (ownerComponentContent.firstElementChild) {
                         var selectedElements = ownerComponentContent.querySelectorAll(selector);
                         var selectedElementCount = selectedElements.length;
                         if (selectedElementCount) {
@@ -2718,12 +2702,12 @@ var RtRepeat = /** @class */ (function (_super) {
         this._active = true;
         if (!this.initialized) {
             var input = this.input;
-            var forAttrValue = input['for'].match(reForAttrValue);
-            if (!forAttrValue) {
+            var for_ = input['for'].match(reForAttrValue);
+            if (!for_) {
                 throw new SyntaxError("Invalid value of attribute \"for\" (" + input['for'] + ")");
             }
-            this._itemName = forAttrValue[1];
-            this._list = new cellx_1.Cell(compileKeypath_1.compileKeypath(forAttrValue[2]), {
+            this._itemName = for_[1];
+            this._list = new cellx_1.Cell(compileKeypath_1.compileKeypath(for_[2]), {
                 context: input.$context
             });
             this._trackBy = input.trackBy;
@@ -3016,9 +3000,9 @@ var RtSlot = /** @class */ (function (_super) {
             var bindings = void 0;
             var childComponents = void 0;
             if (!cloneContent || ownerComponentContent.firstChild) {
-                var name_1 = input.name;
-                var key = get_uid_1.getUID(ownerComponent) + '/' + (name_1 || '');
-                if (name_1) {
+                var for_ = input['for'];
+                var key = get_uid_1.getUID(ownerComponent) + '/' + (for_ || '');
+                if (for_) {
                     var contentMap = void 0;
                     if (!cloneContent &&
                         (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
@@ -3031,20 +3015,24 @@ var RtSlot = /** @class */ (function (_super) {
                             childComponents = container.$component._childComponents;
                         }
                     }
-                    else if (ownerComponentContent.firstChild) {
-                        var selectedElements = ownerComponentContent.querySelectorAll("[rt-slot=" + name_1 + "]");
-                        var selectedElementCount = selectedElements.length;
-                        if (selectedElementCount) {
-                            content = document.createDocumentFragment();
-                            var extendChildren = input.extendChildren;
-                            for (var i = 0; i < selectedElementCount; i++) {
-                                var selectedElement = (cloneContent
-                                    ? selectedElements[i].cloneNode(true)
-                                    : selectedElements[i]);
-                                if (extendChildren) {
-                                    var classNames = ownerComponent.constructor._contentBlockNames.join('__' + extendChildren + ' ') +
+                    else {
+                        var child = ownerComponentContent.firstElementChild;
+                        if (child) {
+                            var selectedElements = void 0;
+                            do {
+                                if (child.getAttribute('rt-element') === for_) {
+                                    (selectedElements || (selectedElements = [])).push(child);
+                                }
+                            } while ((child = child.nextElementSibling));
+                            if (selectedElements) {
+                                content = document.createDocumentFragment();
+                                for (var i = 0, l = selectedElements.length; i < l; i++) {
+                                    var selectedElement = (cloneContent
+                                        ? selectedElements[i].cloneNode(true)
+                                        : selectedElements[i]);
+                                    var classNames = ownerComponent.constructor._contentBlockNames.join('__' + for_ + ' ') +
                                         '__' +
-                                        extendChildren;
+                                        for_;
                                     if (selectedElement instanceof HTMLElement) {
                                         selectedElement.className += ' ' + classNames;
                                     }
@@ -3053,14 +3041,14 @@ var RtSlot = /** @class */ (function (_super) {
                                             ' ' +
                                             classNames);
                                     }
+                                    content.appendChild(selectedElement);
                                 }
-                                content.appendChild(selectedElement);
                             }
-                        }
-                        if (!cloneContent) {
-                            (contentMap ||
-                                contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
-                                (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                            if (!cloneContent) {
+                                (contentMap ||
+                                    contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
+                                    (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                            }
                         }
                     }
                 }
@@ -3127,8 +3115,7 @@ var RtSlot = /** @class */ (function (_super) {
         ComponentDecorator_1.ComponentDecorator({
             elementIs: 'rt-slot',
             input: {
-                name: { type: String, readonly: true },
-                extendChildren: { type: String, readonly: true },
+                for: { type: String, readonly: true },
                 cloneContent: { default: false, readonly: true },
                 getContext: { type: Object, readonly: true }
             },
