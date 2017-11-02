@@ -16,7 +16,7 @@ import {
 	TEventHandler,
 	TOEventHandler
 	} from './Component';
-import { ComponentDecorator } from './ComponentDecorator';
+import { ComponentConfigDecorator } from './ComponentConfigDecorator';
 import { ComponentInput, IComponentInput } from './ComponentInput';
 import { componentInputValueMap } from './componentInputValueMap';
 import { RtContent } from './components/rt-content';
@@ -58,7 +58,7 @@ export {
 	TListener,
 	DisposableMixin,
 	formatters,
-	ComponentDecorator as ComponentConfig,
+	ComponentConfigDecorator as ComponentConfig,
 	IPossiblyComponentElement,
 	IComponentElement,
 	IComponentElementClassNameMap,

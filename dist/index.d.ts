@@ -1,6 +1,6 @@
 import { IBlock as INelmBlock, NodeType as NelmNodeType, Parser as NelmParser, Template } from 'nelm';
 import { Component, IComponentElement, IComponentElementClassNameMap, IComponentEvents, IComponentOEvents, IPossiblyComponentElement, TEventHandler, TOEventHandler } from './Component';
-import { ComponentDecorator } from './ComponentDecorator';
+import { ComponentConfigDecorator } from './ComponentConfigDecorator';
 import { ComponentInput, IComponentInput } from './ComponentInput';
 import { componentInputValueMap } from './componentInputValueMap';
 import { RtContent } from './components/rt-content';
@@ -12,4 +12,4 @@ import { DisposableMixin, IDisposable, IDisposableCallback, IDisposableInterval,
 import { formatters } from './formatters';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
 import './templateHelpers';
-export { NelmNodeType, INelmBlock, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin, formatters, ComponentDecorator as ComponentConfig, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TOEventHandler, TEventHandler, IComponentOEvents, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, IComponentInput, ComponentInput, componentInputValueMap, RtContent, RtSlot, TRtIfThenIfCell, RtIfThen, RtIfElse, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, RtRepeat };
+export { NelmNodeType, INelmBlock, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin, formatters, ComponentConfigDecorator as ComponentConfig, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TOEventHandler, TEventHandler, IComponentOEvents, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, IComponentInput, ComponentInput, componentInputValueMap, RtContent, RtSlot, TRtIfThenIfCell, RtIfThen, RtIfElse, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, RtRepeat };

@@ -5,7 +5,6 @@ import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { compileKeypath } from '../compileKeypath';
 import { Component } from '../Component';
-import { ComponentDecorator } from '../ComponentDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { templateTag as templateTagFeature } from '../Features';
 import { KEY_ELEMENT_CONNECTED } from '../KEY_ELEMENT_CONNECTED';
@@ -26,7 +25,7 @@ export type TItemMap = Map<any, TItemList>;
 
 let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+of\\s+(${keypathPattern})\\s*$`);
 
-@ComponentDecorator({
+@Component.Config({
 	elementIs: 'rt-repeat',
 	elementExtends: 'template',
 

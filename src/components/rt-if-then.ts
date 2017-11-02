@@ -4,7 +4,6 @@ import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { compileKeypath } from '../compileKeypath';
 import { Component } from '../Component';
-import { ComponentDecorator } from '../ComponentDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { templateTag as templateTagFeature } from '../Features';
 import { KEY_ELEMENT_CONNECTED } from '../KEY_ELEMENT_CONNECTED';
@@ -16,7 +15,7 @@ export type TIfCell = Cell<boolean>;
 
 let reKeypath = RegExp(`^${keypathPattern}$`);
 
-@ComponentDecorator({
+@Component.Config({
 	elementIs: 'rt-if-then',
 	elementExtends: 'template',
 

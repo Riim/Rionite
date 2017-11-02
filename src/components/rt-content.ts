@@ -7,12 +7,11 @@ import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { Component, IComponentElement } from '../Component';
 import { IFreezableCell } from '../componentBinding';
-import { ComponentDecorator } from '../ComponentDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 
 let KEY_CONTENT_MAP = Symbol('contentMap');
 
-@ComponentDecorator({
+@Component.Config({
 	elementIs: 'rt-content',
 
 	input: {

@@ -2,6 +2,7 @@ import { Logger } from '@riim/logger';
 import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
 import { IBlock, Template } from 'nelm';
 import { IFreezableCell } from './componentBinding';
+import { ComponentConfigDecorator } from './ComponentConfigDecorator';
 import { IComponentInput } from './ComponentInput';
 import { DisposableMixin, IDisposableListening, TListener, TListeningTarget } from './DisposableMixin';
 import { registerComponent } from './registerComponent';
@@ -29,6 +30,7 @@ export interface IComponentEvents<T extends Component, U = IEvent | Event> {
     };
 }
 export declare class Component extends EventEmitter implements DisposableMixin {
+    static Config: typeof ComponentConfigDecorator;
     static register: typeof registerComponent;
     static elementIs: string;
     static elementExtends: string | null;

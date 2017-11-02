@@ -1,7 +1,7 @@
 import { IEvent } from 'cellx';
 import { IBlock, Template } from 'nelm';
 import { Component, IComponentEvents, IComponentOEvents } from './Component';
-export declare function ComponentDecorator<T extends Component>(config: {
+export declare function ComponentConfigDecorator<T extends Component>(config: {
     elementIs: string;
     elementExtends?: string | null;
     input?: {

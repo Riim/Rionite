@@ -11,6 +11,7 @@ import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { bindEvents } from './bindEvents';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
+import { ComponentConfigDecorator } from './ComponentConfigDecorator';
 import { componentConstructorMap } from './componentConstructorMap';
 import { ComponentInput, IComponentInput } from './ComponentInput';
 import {
@@ -122,6 +123,8 @@ function findChildComponents(
 }
 
 export class Component extends EventEmitter implements DisposableMixin {
+	static Config = ComponentConfigDecorator;
+
 	static register = registerComponent;
 
 	static elementIs: string;
