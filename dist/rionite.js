@@ -2997,9 +2997,10 @@ var RtSlot = /** @class */ (function (_super) {
             var bindings = void 0;
             var childComponents = void 0;
             if (!cloneContent || ownerComponentContent.firstChild) {
+                var forTag = input.forTag;
                 var for_ = input['for'];
-                var key = get_uid_1.getUID(ownerComponent) + '/' + (for_ || '');
-                if (for_) {
+                var key = get_uid_1.getUID(ownerComponent) + '/' + (forTag ? ':' + forTag : for_ || '');
+                if (forTag || for_) {
                     var contentMap = void 0;
                     if (!cloneContent &&
                         (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
@@ -3013,34 +3014,38 @@ var RtSlot = /** @class */ (function (_super) {
                         }
                     }
                     else {
-                        var child = ownerComponentContent.firstElementChild;
-                        if (child) {
-                            var selectedElements = void 0;
-                            do {
-                                if (child.getAttribute('rt-element') === for_) {
-                                    (selectedElements || (selectedElements = [])).push(child);
-                                }
-                            } while ((child = child.nextElementSibling));
-                            if (selectedElements) {
-                                content = document.createDocumentFragment();
-                                for (var i = 0, l = selectedElements.length; i < l; i++) {
-                                    var selectedElement = (cloneContent
-                                        ? selectedElements[i].cloneNode(true)
-                                        : selectedElements[i]);
-                                    var classNames = ownerComponent.constructor._contentBlockNames.join('__' + for_ + ' ') +
-                                        '__' +
-                                        for_;
-                                    if (selectedElement instanceof HTMLElement) {
-                                        selectedElement.className += ' ' + classNames;
-                                    }
-                                    else {
-                                        selectedElement.setAttribute('class', (selectedElement.getAttribute('class') || '') +
-                                            ' ' +
-                                            classNames);
-                                    }
-                                    content.appendChild(selectedElement);
-                                }
+                        var contentEl = ownerComponentContent.firstElementChild;
+                        if (contentEl) {
+                            if (forTag) {
+                                forTag = forTag.toUpperCase();
                             }
+                            do {
+                                if (forTag
+                                    ? contentEl.tagName == forTag
+                                    : contentEl.getAttribute('rt-element') === for_) {
+                                    var selectedEl = (cloneContent
+                                        ? contentEl.cloneNode(true)
+                                        : contentEl);
+                                    if (for_) {
+                                        var classNames = ownerComponent.constructor._contentBlockNames.join('__' + for_ + ' ') +
+                                            '__' +
+                                            for_;
+                                        if (selectedEl instanceof HTMLElement) {
+                                            selectedEl.className += ' ' + classNames;
+                                        }
+                                        else {
+                                            selectedEl.setAttribute('class', (selectedEl.getAttribute('class') || '') +
+                                                ' ' +
+                                                classNames);
+                                        }
+                                    }
+                                    contentEl = contentEl.nextElementSibling;
+                                    (content || (content = document.createDocumentFragment())).appendChild(selectedEl);
+                                }
+                                else {
+                                    contentEl = contentEl.nextElementSibling;
+                                }
+                            } while (contentEl);
                             if (!cloneContent) {
                                 (contentMap ||
                                     contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
@@ -3112,6 +3117,7 @@ var RtSlot = /** @class */ (function (_super) {
         Component_1.Component.Config({
             elementIs: 'rt-slot',
             input: {
+                forTag: { type: String, readonly: true },
                 for: { type: String, readonly: true },
                 cloneContent: { default: false, readonly: true },
                 getContext: { type: Object, readonly: true }

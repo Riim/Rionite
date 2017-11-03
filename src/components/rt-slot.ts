@@ -15,6 +15,7 @@ let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 	elementIs: 'rt-slot',
 
 	input: {
+		forTag: { type: String, readonly: true },
 		for: { type: String, readonly: true },
 		cloneContent: { default: false, readonly: true },
 		getContext: { type: Object, readonly: true }
@@ -42,10 +43,11 @@ export class RtSlot extends Component {
 			let childComponents: Array<Component> | null | undefined;
 
 			if (!cloneContent || ownerComponentContent.firstChild) {
+				let forTag = input.forTag;
 				let for_ = input['for'];
-				let key = getUID(ownerComponent) + '/' + (for_ || '');
+				let key = getUID(ownerComponent) + '/' + (forTag ? ':' + forTag : for_ || '');
 
-				if (for_) {
+				if (forTag || for_) {
 					let contentMap: Map<string, IComponentElement> | undefined;
 
 					if (
@@ -63,45 +65,51 @@ export class RtSlot extends Component {
 							childComponents = (container.$component as RtSlot)._childComponents;
 						}
 					} else {
-						let child = ownerComponentContent.firstElementChild;
+						let contentEl = ownerComponentContent.firstElementChild;
 
-						if (child) {
-							let selectedElements: Array<Element> | undefined;
+						if (contentEl) {
+							if (forTag) {
+								forTag = forTag.toUpperCase();
+							}
 
 							do {
-								if (child.getAttribute('rt-element') === for_) {
-									(selectedElements || (selectedElements = [])).push(child);
-								}
-							} while ((child = child.nextElementSibling));
+								if (
+									forTag
+										? contentEl.tagName == forTag
+										: contentEl.getAttribute('rt-element') === for_
+								) {
+									let selectedEl = (cloneContent
+										? contentEl.cloneNode(true)
+										: contentEl) as Element;
 
-							if (selectedElements) {
-								content = document.createDocumentFragment();
+									if (for_) {
+										let classNames =
+											(ownerComponent.constructor as typeof Component)._contentBlockNames.join(
+												'__' + for_ + ' '
+											) +
+											'__' +
+											for_;
 
-								for (let i = 0, l = selectedElements.length; i < l; i++) {
-									let selectedElement = (cloneContent
-										? selectedElements[i].cloneNode(true)
-										: selectedElements[i]) as Element;
-									let classNames =
-										(ownerComponent.constructor as typeof Component)._contentBlockNames.join(
-											'__' + for_ + ' '
-										) +
-										'__' +
-										for_;
-
-									if (selectedElement instanceof HTMLElement) {
-										selectedElement.className += ' ' + classNames;
-									} else {
-										selectedElement.setAttribute(
-											'class',
-											(selectedElement.getAttribute('class') || '') +
-												' ' +
-												classNames
-										);
+										if (selectedEl instanceof HTMLElement) {
+											selectedEl.className += ' ' + classNames;
+										} else {
+											selectedEl.setAttribute(
+												'class',
+												(selectedEl.getAttribute('class') || '') +
+													' ' +
+													classNames
+											);
+										}
 									}
 
-									content.appendChild(selectedElement);
+									contentEl = contentEl.nextElementSibling;
+
+									(content || (content = document.createDocumentFragment())
+									).appendChild(selectedEl);
+								} else {
+									contentEl = contentEl.nextElementSibling;
 								}
-							}
+							} while (contentEl);
 
 							if (!cloneContent) {
 								(contentMap ||
