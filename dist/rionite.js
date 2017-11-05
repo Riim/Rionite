@@ -137,7 +137,7 @@ function createClassBlockElementReplacer(contentBlockName, events, evtPrefix) {
         if (blockName == contentBlockName && (elEvents = events[elName])) {
             var eventAttrs = [];
             for (var type in elEvents) {
-                eventAttrs.push(" " + evtPrefix + type + "=\":" + elName + "\"");
+                eventAttrs.push(" " + evtPrefix + type + "=\"/" + elName + "\"");
             }
             return match + eventAttrs.join('');
         }
@@ -336,10 +336,10 @@ var Component = /** @class */ (function (_super) {
                 if (!rawContent) {
                     var contentHTML = constr.template.render();
                     if (constr.events) {
-                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr._contentBlockNames[0], constr.events, 'oncomponent-'));
+                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr.elementIs, constr.events, 'oncomponent-'));
                     }
                     if (constr.domEvents) {
-                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr._contentBlockNames[0], constr.domEvents, 'on-'));
+                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr.elementIs, constr.domEvents, 'on-'));
                     }
                     rawContent = constr._rawContent = html_to_fragment_1.htmlToFragment(contentHTML);
                 }
@@ -428,30 +428,9 @@ var Component = /** @class */ (function (_super) {
         var key = container ? get_uid_1.getUID(containerEl) + '/' + name : name;
         var elList = elListMap.get(key);
         if (!elList) {
-            var constr = this.constructor;
-            var className = constr._elementClassNameMap[name];
-            if (className) {
-                elList = containerEl.getElementsByClassName(className);
-                elListMap.set(key, elList);
-            }
-            else {
-                var contentBlockNames = constr._contentBlockNames;
-                for (var i = contentBlockNames.length - 1;; i--) {
-                    className = contentBlockNames[i] + '__' + name;
-                    elList = containerEl.getElementsByClassName(className);
-                    if (elList.length) {
-                        constr._elementClassNameMap[name] = className;
-                        elListMap.set(key, elList);
-                        break;
-                    }
-                    if (!i) {
-                        break;
-                    }
-                }
-                if (!elList.length) {
-                    return;
-                }
-            }
+            var contentBlockNames = this.constructor._contentBlockNames;
+            elList = containerEl.getElementsByClassName(contentBlockNames[contentBlockNames.length - 1] + '__' + name);
+            elListMap.set(key, elList);
         }
         return elList;
     };
@@ -2249,7 +2228,7 @@ function handleEvent(evt, stopElement) {
             for (var i = 0;;) {
                 var attrValue = receivers[i].getAttribute(attrName);
                 var handler = void 0;
-                if (attrValue.charAt(0) == ':') {
+                if (attrValue.charAt(0) == '/') {
                     var events = component.constructor[eventsName];
                     if (events) {
                         events = events[attrValue.slice(1)];
@@ -2347,7 +2326,6 @@ function registerComponent(componentConstr) {
         push.apply(componentConstr._contentBlockNames, parentComponentConstr._contentBlockNames);
     }
     componentConstr._rawContent = undefined;
-    componentConstr._elementClassNameMap = Object.create(parentComponentConstr._elementClassNameMap || null);
     inheritProperty(componentConstr, parentComponentConstr, 'oevents', 1);
     inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
     inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);

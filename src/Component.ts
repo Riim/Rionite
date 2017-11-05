@@ -77,7 +77,7 @@ function createClassBlockElementReplacer(
 			let eventAttrs = [];
 
 			for (let type in elEvents) {
-				eventAttrs.push(` ${evtPrefix}${type}=":${elName}"`);
+				eventAttrs.push(` ${evtPrefix}${type}="/${elName}"`);
 			}
 
 			return match + eventAttrs.join('');
@@ -140,8 +140,6 @@ export class Component extends EventEmitter implements DisposableMixin {
 	static _contentBlockNames: Array<string>;
 
 	static _rawContent: DocumentFragment | undefined;
-
-	static _elementClassNameMap: IComponentElementClassNameMap;
 
 	static oevents: IComponentOEvents<Component> | null = null;
 	static events: IComponentEvents<Component, IEvent> | null = null;
@@ -417,7 +415,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 						contentHTML = contentHTML.replace(
 							reClassBlockElement,
 							createClassBlockElementReplacer(
-								constr._contentBlockNames[0],
+								constr.elementIs,
 								constr.events,
 								'oncomponent-'
 							)
@@ -428,7 +426,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 						contentHTML = contentHTML.replace(
 							reClassBlockElement,
 							createClassBlockElementReplacer(
-								constr._contentBlockNames[0],
+								constr.elementIs,
 								constr.domEvents,
 								'on-'
 							)
@@ -549,35 +547,12 @@ export class Component extends EventEmitter implements DisposableMixin {
 		let elList = elListMap.get(key);
 
 		if (!elList) {
-			let constr = this.constructor as typeof Component;
-			let className = constr._elementClassNameMap[name];
+			let contentBlockNames = (this.constructor as typeof Component)._contentBlockNames;
 
-			if (className) {
-				elList = containerEl.getElementsByClassName(className);
-				elListMap.set(key, elList);
-			} else {
-				let contentBlockNames = constr._contentBlockNames;
-
-				for (let i = contentBlockNames.length - 1; ; i--) {
-					className = contentBlockNames[i] + '__' + name;
-
-					elList = containerEl.getElementsByClassName(className);
-
-					if (elList.length) {
-						constr._elementClassNameMap[name] = className;
-						elListMap.set(key, elList);
-						break;
-					}
-
-					if (!i) {
-						break;
-					}
-				}
-
-				if (!elList.length) {
-					return;
-				}
-			}
+			elList = containerEl.getElementsByClassName(
+				contentBlockNames[contentBlockNames.length - 1] + '__' + name
+			);
+			elListMap.set(key, elList);
 		}
 
 		return elList;

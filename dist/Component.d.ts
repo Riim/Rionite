@@ -44,7 +44,6 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     static template: string | IBlock | Template | null;
     static _contentBlockNames: Array<string>;
     static _rawContent: DocumentFragment | undefined;
-    static _elementClassNameMap: IComponentElementClassNameMap;
     static oevents: IComponentOEvents<Component> | null;
     static events: IComponentEvents<Component, IEvent> | null;
     static domEvents: IComponentEvents<Component, Event> | null;

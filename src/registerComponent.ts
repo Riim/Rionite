@@ -76,10 +76,6 @@ export function registerComponent(componentConstr: typeof Component) {
 
 	componentConstr._rawContent = undefined;
 
-	componentConstr._elementClassNameMap = Object.create(
-		parentComponentConstr._elementClassNameMap || null
-	);
-
 	inheritProperty(componentConstr, parentComponentConstr, 'oevents', 1);
 	inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
 	inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
