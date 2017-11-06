@@ -50,13 +50,13 @@ export interface IComponentOEvents<T extends Component> {
 	};
 }
 
-export type TEventHandler<T extends Component, U = IEvent | Event> = (
+export type TEventHandler<T extends Component = Component, U = IEvent | Event> = (
 	this: T,
 	evt: U,
 	receiver: Element
 ) => boolean | void;
 
-export interface IComponentEvents<T extends Component, U = IEvent | Event> {
+export interface IComponentEvents<T extends Component = Component, U = IEvent | Event> {
 	[name: string]: {
 		[eventName: string]: TEventHandler<T, U>;
 	};
@@ -67,11 +67,11 @@ let reInputChangeEventName = /input\-([\-0-9a-z]*)\-change/;
 
 function createClassBlockElementReplacer(
 	contentBlockName: string,
-	events: IComponentEvents<Component>,
+	events: IComponentEvents,
 	evtPrefix: string
 ): (match: string, blockName: string, elName: string) => string {
 	return (match: string, blockName: string, elName: string): string => {
-		let elEvents: { [eventName: string]: TEventHandler<Component> };
+		let elEvents: { [eventName: string]: TEventHandler };
 
 		if (blockName == contentBlockName && (elEvents = events[elName])) {
 			let eventAttrs = [];
@@ -142,7 +142,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 	static _rawContent: DocumentFragment | undefined;
 
 	static oevents: IComponentOEvents<Component> | null = null;
-	static events: IComponentEvents<Component, IEvent> | null = null;
+	static events: IComponentEvents<Component, IEvent<Component>> | null = null;
 	static domEvents: IComponentEvents<Component, Event> | null = null;
 
 	@Inject('logger') logger: Logger;

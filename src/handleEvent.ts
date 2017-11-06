@@ -35,7 +35,7 @@ export function handleEvent(evt: IEvent | Event, stopElement: Element) {
 		if (component && receivers && receivers.length) {
 			for (let i = 0; ; ) {
 				let attrValue = receivers[i].getAttribute(attrName)!;
-				let handler: TEventHandler<Component> | undefined;
+				let handler: TEventHandler | undefined;
 
 				if (attrValue.charAt(0) == '/') {
 					let events = (component.constructor as any)[eventsName];

@@ -12,6 +12,6 @@ export declare function ComponentConfigDecorator<T extends Component>(config: {
     } | null;
     template?: string | IBlock | Template | null;
     oevents?: IComponentOEvents<T> | null;
-    events?: IComponentEvents<T, IEvent> | null;
+    events?: IComponentEvents<T, IEvent<Component>> | null;
     domEvents?: IComponentEvents<T, Event> | null;
 }): (componentConstr: Function) => void;
