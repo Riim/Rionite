@@ -76,31 +76,19 @@ export class RtSlot extends Component {
 								if (
 									forTag
 										? contentEl.tagName == forTag
-										: contentEl.getAttribute('rt-element') === for_
+										: contentEl.classList.contains(
+												(ownerComponent.constructor as typeof Component)
+													._contentBlockNames[
+													(ownerComponent.constructor as typeof Component)
+														._contentBlockNames.length - 1
+												] +
+													'__' +
+													for_
+											)
 								) {
 									let selectedEl = (cloneContent
 										? contentEl.cloneNode(true)
 										: contentEl) as Element;
-
-									if (for_) {
-										let classNames =
-											(ownerComponent.constructor as typeof Component)._contentBlockNames.join(
-												'__' + for_ + ' '
-											) +
-											'__' +
-											for_;
-
-										if (selectedEl instanceof HTMLElement) {
-											selectedEl.className += ' ' + classNames;
-										} else {
-											selectedEl.setAttribute(
-												'class',
-												(selectedEl.getAttribute('class') || '') +
-													' ' +
-													classNames
-											);
-										}
-									}
 
 									contentEl = contentEl.nextElementSibling;
 

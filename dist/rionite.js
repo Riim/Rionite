@@ -3000,23 +3000,14 @@ var RtSlot = /** @class */ (function (_super) {
                             do {
                                 if (forTag
                                     ? contentEl.tagName == forTag
-                                    : contentEl.getAttribute('rt-element') === for_) {
+                                    : contentEl.classList.contains(ownerComponent.constructor
+                                        ._contentBlockNames[ownerComponent.constructor
+                                        ._contentBlockNames.length - 1] +
+                                        '__' +
+                                        for_)) {
                                     var selectedEl = (cloneContent
                                         ? contentEl.cloneNode(true)
                                         : contentEl);
-                                    if (for_) {
-                                        var classNames = ownerComponent.constructor._contentBlockNames.join('__' + for_ + ' ') +
-                                            '__' +
-                                            for_;
-                                        if (selectedEl instanceof HTMLElement) {
-                                            selectedEl.className += ' ' + classNames;
-                                        }
-                                        else {
-                                            selectedEl.setAttribute('class', (selectedEl.getAttribute('class') || '') +
-                                                ' ' +
-                                                classNames);
-                                        }
-                                    }
                                     contentEl = contentEl.nextElementSibling;
                                     (content || (content = document.createDocumentFragment())).appendChild(selectedEl);
                                 }
