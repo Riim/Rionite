@@ -422,9 +422,16 @@ var Component = /** @class */ (function (_super) {
     };
     Component.prototype._getElementList = function (name, container) {
         var elListMap = this._elementListMap || (this._elementListMap = new map_set_polyfill_1.Map());
-        var containerEl = container
-            ? container instanceof Component ? container.element : container
-            : this.element;
+        var containerEl;
+        if (container) {
+            if (typeof container == 'string') {
+                container = this.$(container);
+            }
+            containerEl = container instanceof Component ? container.element : container;
+        }
+        else {
+            containerEl = this.element;
+        }
         var key = container ? get_uid_1.getUID(containerEl) + '/' + name : name;
         var elList = elListMap.get(key);
         if (!elList) {
