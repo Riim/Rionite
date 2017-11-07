@@ -43,11 +43,11 @@ export class RtSlot extends Component {
 			let childComponents: Array<Component> | null | undefined;
 
 			if (!cloneContent || ownerComponentContent.firstChild) {
-				let forTag = input.forTag;
+				let tagName = input.forTag;
 				let for_ = input['for'];
-				let key = getUID(ownerComponent) + '/' + (forTag ? ':' + forTag : for_ || '');
+				let key = getUID(ownerComponent) + '/' + (tagName ? ':' + tagName : for_ || '');
 
-				if (forTag || for_) {
+				if (tagName || for_) {
 					let contentMap: Map<string, IComponentElement> | undefined;
 
 					if (
@@ -68,23 +68,24 @@ export class RtSlot extends Component {
 						let contentEl = ownerComponentContent.firstElementChild;
 
 						if (contentEl) {
-							if (forTag) {
-								forTag = forTag.toUpperCase();
+							if (tagName) {
+								tagName = tagName.toUpperCase();
+							} else if (for_.indexOf('__') == -1) {
+								for_ =
+									(ownerComponent.constructor as typeof Component)
+										._contentBlockNames[
+										(ownerComponent.constructor as typeof Component)
+											._contentBlockNames.length - 1
+									] +
+									'__' +
+									for_;
 							}
 
 							do {
 								if (
-									forTag
-										? contentEl.tagName == forTag
-										: contentEl.classList.contains(
-												(ownerComponent.constructor as typeof Component)
-													._contentBlockNames[
-													(ownerComponent.constructor as typeof Component)
-														._contentBlockNames.length - 1
-												] +
-													'__' +
-													for_
-											)
+									tagName
+										? contentEl.tagName == tagName
+										: contentEl.classList.contains(for_)
 								) {
 									let selectedEl = (cloneContent
 										? contentEl.cloneNode(true)

@@ -2982,10 +2982,10 @@ var RtSlot = /** @class */ (function (_super) {
             var bindings = void 0;
             var childComponents = void 0;
             if (!cloneContent || ownerComponentContent.firstChild) {
-                var forTag = input.forTag;
+                var tagName = input.forTag;
                 var for_ = input['for'];
-                var key = get_uid_1.getUID(ownerComponent) + '/' + (forTag ? ':' + forTag : for_ || '');
-                if (forTag || for_) {
+                var key = get_uid_1.getUID(ownerComponent) + '/' + (tagName ? ':' + tagName : for_ || '');
+                if (tagName || for_) {
                     var contentMap = void 0;
                     if (!cloneContent &&
                         (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
@@ -3001,17 +3001,21 @@ var RtSlot = /** @class */ (function (_super) {
                     else {
                         var contentEl = ownerComponentContent.firstElementChild;
                         if (contentEl) {
-                            if (forTag) {
-                                forTag = forTag.toUpperCase();
+                            if (tagName) {
+                                tagName = tagName.toUpperCase();
                             }
-                            do {
-                                if (forTag
-                                    ? contentEl.tagName == forTag
-                                    : contentEl.classList.contains(ownerComponent.constructor
+                            else if (for_.indexOf('__') == -1) {
+                                for_ =
+                                    ownerComponent.constructor
                                         ._contentBlockNames[ownerComponent.constructor
                                         ._contentBlockNames.length - 1] +
                                         '__' +
-                                        for_)) {
+                                        for_;
+                            }
+                            do {
+                                if (tagName
+                                    ? contentEl.tagName == tagName
+                                    : contentEl.classList.contains(for_)) {
                                     var selectedEl = (cloneContent
                                         ? contentEl.cloneNode(true)
                                         : contentEl);
