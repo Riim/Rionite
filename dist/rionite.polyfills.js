@@ -3808,27 +3808,27 @@ function registerComponent(componentConstr) {
     inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
     componentConstr._blockNamesString =
         elIs + ' ' + (parentComponentConstr._blockNamesString || '');
-    var template = componentConstr.template;
-    if (template === null || template === parentComponentConstr.template) {
-        componentConstr.template = template
-            ? template.extend('', { blockName: elIs })
-            : new nelm_1.Template('', { blockName: elIs });
-    }
-    else {
-        if (template instanceof nelm_1.Template) {
-            template.setBlockName(elIs);
-        }
-        else {
-            componentConstr.template = parentComponentConstr.template
-                ? parentComponentConstr.template.extend(template, {
-                    blockName: elIs
-                })
-                : new nelm_1.Template(template, { blockName: elIs });
-        }
-    }
     componentConstr._elementBlockNames = [elIs];
     if (parentComponentConstr._elementBlockNames) {
         push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
+    }
+    var template = componentConstr.template;
+    if (template !== null) {
+        if (template === parentComponentConstr.template) {
+            componentConstr.template = template.extend('', { blockName: elIs });
+        }
+        else {
+            if (template instanceof nelm_1.Template) {
+                template.setBlockName(componentConstr._elementBlockNames);
+            }
+            else {
+                componentConstr.template = parentComponentConstr.template
+                    ? parentComponentConstr.template.extend(template, {
+                        blockName: elIs
+                    })
+                    : new nelm_1.Template(template, { blockName: componentConstr._elementBlockNames });
+            }
+        }
     }
     componentConstr._rawContent = undefined;
     inheritProperty(componentConstr, parentComponentConstr, 'oevents', 1);

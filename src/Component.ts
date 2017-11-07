@@ -136,8 +136,8 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	static _blockNamesString: string;
 
-	static template: string | IBlock | Template | null = null;
 	static _elementBlockNames: Array<string>;
+	static template: string | IBlock | Template | null = null;
 
 	static _rawContent: DocumentFragment | undefined;
 
