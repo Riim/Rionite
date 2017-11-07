@@ -52,26 +52,26 @@ export function registerComponent(componentConstr: typeof Component) {
 
 	let template = componentConstr.template;
 
-	if (template !== null) {
-		if (template === parentComponentConstr.template) {
-			componentConstr.template = (template as Template).extend('', { blockName: elIs });
+	if (template === null || template === parentComponentConstr.template) {
+		componentConstr.template = template
+			? (template as Template).extend('', { blockName: elIs })
+			: new Template('', { blockName: elIs });
+	} else {
+		if (template instanceof Template) {
+			template.setBlockName(elIs);
 		} else {
-			if (template instanceof Template) {
-				template.setBlockName(elIs);
-			} else {
-				componentConstr.template = parentComponentConstr.template
-					? (parentComponentConstr.template as Template).extend(template, {
-							blockName: elIs
-						})
-					: new Template(template, { blockName: elIs });
-			}
+			componentConstr.template = parentComponentConstr.template
+				? (parentComponentConstr.template as Template).extend(template, {
+						blockName: elIs
+					})
+				: new Template(template, { blockName: elIs });
 		}
 	}
 
-	componentConstr._contentBlockNames = [elIs];
+	componentConstr._elementBlockNames = [elIs];
 
-	if (parentComponentConstr._contentBlockNames) {
-		push.apply(componentConstr._contentBlockNames, parentComponentConstr._contentBlockNames);
+	if (parentComponentConstr._elementBlockNames) {
+		push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
 	}
 
 	componentConstr._rawContent = undefined;

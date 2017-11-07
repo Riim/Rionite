@@ -137,7 +137,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 	static _blockNamesString: string;
 
 	static template: string | IBlock | Template | null = null;
-	static _contentBlockNames: Array<string>;
+	static _elementBlockNames: Array<string>;
 
 	static _rawContent: DocumentFragment | undefined;
 
@@ -556,10 +556,10 @@ export class Component extends EventEmitter implements DisposableMixin {
 		let elList = elListMap.get(key);
 
 		if (!elList) {
-			let contentBlockNames = (this.constructor as typeof Component)._contentBlockNames;
+			let elementBlockNames = (this.constructor as typeof Component)._elementBlockNames;
 
 			elList = containerEl.getElementsByClassName(
-				contentBlockNames[contentBlockNames.length - 1] + '__' + name
+				elementBlockNames[elementBlockNames.length - 1] + '__' + name
 			);
 			elListMap.set(key, elList);
 		}

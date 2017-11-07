@@ -71,14 +71,10 @@ export class RtSlot extends Component {
 							if (tagName) {
 								tagName = tagName.toUpperCase();
 							} else if (for_.indexOf('__') == -1) {
+								let elementBlockNames = (ownerComponent.constructor as typeof Component)
+									._elementBlockNames;
 								for_ =
-									(ownerComponent.constructor as typeof Component)
-										._contentBlockNames[
-										(ownerComponent.constructor as typeof Component)
-											._contentBlockNames.length - 1
-									] +
-									'__' +
-									for_;
+									elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
 							}
 
 							do {
