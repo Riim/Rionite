@@ -3,7 +3,7 @@ import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx'
 import { IBlock, Template } from 'nelm';
 import { IFreezableCell } from './componentBinding';
 import { ComponentConfigDecorator } from './ComponentConfigDecorator';
-import { IComponentInput } from './ComponentInput';
+import { IComponentInputs } from './ComponentInputs';
 import { DisposableMixin, IDisposableListening, TListener, TListeningTarget } from './DisposableMixin';
 import { registerComponent } from './registerComponent';
 export interface IPossiblyComponentElement<T extends Component = Component> extends HTMLElement {
@@ -34,7 +34,7 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     static register: typeof registerComponent;
     static elementIs: string;
     static elementExtends: string | null;
-    static input: {
+    static inputs: {
         [name: string]: any;
     } | null;
     static i18n: {
@@ -54,7 +54,7 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     _parentComponent: Component | null | undefined;
     readonly parentComponent: Component | null;
     element: IComponentElement;
-    readonly input: IComponentInput;
+    readonly inputs: IComponentInputs;
     _bindings: Array<IFreezableCell> | null;
     _elementListMap: Map<string, NodeListOf<Element>> | undefined;
     _attached: boolean;

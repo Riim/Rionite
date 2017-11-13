@@ -5,7 +5,7 @@ import { Component, IComponentEvents, IComponentOEvents } from './Component';
 export function ComponentConfigDecorator<T extends Component>(config: {
 	elementIs: string;
 	elementExtends?: string | null;
-	input?: { [name: string]: any } | null;
+	inputs?: { [name: string]: any } | null;
 	i18n?: { [key: string]: any } | null;
 	template?: string | IBlock | Template | null;
 	oevents?: IComponentOEvents<T> | null;
@@ -18,8 +18,8 @@ export function ComponentConfigDecorator<T extends Component>(config: {
 			(componentConstr as typeof Component).elementExtends = config.elementExtends;
 		}
 
-		if (config.input !== undefined) {
-			(componentConstr as typeof Component).input = config.input;
+		if (config.inputs !== undefined) {
+			(componentConstr as typeof Component).inputs = config.inputs;
 		}
 
 		if (config.i18n !== undefined) {

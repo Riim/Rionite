@@ -121,7 +121,7 @@ var bindEvents_1 = __webpack_require__(36);
 var componentBinding_1 = __webpack_require__(37);
 var ComponentConfigDecorator_1 = __webpack_require__(38);
 var componentConstructorMap_1 = __webpack_require__(20);
-var ComponentInput_1 = __webpack_require__(21);
+var ComponentInputs_1 = __webpack_require__(21);
 var DisposableMixin_1 = __webpack_require__(23);
 var ElementProtoMixin_1 = __webpack_require__(3);
 var Features_1 = __webpack_require__(6);
@@ -150,7 +150,7 @@ function findChildComponents(node, ownerComponent, context, childComponents) {
             var childComponent = child.$component;
             if (childComponent) {
                 childComponent._ownerComponent = ownerComponent;
-                childComponent.input.$context = context;
+                childComponent.inputs.$context = context;
                 (childComponents || (childComponents = [])).push(childComponent);
             }
             if (child.firstChild &&
@@ -219,16 +219,16 @@ var Component = /** @class */ (function (_super) {
         enumerable: true,
         configurable: true
     });
-    Object.defineProperty(Component.prototype, "input", {
+    Object.defineProperty(Component.prototype, "inputs", {
         get: function () {
-            var input = ComponentInput_1.ComponentInput.init(this);
-            Object.defineProperty(this, 'input', {
+            var inputs = ComponentInputs_1.ComponentInputs.init(this);
+            Object.defineProperty(this, 'inputs', {
                 configurable: true,
                 enumerable: true,
                 writable: true,
-                value: input
+                value: inputs
             });
-            return input;
+            return inputs;
         },
         enumerable: true,
         configurable: true
@@ -236,7 +236,7 @@ var Component = /** @class */ (function (_super) {
     Component.prototype._on = function (type, listener, context) {
         if (!type.lastIndexOf('input-', 0) && reInputChangeEventName.test(type)) {
             cellx_1.EventEmitter.currentlySubscribing = true;
-            this.input[camelize_1.camelize(RegExp.$1, true)];
+            this.inputs[camelize_1.camelize(RegExp.$1, true)];
             cellx_1.EventEmitter.currentlySubscribing = false;
         }
         _super.prototype._on.call(this, type, listener, context);
@@ -313,9 +313,9 @@ var Component = /** @class */ (function (_super) {
             var el = this.element;
             el.className = constr._blockNamesString + el.className;
             if (constr.template == null) {
-                this.input;
+                this.inputs;
                 this._bindings = null;
-                var childComponents = findChildComponents(el, this.ownerComponent, this.input.$context);
+                var childComponents = findChildComponents(el, this.ownerComponent, this.inputs.$context);
                 if (childComponents) {
                     attachChildComponentElements_1.attachChildComponentElements(childComponents);
                 }
@@ -326,11 +326,11 @@ var Component = /** @class */ (function (_super) {
             else {
                 if (el.firstChild) {
                     ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                    this.input.$content = move_content_1.moveContent(document.createDocumentFragment(), el);
+                    this.inputs.$content = move_content_1.moveContent(document.createDocumentFragment(), el);
                     ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                 }
                 else {
-                    this.input.$content = document.createDocumentFragment();
+                    this.inputs.$content = document.createDocumentFragment();
                 }
                 var rawContent = constr._rawContent;
                 if (!rawContent) {
@@ -444,7 +444,7 @@ var Component = /** @class */ (function (_super) {
     Component.Config = ComponentConfigDecorator_1.ComponentConfigDecorator;
     Component.register = registerComponent_1.registerComponent;
     Component.elementExtends = null;
-    Component.input = null;
+    Component.inputs = null;
     Component.i18n = null;
     Component.template = null;
     Component.oevents = null;
@@ -555,10 +555,10 @@ exports.ElementProtoMixin = (_a = {
     _a.attributeChangedCallback = function (name, prev, value) {
         var component = this.rioniteComponent;
         if (component && component.isReady) {
-            var input = component.input;
+            var inputs = component.inputs;
             var privateName = '_' + name;
-            if (input[privateName]) {
-                input[privateName](value);
+            if (inputs[privateName]) {
+                inputs[privateName](value);
             }
             else if (Features_1.nativeCustomElements) {
                 throw new TypeError("Cannot write to readonly input property \"" + name + "\"");
@@ -673,8 +673,8 @@ function bindContent(node, ownerComponent, context, result) {
                 }
                 if (childComponent) {
                     childComponent._ownerComponent = ownerComponent;
-                    childComponent.input.$context = context;
-                    childComponent.input.$specified = $specified;
+                    childComponent.inputs.$context = context;
+                    childComponent.inputs.$specified = $specified;
                     (result[1] || (result[1] = [])).push(childComponent);
                 }
                 if (child.firstChild &&
@@ -1270,23 +1270,24 @@ var hyphenize_1 = __webpack_require__(22);
 var cellx_1 = __webpack_require__(1);
 var componentInputTypeMap_1 = __webpack_require__(39);
 var componentInputTypeSerializerMap_1 = __webpack_require__(40);
-function initComponentInputProperty(componentInput, name, el) {
+function initProperty(inputs, name, el) {
     var component = el.$component;
-    var cipc = component.constructor.input[name];
-    if (cipc == null) {
+    var inputConfig = component.constructor.inputs[name];
+    if (inputConfig == null) {
         return;
     }
-    var type = typeof cipc;
+    var type = typeof inputConfig;
     var defaultValue;
     var required;
     var readonly;
     if (type == 'function') {
-        type = cipc;
+        type = inputConfig;
         required = readonly = false;
     }
-    else if (type == 'object' && (cipc.type !== undefined || cipc.default !== undefined)) {
-        type = cipc.type;
-        defaultValue = cipc.default;
+    else if (type == 'object' &&
+        (inputConfig.type !== undefined || inputConfig.default !== undefined)) {
+        type = inputConfig.type;
+        defaultValue = inputConfig.default;
         if (type === undefined) {
             type = typeof defaultValue;
         }
@@ -1295,11 +1296,11 @@ function initComponentInputProperty(componentInput, name, el) {
             componentInputTypeMap_1.componentInputTypeMap.get(type) != typeof defaultValue) {
             throw new TypeError('Specified type does not match defaultValue type');
         }
-        required = cipc.required;
-        readonly = cipc.readonly;
+        required = inputConfig.required;
+        readonly = inputConfig.readonly;
     }
     else {
-        defaultValue = cipc;
+        defaultValue = inputConfig;
         required = readonly = false;
     }
     var typeSerializer = componentInputTypeSerializerMap_1.componentInputTypeSerializerMap.get(type);
@@ -1341,9 +1342,9 @@ function initComponentInputProperty(componentInput, name, el) {
                 value = val;
             }
         };
-        componentInput['_' + name] = setRawValue;
+        inputs['_' + name] = setRawValue;
         if (name != hyphenizedName) {
-            componentInput['_' + hyphenizedName] = setRawValue;
+            inputs['_' + hyphenizedName] = setRawValue;
         }
         descriptor = {
             configurable: true,
@@ -1394,19 +1395,23 @@ function initComponentInputProperty(componentInput, name, el) {
             }
         };
     }
-    Object.defineProperty(componentInput, name, descriptor);
+    Object.defineProperty(inputs, name, descriptor);
 }
-exports.ComponentInput = {
+exports.ComponentInputs = {
     init: function (component) {
-        var componentInputConfig = component.constructor.input;
+        var inputsConfig = component.constructor.inputs;
         var el = component.element;
-        var componentInput = { $content: null, $context: null, $specified: null };
-        if (componentInputConfig) {
-            for (var name_1 in componentInputConfig) {
-                initComponentInputProperty(componentInput, name_1, el);
+        var inputs = {
+            $content: null,
+            $context: null,
+            $specified: null
+        };
+        if (inputsConfig) {
+            for (var name_1 in inputsConfig) {
+                initProperty(inputs, name_1, el);
             }
         }
-        return componentInput;
+        return inputs;
     }
 };
 
@@ -1632,14 +1637,14 @@ var RtIfThen = /** @class */ (function (_super) {
         }
         this._active = true;
         if (!this.initialized) {
-            var if_ = (this.input['if'] || '').trim();
+            var if_ = (this.inputs['if'] || '').trim();
             if (!reKeypath.test(if_)) {
                 throw new SyntaxError("Invalid value of attribute \"if\" (" + if_ + ")");
             }
             var getIfValue_1 = compileKeypath_1.compileKeypath(if_);
             this._if = new cellx_1.Cell(function () {
                 return !!getIfValue_1.call(this);
-            }, { context: this.input.$context });
+            }, { context: this.inputs.$context });
             this.initialized = true;
         }
         this._if.on('change', this._onIfChange, this);
@@ -1673,7 +1678,7 @@ var RtIfThen = /** @class */ (function (_super) {
                     i += templates[i].content.querySelectorAll('template').length + 1;
                 }
             }
-            var _a = bindContent_1.bindContent(content, this.ownerComponent, this.input.$context, { 0: null, 1: null }), bindings = _a[0], childComponents = _a[1];
+            var _a = bindContent_1.bindContent(content, this.ownerComponent, this.inputs.$context, { 0: null, 1: null }), bindings = _a[0], childComponents = _a[1];
             this._nodes = slice.call(content.childNodes);
             this._bindings = bindings;
             ElementProtoMixin_1.suppressConnectionStatusCallbacks();
@@ -1724,7 +1729,7 @@ var RtIfThen = /** @class */ (function (_super) {
         Component_1.Component.Config({
             elementIs: 'rt-if-then',
             elementExtends: 'template',
-            input: {
+            inputs: {
                 if: { type: String, required: true, readonly: true }
             }
         })
@@ -1771,8 +1776,8 @@ exports.NelmParser = nelm_1.Parser;
 exports.Template = nelm_1.Template;
 var Component_1 = __webpack_require__(2);
 exports.Component = Component_1.Component;
-var ComponentInput_1 = __webpack_require__(21);
-exports.ComponentInput = ComponentInput_1.ComponentInput;
+var ComponentInputs_1 = __webpack_require__(21);
+exports.ComponentInputs = ComponentInputs_1.ComponentInputs;
 var componentInputValueMap_1 = __webpack_require__(12);
 exports.componentInputValueMap = componentInputValueMap_1.componentInputValueMap;
 var rt_content_1 = __webpack_require__(50);
@@ -2023,8 +2028,8 @@ function ComponentConfigDecorator(config) {
         if (config.elementExtends !== undefined) {
             componentConstr.elementExtends = config.elementExtends;
         }
-        if (config.input !== undefined) {
-            componentConstr.input = config.input;
+        if (config.inputs !== undefined) {
+            componentConstr.inputs = config.inputs;
         }
         if (config.i18n !== undefined) {
             componentConstr.i18n = config.i18n;
@@ -2304,7 +2309,7 @@ function registerComponent(componentConstr) {
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
         .constructor;
-    inheritProperty(componentConstr, parentComponentConstr, 'input', 0);
+    inheritProperty(componentConstr, parentComponentConstr, 'inputs', 0);
     inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
     componentConstr._blockNamesString =
         elIs + ' ' + (parentComponentConstr._blockNamesString || '');
@@ -2347,12 +2352,12 @@ function registerComponent(componentConstr) {
         configurable: true,
         enumerable: true,
         get: function () {
-            var inputConfig = componentConstr.input;
-            if (!inputConfig) {
+            var inputsConfig = componentConstr.inputs;
+            if (!inputsConfig) {
                 return [];
             }
             var observedAttrs = [];
-            for (var name_1 in inputConfig) {
+            for (var name_1 in inputsConfig) {
                 observedAttrs.push(hyphenize_1.hyphenize(name_1, true));
             }
             return observedAttrs;
@@ -2475,15 +2480,15 @@ var RtContent = /** @class */ (function (_super) {
         else {
             var ownerComponent = this.ownerComponent;
             var el = this.element;
-            var input = this.input;
+            var inputs = this.inputs;
             var contentOwnerComponent = ownerComponent.ownerComponent;
-            var ownerComponentContent = ownerComponent.input.$content;
-            var clone = input.clone;
+            var ownerComponentContent = ownerComponent.inputs.$content;
+            var clone = inputs.clone;
             var content = void 0;
             var bindings = void 0;
             var childComponents = void 0;
             if (!clone || ownerComponentContent.firstChild) {
-                var selector = input.select;
+                var selector = inputs.select;
                 var key = get_uid_1.getUID(ownerComponent) + '/' + (selector || '');
                 if (selector) {
                     var contentMap = void 0;
@@ -2537,12 +2542,12 @@ var RtContent = /** @class */ (function (_super) {
             if (bindings === undefined) {
                 if (content || el.firstChild) {
                     _a = content
-                        ? bindContent_1.bindContent(content, contentOwnerComponent, input.getContext
-                            ? input.getContext.call(ownerComponent, ownerComponent.input.$context, this)
-                            : ownerComponent.input.$context, { 0: null, 1: null })
-                        : bindContent_1.bindContent(el, ownerComponent, input.getContext
-                            ? input.getContext.call(ownerComponent, input.$context, this)
-                            : input.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
+                        ? bindContent_1.bindContent(content, contentOwnerComponent, inputs.getContext
+                            ? inputs.getContext.call(ownerComponent, ownerComponent.inputs.$context, this)
+                            : ownerComponent.inputs.$context, { 0: null, 1: null })
+                        : bindContent_1.bindContent(el, ownerComponent, inputs.getContext
+                            ? inputs.getContext.call(ownerComponent, inputs.$context, this)
+                            : inputs.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
                     this._childComponents = childComponents;
                 }
                 else {
@@ -2577,7 +2582,7 @@ var RtContent = /** @class */ (function (_super) {
     RtContent = __decorate([
         Component_1.Component.Config({
             elementIs: 'rt-content',
-            input: {
+            inputs: {
                 select: { type: String, readonly: true },
                 clone: { default: false, readonly: true },
                 getContext: { type: Object, readonly: true }
@@ -2682,18 +2687,18 @@ var RtRepeat = /** @class */ (function (_super) {
         }
         this._active = true;
         if (!this.initialized) {
-            var input = this.input;
-            var for_ = input['for'].match(reForAttrValue);
+            var inputs = this.inputs;
+            var for_ = inputs['for'].match(reForAttrValue);
             if (!for_) {
-                throw new SyntaxError("Invalid value of attribute \"for\" (" + input['for'] + ")");
+                throw new SyntaxError("Invalid value of input property \"for\" (" + inputs['for'] + ")");
             }
             this._itemName = for_[1];
             this._list = new cellx_1.Cell(compileKeypath_1.compileKeypath(for_[2]), {
-                context: input.$context
+                context: inputs.$context
             });
-            this._trackBy = input.trackBy;
+            this._trackBy = inputs.trackBy;
             var rawItemContent = (this._rawItemContent = document.importNode(this.element.content, true));
-            if (input.strip) {
+            if (inputs.strip) {
                 var firstChild = rawItemContent.firstChild;
                 var lastChild = rawItemContent.lastChild;
                 if (firstChild == lastChild) {
@@ -2820,7 +2825,7 @@ var RtRepeat = /** @class */ (function (_super) {
                 i += templates[i].content.querySelectorAll('template').length + 1;
             }
         }
-        var context = this.input.$context;
+        var context = this.inputs.$context;
         var _a = bindContent_1.bindContent(content, this.ownerComponent, Object.create(context, (_b = {
                 $component: {
                     configurable: false,
@@ -2914,7 +2919,7 @@ var RtRepeat = /** @class */ (function (_super) {
         Component_1.Component.Config({
             elementIs: 'rt-repeat',
             elementExtends: 'template',
-            input: {
+            inputs: {
                 for: { type: String, required: true, readonly: true },
                 trackBy: { type: String, readonly: true },
                 strip: { default: false, readonly: true }
@@ -2972,16 +2977,16 @@ var RtSlot = /** @class */ (function (_super) {
         else {
             var ownerComponent = this.ownerComponent;
             var el = this.element;
-            var input = this.input;
+            var inputs = this.inputs;
             var contentOwnerComponent = ownerComponent.ownerComponent;
-            var ownerComponentContent = ownerComponent.input.$content;
-            var cloneContent = input.cloneContent;
+            var ownerComponentContent = ownerComponent.inputs.$content;
+            var cloneContent = inputs.cloneContent;
             var content = void 0;
             var bindings = void 0;
             var childComponents = void 0;
             if (!cloneContent || ownerComponentContent.firstChild) {
-                var tagName = input.forTag;
-                var for_ = input['for'];
+                var tagName = inputs.forTag;
+                var for_ = inputs['for'];
                 var key = get_uid_1.getUID(ownerComponent) + '/' + (tagName ? ':' + tagName : for_ || '');
                 if (tagName || for_) {
                     var contentMap = void 0;
@@ -3052,12 +3057,12 @@ var RtSlot = /** @class */ (function (_super) {
             if (bindings === undefined) {
                 if (content || el.firstChild) {
                     _a = content
-                        ? bindContent_1.bindContent(content, contentOwnerComponent, input.getContext
-                            ? input.getContext.call(ownerComponent, ownerComponent.input.$context, this)
-                            : ownerComponent.input.$context, { 0: null, 1: null })
-                        : bindContent_1.bindContent(el, ownerComponent, input.getContext
-                            ? input.getContext.call(ownerComponent, input.$context, this)
-                            : input.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
+                        ? bindContent_1.bindContent(content, contentOwnerComponent, inputs.getContext
+                            ? inputs.getContext.call(ownerComponent, ownerComponent.inputs.$context, this)
+                            : ownerComponent.inputs.$context, { 0: null, 1: null })
+                        : bindContent_1.bindContent(el, ownerComponent, inputs.getContext
+                            ? inputs.getContext.call(ownerComponent, inputs.$context, this)
+                            : inputs.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
                     this._childComponents = childComponents;
                 }
                 else {
@@ -3092,7 +3097,7 @@ var RtSlot = /** @class */ (function (_super) {
     RtSlot = __decorate([
         Component_1.Component.Config({
             elementIs: 'rt-slot',
-            input: {
+            inputs: {
                 forTag: { type: String, readonly: true },
                 for: { type: String, readonly: true },
                 cloneContent: { default: false, readonly: true },

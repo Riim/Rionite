@@ -4,7 +4,7 @@ import { Component, IComponentEvents, IComponentOEvents } from './Component';
 export declare function ComponentConfigDecorator<T extends Component>(config: {
     elementIs: string;
     elementExtends?: string | null;
-    input?: {
+    inputs?: {
         [name: string]: any;
     } | null;
     i18n?: {

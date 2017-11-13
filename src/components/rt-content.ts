@@ -14,7 +14,7 @@ let KEY_CONTENT_MAP = Symbol('contentMap');
 @Component.Config({
 	elementIs: 'rt-content',
 
-	input: {
+	inputs: {
 		select: { type: String, readonly: true },
 		clone: { default: false, readonly: true },
 		getContext: { type: Object, readonly: true }
@@ -33,16 +33,16 @@ export class RtContent extends Component {
 		} else {
 			let ownerComponent = this.ownerComponent;
 			let el = this.element;
-			let input = this.input;
+			let inputs = this.inputs;
 			let contentOwnerComponent = ownerComponent.ownerComponent;
-			let ownerComponentContent = ownerComponent.input.$content!;
-			let clone = input.clone;
+			let ownerComponentContent = ownerComponent.inputs.$content!;
+			let clone = inputs.clone;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
 			let childComponents: Array<Component> | null | undefined;
 
 			if (!clone || ownerComponentContent.firstChild) {
-				let selector = input.select;
+				let selector = inputs.select;
 				let key = getUID(ownerComponent) + '/' + (selector || '');
 
 				if (selector) {
@@ -114,21 +114,21 @@ export class RtContent extends Component {
 						? bindContent(
 								content,
 								contentOwnerComponent,
-								input.getContext
-									? input.getContext.call(
+								inputs.getContext
+									? inputs.getContext.call(
 											ownerComponent,
-											ownerComponent.input.$context,
+											ownerComponent.inputs.$context,
 											this
 										)
-									: ownerComponent.input.$context,
+									: ownerComponent.inputs.$context,
 								{ 0: null, 1: null } as any
 							)
 						: bindContent(
 								el,
 								ownerComponent,
-								input.getContext
-									? input.getContext.call(ownerComponent, input.$context, this)
-									: input.$context,
+								inputs.getContext
+									? inputs.getContext.call(ownerComponent, inputs.$context, this)
+									: inputs.$context,
 								{ 0: null, 1: null } as any
 							);
 

@@ -1,5 +1,5 @@
 import { Component } from './Component';
-export interface IComponentInput extends Object {
+export interface IComponentInputs extends Object {
     $content: DocumentFragment | null;
     $context: {
         [name: string]: any;
@@ -7,6 +7,6 @@ export interface IComponentInput extends Object {
     $specified: Set<string>;
     [name: string]: any;
 }
-export declare let ComponentInput: {
-    init(component: Component): IComponentInput;
+export declare let ComponentInputs: {
+    init(component: Component): IComponentInputs;
 };

@@ -14,7 +14,7 @@ let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 @Component.Config({
 	elementIs: 'rt-slot',
 
-	input: {
+	inputs: {
 		forTag: { type: String, readonly: true },
 		for: { type: String, readonly: true },
 		cloneContent: { default: false, readonly: true },
@@ -34,17 +34,17 @@ export class RtSlot extends Component {
 		} else {
 			let ownerComponent = this.ownerComponent;
 			let el = this.element;
-			let input = this.input;
+			let inputs = this.inputs;
 			let contentOwnerComponent = ownerComponent.ownerComponent;
-			let ownerComponentContent = ownerComponent.input.$content!;
-			let cloneContent = input.cloneContent;
+			let ownerComponentContent = ownerComponent.inputs.$content!;
+			let cloneContent = inputs.cloneContent;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
 			let childComponents: Array<Component> | null | undefined;
 
 			if (!cloneContent || ownerComponentContent.firstChild) {
-				let tagName = input.forTag;
-				let for_ = input['for'];
+				let tagName = inputs.forTag;
+				let for_ = inputs['for'];
 				let key = getUID(ownerComponent) + '/' + (tagName ? ':' + tagName : for_ || '');
 
 				if (tagName || for_) {
@@ -136,21 +136,21 @@ export class RtSlot extends Component {
 						? bindContent(
 								content,
 								contentOwnerComponent,
-								input.getContext
-									? input.getContext.call(
+								inputs.getContext
+									? inputs.getContext.call(
 											ownerComponent,
-											ownerComponent.input.$context,
+											ownerComponent.inputs.$context,
 											this
 										)
-									: ownerComponent.input.$context,
+									: ownerComponent.inputs.$context,
 								{ 0: null, 1: null } as any
 							)
 						: bindContent(
 								el,
 								ownerComponent,
-								input.getContext
-									? input.getContext.call(ownerComponent, input.$context, this)
-									: input.$context,
+								inputs.getContext
+									? inputs.getContext.call(ownerComponent, inputs.$context, this)
+									: inputs.$context,
 								{ 0: null, 1: null } as any
 							);
 

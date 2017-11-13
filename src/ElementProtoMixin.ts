@@ -94,11 +94,11 @@ export let ElementProtoMixin = {
 		let component = this.rioniteComponent;
 
 		if (component && component.isReady) {
-			let input = component.input;
+			let inputs = component.inputs;
 			let privateName = '_' + name;
 
-			if (input[privateName]) {
-				input[privateName](value);
+			if (inputs[privateName]) {
+				inputs[privateName](value);
 			} else if (nativeCustomElementsFeature) {
 				throw new TypeError(`Cannot write to readonly input property "${name}"`);
 			}

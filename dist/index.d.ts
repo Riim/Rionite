@@ -1,6 +1,6 @@
 import { IBlock as INelmBlock, NodeType as NelmNodeType, Parser as NelmParser, Template } from 'nelm';
 import { Component, IComponentElement, IComponentElementClassNameMap, IComponentEvents, IComponentOEvents, IPossiblyComponentElement, TEventHandler, TOEventHandler } from './Component';
-import { ComponentInput, IComponentInput } from './ComponentInput';
+import { ComponentInputs, IComponentInputs } from './ComponentInputs';
 import { componentInputValueMap } from './componentInputValueMap';
 import { RtContent } from './components/rt-content';
 import { RtIfElse } from './components/rt-if-else';
@@ -11,4 +11,4 @@ import { DisposableMixin, IDisposable, IDisposableCallback, IDisposableInterval,
 import { formatters } from './formatters';
 import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
 import './templateHelpers';
-export { NelmNodeType, INelmBlock, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin, formatters, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TOEventHandler, TEventHandler, IComponentOEvents, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, IComponentInput, ComponentInput, componentInputValueMap, RtContent, RtSlot, TRtIfThenIfCell, RtIfThen, RtIfElse, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, RtRepeat };
+export { NelmNodeType, INelmBlock, NelmParser, Template, IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin, formatters, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TOEventHandler, TEventHandler, IComponentOEvents, IComponentEvents, Component, KEY_ELEMENT_CONNECTED, IComponentInputs, ComponentInputs, componentInputValueMap, RtContent, RtSlot, TRtIfThenIfCell, RtIfThen, RtIfElse, TRtRepeatListCell, IRtRepeatItem, TRtRepeatItemList, TRtRepeatItemMap, RtRepeat };

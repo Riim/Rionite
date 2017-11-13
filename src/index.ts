@@ -16,7 +16,7 @@ import {
 	TEventHandler,
 	TOEventHandler
 	} from './Component';
-import { ComponentInput, IComponentInput } from './ComponentInput';
+import { ComponentInputs, IComponentInputs } from './ComponentInputs';
 import { componentInputValueMap } from './componentInputValueMap';
 import { RtContent } from './components/rt-content';
 import { RtIfElse } from './components/rt-if-else';
@@ -66,8 +66,8 @@ export {
 	IComponentEvents,
 	Component,
 	KEY_ELEMENT_CONNECTED,
-	IComponentInput,
-	ComponentInput,
+	IComponentInputs,
+	ComponentInputs,
 	componentInputValueMap,
 	RtContent,
 	RtSlot,

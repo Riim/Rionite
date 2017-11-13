@@ -19,11 +19,11 @@ npm install cellx rionite --save
 
 Rionite.Component.extend('hello-user', {
 	Static: {
-		input: {
+		inputs: {
 			name: String
 		},
 
-		template: 'Hello, {input.name}!'
+		template: 'Hello, {inputs.name}!'
 	},
 
     elementAttached: function() {
@@ -49,11 +49,11 @@ import { Component, d } from 'rionite';
 @d.Component({
     elementIs: 'hello-user',
 
-    input: {
+    inputs: {
         name: String
     },
 
-    template: 'Hello, {input.name}!'
+    template: 'Hello, {inputs.name}!'
 })
 export class HelloUser extends Component {
     elementAttached() {}
@@ -102,7 +102,7 @@ super-select {
 </super-select>
 ```
 
-В статическом свойстве `input` задаётся объект-объявление возможных атрибутов элемента. В качестве значений объекта можно указать тип из следующих возможных: `Boolean`, `Number`, `String` и `Object`. Также можно указать значение по-умолчанию, тип будет вычислен из него:
+В статическом свойстве `inputs` задаётся объект-объявление возможных атрибутов элемента. В качестве значений объекта можно указать тип из следующих возможных: `Boolean`, `Number`, `String` и `Object`. Также можно указать значение по-умолчанию, тип будет вычислен из него:
 ```html
 <hello-user></hello-user>
 
@@ -110,11 +110,11 @@ super-select {
 
 Rionite.Component.extend('hello-user', {
 	Static: {
-		input: {
+		inputs: {
 			name: 'Anonymous'
 		},
 
-		template: 'Hello, {input.name}!'
+		template: 'Hello, {inputs.name}!'
 	}
 });
 
@@ -125,8 +125,8 @@ Rionite.Component.extend('hello-user', {
 <hello-user class="hello-user">Hello, Anonymous!</hello-user>
 ```
 
-Статическое свойство `input` отражается на одноимённое свойство экземпляра компонента, в нём будет объект со значениями объявленных атрибутов, приведёнными к указанному типу.  
-Свойство `input.$content` будет фрагментом документа, в который перенесётся изначально переданное элементу содержимое. В дальнейшем оно чаще всего используются элементом `<rt-content>`:
+Статическое свойство `inputs` отражается на одноимённое свойство экземпляра компонента, в нём будет объект со значениями объявленных атрибутов, приведёнными к указанному типу.  
+Свойство `inputs.$content` будет фрагментом документа, в который перенесётся изначально переданное элементу содержимое. В дальнейшем оно чаще всего используются элементом `<rt-content>`:
 ```js
 <super-button>123</super-button>
 
@@ -202,7 +202,7 @@ Rionite.Component.extend('simple-counter', {
 </script>
 ```
 
-Свойства в `input` тоже реактивные, при изменении значения атрибута разметка будет обновляться в местах где они использованы. При записи в них будет обновляться и разметка и значение атрибута.
+Свойства в `inputs` тоже реактивные, при изменении значения атрибута разметка будет обновляться в местах где они использованы. При записи в них будет обновляться и разметка и значение атрибута.
 
 Реактивные свойства могут вычислятся из других реактивных свойств и будут автоматически обновляться при изменении исходных:
 ```js
@@ -462,7 +462,7 @@ Rionite.Component.extend('x-parent', {
 
 Rionite.Component.extend('x-child', {
 	Static: {
-    	input: {
+    	inputs: {
         	childId: String
         }
     },
@@ -471,7 +471,7 @@ Rionite.Component.extend('x-child', {
         this.setInterval(function() {
             this.emit({
                 type: 'foo',
-                childId: this.input.childId
+                childId: this.inputs.childId
             });
         }, 1000);
     }

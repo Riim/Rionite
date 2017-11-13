@@ -4,36 +4,35 @@ import { Component, IComponentElement } from './Component';
 import { componentInputTypeMap } from './componentInputTypeMap';
 import { componentInputTypeSerializerMap } from './componentInputTypeSerializerMap';
 
-export interface IComponentInput extends Object {
+export interface IComponentInputs extends Object {
 	$content: DocumentFragment | null;
 	$context: { [name: string]: any };
 	$specified: Set<string>;
 	[name: string]: any;
 }
 
-function initComponentInputProperty(
-	componentInput: IComponentInput,
-	name: string,
-	el: IComponentElement
-) {
+function initProperty(inputs: IComponentInputs, name: string, el: IComponentElement) {
 	let component = el.$component;
-	let cipc = (component.constructor as typeof Component).input![name];
+	let inputConfig = (component.constructor as typeof Component).inputs![name];
 
-	if (cipc == null) {
+	if (inputConfig == null) {
 		return;
 	}
 
-	let type = typeof cipc;
+	let type = typeof inputConfig;
 	let defaultValue: any;
 	let required: boolean;
 	let readonly: boolean;
 
 	if (type == 'function') {
-		type = cipc;
+		type = inputConfig;
 		required = readonly = false;
-	} else if (type == 'object' && (cipc.type !== undefined || cipc.default !== undefined)) {
-		type = cipc.type;
-		defaultValue = cipc.default;
+	} else if (
+		type == 'object' &&
+		(inputConfig.type !== undefined || inputConfig.default !== undefined)
+	) {
+		type = inputConfig.type;
+		defaultValue = inputConfig.default;
 
 		if (type === undefined) {
 			type = typeof defaultValue;
@@ -45,10 +44,10 @@ function initComponentInputProperty(
 			throw new TypeError('Specified type does not match defaultValue type');
 		}
 
-		required = cipc.required;
-		readonly = cipc.readonly;
+		required = inputConfig.required;
+		readonly = inputConfig.readonly;
 	} else {
-		defaultValue = cipc;
+		defaultValue = inputConfig;
 		required = readonly = false;
 	}
 
@@ -100,10 +99,10 @@ function initComponentInputProperty(
 			}
 		};
 
-		componentInput['_' + name] = setRawValue;
+		inputs['_' + name] = setRawValue;
 
 		if (name != hyphenizedName) {
-			componentInput['_' + hyphenizedName] = setRawValue;
+			inputs['_' + hyphenizedName] = setRawValue;
 		}
 
 		descriptor = {
@@ -164,21 +163,25 @@ function initComponentInputProperty(
 		};
 	}
 
-	Object.defineProperty(componentInput, name, descriptor);
+	Object.defineProperty(inputs, name, descriptor);
 }
 
-export let ComponentInput = {
-	init(component: Component): IComponentInput {
-		let componentInputConfig = (component.constructor as typeof Component).input;
+export let ComponentInputs = {
+	init(component: Component): IComponentInputs {
+		let inputsConfig = (component.constructor as typeof Component).inputs;
 		let el = component.element;
-		let componentInput = { $content: null, $context: null as any, $specified: null as any };
+		let inputs = {
+			$content: null,
+			$context: null as any,
+			$specified: null as any
+		};
 
-		if (componentInputConfig) {
-			for (let name in componentInputConfig) {
-				initComponentInputProperty(componentInput, name, el);
+		if (inputsConfig) {
+			for (let name in inputsConfig) {
+				initProperty(inputs, name, el);
 			}
 		}
 
-		return componentInput;
+		return inputs;
 	}
 };
