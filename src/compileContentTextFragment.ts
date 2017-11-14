@@ -1,6 +1,6 @@
 import { escapeString } from 'escape-string';
 import { bindingToJSExpression } from './bindingToJSExpression';
-import { componentInputValueMap } from './componentInputValueMap';
+import { componentParamValueMap } from './componentParamValueMap';
 import {
 	ContentTextFragmentParser,
 	IContentTextFragmentBinding,
@@ -60,7 +60,7 @@ export function compileContentTextFragment(
 
 					if (valueType == 'object' || valueType == 'function') {
 						let key = String(++keyCounter);
-						componentInputValueMap.set(key, value);
+						componentParamValueMap.set(key, value);
 						return key;
 					}
 				}

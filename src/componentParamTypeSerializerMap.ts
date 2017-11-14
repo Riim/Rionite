@@ -1,9 +1,9 @@
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import { isRegExp } from '@riim/is-regexp';
 import { Map } from '@riim/map-set-polyfill';
-import { componentInputValueMap } from './componentInputValueMap';
+import { componentParamValueMap } from './componentParamValueMap';
 
-export let componentInputTypeSerializerMap = new Map<
+export let componentParamTypeSerializerMap = new Map<
 	any,
 	{
 		read: (value: string | null, defaultValue: any) => any;
@@ -57,12 +57,12 @@ export let componentInputTypeSerializerMap = new Map<
 					return defaultValue || null;
 				}
 
-				if (!componentInputValueMap.has(value)) {
+				if (!componentParamValueMap.has(value)) {
 					throw new TypeError('Value is not an object');
 				}
 
-				let val = componentInputValueMap.get(value) as object;
-				componentInputValueMap.delete(value);
+				let val = componentParamValueMap.get(value) as object;
+				componentParamValueMap.delete(value);
 				return val;
 			},
 			write: (value: any): string | null => {
@@ -88,7 +88,7 @@ export let componentInputTypeSerializerMap = new Map<
 	]
 ]);
 
-componentInputTypeSerializerMap.set('boolean', componentInputTypeSerializerMap.get(Boolean)!);
-componentInputTypeSerializerMap.set('number', componentInputTypeSerializerMap.get(Number)!);
-componentInputTypeSerializerMap.set('string', componentInputTypeSerializerMap.get(String)!);
-componentInputTypeSerializerMap.set('object', componentInputTypeSerializerMap.get(Object)!);
+componentParamTypeSerializerMap.set('boolean', componentParamTypeSerializerMap.get(Boolean)!);
+componentParamTypeSerializerMap.set('number', componentParamTypeSerializerMap.get(Number)!);
+componentParamTypeSerializerMap.set('string', componentParamTypeSerializerMap.get(String)!);
+componentParamTypeSerializerMap.set('object', componentParamTypeSerializerMap.get(Object)!);

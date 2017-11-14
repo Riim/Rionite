@@ -13,7 +13,7 @@ import { bindEvents } from './bindEvents';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { ComponentConfigDecorator } from './ComponentConfigDecorator';
 import { componentConstructorMap } from './componentConstructorMap';
-import { ComponentInputs, IComponentInputs } from './ComponentInputs';
+import { ComponentParams, IComponentParams } from './ComponentParams';
 import {
 	DisposableMixin,
 	IDisposableListening,
@@ -63,7 +63,7 @@ export interface IComponentEvents<T extends Component = Component, U = IEvent | 
 }
 
 let reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)(?:\s[^"]*)?"/g;
-let reInputChangeEventName = /input\-([\-0-9a-z]*)\-change/;
+let reParamChangeEventName = /param\-([\-0-9a-z]*)\-change/;
 
 function createClassBlockElementReplacer(
 	contentBlockName: string,
@@ -99,7 +99,7 @@ function findChildComponents(
 
 			if (childComponent) {
 				childComponent._ownerComponent = ownerComponent;
-				childComponent.inputs.$context = context;
+				childComponent.params.$context = context;
 
 				(childComponents || (childComponents = [])).push(childComponent);
 			}
@@ -130,7 +130,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 	static elementIs: string;
 	static elementExtends: string | null = null;
 
-	static inputs: { [name: string]: any } | null = null;
+	static params: { [name: string]: any } | null = null;
 
 	static i18n: { [key: string]: any } | null = null;
 
@@ -190,17 +190,17 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	element: IComponentElement;
 
-	get inputs(): IComponentInputs {
-		let inputs = ComponentInputs.init(this);
+	get params(): IComponentParams {
+		let params = ComponentParams.init(this);
 
-		Object.defineProperty(this, 'inputs', {
+		Object.defineProperty(this, 'params', {
 			configurable: true,
 			enumerable: true,
 			writable: true,
-			value: inputs
+			value: params
 		});
 
-		return inputs;
+		return params;
 	}
 
 	_bindings: Array<IFreezableCell> | null;
@@ -235,9 +235,9 @@ export class Component extends EventEmitter implements DisposableMixin {
 	}
 
 	_on(type: string, listener: TEventEmitterListener, context: any) {
-		if (!type.lastIndexOf('input-', 0) && reInputChangeEventName.test(type)) {
+		if (!type.lastIndexOf('param-', 0) && reParamChangeEventName.test(type)) {
 			EventEmitter.currentlySubscribing = true;
-			this.inputs[camelize(RegExp.$1, true)];
+			this.params[camelize(RegExp.$1, true)];
 			EventEmitter.currentlySubscribing = false;
 		}
 
@@ -380,14 +380,14 @@ export class Component extends EventEmitter implements DisposableMixin {
 			el.className = constr._blockNamesString + el.className;
 
 			if (constr.template == null) {
-				this.inputs;
+				this.params;
 
 				this._bindings = null;
 
 				let childComponents = findChildComponents(
 					el,
 					this.ownerComponent,
-					this.inputs.$context
+					this.params.$context
 				);
 
 				if (childComponents) {
@@ -400,10 +400,10 @@ export class Component extends EventEmitter implements DisposableMixin {
 			} else {
 				if (el.firstChild) {
 					suppressConnectionStatusCallbacks();
-					this.inputs.$content = moveContent(document.createDocumentFragment(), el);
+					this.params.$content = moveContent(document.createDocumentFragment(), el);
 					resumeConnectionStatusCallbacks();
 				} else {
-					this.inputs.$content = document.createDocumentFragment();
+					this.params.$content = document.createDocumentFragment();
 				}
 
 				let rawContent = constr._rawContent;

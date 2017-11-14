@@ -56,7 +56,7 @@ let todos = new cellx.ObservableList([
 
 class TodoView extends Rionite.Component {
 	initialize() {
-		this.todo = this.inputs.todo;
+		this.todo = this.params.todo;
 	}
 
 	onCbDoneChange(evt) {
@@ -70,7 +70,7 @@ class TodoView extends Rionite.Component {
 
 TodoView.elementIs = 'todo-view';
 
-TodoView.inputs = {
+TodoView.params = {
 	todo: { type: Object, required: true, readonly: true }
 };
 

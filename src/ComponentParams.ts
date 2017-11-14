@@ -1,67 +1,67 @@
 import { hyphenize } from '@riim/hyphenize';
 import { Cell, EventEmitter } from 'cellx';
 import { Component, IComponentElement } from './Component';
-import { componentInputTypeMap } from './componentInputTypeMap';
-import { componentInputTypeSerializerMap } from './componentInputTypeSerializerMap';
+import { componentParamTypeMap } from './componentParamTypeMap';
+import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 
-export interface IComponentInputs extends Object {
+export interface IComponentParams extends Object {
 	$content: DocumentFragment | null;
 	$context: { [name: string]: any };
 	$specified: Set<string>;
 	[name: string]: any;
 }
 
-function initProperty(inputs: IComponentInputs, name: string, el: IComponentElement) {
+function initParam(params: IComponentParams, name: string, el: IComponentElement) {
 	let component = el.$component;
-	let inputConfig = (component.constructor as typeof Component).inputs![name];
+	let paramConfig = (component.constructor as typeof Component).params![name];
 
-	if (inputConfig == null) {
+	if (paramConfig == null) {
 		return;
 	}
 
-	let type = typeof inputConfig;
+	let type = typeof paramConfig;
 	let defaultValue: any;
 	let required: boolean;
 	let readonly: boolean;
 
 	if (type == 'function') {
-		type = inputConfig;
+		type = paramConfig;
 		required = readonly = false;
 	} else if (
 		type == 'object' &&
-		(inputConfig.type !== undefined || inputConfig.default !== undefined)
+		(paramConfig.type !== undefined || paramConfig.default !== undefined)
 	) {
-		type = inputConfig.type;
-		defaultValue = inputConfig.default;
+		type = paramConfig.type;
+		defaultValue = paramConfig.default;
 
 		if (type === undefined) {
 			type = typeof defaultValue;
 		} else if (
 			defaultValue !== undefined &&
-			componentInputTypeMap.has(type) &&
-			componentInputTypeMap.get(type) != typeof defaultValue
+			componentParamTypeMap.has(type) &&
+			componentParamTypeMap.get(type) != typeof defaultValue
 		) {
 			throw new TypeError('Specified type does not match defaultValue type');
 		}
 
-		required = inputConfig.required;
-		readonly = inputConfig.readonly;
+		required = paramConfig.required;
+		readonly = paramConfig.readonly;
 	} else {
-		defaultValue = inputConfig;
+		defaultValue = paramConfig;
 		required = readonly = false;
 	}
 
-	let typeSerializer = componentInputTypeSerializerMap.get(type);
+	let typeSerializer = componentParamTypeSerializerMap.get(type);
 
 	if (!typeSerializer) {
-		throw new TypeError('Unsupported component input type');
+		throw new TypeError('Unsupported component parameter type');
 	}
 
 	let hyphenizedName = hyphenize(name, true);
 	let rawValue = el.getAttribute(hyphenizedName);
 
 	if (required && rawValue === null) {
-		throw new TypeError(`Input property "${name}" is required`);
+		throw new TypeError(`Parameter "${name}" is required`);
 	}
 
 	if (rawValue === null && defaultValue != null && defaultValue !== false) {
@@ -82,7 +82,7 @@ function initProperty(inputs: IComponentInputs, name: string, el: IComponentElem
 
 			set(val: any) {
 				if (val !== value) {
-					throw new TypeError(`Input property "${name}" is readonly`);
+					throw new TypeError(`Parameter "${name}" is readonly`);
 				}
 			}
 		};
@@ -99,10 +99,10 @@ function initProperty(inputs: IComponentInputs, name: string, el: IComponentElem
 			}
 		};
 
-		inputs['_' + name] = setRawValue;
+		params['_' + name] = setRawValue;
 
 		if (name != hyphenizedName) {
-			inputs['_' + hyphenizedName] = setRawValue;
+			params['_' + hyphenizedName] = setRawValue;
 		}
 
 		descriptor = {
@@ -122,11 +122,11 @@ function initProperty(inputs: IComponentInputs, name: string, el: IComponentElem
 							component.emit(
 								evt.target == valueCell
 									? {
-											type: `input-${hyphenizedName}-change`,
+											type: `param-${hyphenizedName}-change`,
 											data: evt.data
 										}
 									: {
-											type: `input-${hyphenizedName}-change`,
+											type: `param-${hyphenizedName}-change`,
 											data: {
 												prevEvent: null,
 												prevValue: evt.target,
@@ -163,25 +163,25 @@ function initProperty(inputs: IComponentInputs, name: string, el: IComponentElem
 		};
 	}
 
-	Object.defineProperty(inputs, name, descriptor);
+	Object.defineProperty(params, name, descriptor);
 }
 
-export let ComponentInputs = {
-	init(component: Component): IComponentInputs {
-		let inputsConfig = (component.constructor as typeof Component).inputs;
+export let ComponentParams = {
+	init(component: Component): IComponentParams {
+		let paramsConfig = (component.constructor as typeof Component).params;
 		let el = component.element;
-		let inputs = {
+		let params = {
 			$content: null,
 			$context: null as any,
 			$specified: null as any
 		};
 
-		if (inputsConfig) {
-			for (let name in inputsConfig) {
-				initProperty(inputs, name, el);
+		if (paramsConfig) {
+			for (let name in paramsConfig) {
+				initParam(params, name, el);
 			}
 		}
 
-		return inputs;
+		return params;
 	}
 };

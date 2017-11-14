@@ -16,8 +16,8 @@ import {
 	TEventHandler,
 	TOEventHandler
 	} from './Component';
-import { ComponentInputs, IComponentInputs } from './ComponentInputs';
-import { componentInputValueMap } from './componentInputValueMap';
+import { ComponentParams, IComponentParams } from './ComponentParams';
+import { componentParamValueMap } from './componentParamValueMap';
 import { RtContent } from './components/rt-content';
 import { RtIfElse } from './components/rt-if-else';
 import { RtIfThen, TIfCell as TRtIfThenIfCell } from './components/rt-if-then';
@@ -66,9 +66,9 @@ export {
 	IComponentEvents,
 	Component,
 	KEY_ELEMENT_CONNECTED,
-	IComponentInputs,
-	ComponentInputs,
-	componentInputValueMap,
+	IComponentParams,
+	ComponentParams,
+	componentParamValueMap,
 	RtContent,
 	RtSlot,
 	TRtIfThenIfCell,

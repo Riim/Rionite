@@ -44,7 +44,7 @@ export function registerComponent(componentConstr: typeof Component) {
 	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
 		.constructor as typeof Component;
 
-	inheritProperty(componentConstr, parentComponentConstr, 'inputs', 0);
+	inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
 	inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
 
 	componentConstr._blockNamesString =
@@ -98,15 +98,15 @@ export function registerComponent(componentConstr: typeof Component) {
 		enumerable: true,
 
 		get() {
-			let inputsConfig = componentConstr.inputs;
+			let paramsConfig = componentConstr.params;
 
-			if (!inputsConfig) {
+			if (!paramsConfig) {
 				return [];
 			}
 
 			let observedAttrs: Array<string> = [];
 
-			for (let name in inputsConfig) {
+			for (let name in paramsConfig) {
 				observedAttrs.push(hyphenize(name, true));
 			}
 

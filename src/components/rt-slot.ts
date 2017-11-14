@@ -14,7 +14,7 @@ let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 @Component.Config({
 	elementIs: 'rt-slot',
 
-	inputs: {
+	params: {
 		forTag: { type: String, readonly: true },
 		for: { type: String, readonly: true },
 		cloneContent: { default: false, readonly: true },
@@ -34,17 +34,17 @@ export class RtSlot extends Component {
 		} else {
 			let ownerComponent = this.ownerComponent;
 			let el = this.element;
-			let inputs = this.inputs;
+			let params = this.params;
 			let contentOwnerComponent = ownerComponent.ownerComponent;
-			let ownerComponentContent = ownerComponent.inputs.$content!;
-			let cloneContent = inputs.cloneContent;
+			let ownerComponentContent = ownerComponent.params.$content!;
+			let cloneContent = params.cloneContent;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
 			let childComponents: Array<Component> | null | undefined;
 
 			if (!cloneContent || ownerComponentContent.firstChild) {
-				let tagName = inputs.forTag;
-				let for_ = inputs['for'];
+				let tagName = params.forTag;
+				let for_ = params['for'];
 				let key = getUID(ownerComponent) + '/' + (tagName ? ':' + tagName : for_ || '');
 
 				if (tagName || for_) {
@@ -136,21 +136,21 @@ export class RtSlot extends Component {
 						? bindContent(
 								content,
 								contentOwnerComponent,
-								inputs.getContext
-									? inputs.getContext.call(
+								params.getContext
+									? params.getContext.call(
 											ownerComponent,
-											ownerComponent.inputs.$context,
+											ownerComponent.params.$context,
 											this
 										)
-									: ownerComponent.inputs.$context,
+									: ownerComponent.params.$context,
 								{ 0: null, 1: null } as any
 							)
 						: bindContent(
 								el,
 								ownerComponent,
-								inputs.getContext
-									? inputs.getContext.call(ownerComponent, inputs.$context, this)
-									: inputs.$context,
+								params.getContext
+									? params.getContext.call(ownerComponent, params.$context, this)
+									: params.$context,
 								{ 0: null, 1: null } as any
 							);
 

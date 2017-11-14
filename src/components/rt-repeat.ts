@@ -29,7 +29,7 @@ let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+of\\s+(${keypathPattern})\
 	elementIs: 'rt-repeat',
 	elementExtends: 'template',
 
-	inputs: {
+	params: {
 		for: { type: String, required: true, readonly: true },
 		trackBy: { type: String, readonly: true },
 		strip: { default: false, readonly: true }
@@ -59,25 +59,25 @@ export class RtRepeat extends Component {
 		this._active = true;
 
 		if (!this.initialized) {
-			let inputs = this.inputs;
-			let for_ = inputs['for'].match(reForAttrValue);
+			let params = this.params;
+			let for_ = params['for'].match(reForAttrValue);
 
 			if (!for_) {
-				throw new SyntaxError(`Invalid value of input property "for" (${inputs['for']})`);
+				throw new SyntaxError(`Invalid value of parameter "for" (${params['for']})`);
 			}
 
 			this._itemName = for_[1];
 			this._list = new Cell<any>(compileKeypath(for_[2]), {
-				context: inputs.$context
+				context: params.$context
 			});
-			this._trackBy = inputs.trackBy;
+			this._trackBy = params.trackBy;
 
 			let rawItemContent = (this._rawItemContent = document.importNode(
 				((this.element as any) as HTMLTemplateElement).content,
 				true
 			));
 
-			if (inputs.strip) {
+			if (params.strip) {
 				let firstChild = rawItemContent.firstChild!;
 				let lastChild = rawItemContent.lastChild!;
 
@@ -232,7 +232,7 @@ export class RtRepeat extends Component {
 				i += templates[i].content.querySelectorAll('template').length + 1;
 			}
 		}
-		let context = this.inputs.$context;
+		let context = this.params.$context;
 		let [bindings, childComponents] = bindContent(
 			content,
 			this.ownerComponent,

@@ -19,7 +19,7 @@ let reKeypath = RegExp(`^${keypathPattern}$`);
 	elementIs: 'rt-if-then',
 	elementExtends: 'template',
 
-	inputs: {
+	params: {
 		if: { type: String, required: true, readonly: true }
 	}
 })
@@ -40,7 +40,7 @@ export class RtIfThen extends Component {
 		this._active = true;
 
 		if (!this.initialized) {
-			let if_ = (this.inputs['if'] || '').trim();
+			let if_ = (this.params['if'] || '').trim();
 
 			if (!reKeypath.test(if_)) {
 				throw new SyntaxError(`Invalid value of attribute "if" (${if_})`);
@@ -51,7 +51,7 @@ export class RtIfThen extends Component {
 				function() {
 					return !!getIfValue.call(this);
 				},
-				{ context: this.inputs.$context }
+				{ context: this.params.$context }
 			);
 
 			this.initialized = true;
@@ -99,7 +99,7 @@ export class RtIfThen extends Component {
 			let [bindings, childComponents] = bindContent(
 				content,
 				this.ownerComponent,
-				this.inputs.$context,
+				this.params.$context,
 				{ 0: null, 1: null } as any
 			);
 

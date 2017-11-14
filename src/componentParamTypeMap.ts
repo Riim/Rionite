@@ -1,6 +1,6 @@
 import { Map } from '@riim/map-set-polyfill';
 
-export let componentInputTypeMap = new Map<any, string>([
+export let componentParamTypeMap = new Map<any, string>([
 	[Boolean, 'boolean'],
 	['boolean', 'boolean'],
 	[Number, 'number'],
