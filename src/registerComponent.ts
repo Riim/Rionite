@@ -18,7 +18,7 @@ function inheritProperty(
 	let parentObj = source[name] as { [name: string]: any } | null | undefined;
 
 	if (obj && parentObj && obj != parentObj) {
-		let o = (target[name] = { __proto__: parentObj } as { [name: string]: any });
+		let o: { [name: string]: any } = (target[name] = { __proto__: parentObj });
 
 		for (let key in obj) {
 			o[key] = obj[key];

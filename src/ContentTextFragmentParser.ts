@@ -191,7 +191,7 @@ export class ContentTextFragmentParser {
 
 				if (arg) {
 					if (this._skipWhitespaces() == ',' || this.chr == ')') {
-						args.push(arg as string);
+						args.push(arg);
 
 						if (this.chr == ',') {
 							this._next();

@@ -106,7 +106,7 @@ export function bindContent(
 				if (childComponent) {
 					childComponent._ownerComponent = ownerComponent;
 					childComponent.params.$context = context;
-					childComponent.params.$specified = $specified as Set<string>;
+					childComponent.params.$specified = $specified!;
 
 					(result[1] || (result[1] = [])).push(childComponent);
 				}

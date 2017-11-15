@@ -1,4 +1,4 @@
-import { IElement, NodeType, Template } from 'nelm';
+import { NodeType, Template } from 'nelm';
 
 ['if-then', 'if-else', 'repeat'].forEach(tagName => {
 	Template.helpers[tagName] = el => {
@@ -22,7 +22,7 @@ import { IElement, NodeType, Template } from 'nelm';
 				names: el.names && el.names[0] ? ['$' + el.names[0], ...el.names] : el.names,
 				attributes: attrs,
 				content: el.content
-			} as IElement
+			}
 		];
 	};
 });
