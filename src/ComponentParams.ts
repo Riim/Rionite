@@ -21,7 +21,6 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 
 	let type = typeof config;
 	let defaultValue: any;
-	let pullDefault: Function | undefined;
 	let required: boolean;
 	let readonly: boolean;
 
@@ -34,9 +33,8 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 
 		if (type === undefined) {
 			type = typeof defaultValue;
-		} else if (defaultValue === undefined) {
-			pullDefault = config.pullDefault;
 		} else if (
+			defaultValue !== undefined &&
 			componentParamTypeMap.has(type) &&
 			componentParamTypeMap.get(type) != typeof defaultValue
 		) {
@@ -72,7 +70,7 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 	let value = typeSerializer.read(rawValue, defaultValue);
 	let descriptor: PropertyDescriptor;
 
-	if (readonly && !pullDefault) {
+	if (readonly) {
 		descriptor = {
 			configurable: true,
 			enumerable: true,
@@ -90,42 +88,15 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 	} else {
 		let valueCell: Cell | undefined;
 
-		if (pullDefault) {
-			valueCell = new Cell(pullDefault, {
-				onChange(evt) {
-					component.emit(
-						`param-${hyphenizedName}-change`,
-						evt.target == valueCell
-							? evt.data
-							: {
-									prevEvent: null,
-									prevValue: evt.target,
-									value: evt.target
-								}
-					);
-				}
-			});
+		params['_' + hyphenizedName] = (rawValue: string | null) => {
+			let val = typeSerializer!.read(rawValue, defaultValue);
 
-			if (rawValue !== null) {
-				valueCell.set(value);
+			if (valueCell) {
+				valueCell.set(val);
+			} else {
+				value = val;
 			}
-		}
-
-		if (!readonly) {
-			params['_' + hyphenizedName] = (rawValue: string | null) => {
-				if (rawValue === null && pullDefault) {
-					valueCell!.pull();
-				} else {
-					let val = typeSerializer!.read(rawValue, defaultValue);
-
-					if (valueCell) {
-						valueCell.set(val);
-					} else {
-						value = val;
-					}
-				}
-			};
-		}
+		};
 
 		descriptor = {
 			configurable: true,
@@ -140,17 +111,20 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 
 				if (currentlyPulling || EventEmitter.currentlySubscribing) {
 					valueCell = new Cell(value, {
+						context: params,
+
 						onChange(evt) {
-							component.emit(
-								`param-${hyphenizedName}-change`,
-								evt.target == valueCell
-									? evt.data
-									: {
-											prevEvent: null,
-											prevValue: evt.target,
-											value: evt.target
-										}
-							);
+							component.emit({
+								type: `param-${hyphenizedName}-change`,
+								data:
+									evt.target == valueCell
+										? evt.data
+										: {
+												prevEvent: null,
+												prevValue: evt.target,
+												value: evt.target
+											}
+							});
 						}
 					});
 
@@ -162,29 +136,21 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 				return value;
 			},
 
-			set: readonly
-				? (val: any) => {
-						if (val !== value) {
-							throw new TypeError(`Parameter "${name}" is readonly`);
-						}
-					}
-				: (val: any) => {
-						let rawValue = typeSerializer!.write(val, defaultValue);
+			set(val: any) {
+				let rawValue = typeSerializer!.write(val, defaultValue);
 
-						if (rawValue === null) {
-							el.removeAttribute(hyphenizedName);
-						} else {
-							el.setAttribute(hyphenizedName, rawValue);
-						}
+				if (rawValue === null) {
+					el.removeAttribute(hyphenizedName);
+				} else {
+					el.setAttribute(hyphenizedName, rawValue);
+				}
 
-						if (rawValue === null && pullDefault) {
-							valueCell!.pull();
-						} else if (valueCell) {
-							valueCell.set(val);
-						} else {
-							value = val;
-						}
-					}
+				if (valueCell) {
+					valueCell.set(val);
+				} else {
+					value = val;
+				}
+			}
 		};
 	}
 

@@ -2777,7 +2777,6 @@ function initParam(params, name, el) {
     }
     var type = typeof config;
     var defaultValue;
-    var pullDefault;
     var required;
     var readonly;
     if (type == 'function') {
@@ -2790,10 +2789,8 @@ function initParam(params, name, el) {
         if (type === undefined) {
             type = typeof defaultValue;
         }
-        else if (defaultValue === undefined) {
-            pullDefault = config.pullDefault;
-        }
-        else if (componentParamTypeMap_1.componentParamTypeMap.has(type) &&
+        else if (defaultValue !== undefined &&
+            componentParamTypeMap_1.componentParamTypeMap.has(type) &&
             componentParamTypeMap_1.componentParamTypeMap.get(type) != typeof defaultValue) {
             throw new TypeError('Specified type does not match defaultValue type');
         }
@@ -2820,7 +2817,7 @@ function initParam(params, name, el) {
     }
     var value = typeSerializer.read(rawValue, defaultValue);
     var descriptor;
-    if (readonly && !pullDefault) {
+    if (readonly) {
         descriptor = {
             configurable: true,
             enumerable: true,
@@ -2836,38 +2833,15 @@ function initParam(params, name, el) {
     }
     else {
         var valueCell_1;
-        if (pullDefault) {
-            valueCell_1 = new cellx_1.Cell(pullDefault, {
-                onChange: function (evt) {
-                    component.emit("param-" + hyphenizedName + "-change", evt.target == valueCell_1
-                        ? evt.data
-                        : {
-                            prevEvent: null,
-                            prevValue: evt.target,
-                            value: evt.target
-                        });
-                }
-            });
-            if (rawValue !== null) {
-                valueCell_1.set(value);
+        params['_' + hyphenizedName] = function (rawValue) {
+            var val = typeSerializer.read(rawValue, defaultValue);
+            if (valueCell_1) {
+                valueCell_1.set(val);
             }
-        }
-        if (!readonly) {
-            params['_' + hyphenizedName] = function (rawValue) {
-                if (rawValue === null && pullDefault) {
-                    valueCell_1.pull();
-                }
-                else {
-                    var val = typeSerializer.read(rawValue, defaultValue);
-                    if (valueCell_1) {
-                        valueCell_1.set(val);
-                    }
-                    else {
-                        value = val;
-                    }
-                }
-            };
-        }
+            else {
+                value = val;
+            }
+        };
         descriptor = {
             configurable: true,
             enumerable: true,
@@ -2878,14 +2852,18 @@ function initParam(params, name, el) {
                 var currentlyPulling = cellx_1.Cell.currentlyPulling;
                 if (currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
                     valueCell_1 = new cellx_1.Cell(value, {
+                        context: params,
                         onChange: function (evt) {
-                            component.emit("param-" + hyphenizedName + "-change", evt.target == valueCell_1
-                                ? evt.data
-                                : {
-                                    prevEvent: null,
-                                    prevValue: evt.target,
-                                    value: evt.target
-                                });
+                            component.emit({
+                                type: "param-" + hyphenizedName + "-change",
+                                data: evt.target == valueCell_1
+                                    ? evt.data
+                                    : {
+                                        prevEvent: null,
+                                        prevValue: evt.target,
+                                        value: evt.target
+                                    }
+                            });
                         }
                     });
                     if (currentlyPulling) {
@@ -2894,30 +2872,21 @@ function initParam(params, name, el) {
                 }
                 return value;
             },
-            set: readonly
-                ? function (val) {
-                    if (val !== value) {
-                        throw new TypeError("Parameter \"" + name + "\" is readonly");
-                    }
+            set: function (val) {
+                var rawValue = typeSerializer.write(val, defaultValue);
+                if (rawValue === null) {
+                    el.removeAttribute(hyphenizedName);
                 }
-                : function (val) {
-                    var rawValue = typeSerializer.write(val, defaultValue);
-                    if (rawValue === null) {
-                        el.removeAttribute(hyphenizedName);
-                    }
-                    else {
-                        el.setAttribute(hyphenizedName, rawValue);
-                    }
-                    if (rawValue === null && pullDefault) {
-                        valueCell_1.pull();
-                    }
-                    else if (valueCell_1) {
-                        valueCell_1.set(val);
-                    }
-                    else {
-                        value = val;
-                    }
+                else {
+                    el.setAttribute(hyphenizedName, rawValue);
                 }
+                if (valueCell_1) {
+                    valueCell_1.set(val);
+                }
+                else {
+                    value = val;
+                }
+            }
         };
     }
     Object.defineProperty(params, name, descriptor);
