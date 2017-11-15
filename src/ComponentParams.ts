@@ -13,65 +13,66 @@ export interface IComponentParams extends Object {
 
 function initParam(params: IComponentParams, name: string, el: IComponentElement) {
 	let component = el.$component;
-	let paramConfig = (component.constructor as typeof Component).params![name];
+	let config = (component.constructor as typeof Component).params![name];
 
-	if (paramConfig == null) {
+	if (config == null) {
 		return;
 	}
 
-	let type = typeof paramConfig;
+	let type = typeof config;
 	let defaultValue: any;
+	let pullDefault: Function | undefined;
 	let required: boolean;
 	let readonly: boolean;
 
 	if (type == 'function') {
-		type = paramConfig;
+		type = config;
 		required = readonly = false;
-	} else if (
-		type == 'object' &&
-		(paramConfig.type !== undefined || paramConfig.default !== undefined)
-	) {
-		type = paramConfig.type;
-		defaultValue = paramConfig.default;
+	} else if (type == 'object' && (config.type !== undefined || config.default !== undefined)) {
+		type = config.type;
+		defaultValue = config.default;
 
 		if (type === undefined) {
 			type = typeof defaultValue;
+		} else if (defaultValue === undefined) {
+			pullDefault = config.pullDefault;
 		} else if (
-			defaultValue !== undefined &&
 			componentParamTypeMap.has(type) &&
 			componentParamTypeMap.get(type) != typeof defaultValue
 		) {
 			throw new TypeError('Specified type does not match defaultValue type');
 		}
 
-		required = paramConfig.required;
-		readonly = paramConfig.readonly;
+		required = config.required;
+		readonly = config.readonly;
 	} else {
-		defaultValue = paramConfig;
+		defaultValue = config;
 		required = readonly = false;
 	}
 
 	let typeSerializer = componentParamTypeSerializerMap.get(type);
 
 	if (!typeSerializer) {
-		throw new TypeError('Unsupported component parameter type');
+		throw new TypeError('Unsupported parameter type');
 	}
 
 	let hyphenizedName = hyphenize(name, true);
 	let rawValue = el.getAttribute(hyphenizedName);
 
-	if (required && rawValue === null) {
-		throw new TypeError(`Parameter "${name}" is required`);
-	}
+	if (rawValue === null) {
+		if (required) {
+			throw new TypeError(`Parameter "${name}" is required`);
+		}
 
-	if (rawValue === null && defaultValue != null && defaultValue !== false) {
-		el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue)!);
+		if (defaultValue != null && defaultValue !== false) {
+			el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue)!);
+		}
 	}
 
 	let value = typeSerializer.read(rawValue, defaultValue);
 	let descriptor: PropertyDescriptor;
 
-	if (readonly) {
+	if (readonly && !pullDefault) {
 		descriptor = {
 			configurable: true,
 			enumerable: true,
@@ -89,20 +90,41 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 	} else {
 		let valueCell: Cell | undefined;
 
-		let setRawValue = (rawValue: string | null) => {
-			let val = typeSerializer!.read(rawValue, defaultValue);
+		if (pullDefault) {
+			valueCell = new Cell(pullDefault, {
+				onChange(evt) {
+					component.emit(
+						`param-${hyphenizedName}-change`,
+						evt.target == valueCell
+							? evt.data
+							: {
+									prevEvent: null,
+									prevValue: evt.target,
+									value: evt.target
+								}
+					);
+				}
+			});
 
-			if (valueCell) {
-				valueCell.set(val);
-			} else {
-				value = val;
+			if (rawValue !== null) {
+				valueCell.set(value);
 			}
-		};
+		}
 
-		params['_' + name] = setRawValue;
+		if (!readonly) {
+			params['_' + hyphenizedName] = (rawValue: string | null) => {
+				if (rawValue === null && pullDefault) {
+					valueCell!.pull();
+				} else {
+					let val = typeSerializer!.read(rawValue, defaultValue);
 
-		if (name != hyphenizedName) {
-			params['_' + hyphenizedName] = setRawValue;
+					if (valueCell) {
+						valueCell.set(val);
+					} else {
+						value = val;
+					}
+				}
+			};
 		}
 
 		descriptor = {
@@ -120,18 +142,13 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 					valueCell = new Cell(value, {
 						onChange(evt) {
 							component.emit(
+								`param-${hyphenizedName}-change`,
 								evt.target == valueCell
-									? {
-											type: `param-${hyphenizedName}-change`,
-											data: evt.data
-										}
+									? evt.data
 									: {
-											type: `param-${hyphenizedName}-change`,
-											data: {
-												prevEvent: null,
-												prevValue: evt.target,
-												value: evt.target
-											}
+											prevEvent: null,
+											prevValue: evt.target,
+											value: evt.target
 										}
 							);
 						}
@@ -145,21 +162,29 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 				return value;
 			},
 
-			set(val: any) {
-				let rawValue = typeSerializer!.write(val, defaultValue);
+			set: readonly
+				? (val: any) => {
+						if (val !== value) {
+							throw new TypeError(`Parameter "${name}" is readonly`);
+						}
+					}
+				: (val: any) => {
+						let rawValue = typeSerializer!.write(val, defaultValue);
 
-				if (rawValue === null) {
-					el.removeAttribute(hyphenizedName);
-				} else {
-					el.setAttribute(hyphenizedName, rawValue);
-				}
+						if (rawValue === null) {
+							el.removeAttribute(hyphenizedName);
+						} else {
+							el.setAttribute(hyphenizedName, rawValue);
+						}
 
-				if (valueCell) {
-					valueCell.set(val);
-				} else {
-					value = val;
-				}
-			}
+						if (rawValue === null && pullDefault) {
+							valueCell!.pull();
+						} else if (valueCell) {
+							valueCell.set(val);
+						} else {
+							value = val;
+						}
+					}
 		};
 	}
 
@@ -168,7 +193,7 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 
 export let ComponentParams = {
 	init(component: Component): IComponentParams {
-		let paramsConfig = (component.constructor as typeof Component).params;
+		let config = (component.constructor as typeof Component).params;
 		let el = component.element;
 		let params = {
 			$content: null,
@@ -176,8 +201,8 @@ export let ComponentParams = {
 			$specified: null as any
 		};
 
-		if (paramsConfig) {
-			for (let name in paramsConfig) {
+		if (config) {
+			for (let name in config) {
 				initParam(params, name, el);
 			}
 		}

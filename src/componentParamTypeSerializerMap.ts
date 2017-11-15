@@ -16,6 +16,7 @@ export let componentParamTypeSerializerMap = new Map<
 			read: (value: string | null, defaultValue: boolean | undefined): boolean => {
 				return value !== null ? value != 'no' : !!defaultValue;
 			},
+
 			write: (value: any, defaultValue: boolean | undefined): string | null => {
 				return value ? '' : defaultValue ? 'no' : null;
 			}
@@ -28,6 +29,7 @@ export let componentParamTypeSerializerMap = new Map<
 			read: (value: string | null, defaultValue: number | undefined): number | null => {
 				return value !== null ? +value : defaultValue !== undefined ? defaultValue : null;
 			},
+
 			write: (value: any): string | null => {
 				return value != null ? String(+value) : null;
 			}
@@ -40,6 +42,7 @@ export let componentParamTypeSerializerMap = new Map<
 			read: (value: string | null, defaultValue: string | undefined): string | null => {
 				return value !== null ? value : defaultValue !== undefined ? defaultValue : null;
 			},
+
 			write: (value: any): string | null => {
 				return value != null ? String(value) : null;
 			}
@@ -61,10 +64,11 @@ export let componentParamTypeSerializerMap = new Map<
 					throw new TypeError('Value is not an object');
 				}
 
-				let val = componentParamValueMap.get(value) as object;
+				let val = componentParamValueMap.get(value)!;
 				componentParamValueMap.delete(value);
 				return val;
 			},
+
 			write: (value: any): string | null => {
 				return value != null ? '' : null;
 			}
@@ -79,6 +83,7 @@ export let componentParamTypeSerializerMap = new Map<
 					? Function(`return ${unescapeHTML(value)};`)()
 					: defaultValue !== undefined ? defaultValue : null;
 			},
+
 			write: (value: any): string | null => {
 				return value != null
 					? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value))

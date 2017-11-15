@@ -1182,50 +1182,49 @@ exports.keypathToJSExpression = keypathToJSExpression;
 Object.defineProperty(exports, "__esModule", { value: true });
 var gettext_1 = __webpack_require__(35);
 exports.formatters = {
-    or: function or(value, arg) {
+    or: function (value, arg) {
         return value || arg;
     },
-    default: function default_(value, arg) {
+    default: function (value, arg) {
         return value === undefined ? arg : value;
     },
-    not: function not(value) {
+    not: function (value) {
         return !value;
     },
-    eq: function eq(value, arg) {
+    eq: function (value, arg) {
         return value == arg;
     },
-    identical: function identical(value, arg) {
+    identical: function (value, arg) {
         return value === arg;
     },
-    lt: function lt(value, arg) {
+    lt: function (value, arg) {
         return value < arg;
     },
-    lte: function lte(value, arg) {
+    lte: function (value, arg) {
         return value <= arg;
     },
-    gt: function gt(value, arg) {
+    gt: function (value, arg) {
         return value > arg;
     },
-    gte: function gte(value, arg) {
+    gte: function (value, arg) {
         return value >= arg;
     },
-    has: function has(obj, key) {
+    has: function (obj, key) {
         return !!obj && (typeof obj.has == 'function' ? obj.has(key) : obj.hasOwnProperty(key));
     },
-    get: function get(obj, key) {
+    get: function (obj, key) {
         return obj && (typeof obj.get == 'function' ? obj.get(key) : obj[key]);
     },
-    // Safary: "Cannot declare a parameter named 'key' as it shadows the name of a strict mode function."
-    key: function key_(obj, key) {
+    key: function (obj, key) {
         return obj && obj[key];
     },
-    join: function join(arr, separator) {
+    join: function (arr, separator) {
         if (separator === void 0) { separator = ', '; }
         return arr && arr.join(separator);
     },
     t: gettext_1.getText.t,
     pt: gettext_1.getText.pt,
-    nt: function nt(count, key) {
+    nt: function (count, key) {
         var args = [];
         for (var _i = 2; _i < arguments.length; _i++) {
             args[_i - 2] = arguments[_i];
@@ -1233,7 +1232,7 @@ exports.formatters = {
         args.unshift(count);
         return gettext_1.getText('', key, true, args);
     },
-    npt: function npt(count, key, context) {
+    npt: function (count, key, context) {
         var args = [];
         for (var _i = 3; _i < arguments.length; _i++) {
             args[_i - 3] = arguments[_i];
@@ -1241,7 +1240,7 @@ exports.formatters = {
         args.unshift(count);
         return gettext_1.getText(context, key, true, args);
     },
-    json: function json(value) {
+    json: function (value) {
         return JSON.stringify(value);
     }
 };
@@ -1272,52 +1271,56 @@ var componentParamTypeMap_1 = __webpack_require__(39);
 var componentParamTypeSerializerMap_1 = __webpack_require__(40);
 function initParam(params, name, el) {
     var component = el.$component;
-    var paramConfig = component.constructor.params[name];
-    if (paramConfig == null) {
+    var config = component.constructor.params[name];
+    if (config == null) {
         return;
     }
-    var type = typeof paramConfig;
+    var type = typeof config;
     var defaultValue;
+    var pullDefault;
     var required;
     var readonly;
     if (type == 'function') {
-        type = paramConfig;
+        type = config;
         required = readonly = false;
     }
-    else if (type == 'object' &&
-        (paramConfig.type !== undefined || paramConfig.default !== undefined)) {
-        type = paramConfig.type;
-        defaultValue = paramConfig.default;
+    else if (type == 'object' && (config.type !== undefined || config.default !== undefined)) {
+        type = config.type;
+        defaultValue = config.default;
         if (type === undefined) {
             type = typeof defaultValue;
         }
-        else if (defaultValue !== undefined &&
-            componentParamTypeMap_1.componentParamTypeMap.has(type) &&
+        else if (defaultValue === undefined) {
+            pullDefault = config.pullDefault;
+        }
+        else if (componentParamTypeMap_1.componentParamTypeMap.has(type) &&
             componentParamTypeMap_1.componentParamTypeMap.get(type) != typeof defaultValue) {
             throw new TypeError('Specified type does not match defaultValue type');
         }
-        required = paramConfig.required;
-        readonly = paramConfig.readonly;
+        required = config.required;
+        readonly = config.readonly;
     }
     else {
-        defaultValue = paramConfig;
+        defaultValue = config;
         required = readonly = false;
     }
     var typeSerializer = componentParamTypeSerializerMap_1.componentParamTypeSerializerMap.get(type);
     if (!typeSerializer) {
-        throw new TypeError('Unsupported component parameter type');
+        throw new TypeError('Unsupported parameter type');
     }
     var hyphenizedName = hyphenize_1.hyphenize(name, true);
     var rawValue = el.getAttribute(hyphenizedName);
-    if (required && rawValue === null) {
-        throw new TypeError("Parameter \"" + name + "\" is required");
-    }
-    if (rawValue === null && defaultValue != null && defaultValue !== false) {
-        el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue));
+    if (rawValue === null) {
+        if (required) {
+            throw new TypeError("Parameter \"" + name + "\" is required");
+        }
+        if (defaultValue != null && defaultValue !== false) {
+            el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue));
+        }
     }
     var value = typeSerializer.read(rawValue, defaultValue);
     var descriptor;
-    if (readonly) {
+    if (readonly && !pullDefault) {
         descriptor = {
             configurable: true,
             enumerable: true,
@@ -1333,18 +1336,37 @@ function initParam(params, name, el) {
     }
     else {
         var valueCell_1;
-        var setRawValue = function (rawValue) {
-            var val = typeSerializer.read(rawValue, defaultValue);
-            if (valueCell_1) {
-                valueCell_1.set(val);
+        if (pullDefault) {
+            valueCell_1 = new cellx_1.Cell(pullDefault, {
+                onChange: function (evt) {
+                    component.emit("param-" + hyphenizedName + "-change", evt.target == valueCell_1
+                        ? evt.data
+                        : {
+                            prevEvent: null,
+                            prevValue: evt.target,
+                            value: evt.target
+                        });
+                }
+            });
+            if (rawValue !== null) {
+                valueCell_1.set(value);
             }
-            else {
-                value = val;
-            }
-        };
-        params['_' + name] = setRawValue;
-        if (name != hyphenizedName) {
-            params['_' + hyphenizedName] = setRawValue;
+        }
+        if (!readonly) {
+            params['_' + hyphenizedName] = function (rawValue) {
+                if (rawValue === null && pullDefault) {
+                    valueCell_1.pull();
+                }
+                else {
+                    var val = typeSerializer.read(rawValue, defaultValue);
+                    if (valueCell_1) {
+                        valueCell_1.set(val);
+                    }
+                    else {
+                        value = val;
+                    }
+                }
+            };
         }
         descriptor = {
             configurable: true,
@@ -1357,18 +1379,12 @@ function initParam(params, name, el) {
                 if (currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
                     valueCell_1 = new cellx_1.Cell(value, {
                         onChange: function (evt) {
-                            component.emit(evt.target == valueCell_1
-                                ? {
-                                    type: "param-" + hyphenizedName + "-change",
-                                    data: evt.data
-                                }
+                            component.emit("param-" + hyphenizedName + "-change", evt.target == valueCell_1
+                                ? evt.data
                                 : {
-                                    type: "param-" + hyphenizedName + "-change",
-                                    data: {
-                                        prevEvent: null,
-                                        prevValue: evt.target,
-                                        value: evt.target
-                                    }
+                                    prevEvent: null,
+                                    prevValue: evt.target,
+                                    value: evt.target
                                 });
                         }
                     });
@@ -1378,36 +1394,45 @@ function initParam(params, name, el) {
                 }
                 return value;
             },
-            set: function (val) {
-                var rawValue = typeSerializer.write(val, defaultValue);
-                if (rawValue === null) {
-                    el.removeAttribute(hyphenizedName);
+            set: readonly
+                ? function (val) {
+                    if (val !== value) {
+                        throw new TypeError("Parameter \"" + name + "\" is readonly");
+                    }
                 }
-                else {
-                    el.setAttribute(hyphenizedName, rawValue);
+                : function (val) {
+                    var rawValue = typeSerializer.write(val, defaultValue);
+                    if (rawValue === null) {
+                        el.removeAttribute(hyphenizedName);
+                    }
+                    else {
+                        el.setAttribute(hyphenizedName, rawValue);
+                    }
+                    if (rawValue === null && pullDefault) {
+                        valueCell_1.pull();
+                    }
+                    else if (valueCell_1) {
+                        valueCell_1.set(val);
+                    }
+                    else {
+                        value = val;
+                    }
                 }
-                if (valueCell_1) {
-                    valueCell_1.set(val);
-                }
-                else {
-                    value = val;
-                }
-            }
         };
     }
     Object.defineProperty(params, name, descriptor);
 }
 exports.ComponentParams = {
     init: function (component) {
-        var paramsConfig = component.constructor.params;
+        var config = component.constructor.params;
         var el = component.element;
         var params = {
             $content: null,
             $context: null,
             $specified: null
         };
-        if (paramsConfig) {
-            for (var name_1 in paramsConfig) {
+        if (config) {
+            for (var name_1 in config) {
                 initParam(params, name_1, el);
             }
         }
