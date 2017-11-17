@@ -1,7 +1,7 @@
 import { RtIfThen } from './rt-if-then';
 
 @RtIfThen.Config({
-	elementIs: 'rt-if-else',
+	elementIs: 'RtIfElse',
 	elementExtends: 'template'
 })
 export class RtIfElse extends RtIfThen {

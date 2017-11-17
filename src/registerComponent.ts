@@ -1,5 +1,6 @@
 import { hyphenize } from '@riim/hyphenize';
 import { mixin } from '@riim/mixin';
+import { pascalize } from '@riim/pascalize';
 import { Template } from 'nelm';
 import { Component, IComponentElement } from './Component';
 import { componentConstructorMap } from './componentConstructorMap';
@@ -31,7 +32,7 @@ function inheritProperty(
 }
 
 export function registerComponent(componentConstr: typeof Component) {
-	let elIs = componentConstr.elementIs;
+	let elIs = componentConstr.elementIs && hyphenize(componentConstr.elementIs);
 
 	if (!elIs) {
 		throw new TypeError('Static property "elementIs" is required');
@@ -80,11 +81,11 @@ export function registerComponent(componentConstr: typeof Component) {
 	inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
 	inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
 
-	let elExtends = componentConstr.elementExtends;
+	let elExtends = componentConstr.elementExtends && hyphenize(componentConstr.elementExtends);
 
 	let parentElConstr = elExtends
 		? elementConstructorMap.get(elExtends) ||
-			(window as any)[`HTML${elExtends.charAt(0).toUpperCase() + elExtends.slice(1)}Element`]
+			(window as any)[`HTML${pascalize(elExtends)}Element`]
 		: HTMLElement;
 
 	let elConstr = function(self: HTMLElement | undefined): IComponentElement {

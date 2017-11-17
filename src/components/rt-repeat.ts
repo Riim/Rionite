@@ -26,7 +26,7 @@ export type TItemMap = Map<any, TItemList>;
 let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+of\\s+(${keypathPattern})\\s*$`);
 
 @Component.Config({
-	elementIs: 'rt-repeat',
+	elementIs: 'RtRepeat',
 	elementExtends: 'template',
 
 	params: {

@@ -16,7 +16,7 @@ export type TIfCell = Cell<boolean>;
 let reKeypath = RegExp(`^${keypathPattern}$`);
 
 @Component.Config({
-	elementIs: 'rt-if-then',
+	elementIs: 'RtIfThen',
 	elementExtends: 'template',
 
 	params: {

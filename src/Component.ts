@@ -218,12 +218,12 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 		let constr = this.constructor as typeof Component;
 
-		if (!componentConstructorMap.has(constr.elementIs)) {
+		if (!componentConstructorMap.has(constr._elementBlockNames[0])) {
 			throw new TypeError('Component must be registered');
 		}
 
 		if (!el) {
-			el = document.createElement(constr.elementIs);
+			el = document.createElement(constr._elementBlockNames[0]);
 		}
 
 		this.element = el as IComponentElement;
@@ -415,7 +415,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 						contentHTML = contentHTML.replace(
 							reClassBlockElement,
 							createClassBlockElementReplacer(
-								constr.elementIs,
+								constr._elementBlockNames[0],
 								constr.events,
 								'oncomponent-'
 							)
@@ -426,7 +426,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 						contentHTML = contentHTML.replace(
 							reClassBlockElement,
 							createClassBlockElementReplacer(
-								constr.elementIs,
+								constr._elementBlockNames[0],
 								constr.domEvents,
 								'on-'
 							)

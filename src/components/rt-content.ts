@@ -12,7 +12,7 @@ import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } fr
 let KEY_CONTENT_MAP = Symbol('contentMap');
 
 @Component.Config({
-	elementIs: 'rt-content',
+	elementIs: 'RtContent',
 
 	params: {
 		select: { type: String, readonly: true },

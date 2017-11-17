@@ -12,7 +12,7 @@ import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } fr
 let KEY_SLOT_CONTENT_MAP = Symbol('slotContentMap');
 
 @Component.Config({
-	elementIs: 'rt-slot',
+	elementIs: 'RtSlot',
 
 	params: {
 		forTag: { type: String, readonly: true },
