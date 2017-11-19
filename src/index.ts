@@ -1,53 +1,14 @@
 import { Container } from '@riim/di';
 import { logger } from '@riim/logger';
-import {
-	IBlock as INelmBlock,
-	NodeType as NelmNodeType,
-	Parser as NelmParser,
-	Template
-	} from 'nelm';
-import {
-	Component,
-	IComponentElement,
-	IComponentElementClassNameMap,
-	IComponentEvents,
-	IComponentOEvents,
-	IPossiblyComponentElement,
-	TEventHandler,
-	TOEventHandler
-	} from './Component';
-import { ComponentParams, IComponentParams } from './ComponentParams';
-import { componentParamValueMap } from './componentParamValueMap';
-import { RtContent } from './components/rt-content';
-import { RtIfElse } from './components/rt-if-else';
-import { RtIfThen, TIfCell as TRtIfThenIfCell } from './components/rt-if-then';
-import {
-	IItem as IRtRepeatItem,
-	RtRepeat,
-	TItemList as TRtRepeatItemList,
-	TItemMap as TRtRepeatItemMap,
-	TListCell as TRtRepeatListCell
-	} from './components/rt-repeat';
-import { RtSlot } from './components/rt-slot';
-import {
-	DisposableMixin,
-	IDisposable,
-	IDisposableCallback,
-	IDisposableInterval,
-	IDisposableListening,
-	IDisposableTimeout,
-	TListener,
-	TListeningTarget
-	} from './DisposableMixin';
-import { formatters } from './formatters';
-import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
 import './templateHelpers';
 
 export {
-	NelmNodeType,
-	INelmBlock,
-	NelmParser,
-	Template,
+	NodeType as NelmNodeType,
+	IBlock as INelmBlock,
+	Parser as NelmParser,
+	Template
+} from 'nelm';
+export {
 	IDisposable,
 	IDisposableListening,
 	IDisposableTimeout,
@@ -55,8 +16,12 @@ export {
 	IDisposableCallback,
 	TListeningTarget,
 	TListener,
-	DisposableMixin,
-	formatters,
+	DisposableMixin
+} from './DisposableMixin';
+export { formatters } from './formatters';
+export { RtSlot } from './components/rt-slot';
+export { RtContent } from './components/rt-content';
+export {
 	IPossiblyComponentElement,
 	IComponentElement,
 	IComponentElementClassNameMap,
@@ -64,21 +29,19 @@ export {
 	TEventHandler,
 	IComponentOEvents,
 	IComponentEvents,
-	Component,
-	KEY_ELEMENT_CONNECTED,
-	IComponentParams,
-	ComponentParams,
-	componentParamValueMap,
-	RtContent,
-	RtSlot,
-	TRtIfThenIfCell,
-	RtIfThen,
-	RtIfElse,
-	TRtRepeatListCell,
-	IRtRepeatItem,
-	TRtRepeatItemList,
-	TRtRepeatItemMap,
+	Component
+} from './Component';
+export { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
+export { IComponentParams, ComponentParams } from './ComponentParams';
+export { componentParamValueMap } from './componentParamValueMap';
+export { TIfCell as TRtIfThenIfCell, RtIfThen } from './components/rt-if-then';
+export { RtIfElse } from './components/rt-if-else';
+export {
+	TListCell as TRtRepeatListCell,
+	IItem as IRtRepeatItem,
+	TItemList as TRtRepeatItemList,
+	TItemMap as TRtRepeatItemMap,
 	RtRepeat
-};
+} from './components/rt-repeat';
 
 Container.registerService('logger', logger);

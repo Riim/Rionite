@@ -23,6 +23,7 @@ import {
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { templateTag as templateTagFeature } from './Features';
 import { handledEvents } from './handledEvents';
+import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
 import { registerComponent } from './registerComponent';
 
@@ -256,11 +257,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 			}
 		}
 
-		let targetOwnerComponent = evt.target.ownerComponent;
-
-		if (targetOwnerComponent != evt.target) {
-			handleEvent(evt, targetOwnerComponent.element);
-		}
+		handleEvent(evt);
 	}
 
 	listenTo(
@@ -587,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	handledEvents.forEach(type => {
 		document.documentElement.addEventListener(type, evt => {
 			if (evt.target != document.documentElement) {
-				handleEvent(evt, document.documentElement);
+				handleDOMEvent(evt);
 			}
 		});
 	});

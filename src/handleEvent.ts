@@ -1,74 +1,86 @@
 import { IEvent } from 'cellx';
 import { Component, IPossiblyComponentElement, TEventHandler } from './Component';
 
-export function handleEvent(evt: IEvent | Event, stopElement: Element) {
-	let el: Element | null;
-	let attrName: string;
-	let receivers: Array<Element> | undefined;
-	let eventsName: string;
+let ownerComponentStack: Array<[Component, Array<Element> | undefined]> = [];
 
-	if (evt instanceof Event) {
-		el = evt.target as Element;
-		attrName = 'on-' + evt.type;
-		eventsName = 'domEvents';
-	} else {
-		el = (evt.target as Component).element;
-		attrName = 'oncomponent-' + evt.type;
-		eventsName = 'events';
+export function handleEvent(evt: IEvent<Component>) {
+	let target = evt.target;
+	let ownerComponent = target.ownerComponent;
+
+	if (target == ownerComponent) {
+		return;
 	}
 
-	for (;;) {
-		let parentEl: Element | null = el.parentNode as Element | null;
+	let el: Element = target.element;
 
-		if (!parentEl) {
-			break;
-		}
+	if (!el.parentNode) {
+		return;
+	}
 
+	ownerComponentStack.length = 0;
+
+	let attrName = 'oncomponent-' + evt.type;
+	let ownerComponentElement = ownerComponent.element;
+	let receivers: Array<Element> | undefined;
+
+	for (let component: Component | undefined; ; ) {
 		if (el.hasAttribute(attrName)) {
 			(receivers || (receivers = [])).push(el);
 		}
 
-		el = parentEl;
+		el = el.parentNode as Element;
 
-		let component = (el as IPossiblyComponentElement).$component;
+		if (el == ownerComponentElement) {
+			if (receivers) {
+				for (let i = 0, l = receivers.length; i < l; i++) {
+					let attrValue = receivers[i].getAttribute(attrName)!;
+					let handler: TEventHandler | undefined;
 
-		if (component && receivers && receivers.length) {
-			for (let i = 0; ; ) {
-				let attrValue = receivers[i].getAttribute(attrName)!;
-				let handler: TEventHandler | undefined;
-
-				if (attrValue.charAt(0) == '/') {
-					let events = (component.constructor as any)[eventsName];
-
-					if (events) {
-						events = events[attrValue.slice(1)];
+					if (attrValue.charAt(0) == '/') {
+						let events: any = (ownerComponent.constructor as typeof Component).events;
 
 						if (events) {
-							handler = events[evt.type];
-						}
-					}
-				} else {
-					handler = (component as any)[attrValue];
-				}
+							events = events[attrValue.slice(1)];
 
-				if (handler) {
-					if (handler.call(component, evt, receivers[i]) === false) {
+							if (events) {
+								handler = events[evt.type];
+							}
+						}
+					} else {
+						handler = (ownerComponent as any)[attrValue];
+					}
+
+					if (handler && handler.call(ownerComponent, evt, receivers[i]) === false) {
 						return;
 					}
-
-					receivers.splice(i, 1);
-				} else {
-					i++;
 				}
+			}
 
-				if (i == receivers.length) {
+			if (ownerComponentStack.length) {
+				if (!el.parentNode) {
 					break;
 				}
+
+				[ownerComponent, receivers] = ownerComponentStack.pop()!;
+				ownerComponentElement = ownerComponent.element;
+
+				continue;
+			} else {
+				break;
 			}
 		}
 
-		if (parentEl == stopElement) {
+		if (!el.parentNode) {
 			break;
+		}
+
+		component = (el as IPossiblyComponentElement).$component;
+
+		if (component && component.ownerComponent != ownerComponent) {
+			ownerComponentStack.push([ownerComponent, receivers]);
+			ownerComponent = component.ownerComponent;
+			ownerComponentElement = ownerComponent.element;
+			receivers = undefined;
 		}
 	}
 }
