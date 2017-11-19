@@ -20,7 +20,7 @@ export function handleEvent(evt: IEvent<Component>) {
 	ownerComponentStack.length = 0;
 
 	let attrName = 'oncomponent-' + evt.type;
-	let ownerComponentElement = ownerComponent.element;
+	let ownerComponentEl = ownerComponent.element;
 	let receivers: Array<Element> | undefined;
 
 	for (let component: Component | undefined; ; ) {
@@ -30,7 +30,7 @@ export function handleEvent(evt: IEvent<Component>) {
 
 		el = el.parentNode as Element;
 
-		if (el == ownerComponentElement) {
+		if (el == ownerComponentEl) {
 			if (receivers) {
 				for (let i = 0, l = receivers.length; i < l; i++) {
 					let attrValue = receivers[i].getAttribute(attrName)!;
@@ -62,7 +62,7 @@ export function handleEvent(evt: IEvent<Component>) {
 				}
 
 				[ownerComponent, receivers] = ownerComponentStack.pop()!;
-				ownerComponentElement = ownerComponent.element;
+				ownerComponentEl = ownerComponent.element;
 
 				continue;
 			} else {
@@ -79,7 +79,7 @@ export function handleEvent(evt: IEvent<Component>) {
 		if (component && component.ownerComponent != ownerComponent) {
 			ownerComponentStack.push([ownerComponent, receivers]);
 			ownerComponent = component.ownerComponent;
-			ownerComponentElement = ownerComponent.element;
+			ownerComponentEl = ownerComponent.element;
 			receivers = undefined;
 		}
 	}

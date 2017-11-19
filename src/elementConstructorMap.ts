@@ -33,7 +33,7 @@ export let elementConstructorMap = new Map<string, Function>([
 	['q', (window as any).HTMLQuoteElement],
 	['tbody', (window as any).HTMLTableSectionElement],
 	['td', (window as any).HTMLTableCellElement],
-	['template', (window as any).HTMLTemplateElement || HTMLElement],
+	['template', (window as any).HTMLTemplateElement],
 	['textarea', (window as any).HTMLTextAreaElement],
 	['tfoot', (window as any).HTMLTableSectionElement],
 	['th', (window as any).HTMLTableCellElement],

@@ -219,7 +219,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 		let constr = this.constructor as typeof Component;
 
-		if (!componentConstructorMap.has(constr._elementBlockNames[0])) {
+		if (!componentConstructorMap.has(constr.elementIs)) {
 			throw new TypeError('Component must be registered');
 		}
 
@@ -301,19 +301,19 @@ export class Component extends EventEmitter implements DisposableMixin {
 			let index: number;
 
 			if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
-				let targetName = type.slice(1, index);
+				let targetType = type.slice(1, index);
 
-				if (targetName != '*') {
-					let targetConstr = componentConstructorMap.get(targetName);
+				if (targetType != '*') {
+					let targetConstr = componentConstructorMap.get(targetType);
 
 					if (!targetConstr) {
-						throw new TypeError(`Component "${targetName}" is not defined`);
+						throw new TypeError(`Component "${targetType}" is not defined`);
 					}
 
 					let inner = listener;
 
 					listener = function(evt) {
-						if (evt.target instanceof (targetConstr as typeof Component)) {
+						if (evt.target instanceof targetConstr!) {
 							return inner.call(this, evt);
 						}
 					};

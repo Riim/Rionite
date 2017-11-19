@@ -173,7 +173,7 @@ var Component = /** @class */ (function (_super) {
         _this.isReady = false;
         DisposableMixin_1.DisposableMixin.call(_this);
         var constr = _this.constructor;
-        if (!componentConstructorMap_1.componentConstructorMap.has(constr._elementBlockNames[0])) {
+        if (!componentConstructorMap_1.componentConstructorMap.has(constr.elementIs)) {
             throw new TypeError('Component must be registered');
         }
         if (!el) {
@@ -260,11 +260,11 @@ var Component = /** @class */ (function (_super) {
         if (target instanceof Component) {
             var index = void 0;
             if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
-                var targetName = type.slice(1, index);
-                if (targetName != '*') {
-                    var targetConstr_1 = componentConstructorMap_1.componentConstructorMap.get(targetName);
+                var targetType = type.slice(1, index);
+                if (targetType != '*') {
+                    var targetConstr_1 = componentConstructorMap_1.componentConstructorMap.get(targetType);
                     if (!targetConstr_1) {
-                        throw new TypeError("Component \"" + targetName + "\" is not defined");
+                        throw new TypeError("Component \"" + targetType + "\" is not defined");
                     }
                     var inner_1 = listener;
                     listener = function (evt) {
@@ -2482,14 +2482,14 @@ function handleEvent(evt) {
     }
     ownerComponentStack.length = 0;
     var attrName = 'oncomponent-' + evt.type;
-    var ownerComponentElement = ownerComponent.element;
+    var ownerComponentEl = ownerComponent.element;
     var receivers;
     for (var component = void 0;;) {
         if (el.hasAttribute(attrName)) {
             (receivers || (receivers = [])).push(el);
         }
         el = el.parentNode;
-        if (el == ownerComponentElement) {
+        if (el == ownerComponentEl) {
             if (receivers) {
                 for (var i = 0, l = receivers.length; i < l; i++) {
                     var attrValue = receivers[i].getAttribute(attrName);
@@ -2516,7 +2516,7 @@ function handleEvent(evt) {
                     break;
                 }
                 _a = ownerComponentStack.pop(), ownerComponent = _a[0], receivers = _a[1];
-                ownerComponentElement = ownerComponent.element;
+                ownerComponentEl = ownerComponent.element;
                 continue;
             }
             else {
@@ -2530,7 +2530,7 @@ function handleEvent(evt) {
         if (component && component.ownerComponent != ownerComponent) {
             ownerComponentStack.push([ownerComponent, receivers]);
             ownerComponent = component.ownerComponent;
-            ownerComponentElement = ownerComponent.element;
+            ownerComponentEl = ownerComponent.element;
             receivers = undefined;
         }
     }
@@ -2568,27 +2568,30 @@ function inheritProperty(target, source, name, depth) {
     }
 }
 function registerComponent(componentConstr) {
-    var elIs = componentConstr.elementIs && hyphenize_1.hyphenize(componentConstr.elementIs);
+    var elIs = componentConstr.elementIs;
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
-    if (componentConstructorMap_1.componentConstructorMap.has(elIs)) {
-        throw new TypeError("Component \"" + elIs + "\" already registered");
+    var hyphenizedElIs = hyphenize_1.hyphenize(elIs);
+    if (componentConstructorMap_1.componentConstructorMap.has(hyphenizedElIs)) {
+        throw new TypeError("Component \"" + hyphenizedElIs + "\" already registered");
     }
     var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
         .constructor;
     inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
     inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
     componentConstr._blockNamesString =
-        elIs + ' ' + (parentComponentConstr._blockNamesString || '');
-    componentConstr._elementBlockNames = [elIs];
+        hyphenizedElIs + ' ' + (parentComponentConstr._blockNamesString || '');
+    componentConstr._elementBlockNames = [hyphenizedElIs];
     if (parentComponentConstr._elementBlockNames) {
         push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
     }
     var template = componentConstr.template;
     if (template !== null) {
         if (template === parentComponentConstr.template) {
-            componentConstr.template = template.extend('', { blockName: elIs });
+            componentConstr.template = template.extend('', {
+                blockName: hyphenizedElIs
+            });
         }
         else {
             if (template instanceof nelm_1.Template) {
@@ -2597,7 +2600,7 @@ function registerComponent(componentConstr) {
             else {
                 componentConstr.template = parentComponentConstr.template
                     ? parentComponentConstr.template.extend(template, {
-                        blockName: elIs
+                        blockName: hyphenizedElIs
                     })
                     : new nelm_1.Template(template, { blockName: componentConstr._elementBlockNames });
             }
@@ -2608,10 +2611,10 @@ function registerComponent(componentConstr) {
     inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
     inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
     var elExtends = componentConstr.elementExtends && hyphenize_1.hyphenize(componentConstr.elementExtends);
-    var parentElConstr = elExtends
-        ? elementConstructorMap_1.elementConstructorMap.get(elExtends) ||
-            window["HTML" + pascalize_1.pascalize(elExtends) + "Element"]
-        : HTMLElement;
+    var parentElConstr = (elExtends &&
+        (elementConstructorMap_1.elementConstructorMap.get(elExtends) ||
+            window["HTML" + pascalize_1.pascalize(elExtends) + "Element"])) ||
+        HTMLElement;
     var elConstr = function (self) {
         return parentElConstr.call(this, self);
     };
@@ -2634,10 +2637,13 @@ function registerComponent(componentConstr) {
     var elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
     elProto.constructor = elConstr;
     mixin_1.mixin(elProto, ElementProtoMixin_1.ElementProtoMixin);
-    window.customElements.define(elIs, elConstr, elExtends ? { extends: elExtends } : null);
+    window.customElements.define(hyphenizedElIs, elConstr, elExtends ? { extends: elExtends } : null);
     componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr);
-    componentConstructorMap_1.componentConstructorMap.set(elIs.toUpperCase(), componentConstr);
     elementConstructorMap_1.elementConstructorMap.set(elIs, elConstr);
+    if (hyphenizedElIs != elIs) {
+        componentConstructorMap_1.componentConstructorMap.set(hyphenizedElIs, componentConstr);
+        elementConstructorMap_1.elementConstructorMap.set(hyphenizedElIs, elConstr);
+    }
     return componentConstr;
 }
 exports.registerComponent = registerComponent;
@@ -2709,7 +2715,7 @@ exports.elementConstructorMap = new map_set_polyfill_1.Map([
     ['q', window.HTMLQuoteElement],
     ['tbody', window.HTMLTableSectionElement],
     ['td', window.HTMLTableCellElement],
-    ['template', window.HTMLTemplateElement || HTMLElement],
+    ['template', window.HTMLTemplateElement],
     ['textarea', window.HTMLTextAreaElement],
     ['tfoot', window.HTMLTableSectionElement],
     ['th', window.HTMLTableCellElement],

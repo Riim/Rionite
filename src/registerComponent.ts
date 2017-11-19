@@ -32,14 +32,16 @@ function inheritProperty(
 }
 
 export function registerComponent(componentConstr: typeof Component) {
-	let elIs = componentConstr.elementIs && hyphenize(componentConstr.elementIs);
+	let elIs = componentConstr.elementIs;
 
 	if (!elIs) {
 		throw new TypeError('Static property "elementIs" is required');
 	}
 
-	if (componentConstructorMap.has(elIs)) {
-		throw new TypeError(`Component "${elIs}" already registered`);
+	let hyphenizedElIs = hyphenize(elIs);
+
+	if (componentConstructorMap.has(hyphenizedElIs)) {
+		throw new TypeError(`Component "${hyphenizedElIs}" already registered`);
 	}
 
 	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
@@ -49,9 +51,9 @@ export function registerComponent(componentConstr: typeof Component) {
 	inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
 
 	componentConstr._blockNamesString =
-		elIs + ' ' + (parentComponentConstr._blockNamesString || '');
+		hyphenizedElIs + ' ' + (parentComponentConstr._blockNamesString || '');
 
-	componentConstr._elementBlockNames = [elIs];
+	componentConstr._elementBlockNames = [hyphenizedElIs];
 
 	if (parentComponentConstr._elementBlockNames) {
 		push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
@@ -61,14 +63,16 @@ export function registerComponent(componentConstr: typeof Component) {
 
 	if (template !== null) {
 		if (template === parentComponentConstr.template) {
-			componentConstr.template = (template as Template).extend('', { blockName: elIs });
+			componentConstr.template = (template as Template).extend('', {
+				blockName: hyphenizedElIs
+			});
 		} else {
 			if (template instanceof Template) {
 				template.setBlockName(componentConstr._elementBlockNames);
 			} else {
 				componentConstr.template = parentComponentConstr.template
 					? (parentComponentConstr.template as Template).extend(template, {
-							blockName: elIs
+							blockName: hyphenizedElIs
 						})
 					: new Template(template, { blockName: componentConstr._elementBlockNames });
 			}
@@ -83,10 +87,11 @@ export function registerComponent(componentConstr: typeof Component) {
 
 	let elExtends = componentConstr.elementExtends && hyphenize(componentConstr.elementExtends);
 
-	let parentElConstr = elExtends
-		? elementConstructorMap.get(elExtends) ||
-			(window as any)[`HTML${pascalize(elExtends)}Element`]
-		: HTMLElement;
+	let parentElConstr =
+		(elExtends &&
+			(elementConstructorMap.get(elExtends) ||
+				(window as any)[`HTML${pascalize(elExtends)}Element`])) ||
+		HTMLElement;
 
 	let elConstr = function(self: HTMLElement | undefined): IComponentElement {
 		return parentElConstr.call(this, self);
@@ -121,14 +126,18 @@ export function registerComponent(componentConstr: typeof Component) {
 	mixin(elProto, ElementProtoMixin);
 
 	(window as any).customElements.define(
-		elIs,
+		hyphenizedElIs,
 		elConstr,
 		elExtends ? { extends: elExtends } : null
 	);
 
 	componentConstructorMap.set(elIs, componentConstr);
-	componentConstructorMap.set(elIs.toUpperCase(), componentConstr);
 	elementConstructorMap.set(elIs, elConstr);
+
+	if (hyphenizedElIs != elIs) {
+		componentConstructorMap.set(hyphenizedElIs, componentConstr);
+		elementConstructorMap.set(hyphenizedElIs, elConstr);
+	}
 
 	return componentConstr;
 }
