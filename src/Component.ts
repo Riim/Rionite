@@ -1,6 +1,7 @@
 import { camelize } from '@riim/camelize';
 import { Inject } from '@riim/di';
 import { getUID } from '@riim/get-uid';
+import { hyphenize } from '@riim/hyphenize';
 import { Logger } from '@riim/logger';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
@@ -224,7 +225,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 		}
 
 		if (!el) {
-			el = document.createElement(constr._elementBlockNames[0]);
+			el = document.createElement(hyphenize(constr.elementIs, true));
 		}
 
 		this.element = el as IComponentElement;
@@ -412,7 +413,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 						contentHTML = contentHTML.replace(
 							reClassBlockElement,
 							createClassBlockElementReplacer(
-								constr._elementBlockNames[0],
+								constr.elementIs,
 								constr.events,
 								'oncomponent-'
 							)
@@ -423,7 +424,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 						contentHTML = contentHTML.replace(
 							reClassBlockElement,
 							createClassBlockElementReplacer(
-								constr._elementBlockNames[0],
+								constr.elementIs,
 								constr.domEvents,
 								'on-'
 							)

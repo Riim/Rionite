@@ -38,7 +38,7 @@ export function registerComponent(componentConstr: typeof Component) {
 		throw new TypeError('Static property "elementIs" is required');
 	}
 
-	let hyphenizedElIs = hyphenize(elIs);
+	let hyphenizedElIs = hyphenize(elIs, true);
 
 	if (componentConstructorMap.has(hyphenizedElIs)) {
 		throw new TypeError(`Component "${hyphenizedElIs}" already registered`);
@@ -51,9 +51,9 @@ export function registerComponent(componentConstr: typeof Component) {
 	inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
 
 	componentConstr._blockNamesString =
-		hyphenizedElIs + ' ' + (parentComponentConstr._blockNamesString || '');
+		elIs + ' ' + (parentComponentConstr._blockNamesString || '');
 
-	componentConstr._elementBlockNames = [hyphenizedElIs];
+	componentConstr._elementBlockNames = [elIs];
 
 	if (parentComponentConstr._elementBlockNames) {
 		push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
@@ -64,7 +64,7 @@ export function registerComponent(componentConstr: typeof Component) {
 	if (template !== null) {
 		if (template === parentComponentConstr.template) {
 			componentConstr.template = (template as Template).extend('', {
-				blockName: hyphenizedElIs
+				blockName: elIs
 			});
 		} else {
 			if (template instanceof Template) {
@@ -72,7 +72,7 @@ export function registerComponent(componentConstr: typeof Component) {
 			} else {
 				componentConstr.template = parentComponentConstr.template
 					? (parentComponentConstr.template as Template).extend(template, {
-							blockName: hyphenizedElIs
+							blockName: elIs
 						})
 					: new Template(template, { blockName: componentConstr._elementBlockNames });
 			}
