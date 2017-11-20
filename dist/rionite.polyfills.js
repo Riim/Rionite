@@ -1631,17 +1631,19 @@ var handleDOMEvent_1 = __webpack_require__(48);
 var handleEvent_1 = __webpack_require__(49);
 var registerComponent_1 = __webpack_require__(50);
 var map = Array.prototype.map;
-var reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)(?:\s[^"]*)?"/g;
+var reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)/g;
 var reParamChangeEventName = /param\-([\-0-9a-z]*)\-change/;
-function createClassBlockElementReplacer(contentBlockName, events, evtPrefix) {
-    return function (match, blockName, elName) {
+function createClassBlockElementReplacer(blockName, events, evtAttrPrefix) {
+    return function (match, elBlockName, elName) {
         var elEvents;
-        if (blockName == contentBlockName && (elEvents = events[elName])) {
-            var eventAttrs = [];
+        if (elBlockName == blockName && (elEvents = events[elName])) {
+            var evtAttrs = [];
             for (var type in elEvents) {
-                eventAttrs.push(" " + evtPrefix + type + "=\"/" + elName + "\"");
+                evtAttrs.push(" " + evtAttrPrefix + (type.charAt(0) == '<'
+                    ? type.slice(type.indexOf('>', 2) + 1)
+                    : type) + "=\"/" + elName + "\"");
             }
-            return match + eventAttrs.join('');
+            return evtAttrs.join('') + match;
         }
         return match;
     };
@@ -1759,8 +1761,8 @@ var Component = /** @class */ (function (_super) {
     };
     Component.prototype._listenTo = function (target, type, listener, context, useCapture) {
         if (target instanceof Component) {
-            var index = void 0;
-            if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
+            if (type.charAt(0) == '<') {
+                var index = type.indexOf('>', 2);
                 var targetType = type.slice(1, index);
                 if (targetType != '*') {
                     var targetConstr_1 = componentConstructorMap_1.componentConstructorMap.get(targetType);
@@ -3977,12 +3979,13 @@ function handleEvent(evt) {
     if (target == ownerComponent) {
         return;
     }
-    var el = target.element;
-    if (!el.parentNode) {
+    var targetEl = target.element;
+    if (!targetEl.parentNode) {
         return;
     }
     ownerComponentStack.length = 0;
     var attrName = 'oncomponent-' + evt.type;
+    var el = targetEl;
     var ownerComponentEl = ownerComponent.element;
     var receivers;
     for (var component = void 0;;) {
@@ -3993,21 +3996,31 @@ function handleEvent(evt) {
         if (el == ownerComponentEl) {
             if (receivers) {
                 for (var i = 0, l = receivers.length; i < l; i++) {
-                    var attrValue = receivers[i].getAttribute(attrName);
+                    var receiver = receivers[i];
+                    var attrValue = receiver.getAttribute(attrName);
                     var handler = void 0;
                     if (attrValue.charAt(0) == '/') {
-                        var events = ownerComponent.constructor.events;
-                        if (events) {
-                            events = events[attrValue.slice(1)];
-                            if (events) {
-                                handler = events[evt.type];
+                        if (receiver != targetEl) {
+                            var elementBlockNames = target.constructor
+                                ._elementBlockNames;
+                            for (var i_1 = 0, l_1 = elementBlockNames.length; i_1 < l_1; i_1++) {
+                                var typedHandler = ownerComponent.constructor
+                                    .events[attrValue.slice(1)]["<" + elementBlockNames[i_1] + ">" + evt.type];
+                                if (typedHandler) {
+                                    if (typedHandler &&
+                                        typedHandler.call(ownerComponent, evt, receiver) === false) {
+                                        return;
+                                    }
+                                    break;
+                                }
                             }
                         }
+                        handler = ownerComponent.constructor.events[attrValue.slice(1)][(receiver == targetEl ? '' : '<*>') + evt.type];
                     }
                     else {
                         handler = ownerComponent[attrValue];
                     }
-                    if (handler && handler.call(ownerComponent, evt, receivers[i]) === false) {
+                    if (handler && handler.call(ownerComponent, evt, receiver) === false) {
                         return;
                     }
                 }

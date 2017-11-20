@@ -64,25 +64,29 @@ export interface IComponentEvents<T extends Component = Component, U = IEvent | 
 	};
 }
 
-let reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)(?:\s[^"]*)?"/g;
+let reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)/g;
 let reParamChangeEventName = /param\-([\-0-9a-z]*)\-change/;
 
 function createClassBlockElementReplacer(
-	contentBlockName: string,
+	blockName: string,
 	events: IComponentEvents,
-	evtPrefix: string
-): (match: string, blockName: string, elName: string) => string {
-	return (match: string, blockName: string, elName: string): string => {
+	evtAttrPrefix: string
+): (match: string, elBlockName: string, elName: string) => string {
+	return (match: string, elBlockName: string, elName: string): string => {
 		let elEvents: { [eventName: string]: TEventHandler };
 
-		if (blockName == contentBlockName && (elEvents = events[elName])) {
-			let eventAttrs = [];
+		if (elBlockName == blockName && (elEvents = events[elName])) {
+			let evtAttrs = [];
 
 			for (let type in elEvents) {
-				eventAttrs.push(` ${evtPrefix}${type}="/${elName}"`);
+				evtAttrs.push(
+					` ${evtAttrPrefix}${type.charAt(0) == '<'
+						? type.slice(type.indexOf('>', 2) + 1)
+						: type}="/${elName}"`
+				);
 			}
 
-			return match + eventAttrs.join('');
+			return evtAttrs.join('') + match;
 		}
 
 		return match;
@@ -299,9 +303,8 @@ export class Component extends EventEmitter implements DisposableMixin {
 		useCapture: boolean
 	): IDisposableListening {
 		if (target instanceof Component) {
-			let index: number;
-
-			if (type.charAt(0) == '<' && (index = type.indexOf('>', 1)) > 1) {
+			if (type.charAt(0) == '<') {
+				let index = type.indexOf('>', 2);
 				let targetType = type.slice(1, index);
 
 				if (targetType != '*') {

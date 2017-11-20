@@ -11,15 +11,16 @@ export function handleEvent(evt: IEvent<Component>) {
 		return;
 	}
 
-	let el: Element = target.element;
+	let targetEl: Element = target.element;
 
-	if (!el.parentNode) {
+	if (!targetEl.parentNode) {
 		return;
 	}
 
 	ownerComponentStack.length = 0;
 
 	let attrName = 'oncomponent-' + evt.type;
+	let el = targetEl;
 	let ownerComponentEl = ownerComponent.element;
 	let receivers: Array<Element> | undefined;
 
@@ -33,24 +34,42 @@ export function handleEvent(evt: IEvent<Component>) {
 		if (el == ownerComponentEl) {
 			if (receivers) {
 				for (let i = 0, l = receivers.length; i < l; i++) {
-					let attrValue = receivers[i].getAttribute(attrName)!;
+					let receiver = receivers[i];
+					let attrValue = receiver.getAttribute(attrName)!;
 					let handler: TEventHandler | undefined;
 
 					if (attrValue.charAt(0) == '/') {
-						let events: any = (ownerComponent.constructor as typeof Component).events;
+						if (receiver != targetEl) {
+							let elementBlockNames = (target.constructor as typeof Component)
+								._elementBlockNames;
 
-						if (events) {
-							events = events[attrValue.slice(1)];
+							for (let i = 0, l = elementBlockNames.length; i < l; i++) {
+								let typedHandler = (ownerComponent.constructor as typeof Component)
+									.events![attrValue.slice(1)][
+									`<${elementBlockNames[i]}>` + evt.type
+								];
 
-							if (events) {
-								handler = events[evt.type];
+								if (typedHandler) {
+									if (
+										typedHandler &&
+										typedHandler.call(ownerComponent, evt, receiver) === false
+									) {
+										return;
+									}
+
+									break;
+								}
 							}
 						}
+
+						handler = (ownerComponent.constructor as typeof Component).events![
+							attrValue.slice(1)
+						][(receiver == targetEl ? '' : '<*>') + evt.type];
 					} else {
 						handler = (ownerComponent as any)[attrValue];
 					}
 
-					if (handler && handler.call(ownerComponent, evt, receivers[i]) === false) {
+					if (handler && handler.call(ownerComponent, evt, receiver) === false) {
 						return;
 					}
 				}
