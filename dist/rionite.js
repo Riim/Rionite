@@ -1128,7 +1128,7 @@ var ContentTextFragmentParser = /** @class */ (function () {
             var result = this.result;
             var resultLen = result.length;
             if (resultLen && result[resultLen - 1].nodeType == ContentTextFragmentNodeType.TEXT) {
-                result[resultLen - 1].value = value;
+                result[resultLen - 1].value += value;
             }
             else {
                 result.push({
@@ -1142,13 +1142,12 @@ var ContentTextFragmentParser = /** @class */ (function () {
         var at = this.at;
         this._next('{');
         this._skipWhitespaces();
-        var argument = this._readValue();
-        var isArgumentKeypath;
-        if (!argument) {
-            argument = this._readKeypath();
-            isArgumentKeypath = true;
+        var keypath = this._readKeypath();
+        var value;
+        if (!keypath) {
+            value = this._readValue();
         }
-        if (argument) {
+        if (keypath || value) {
             var formatters = void 0;
             for (var formatter = void 0; this._skipWhitespaces() == '|' && (formatter = this._readFormatter());) {
                 (formatters || (formatters = [])).push(formatter);
@@ -1157,8 +1156,8 @@ var ContentTextFragmentParser = /** @class */ (function () {
                 this._next();
                 return {
                     nodeType: ContentTextFragmentNodeType.BINDING,
-                    argument: argument,
-                    isArgumentKeypath: isArgumentKeypath || false,
+                    keypath: keypath,
+                    value: value || null,
                     formatters: formatters || null,
                     raw: this.contentTextFragment.slice(at, this.at)
                 };
@@ -2115,25 +2114,27 @@ function bindingToJSExpression(binding) {
         return cache[bindingRaw];
     }
     var formatters = binding.formatters;
-    if (!binding.isArgumentKeypath) {
+    if (binding.keypath) {
+        var keys = binding.keypath.split('.');
+        var keyCount = keys.length;
+        if (keyCount == 1) {
+            return (cache[bindingRaw] = formatters
+                ? formatters.reduce(formattersReducer, "this['" + keys[0] + "']")
+                : "this['" + keys[0] + "']");
+        }
+        var index = keyCount - 2;
+        var jsExprArr = Array(index);
+        while (index) {
+            jsExprArr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
+        }
+        var jsExpr = "(temp = this['" + keys[0] + "'])" + jsExprArr.join('') + " && temp['" + keys[keyCount - 1] + "']";
         return (cache[bindingRaw] = formatters
-            ? formatters.reduce(formattersReducer, binding.argument)
-            : binding.argument);
+            ? formatters.reduce(formattersReducer, jsExpr)
+            : jsExpr);
     }
-    var keys = binding.argument.split('.');
-    var keyCount = keys.length;
-    if (keyCount == 1) {
-        return (cache[bindingRaw] = formatters
-            ? formatters.reduce(formattersReducer, "this['" + keys[0] + "']")
-            : "this['" + keys[0] + "']");
-    }
-    var index = keyCount - 2;
-    var jsExprArr = Array(index);
-    while (index) {
-        jsExprArr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
-    }
-    var jsExpr = "(temp = this['" + keys[0] + "'])" + jsExprArr.join('') + " && temp['" + keys[keyCount - 1] + "']";
-    return (cache[bindingRaw] = formatters ? formatters.reduce(formattersReducer, jsExpr) : jsExpr);
+    return (cache[bindingRaw] = formatters
+        ? formatters.reduce(formattersReducer, binding.value)
+        : binding.value);
 }
 exports.bindingToJSExpression = bindingToJSExpression;
 

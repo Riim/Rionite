@@ -23,31 +23,33 @@ export function bindingToJSExpression(binding: IContentTextFragmentBinding): str
 
 	let formatters = binding.formatters;
 
-	if (!binding.isArgumentKeypath) {
+	if (binding.keypath) {
+		let keys = binding.keypath.split('.');
+		let keyCount = keys.length;
+
+		if (keyCount == 1) {
+			return (cache[bindingRaw] = formatters
+				? formatters.reduce(formattersReducer, `this['${keys[0]}']`)
+				: `this['${keys[0]}']`);
+		}
+
+		let index = keyCount - 2;
+		let jsExprArr = Array(index);
+
+		while (index) {
+			jsExprArr[--index] = ` && (temp = temp['${keys[index + 1]}'])`;
+		}
+
+		let jsExpr = `(temp = this['${keys[0]}'])${jsExprArr.join('')} && temp['${keys[
+			keyCount - 1
+		]}']`;
+
 		return (cache[bindingRaw] = formatters
-			? formatters.reduce(formattersReducer, binding.argument)
-			: binding.argument);
+			? formatters.reduce(formattersReducer, jsExpr)
+			: jsExpr);
 	}
 
-	let keys = binding.argument.split('.');
-	let keyCount = keys.length;
-
-	if (keyCount == 1) {
-		return (cache[bindingRaw] = formatters
-			? formatters.reduce(formattersReducer, `this['${keys[0]}']`)
-			: `this['${keys[0]}']`);
-	}
-
-	let index = keyCount - 2;
-	let jsExprArr = Array(index);
-
-	while (index) {
-		jsExprArr[--index] = ` && (temp = temp['${keys[index + 1]}'])`;
-	}
-
-	let jsExpr = `(temp = this['${keys[0]}'])${jsExprArr.join('')} && temp['${keys[
-		keyCount - 1
-	]}']`;
-
-	return (cache[bindingRaw] = formatters ? formatters.reduce(formattersReducer, jsExpr) : jsExpr);
+	return (cache[bindingRaw] = formatters
+		? formatters.reduce(formattersReducer, binding.value!)
+		: binding.value!);
 }

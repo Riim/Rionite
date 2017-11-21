@@ -32,8 +32,8 @@ export interface IContentTextFragmentBindingFormatter extends IContentTextFragme
 
 export interface IContentTextFragmentBinding extends IContentTextFragmentNode {
 	nodeType: ContentTextFragmentNodeType.BINDING;
-	argument: string;
-	isArgumentKeypath: boolean;
+	keypath: string | null;
+	value: string | null;
 	formatters: Array<IContentTextFragmentBindingFormatter> | null;
 	raw: string;
 }
@@ -100,7 +100,7 @@ export class ContentTextFragmentParser {
 			let resultLen = result.length;
 
 			if (resultLen && result[resultLen - 1].nodeType == ContentTextFragmentNodeType.TEXT) {
-				(result[resultLen - 1] as IContentTextFragmentTextNode).value = value;
+				(result[resultLen - 1] as IContentTextFragmentTextNode).value += value;
 			} else {
 				result.push({
 					nodeType: ContentTextFragmentNodeType.TEXT,
@@ -116,15 +116,14 @@ export class ContentTextFragmentParser {
 		this._next('{');
 		this._skipWhitespaces();
 
-		let argument = this._readValue();
-		let isArgumentKeypath;
+		let keypath = this._readKeypath();
+		let value: string | null | undefined;
 
-		if (!argument) {
-			argument = this._readKeypath();
-			isArgumentKeypath = true;
+		if (!keypath) {
+			value = this._readValue();
 		}
 
-		if (argument) {
+		if (keypath || value) {
 			let formatters: Array<IContentTextFragmentBindingFormatter> | undefined;
 
 			for (
@@ -140,8 +139,8 @@ export class ContentTextFragmentParser {
 
 				return {
 					nodeType: ContentTextFragmentNodeType.BINDING,
-					argument,
-					isArgumentKeypath: isArgumentKeypath || false,
+					keypath,
+					value: value || null,
 					formatters: formatters || null,
 					raw: this.contentTextFragment.slice(at, this.at)
 				};

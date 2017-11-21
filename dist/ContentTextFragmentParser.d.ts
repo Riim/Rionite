@@ -23,8 +23,8 @@ export interface IContentTextFragmentBindingFormatter extends IContentTextFragme
 }
 export interface IContentTextFragmentBinding extends IContentTextFragmentNode {
     nodeType: ContentTextFragmentNodeType.BINDING;
-    argument: string;
-    isArgumentKeypath: boolean;
+    keypath: string | null;
+    value: string | null;
     formatters: Array<IContentTextFragmentBindingFormatter> | null;
     raw: string;
 }
