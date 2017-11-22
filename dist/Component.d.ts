@@ -1,9 +1,8 @@
 import { Logger } from '@riim/logger';
-import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
+import { EventEmitter, IEvent } from 'cellx';
 import { IBlock, Template } from 'nelm';
 import { IFreezableCell } from './componentBinding';
 import { ComponentConfigDecorator } from './ComponentConfigDecorator';
-import { IComponentParams } from './ComponentParams';
 import { DisposableMixin, IDisposableListening, TListener, TListeningTarget } from './DisposableMixin';
 import { registerComponent } from './registerComponent';
 export interface IPossiblyComponentElement<T extends Component = Component> extends HTMLElement {
@@ -54,14 +53,17 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     _parentComponent: Component | null | undefined;
     readonly parentComponent: Component | null;
     element: IComponentElement;
-    readonly params: IComponentParams;
+    $content: DocumentFragment | null;
+    $context: {
+        [name: string]: any;
+    };
+    $specifiedParams: Set<string>;
     _bindings: Array<IFreezableCell> | null;
     _elementListMap: Map<string, NodeListOf<Element>> | undefined;
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;
     constructor(el?: HTMLElement);
-    _on(type: string, listener: TEventEmitterListener, context: any): void;
     handleEvent(evt: IEvent<Component>): void;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, listeners: {

@@ -1,4 +1,5 @@
 import { Component, IComponentElement } from './Component';
+export declare let KEY_IS_ELEMENT_CONNECTED: symbol;
 export declare function suppressConnectionStatusCallbacks(): void;
 export declare function resumeConnectionStatusCallbacks(): void;
 export declare let ElementProtoMixin: {

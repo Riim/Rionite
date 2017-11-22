@@ -1,8 +1,11 @@
 import { defer } from '@riim/defer';
 import { Container } from '@riim/di';
+import { Symbol } from '@riim/symbol-polyfill';
 import { Component, IComponentElement } from './Component';
+import { ComponentParams, KEY_IS_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { nativeCustomElements as nativeCustomElementsFeature } from './lib/Features';
-import { KEY_ELEMENT_CONNECTED } from './lib/KEY_ELEMENT_CONNECTED';
+
+export let KEY_IS_ELEMENT_CONNECTED = Symbol('Rionite.isElementConnected');
 
 let isConnectionStatusCallbacksSuppressed = false;
 
@@ -24,10 +27,10 @@ export let ElementProtoMixin = {
 		);
 	},
 
-	[KEY_ELEMENT_CONNECTED]: false,
+	[KEY_IS_ELEMENT_CONNECTED]: false,
 
 	connectedCallback(this: IComponentElement) {
-		(this as any)[KEY_ELEMENT_CONNECTED] = true;
+		(this as any)[KEY_IS_ELEMENT_CONNECTED] = true;
 
 		if (isConnectionStatusCallbacksSuppressed) {
 			return;
@@ -36,6 +39,10 @@ export let ElementProtoMixin = {
 		let component = this.rioniteComponent;
 
 		if (component) {
+			if (!(component as any)[KEY_IS_COMPONENT_PARAMS_INITED]) {
+				ComponentParams.init(component);
+			}
+
 			component.elementConnected();
 
 			if (component._attached) {
@@ -49,12 +56,16 @@ export let ElementProtoMixin = {
 			}
 		} else {
 			defer(() => {
-				if ((this as any)[KEY_ELEMENT_CONNECTED]) {
+				if ((this as any)[KEY_IS_ELEMENT_CONNECTED]) {
 					let component = this.$component;
 
 					component._parentComponent = undefined;
 
 					if (!component.parentComponent && !component._attached) {
+						if (!(component as any)[KEY_IS_COMPONENT_PARAMS_INITED]) {
+							ComponentParams.init(component);
+						}
+
 						component.elementConnected();
 						component._attach();
 					}
@@ -64,7 +75,7 @@ export let ElementProtoMixin = {
 	},
 
 	disconnectedCallback(this: IComponentElement) {
-		(this as any)[KEY_ELEMENT_CONNECTED] = false;
+		(this as any)[KEY_IS_ELEMENT_CONNECTED] = false;
 
 		if (isConnectionStatusCallbacksSuppressed) {
 			return;
@@ -94,11 +105,10 @@ export let ElementProtoMixin = {
 		let component = this.rioniteComponent;
 
 		if (component && component.isReady) {
-			let params = component.params;
-			let setMethodName = '_set_' + name;
+			let methodName = '_setParam_' + name;
 
-			if (params[setMethodName]) {
-				params[setMethodName](value);
+			if ((component as any)[methodName]) {
+				(component as any)[methodName](value);
 			} else if (nativeCustomElementsFeature) {
 				throw new TypeError(`Cannot write to readonly parameter "${name}"`);
 			}

@@ -85,7 +85,7 @@ export function registerComponent(componentConstr: typeof Component) {
 	inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
 	inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
 
-	let elExtends = componentConstr.elementExtends && hyphenize(componentConstr.elementExtends);
+	let elExtends = componentConstr.elementExtends;
 
 	let parentElConstr =
 		(elExtends &&
@@ -136,7 +136,6 @@ export function registerComponent(componentConstr: typeof Component) {
 
 	if (hyphenizedElIs != elIs) {
 		componentConstructorMap.set(hyphenizedElIs, componentConstr);
-		elementConstructorMap.set(hyphenizedElIs, elConstr);
 	}
 
 	return componentConstr;

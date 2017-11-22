@@ -4,10 +4,11 @@ import { Cell, ObservableList } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { Component } from '../Component';
+import { ComponentParamDecorator } from '../ComponentParamDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
+import { KEY_IS_ELEMENT_CONNECTED } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
 import { templateTag as templateTagFeature } from '../lib/Features';
-import { KEY_ELEMENT_CONNECTED } from '../lib/KEY_ELEMENT_CONNECTED';
 import { keypathPattern } from '../lib/keypathPattern';
 import { namePattern } from '../lib/namePattern';
 
@@ -30,15 +31,19 @@ let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+of\\s+(${keypathPattern})\
 	elementExtends: 'template',
 
 	params: {
-		for: { type: String, required: true, readonly: true },
-		trackBy: { type: String, readonly: true },
-		strip: { default: false, readonly: true }
+		for: { property: 'paramFor', type: String, required: true, readonly: true },
+		trackBy: { property: 'paramTrackBy', type: String, readonly: true },
+		strip: { property: 'paramStrip', default: false, readonly: true }
 	}
 })
 export class RtRepeat extends Component {
+	@ComponentParamDecorator('for') readonly paramFor: string;
+	@ComponentParamDecorator('trackBy') readonly paramTrackBy: string | null;
+	@ComponentParamDecorator('strip') readonly paramStrip = false;
+
 	_itemName: string;
 	_list: TListCell;
-	_trackBy: string;
+	_trackBy: string | null;
 
 	_rawItemContent: DocumentFragment;
 
@@ -57,25 +62,24 @@ export class RtRepeat extends Component {
 		this._active = true;
 
 		if (!this.initialized) {
-			let params = this.params;
-			let for_ = params['for'].match(reForAttrValue);
+			let for_ = this.paramFor.match(reForAttrValue);
 
 			if (!for_) {
-				throw new SyntaxError(`Invalid value of parameter "for" (${params['for']})`);
+				throw new SyntaxError(`Invalid value of parameter "for" (${this.paramFor})`);
 			}
 
 			this._itemName = for_[1];
 			this._list = new Cell<any>(compileKeypath(for_[2]), {
-				context: params.$context
+				context: this.$context
 			});
-			this._trackBy = params.trackBy;
+			this._trackBy = this.paramTrackBy;
 
 			let rawItemContent = (this._rawItemContent = document.importNode(
 				((this.element as any) as HTMLTemplateElement).content,
 				true
 			));
 
-			if (params.strip) {
+			if (this.paramStrip) {
 				let firstChild = rawItemContent.firstChild!;
 				let lastChild = rawItemContent.lastChild!;
 
@@ -109,7 +113,7 @@ export class RtRepeat extends Component {
 
 	elementDisconnected() {
 		nextTick(() => {
-			if (!(this.element as any)[KEY_ELEMENT_CONNECTED]) {
+			if (!(this.element as any)[KEY_IS_ELEMENT_CONNECTED]) {
 				this._deactivate();
 			}
 		});
@@ -230,7 +234,7 @@ export class RtRepeat extends Component {
 				i += templates[i].content.querySelectorAll('template').length + 1;
 			}
 		}
-		let context = this.params.$context;
+		let context = this.$context;
 		let [bindings, childComponents] = bindContent(
 			content,
 			this.ownerComponent,

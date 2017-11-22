@@ -7,22 +7,34 @@ import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { Component, IComponentElement } from '../Component';
 import { IFreezableCell } from '../componentBinding';
+import { ComponentParamDecorator } from '../ComponentParamDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 
-let KEY_CONTENT_MAP = Symbol('contentMap');
+let KEY_CONTENT_MAP = Symbol('Rionite.RtContent.contentMap');
 
 @Component.Config({
 	elementIs: 'RtContent',
 
 	params: {
-		select: { type: String, readonly: true },
-		clone: { default: false, readonly: true },
-		getContext: { type: Object, readonly: true }
+		select: { property: 'paramSelect', type: String, readonly: true },
+		clone: { property: 'paramClone', default: false, readonly: true },
+		getContext: { property: 'getContext', type: Object, readonly: true }
 	},
 
 	template: ''
 })
 export class RtContent extends Component {
+	@ComponentParamDecorator('select') readonly paramSelect: string | null;
+	@ComponentParamDecorator('clone') readonly paramClone = false;
+	@ComponentParamDecorator('getContext')
+	readonly paramGetContext:
+		| ((
+				this: Component,
+				context: { [name: string]: any },
+				content: Component
+			) => { [name: string]: any })
+		| null;
+
 	_childComponents: Array<Component> | null;
 
 	_attach() {
@@ -33,16 +45,15 @@ export class RtContent extends Component {
 		} else {
 			let ownerComponent = this.ownerComponent;
 			let el = this.element;
-			let params = this.params;
 			let contentOwnerComponent = ownerComponent.ownerComponent;
-			let ownerComponentContent = ownerComponent.params.$content!;
-			let clone = params.clone;
+			let ownerComponentContent = ownerComponent.$content!;
+			let clone = this.paramClone;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
 			let childComponents: Array<Component> | null | undefined;
 
 			if (!clone || ownerComponentContent.firstChild) {
-				let selector = params.select;
+				let selector = this.paramSelect;
 				let key = getUID(ownerComponent) + '/' + (selector || '');
 
 				if (selector) {
@@ -79,7 +90,8 @@ export class RtContent extends Component {
 						}
 
 						if (!clone) {
-							(contentMap ||
+							(
+								contentMap ||
 								(contentOwnerComponent as any)[KEY_CONTENT_MAP] ||
 								((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
 							).set(key, el);
@@ -100,7 +112,9 @@ export class RtContent extends Component {
 						childComponents = (container.$component as RtContent)._childComponents;
 					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
-						(contentMap || ((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
+						(
+							contentMap ||
+							((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
 						).set(key, el);
 					}
 				} else {
@@ -114,21 +128,21 @@ export class RtContent extends Component {
 						? bindContent(
 								content,
 								contentOwnerComponent,
-								params.getContext
-									? params.getContext.call(
+								this.paramGetContext
+									? this.paramGetContext.call(
 											ownerComponent,
-											ownerComponent.params.$context,
+											ownerComponent.$context,
 											this
 										)
-									: ownerComponent.params.$context,
+									: ownerComponent.$context,
 								{ 0: null, 1: null } as any
 							)
 						: bindContent(
 								el,
 								ownerComponent,
-								params.getContext
-									? params.getContext.call(ownerComponent, params.$context, this)
-									: params.$context,
+								this.paramGetContext
+									? this.paramGetContext.call(ownerComponent, this.$context, this)
+									: this.$context,
 								{ 0: null, 1: null } as any
 							);
 

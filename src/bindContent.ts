@@ -52,10 +52,10 @@ export function bindContent(
 		switch (child.nodeType) {
 			case Node.ELEMENT_NODE: {
 				let childComponent = (child as IPossiblyComponentElement).$component;
-				let $specified;
+				let $specifiedParams;
 
 				if (childComponent) {
-					$specified = new Set<string>();
+					$specifiedParams = new Set<string>();
 				}
 
 				let attrs = child.attributes;
@@ -63,8 +63,8 @@ export function bindContent(
 				for (let i = attrs.length; i; ) {
 					let attr = attrs.item(--i);
 
-					if ($specified) {
-						$specified.add(camelize(attr.name, true));
+					if ($specifiedParams) {
+						$specifiedParams.add(camelize(attr.name, true));
 					}
 
 					let value = attr.value;
@@ -105,8 +105,8 @@ export function bindContent(
 
 				if (childComponent) {
 					childComponent._ownerComponent = ownerComponent;
-					childComponent.params.$context = context;
-					childComponent.params.$specified = $specified!;
+					childComponent.$context = context;
+					childComponent.$specifiedParams = $specifiedParams!;
 
 					(result[1] || (result[1] = [])).push(childComponent);
 				}

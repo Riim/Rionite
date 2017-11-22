@@ -1,11 +1,10 @@
-import { camelize } from '@riim/camelize';
 import { Inject } from '@riim/di';
 import { getUID } from '@riim/get-uid';
 import { hyphenize } from '@riim/hyphenize';
 import { Logger } from '@riim/logger';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
-import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
+import { EventEmitter, IEvent } from 'cellx';
 import { htmlToFragment } from 'html-to-fragment';
 import { IBlock, Template } from 'nelm';
 import { attachChildComponentElements } from './attachChildComponentElements';
@@ -14,7 +13,6 @@ import { bindEvents } from './bindEvents';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { ComponentConfigDecorator } from './ComponentConfigDecorator';
 import { componentConstructorMap } from './componentConstructorMap';
-import { ComponentParams, IComponentParams } from './ComponentParams';
 import {
 	DisposableMixin,
 	IDisposableListening,
@@ -65,7 +63,6 @@ export interface IComponentEvents<T extends Component = Component, U = IEvent | 
 }
 
 let reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)/g;
-let reParamChangeEventName = /param\-([\-0-9a-z]*)\-change/;
 
 function createClassBlockElementReplacer(
 	blockName: string,
@@ -105,7 +102,7 @@ function findChildComponents(
 
 			if (childComponent) {
 				childComponent._ownerComponent = ownerComponent;
-				childComponent.params.$context = context;
+				childComponent.$context = context;
 
 				(childComponents || (childComponents = [])).push(childComponent);
 			}
@@ -196,18 +193,9 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	element: IComponentElement;
 
-	get params(): IComponentParams {
-		let params = ComponentParams.init(this);
-
-		Object.defineProperty(this, 'params', {
-			configurable: true,
-			enumerable: true,
-			writable: true,
-			value: params
-		});
-
-		return params;
-	}
+	$content: DocumentFragment | null;
+	$context: { [name: string]: any };
+	$specifiedParams: Set<string>;
 
 	_bindings: Array<IFreezableCell> | null;
 
@@ -238,16 +226,6 @@ export class Component extends EventEmitter implements DisposableMixin {
 		Object.defineProperty(el, '$component', { value: this });
 
 		this.created();
-	}
-
-	_on(type: string, listener: TEventEmitterListener, context: any) {
-		if (!type.lastIndexOf('param-', 0) && reParamChangeEventName.test(type)) {
-			EventEmitter.currentlySubscribing = true;
-			this.params[camelize(RegExp.$1, true)];
-			EventEmitter.currentlySubscribing = false;
-		}
-
-		super._on(type, listener, context);
 	}
 
 	handleEvent(evt: IEvent<Component>) {
@@ -381,14 +359,12 @@ export class Component extends EventEmitter implements DisposableMixin {
 			el.className = constr._blockNamesString + el.className;
 
 			if (constr.template == null) {
-				this.params;
-
 				this._bindings = null;
 
 				let childComponents = findChildComponents(
 					el,
 					this.ownerComponent,
-					this.params.$context
+					this.$context
 				);
 
 				if (childComponents) {
@@ -401,10 +377,10 @@ export class Component extends EventEmitter implements DisposableMixin {
 			} else {
 				if (el.firstChild) {
 					suppressConnectionStatusCallbacks();
-					this.params.$content = moveContent(document.createDocumentFragment(), el);
+					this.$content = moveContent(document.createDocumentFragment(), el);
 					resumeConnectionStatusCallbacks();
 				} else {
-					this.params.$content = document.createDocumentFragment();
+					this.$content = document.createDocumentFragment();
 				}
 
 				let rawContent = constr._rawContent;

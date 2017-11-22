@@ -31,9 +31,10 @@ export {
 	IComponentEvents,
 	Component
 } from './Component';
-export { KEY_ELEMENT_CONNECTED } from './lib/KEY_ELEMENT_CONNECTED';
-export { IComponentParams, ComponentParams } from './ComponentParams';
+export { KEY_IS_ELEMENT_CONNECTED } from './ElementProtoMixin';
+export { ComponentParams } from './ComponentParams';
 export { componentParamValueMap } from './componentParamValueMap';
+export { ComponentParamDecorator as Param } from './ComponentParamDecorator';
 export { TIfCell as TRtIfThenIfCell, RtIfThen } from './components/rt-if-then';
 export { RtIfElse } from './components/rt-if-else';
 export {

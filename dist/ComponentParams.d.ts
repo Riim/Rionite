@@ -1,12 +1,5 @@
 import { Component } from './Component';
-export interface IComponentParams extends Object {
-    $content: DocumentFragment | null;
-    $context: {
-        [name: string]: any;
-    };
-    $specified: Set<string>;
-    [name: string]: any;
-}
+export declare let KEY_IS_COMPONENT_PARAMS_INITED: symbol;
 export declare let ComponentParams: {
-    init(component: Component): IComponentParams;
+    init(component: Component): void;
 };

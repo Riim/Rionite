@@ -1,24 +1,19 @@
 import { hyphenize } from '@riim/hyphenize';
+import { Symbol } from '@riim/symbol-polyfill';
 import { Cell, EventEmitter } from 'cellx';
 import { Component } from './Component';
 import { componentParamTypeMap } from './componentParamTypeMap';
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 
-export interface IComponentParams extends Object {
-	$content: DocumentFragment | null;
-	$context: { [name: string]: any };
-	$specified: Set<string>;
-	[name: string]: any;
-}
+export let KEY_IS_COMPONENT_PARAMS_INITED = Symbol('Rionite.isComponentParamsInited');
 
-function initParam(component: Component, params: IComponentParams, name: string) {
-	let config = (component.constructor as typeof Component).params![name];
-
+function initParam(component: Component, config: any, name: string) {
 	if (config == null) {
 		return;
 	}
 
-	let type = typeof config;
+	let propertyName: string | undefined;
+	let type: any = typeof config;
 	let defaultValue: any;
 	let required: boolean;
 	let readonly: boolean;
@@ -27,6 +22,7 @@ function initParam(component: Component, params: IComponentParams, name: string)
 		type = config;
 		required = readonly = false;
 	} else if (type == 'object' && (config.type !== undefined || config.default !== undefined)) {
+		propertyName = config.property;
 		type = config.type;
 		defaultValue = config.default;
 
@@ -88,7 +84,7 @@ function initParam(component: Component, params: IComponentParams, name: string)
 	} else {
 		let valueCell: Cell | undefined;
 
-		params['_set_' + hyphenizedName] = (rawValue: string | null) => {
+		(component as any)['_setParam_' + hyphenizedName] = (rawValue: string | null) => {
 			let val = typeSerializer!.read(rawValue, defaultValue);
 
 			if (valueCell) {
@@ -110,23 +106,7 @@ function initParam(component: Component, params: IComponentParams, name: string)
 				let currentlyPulling = Cell.currentlyPulling;
 
 				if (currentlyPulling || EventEmitter.currentlySubscribing) {
-					valueCell = new Cell(value, {
-						context: params,
-
-						onChange(evt) {
-							component.emit({
-								type: `param-${hyphenizedName}-change`,
-								data:
-									evt.target == valueCell
-										? evt.data
-										: {
-												prevEvent: null,
-												prevValue: evt.target,
-												value: evt.target
-											}
-							});
-						}
-					});
+					valueCell = new Cell(value, { context: component });
 
 					if (currentlyPulling) {
 						return valueCell.get();
@@ -154,24 +134,17 @@ function initParam(component: Component, params: IComponentParams, name: string)
 		};
 	}
 
-	Object.defineProperty(params, name, descriptor);
+	Object.defineProperty(component, propertyName || name, descriptor);
 }
 
 export let ComponentParams = {
-	init(component: Component): IComponentParams {
+	init(component: Component) {
 		let config = (component.constructor as typeof Component).params;
-		let params = {
-			$content: null,
-			$context: null as any,
-			$specified: null as any
-		};
 
 		if (config) {
 			for (let name in config) {
-				initParam(component, params, name);
+				initParam(component, config[name], name);
 			}
 		}
-
-		return params;
 	}
 };

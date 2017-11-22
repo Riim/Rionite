@@ -10,9 +10,12 @@ export interface IItem {
 export declare type TItemList = Array<IItem>;
 export declare type TItemMap = Map<any, TItemList>;
 export declare class RtRepeat extends Component {
+    readonly paramFor: string;
+    readonly paramTrackBy: string | null;
+    readonly paramStrip: boolean;
     _itemName: string;
     _list: TListCell;
-    _trackBy: string;
+    _trackBy: string | null;
     _rawItemContent: DocumentFragment;
     _itemMap: TItemMap;
     _prevItemMap: TItemMap;

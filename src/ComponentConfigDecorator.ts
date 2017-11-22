@@ -40,6 +40,6 @@ export function ComponentConfigDecorator<T extends Component>(config: {
 			(componentConstr as typeof Component).domEvents = config.domEvents;
 		}
 
-		Component.register(componentConstr as typeof Component);
+		Component.register(componentConstr as any);
 	};
 }

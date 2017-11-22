@@ -3,10 +3,11 @@ import { Cell } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { Component } from '../Component';
+import { ComponentParamDecorator } from '../ComponentParamDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
+import { KEY_IS_ELEMENT_CONNECTED } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
 import { templateTag as templateTagFeature } from '../lib/Features';
-import { KEY_ELEMENT_CONNECTED } from '../lib/KEY_ELEMENT_CONNECTED';
 import { keypathPattern } from '../lib/keypathPattern';
 
 let slice = Array.prototype.slice;
@@ -20,10 +21,12 @@ let reKeypath = RegExp(`^${keypathPattern}$`);
 	elementExtends: 'template',
 
 	params: {
-		if: { type: String, required: true, readonly: true }
+		if: { property: 'paramIf', type: String, required: true, readonly: true }
 	}
 })
 export class RtIfThen extends Component {
+	@ComponentParamDecorator('if') readonly paramIf: string;
+
 	_elseMode = false;
 
 	_if: TIfCell;
@@ -40,7 +43,7 @@ export class RtIfThen extends Component {
 		this._active = true;
 
 		if (!this.initialized) {
-			let if_ = (this.params['if'] || '').trim();
+			let if_ = this.paramIf.trim();
 
 			if (!reKeypath.test(if_)) {
 				throw new SyntaxError(`Invalid value of attribute "if" (${if_})`);
@@ -51,7 +54,7 @@ export class RtIfThen extends Component {
 				function() {
 					return !!getIfValue.call(this);
 				},
-				{ context: this.params.$context }
+				{ context: this.$context }
 			);
 
 			this.initialized = true;
@@ -64,7 +67,7 @@ export class RtIfThen extends Component {
 
 	elementDisconnected() {
 		nextTick(() => {
-			if (!(this.element as any)[KEY_ELEMENT_CONNECTED]) {
+			if (!(this.element as any)[KEY_IS_ELEMENT_CONNECTED]) {
 				this._deactivate();
 			}
 		});
@@ -99,7 +102,7 @@ export class RtIfThen extends Component {
 			let [bindings, childComponents] = bindContent(
 				content,
 				this.ownerComponent,
-				this.params.$context,
+				this.$context,
 				{ 0: null, 1: null } as any
 			);
 
