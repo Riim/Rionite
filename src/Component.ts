@@ -22,10 +22,10 @@ import {
 	TListeningTarget
 	} from './DisposableMixin';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
-import { templateTag as templateTagFeature } from './Features';
 import { handledEvents } from './handledEvents';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
+import { templateTag as templateTagFeature } from './lib/Features';
 import { registerComponent } from './registerComponent';
 
 let map = Array.prototype.map;

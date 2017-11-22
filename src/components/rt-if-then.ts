@@ -2,12 +2,12 @@ import { nextTick } from '@riim/next-tick';
 import { Cell } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
-import { compileKeypath } from '../compileKeypath';
 import { Component } from '../Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
-import { templateTag as templateTagFeature } from '../Features';
-import { KEY_ELEMENT_CONNECTED } from '../KEY_ELEMENT_CONNECTED';
-import { keypathPattern } from '../keypathPattern';
+import { compileKeypath } from '../lib/compileKeypath';
+import { templateTag as templateTagFeature } from '../lib/Features';
+import { KEY_ELEMENT_CONNECTED } from '../lib/KEY_ELEMENT_CONNECTED';
+import { keypathPattern } from '../lib/keypathPattern';
 
 let slice = Array.prototype.slice;
 

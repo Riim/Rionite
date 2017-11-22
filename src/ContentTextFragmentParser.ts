@@ -1,6 +1,6 @@
-import { keypathPattern } from './keypathPattern';
-import { keypathToJSExpression } from './keypathToJSExpression';
-import { namePattern } from './namePattern';
+import { keypathPattern } from './lib/keypathPattern';
+import { keypathToJSExpression } from './lib/keypathToJSExpression';
+import { namePattern } from './lib/namePattern';
 
 export enum ContentTextFragmentNodeType {
 	TEXT = 1,

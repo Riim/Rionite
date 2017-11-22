@@ -1,8 +1,8 @@
 import { defer } from '@riim/defer';
 import { Container } from '@riim/di';
 import { Component, IComponentElement } from './Component';
-import { nativeCustomElements as nativeCustomElementsFeature } from './Features';
-import { KEY_ELEMENT_CONNECTED } from './KEY_ELEMENT_CONNECTED';
+import { nativeCustomElements as nativeCustomElementsFeature } from './lib/Features';
+import { KEY_ELEMENT_CONNECTED } from './lib/KEY_ELEMENT_CONNECTED';
 
 let isConnectionStatusCallbacksSuppressed = false;
 
@@ -95,10 +95,10 @@ export let ElementProtoMixin = {
 
 		if (component && component.isReady) {
 			let params = component.params;
-			let privateName = '_' + name;
+			let setMethodName = '_set_' + name;
 
-			if (params[privateName]) {
-				params[privateName](value);
+			if (params[setMethodName]) {
+				params[setMethodName](value);
 			} else if (nativeCustomElementsFeature) {
 				throw new TypeError(`Cannot write to readonly parameter "${name}"`);
 			}

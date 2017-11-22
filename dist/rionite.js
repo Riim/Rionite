@@ -125,10 +125,10 @@ var componentConstructorMap_1 = __webpack_require__(23);
 var ComponentParams_1 = __webpack_require__(24);
 var DisposableMixin_1 = __webpack_require__(18);
 var ElementProtoMixin_1 = __webpack_require__(3);
-var Features_1 = __webpack_require__(6);
 var handledEvents_1 = __webpack_require__(47);
 var handleDOMEvent_1 = __webpack_require__(48);
 var handleEvent_1 = __webpack_require__(49);
+var Features_1 = __webpack_require__(6);
 var registerComponent_1 = __webpack_require__(50);
 var map = Array.prototype.map;
 var reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)/g;
@@ -557,9 +557,9 @@ exports.ElementProtoMixin = (_a = {
         var component = this.rioniteComponent;
         if (component && component.isReady) {
             var params = component.params;
-            var privateName = '_' + name;
-            if (params[privateName]) {
-                params[privateName](value);
+            var setMethodName = '_set_' + name;
+            if (params[setMethodName]) {
+                params[setMethodName](value);
             }
             else if (Features_1.nativeCustomElements) {
                 throw new TypeError("Cannot write to readonly parameter \"" + name + "\"");
@@ -756,7 +756,7 @@ exports.nativeCustomElements = nativeCustomElementsFeature;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var symbol_polyfill_1 = __webpack_require__(12);
-exports.KEY_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite.KEY_ELEMENT_CONNECTED');
+exports.KEY_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite.elementConnected');
 
 
 /***/ }),
@@ -1441,8 +1441,7 @@ var hyphenize_1 = __webpack_require__(17);
 var cellx_1 = __webpack_require__(1);
 var componentParamTypeMap_1 = __webpack_require__(42);
 var componentParamTypeSerializerMap_1 = __webpack_require__(43);
-function initParam(params, name, el) {
-    var component = el.$component;
+function initParam(component, params, name) {
     var config = component.constructor.params[name];
     if (config == null) {
         return;
@@ -1477,6 +1476,7 @@ function initParam(params, name, el) {
     if (!typeSerializer) {
         throw new TypeError('Unsupported parameter type');
     }
+    var el = component.element;
     var hyphenizedName = hyphenize_1.hyphenize(name, true);
     var rawValue = el.getAttribute(hyphenizedName);
     if (rawValue === null) {
@@ -1505,7 +1505,7 @@ function initParam(params, name, el) {
     }
     else {
         var valueCell_1;
-        params['_' + hyphenizedName] = function (rawValue) {
+        params['_set_' + hyphenizedName] = function (rawValue) {
             var val = typeSerializer.read(rawValue, defaultValue);
             if (valueCell_1) {
                 valueCell_1.set(val);
@@ -1566,7 +1566,6 @@ function initParam(params, name, el) {
 exports.ComponentParams = {
     init: function (component) {
         var config = component.constructor.params;
-        var el = component.element;
         var params = {
             $content: null,
             $context: null,
@@ -1574,7 +1573,7 @@ exports.ComponentParams = {
         };
         if (config) {
             for (var name_1 in config) {
-                initParam(params, name_1, el);
+                initParam(component, params, name_1);
             }
         }
         return params;
@@ -1609,9 +1608,9 @@ var next_tick_1 = __webpack_require__(26);
 var cellx_1 = __webpack_require__(1);
 var attachChildComponentElements_1 = __webpack_require__(4);
 var bindContent_1 = __webpack_require__(5);
-var compileKeypath_1 = __webpack_require__(27);
 var Component_1 = __webpack_require__(2);
 var ElementProtoMixin_1 = __webpack_require__(3);
+var compileKeypath_1 = __webpack_require__(27);
 var Features_1 = __webpack_require__(6);
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(7);
 var keypathPattern_1 = __webpack_require__(15);
@@ -2973,9 +2972,9 @@ var next_tick_1 = __webpack_require__(26);
 var cellx_1 = __webpack_require__(1);
 var attachChildComponentElements_1 = __webpack_require__(4);
 var bindContent_1 = __webpack_require__(5);
-var compileKeypath_1 = __webpack_require__(27);
 var Component_1 = __webpack_require__(2);
 var ElementProtoMixin_1 = __webpack_require__(3);
+var compileKeypath_1 = __webpack_require__(27);
 var Features_1 = __webpack_require__(6);
 var KEY_ELEMENT_CONNECTED_1 = __webpack_require__(7);
 var keypathPattern_1 = __webpack_require__(15);

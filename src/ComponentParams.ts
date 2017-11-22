@@ -1,6 +1,6 @@
 import { hyphenize } from '@riim/hyphenize';
 import { Cell, EventEmitter } from 'cellx';
-import { Component, IComponentElement } from './Component';
+import { Component } from './Component';
 import { componentParamTypeMap } from './componentParamTypeMap';
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 
@@ -11,8 +11,7 @@ export interface IComponentParams extends Object {
 	[name: string]: any;
 }
 
-function initParam(params: IComponentParams, name: string, el: IComponentElement) {
-	let component = el.$component;
+function initParam(component: Component, params: IComponentParams, name: string) {
 	let config = (component.constructor as typeof Component).params![name];
 
 	if (config == null) {
@@ -54,6 +53,7 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 		throw new TypeError('Unsupported parameter type');
 	}
 
+	let el = component.element;
 	let hyphenizedName = hyphenize(name, true);
 	let rawValue = el.getAttribute(hyphenizedName);
 
@@ -88,7 +88,7 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 	} else {
 		let valueCell: Cell | undefined;
 
-		params['_' + hyphenizedName] = (rawValue: string | null) => {
+		params['_set_' + hyphenizedName] = (rawValue: string | null) => {
 			let val = typeSerializer!.read(rawValue, defaultValue);
 
 			if (valueCell) {
@@ -160,7 +160,6 @@ function initParam(params: IComponentParams, name: string, el: IComponentElement
 export let ComponentParams = {
 	init(component: Component): IComponentParams {
 		let config = (component.constructor as typeof Component).params;
-		let el = component.element;
 		let params = {
 			$content: null,
 			$context: null as any,
@@ -169,7 +168,7 @@ export let ComponentParams = {
 
 		if (config) {
 			for (let name in config) {
-				initParam(params, name, el);
+				initParam(component, params, name);
 			}
 		}
 

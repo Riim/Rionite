@@ -7,7 +7,7 @@ import {
 	IContentTextFragmentTextNode,
 	TContentTextFragment
 	} from './ContentTextFragmentParser';
-import { formatters } from './formatters';
+import { formatters } from './lib/formatters';
 
 let ContentTextFragmentNodeType = ContentTextFragmentParser.ContentTextFragmentNodeType;
 
