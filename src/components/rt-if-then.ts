@@ -3,7 +3,6 @@ import { Cell } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { Component } from '../Component';
-import { ComponentParamDecorator } from '../ComponentParamDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { KEY_IS_ELEMENT_CONNECTED } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
@@ -25,7 +24,7 @@ let reKeypath = RegExp(`^${keypathPattern}$`);
 	}
 })
 export class RtIfThen extends Component {
-	@ComponentParamDecorator('if') readonly paramIf: string;
+	paramIf: string;
 
 	_elseMode = false;
 

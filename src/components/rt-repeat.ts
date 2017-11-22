@@ -4,7 +4,6 @@ import { Cell, ObservableList } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { Component } from '../Component';
-import { ComponentParamDecorator } from '../ComponentParamDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { KEY_IS_ELEMENT_CONNECTED } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
@@ -37,9 +36,9 @@ let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+of\\s+(${keypathPattern})\
 	}
 })
 export class RtRepeat extends Component {
-	@ComponentParamDecorator('for') readonly paramFor: string;
-	@ComponentParamDecorator('trackBy') readonly paramTrackBy: string | null;
-	@ComponentParamDecorator('strip') readonly paramStrip = false;
+	paramFor: string;
+	paramTrackBy: string;
+	paramStrip: boolean;
 
 	_itemName: string;
 	_list: TListCell;

@@ -5,26 +5,40 @@ import { Component } from './Component';
 import { componentParamTypeMap } from './componentParamTypeMap';
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 
+export type TComponentParamConfig =
+	| Function
+	| {
+			property?: string;
+			type?: Function;
+			default?: any;
+			required?: boolean;
+			readonly?: boolean;
+		};
+
 export let KEY_IS_COMPONENT_PARAMS_INITED = Symbol('Rionite.isComponentParamsInited');
 
-function initParam(component: Component, config: any, name: string) {
+function initParam(component: Component, config: TComponentParamConfig | null, name: string) {
 	if (config == null) {
 		return;
 	}
 
-	let propertyName: string | undefined;
+	let propertyName: string;
 	let type: any = typeof config;
 	let defaultValue: any;
 	let required: boolean;
 	let readonly: boolean;
 
 	if (type == 'function') {
+		propertyName = name;
 		type = config;
 		required = readonly = false;
-	} else if (type == 'object' && (config.type !== undefined || config.default !== undefined)) {
-		propertyName = config.property;
-		type = config.type;
-		defaultValue = config.default;
+	} else if (
+		type == 'object' &&
+		((config as any).type !== undefined || (config as any).default !== undefined)
+	) {
+		propertyName = (config as any).property || name;
+		type = (config as any).type;
+		defaultValue = (config as any).default;
 
 		if (type === undefined) {
 			type = typeof defaultValue;
@@ -36,9 +50,10 @@ function initParam(component: Component, config: any, name: string) {
 			throw new TypeError('Specified type does not match defaultValue type');
 		}
 
-		required = config.required;
-		readonly = config.readonly;
+		required = (config as any).required;
+		readonly = (config as any).readonly;
 	} else {
+		propertyName = name;
 		defaultValue = config;
 		required = readonly = false;
 	}
@@ -108,6 +123,13 @@ function initParam(component: Component, config: any, name: string) {
 				if (currentlyPulling || EventEmitter.currentlySubscribing) {
 					valueCell = new Cell(value, { context: component });
 
+					Object.defineProperty(component, propertyName + 'Cell', {
+						configurable: true,
+						enumerable: false,
+						writable: true,
+						value: valueCell
+					});
+
 					if (currentlyPulling) {
 						return valueCell.get();
 					}
@@ -134,7 +156,7 @@ function initParam(component: Component, config: any, name: string) {
 		};
 	}
 
-	Object.defineProperty(component, propertyName || name, descriptor);
+	Object.defineProperty(component, propertyName, descriptor);
 }
 
 export let ComponentParams = {

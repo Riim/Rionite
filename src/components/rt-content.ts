@@ -7,7 +7,6 @@ import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { Component, IComponentElement } from '../Component';
 import { IFreezableCell } from '../componentBinding';
-import { ComponentParamDecorator } from '../ComponentParamDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 
 let KEY_CONTENT_MAP = Symbol('Rionite.RtContent.contentMap');
@@ -18,22 +17,19 @@ let KEY_CONTENT_MAP = Symbol('Rionite.RtContent.contentMap');
 	params: {
 		select: { property: 'paramSelect', type: String, readonly: true },
 		clone: { property: 'paramClone', default: false, readonly: true },
-		getContext: { property: 'getContext', type: Object, readonly: true }
+		getContext: { property: 'paramGetContext', type: Object, readonly: true }
 	},
 
 	template: ''
 })
 export class RtContent extends Component {
-	@ComponentParamDecorator('select') readonly paramSelect: string | null;
-	@ComponentParamDecorator('clone') readonly paramClone = false;
-	@ComponentParamDecorator('getContext')
-	readonly paramGetContext:
-		| ((
-				this: Component,
-				context: { [name: string]: any },
-				content: Component
-			) => { [name: string]: any })
-		| null;
+	paramSelect: string;
+	paramClone: boolean;
+	paramGetContext: (
+		this: Component,
+		context: { [name: string]: any },
+		content: RtContent
+	) => { [name: string]: any };
 
 	_childComponents: Array<Component> | null;
 

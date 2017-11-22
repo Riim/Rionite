@@ -7,7 +7,6 @@ import { attachChildComponentElements } from '../attachChildComponentElements';
 import { bindContent } from '../bindContent';
 import { Component, IComponentElement } from '../Component';
 import { IFreezableCell } from '../componentBinding';
-import { ComponentParamDecorator } from '../ComponentParamDecorator';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 
 let KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RtSlot.slotContentMap');
@@ -16,26 +15,23 @@ let KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RtSlot.slotContentMap');
 	elementIs: 'RtSlot',
 
 	params: {
-		forTag: { property: 'forTag', type: String, readonly: true },
-		for: { property: 'for', type: String, readonly: true },
-		cloneContent: { property: 'cloneContent', default: false, readonly: true },
-		getContext: { property: 'getContext', type: Object, readonly: true }
+		forTag: { property: 'paramForTag', type: String, readonly: true },
+		for: { property: 'paramFor', type: String, readonly: true },
+		cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
+		getContext: { property: 'paramGetContext', type: Object, readonly: true }
 	},
 
 	template: ''
 })
 export class RtSlot extends Component {
-	@ComponentParamDecorator('forTag') readonly paramForTag: string | null;
-	@ComponentParamDecorator('for') readonly paramFor: string | null;
-	@ComponentParamDecorator('cloneContent') readonly paramCloneContent = false;
-	@ComponentParamDecorator('getContext')
-	readonly paramGetContext:
-		| ((
-				this: Component,
-				context: { [name: string]: any },
-				slot: RtSlot
-			) => { [name: string]: any })
-		| null;
+	paramForTag: string;
+	paramFor: string;
+	paramCloneContent: boolean;
+	paramGetContext: (
+		this: Component,
+		context: { [name: string]: any },
+		slot: RtSlot
+	) => { [name: string]: any };
 
 	_childComponents: Array<Component> | null;
 
