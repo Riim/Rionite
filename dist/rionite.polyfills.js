@@ -1667,7 +1667,7 @@ exports.ElementProtoMixin = (_a = {
     _a.attributeChangedCallback = function (name, prev, value) {
         var component = this.rioniteComponent;
         if (component && component.isReady) {
-            var methodName = '_setParam_' + name;
+            var methodName = '__setParam_' + name;
             if (component[methodName]) {
                 component[methodName](value);
             }
@@ -2128,7 +2128,6 @@ function onAttributeBindingCellChange(evt) {
 function onTextNodeBindingCellChange(evt) {
     evt.target.textNode.nodeValue = evt.data.value;
 }
-var ContentTextFragmentNodeType = ContentTextFragmentParser_1.ContentTextFragmentParser.ContentTextFragmentNodeType;
 function bindContent(node, ownerComponent, context, result) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         switch (child.nodeType) {
@@ -2148,7 +2147,7 @@ function bindContent(node, ownerComponent, context, result) {
                     if (value.indexOf('{') != -1) {
                         var contentTextFragment = new ContentTextFragmentParser_1.ContentTextFragmentParser(value).parse();
                         if (contentTextFragment.length > 1 ||
-                            contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING) {
+                            contentTextFragment[0].nodeType == ContentTextFragmentParser_1.ContentTextFragmentNodeType.BINDING) {
                             var name_1 = attr.name;
                             if (name_1.charAt(0) == '_') {
                                 name_1 = name_1.slice(1);
@@ -2184,7 +2183,7 @@ function bindContent(node, ownerComponent, context, result) {
                 if (value.indexOf('{') != -1) {
                     var contentTextFragment = new ContentTextFragmentParser_1.ContentTextFragmentParser(value).parse();
                     if (contentTextFragment.length > 1 ||
-                        contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING) {
+                        contentTextFragment[0].nodeType == ContentTextFragmentParser_1.ContentTextFragmentNodeType.BINDING) {
                         var cell = new TextNodeBindingCell(compileContentTextFragment_1.compileContentTextFragment(contentTextFragment, value, false), child, {
                             context: context,
                             onChange: onTextNodeBindingCellChange
@@ -2349,7 +2348,7 @@ function initParam(component, config, name) {
     }
     else {
         var valueCell_1;
-        component['_setParam_' + hyphenizedName] = function (rawValue) {
+        component['__setParam_' + hyphenizedName] = function (rawValue) {
             var val = typeSerializer.read(rawValue, defaultValue);
             if (valueCell_1) {
                 valueCell_1.set(val);
@@ -3030,7 +3029,6 @@ var ContentTextFragmentParser = /** @class */ (function () {
         }
         return (this.chr = this.contentTextFragment.charAt(++this.at));
     };
-    ContentTextFragmentParser.ContentTextFragmentNodeType = ContentTextFragmentNodeType;
     return ContentTextFragmentParser;
 }());
 exports.ContentTextFragmentParser = ContentTextFragmentParser;
@@ -3281,9 +3279,9 @@ var ComponentParamDecorator_1 = __webpack_require__(54);
 exports.Param = ComponentParamDecorator_1.ComponentParamDecorator;
 var rt_if_then_1 = __webpack_require__(26);
 exports.RtIfThen = rt_if_then_1.RtIfThen;
-var rt_if_else_1 = __webpack_require__(55);
+var rt_if_else_1 = __webpack_require__(56);
 exports.RtIfElse = rt_if_else_1.RtIfElse;
-var rt_repeat_1 = __webpack_require__(56);
+var rt_repeat_1 = __webpack_require__(57);
 exports.RtRepeat = rt_repeat_1.RtRepeat;
 di_1.Container.registerService('logger', logger_1.logger);
 
@@ -3542,7 +3540,7 @@ exports.componentParamTypeSerializerMap = new map_set_polyfill_1.Map([
                 return value !== null ? +value : defaultValue !== undefined ? defaultValue : null;
             },
             write: function (value) {
-                return value != null ? String(+value) : null;
+                return value != null ? +value + '' : null;
             }
         }
     ],
@@ -3553,7 +3551,7 @@ exports.componentParamTypeSerializerMap = new map_set_polyfill_1.Map([
                 return value !== null ? value : defaultValue !== undefined ? defaultValue : null;
             },
             write: function (value) {
-                return value != null ? String(value) : null;
+                return value != null ? value + '' : null;
             }
         }
     ],
@@ -3628,17 +3626,16 @@ var bindingToJSExpression_1 = __webpack_require__(40);
 var componentParamValueMap_1 = __webpack_require__(14);
 var ContentTextFragmentParser_1 = __webpack_require__(23);
 var formatters_1 = __webpack_require__(19);
-var ContentTextFragmentNodeType = ContentTextFragmentParser_1.ContentTextFragmentParser.ContentTextFragmentNodeType;
-var keyCounter = 0;
+var valueMapKeyCounter = 0;
 var cache = Object.create(null);
-function compileContentTextFragment(contentTextFragment, contentTextFragmentString, c) {
-    var key = contentTextFragmentString + (c ? ',' : '.');
-    if (cache[key]) {
-        return cache[key];
+function compileContentTextFragment(contentTextFragment, contentTextFragmentString, useValueMap) {
+    var cacheKey = contentTextFragmentString + (useValueMap ? ',' : '.');
+    if (cache[cacheKey]) {
+        return cache[cacheKey];
     }
     var inner;
     if (contentTextFragment.length == 1) {
-        inner = Function('formatters', "var temp; return " + (contentTextFragment[0].nodeType == ContentTextFragmentNodeType.TEXT
+        inner = Function('formatters', "var temp; return " + (contentTextFragment[0].nodeType == ContentTextFragmentParser_1.ContentTextFragmentNodeType.TEXT
             ? "'" + escape_string_1.escapeString(contentTextFragment[0].value) + "'"
             : bindingToJSExpression_1.bindingToJSExpression(contentTextFragment[0])) + ";");
     }
@@ -3646,27 +3643,27 @@ function compileContentTextFragment(contentTextFragment, contentTextFragmentStri
         var jsExpr = [];
         for (var _i = 0, contentTextFragment_1 = contentTextFragment; _i < contentTextFragment_1.length; _i++) {
             var node = contentTextFragment_1[_i];
-            jsExpr.push(node.nodeType == ContentTextFragmentNodeType.TEXT
+            jsExpr.push(node.nodeType == ContentTextFragmentParser_1.ContentTextFragmentNodeType.TEXT
                 ? "'" + escape_string_1.escapeString(node.value) + "'"
                 : bindingToJSExpression_1.bindingToJSExpression(node));
         }
         inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
     }
-    return (cache[key] = c
+    return (cache[cacheKey] = useValueMap
         ? function () {
             var value = inner.call(this, formatters_1.formatters);
             if (value) {
                 var valueType = typeof value;
                 if (valueType == 'object' || valueType == 'function') {
-                    var key_1 = String(++keyCounter);
-                    componentParamValueMap_1.componentParamValueMap.set(key_1, value);
-                    return key_1;
+                    var key = ++valueMapKeyCounter + '';
+                    componentParamValueMap_1.componentParamValueMap.set(key, value);
+                    return key;
                 }
             }
             return value;
         }
         : function () {
-            return inner.call(this, formatters_1.formatters);
+            return inner.call(this, formatters_1.formatters) + '';
         });
 }
 exports.compileContentTextFragment = compileContentTextFragment;
@@ -4377,6 +4374,8 @@ exports.RtContent = RtContent;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var componentParamTypeMap_1 = __webpack_require__(21);
+var toLowerCase_1 = __webpack_require__(55);
+var reFirstWord = /^[0-9A-Z]+?(?=[0-9A-Z]?[a-z])/;
 function ComponentParamDecorator(name, config) {
     if (name && typeof name != 'string') {
         config = name;
@@ -4395,7 +4394,10 @@ function ComponentParamDecorator(name, config) {
             config.type = componentParamTypeMap_1.componentParamTypeMap.has(type) ? type : Object;
         }
         (target.constructor.params ||
-            (target.constructor.params = {}))[(name || propertyName)] = config;
+            (target.constructor.params = {}))[(name ||
+            (propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
+                ? propertyName
+                : propertyName.slice(5).replace(reFirstWord, toLowerCase_1.toLowerCase)))] = config;
     };
 }
 exports.ComponentParamDecorator = ComponentParamDecorator;
@@ -4403,6 +4405,19 @@ exports.ComponentParamDecorator = ComponentParamDecorator;
 
 /***/ }),
 /* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function toLowerCase(str) {
+    return str.toLowerCase();
+}
+exports.toLowerCase = toLowerCase;
+
+
+/***/ }),
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4444,7 +4459,7 @@ exports.RtIfElse = RtIfElse;
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

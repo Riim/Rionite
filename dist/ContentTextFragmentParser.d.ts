@@ -31,7 +31,6 @@ export interface IContentTextFragmentBinding extends IContentTextFragmentNode {
 export declare type TContentTextFragment = Array<IContentTextFragmentTextNode | IContentTextFragmentBinding>;
 export declare type TNotValueAndNotKeypath = Object;
 export declare class ContentTextFragmentParser {
-    static ContentTextFragmentNodeType: typeof ContentTextFragmentNodeType;
     contentTextFragment: string;
     at: number;
     chr: string;

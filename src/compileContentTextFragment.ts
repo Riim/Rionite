@@ -2,28 +2,26 @@ import { escapeString } from 'escape-string';
 import { bindingToJSExpression } from './bindingToJSExpression';
 import { componentParamValueMap } from './componentParamValueMap';
 import {
-	ContentTextFragmentParser,
+	ContentTextFragmentNodeType,
 	IContentTextFragmentBinding,
 	IContentTextFragmentTextNode,
 	TContentTextFragment
 	} from './ContentTextFragmentParser';
 import { formatters } from './lib/formatters';
 
-let ContentTextFragmentNodeType = ContentTextFragmentParser.ContentTextFragmentNodeType;
-
-let keyCounter = 0;
+let valueMapKeyCounter = 0;
 
 let cache = Object.create(null);
 
 export function compileContentTextFragment(
 	contentTextFragment: TContentTextFragment,
 	contentTextFragmentString: string,
-	c: boolean
+	useValueMap: boolean
 ): () => any {
-	let key = contentTextFragmentString + (c ? ',' : '.');
+	let cacheKey = contentTextFragmentString + (useValueMap ? ',' : '.');
 
-	if (cache[key]) {
-		return cache[key];
+	if (cache[cacheKey]) {
+		return cache[cacheKey];
 	}
 
 	let inner: (formatters: { [name: string]: Function }) => any;
@@ -31,11 +29,13 @@ export function compileContentTextFragment(
 	if (contentTextFragment.length == 1) {
 		inner = Function(
 			'formatters',
-			`var temp; return ${contentTextFragment[0].nodeType == ContentTextFragmentNodeType.TEXT
-				? `'${escapeString(
-						(contentTextFragment[0] as IContentTextFragmentTextNode).value
-					)}'`
-				: bindingToJSExpression(contentTextFragment[0] as IContentTextFragmentBinding)};`
+			`var temp; return ${
+				contentTextFragment[0].nodeType == ContentTextFragmentNodeType.TEXT
+					? `'${escapeString(
+							(contentTextFragment[0] as IContentTextFragmentTextNode).value
+						)}'`
+					: bindingToJSExpression(contentTextFragment[0] as IContentTextFragmentBinding)
+			};`
 		) as any;
 	} else {
 		let jsExpr: Array<string> = [];
@@ -51,7 +51,7 @@ export function compileContentTextFragment(
 		inner = Function('formatters', `var temp; return [${jsExpr.join(', ')}].join('');`) as any;
 	}
 
-	return (cache[key] = c
+	return (cache[cacheKey] = useValueMap
 		? function() {
 				let value = inner.call(this, formatters);
 
@@ -59,7 +59,7 @@ export function compileContentTextFragment(
 					let valueType = typeof value;
 
 					if (valueType == 'object' || valueType == 'function') {
-						let key = String(++keyCounter);
+						let key = ++valueMapKeyCounter + '';
 						componentParamValueMap.set(key, value);
 						return key;
 					}
@@ -68,6 +68,6 @@ export function compileContentTextFragment(
 				return value;
 			}
 		: function() {
-				return inner.call(this, formatters);
+				return inner.call(this, formatters) + '';
 			});
 }

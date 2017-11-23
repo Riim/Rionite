@@ -51,8 +51,6 @@ let reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[
 let reVacuumOrNothing = /null|undefined|void 0|/g;
 
 export class ContentTextFragmentParser {
-	static ContentTextFragmentNodeType = ContentTextFragmentNodeType;
-
 	contentTextFragment: string;
 	at: number;
 	chr: string;

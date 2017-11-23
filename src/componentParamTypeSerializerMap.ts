@@ -31,7 +31,7 @@ export let componentParamTypeSerializerMap = new Map<
 			},
 
 			write: (value: any): string | null => {
-				return value != null ? String(+value) : null;
+				return value != null ? +value + '' : null;
 			}
 		}
 	],
@@ -44,7 +44,7 @@ export let componentParamTypeSerializerMap = new Map<
 			},
 
 			write: (value: any): string | null => {
-				return value != null ? String(value) : null;
+				return value != null ? value + '' : null;
 			}
 		}
 	],

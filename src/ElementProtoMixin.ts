@@ -105,7 +105,7 @@ export let ElementProtoMixin = {
 		let component = this.rioniteComponent;
 
 		if (component && component.isReady) {
-			let methodName = '_setParam_' + name;
+			let methodName = '__setParam_' + name;
 
 			if ((component as any)[methodName]) {
 				(component as any)[methodName](value);

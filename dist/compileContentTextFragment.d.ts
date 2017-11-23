@@ -1,2 +1,2 @@
 import { TContentTextFragment } from './ContentTextFragmentParser';
-export declare function compileContentTextFragment(contentTextFragment: TContentTextFragment, contentTextFragmentString: string, c: boolean): () => any;
+export declare function compileContentTextFragment(contentTextFragment: TContentTextFragment, contentTextFragmentString: string, useValueMap: boolean): () => any;

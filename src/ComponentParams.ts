@@ -99,7 +99,7 @@ function initParam(component: Component, config: TComponentParamConfig | null, n
 	} else {
 		let valueCell: Cell | undefined;
 
-		(component as any)['_setParam_' + hyphenizedName] = (rawValue: string | null) => {
+		(component as any)['__setParam_' + hyphenizedName] = (rawValue: string | null) => {
 			let val = typeSerializer!.read(rawValue, defaultValue);
 
 			if (valueCell) {

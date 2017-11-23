@@ -10,7 +10,7 @@ import {
 import { compileContentTextFragment } from './compileContentTextFragment';
 import { Component, IPossiblyComponentElement } from './Component';
 import { IFreezableCell } from './componentBinding';
-import { ContentTextFragmentParser } from './ContentTextFragmentParser';
+import { ContentTextFragmentNodeType, ContentTextFragmentParser } from './ContentTextFragmentParser';
 
 class AttributeBindingCell extends Cell {
 	element: Element;
@@ -39,8 +39,6 @@ function onAttributeBindingCellChange(evt: IEvent<AttributeBindingCell>) {
 function onTextNodeBindingCellChange(evt: IEvent<TextNodeBindingCell>) {
 	evt.target.textNode.nodeValue = evt.data.value;
 }
-
-let ContentTextFragmentNodeType = ContentTextFragmentParser.ContentTextFragmentNodeType;
 
 export function bindContent(
 	node: Element | DocumentFragment,
