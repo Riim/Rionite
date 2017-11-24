@@ -4393,8 +4393,8 @@ function ComponentParamDecorator(name, config) {
             var type = Reflect.getMetadata('design:type', target, propertyName);
             config.type = componentParamTypeMap_1.componentParamTypeMap.has(type) ? type : Object;
         }
-        (target.constructor.params ||
-            (target.constructor.params = {}))[(name ||
+        var constr = target.constructor;
+        (constr.hasOwnProperty('params') ? constr.params : (constr.params = {}))[(name ||
             (propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
                 ? propertyName
                 : propertyName.slice(5).replace(reFirstWord, toLowerCase_1.toLowerCase)))] = config;
