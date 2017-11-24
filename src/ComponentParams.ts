@@ -2,7 +2,6 @@ import { hyphenize } from '@riim/hyphenize';
 import { Symbol } from '@riim/symbol-polyfill';
 import { Cell, EventEmitter } from 'cellx';
 import { Component } from './Component';
-import { componentParamTypeMap } from './componentParamTypeMap';
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 
 export type TComponentParamConfig =
@@ -28,33 +27,32 @@ function initParam(component: Component, config: TComponentParamConfig | null, n
 	let required: boolean;
 	let readonly: boolean;
 
-	if (type == 'function') {
-		propertyName = name;
-		type = config;
-		required = readonly = false;
-	} else if (
+	let isObject =
 		type == 'object' &&
-		((config as any).type !== undefined || (config as any).default !== undefined)
-	) {
-		propertyName = (config as any).property || name;
-		type = (config as any).type;
-		defaultValue = (config as any).default;
+		((config as any).type !== undefined || (config as any).default !== undefined);
 
-		if (type === undefined) {
-			type = typeof defaultValue;
-		} else if (
-			defaultValue !== undefined &&
-			componentParamTypeMap.has(type) &&
-			componentParamTypeMap.get(type) != typeof defaultValue
-		) {
-			throw new TypeError('Specified type does not match defaultValue type');
+	propertyName = (isObject && (config as any).property) || name;
+
+	defaultValue = (component as any)[propertyName];
+
+	if (defaultValue === undefined) {
+		if (isObject) {
+			defaultValue = (config as any).default;
+		} else if (type != 'function') {
+			defaultValue = config;
 		}
+	}
 
+	type = isObject ? (config as any).type : config;
+
+	if (defaultValue !== undefined && type !== eval) {
+		type = typeof defaultValue;
+	}
+
+	if (isObject) {
 		required = (config as any).required;
 		readonly = (config as any).readonly;
 	} else {
-		propertyName = name;
-		defaultValue = config;
 		required = readonly = false;
 	}
 

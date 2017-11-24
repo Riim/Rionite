@@ -1,7 +1,9 @@
+import { Set } from '@riim/map-set-polyfill';
 import { Component } from './Component';
 import { TComponentParamConfig } from './ComponentParams';
-import { componentParamTypeMap } from './componentParamTypeMap';
 import { toLowerCase } from './lib/toLowerCase';
+
+let types = new Set([Boolean, Number, String, Object]);
 
 let reFirstWord = /^[0-9A-Z]+?(?=[0-9A-Z]?[a-z])/;
 
@@ -32,7 +34,7 @@ export function ComponentParamDecorator(
 
 		if (!(config as any).type) {
 			let type = (Reflect as any).getMetadata('design:type', target, propertyName);
-			(config as any).type = componentParamTypeMap.has(type) ? type : Object;
+			(config as any).type = types.has(type) ? type : Object;
 		}
 
 		let constr = target.constructor as typeof Component;
