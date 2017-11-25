@@ -1,6 +1,6 @@
 import { IEvent } from 'cellx';
 import { IBlock, Template } from 'nelm';
-import { Component, IComponentEvents, IComponentOEvents } from './Component';
+import { Component, IComponentEvents } from './Component';
 
 export function ComponentConfigDecorator<T extends Component>(config: {
 	elementIs: string;
@@ -8,7 +8,6 @@ export function ComponentConfigDecorator<T extends Component>(config: {
 	params?: { [name: string]: any } | null;
 	i18n?: { [key: string]: any } | null;
 	template?: string | IBlock | Template | null;
-	oevents?: IComponentOEvents<T> | null;
 	events?: IComponentEvents<T, IEvent<Component>> | null;
 	domEvents?: IComponentEvents<T, Event> | null;
 }) {
@@ -30,9 +29,6 @@ export function ComponentConfigDecorator<T extends Component>(config: {
 			(componentConstr as typeof Component).template = config.template;
 		}
 
-		if (config.oevents !== undefined) {
-			(componentConstr as typeof Component).oevents = config.oevents;
-		}
 		if (config.events !== undefined) {
 			(componentConstr as typeof Component).events = config.events;
 		}

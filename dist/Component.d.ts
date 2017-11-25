@@ -16,12 +16,6 @@ export interface IComponentElement<T extends Component = Component> extends HTML
 export interface IComponentElementClassNameMap {
     [elName: string]: string;
 }
-export declare type TOEventHandler<T extends Component> = (this: T, evt: IEvent | Event) => boolean | void;
-export interface IComponentOEvents<T extends Component> {
-    [name: string]: {
-        [eventName: string]: TOEventHandler<T>;
-    };
-}
 export declare type TEventHandler<T extends Component = Component, U = IEvent | Event> = (this: T, evt: U, receiver: Element) => boolean | void;
 export interface IComponentEvents<T extends Component = Component, U = IEvent | Event> {
     [name: string]: {
@@ -43,7 +37,6 @@ export declare class Component extends EventEmitter implements DisposableMixin {
     static _elementBlockNames: Array<string>;
     static template: string | IBlock | Template | null;
     static _rawContent: DocumentFragment | undefined;
-    static oevents: IComponentOEvents<Component> | null;
     static events: IComponentEvents<Component, IEvent<Component>> | null;
     static domEvents: IComponentEvents<Component, Event> | null;
     logger: Logger;

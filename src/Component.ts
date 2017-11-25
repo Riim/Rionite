@@ -9,7 +9,6 @@ import { htmlToFragment } from 'html-to-fragment';
 import { IBlock, Template } from 'nelm';
 import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
-import { bindEvents } from './bindEvents';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { ComponentConfigDecorator } from './ComponentConfigDecorator';
 import { componentConstructorMap } from './componentConstructorMap';
@@ -42,14 +41,6 @@ export interface IComponentElementClassNameMap {
 	[elName: string]: string;
 }
 
-export type TOEventHandler<T extends Component> = (this: T, evt: IEvent | Event) => boolean | void;
-
-export interface IComponentOEvents<T extends Component> {
-	[name: string]: {
-		[eventName: string]: TOEventHandler<T>;
-	};
-}
-
 export type TEventHandler<T extends Component = Component, U = IEvent | Event> = (
 	this: T,
 	evt: U,
@@ -77,9 +68,9 @@ function createClassBlockElementReplacer(
 
 			for (let type in elEvents) {
 				evtAttrs.push(
-					` ${evtAttrPrefix}${type.charAt(0) == '<'
-						? type.slice(type.indexOf('>', 2) + 1)
-						: type}="/${elName}"`
+					` ${evtAttrPrefix}${
+						type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type
+					}="/${elName}"`
 				);
 			}
 
@@ -144,7 +135,6 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	static _rawContent: DocumentFragment | undefined;
 
-	static oevents: IComponentOEvents<Component> | null = null;
 	static events: IComponentEvents<Component, IEvent<Component>> | null = null;
 	static domEvents: IComponentEvents<Component, Event> | null = null;
 
@@ -349,10 +339,6 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 		if (this.isReady) {
 			this._unfreezeBindings();
-
-			if (constr.oevents) {
-				bindEvents(this, constr.oevents);
-			}
 		} else {
 			let el = this.element;
 
@@ -361,18 +347,10 @@ export class Component extends EventEmitter implements DisposableMixin {
 			if (constr.template == null) {
 				this._bindings = null;
 
-				let childComponents = findChildComponents(
-					el,
-					this.ownerComponent,
-					this.$context
-				);
+				let childComponents = findChildComponents(el, this.ownerComponent, this.$context);
 
 				if (childComponents) {
 					attachChildComponentElements(childComponents);
-				}
-
-				if (constr.oevents) {
-					bindEvents(this, constr.oevents);
 				}
 			} else {
 				if (el.firstChild) {
@@ -434,10 +412,6 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 				if (childComponents) {
 					attachChildComponentElements(childComponents);
-				}
-
-				if (constr.oevents) {
-					bindEvents(this, constr.oevents);
 				}
 			}
 

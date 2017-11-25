@@ -25,9 +25,7 @@ export {
 	IPossiblyComponentElement,
 	IComponentElement,
 	IComponentElementClassNameMap,
-	TOEventHandler,
 	TEventHandler,
-	IComponentOEvents,
 	IComponentEvents,
 	Component
 } from './Component';

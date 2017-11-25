@@ -4,7 +4,7 @@ export { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInter
 export { formatters } from './lib/formatters';
 export { RtSlot } from './components/rt-slot';
 export { RtContent } from './components/rt-content';
-export { IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TOEventHandler, TEventHandler, IComponentOEvents, IComponentEvents, Component } from './Component';
+export { IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TEventHandler, IComponentEvents, Component } from './Component';
 export { KEY_IS_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export { componentParamValueMap } from './componentParamValueMap';
