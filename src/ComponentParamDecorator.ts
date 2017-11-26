@@ -8,6 +8,11 @@ let types = new Set([Boolean, Number, String, Object]);
 let reFirstWord = /^[0-9A-Z]+?(?=[0-9A-Z]?[a-z])/;
 
 export function ComponentParamDecorator(
+	target: Object,
+	propertyName: string,
+	propertyDesc?: PropertyDescriptor
+): void;
+export function ComponentParamDecorator(
 	name?: string,
 	config?: TComponentParamConfig
 ): (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor) => void;
@@ -15,12 +20,22 @@ export function ComponentParamDecorator(
 	config?: TComponentParamConfig
 ): (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor) => void;
 export function ComponentParamDecorator(
-	name?: string | TComponentParamConfig,
+	target?: Object | string | TComponentParamConfig,
+	propertyName?: string | TComponentParamConfig,
+	propertyDesc?: PropertyDescriptor,
+	name?: string,
 	config?: TComponentParamConfig
-) {
-	if (name && typeof name != 'string') {
-		config = name;
-		name = undefined;
+): any {
+	if (typeof propertyName != 'string') {
+		if (target && typeof target != 'string') {
+			config = target;
+		} else {
+			name = target;
+			config = propertyName;
+		}
+
+		return (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor): void =>
+			(ComponentParamDecorator as any)(target, propertyName, propertyDesc, name, config);
 	}
 
 	if (!config) {
@@ -29,21 +44,19 @@ export function ComponentParamDecorator(
 		config = { type: config };
 	}
 
-	return (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor) => {
-		(config as any).property = propertyName;
+	config.property = propertyName;
 
-		if (!(config as any).type) {
-			let type = (Reflect as any).getMetadata('design:type', target, propertyName);
-			(config as any).type = types.has(type) ? type : Object;
-		}
+	if (!config.type) {
+		let type = (Reflect as any).getMetadata('design:type', target, propertyName);
+		config.type = types.has(type) ? type : Object;
+	}
 
-		let constr = target.constructor as typeof Component;
+	let constr = target!.constructor as typeof Component;
 
-		(constr.hasOwnProperty('params') ? constr.params! : (constr.params = {}))[
-			(name ||
-				(propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
-					? propertyName
-					: propertyName.slice(5).replace(reFirstWord, toLowerCase))) as string
-		] = config as any;
-	};
+	(constr.hasOwnProperty('params') ? constr.params! : (constr.params = {}))[
+		(name ||
+			(propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
+				? propertyName
+				: propertyName.slice(5).replace(reFirstWord, toLowerCase))) as string
+	] = config;
 }

@@ -4309,10 +4309,18 @@ var map_set_polyfill_1 = __webpack_require__(0);
 var toLowerCase_1 = __webpack_require__(53);
 var types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
 var reFirstWord = /^[0-9A-Z]+?(?=[0-9A-Z]?[a-z])/;
-function ComponentParamDecorator(name, config) {
-    if (name && typeof name != 'string') {
-        config = name;
-        name = undefined;
+function ComponentParamDecorator(target, propertyName, propertyDesc, name, config) {
+    if (typeof propertyName != 'string') {
+        if (target && typeof target != 'string') {
+            config = target;
+        }
+        else {
+            name = target;
+            config = propertyName;
+        }
+        return function (target, propertyName, propertyDesc) {
+            return ComponentParamDecorator(target, propertyName, propertyDesc, name, config);
+        };
     }
     if (!config) {
         config = {};
@@ -4320,18 +4328,16 @@ function ComponentParamDecorator(name, config) {
     else if (typeof config == 'function') {
         config = { type: config };
     }
-    return function (target, propertyName, propertyDesc) {
-        config.property = propertyName;
-        if (!config.type) {
-            var type = Reflect.getMetadata('design:type', target, propertyName);
-            config.type = types.has(type) ? type : Object;
-        }
-        var constr = target.constructor;
-        (constr.hasOwnProperty('params') ? constr.params : (constr.params = {}))[(name ||
-            (propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
-                ? propertyName
-                : propertyName.slice(5).replace(reFirstWord, toLowerCase_1.toLowerCase)))] = config;
-    };
+    config.property = propertyName;
+    if (!config.type) {
+        var type = Reflect.getMetadata('design:type', target, propertyName);
+        config.type = types.has(type) ? type : Object;
+    }
+    var constr = target.constructor;
+    (constr.hasOwnProperty('params') ? constr.params : (constr.params = {}))[(name ||
+        (propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
+            ? propertyName
+            : propertyName.slice(5).replace(reFirstWord, toLowerCase_1.toLowerCase)))] = config;
 }
 exports.ComponentParamDecorator = ComponentParamDecorator;
 
