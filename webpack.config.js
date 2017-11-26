@@ -51,6 +51,7 @@ module.exports = () => {
 			'@riim/hyphenize',
 			'@riim/is-regexp',
 			'@riim/logger',
+			'@riim/lower-case-first-word',
 			'@riim/map-set-polyfill',
 			'@riim/mixin',
 			'@riim/move-content',

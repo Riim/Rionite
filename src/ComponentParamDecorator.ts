@@ -1,11 +1,9 @@
+import { lowerCaseFirstWord } from '@riim/lower-case-first-word';
 import { Set } from '@riim/map-set-polyfill';
 import { Component } from './Component';
 import { TComponentParamConfig } from './ComponentParams';
-import { toLowerCase } from './lib/toLowerCase';
 
 let types = new Set([Boolean, Number, String, Object]);
-
-let reFirstWord = /^[0-9A-Z]+?(?=[0-9A-Z]?[a-z])/;
 
 export function ComponentParamDecorator(
 	target: Object,
@@ -57,6 +55,6 @@ export function ComponentParamDecorator(
 		(name ||
 			(propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
 				? propertyName
-				: propertyName.slice(5).replace(reFirstWord, toLowerCase))) as string
+				: lowerCaseFirstWord(propertyName.slice(5)))) as string
 	] = config;
 }

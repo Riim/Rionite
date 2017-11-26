@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/hyphenize"), require("@riim/logger"), require("@riim/clear-node"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("html-to-fragment"), require("@riim/defer"), require("@riim/mixin"));
+		module.exports = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/hyphenize"), require("@riim/logger"), require("@riim/clear-node"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("html-to-fragment"), require("@riim/defer"), require("@riim/mixin"), require("@riim/lower-case-first-word"));
 	else if(typeof define === 'function' && define.amd)
-		define(["@riim/map-set-polyfill", "cellx", "@riim/symbol-polyfill", "@riim/di", "nelm", "@riim/get-uid", "@riim/move-content", "@riim/hyphenize", "@riim/logger", "@riim/clear-node", "@riim/camelize", "@riim/next-tick", "@riim/next-uid", "@riim/gettext", "@riim/escape-html", "@riim/is-regexp", "@riim/set-attribute", "escape-string", "html-to-fragment", "@riim/defer", "@riim/mixin"], factory);
+		define(["@riim/map-set-polyfill", "cellx", "@riim/symbol-polyfill", "@riim/di", "nelm", "@riim/get-uid", "@riim/move-content", "@riim/hyphenize", "@riim/logger", "@riim/clear-node", "@riim/camelize", "@riim/next-tick", "@riim/next-uid", "@riim/gettext", "@riim/escape-html", "@riim/is-regexp", "@riim/set-attribute", "escape-string", "html-to-fragment", "@riim/defer", "@riim/mixin", "@riim/lower-case-first-word"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/hyphenize"), require("@riim/logger"), require("@riim/clear-node"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("html-to-fragment"), require("@riim/defer"), require("@riim/mixin"));
+		exports["rionite"] = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/hyphenize"), require("@riim/logger"), require("@riim/clear-node"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("html-to-fragment"), require("@riim/defer"), require("@riim/mixin"), require("@riim/lower-case-first-word"));
 	else
-		root["rionite"] = factory(root["@riim/map-set-polyfill"], root["cellx"], root["@riim/symbol-polyfill"], root["@riim/di"], root["nelm"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/hyphenize"], root["@riim/logger"], root["@riim/clear-node"], root["@riim/camelize"], root["@riim/next-tick"], root["@riim/next-uid"], root["@riim/gettext"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["escape-string"], root["html-to-fragment"], root["@riim/defer"], root["@riim/mixin"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_8__, __WEBPACK_EXTERNAL_MODULE_9__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_17__, __WEBPACK_EXTERNAL_MODULE_20__, __WEBPACK_EXTERNAL_MODULE_21__, __WEBPACK_EXTERNAL_MODULE_26__, __WEBPACK_EXTERNAL_MODULE_30__, __WEBPACK_EXTERNAL_MODULE_31__, __WEBPACK_EXTERNAL_MODULE_34__, __WEBPACK_EXTERNAL_MODULE_35__, __WEBPACK_EXTERNAL_MODULE_36__, __WEBPACK_EXTERNAL_MODULE_38__, __WEBPACK_EXTERNAL_MODULE_40__, __WEBPACK_EXTERNAL_MODULE_43__, __WEBPACK_EXTERNAL_MODULE_48__) {
+		root["rionite"] = factory(root["@riim/map-set-polyfill"], root["cellx"], root["@riim/symbol-polyfill"], root["@riim/di"], root["nelm"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/hyphenize"], root["@riim/logger"], root["@riim/clear-node"], root["@riim/camelize"], root["@riim/next-tick"], root["@riim/next-uid"], root["@riim/gettext"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["escape-string"], root["html-to-fragment"], root["@riim/defer"], root["@riim/mixin"], root["@riim/lower-case-first-word"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_8__, __WEBPACK_EXTERNAL_MODULE_9__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_17__, __WEBPACK_EXTERNAL_MODULE_20__, __WEBPACK_EXTERNAL_MODULE_21__, __WEBPACK_EXTERNAL_MODULE_26__, __WEBPACK_EXTERNAL_MODULE_30__, __WEBPACK_EXTERNAL_MODULE_31__, __WEBPACK_EXTERNAL_MODULE_34__, __WEBPACK_EXTERNAL_MODULE_35__, __WEBPACK_EXTERNAL_MODULE_36__, __WEBPACK_EXTERNAL_MODULE_38__, __WEBPACK_EXTERNAL_MODULE_40__, __WEBPACK_EXTERNAL_MODULE_43__, __WEBPACK_EXTERNAL_MODULE_48__, __WEBPACK_EXTERNAL_MODULE_53__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -2575,6 +2575,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var camelize_1 = __webpack_require__(21);
 var cache = Object.create(null);
 function pascalize(str, useCache) {
+    str = String(str);
     var value;
     return ((useCache && cache[str]) ||
         ((value = camelize_1.camelize(str)),
@@ -2805,10 +2806,9 @@ exports.RtContent = RtContent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var lower_case_first_word_1 = __webpack_require__(53);
 var map_set_polyfill_1 = __webpack_require__(0);
-var toLowerCase_1 = __webpack_require__(53);
 var types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
-var reFirstWord = /^[0-9A-Z]+?(?=[0-9A-Z]?[a-z])/;
 function ComponentParamDecorator(target, propertyName, propertyDesc, name, config) {
     if (typeof propertyName != 'string') {
         if (target && typeof target != 'string') {
@@ -2837,23 +2837,16 @@ function ComponentParamDecorator(target, propertyName, propertyDesc, name, confi
     (constr.hasOwnProperty('params') ? constr.params : (constr.params = {}))[(name ||
         (propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
             ? propertyName
-            : propertyName.slice(5).replace(reFirstWord, toLowerCase_1.toLowerCase)))] = config;
+            : lower_case_first_word_1.lowerCaseFirstWord(propertyName.slice(5))))] = config;
 }
 exports.ComponentParamDecorator = ComponentParamDecorator;
 
 
 /***/ }),
 /* 53 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function toLowerCase(str) {
-    return str.toLowerCase();
-}
-exports.toLowerCase = toLowerCase;
-
+module.exports = __WEBPACK_EXTERNAL_MODULE_53__;
 
 /***/ }),
 /* 54 */
