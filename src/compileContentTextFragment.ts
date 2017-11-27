@@ -1,4 +1,6 @@
+import { TCellPull } from 'cellx/dist/Cell';
 import { escapeString } from 'escape-string';
+import { AttributeBindingCell } from './bindContent';
 import { bindingToJSExpression } from './bindingToJSExpression';
 import { componentParamValueMap } from './componentParamValueMap';
 import {
@@ -17,7 +19,7 @@ export function compileContentTextFragment(
 	contentTextFragment: TContentTextFragment,
 	contentTextFragmentString: string,
 	useValueMap: boolean
-): () => any {
+): TCellPull<any> {
 	let cacheKey = contentTextFragmentString + (useValueMap ? ',' : '.');
 
 	if (cache[cacheKey]) {
@@ -52,22 +54,27 @@ export function compileContentTextFragment(
 	}
 
 	return (cache[cacheKey] = useValueMap
-		? function() {
+		? function(cell: AttributeBindingCell, next: string): any {
 				let value = inner.call(this, formatters);
 
 				if (value) {
+					if (value === cell.prevValue) {
+						return next;
+					}
+
 					let valueType = typeof value;
 
 					if (valueType == 'object' || valueType == 'function') {
 						let key = ++valueMapKeyCounter + '';
 						componentParamValueMap.set(key, value);
+						cell.prevValue = value;
 						return key;
 					}
 				}
 
 				return value;
 			}
-		: function() {
+		: function(): string {
 				return inner.call(this, formatters) + '';
 			});
 }

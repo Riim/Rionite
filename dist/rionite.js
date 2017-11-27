@@ -600,6 +600,7 @@ var AttributeBindingCell = /** @class */ (function (_super) {
     }
     return AttributeBindingCell;
 }(cellx_1.Cell));
+exports.AttributeBindingCell = AttributeBindingCell;
 var TextNodeBindingCell = /** @class */ (function (_super) {
     __extends(TextNodeBindingCell, _super);
     function TextNodeBindingCell(pull, textNode, opts) {
@@ -609,6 +610,7 @@ var TextNodeBindingCell = /** @class */ (function (_super) {
     }
     return TextNodeBindingCell;
 }(cellx_1.Cell));
+exports.TextNodeBindingCell = TextNodeBindingCell;
 function onAttributeBindingCellChange(evt) {
     set_attribute_1.setAttribute(evt.target.element, evt.target.attributeName, evt.data.value);
 }
@@ -2117,13 +2119,17 @@ function compileContentTextFragment(contentTextFragment, contentTextFragmentStri
         inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
     }
     return (cache[cacheKey] = useValueMap
-        ? function () {
+        ? function (cell, next) {
             var value = inner.call(this, formatters_1.formatters);
             if (value) {
+                if (value === cell.prevValue) {
+                    return next;
+                }
                 var valueType = typeof value;
                 if (valueType == 'object' || valueType == 'function') {
                     var key = ++valueMapKeyCounter + '';
                     componentParamValueMap_1.componentParamValueMap.set(key, value);
+                    cell.prevValue = value;
                     return key;
                 }
             }

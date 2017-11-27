@@ -12,7 +12,9 @@ import { Component, IPossiblyComponentElement } from './Component';
 import { IFreezableCell } from './componentBinding';
 import { ContentTextFragmentNodeType, ContentTextFragmentParser } from './ContentTextFragmentParser';
 
-class AttributeBindingCell extends Cell {
+export class AttributeBindingCell extends Cell {
+	prevValue: any;
+
 	element: Element;
 	attributeName: string;
 
@@ -23,10 +25,10 @@ class AttributeBindingCell extends Cell {
 	}
 }
 
-class TextNodeBindingCell extends Cell {
+export class TextNodeBindingCell extends Cell {
 	textNode: Text;
 
-	constructor(pull: TCellPull<any>, textNode: Text, opts?: ICellOptions<any>) {
+	constructor(pull: TCellPull<string>, textNode: Text, opts?: ICellOptions<string>) {
 		super(pull, opts);
 		this.textNode = textNode;
 	}
