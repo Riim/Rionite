@@ -75,6 +75,7 @@ export function compileContentTextFragment(
 				return value;
 			}
 		: function(): string {
-				return inner.call(this, formatters) + '';
+				let value = inner.call(this, formatters);
+				return value === undefined ? '' : value + '';
 			});
 }

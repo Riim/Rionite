@@ -3636,7 +3636,8 @@ function compileContentTextFragment(contentTextFragment, contentTextFragmentStri
             return value;
         }
         : function () {
-            return inner.call(this, formatters_1.formatters) + '';
+            var value = inner.call(this, formatters_1.formatters);
+            return value === undefined ? '' : value + '';
         });
 }
 exports.compileContentTextFragment = compileContentTextFragment;

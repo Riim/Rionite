@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.31.25",
+  "version": "0.31.26",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -32,7 +32,7 @@
     "run-sequence": "^2.2.0",
     "tslint": "^5.8.0",
     "tslint-loader": "^3.5.3",
-    "typescript": "^2.6.1",
+    "typescript": "^2.6.2",
     "webpack": "^3.8.1"
   },
   "dependencies": {
