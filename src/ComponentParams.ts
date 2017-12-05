@@ -1,7 +1,7 @@
 import { hyphenize } from '@riim/hyphenize';
 import { Symbol } from '@riim/symbol-polyfill';
 import { Cell, EventEmitter } from 'cellx';
-import { Component } from './Component';
+import { BaseComponent } from './BaseComponent';
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 
 export type TComponentParamConfig =
@@ -16,7 +16,7 @@ export type TComponentParamConfig =
 
 export let KEY_IS_COMPONENT_PARAMS_INITED = Symbol('Rionite.isComponentParamsInited');
 
-function initParam(component: Component, config: TComponentParamConfig | null, name: string) {
+function initParam(component: BaseComponent, config: TComponentParamConfig | null, name: string) {
 	if (config == null) {
 		return;
 	}
@@ -158,8 +158,8 @@ function initParam(component: Component, config: TComponentParamConfig | null, n
 }
 
 export let ComponentParams = {
-	init(component: Component) {
-		let config = (component.constructor as typeof Component).params;
+	init(component: BaseComponent) {
+		let config = (component.constructor as typeof BaseComponent).params;
 
 		if (config) {
 			for (let name in config) {

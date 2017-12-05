@@ -7,8 +7,8 @@ import {
 	IEvent,
 	TCellPull
 	} from 'cellx';
+import { BaseComponent, IPossiblyComponentElement } from './BaseComponent';
 import { compileContentTextFragment } from './compileContentTextFragment';
-import { Component, IPossiblyComponentElement } from './Component';
 import { IFreezableCell } from './componentBinding';
 import { ContentTextFragmentNodeType, ContentTextFragmentParser } from './ContentTextFragmentParser';
 
@@ -44,10 +44,10 @@ function onTextNodeBindingCellChange(evt: IEvent<TextNodeBindingCell>) {
 
 export function bindContent(
 	node: Element | DocumentFragment,
-	ownerComponent: Component,
+	ownerComponent: BaseComponent,
 	context: object,
-	result: [Array<IFreezableCell> | null, Array<Component> | null]
-): [Array<IFreezableCell> | null, Array<Component> | null] {
+	result: [Array<IFreezableCell> | null, Array<BaseComponent> | null]
+): [Array<IFreezableCell> | null, Array<BaseComponent> | null] {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		switch (child.nodeType) {
 			case Node.ELEMENT_NODE: {
@@ -114,7 +114,7 @@ export function bindContent(
 				if (
 					child.firstChild &&
 					(!childComponent ||
-						(childComponent.constructor as typeof Component).template == null)
+						(childComponent.constructor as typeof BaseComponent).template == null)
 				) {
 					bindContent(child as Element, ownerComponent, context, result);
 				}

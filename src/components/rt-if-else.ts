@@ -1,6 +1,7 @@
+import { Component } from '../decorators/Component';
 import { RtIfThen } from './rt-if-then';
 
-@RtIfThen.Config({
+@Component({
 	elementIs: 'RtIfElse',
 	elementExtends: 'template'
 })

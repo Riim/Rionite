@@ -1,5 +1,5 @@
 import { Cell, ObservableList } from 'cellx';
-import { Component } from '../Component';
+import { BaseComponent } from '../BaseComponent';
 export declare type TListCell = Cell<ObservableList<any>>;
 export interface IItem {
     item: Cell<any>;
@@ -9,7 +9,7 @@ export interface IItem {
 }
 export declare type TItemList = Array<IItem>;
 export declare type TItemMap = Map<any, TItemList>;
-export declare class RtRepeat extends Component {
+export declare class RtRepeat extends BaseComponent {
     paramFor: string;
     paramTrackBy: string;
     paramStrip: boolean;

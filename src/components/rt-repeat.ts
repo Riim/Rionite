@@ -2,8 +2,9 @@ import { Map } from '@riim/map-set-polyfill';
 import { nextTick } from '@riim/next-tick';
 import { Cell, ObservableList } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
+import { BaseComponent } from '../BaseComponent';
 import { bindContent } from '../bindContent';
-import { Component } from '../Component';
+import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { KEY_IS_ELEMENT_CONNECTED } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
@@ -25,7 +26,7 @@ export type TItemMap = Map<any, TItemList>;
 
 let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+of\\s+(${keypathPattern})\\s*$`);
 
-@Component.Config({
+@Component({
 	elementIs: 'RtRepeat',
 	elementExtends: 'template',
 
@@ -35,7 +36,7 @@ let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+of\\s+(${keypathPattern})\
 		strip: { property: 'paramStrip', default: false, readonly: true }
 	}
 })
-export class RtRepeat extends Component {
+export class RtRepeat extends BaseComponent {
 	paramFor: string;
 	paramTrackBy: string;
 	paramStrip: boolean;

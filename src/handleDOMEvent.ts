@@ -1,4 +1,4 @@
-import { IPossiblyComponentElement, TEventHandler } from './Component';
+import { IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 
 export function handleDOMEvent(evt: Event) {
 	let el = evt.target as Element;

@@ -1,9 +1,9 @@
 import { IEvent } from 'cellx';
-import { Component, IPossiblyComponentElement, TEventHandler } from './Component';
+import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 
-let ownerComponentStack: Array<[Component, Array<Element> | undefined]> = [];
+let ownerComponentStack: Array<[BaseComponent, Array<Element> | undefined]> = [];
 
-export function handleEvent(evt: IEvent<Component>) {
+export function handleEvent(evt: IEvent<BaseComponent>) {
 	let target = evt.target;
 	let ownerComponent = target.ownerComponent;
 
@@ -24,7 +24,7 @@ export function handleEvent(evt: IEvent<Component>) {
 	let ownerComponentEl = ownerComponent.element;
 	let receivers: Array<Element> | undefined;
 
-	for (let component: Component | undefined; ; ) {
+	for (let component: BaseComponent | undefined; ; ) {
 		if (el.hasAttribute(attrName)) {
 			(receivers || (receivers = [])).push(el);
 		}
@@ -40,11 +40,11 @@ export function handleEvent(evt: IEvent<Component>) {
 
 					if (attrValue.charAt(0) == '/') {
 						if (receiver != targetEl) {
-							let elementBlockNames = (target.constructor as typeof Component)
+							let elementBlockNames = (target.constructor as typeof BaseComponent)
 								._elementBlockNames;
 
 							for (let i = 0, l = elementBlockNames.length; i < l; i++) {
-								let typedHandler = (ownerComponent.constructor as typeof Component)
+								let typedHandler = (ownerComponent.constructor as typeof BaseComponent)
 									.events![attrValue.slice(1)][
 									`<${elementBlockNames[i]}>` + evt.type
 								];
@@ -62,7 +62,7 @@ export function handleEvent(evt: IEvent<Component>) {
 							}
 						}
 
-						handler = (ownerComponent.constructor as typeof Component).events![
+						handler = (ownerComponent.constructor as typeof BaseComponent).events![
 							attrValue.slice(1)
 						][(receiver == targetEl ? '' : '<*>') + evt.type];
 					} else {

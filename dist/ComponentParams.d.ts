@@ -1,4 +1,4 @@
-import { Component } from './Component';
+import { BaseComponent } from './BaseComponent';
 export declare type TComponentParamConfig = Function | {
     property?: string;
     type?: Function;
@@ -8,5 +8,5 @@ export declare type TComponentParamConfig = Function | {
 };
 export declare let KEY_IS_COMPONENT_PARAMS_INITED: symbol;
 export declare let ComponentParams: {
-    init(component: Component): void;
+    init(component: BaseComponent): void;
 };

@@ -1,7 +1,7 @@
 import { defer } from '@riim/defer';
 import { Container } from '@riim/di';
 import { Symbol } from '@riim/symbol-polyfill';
-import { Component, IComponentElement } from './Component';
+import { BaseComponent, IComponentElement } from './BaseComponent';
 import { ComponentParams, KEY_IS_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { nativeCustomElements as nativeCustomElementsFeature } from './lib/Features';
 
@@ -20,7 +20,7 @@ export function resumeConnectionStatusCallbacks() {
 export let ElementProtoMixin = {
 	rioniteComponent: null,
 
-	get $component(): Component {
+	get $component(): BaseComponent {
 		return (
 			this.rioniteComponent ||
 			Container.get(this.constructor._rioniteComponentConstructor, [this])

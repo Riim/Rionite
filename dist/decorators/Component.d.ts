@@ -1,7 +1,7 @@
 import { IEvent } from 'cellx';
 import { IBlock, Template } from 'nelm';
-import { Component, IComponentEvents } from './Component';
-export declare function ComponentConfigDecorator<T extends Component>(config: {
+import { BaseComponent, IComponentEvents } from '../BaseComponent';
+export declare function Component<T extends BaseComponent>(config: {
     elementIs: string;
     elementExtends?: string | null;
     params?: {
@@ -11,6 +11,6 @@ export declare function ComponentConfigDecorator<T extends Component>(config: {
         [key: string]: any;
     } | null;
     template?: string | IBlock | Template | null;
-    events?: IComponentEvents<T, IEvent<Component>> | null;
+    events?: IComponentEvents<T, IEvent<BaseComponent>> | null;
     domEvents?: IComponentEvents<T, Event> | null;
 }): (componentConstr: Function) => void;

@@ -19,20 +19,19 @@ export {
 	DisposableMixin
 } from './DisposableMixin';
 export { formatters } from './lib/formatters';
-export { RtSlot } from './components/rt-slot';
-export { RtContent } from './components/rt-content';
+export { Component } from './decorators/Component';
+export { Param } from './decorators/Param';
 export {
 	IPossiblyComponentElement,
 	IComponentElement,
 	IComponentElementClassNameMap,
 	TEventHandler,
 	IComponentEvents,
-	Component
-} from './Component';
+	BaseComponent
+} from './BaseComponent';
 export { KEY_IS_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export { componentParamValueMap } from './componentParamValueMap';
-export { ComponentParamDecorator as Param } from './ComponentParamDecorator';
 export { registerComponent } from './registerComponent';
 export { TIfCell as TRtIfThenIfCell, RtIfThen } from './components/rt-if-then';
 export { RtIfElse } from './components/rt-if-else';
@@ -43,5 +42,7 @@ export {
 	TItemMap as TRtRepeatItemMap,
 	RtRepeat
 } from './components/rt-repeat';
+export { RtSlot } from './components/rt-slot';
+export { RtContent } from './components/rt-content';
 
 Container.registerService('logger', logger);

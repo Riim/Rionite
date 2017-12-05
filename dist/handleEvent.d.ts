@@ -1,3 +1,3 @@
 import { IEvent } from 'cellx';
-import { Component } from './Component';
-export declare function handleEvent(evt: IEvent<Component>): void;
+import { BaseComponent } from './BaseComponent';
+export declare function handleEvent(evt: IEvent<BaseComponent>): void;

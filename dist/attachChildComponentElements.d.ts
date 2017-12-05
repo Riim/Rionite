@@ -1,2 +1,2 @@
-import { Component } from './Component';
-export declare function attachChildComponentElements(childComponents: Array<Component>): void;
+import { BaseComponent } from './BaseComponent';
+export declare function attachChildComponentElements(childComponents: Array<BaseComponent>): void;

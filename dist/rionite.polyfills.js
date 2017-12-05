@@ -1500,14 +1500,14 @@ THE SOFTWARE.
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/hyphenize"), require("@riim/logger"), require("@riim/clear-node"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("html-to-fragment"), require("@riim/mixin"), require("@riim/defer"), require("@riim/lower-case-first-word"));
+		module.exports = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/hyphenize"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/logger"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/clear-node"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/mixin"), require("@riim/defer"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/lower-case-first-word"), require("html-to-fragment"), require("@riim/set-attribute"), require("escape-string"));
 	else if(typeof define === 'function' && define.amd)
-		define(["@riim/map-set-polyfill", "cellx", "@riim/symbol-polyfill", "@riim/di", "nelm", "@riim/get-uid", "@riim/move-content", "@riim/hyphenize", "@riim/logger", "@riim/clear-node", "@riim/camelize", "@riim/next-tick", "@riim/next-uid", "@riim/gettext", "@riim/escape-html", "@riim/is-regexp", "@riim/set-attribute", "escape-string", "html-to-fragment", "@riim/mixin", "@riim/defer", "@riim/lower-case-first-word"], factory);
+		define(["@riim/map-set-polyfill", "cellx", "@riim/symbol-polyfill", "@riim/di", "nelm", "@riim/hyphenize", "@riim/get-uid", "@riim/move-content", "@riim/logger", "@riim/camelize", "@riim/next-tick", "@riim/clear-node", "@riim/next-uid", "@riim/gettext", "@riim/mixin", "@riim/defer", "@riim/escape-html", "@riim/is-regexp", "@riim/lower-case-first-word", "html-to-fragment", "@riim/set-attribute", "escape-string"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/hyphenize"), require("@riim/logger"), require("@riim/clear-node"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("html-to-fragment"), require("@riim/mixin"), require("@riim/defer"), require("@riim/lower-case-first-word"));
+		exports["rionite"] = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/hyphenize"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/logger"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/clear-node"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/mixin"), require("@riim/defer"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/lower-case-first-word"), require("html-to-fragment"), require("@riim/set-attribute"), require("escape-string"));
 	else
-		root["rionite"] = factory(root["@riim/map-set-polyfill"], root["cellx"], root["@riim/symbol-polyfill"], root["@riim/di"], root["nelm"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/hyphenize"], root["@riim/logger"], root["@riim/clear-node"], root["@riim/camelize"], root["@riim/next-tick"], root["@riim/next-uid"], root["@riim/gettext"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["escape-string"], root["html-to-fragment"], root["@riim/mixin"], root["@riim/defer"], root["@riim/lower-case-first-word"]);
-})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_8__, __WEBPACK_EXTERNAL_MODULE_9__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_17__, __WEBPACK_EXTERNAL_MODULE_20__, __WEBPACK_EXTERNAL_MODULE_21__, __WEBPACK_EXTERNAL_MODULE_27__, __WEBPACK_EXTERNAL_MODULE_31__, __WEBPACK_EXTERNAL_MODULE_32__, __WEBPACK_EXTERNAL_MODULE_35__, __WEBPACK_EXTERNAL_MODULE_36__, __WEBPACK_EXTERNAL_MODULE_37__, __WEBPACK_EXTERNAL_MODULE_39__, __WEBPACK_EXTERNAL_MODULE_41__, __WEBPACK_EXTERNAL_MODULE_44__, __WEBPACK_EXTERNAL_MODULE_47__, __WEBPACK_EXTERNAL_MODULE_53__) {
+		root["rionite"] = factory(root["@riim/map-set-polyfill"], root["cellx"], root["@riim/symbol-polyfill"], root["@riim/di"], root["nelm"], root["@riim/hyphenize"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/logger"], root["@riim/camelize"], root["@riim/next-tick"], root["@riim/clear-node"], root["@riim/next-uid"], root["@riim/gettext"], root["@riim/mixin"], root["@riim/defer"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/lower-case-first-word"], root["html-to-fragment"], root["@riim/set-attribute"], root["escape-string"]);
+})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_7__, __WEBPACK_EXTERNAL_MODULE_9__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_14__, __WEBPACK_EXTERNAL_MODULE_15__, __WEBPACK_EXTERNAL_MODULE_18__, __WEBPACK_EXTERNAL_MODULE_22__, __WEBPACK_EXTERNAL_MODULE_27__, __WEBPACK_EXTERNAL_MODULE_29__, __WEBPACK_EXTERNAL_MODULE_32__, __WEBPACK_EXTERNAL_MODULE_33__, __WEBPACK_EXTERNAL_MODULE_34__, __WEBPACK_EXTERNAL_MODULE_37__, __WEBPACK_EXTERNAL_MODULE_39__, __WEBPACK_EXTERNAL_MODULE_40__, __WEBPACK_EXTERNAL_MODULE_42__, __WEBPACK_EXTERNAL_MODULE_43__, __WEBPACK_EXTERNAL_MODULE_44__, __WEBPACK_EXTERNAL_MODULE_46__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1570,7 +1570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 29);
+/******/ 	return __webpack_require__(__webpack_require__.s = 30);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1586,11 +1586,11 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var defer_1 = __webpack_require__(47);
-var di_1 = __webpack_require__(8);
-var symbol_polyfill_1 = __webpack_require__(6);
+var defer_1 = __webpack_require__(37);
+var di_1 = __webpack_require__(9);
+var symbol_polyfill_1 = __webpack_require__(7);
 var ComponentParams_1 = __webpack_require__(12);
-var Features_1 = __webpack_require__(7);
+var Features_1 = __webpack_require__(8);
 exports.KEY_IS_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite.isElementConnected');
 var isConnectionStatusCallbacksSuppressed = false;
 function suppressConnectionStatusCallbacks() {
@@ -1693,21 +1693,32 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var ComponentParams_1 = __webpack_require__(12);
-function attachChildComponentElements(childComponents) {
-    for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
-        var childComponent = childComponents_1[_i];
-        if (!childComponent._attached) {
-            childComponent._parentComponent = undefined;
-            if (!childComponent[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
-                ComponentParams_1.ComponentParams.init(childComponent);
-            }
-            childComponent.elementConnected();
-            childComponent._attach();
+var registerComponent_1 = __webpack_require__(21);
+function Component(config) {
+    return function (componentConstr) {
+        componentConstr.elementIs = config.elementIs;
+        if (config.elementExtends !== undefined) {
+            componentConstr.elementExtends = config.elementExtends;
         }
-    }
+        if (config.params !== undefined) {
+            componentConstr.params = config.params;
+        }
+        if (config.i18n !== undefined) {
+            componentConstr.i18n = config.i18n;
+        }
+        if (config.template !== undefined) {
+            componentConstr.template = config.template;
+        }
+        if (config.events !== undefined) {
+            componentConstr.events = config.events;
+        }
+        if (config.domEvents !== undefined) {
+            componentConstr.domEvents = config.domEvents;
+        }
+        registerComponent_1.registerComponent(componentConstr);
+    };
 }
-exports.attachChildComponentElements = attachChildComponentElements;
+exports.Component = Component;
 
 
 /***/ }),
@@ -1726,13 +1737,390 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(21);
+var di_1 = __webpack_require__(9);
+var get_uid_1 = __webpack_require__(14);
+var hyphenize_1 = __webpack_require__(11);
+var logger_1 = __webpack_require__(18);
 var map_set_polyfill_1 = __webpack_require__(0);
-var set_attribute_1 = __webpack_require__(37);
+var move_content_1 = __webpack_require__(15);
 var cellx_1 = __webpack_require__(2);
-var compileContentTextFragment_1 = __webpack_require__(38);
-var ContentTextFragmentParser_1 = __webpack_require__(22);
+var html_to_fragment_1 = __webpack_require__(43);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var bindContent_1 = __webpack_require__(6);
+var componentBinding_1 = __webpack_require__(48);
+var componentConstructorMap_1 = __webpack_require__(23);
+var DisposableMixin_1 = __webpack_require__(19);
+var ElementProtoMixin_1 = __webpack_require__(1);
+var handledEvents_1 = __webpack_require__(49);
+var handleDOMEvent_1 = __webpack_require__(50);
+var handleEvent_1 = __webpack_require__(51);
+var Features_1 = __webpack_require__(8);
+var map = Array.prototype.map;
+var reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)/g;
+function createClassBlockElementReplacer(blockName, events, evtAttrPrefix) {
+    return function (match, elBlockName, elName) {
+        var elEvents;
+        if (elBlockName == blockName && (elEvents = events[elName])) {
+            var evtAttrs = [];
+            for (var type in elEvents) {
+                evtAttrs.push(" " + evtAttrPrefix + (type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type) + "=\"/" + elName + "\"");
+            }
+            return evtAttrs.join('') + match;
+        }
+        return match;
+    };
+}
+function findChildComponents(node, ownerComponent, context, childComponents) {
+    for (var child = node.firstChild; child; child = child.nextSibling) {
+        if (child.nodeType == Node.ELEMENT_NODE) {
+            var childComponent = child.$component;
+            if (childComponent) {
+                childComponent._ownerComponent = ownerComponent;
+                childComponent.$context = context;
+                (childComponents || (childComponents = [])).push(childComponent);
+            }
+            if (child.firstChild &&
+                (!childComponent ||
+                    childComponent.constructor.template == null)) {
+                childComponents = findChildComponents(child, ownerComponent, context, childComponents);
+            }
+        }
+    }
+    return childComponents || null;
+}
+var BaseComponent = /** @class */ (function (_super) {
+    __extends(BaseComponent, _super);
+    function BaseComponent(el) {
+        var _this = _super.call(this) || this;
+        _this._parentComponent = null;
+        _this._attached = false;
+        _this.initialized = false;
+        _this.isReady = false;
+        DisposableMixin_1.DisposableMixin.call(_this);
+        var constr = _this.constructor;
+        if (!componentConstructorMap_1.componentConstructorMap.has(constr.elementIs)) {
+            throw new TypeError('Component must be registered');
+        }
+        if (!el) {
+            el = document.createElement(hyphenize_1.hyphenize(constr.elementIs, true));
+        }
+        _this.element = el;
+        el.rioniteComponent = _this;
+        Object.defineProperty(el, '$component', { value: _this });
+        _this.created();
+        return _this;
+    }
+    Object.defineProperty(BaseComponent.prototype, "ownerComponent", {
+        get: function () {
+            if (this._ownerComponent) {
+                return this._ownerComponent;
+            }
+            var component = this.parentComponent;
+            if (!component) {
+                return (this._ownerComponent = this);
+            }
+            for (var parentComponent = void 0; (parentComponent = component.parentComponent);) {
+                component = parentComponent;
+            }
+            return (this._ownerComponent = component);
+        },
+        set: function (ownerComponent) {
+            this._ownerComponent = ownerComponent;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(BaseComponent.prototype, "parentComponent", {
+        get: function () {
+            if (this._parentComponent !== undefined) {
+                return this._parentComponent;
+            }
+            for (var node = void 0; (node = (node || this.element).parentNode);) {
+                if (node.$component) {
+                    return (this._parentComponent = node.$component);
+                }
+            }
+            return (this._parentComponent = null);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    BaseComponent.prototype.handleEvent = function (evt) {
+        _super.prototype.handleEvent.call(this, evt);
+        if (evt.bubbles !== false && !evt.isPropagationStopped) {
+            var parentComponent = this.parentComponent;
+            if (parentComponent) {
+                parentComponent.handleEvent(evt);
+                return;
+            }
+        }
+        handleEvent_1.handleEvent(evt);
+    };
+    BaseComponent.prototype.listenTo = function (target, type, listener, context, useCapture) {
+        return DisposableMixin_1.DisposableMixin.prototype.listenTo.call(this, typeof target == 'string' ? this.$(target) : target, type, listener, context, useCapture);
+    };
+    BaseComponent.prototype._listenTo = function (target, type, listener, context, useCapture) {
+        if (target instanceof BaseComponent) {
+            if (type.charAt(0) == '<') {
+                var index = type.indexOf('>', 2);
+                var targetType = type.slice(1, index);
+                if (targetType != '*') {
+                    var targetConstr_1 = componentConstructorMap_1.componentConstructorMap.get(targetType);
+                    if (!targetConstr_1) {
+                        throw new TypeError("Component \"" + targetType + "\" is not defined");
+                    }
+                    var inner_1 = listener;
+                    listener = function (evt) {
+                        if (evt.target instanceof targetConstr_1) {
+                            return inner_1.call(this, evt);
+                        }
+                    };
+                }
+                type = type.slice(index + 1);
+            }
+            else if (type.indexOf(':') == -1) {
+                var inner_2 = listener;
+                listener = function (evt) {
+                    if (evt.target == target) {
+                        return inner_2.call(this, evt);
+                    }
+                };
+            }
+        }
+        return DisposableMixin_1.DisposableMixin.prototype._listenTo.call(this, target, type, listener, context, useCapture);
+    };
+    BaseComponent.prototype._attach = function () {
+        var _this = this;
+        this._attached = true;
+        if (!this.initialized) {
+            var result = this.initialize();
+            if (result) {
+                result.then(function () {
+                    _this.initialized = true;
+                    _this._attach();
+                });
+                return;
+            }
+            this.initialized = true;
+        }
+        var constr = this.constructor;
+        if (this.isReady) {
+            this._unfreezeBindings();
+        }
+        else {
+            var el = this.element;
+            el.className = constr._blockNamesString + el.className;
+            if (constr.template == null) {
+                this._bindings = null;
+                var childComponents = findChildComponents(el, this.ownerComponent, this.$context);
+                if (childComponents) {
+                    attachChildComponentElements_1.attachChildComponentElements(childComponents);
+                }
+            }
+            else {
+                if (el.firstChild) {
+                    ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+                    this.$content = move_content_1.moveContent(document.createDocumentFragment(), el);
+                    ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+                }
+                else {
+                    this.$content = document.createDocumentFragment();
+                }
+                var rawContent = constr._rawContent;
+                if (!rawContent) {
+                    var contentHTML = constr.template.render();
+                    if (constr.events) {
+                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr.elementIs, constr.events, 'oncomponent-'));
+                    }
+                    if (constr.domEvents) {
+                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr.elementIs, constr.domEvents, 'on-'));
+                    }
+                    rawContent = constr._rawContent = html_to_fragment_1.htmlToFragment(contentHTML);
+                }
+                var content = rawContent.cloneNode(true);
+                if (!Features_1.templateTag) {
+                    var templates = content.querySelectorAll('template');
+                    for (var i = 0, l = templates.length; i < l;) {
+                        i += templates[i].content.querySelectorAll('template').length + 1;
+                    }
+                }
+                var _a = bindContent_1.bindContent(content, this, this, {
+                    0: null,
+                    1: null
+                }), bindings = _a[0], childComponents = _a[1];
+                this._bindings = bindings;
+                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+                this.element.appendChild(content);
+                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+                if (childComponents) {
+                    attachChildComponentElements_1.attachChildComponentElements(childComponents);
+                }
+            }
+            this.ready();
+            this.isReady = true;
+        }
+        this.elementAttached();
+    };
+    BaseComponent.prototype._detach = function () {
+        this._attached = false;
+        this.elementDetached();
+        this.dispose();
+    };
+    BaseComponent.prototype.dispose = function () {
+        this._freezeBindings();
+        return DisposableMixin_1.DisposableMixin.prototype.dispose.call(this);
+    };
+    BaseComponent.prototype._freezeBindings = function () {
+        if (this._bindings) {
+            componentBinding_1.freezeBindings(this._bindings);
+        }
+    };
+    BaseComponent.prototype._unfreezeBindings = function () {
+        if (this._bindings) {
+            componentBinding_1.unfreezeBindings(this._bindings);
+        }
+    };
+    BaseComponent.prototype._destroyBindings = function () {
+        var bindings = this._bindings;
+        if (bindings) {
+            for (var i = bindings.length; i;) {
+                bindings[--i].off();
+            }
+            this._bindings = null;
+        }
+    };
+    // Callbacks
+    BaseComponent.prototype.created = function () { };
+    BaseComponent.prototype.initialize = function () { };
+    BaseComponent.prototype.ready = function () { };
+    BaseComponent.prototype.elementConnected = function () { };
+    BaseComponent.prototype.elementDisconnected = function () { };
+    BaseComponent.prototype.elementAttached = function () { };
+    BaseComponent.prototype.elementDetached = function () { };
+    BaseComponent.prototype.elementMoved = function () { };
+    // Utils
+    BaseComponent.prototype.$ = function (name, container) {
+        var elList = this._getElementList(name, container);
+        return (elList && elList.length
+            ? elList[0].$component || elList[0]
+            : null);
+    };
+    BaseComponent.prototype.$$ = function (name, container) {
+        var elList = this._getElementList(name, container);
+        return elList
+            ? map.call(elList, function (el) { return el.$component || el; })
+            : [];
+    };
+    BaseComponent.prototype._getElementList = function (name, container) {
+        var elListMap = this._elementListMap || (this._elementListMap = new map_set_polyfill_1.Map());
+        var containerEl;
+        if (container) {
+            if (typeof container == 'string') {
+                container = this.$(container);
+            }
+            containerEl = container instanceof BaseComponent ? container.element : container;
+        }
+        else {
+            containerEl = this.element;
+        }
+        var key = container ? get_uid_1.getUID(containerEl) + '/' + name : name;
+        var elList = elListMap.get(key);
+        if (!elList) {
+            var elementBlockNames = this.constructor._elementBlockNames;
+            elList = containerEl.getElementsByClassName(elementBlockNames[elementBlockNames.length - 1] + '__' + name);
+            elListMap.set(key, elList);
+        }
+        return elList;
+    };
+    BaseComponent.elementExtends = null;
+    BaseComponent.params = null;
+    BaseComponent.i18n = null;
+    BaseComponent.template = null;
+    BaseComponent.events = null;
+    BaseComponent.domEvents = null;
+    __decorate([
+        di_1.Inject('logger'),
+        __metadata("design:type", logger_1.Logger)
+    ], BaseComponent.prototype, "logger", void 0);
+    return BaseComponent;
+}(cellx_1.EventEmitter));
+exports.BaseComponent = BaseComponent;
+var disposableMixinProto = DisposableMixin_1.DisposableMixin.prototype;
+var baseComponentProto = BaseComponent.prototype;
+Object.getOwnPropertyNames(disposableMixinProto).forEach(function (name) {
+    if (!(name in baseComponentProto)) {
+        Object.defineProperty(baseComponentProto, name, Object.getOwnPropertyDescriptor(disposableMixinProto, name));
+    }
+});
+document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
+    document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
+    handledEvents_1.handledEvents.forEach(function (type) {
+        document.documentElement.addEventListener(type, function (evt) {
+            if (evt.target != document.documentElement) {
+                handleDOMEvent_1.handleDOMEvent(evt);
+            }
+        });
+    });
+});
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var ComponentParams_1 = __webpack_require__(12);
+function attachChildComponentElements(childComponents) {
+    for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
+        var childComponent = childComponents_1[_i];
+        if (!childComponent._attached) {
+            childComponent._parentComponent = undefined;
+            if (!childComponent[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
+                ComponentParams_1.ComponentParams.init(childComponent);
+            }
+            childComponent.elementConnected();
+            childComponent._attach();
+        }
+    }
+}
+exports.attachChildComponentElements = attachChildComponentElements;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var camelize_1 = __webpack_require__(22);
+var map_set_polyfill_1 = __webpack_require__(0);
+var set_attribute_1 = __webpack_require__(44);
+var cellx_1 = __webpack_require__(2);
+var compileContentTextFragment_1 = __webpack_require__(45);
+var ContentTextFragmentParser_1 = __webpack_require__(24);
 var AttributeBindingCell = /** @class */ (function (_super) {
     __extends(AttributeBindingCell, _super);
     function AttributeBindingCell(pull, el, attrName, opts) {
@@ -1834,368 +2222,13 @@ exports.bindContent = bindContent;
 
 
 /***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var di_1 = __webpack_require__(8);
-var get_uid_1 = __webpack_require__(10);
-var hyphenize_1 = __webpack_require__(13);
-var logger_1 = __webpack_require__(17);
-var map_set_polyfill_1 = __webpack_require__(0);
-var move_content_1 = __webpack_require__(11);
-var cellx_1 = __webpack_require__(2);
-var html_to_fragment_1 = __webpack_require__(41);
-var attachChildComponentElements_1 = __webpack_require__(3);
-var bindContent_1 = __webpack_require__(4);
-var componentBinding_1 = __webpack_require__(42);
-var ComponentConfigDecorator_1 = __webpack_require__(43);
-var componentConstructorMap_1 = __webpack_require__(25);
-var DisposableMixin_1 = __webpack_require__(18);
-var ElementProtoMixin_1 = __webpack_require__(1);
-var handledEvents_1 = __webpack_require__(48);
-var handleDOMEvent_1 = __webpack_require__(49);
-var handleEvent_1 = __webpack_require__(50);
-var Features_1 = __webpack_require__(7);
-var map = Array.prototype.map;
-var reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)/g;
-function createClassBlockElementReplacer(blockName, events, evtAttrPrefix) {
-    return function (match, elBlockName, elName) {
-        var elEvents;
-        if (elBlockName == blockName && (elEvents = events[elName])) {
-            var evtAttrs = [];
-            for (var type in elEvents) {
-                evtAttrs.push(" " + evtAttrPrefix + (type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type) + "=\"/" + elName + "\"");
-            }
-            return evtAttrs.join('') + match;
-        }
-        return match;
-    };
-}
-function findChildComponents(node, ownerComponent, context, childComponents) {
-    for (var child = node.firstChild; child; child = child.nextSibling) {
-        if (child.nodeType == Node.ELEMENT_NODE) {
-            var childComponent = child.$component;
-            if (childComponent) {
-                childComponent._ownerComponent = ownerComponent;
-                childComponent.$context = context;
-                (childComponents || (childComponents = [])).push(childComponent);
-            }
-            if (child.firstChild &&
-                (!childComponent ||
-                    childComponent.constructor.template == null)) {
-                childComponents = findChildComponents(child, ownerComponent, context, childComponents);
-            }
-        }
-    }
-    return childComponents || null;
-}
-var Component = /** @class */ (function (_super) {
-    __extends(Component, _super);
-    function Component(el) {
-        var _this = _super.call(this) || this;
-        _this._parentComponent = null;
-        _this._attached = false;
-        _this.initialized = false;
-        _this.isReady = false;
-        DisposableMixin_1.DisposableMixin.call(_this);
-        var constr = _this.constructor;
-        if (!componentConstructorMap_1.componentConstructorMap.has(constr.elementIs)) {
-            throw new TypeError('Component must be registered');
-        }
-        if (!el) {
-            el = document.createElement(hyphenize_1.hyphenize(constr.elementIs, true));
-        }
-        _this.element = el;
-        el.rioniteComponent = _this;
-        Object.defineProperty(el, '$component', { value: _this });
-        _this.created();
-        return _this;
-    }
-    Object.defineProperty(Component.prototype, "ownerComponent", {
-        get: function () {
-            if (this._ownerComponent) {
-                return this._ownerComponent;
-            }
-            var component = this.parentComponent;
-            if (!component) {
-                return (this._ownerComponent = this);
-            }
-            for (var parentComponent = void 0; (parentComponent = component.parentComponent);) {
-                component = parentComponent;
-            }
-            return (this._ownerComponent = component);
-        },
-        set: function (ownerComponent) {
-            this._ownerComponent = ownerComponent;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(Component.prototype, "parentComponent", {
-        get: function () {
-            if (this._parentComponent !== undefined) {
-                return this._parentComponent;
-            }
-            for (var node = void 0; (node = (node || this.element).parentNode);) {
-                if (node.$component) {
-                    return (this._parentComponent = node.$component);
-                }
-            }
-            return (this._parentComponent = null);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Component.prototype.handleEvent = function (evt) {
-        _super.prototype.handleEvent.call(this, evt);
-        if (evt.bubbles !== false && !evt.isPropagationStopped) {
-            var parentComponent = this.parentComponent;
-            if (parentComponent) {
-                parentComponent.handleEvent(evt);
-                return;
-            }
-        }
-        handleEvent_1.handleEvent(evt);
-    };
-    Component.prototype.listenTo = function (target, type, listener, context, useCapture) {
-        return DisposableMixin_1.DisposableMixin.prototype.listenTo.call(this, typeof target == 'string' ? this.$(target) : target, type, listener, context, useCapture);
-    };
-    Component.prototype._listenTo = function (target, type, listener, context, useCapture) {
-        if (target instanceof Component) {
-            if (type.charAt(0) == '<') {
-                var index = type.indexOf('>', 2);
-                var targetType = type.slice(1, index);
-                if (targetType != '*') {
-                    var targetConstr_1 = componentConstructorMap_1.componentConstructorMap.get(targetType);
-                    if (!targetConstr_1) {
-                        throw new TypeError("Component \"" + targetType + "\" is not defined");
-                    }
-                    var inner_1 = listener;
-                    listener = function (evt) {
-                        if (evt.target instanceof targetConstr_1) {
-                            return inner_1.call(this, evt);
-                        }
-                    };
-                }
-                type = type.slice(index + 1);
-            }
-            else if (type.indexOf(':') == -1) {
-                var inner_2 = listener;
-                listener = function (evt) {
-                    if (evt.target == target) {
-                        return inner_2.call(this, evt);
-                    }
-                };
-            }
-        }
-        return DisposableMixin_1.DisposableMixin.prototype._listenTo.call(this, target, type, listener, context, useCapture);
-    };
-    Component.prototype._attach = function () {
-        var _this = this;
-        this._attached = true;
-        if (!this.initialized) {
-            var result = this.initialize();
-            if (result) {
-                result.then(function () {
-                    _this.initialized = true;
-                    _this._attach();
-                });
-                return;
-            }
-            this.initialized = true;
-        }
-        var constr = this.constructor;
-        if (this.isReady) {
-            this._unfreezeBindings();
-        }
-        else {
-            var el = this.element;
-            el.className = constr._blockNamesString + el.className;
-            if (constr.template == null) {
-                this._bindings = null;
-                var childComponents = findChildComponents(el, this.ownerComponent, this.$context);
-                if (childComponents) {
-                    attachChildComponentElements_1.attachChildComponentElements(childComponents);
-                }
-            }
-            else {
-                if (el.firstChild) {
-                    ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                    this.$content = move_content_1.moveContent(document.createDocumentFragment(), el);
-                    ElementProtoMixin_1.resumeConnectionStatusCallbacks();
-                }
-                else {
-                    this.$content = document.createDocumentFragment();
-                }
-                var rawContent = constr._rawContent;
-                if (!rawContent) {
-                    var contentHTML = constr.template.render();
-                    if (constr.events) {
-                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr.elementIs, constr.events, 'oncomponent-'));
-                    }
-                    if (constr.domEvents) {
-                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr.elementIs, constr.domEvents, 'on-'));
-                    }
-                    rawContent = constr._rawContent = html_to_fragment_1.htmlToFragment(contentHTML);
-                }
-                var content = rawContent.cloneNode(true);
-                if (!Features_1.templateTag) {
-                    var templates = content.querySelectorAll('template');
-                    for (var i = 0, l = templates.length; i < l;) {
-                        i += templates[i].content.querySelectorAll('template').length + 1;
-                    }
-                }
-                var _a = bindContent_1.bindContent(content, this, this, {
-                    0: null,
-                    1: null
-                }), bindings = _a[0], childComponents = _a[1];
-                this._bindings = bindings;
-                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                this.element.appendChild(content);
-                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
-                if (childComponents) {
-                    attachChildComponentElements_1.attachChildComponentElements(childComponents);
-                }
-            }
-            this.ready();
-            this.isReady = true;
-        }
-        this.elementAttached();
-    };
-    Component.prototype._detach = function () {
-        this._attached = false;
-        this.elementDetached();
-        this.dispose();
-    };
-    Component.prototype.dispose = function () {
-        this._freezeBindings();
-        return DisposableMixin_1.DisposableMixin.prototype.dispose.call(this);
-    };
-    Component.prototype._freezeBindings = function () {
-        if (this._bindings) {
-            componentBinding_1.freezeBindings(this._bindings);
-        }
-    };
-    Component.prototype._unfreezeBindings = function () {
-        if (this._bindings) {
-            componentBinding_1.unfreezeBindings(this._bindings);
-        }
-    };
-    Component.prototype._destroyBindings = function () {
-        var bindings = this._bindings;
-        if (bindings) {
-            for (var i = bindings.length; i;) {
-                bindings[--i].off();
-            }
-            this._bindings = null;
-        }
-    };
-    // Callbacks
-    Component.prototype.created = function () { };
-    Component.prototype.initialize = function () { };
-    Component.prototype.ready = function () { };
-    Component.prototype.elementConnected = function () { };
-    Component.prototype.elementDisconnected = function () { };
-    Component.prototype.elementAttached = function () { };
-    Component.prototype.elementDetached = function () { };
-    Component.prototype.elementMoved = function () { };
-    // Utils
-    Component.prototype.$ = function (name, container) {
-        var elList = this._getElementList(name, container);
-        return (elList && elList.length
-            ? elList[0].$component || elList[0]
-            : null);
-    };
-    Component.prototype.$$ = function (name, container) {
-        var elList = this._getElementList(name, container);
-        return elList
-            ? map.call(elList, function (el) { return el.$component || el; })
-            : [];
-    };
-    Component.prototype._getElementList = function (name, container) {
-        var elListMap = this._elementListMap || (this._elementListMap = new map_set_polyfill_1.Map());
-        var containerEl;
-        if (container) {
-            if (typeof container == 'string') {
-                container = this.$(container);
-            }
-            containerEl = container instanceof Component ? container.element : container;
-        }
-        else {
-            containerEl = this.element;
-        }
-        var key = container ? get_uid_1.getUID(containerEl) + '/' + name : name;
-        var elList = elListMap.get(key);
-        if (!elList) {
-            var elementBlockNames = this.constructor._elementBlockNames;
-            elList = containerEl.getElementsByClassName(elementBlockNames[elementBlockNames.length - 1] + '__' + name);
-            elListMap.set(key, elList);
-        }
-        return elList;
-    };
-    Component.Config = ComponentConfigDecorator_1.ComponentConfigDecorator;
-    Component.elementExtends = null;
-    Component.params = null;
-    Component.i18n = null;
-    Component.template = null;
-    Component.events = null;
-    Component.domEvents = null;
-    __decorate([
-        di_1.Inject('logger'),
-        __metadata("design:type", logger_1.Logger)
-    ], Component.prototype, "logger", void 0);
-    return Component;
-}(cellx_1.EventEmitter));
-exports.Component = Component;
-var disposableMixinProto = DisposableMixin_1.DisposableMixin.prototype;
-var componentProto = Component.prototype;
-Object.getOwnPropertyNames(disposableMixinProto).forEach(function (name) {
-    if (!(name in componentProto)) {
-        Object.defineProperty(componentProto, name, Object.getOwnPropertyDescriptor(disposableMixinProto, name));
-    }
-});
-document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
-    document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
-    handledEvents_1.handledEvents.forEach(function (type) {
-        document.documentElement.addEventListener(type, function (evt) {
-            if (evt.target != document.documentElement) {
-                handleDOMEvent_1.handleDOMEvent(evt);
-            }
-        });
-    });
-});
-
-
-/***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_6__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2231,12 +2264,6 @@ exports.nativeCustomElements = nativeCustomElementsFeature;
 
 
 /***/ }),
-/* 8 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_8__;
-
-/***/ }),
 /* 9 */
 /***/ (function(module, exports) {
 
@@ -2261,10 +2288,10 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_11__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var hyphenize_1 = __webpack_require__(13);
-var symbol_polyfill_1 = __webpack_require__(6);
+var hyphenize_1 = __webpack_require__(11);
+var symbol_polyfill_1 = __webpack_require__(7);
 var cellx_1 = __webpack_require__(2);
-var componentParamTypeSerializerMap_1 = __webpack_require__(34);
+var componentParamTypeSerializerMap_1 = __webpack_require__(38);
 exports.KEY_IS_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite.isComponentParamsInited');
 function initParam(component, config, name) {
     if (config == null) {
@@ -2395,12 +2422,6 @@ exports.ComponentParams = {
 
 /***/ }),
 /* 13 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_13__;
-
-/***/ }),
-/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2411,18 +2432,30 @@ exports.componentParamValueMap = new map_set_polyfill_1.Map();
 
 
 /***/ }),
+/* 14 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_14__;
+
+/***/ }),
 /* 15 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_15__;
+
+/***/ }),
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var namePattern_1 = __webpack_require__(16);
+var namePattern_1 = __webpack_require__(17);
 exports.keypathPattern = "(?:" + namePattern_1.namePattern + "|\\d+)(?:\\.(?:" + namePattern_1.namePattern + "|\\d+))*";
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2432,19 +2465,19 @@ exports.namePattern = '[$_a-zA-Z][$\\w]*';
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_17__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_18__;
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var next_uid_1 = __webpack_require__(31);
+var next_uid_1 = __webpack_require__(32);
 var cellx_1 = __webpack_require__(2);
 var DisposableMixin = /** @class */ (function () {
     function DisposableMixin() {
@@ -2598,13 +2631,13 @@ exports.DisposableMixin = DisposableMixin;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var gettext_1 = __webpack_require__(32);
+var gettext_1 = __webpack_require__(33);
 exports.formatters = {
     or: function (value, arg) {
         return value || arg;
@@ -2672,27 +2705,140 @@ exports.formatters.seq = exports.formatters.identical;
 
 
 /***/ }),
-/* 20 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_20__;
-
-/***/ }),
 /* 21 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_21__;
-
-/***/ }),
-/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathPattern_1 = __webpack_require__(15);
-var keypathToJSExpression_1 = __webpack_require__(23);
-var namePattern_1 = __webpack_require__(16);
+var hyphenize_1 = __webpack_require__(11);
+var mixin_1 = __webpack_require__(34);
+var pascalize_1 = __webpack_require__(35);
+var nelm_1 = __webpack_require__(10);
+var componentConstructorMap_1 = __webpack_require__(23);
+var elementConstructorMap_1 = __webpack_require__(36);
+var ElementProtoMixin_1 = __webpack_require__(1);
+var push = Array.prototype.push;
+function inheritProperty(target, source, name, depth) {
+    var obj = target[name];
+    var parentObj = source[name];
+    if (obj && parentObj && obj != parentObj) {
+        var o = (target[name] = { __proto__: parentObj });
+        for (var key in obj) {
+            o[key] = obj[key];
+            if (depth) {
+                inheritProperty(o, parentObj, key, depth - 1);
+            }
+        }
+    }
+}
+function registerComponent(componentConstr) {
+    var elIs = componentConstr.elementIs;
+    if (!elIs) {
+        throw new TypeError('Static property "elementIs" is required');
+    }
+    var hyphenizedElIs = hyphenize_1.hyphenize(elIs, true);
+    if (componentConstructorMap_1.componentConstructorMap.has(hyphenizedElIs)) {
+        throw new TypeError("Component \"" + hyphenizedElIs + "\" already registered");
+    }
+    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
+        .constructor;
+    inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
+    inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
+    componentConstr._blockNamesString =
+        elIs + ' ' + (parentComponentConstr._blockNamesString || '');
+    componentConstr._elementBlockNames = [elIs];
+    if (parentComponentConstr._elementBlockNames) {
+        push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
+    }
+    var template = componentConstr.template;
+    if (template !== null) {
+        if (template === parentComponentConstr.template) {
+            componentConstr.template = template.extend('', {
+                blockName: elIs
+            });
+        }
+        else {
+            if (template instanceof nelm_1.Template) {
+                template.setBlockName(componentConstr._elementBlockNames);
+            }
+            else {
+                componentConstr.template = parentComponentConstr.template
+                    ? parentComponentConstr.template.extend(template, {
+                        blockName: elIs
+                    })
+                    : new nelm_1.Template(template, { blockName: componentConstr._elementBlockNames });
+            }
+        }
+    }
+    componentConstr._rawContent = undefined;
+    inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
+    inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
+    var elExtends = componentConstr.elementExtends;
+    var parentElConstr = (elExtends &&
+        (elementConstructorMap_1.elementConstructorMap.get(elExtends) ||
+            window["HTML" + pascalize_1.pascalize(elExtends) + "Element"])) ||
+        HTMLElement;
+    var elConstr = function (self) {
+        return parentElConstr.call(this, self);
+    };
+    elConstr._rioniteComponentConstructor = componentConstr;
+    Object.defineProperty(elConstr, 'observedAttributes', {
+        configurable: true,
+        enumerable: true,
+        get: function () {
+            var paramsConfig = componentConstr.params;
+            if (!paramsConfig) {
+                return [];
+            }
+            var observedAttrs = [];
+            for (var name_1 in paramsConfig) {
+                observedAttrs.push(hyphenize_1.hyphenize(name_1, true));
+            }
+            return observedAttrs;
+        }
+    });
+    var elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
+    elProto.constructor = elConstr;
+    mixin_1.mixin(elProto, ElementProtoMixin_1.ElementProtoMixin);
+    window.customElements.define(hyphenizedElIs, elConstr, elExtends ? { extends: elExtends } : null);
+    componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr);
+    elementConstructorMap_1.elementConstructorMap.set(elIs, elConstr);
+    if (hyphenizedElIs != elIs) {
+        componentConstructorMap_1.componentConstructorMap.set(hyphenizedElIs, componentConstr);
+    }
+    return componentConstr;
+}
+exports.registerComponent = registerComponent;
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_22__;
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var map_set_polyfill_1 = __webpack_require__(0);
+exports.componentConstructorMap = new map_set_polyfill_1.Map();
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var keypathPattern_1 = __webpack_require__(16);
+var keypathToJSExpression_1 = __webpack_require__(25);
+var namePattern_1 = __webpack_require__(17);
 var ContentTextFragmentNodeType;
 (function (ContentTextFragmentNodeType) {
     ContentTextFragmentNodeType[ContentTextFragmentNodeType["TEXT"] = 1] = "TEXT";
@@ -3002,7 +3148,7 @@ exports.ContentTextFragmentParser = ContentTextFragmentParser;
 
 
 /***/ }),
-/* 23 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3026,125 +3172,6 @@ function keypathToJSExpression(keypath) {
     return (cache[keypath] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && temp['" + keys[keyCount - 1] + "']");
 }
 exports.keypathToJSExpression = keypathToJSExpression;
-
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var hyphenize_1 = __webpack_require__(13);
-var mixin_1 = __webpack_require__(44);
-var pascalize_1 = __webpack_require__(45);
-var nelm_1 = __webpack_require__(9);
-var componentConstructorMap_1 = __webpack_require__(25);
-var elementConstructorMap_1 = __webpack_require__(46);
-var ElementProtoMixin_1 = __webpack_require__(1);
-var push = Array.prototype.push;
-function inheritProperty(target, source, name, depth) {
-    var obj = target[name];
-    var parentObj = source[name];
-    if (obj && parentObj && obj != parentObj) {
-        var o = (target[name] = { __proto__: parentObj });
-        for (var key in obj) {
-            o[key] = obj[key];
-            if (depth) {
-                inheritProperty(o, parentObj, key, depth - 1);
-            }
-        }
-    }
-}
-function registerComponent(componentConstr) {
-    var elIs = componentConstr.elementIs;
-    if (!elIs) {
-        throw new TypeError('Static property "elementIs" is required');
-    }
-    var hyphenizedElIs = hyphenize_1.hyphenize(elIs, true);
-    if (componentConstructorMap_1.componentConstructorMap.has(hyphenizedElIs)) {
-        throw new TypeError("Component \"" + hyphenizedElIs + "\" already registered");
-    }
-    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
-        .constructor;
-    inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
-    inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
-    componentConstr._blockNamesString =
-        elIs + ' ' + (parentComponentConstr._blockNamesString || '');
-    componentConstr._elementBlockNames = [elIs];
-    if (parentComponentConstr._elementBlockNames) {
-        push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
-    }
-    var template = componentConstr.template;
-    if (template !== null) {
-        if (template === parentComponentConstr.template) {
-            componentConstr.template = template.extend('', {
-                blockName: elIs
-            });
-        }
-        else {
-            if (template instanceof nelm_1.Template) {
-                template.setBlockName(componentConstr._elementBlockNames);
-            }
-            else {
-                componentConstr.template = parentComponentConstr.template
-                    ? parentComponentConstr.template.extend(template, {
-                        blockName: elIs
-                    })
-                    : new nelm_1.Template(template, { blockName: componentConstr._elementBlockNames });
-            }
-        }
-    }
-    componentConstr._rawContent = undefined;
-    inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
-    inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
-    var elExtends = componentConstr.elementExtends;
-    var parentElConstr = (elExtends &&
-        (elementConstructorMap_1.elementConstructorMap.get(elExtends) ||
-            window["HTML" + pascalize_1.pascalize(elExtends) + "Element"])) ||
-        HTMLElement;
-    var elConstr = function (self) {
-        return parentElConstr.call(this, self);
-    };
-    elConstr._rioniteComponentConstructor = componentConstr;
-    Object.defineProperty(elConstr, 'observedAttributes', {
-        configurable: true,
-        enumerable: true,
-        get: function () {
-            var paramsConfig = componentConstr.params;
-            if (!paramsConfig) {
-                return [];
-            }
-            var observedAttrs = [];
-            for (var name_1 in paramsConfig) {
-                observedAttrs.push(hyphenize_1.hyphenize(name_1, true));
-            }
-            return observedAttrs;
-        }
-    });
-    var elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
-    elProto.constructor = elConstr;
-    mixin_1.mixin(elProto, ElementProtoMixin_1.ElementProtoMixin);
-    window.customElements.define(hyphenizedElIs, elConstr, elExtends ? { extends: elExtends } : null);
-    componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr);
-    elementConstructorMap_1.elementConstructorMap.set(elIs, elConstr);
-    if (hyphenizedElIs != elIs) {
-        componentConstructorMap_1.componentConstructorMap.set(hyphenizedElIs, componentConstr);
-    }
-    return componentConstr;
-}
-exports.registerComponent = registerComponent;
-
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var map_set_polyfill_1 = __webpack_require__(0);
-exports.componentConstructorMap = new map_set_polyfill_1.Map();
 
 
 /***/ }),
@@ -3172,14 +3199,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var next_tick_1 = __webpack_require__(27);
 var cellx_1 = __webpack_require__(2);
-var attachChildComponentElements_1 = __webpack_require__(3);
-var bindContent_1 = __webpack_require__(4);
-var Component_1 = __webpack_require__(5);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var BaseComponent_1 = __webpack_require__(4);
+var bindContent_1 = __webpack_require__(6);
+var Component_1 = __webpack_require__(3);
 var ElementProtoMixin_1 = __webpack_require__(1);
 var ElementProtoMixin_2 = __webpack_require__(1);
 var compileKeypath_1 = __webpack_require__(28);
-var Features_1 = __webpack_require__(7);
-var keypathPattern_1 = __webpack_require__(15);
+var Features_1 = __webpack_require__(8);
+var keypathPattern_1 = __webpack_require__(16);
 var slice = Array.prototype.slice;
 var reKeypath = RegExp("^" + keypathPattern_1.keypathPattern + "$");
 var RtIfThen = /** @class */ (function (_super) {
@@ -3285,7 +3313,7 @@ var RtIfThen = /** @class */ (function (_super) {
         }
     };
     RtIfThen = __decorate([
-        Component_1.Component.Config({
+        Component_1.Component({
             elementIs: 'RtIfThen',
             elementExtends: 'template',
             params: {
@@ -3294,7 +3322,7 @@ var RtIfThen = /** @class */ (function (_super) {
         })
     ], RtIfThen);
     return RtIfThen;
-}(Component_1.Component));
+}(BaseComponent_1.BaseComponent));
 exports.RtIfThen = RtIfThen;
 
 
@@ -3311,7 +3339,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_27__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(23);
+var keypathToJSExpression_1 = __webpack_require__(25);
 var cache = Object.create(null);
 function compileKeypath(keypath) {
     return (cache[keypath] ||
@@ -3322,46 +3350,9 @@ exports.compileKeypath = compileKeypath;
 
 /***/ }),
 /* 29 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var di_1 = __webpack_require__(8);
-var logger_1 = __webpack_require__(17);
-__webpack_require__(30);
-var nelm_1 = __webpack_require__(9);
-exports.NelmNodeType = nelm_1.NodeType;
-exports.NelmParser = nelm_1.Parser;
-exports.Template = nelm_1.Template;
-var DisposableMixin_1 = __webpack_require__(18);
-exports.DisposableMixin = DisposableMixin_1.DisposableMixin;
-var formatters_1 = __webpack_require__(19);
-exports.formatters = formatters_1.formatters;
-var rt_slot_1 = __webpack_require__(33);
-exports.RtSlot = rt_slot_1.RtSlot;
-var rt_content_1 = __webpack_require__(51);
-exports.RtContent = rt_content_1.RtContent;
-var Component_1 = __webpack_require__(5);
-exports.Component = Component_1.Component;
-var ElementProtoMixin_1 = __webpack_require__(1);
-exports.KEY_IS_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_IS_ELEMENT_CONNECTED;
-var ComponentParams_1 = __webpack_require__(12);
-exports.ComponentParams = ComponentParams_1.ComponentParams;
-var componentParamValueMap_1 = __webpack_require__(14);
-exports.componentParamValueMap = componentParamValueMap_1.componentParamValueMap;
-var ComponentParamDecorator_1 = __webpack_require__(52);
-exports.Param = ComponentParamDecorator_1.ComponentParamDecorator;
-var registerComponent_1 = __webpack_require__(24);
-exports.registerComponent = registerComponent_1.registerComponent;
-var rt_if_then_1 = __webpack_require__(26);
-exports.RtIfThen = rt_if_then_1.RtIfThen;
-var rt_if_else_1 = __webpack_require__(54);
-exports.RtIfElse = rt_if_else_1.RtIfElse;
-var rt_repeat_1 = __webpack_require__(55);
-exports.RtRepeat = rt_repeat_1.RtRepeat;
-di_1.Container.registerService('logger', logger_1.logger);
-
+module.exports = __WEBPACK_EXTERNAL_MODULE_29__;
 
 /***/ }),
 /* 30 */
@@ -3370,7 +3361,52 @@ di_1.Container.registerService('logger', logger_1.logger);
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var nelm_1 = __webpack_require__(9);
+var di_1 = __webpack_require__(9);
+var logger_1 = __webpack_require__(18);
+__webpack_require__(31);
+var nelm_1 = __webpack_require__(10);
+exports.NelmNodeType = nelm_1.NodeType;
+exports.NelmParser = nelm_1.Parser;
+exports.Template = nelm_1.Template;
+var DisposableMixin_1 = __webpack_require__(19);
+exports.DisposableMixin = DisposableMixin_1.DisposableMixin;
+var formatters_1 = __webpack_require__(20);
+exports.formatters = formatters_1.formatters;
+var Component_1 = __webpack_require__(3);
+exports.Component = Component_1.Component;
+var Param_1 = __webpack_require__(41);
+exports.Param = Param_1.Param;
+var BaseComponent_1 = __webpack_require__(4);
+exports.BaseComponent = BaseComponent_1.BaseComponent;
+var ElementProtoMixin_1 = __webpack_require__(1);
+exports.KEY_IS_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_IS_ELEMENT_CONNECTED;
+var ComponentParams_1 = __webpack_require__(12);
+exports.ComponentParams = ComponentParams_1.ComponentParams;
+var componentParamValueMap_1 = __webpack_require__(13);
+exports.componentParamValueMap = componentParamValueMap_1.componentParamValueMap;
+var registerComponent_1 = __webpack_require__(21);
+exports.registerComponent = registerComponent_1.registerComponent;
+var rt_if_then_1 = __webpack_require__(26);
+exports.RtIfThen = rt_if_then_1.RtIfThen;
+var rt_if_else_1 = __webpack_require__(52);
+exports.RtIfElse = rt_if_else_1.RtIfElse;
+var rt_repeat_1 = __webpack_require__(53);
+exports.RtRepeat = rt_repeat_1.RtRepeat;
+var rt_slot_1 = __webpack_require__(54);
+exports.RtSlot = rt_slot_1.RtSlot;
+var rt_content_1 = __webpack_require__(55);
+exports.RtContent = rt_content_1.RtContent;
+di_1.Container.registerService('logger', logger_1.logger);
+
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var nelm_1 = __webpack_require__(10);
 ['if-then', 'if-else', 'repeat'].forEach(function (tagName) {
     nelm_1.Template.helpers[tagName] = function (el) {
         var attrs = el.attributes;
@@ -3397,12 +3433,6 @@ var nelm_1 = __webpack_require__(9);
 
 
 /***/ }),
-/* 31 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_31__;
-
-/***/ }),
 /* 32 */
 /***/ (function(module, exports) {
 
@@ -3410,194 +3440,106 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_32__;
 
 /***/ }),
 /* 33 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var clear_node_1 = __webpack_require__(20);
-var get_uid_1 = __webpack_require__(10);
-var map_set_polyfill_1 = __webpack_require__(0);
-var move_content_1 = __webpack_require__(11);
-var symbol_polyfill_1 = __webpack_require__(6);
-var attachChildComponentElements_1 = __webpack_require__(3);
-var bindContent_1 = __webpack_require__(4);
-var Component_1 = __webpack_require__(5);
-var ElementProtoMixin_1 = __webpack_require__(1);
-var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite.RtSlot.slotContentMap');
-var RtSlot = /** @class */ (function (_super) {
-    __extends(RtSlot, _super);
-    function RtSlot() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    RtSlot.prototype._attach = function () {
-        this._attached = true;
-        if (this.isReady) {
-            this._unfreezeBindings();
-        }
-        else {
-            var ownerComponent = this.ownerComponent;
-            var el = this.element;
-            var contentOwnerComponent = ownerComponent.ownerComponent;
-            var ownerComponentContent = ownerComponent.$content;
-            var cloneContent = this.paramCloneContent;
-            var content = void 0;
-            var bindings = void 0;
-            var childComponents = void 0;
-            if (!cloneContent || ownerComponentContent.firstChild) {
-                var tagName = this.paramForTag;
-                var for_ = this.paramFor;
-                var key = get_uid_1.getUID(ownerComponent) + '/' + (tagName ? ':' + tagName : for_ || '');
-                if (tagName || for_) {
-                    var contentMap = void 0;
-                    if (!cloneContent &&
-                        (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
-                        contentMap.has(key)) {
-                        var container = contentMap.get(key);
-                        if (container.firstChild) {
-                            content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                            contentMap.set(key, el);
-                            bindings = container.$component._bindings;
-                            childComponents = container.$component._childComponents;
-                        }
-                    }
-                    else {
-                        var contentEl = ownerComponentContent.firstElementChild;
-                        if (contentEl) {
-                            if (tagName) {
-                                tagName = tagName.toUpperCase();
-                            }
-                            else if (for_.indexOf('__') == -1) {
-                                var elementBlockNames = ownerComponent.constructor
-                                    ._elementBlockNames;
-                                for_ =
-                                    elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
-                            }
-                            do {
-                                if (tagName
-                                    ? contentEl.tagName == tagName
-                                    : contentEl.classList.contains(for_)) {
-                                    var selectedEl = cloneContent
-                                        ? contentEl.cloneNode(true)
-                                        : contentEl;
-                                    contentEl = contentEl.nextElementSibling;
-                                    (content || (content = document.createDocumentFragment())).appendChild(selectedEl);
-                                }
-                                else {
-                                    contentEl = contentEl.nextElementSibling;
-                                }
-                            } while (contentEl);
-                            if (!cloneContent) {
-                                (contentMap ||
-                                    contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
-                                    (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                            }
-                        }
-                    }
-                }
-                else if (!cloneContent) {
-                    var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
-                    if (contentMap && contentMap.has(key)) {
-                        var container = contentMap.get(key);
-                        content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                        contentMap.set(key, el);
-                        bindings = container.$component._bindings;
-                        childComponents = container.$component._childComponents;
-                    }
-                    else if (ownerComponentContent.firstChild) {
-                        content = ownerComponentContent;
-                        (contentMap ||
-                            (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                    }
-                }
-                else {
-                    content = ownerComponentContent.cloneNode(true);
-                }
-            }
-            if (bindings === undefined) {
-                if (content || el.firstChild) {
-                    _a = content
-                        ? bindContent_1.bindContent(content, contentOwnerComponent, this.paramGetContext
-                            ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
-                            : ownerComponent.$context, { 0: null, 1: null })
-                        : bindContent_1.bindContent(el, ownerComponent, this.paramGetContext
-                            ? this.paramGetContext.call(ownerComponent, this.$context, this)
-                            : this.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
-                    this._childComponents = childComponents;
-                }
-                else {
-                    this._bindings = null;
-                    childComponents = this._childComponents = null;
-                }
-            }
-            else {
-                this._bindings = bindings;
-                this._childComponents = childComponents;
-                this._unfreezeBindings();
-            }
-            if (content) {
-                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                if (el.firstChild) {
-                    clear_node_1.clearNode(el);
-                }
-                el.appendChild(content);
-                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
-            }
-            if (childComponents) {
-                attachChildComponentElements_1.attachChildComponentElements(childComponents);
-            }
-            this.isReady = true;
-        }
-        var _a;
-    };
-    RtSlot.prototype._detach = function () {
-        this._attached = false;
-        this._freezeBindings();
-    };
-    RtSlot = __decorate([
-        Component_1.Component.Config({
-            elementIs: 'RtSlot',
-            params: {
-                forTag: { property: 'paramForTag', type: String, readonly: true },
-                for: { property: 'paramFor', type: String, readonly: true },
-                cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
-                getContext: { property: 'paramGetContext', type: Object, readonly: true }
-            },
-            template: ''
-        })
-    ], RtSlot);
-    return RtSlot;
-}(Component_1.Component));
-exports.RtSlot = RtSlot;
-
+module.exports = __WEBPACK_EXTERNAL_MODULE_33__;
 
 /***/ }),
 /* 34 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_34__;
+
+/***/ }),
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_html_1 = __webpack_require__(35);
-var is_regexp_1 = __webpack_require__(36);
+var camelize_1 = __webpack_require__(22);
+var cache = Object.create(null);
+function pascalize(str, useCache) {
+    str = String(str);
+    var value;
+    return ((useCache && cache[str]) ||
+        ((value = camelize_1.camelize(str)),
+            (value = value.charAt(0).toUpperCase() + value.slice(1)),
+            useCache ? (cache[str] = value) : value));
+}
+exports.pascalize = pascalize;
+
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
-var componentParamValueMap_1 = __webpack_require__(14);
+exports.elementConstructorMap = new map_set_polyfill_1.Map([
+    ['a', window.HTMLAnchorElement],
+    ['blockquote', window.HTMLQuoteElement],
+    ['br', window.HTMLBRElement],
+    ['caption', window.HTMLTableCaptionElement],
+    ['col', window.HTMLTableColElement],
+    ['colgroup', window.HTMLTableColElement],
+    ['datalist', window.HTMLDataListElement],
+    ['del', window.HTMLModElement],
+    ['dir', window.HTMLDirectoryElement],
+    ['dl', window.HTMLDListElement],
+    ['document', window.HTMLDocument],
+    ['element', Element],
+    ['fieldset', window.HTMLFieldSetElement],
+    ['frameset', window.HTMLFrameSetElement],
+    ['h1', window.HTMLHeadingElement],
+    ['h2', window.HTMLHeadingElement],
+    ['h3', window.HTMLHeadingElement],
+    ['h4', window.HTMLHeadingElement],
+    ['h5', window.HTMLHeadingElement],
+    ['h6', window.HTMLHeadingElement],
+    ['hr', window.HTMLHRElement],
+    ['iframe', window.HTMLIFrameElement],
+    ['img', window.HTMLImageElement],
+    ['ins', window.HTMLModElement],
+    ['li', window.HTMLLIElement],
+    ['menuitem', window.HTMLMenuItemElement],
+    ['ol', window.HTMLOListElement],
+    ['optgroup', window.HTMLOptGroupElement],
+    ['p', window.HTMLParagraphElement],
+    ['q', window.HTMLQuoteElement],
+    ['tbody', window.HTMLTableSectionElement],
+    ['td', window.HTMLTableCellElement],
+    ['template', window.HTMLTemplateElement],
+    ['textarea', window.HTMLTextAreaElement],
+    ['tfoot', window.HTMLTableSectionElement],
+    ['th', window.HTMLTableCellElement],
+    ['thead', window.HTMLTableSectionElement],
+    ['tr', window.HTMLTableRowElement],
+    ['ul', window.HTMLUListElement],
+    ['vhgroupv', window.HTMLUnknownElement],
+    ['vkeygen', window.HTMLUnknownElement]
+]);
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_37__;
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var escape_html_1 = __webpack_require__(39);
+var is_regexp_1 = __webpack_require__(40);
+var map_set_polyfill_1 = __webpack_require__(0);
+var componentParamValueMap_1 = __webpack_require__(13);
 exports.componentParamTypeSerializerMap = new map_set_polyfill_1.Map([
     [
         Boolean,
@@ -3674,35 +3616,90 @@ exports.componentParamTypeSerializerMap.set('object', exports.componentParamType
 
 
 /***/ }),
-/* 35 */
+/* 39 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_35__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_39__;
 
 /***/ }),
-/* 36 */
+/* 40 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_36__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_40__;
 
 /***/ }),
-/* 37 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_37__;
-
-/***/ }),
-/* 38 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(39);
-var bindingToJSExpression_1 = __webpack_require__(40);
-var componentParamValueMap_1 = __webpack_require__(14);
-var ContentTextFragmentParser_1 = __webpack_require__(22);
-var formatters_1 = __webpack_require__(19);
+var lower_case_first_word_1 = __webpack_require__(42);
+var map_set_polyfill_1 = __webpack_require__(0);
+var types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
+function Param(target, propertyName, propertyDesc, name, config) {
+    if (typeof propertyName != 'string') {
+        if (target && typeof target != 'string') {
+            config = target;
+        }
+        else {
+            name = target;
+            config = propertyName;
+        }
+        return function (target, propertyName, propertyDesc) {
+            return Param(target, propertyName, propertyDesc, name, config);
+        };
+    }
+    if (!config) {
+        config = {};
+    }
+    else if (typeof config == 'function') {
+        config = { type: config };
+    }
+    config.property = propertyName;
+    if (!config.type) {
+        var type = Reflect.getMetadata('design:type', target, propertyName);
+        config.type = types.has(type) ? type : Object;
+    }
+    var constr = target.constructor;
+    (constr.hasOwnProperty('params') ? constr.params : (constr.params = {}))[(name ||
+        (propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
+            ? propertyName
+            : lower_case_first_word_1.lowerCaseFirstWord(propertyName.slice(5))))] = config;
+}
+exports.Param = Param;
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_42__;
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_43__;
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_44__;
+
+/***/ }),
+/* 45 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var escape_string_1 = __webpack_require__(46);
+var bindingToJSExpression_1 = __webpack_require__(47);
+var componentParamValueMap_1 = __webpack_require__(13);
+var ContentTextFragmentParser_1 = __webpack_require__(24);
+var formatters_1 = __webpack_require__(20);
 var valueMapKeyCounter = 0;
 var cache = Object.create(null);
 function compileContentTextFragment(contentTextFragment, contentTextFragmentString, useValueMap) {
@@ -3752,13 +3749,13 @@ exports.compileContentTextFragment = compileContentTextFragment;
 
 
 /***/ }),
-/* 39 */
+/* 46 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_39__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_46__;
 
 /***/ }),
-/* 40 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3804,13 +3801,7 @@ exports.bindingToJSExpression = bindingToJSExpression;
 
 
 /***/ }),
-/* 41 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_41__;
-
-/***/ }),
-/* 42 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3863,127 +3854,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 43 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var registerComponent_1 = __webpack_require__(24);
-function ComponentConfigDecorator(config) {
-    return function (componentConstr) {
-        componentConstr.elementIs = config.elementIs;
-        if (config.elementExtends !== undefined) {
-            componentConstr.elementExtends = config.elementExtends;
-        }
-        if (config.params !== undefined) {
-            componentConstr.params = config.params;
-        }
-        if (config.i18n !== undefined) {
-            componentConstr.i18n = config.i18n;
-        }
-        if (config.template !== undefined) {
-            componentConstr.template = config.template;
-        }
-        if (config.events !== undefined) {
-            componentConstr.events = config.events;
-        }
-        if (config.domEvents !== undefined) {
-            componentConstr.domEvents = config.domEvents;
-        }
-        registerComponent_1.registerComponent(componentConstr);
-    };
-}
-exports.ComponentConfigDecorator = ComponentConfigDecorator;
-
-
-/***/ }),
-/* 44 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_44__;
-
-/***/ }),
-/* 45 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(21);
-var cache = Object.create(null);
-function pascalize(str, useCache) {
-    str = String(str);
-    var value;
-    return ((useCache && cache[str]) ||
-        ((value = camelize_1.camelize(str)),
-            (value = value.charAt(0).toUpperCase() + value.slice(1)),
-            useCache ? (cache[str] = value) : value));
-}
-exports.pascalize = pascalize;
-
-
-/***/ }),
-/* 46 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var map_set_polyfill_1 = __webpack_require__(0);
-exports.elementConstructorMap = new map_set_polyfill_1.Map([
-    ['a', window.HTMLAnchorElement],
-    ['blockquote', window.HTMLQuoteElement],
-    ['br', window.HTMLBRElement],
-    ['caption', window.HTMLTableCaptionElement],
-    ['col', window.HTMLTableColElement],
-    ['colgroup', window.HTMLTableColElement],
-    ['datalist', window.HTMLDataListElement],
-    ['del', window.HTMLModElement],
-    ['dir', window.HTMLDirectoryElement],
-    ['dl', window.HTMLDListElement],
-    ['document', window.HTMLDocument],
-    ['element', Element],
-    ['fieldset', window.HTMLFieldSetElement],
-    ['frameset', window.HTMLFrameSetElement],
-    ['h1', window.HTMLHeadingElement],
-    ['h2', window.HTMLHeadingElement],
-    ['h3', window.HTMLHeadingElement],
-    ['h4', window.HTMLHeadingElement],
-    ['h5', window.HTMLHeadingElement],
-    ['h6', window.HTMLHeadingElement],
-    ['hr', window.HTMLHRElement],
-    ['iframe', window.HTMLIFrameElement],
-    ['img', window.HTMLImageElement],
-    ['ins', window.HTMLModElement],
-    ['li', window.HTMLLIElement],
-    ['menuitem', window.HTMLMenuItemElement],
-    ['ol', window.HTMLOListElement],
-    ['optgroup', window.HTMLOptGroupElement],
-    ['p', window.HTMLParagraphElement],
-    ['q', window.HTMLQuoteElement],
-    ['tbody', window.HTMLTableSectionElement],
-    ['td', window.HTMLTableCellElement],
-    ['template', window.HTMLTemplateElement],
-    ['textarea', window.HTMLTextAreaElement],
-    ['tfoot', window.HTMLTableSectionElement],
-    ['th', window.HTMLTableCellElement],
-    ['thead', window.HTMLTableSectionElement],
-    ['tr', window.HTMLTableRowElement],
-    ['ul', window.HTMLUListElement],
-    ['vhgroupv', window.HTMLUnknownElement],
-    ['vkeygen', window.HTMLUnknownElement]
-]);
-
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_47__;
-
-/***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4003,7 +3874,7 @@ exports.handledEvents = [
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4058,7 +3929,7 @@ exports.handleDOMEvent = handleDOMEvent;
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4146,221 +4017,11 @@ exports.handleEvent = handleEvent;
 
 
 /***/ }),
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var clear_node_1 = __webpack_require__(20);
-var get_uid_1 = __webpack_require__(10);
-var map_set_polyfill_1 = __webpack_require__(0);
-var move_content_1 = __webpack_require__(11);
-var symbol_polyfill_1 = __webpack_require__(6);
-var attachChildComponentElements_1 = __webpack_require__(3);
-var bindContent_1 = __webpack_require__(4);
-var Component_1 = __webpack_require__(5);
-var ElementProtoMixin_1 = __webpack_require__(1);
-var KEY_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite.RtContent.contentMap');
-var RtContent = /** @class */ (function (_super) {
-    __extends(RtContent, _super);
-    function RtContent() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    RtContent.prototype._attach = function () {
-        this._attached = true;
-        if (this.isReady) {
-            this._unfreezeBindings();
-        }
-        else {
-            var ownerComponent = this.ownerComponent;
-            var el = this.element;
-            var contentOwnerComponent = ownerComponent.ownerComponent;
-            var ownerComponentContent = ownerComponent.$content;
-            var clone = this.paramClone;
-            var content = void 0;
-            var bindings = void 0;
-            var childComponents = void 0;
-            if (!clone || ownerComponentContent.firstChild) {
-                var selector = this.paramSelect;
-                var key = get_uid_1.getUID(ownerComponent) + '/' + (selector || '');
-                if (selector) {
-                    var contentMap = void 0;
-                    if (!clone &&
-                        (contentMap = contentOwnerComponent[KEY_CONTENT_MAP]) &&
-                        contentMap.has(key)) {
-                        var container = contentMap.get(key);
-                        if (container.firstChild) {
-                            content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                            contentMap.set(key, el);
-                            bindings = container.$component._bindings;
-                            childComponents = container.$component._childComponents;
-                        }
-                    }
-                    else if (ownerComponentContent.firstElementChild) {
-                        var selectedElements = ownerComponentContent.querySelectorAll(selector);
-                        var selectedElementCount = selectedElements.length;
-                        if (selectedElementCount) {
-                            content = document.createDocumentFragment();
-                            for (var i = 0; i < selectedElementCount; i++) {
-                                content.appendChild(clone
-                                    ? selectedElements[i].cloneNode(true)
-                                    : selectedElements[i]);
-                            }
-                        }
-                        if (!clone) {
-                            (contentMap ||
-                                contentOwnerComponent[KEY_CONTENT_MAP] ||
-                                (contentOwnerComponent[KEY_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                        }
-                    }
-                }
-                else if (!clone) {
-                    var contentMap = contentOwnerComponent[KEY_CONTENT_MAP];
-                    if (contentMap && contentMap.has(key)) {
-                        var container = contentMap.get(key);
-                        content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                        contentMap.set(key, el);
-                        bindings = container.$component._bindings;
-                        childComponents = container.$component._childComponents;
-                    }
-                    else if (ownerComponentContent.firstChild) {
-                        content = ownerComponentContent;
-                        (contentMap ||
-                            (contentOwnerComponent[KEY_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                    }
-                }
-                else {
-                    content = ownerComponentContent.cloneNode(true);
-                }
-            }
-            if (bindings === undefined) {
-                if (content || el.firstChild) {
-                    _a = content
-                        ? bindContent_1.bindContent(content, contentOwnerComponent, this.paramGetContext
-                            ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
-                            : ownerComponent.$context, { 0: null, 1: null })
-                        : bindContent_1.bindContent(el, ownerComponent, this.paramGetContext
-                            ? this.paramGetContext.call(ownerComponent, this.$context, this)
-                            : this.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
-                    this._childComponents = childComponents;
-                }
-                else {
-                    this._bindings = null;
-                    childComponents = this._childComponents = null;
-                }
-            }
-            else {
-                this._bindings = bindings;
-                this._childComponents = childComponents;
-                this._unfreezeBindings();
-            }
-            if (content) {
-                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                if (el.firstChild) {
-                    clear_node_1.clearNode(el);
-                }
-                el.appendChild(content);
-                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
-            }
-            if (childComponents) {
-                attachChildComponentElements_1.attachChildComponentElements(childComponents);
-            }
-            this.isReady = true;
-        }
-        var _a;
-    };
-    RtContent.prototype._detach = function () {
-        this._attached = false;
-        this._freezeBindings();
-    };
-    RtContent = __decorate([
-        Component_1.Component.Config({
-            elementIs: 'RtContent',
-            params: {
-                select: { property: 'paramSelect', type: String, readonly: true },
-                clone: { property: 'paramClone', default: false, readonly: true },
-                getContext: { property: 'paramGetContext', type: Object, readonly: true }
-            },
-            template: ''
-        })
-    ], RtContent);
-    return RtContent;
-}(Component_1.Component));
-exports.RtContent = RtContent;
-
-
-/***/ }),
 /* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-var lower_case_first_word_1 = __webpack_require__(53);
-var map_set_polyfill_1 = __webpack_require__(0);
-var types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
-function ComponentParamDecorator(target, propertyName, propertyDesc, name, config) {
-    if (typeof propertyName != 'string') {
-        if (target && typeof target != 'string') {
-            config = target;
-        }
-        else {
-            name = target;
-            config = propertyName;
-        }
-        return function (target, propertyName, propertyDesc) {
-            return ComponentParamDecorator(target, propertyName, propertyDesc, name, config);
-        };
-    }
-    if (!config) {
-        config = {};
-    }
-    else if (typeof config == 'function') {
-        config = { type: config };
-    }
-    config.property = propertyName;
-    if (!config.type) {
-        var type = Reflect.getMetadata('design:type', target, propertyName);
-        config.type = types.has(type) ? type : Object;
-    }
-    var constr = target.constructor;
-    (constr.hasOwnProperty('params') ? constr.params : (constr.params = {}))[(name ||
-        (propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
-            ? propertyName
-            : lower_case_first_word_1.lowerCaseFirstWord(propertyName.slice(5))))] = config;
-}
-exports.ComponentParamDecorator = ComponentParamDecorator;
-
-
-/***/ }),
-/* 53 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_53__;
-
-/***/ }),
-/* 54 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -4378,6 +4039,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var Component_1 = __webpack_require__(3);
 var rt_if_then_1 = __webpack_require__(26);
 var RtIfElse = /** @class */ (function (_super) {
     __extends(RtIfElse, _super);
@@ -4387,7 +4049,7 @@ var RtIfElse = /** @class */ (function (_super) {
         return _this;
     }
     RtIfElse = __decorate([
-        rt_if_then_1.RtIfThen.Config({
+        Component_1.Component({
             elementIs: 'RtIfElse',
             elementExtends: 'template'
         })
@@ -4398,7 +4060,7 @@ exports.RtIfElse = RtIfElse;
 
 
 /***/ }),
-/* 55 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4423,15 +4085,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
 var next_tick_1 = __webpack_require__(27);
 var cellx_1 = __webpack_require__(2);
-var attachChildComponentElements_1 = __webpack_require__(3);
-var bindContent_1 = __webpack_require__(4);
-var Component_1 = __webpack_require__(5);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var BaseComponent_1 = __webpack_require__(4);
+var bindContent_1 = __webpack_require__(6);
+var Component_1 = __webpack_require__(3);
 var ElementProtoMixin_1 = __webpack_require__(1);
 var ElementProtoMixin_2 = __webpack_require__(1);
 var compileKeypath_1 = __webpack_require__(28);
-var Features_1 = __webpack_require__(7);
-var keypathPattern_1 = __webpack_require__(15);
-var namePattern_1 = __webpack_require__(16);
+var Features_1 = __webpack_require__(8);
+var keypathPattern_1 = __webpack_require__(16);
+var namePattern_1 = __webpack_require__(17);
 var slice = Array.prototype.slice;
 var reForAttrValue = RegExp("^\\s*(" + namePattern_1.namePattern + ")\\s+of\\s+(" + keypathPattern_1.keypathPattern + ")\\s*$");
 var RtRepeat = /** @class */ (function (_super) {
@@ -4675,7 +4338,7 @@ var RtRepeat = /** @class */ (function (_super) {
         this._clearByItemMap(this._itemMap);
     };
     RtRepeat = __decorate([
-        Component_1.Component.Config({
+        Component_1.Component({
             elementIs: 'RtRepeat',
             elementExtends: 'template',
             params: {
@@ -4686,8 +4349,350 @@ var RtRepeat = /** @class */ (function (_super) {
         })
     ], RtRepeat);
     return RtRepeat;
-}(Component_1.Component));
+}(BaseComponent_1.BaseComponent));
 exports.RtRepeat = RtRepeat;
+
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var clear_node_1 = __webpack_require__(29);
+var get_uid_1 = __webpack_require__(14);
+var map_set_polyfill_1 = __webpack_require__(0);
+var move_content_1 = __webpack_require__(15);
+var symbol_polyfill_1 = __webpack_require__(7);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var BaseComponent_1 = __webpack_require__(4);
+var bindContent_1 = __webpack_require__(6);
+var Component_1 = __webpack_require__(3);
+var ElementProtoMixin_1 = __webpack_require__(1);
+var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite.RtSlot.slotContentMap');
+var RtSlot = /** @class */ (function (_super) {
+    __extends(RtSlot, _super);
+    function RtSlot() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    RtSlot.prototype._attach = function () {
+        this._attached = true;
+        if (this.isReady) {
+            this._unfreezeBindings();
+        }
+        else {
+            var ownerComponent = this.ownerComponent;
+            var el = this.element;
+            var contentOwnerComponent = ownerComponent.ownerComponent;
+            var ownerComponentContent = ownerComponent.$content;
+            var cloneContent = this.paramCloneContent;
+            var content = void 0;
+            var bindings = void 0;
+            var childComponents = void 0;
+            if (!cloneContent || ownerComponentContent.firstChild) {
+                var tagName = this.paramForTag;
+                var for_ = this.paramFor;
+                var key = get_uid_1.getUID(ownerComponent) + '/' + (tagName ? ':' + tagName : for_ || '');
+                if (tagName || for_) {
+                    var contentMap = void 0;
+                    if (!cloneContent &&
+                        (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
+                        contentMap.has(key)) {
+                        var container = contentMap.get(key);
+                        if (container.firstChild) {
+                            content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                            contentMap.set(key, el);
+                            bindings = container.$component._bindings;
+                            childComponents = container.$component._childComponents;
+                        }
+                    }
+                    else {
+                        var contentEl = ownerComponentContent.firstElementChild;
+                        if (contentEl) {
+                            if (tagName) {
+                                tagName = tagName.toUpperCase();
+                            }
+                            else if (for_.indexOf('__') == -1) {
+                                var elementBlockNames = ownerComponent.constructor
+                                    ._elementBlockNames;
+                                for_ =
+                                    elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
+                            }
+                            do {
+                                if (tagName
+                                    ? contentEl.tagName == tagName
+                                    : contentEl.classList.contains(for_)) {
+                                    var selectedEl = cloneContent
+                                        ? contentEl.cloneNode(true)
+                                        : contentEl;
+                                    contentEl = contentEl.nextElementSibling;
+                                    (content || (content = document.createDocumentFragment())).appendChild(selectedEl);
+                                }
+                                else {
+                                    contentEl = contentEl.nextElementSibling;
+                                }
+                            } while (contentEl);
+                            if (!cloneContent) {
+                                (contentMap ||
+                                    contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
+                                    (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                            }
+                        }
+                    }
+                }
+                else if (!cloneContent) {
+                    var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
+                    if (contentMap && contentMap.has(key)) {
+                        var container = contentMap.get(key);
+                        content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                        contentMap.set(key, el);
+                        bindings = container.$component._bindings;
+                        childComponents = container.$component._childComponents;
+                    }
+                    else if (ownerComponentContent.firstChild) {
+                        content = ownerComponentContent;
+                        (contentMap ||
+                            (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                    }
+                }
+                else {
+                    content = ownerComponentContent.cloneNode(true);
+                }
+            }
+            if (bindings === undefined) {
+                if (content || el.firstChild) {
+                    _a = content
+                        ? bindContent_1.bindContent(content, contentOwnerComponent, this.paramGetContext
+                            ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
+                            : ownerComponent.$context, { 0: null, 1: null })
+                        : bindContent_1.bindContent(el, ownerComponent, this.paramGetContext
+                            ? this.paramGetContext.call(ownerComponent, this.$context, this)
+                            : this.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
+                    this._childComponents = childComponents;
+                }
+                else {
+                    this._bindings = null;
+                    childComponents = this._childComponents = null;
+                }
+            }
+            else {
+                this._bindings = bindings;
+                this._childComponents = childComponents;
+                this._unfreezeBindings();
+            }
+            if (content) {
+                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+                if (el.firstChild) {
+                    clear_node_1.clearNode(el);
+                }
+                el.appendChild(content);
+                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+            }
+            if (childComponents) {
+                attachChildComponentElements_1.attachChildComponentElements(childComponents);
+            }
+            this.isReady = true;
+        }
+        var _a;
+    };
+    RtSlot.prototype._detach = function () {
+        this._attached = false;
+        this._freezeBindings();
+    };
+    RtSlot = __decorate([
+        Component_1.Component({
+            elementIs: 'RtSlot',
+            params: {
+                forTag: { property: 'paramForTag', type: String, readonly: true },
+                for: { property: 'paramFor', type: String, readonly: true },
+                cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
+                getContext: { property: 'paramGetContext', type: Object, readonly: true }
+            },
+            template: ''
+        })
+    ], RtSlot);
+    return RtSlot;
+}(BaseComponent_1.BaseComponent));
+exports.RtSlot = RtSlot;
+
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var clear_node_1 = __webpack_require__(29);
+var get_uid_1 = __webpack_require__(14);
+var map_set_polyfill_1 = __webpack_require__(0);
+var move_content_1 = __webpack_require__(15);
+var symbol_polyfill_1 = __webpack_require__(7);
+var attachChildComponentElements_1 = __webpack_require__(5);
+var BaseComponent_1 = __webpack_require__(4);
+var bindContent_1 = __webpack_require__(6);
+var Component_1 = __webpack_require__(3);
+var ElementProtoMixin_1 = __webpack_require__(1);
+var KEY_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite.RtContent.contentMap');
+var RtContent = /** @class */ (function (_super) {
+    __extends(RtContent, _super);
+    function RtContent() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    RtContent.prototype._attach = function () {
+        this._attached = true;
+        if (this.isReady) {
+            this._unfreezeBindings();
+        }
+        else {
+            var ownerComponent = this.ownerComponent;
+            var el = this.element;
+            var contentOwnerComponent = ownerComponent.ownerComponent;
+            var ownerComponentContent = ownerComponent.$content;
+            var clone = this.paramClone;
+            var content = void 0;
+            var bindings = void 0;
+            var childComponents = void 0;
+            if (!clone || ownerComponentContent.firstChild) {
+                var selector = this.paramSelect;
+                var key = get_uid_1.getUID(ownerComponent) + '/' + (selector || '');
+                if (selector) {
+                    var contentMap = void 0;
+                    if (!clone &&
+                        (contentMap = contentOwnerComponent[KEY_CONTENT_MAP]) &&
+                        contentMap.has(key)) {
+                        var container = contentMap.get(key);
+                        if (container.firstChild) {
+                            content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                            contentMap.set(key, el);
+                            bindings = container.$component._bindings;
+                            childComponents = container.$component._childComponents;
+                        }
+                    }
+                    else if (ownerComponentContent.firstElementChild) {
+                        var selectedElements = ownerComponentContent.querySelectorAll(selector);
+                        var selectedElementCount = selectedElements.length;
+                        if (selectedElementCount) {
+                            content = document.createDocumentFragment();
+                            for (var i = 0; i < selectedElementCount; i++) {
+                                content.appendChild(clone
+                                    ? selectedElements[i].cloneNode(true)
+                                    : selectedElements[i]);
+                            }
+                        }
+                        if (!clone) {
+                            (contentMap ||
+                                contentOwnerComponent[KEY_CONTENT_MAP] ||
+                                (contentOwnerComponent[KEY_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                        }
+                    }
+                }
+                else if (!clone) {
+                    var contentMap = contentOwnerComponent[KEY_CONTENT_MAP];
+                    if (contentMap && contentMap.has(key)) {
+                        var container = contentMap.get(key);
+                        content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                        contentMap.set(key, el);
+                        bindings = container.$component._bindings;
+                        childComponents = container.$component._childComponents;
+                    }
+                    else if (ownerComponentContent.firstChild) {
+                        content = ownerComponentContent;
+                        (contentMap ||
+                            (contentOwnerComponent[KEY_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                    }
+                }
+                else {
+                    content = ownerComponentContent.cloneNode(true);
+                }
+            }
+            if (bindings === undefined) {
+                if (content || el.firstChild) {
+                    _a = content
+                        ? bindContent_1.bindContent(content, contentOwnerComponent, this.paramGetContext
+                            ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
+                            : ownerComponent.$context, { 0: null, 1: null })
+                        : bindContent_1.bindContent(el, ownerComponent, this.paramGetContext
+                            ? this.paramGetContext.call(ownerComponent, this.$context, this)
+                            : this.$context, { 0: null, 1: null }), this._bindings = _a[0], childComponents = _a[1];
+                    this._childComponents = childComponents;
+                }
+                else {
+                    this._bindings = null;
+                    childComponents = this._childComponents = null;
+                }
+            }
+            else {
+                this._bindings = bindings;
+                this._childComponents = childComponents;
+                this._unfreezeBindings();
+            }
+            if (content) {
+                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+                if (el.firstChild) {
+                    clear_node_1.clearNode(el);
+                }
+                el.appendChild(content);
+                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+            }
+            if (childComponents) {
+                attachChildComponentElements_1.attachChildComponentElements(childComponents);
+            }
+            this.isReady = true;
+        }
+        var _a;
+    };
+    RtContent.prototype._detach = function () {
+        this._attached = false;
+        this._freezeBindings();
+    };
+    RtContent = __decorate([
+        Component_1.Component({
+            elementIs: 'RtContent',
+            params: {
+                select: { property: 'paramSelect', type: String, readonly: true },
+                clone: { property: 'paramClone', default: false, readonly: true },
+                getContext: { property: 'paramGetContext', type: Object, readonly: true }
+            },
+            template: ''
+        })
+    ], RtContent);
+    return RtContent;
+}(BaseComponent_1.BaseComponent));
+exports.RtContent = RtContent;
 
 
 /***/ })

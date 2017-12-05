@@ -1,2 +1,2 @@
-import { Component } from './Component';
-export declare let componentConstructorMap: Map<string, typeof Component>;
+import { BaseComponent } from './BaseComponent';
+export declare let componentConstructorMap: Map<string, typeof BaseComponent>;

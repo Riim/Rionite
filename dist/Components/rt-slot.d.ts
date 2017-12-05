@@ -1,14 +1,14 @@
-import { Component } from '../Component';
-export declare class RtSlot extends Component {
+import { BaseComponent } from '../BaseComponent';
+export declare class RtSlot extends BaseComponent {
     paramForTag: string;
     paramFor: string;
     paramCloneContent: boolean;
-    paramGetContext: (this: Component, context: {
+    paramGetContext: (this: BaseComponent, context: {
         [name: string]: any;
     }, slot: RtSlot) => {
         [name: string]: any;
     };
-    _childComponents: Array<Component> | null;
+    _childComponents: Array<BaseComponent> | null;
     _attach(): void;
     _detach(): void;
 }

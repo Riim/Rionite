@@ -4,14 +4,15 @@ import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
 import { Symbol } from '@riim/symbol-polyfill';
 import { attachChildComponentElements } from '../attachChildComponentElements';
+import { BaseComponent, IComponentElement } from '../BaseComponent';
 import { bindContent } from '../bindContent';
-import { Component, IComponentElement } from '../Component';
 import { IFreezableCell } from '../componentBinding';
+import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 
 let KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RtSlot.slotContentMap');
 
-@Component.Config({
+@Component({
 	elementIs: 'RtSlot',
 
 	params: {
@@ -23,17 +24,17 @@ let KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RtSlot.slotContentMap');
 
 	template: ''
 })
-export class RtSlot extends Component {
+export class RtSlot extends BaseComponent {
 	paramForTag: string;
 	paramFor: string;
 	paramCloneContent: boolean;
 	paramGetContext: (
-		this: Component,
+		this: BaseComponent,
 		context: { [name: string]: any },
 		slot: RtSlot
 	) => { [name: string]: any };
 
-	_childComponents: Array<Component> | null;
+	_childComponents: Array<BaseComponent> | null;
 
 	_attach() {
 		this._attached = true;
@@ -48,7 +49,7 @@ export class RtSlot extends Component {
 			let cloneContent = this.paramCloneContent;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
-			let childComponents: Array<Component> | null | undefined;
+			let childComponents: Array<BaseComponent> | null | undefined;
 
 			if (!cloneContent || ownerComponentContent.firstChild) {
 				let tagName = this.paramForTag;
@@ -79,7 +80,7 @@ export class RtSlot extends Component {
 							if (tagName) {
 								tagName = tagName.toUpperCase();
 							} else if (for_!.indexOf('__') == -1) {
-								let elementBlockNames = (ownerComponent.constructor as typeof Component)
+								let elementBlockNames = (ownerComponent.constructor as typeof BaseComponent)
 									._elementBlockNames;
 								for_ =
 									elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
@@ -172,7 +173,7 @@ export class RtSlot extends Component {
 				}
 			} else {
 				this._bindings = bindings;
-				this._childComponents = childComponents as Array<Component> | null;
+				this._childComponents = childComponents as Array<BaseComponent> | null;
 
 				this._unfreezeBindings();
 			}

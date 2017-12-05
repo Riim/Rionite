@@ -1,8 +1,9 @@
 import { nextTick } from '@riim/next-tick';
 import { Cell } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
+import { BaseComponent } from '../BaseComponent';
 import { bindContent } from '../bindContent';
-import { Component } from '../Component';
+import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { KEY_IS_ELEMENT_CONNECTED } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
@@ -15,7 +16,7 @@ export type TIfCell = Cell<boolean>;
 
 let reKeypath = RegExp(`^${keypathPattern}$`);
 
-@Component.Config({
+@Component({
 	elementIs: 'RtIfThen',
 	elementExtends: 'template',
 
@@ -23,7 +24,7 @@ let reKeypath = RegExp(`^${keypathPattern}$`);
 		if: { property: 'paramIf', type: String, required: true, readonly: true }
 	}
 })
-export class RtIfThen extends Component {
+export class RtIfThen extends BaseComponent {
 	paramIf: string;
 
 	_elseMode = false;

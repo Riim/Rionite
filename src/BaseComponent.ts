@@ -10,7 +10,6 @@ import { IBlock, Template } from 'nelm';
 import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
-import { ComponentConfigDecorator } from './ComponentConfigDecorator';
 import { componentConstructorMap } from './componentConstructorMap';
 import {
 	DisposableMixin,
@@ -26,12 +25,13 @@ import { templateTag as templateTagFeature } from './lib/Features';
 
 let map = Array.prototype.map;
 
-export interface IPossiblyComponentElement<T extends Component = Component> extends HTMLElement {
+export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent>
+	extends HTMLElement {
 	rioniteComponent?: T | null;
 	$component?: T;
 }
 
-export interface IComponentElement<T extends Component = Component> extends HTMLElement {
+export interface IComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
 	rioniteComponent: T | null;
 	$component: T;
 }
@@ -40,13 +40,13 @@ export interface IComponentElementClassNameMap {
 	[elName: string]: string;
 }
 
-export type TEventHandler<T extends Component = Component, U = IEvent | Event> = (
+export type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (
 	this: T,
 	evt: U,
 	receiver: Element
 ) => boolean | void;
 
-export interface IComponentEvents<T extends Component = Component, U = IEvent | Event> {
+export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
 	[name: string]: {
 		[eventName: string]: TEventHandler<T, U>;
 	};
@@ -82,10 +82,10 @@ function createClassBlockElementReplacer(
 
 function findChildComponents(
 	node: Node,
-	ownerComponent: Component,
+	ownerComponent: BaseComponent,
 	context: object,
-	childComponents?: Array<Component> | null | undefined
-): Array<Component> | null {
+	childComponents?: Array<BaseComponent> | null | undefined
+): Array<BaseComponent> | null {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		if (child.nodeType == Node.ELEMENT_NODE) {
 			let childComponent = (child as IPossiblyComponentElement).$component;
@@ -100,7 +100,7 @@ function findChildComponents(
 			if (
 				child.firstChild &&
 				(!childComponent ||
-					(childComponent.constructor as typeof Component).template == null)
+					(childComponent.constructor as typeof BaseComponent).template == null)
 			) {
 				childComponents = findChildComponents(
 					child,
@@ -115,9 +115,7 @@ function findChildComponents(
 	return childComponents || null;
 }
 
-export class Component extends EventEmitter implements DisposableMixin {
-	static Config = ComponentConfigDecorator;
-
+export class BaseComponent extends EventEmitter implements DisposableMixin {
 	static elementIs: string;
 	static elementExtends: string | null = null;
 
@@ -132,16 +130,16 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	static _rawContent: DocumentFragment | undefined;
 
-	static events: IComponentEvents<Component, IEvent<Component>> | null = null;
-	static domEvents: IComponentEvents<Component, Event> | null = null;
+	static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null = null;
+	static domEvents: IComponentEvents<BaseComponent, Event> | null = null;
 
 	@Inject('logger') logger: Logger;
 
 	_disposables: typeof DisposableMixin.prototype._disposables;
 
-	_ownerComponent: Component | undefined;
+	_ownerComponent: BaseComponent | undefined;
 
-	get ownerComponent(): Component {
+	get ownerComponent(): BaseComponent {
 		if (this._ownerComponent) {
 			return this._ownerComponent;
 		}
@@ -158,13 +156,13 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 		return (this._ownerComponent = component);
 	}
-	set ownerComponent(ownerComponent: Component) {
+	set ownerComponent(ownerComponent: BaseComponent) {
 		this._ownerComponent = ownerComponent;
 	}
 
-	_parentComponent: Component | null | undefined = null;
+	_parentComponent: BaseComponent | null | undefined = null;
 
-	get parentComponent(): Component | null {
+	get parentComponent(): BaseComponent | null {
 		if (this._parentComponent !== undefined) {
 			return this._parentComponent;
 		}
@@ -197,7 +195,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 		super();
 		DisposableMixin.call(this);
 
-		let constr = this.constructor as typeof Component;
+		let constr = this.constructor as typeof BaseComponent;
 
 		if (!componentConstructorMap.has(constr.elementIs)) {
 			throw new TypeError('Component must be registered');
@@ -215,7 +213,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 		this.created();
 	}
 
-	handleEvent(evt: IEvent<Component>) {
+	handleEvent(evt: IEvent<BaseComponent>) {
 		super.handleEvent(evt);
 
 		if (evt.bubbles !== false && !evt.isPropagationStopped) {
@@ -267,7 +265,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 		context: any,
 		useCapture: boolean
 	): IDisposableListening {
-		if (target instanceof Component) {
+		if (target instanceof BaseComponent) {
 			if (type.charAt(0) == '<') {
 				let index = type.indexOf('>', 2);
 				let targetType = type.slice(1, index);
@@ -332,7 +330,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 			this.initialized = true;
 		}
 
-		let constr = this.constructor as typeof Component;
+		let constr = this.constructor as typeof BaseComponent;
 
 		if (this.isReady) {
 			this._unfreezeBindings();
@@ -426,7 +424,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 		this.dispose();
 	}
 
-	dispose(): Component {
+	dispose(): BaseComponent {
 		this._freezeBindings();
 		return DisposableMixin.prototype.dispose.call(this);
 	}
@@ -468,14 +466,20 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	// Utils
 
-	$<R = Component | Element>(name: string, container?: Element | Component | string): R | null {
+	$<R = BaseComponent | Element>(
+		name: string,
+		container?: Element | BaseComponent | string
+	): R | null {
 		let elList = this._getElementList(name, container);
 		return (elList && elList.length
 			? (elList[0] as IPossiblyComponentElement).$component || elList[0]
 			: null) as any;
 	}
 
-	$$<R = Component | Element>(name: string, container?: Element | Component | string): Array<R> {
+	$$<R = BaseComponent | Element>(
+		name: string,
+		container?: Element | BaseComponent | string
+	): Array<R> {
 		let elList = this._getElementList(name, container);
 		return elList
 			? map.call(elList, (el: IPossiblyComponentElement) => el.$component || el)
@@ -484,7 +488,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 
 	_getElementList(
 		name: string,
-		container?: Element | Component | string
+		container?: Element | BaseComponent | string
 	): NodeListOf<Element> | undefined {
 		let elListMap =
 			this._elementListMap || (this._elementListMap = new Map<string, NodeListOf<Element>>());
@@ -495,7 +499,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 				container = this.$(container)!;
 			}
 
-			containerEl = container instanceof Component ? container.element : container;
+			containerEl = container instanceof BaseComponent ? container.element : container;
 		} else {
 			containerEl = this.element;
 		}
@@ -504,7 +508,7 @@ export class Component extends EventEmitter implements DisposableMixin {
 		let elList = elListMap.get(key);
 
 		if (!elList) {
-			let elementBlockNames = (this.constructor as typeof Component)._elementBlockNames;
+			let elementBlockNames = (this.constructor as typeof BaseComponent)._elementBlockNames;
 
 			elList = containerEl.getElementsByClassName(
 				elementBlockNames[elementBlockNames.length - 1] + '__' + name
@@ -517,12 +521,12 @@ export class Component extends EventEmitter implements DisposableMixin {
 }
 
 let disposableMixinProto = DisposableMixin.prototype;
-let componentProto = Component.prototype;
+let baseComponentProto = BaseComponent.prototype;
 
 Object.getOwnPropertyNames(disposableMixinProto).forEach(name => {
-	if (!(name in componentProto)) {
+	if (!(name in baseComponentProto)) {
 		Object.defineProperty(
-			componentProto,
+			baseComponentProto,
 			name,
 			Object.getOwnPropertyDescriptor(disposableMixinProto, name)!
 		);

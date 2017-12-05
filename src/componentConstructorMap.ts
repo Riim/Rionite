@@ -1,4 +1,4 @@
 import { Map } from '@riim/map-set-polyfill';
-import { Component } from './Component';
+import { BaseComponent } from './BaseComponent';
 
-export let componentConstructorMap = new Map<string, typeof Component>();
+export let componentConstructorMap = new Map<string, typeof BaseComponent>();

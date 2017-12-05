@@ -2,7 +2,7 @@ import { hyphenize } from '@riim/hyphenize';
 import { mixin } from '@riim/mixin';
 import { pascalize } from '@riim/pascalize';
 import { Template } from 'nelm';
-import { Component, IComponentElement } from './Component';
+import { BaseComponent, IComponentElement } from './BaseComponent';
 import { componentConstructorMap } from './componentConstructorMap';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
@@ -31,7 +31,7 @@ function inheritProperty(
 	}
 }
 
-export function registerComponent(componentConstr: typeof Component) {
+export function registerComponent(componentConstr: typeof BaseComponent) {
 	let elIs = componentConstr.elementIs;
 
 	if (!elIs) {
@@ -45,7 +45,7 @@ export function registerComponent(componentConstr: typeof Component) {
 	}
 
 	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
-		.constructor as typeof Component;
+		.constructor as typeof BaseComponent;
 
 	inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
 	inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);

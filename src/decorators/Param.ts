@@ -1,23 +1,23 @@
 import { lowerCaseFirstWord } from '@riim/lower-case-first-word';
 import { Set } from '@riim/map-set-polyfill';
-import { Component } from './Component';
-import { TComponentParamConfig } from './ComponentParams';
+import { BaseComponent } from '../BaseComponent';
+import { TComponentParamConfig } from '../ComponentParams';
 
 let types = new Set([Boolean, Number, String, Object]);
 
-export function ComponentParamDecorator(
+export function Param(
 	target: Object,
 	propertyName: string,
 	propertyDesc?: PropertyDescriptor
 ): void;
-export function ComponentParamDecorator(
+export function Param(
 	name?: string,
 	config?: TComponentParamConfig
 ): (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor) => void;
-export function ComponentParamDecorator(
+export function Param(
 	config?: TComponentParamConfig
 ): (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor) => void;
-export function ComponentParamDecorator(
+export function Param(
 	target?: Object | string | TComponentParamConfig,
 	propertyName?: string | TComponentParamConfig,
 	propertyDesc?: PropertyDescriptor,
@@ -33,7 +33,7 @@ export function ComponentParamDecorator(
 		}
 
 		return (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor): void =>
-			(ComponentParamDecorator as any)(target, propertyName, propertyDesc, name, config);
+			(Param as any)(target, propertyName, propertyDesc, name, config);
 	}
 
 	if (!config) {
@@ -49,7 +49,7 @@ export function ComponentParamDecorator(
 		config.type = types.has(type) ? type : Object;
 	}
 
-	let constr = target!.constructor as typeof Component;
+	let constr = target!.constructor as typeof BaseComponent;
 
 	(constr.hasOwnProperty('params') ? constr.params! : (constr.params = {}))[
 		(name ||
