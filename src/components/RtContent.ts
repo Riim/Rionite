@@ -10,28 +10,24 @@ import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 
-let KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RtSlot.slotContentMap');
+let KEY_CONTENT_MAP = Symbol('Rionite.RtContent.contentMap');
 
 @Component({
-	elementIs: 'RtSlot',
-
 	params: {
-		forTag: { property: 'paramForTag', type: String, readonly: true },
-		for: { property: 'paramFor', type: String, readonly: true },
-		cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
+		select: { property: 'paramSelect', type: String, readonly: true },
+		clone: { property: 'paramClone', default: false, readonly: true },
 		getContext: { property: 'paramGetContext', type: Object, readonly: true }
 	},
 
 	template: ''
 })
-export class RtSlot extends BaseComponent {
-	paramForTag: string;
-	paramFor: string;
-	paramCloneContent: boolean;
+export class RtContent extends BaseComponent {
+	paramSelect: string;
+	paramClone: boolean;
 	paramGetContext: (
 		this: BaseComponent,
 		context: { [name: string]: any },
-		slot: RtSlot
+		content: RtContent
 	) => { [name: string]: any };
 
 	_childComponents: Array<BaseComponent> | null;
@@ -46,22 +42,21 @@ export class RtSlot extends BaseComponent {
 			let el = this.element;
 			let contentOwnerComponent = ownerComponent.ownerComponent;
 			let ownerComponentContent = ownerComponent.$content!;
-			let cloneContent = this.paramCloneContent;
+			let clone = this.paramClone;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
 			let childComponents: Array<BaseComponent> | null | undefined;
 
-			if (!cloneContent || ownerComponentContent.firstChild) {
-				let tagName = this.paramForTag;
-				let for_ = this.paramFor;
-				let key = getUID(ownerComponent) + '/' + (tagName ? ':' + tagName : for_ || '');
+			if (!clone || ownerComponentContent.firstChild) {
+				let selector = this.paramSelect;
+				let key = getUID(ownerComponent) + '/' + (selector || '');
 
-				if (tagName || for_) {
+				if (selector) {
 					let contentMap: Map<string, IComponentElement> | undefined;
 
 					if (
-						!cloneContent &&
-						(contentMap = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP]) &&
+						!clone &&
+						(contentMap = (contentOwnerComponent as any)[KEY_CONTENT_MAP]) &&
 						contentMap.has(key)
 					) {
 						let container = contentMap.get(key)!;
@@ -71,56 +66,36 @@ export class RtSlot extends BaseComponent {
 							contentMap.set(key, el);
 
 							bindings = container.$component._bindings;
-							childComponents = (container.$component as RtSlot)._childComponents;
+							childComponents = (container.$component as RtContent)._childComponents;
 						}
-					} else {
-						let contentEl = ownerComponentContent.firstElementChild;
+					} else if (ownerComponentContent.firstElementChild) {
+						let selectedElements = ownerComponentContent.querySelectorAll(selector);
+						let selectedElementCount = selectedElements.length;
 
-						if (contentEl) {
-							if (tagName) {
-								tagName = tagName.toUpperCase();
-							} else if (for_!.indexOf('__') == -1) {
-								let elementBlockNames = (ownerComponent.constructor as typeof BaseComponent)
-									._elementBlockNames;
-								for_ =
-									elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
+						if (selectedElementCount) {
+							content = document.createDocumentFragment();
+
+							for (let i = 0; i < selectedElementCount; i++) {
+								content.appendChild(
+									clone
+										? selectedElements[i].cloneNode(true)
+										: selectedElements[i]
+								);
 							}
+						}
 
-							do {
-								if (
-									tagName
-										? contentEl.tagName == tagName
-										: contentEl.classList.contains(for_!)
-								) {
-									let selectedEl = cloneContent
-										? (contentEl.cloneNode(true) as Element)
-										: contentEl;
-
-									contentEl = contentEl.nextElementSibling;
-
-									(
-										content || (content = document.createDocumentFragment())
-									).appendChild(selectedEl);
-								} else {
-									contentEl = contentEl.nextElementSibling;
-								}
-							} while (contentEl);
-
-							if (!cloneContent) {
-								(
-									contentMap ||
-									(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] ||
-									((contentOwnerComponent as any)[
-										KEY_SLOT_CONTENT_MAP
-									] = new Map())
-								).set(key, el);
-							}
+						if (!clone) {
+							(
+								contentMap ||
+								(contentOwnerComponent as any)[KEY_CONTENT_MAP] ||
+								((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
+							).set(key, el);
 						}
 					}
-				} else if (!cloneContent) {
+				} else if (!clone) {
 					let contentMap:
 						| Map<string, IComponentElement>
-						| undefined = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP];
+						| undefined = (contentOwnerComponent as any)[KEY_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
 						let container = contentMap.get(key)!;
@@ -129,12 +104,12 @@ export class RtSlot extends BaseComponent {
 						contentMap.set(key, el);
 
 						bindings = container.$component._bindings;
-						childComponents = (container.$component as RtSlot)._childComponents;
+						childComponents = (container.$component as RtContent)._childComponents;
 					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
 						(
 							contentMap ||
-							((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())
+							((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
 						).set(key, el);
 					}
 				} else {

@@ -32,7 +32,9 @@ function inheritProperty(
 }
 
 export function registerComponent(componentConstr: typeof BaseComponent) {
-	let elIs = componentConstr.elementIs;
+	let elIs = componentConstr.hasOwnProperty('elementIs')
+		? componentConstr.elementIs
+		: (componentConstr.elementIs = componentConstr.name);
 
 	if (!elIs) {
 		throw new TypeError('Static property "elementIs" is required');

@@ -1696,24 +1696,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var registerComponent_1 = __webpack_require__(21);
 function Component(config) {
     return function (componentConstr) {
-        componentConstr.elementIs = config.elementIs;
-        if (config.elementExtends !== undefined) {
-            componentConstr.elementExtends = config.elementExtends;
-        }
-        if (config.params !== undefined) {
-            componentConstr.params = config.params;
-        }
-        if (config.i18n !== undefined) {
-            componentConstr.i18n = config.i18n;
-        }
-        if (config.template !== undefined) {
-            componentConstr.template = config.template;
-        }
-        if (config.events !== undefined) {
-            componentConstr.events = config.events;
-        }
-        if (config.domEvents !== undefined) {
-            componentConstr.domEvents = config.domEvents;
+        if (config) {
+            if (config.elementIs !== undefined) {
+                componentConstr.elementIs = config.elementIs;
+            }
+            if (config.elementExtends !== undefined) {
+                componentConstr.elementExtends = config.elementExtends;
+            }
+            if (config.params !== undefined) {
+                componentConstr.params = config.params;
+            }
+            if (config.i18n !== undefined) {
+                componentConstr.i18n = config.i18n;
+            }
+            if (config.template !== undefined) {
+                componentConstr.template = config.template;
+            }
+            if (config.events !== undefined) {
+                componentConstr.events = config.events;
+            }
+            if (config.domEvents !== undefined) {
+                componentConstr.domEvents = config.domEvents;
+            }
         }
         registerComponent_1.registerComponent(componentConstr);
     };
@@ -2733,7 +2737,9 @@ function inheritProperty(target, source, name, depth) {
     }
 }
 function registerComponent(componentConstr) {
-    var elIs = componentConstr.elementIs;
+    var elIs = componentConstr.hasOwnProperty('elementIs')
+        ? componentConstr.elementIs
+        : (componentConstr.elementIs = componentConstr.name);
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
@@ -3314,7 +3320,6 @@ var RtIfThen = /** @class */ (function (_super) {
     };
     RtIfThen = __decorate([
         Component_1.Component({
-            elementIs: 'RtIfThen',
             elementExtends: 'template',
             params: {
                 if: { property: 'paramIf', type: String, required: true, readonly: true }
@@ -3386,16 +3391,16 @@ var componentParamValueMap_1 = __webpack_require__(13);
 exports.componentParamValueMap = componentParamValueMap_1.componentParamValueMap;
 var registerComponent_1 = __webpack_require__(21);
 exports.registerComponent = registerComponent_1.registerComponent;
-var rt_if_then_1 = __webpack_require__(26);
-exports.RtIfThen = rt_if_then_1.RtIfThen;
-var rt_if_else_1 = __webpack_require__(52);
-exports.RtIfElse = rt_if_else_1.RtIfElse;
-var rt_repeat_1 = __webpack_require__(53);
-exports.RtRepeat = rt_repeat_1.RtRepeat;
-var rt_slot_1 = __webpack_require__(54);
-exports.RtSlot = rt_slot_1.RtSlot;
-var rt_content_1 = __webpack_require__(55);
-exports.RtContent = rt_content_1.RtContent;
+var RtIfThen_1 = __webpack_require__(26);
+exports.RtIfThen = RtIfThen_1.RtIfThen;
+var RtIfElse_1 = __webpack_require__(52);
+exports.RtIfElse = RtIfElse_1.RtIfElse;
+var RtRepeat_1 = __webpack_require__(53);
+exports.RtRepeat = RtRepeat_1.RtRepeat;
+var RtSlot_1 = __webpack_require__(54);
+exports.RtSlot = RtSlot_1.RtSlot;
+var RtContent_1 = __webpack_require__(55);
+exports.RtContent = RtContent_1.RtContent;
 di_1.Container.registerService('logger', logger_1.logger);
 
 
@@ -4040,7 +4045,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var Component_1 = __webpack_require__(3);
-var rt_if_then_1 = __webpack_require__(26);
+var RtIfThen_1 = __webpack_require__(26);
 var RtIfElse = /** @class */ (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
@@ -4050,12 +4055,11 @@ var RtIfElse = /** @class */ (function (_super) {
     }
     RtIfElse = __decorate([
         Component_1.Component({
-            elementIs: 'RtIfElse',
             elementExtends: 'template'
         })
     ], RtIfElse);
     return RtIfElse;
-}(rt_if_then_1.RtIfThen));
+}(RtIfThen_1.RtIfThen));
 exports.RtIfElse = RtIfElse;
 
 
@@ -4339,7 +4343,6 @@ var RtRepeat = /** @class */ (function (_super) {
     };
     RtRepeat = __decorate([
         Component_1.Component({
-            elementIs: 'RtRepeat',
             elementExtends: 'template',
             params: {
                 for: { property: 'paramFor', type: String, required: true, readonly: true },
@@ -4518,7 +4521,6 @@ var RtSlot = /** @class */ (function (_super) {
     };
     RtSlot = __decorate([
         Component_1.Component({
-            elementIs: 'RtSlot',
             params: {
                 forTag: { property: 'paramForTag', type: String, readonly: true },
                 for: { property: 'paramFor', type: String, readonly: true },
@@ -4681,7 +4683,6 @@ var RtContent = /** @class */ (function (_super) {
     };
     RtContent = __decorate([
         Component_1.Component({
-            elementIs: 'RtContent',
             params: {
                 select: { property: 'paramSelect', type: String, readonly: true },
                 clone: { property: 'paramClone', default: false, readonly: true },

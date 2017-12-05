@@ -17,7 +17,6 @@ export type TIfCell = Cell<boolean>;
 let reKeypath = RegExp(`^${keypathPattern}$`);
 
 @Component({
-	elementIs: 'RtIfThen',
 	elementExtends: 'template',
 
 	params: {

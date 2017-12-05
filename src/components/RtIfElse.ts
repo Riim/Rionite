@@ -1,8 +1,7 @@
 import { Component } from '../decorators/Component';
-import { RtIfThen } from './rt-if-then';
+import { RtIfThen } from './RtIfThen';
 
 @Component({
-	elementIs: 'RtIfElse',
 	elementExtends: 'template'
 })
 export class RtIfElse extends RtIfThen {
