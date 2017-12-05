@@ -23,7 +23,6 @@ import { handledEvents } from './handledEvents';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
 import { templateTag as templateTagFeature } from './lib/Features';
-import { registerComponent } from './registerComponent';
 
 let map = Array.prototype.map;
 
@@ -118,8 +117,6 @@ function findChildComponents(
 
 export class Component extends EventEmitter implements DisposableMixin {
 	static Config = ComponentConfigDecorator;
-
-	static register = registerComponent;
 
 	static elementIs: string;
 	static elementExtends: string | null = null;

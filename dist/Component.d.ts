@@ -4,7 +4,6 @@ import { IBlock, Template } from 'nelm';
 import { IFreezableCell } from './componentBinding';
 import { ComponentConfigDecorator } from './ComponentConfigDecorator';
 import { DisposableMixin, IDisposableListening, TListener, TListeningTarget } from './DisposableMixin';
-import { registerComponent } from './registerComponent';
 export interface IPossiblyComponentElement<T extends Component = Component> extends HTMLElement {
     rioniteComponent?: T | null;
     $component?: T;
@@ -24,7 +23,6 @@ export interface IComponentEvents<T extends Component = Component, U = IEvent | 
 }
 export declare class Component extends EventEmitter implements DisposableMixin {
     static Config: typeof ComponentConfigDecorator;
-    static register: typeof registerComponent;
     static elementIs: string;
     static elementExtends: string | null;
     static params: {

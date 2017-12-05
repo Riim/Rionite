@@ -1,6 +1,7 @@
 import { IEvent } from 'cellx';
 import { IBlock, Template } from 'nelm';
 import { Component, IComponentEvents } from './Component';
+import { registerComponent } from './registerComponent';
 
 export function ComponentConfigDecorator<T extends Component>(config: {
 	elementIs: string;
@@ -36,6 +37,6 @@ export function ComponentConfigDecorator<T extends Component>(config: {
 			(componentConstr as typeof Component).domEvents = config.domEvents;
 		}
 
-		Component.register(componentConstr as any);
+		registerComponent(componentConstr as any);
 	};
 }

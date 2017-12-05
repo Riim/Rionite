@@ -33,6 +33,7 @@ export { KEY_IS_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export { componentParamValueMap } from './componentParamValueMap';
 export { ComponentParamDecorator as Param } from './ComponentParamDecorator';
+export { registerComponent } from './registerComponent';
 export { TIfCell as TRtIfThenIfCell, RtIfThen } from './components/rt-if-then';
 export { RtIfElse } from './components/rt-if-else';
 export {

@@ -1500,14 +1500,14 @@ THE SOFTWARE.
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/hyphenize"), require("@riim/logger"), require("@riim/clear-node"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("html-to-fragment"), require("@riim/defer"), require("@riim/mixin"), require("@riim/lower-case-first-word"));
+		module.exports = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/hyphenize"), require("@riim/logger"), require("@riim/clear-node"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("html-to-fragment"), require("@riim/mixin"), require("@riim/defer"), require("@riim/lower-case-first-word"));
 	else if(typeof define === 'function' && define.amd)
-		define(["@riim/map-set-polyfill", "cellx", "@riim/symbol-polyfill", "@riim/di", "nelm", "@riim/get-uid", "@riim/move-content", "@riim/hyphenize", "@riim/logger", "@riim/clear-node", "@riim/camelize", "@riim/next-tick", "@riim/next-uid", "@riim/gettext", "@riim/escape-html", "@riim/is-regexp", "@riim/set-attribute", "escape-string", "html-to-fragment", "@riim/defer", "@riim/mixin", "@riim/lower-case-first-word"], factory);
+		define(["@riim/map-set-polyfill", "cellx", "@riim/symbol-polyfill", "@riim/di", "nelm", "@riim/get-uid", "@riim/move-content", "@riim/hyphenize", "@riim/logger", "@riim/clear-node", "@riim/camelize", "@riim/next-tick", "@riim/next-uid", "@riim/gettext", "@riim/escape-html", "@riim/is-regexp", "@riim/set-attribute", "escape-string", "html-to-fragment", "@riim/mixin", "@riim/defer", "@riim/lower-case-first-word"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/hyphenize"), require("@riim/logger"), require("@riim/clear-node"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("html-to-fragment"), require("@riim/defer"), require("@riim/mixin"), require("@riim/lower-case-first-word"));
+		exports["rionite"] = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/hyphenize"), require("@riim/logger"), require("@riim/clear-node"), require("@riim/camelize"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("html-to-fragment"), require("@riim/mixin"), require("@riim/defer"), require("@riim/lower-case-first-word"));
 	else
-		root["rionite"] = factory(root["@riim/map-set-polyfill"], root["cellx"], root["@riim/symbol-polyfill"], root["@riim/di"], root["nelm"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/hyphenize"], root["@riim/logger"], root["@riim/clear-node"], root["@riim/camelize"], root["@riim/next-tick"], root["@riim/next-uid"], root["@riim/gettext"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["escape-string"], root["html-to-fragment"], root["@riim/defer"], root["@riim/mixin"], root["@riim/lower-case-first-word"]);
-})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_8__, __WEBPACK_EXTERNAL_MODULE_9__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_17__, __WEBPACK_EXTERNAL_MODULE_20__, __WEBPACK_EXTERNAL_MODULE_21__, __WEBPACK_EXTERNAL_MODULE_26__, __WEBPACK_EXTERNAL_MODULE_30__, __WEBPACK_EXTERNAL_MODULE_31__, __WEBPACK_EXTERNAL_MODULE_34__, __WEBPACK_EXTERNAL_MODULE_35__, __WEBPACK_EXTERNAL_MODULE_36__, __WEBPACK_EXTERNAL_MODULE_38__, __WEBPACK_EXTERNAL_MODULE_40__, __WEBPACK_EXTERNAL_MODULE_43__, __WEBPACK_EXTERNAL_MODULE_48__, __WEBPACK_EXTERNAL_MODULE_53__) {
+		root["rionite"] = factory(root["@riim/map-set-polyfill"], root["cellx"], root["@riim/symbol-polyfill"], root["@riim/di"], root["nelm"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/hyphenize"], root["@riim/logger"], root["@riim/clear-node"], root["@riim/camelize"], root["@riim/next-tick"], root["@riim/next-uid"], root["@riim/gettext"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["escape-string"], root["html-to-fragment"], root["@riim/mixin"], root["@riim/defer"], root["@riim/lower-case-first-word"]);
+})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_6__, __WEBPACK_EXTERNAL_MODULE_8__, __WEBPACK_EXTERNAL_MODULE_9__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_17__, __WEBPACK_EXTERNAL_MODULE_20__, __WEBPACK_EXTERNAL_MODULE_21__, __WEBPACK_EXTERNAL_MODULE_27__, __WEBPACK_EXTERNAL_MODULE_31__, __WEBPACK_EXTERNAL_MODULE_32__, __WEBPACK_EXTERNAL_MODULE_35__, __WEBPACK_EXTERNAL_MODULE_36__, __WEBPACK_EXTERNAL_MODULE_37__, __WEBPACK_EXTERNAL_MODULE_39__, __WEBPACK_EXTERNAL_MODULE_41__, __WEBPACK_EXTERNAL_MODULE_44__, __WEBPACK_EXTERNAL_MODULE_47__, __WEBPACK_EXTERNAL_MODULE_53__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1570,7 +1570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 28);
+/******/ 	return __webpack_require__(__webpack_require__.s = 29);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -1586,7 +1586,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var defer_1 = __webpack_require__(43);
+var defer_1 = __webpack_require__(47);
 var di_1 = __webpack_require__(8);
 var symbol_polyfill_1 = __webpack_require__(6);
 var ComponentParams_1 = __webpack_require__(12);
@@ -1692,6 +1692,153 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
 
 "use strict";
 
+Object.defineProperty(exports, "__esModule", { value: true });
+var ComponentParams_1 = __webpack_require__(12);
+function attachChildComponentElements(childComponents) {
+    for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
+        var childComponent = childComponents_1[_i];
+        if (!childComponent._attached) {
+            childComponent._parentComponent = undefined;
+            if (!childComponent[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
+                ComponentParams_1.ComponentParams.init(childComponent);
+            }
+            childComponent.elementConnected();
+            childComponent._attach();
+        }
+    }
+}
+exports.attachChildComponentElements = attachChildComponentElements;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var camelize_1 = __webpack_require__(21);
+var map_set_polyfill_1 = __webpack_require__(0);
+var set_attribute_1 = __webpack_require__(37);
+var cellx_1 = __webpack_require__(2);
+var compileContentTextFragment_1 = __webpack_require__(38);
+var ContentTextFragmentParser_1 = __webpack_require__(22);
+var AttributeBindingCell = /** @class */ (function (_super) {
+    __extends(AttributeBindingCell, _super);
+    function AttributeBindingCell(pull, el, attrName, opts) {
+        var _this = _super.call(this, pull, opts) || this;
+        _this.element = el;
+        _this.attributeName = attrName;
+        return _this;
+    }
+    return AttributeBindingCell;
+}(cellx_1.Cell));
+exports.AttributeBindingCell = AttributeBindingCell;
+var TextNodeBindingCell = /** @class */ (function (_super) {
+    __extends(TextNodeBindingCell, _super);
+    function TextNodeBindingCell(pull, textNode, opts) {
+        var _this = _super.call(this, pull, opts) || this;
+        _this.textNode = textNode;
+        return _this;
+    }
+    return TextNodeBindingCell;
+}(cellx_1.Cell));
+exports.TextNodeBindingCell = TextNodeBindingCell;
+function onAttributeBindingCellChange(evt) {
+    set_attribute_1.setAttribute(evt.target.element, evt.target.attributeName, evt.data.value);
+}
+function onTextNodeBindingCellChange(evt) {
+    evt.target.textNode.nodeValue = evt.data.value;
+}
+function bindContent(node, ownerComponent, context, result) {
+    for (var child = node.firstChild; child; child = child.nextSibling) {
+        switch (child.nodeType) {
+            case Node.ELEMENT_NODE: {
+                var childComponent = child.$component;
+                var $specifiedParams = void 0;
+                if (childComponent) {
+                    $specifiedParams = new map_set_polyfill_1.Set();
+                }
+                var attrs = child.attributes;
+                for (var i = attrs.length; i;) {
+                    var attr = attrs.item(--i);
+                    if ($specifiedParams) {
+                        $specifiedParams.add(camelize_1.camelize(attr.name, true));
+                    }
+                    var value = attr.value;
+                    if (value.indexOf('{') != -1) {
+                        var contentTextFragment = new ContentTextFragmentParser_1.ContentTextFragmentParser(value).parse();
+                        if (contentTextFragment.length > 1 ||
+                            contentTextFragment[0].nodeType == ContentTextFragmentParser_1.ContentTextFragmentNodeType.BINDING) {
+                            var name_1 = attr.name;
+                            if (name_1.charAt(0) == '_') {
+                                name_1 = name_1.slice(1);
+                            }
+                            var cell = new AttributeBindingCell(compileContentTextFragment_1.compileContentTextFragment(contentTextFragment, value, contentTextFragment.length == 1), child, name_1, {
+                                context: context,
+                                onChange: onAttributeBindingCellChange
+                            });
+                            set_attribute_1.setAttribute(child, name_1, cell.get());
+                            (result[0] || (result[0] = [])).push(cell);
+                        }
+                    }
+                }
+                if (childComponent) {
+                    childComponent._ownerComponent = ownerComponent;
+                    childComponent.$context = context;
+                    childComponent.$specifiedParams = $specifiedParams;
+                    (result[1] || (result[1] = [])).push(childComponent);
+                }
+                if (child.firstChild &&
+                    (!childComponent ||
+                        childComponent.constructor.template == null)) {
+                    bindContent(child, ownerComponent, context, result);
+                }
+                break;
+            }
+            case Node.TEXT_NODE: {
+                for (var nextChild = void 0; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE;) {
+                    child.nodeValue += nextChild.nodeValue;
+                    node.removeChild(nextChild);
+                }
+                var value = child.nodeValue;
+                if (value.indexOf('{') != -1) {
+                    var contentTextFragment = new ContentTextFragmentParser_1.ContentTextFragmentParser(value).parse();
+                    if (contentTextFragment.length > 1 ||
+                        contentTextFragment[0].nodeType == ContentTextFragmentParser_1.ContentTextFragmentNodeType.BINDING) {
+                        var cell = new TextNodeBindingCell(compileContentTextFragment_1.compileContentTextFragment(contentTextFragment, value, false), child, {
+                            context: context,
+                            onChange: onTextNodeBindingCellChange
+                        });
+                        child.nodeValue = cell.get();
+                        (result[0] || (result[0] = [])).push(cell);
+                    }
+                }
+                break;
+            }
+        }
+    }
+    return result;
+}
+exports.bindContent = bindContent;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -1719,19 +1866,18 @@ var logger_1 = __webpack_require__(17);
 var map_set_polyfill_1 = __webpack_require__(0);
 var move_content_1 = __webpack_require__(11);
 var cellx_1 = __webpack_require__(2);
-var html_to_fragment_1 = __webpack_require__(40);
-var attachChildComponentElements_1 = __webpack_require__(4);
-var bindContent_1 = __webpack_require__(5);
-var componentBinding_1 = __webpack_require__(41);
-var ComponentConfigDecorator_1 = __webpack_require__(42);
-var componentConstructorMap_1 = __webpack_require__(24);
+var html_to_fragment_1 = __webpack_require__(41);
+var attachChildComponentElements_1 = __webpack_require__(3);
+var bindContent_1 = __webpack_require__(4);
+var componentBinding_1 = __webpack_require__(42);
+var ComponentConfigDecorator_1 = __webpack_require__(43);
+var componentConstructorMap_1 = __webpack_require__(25);
 var DisposableMixin_1 = __webpack_require__(18);
 var ElementProtoMixin_1 = __webpack_require__(1);
-var handledEvents_1 = __webpack_require__(44);
-var handleDOMEvent_1 = __webpack_require__(45);
-var handleEvent_1 = __webpack_require__(46);
+var handledEvents_1 = __webpack_require__(48);
+var handleDOMEvent_1 = __webpack_require__(49);
+var handleEvent_1 = __webpack_require__(50);
 var Features_1 = __webpack_require__(7);
-var registerComponent_1 = __webpack_require__(47);
 var map = Array.prototype.map;
 var reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)/g;
 function createClassBlockElementReplacer(blockName, events, evtAttrPrefix) {
@@ -2010,7 +2156,6 @@ var Component = /** @class */ (function (_super) {
         return elList;
     };
     Component.Config = ComponentConfigDecorator_1.ComponentConfigDecorator;
-    Component.register = registerComponent_1.registerComponent;
     Component.elementExtends = null;
     Component.params = null;
     Component.i18n = null;
@@ -2041,153 +2186,6 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
         });
     });
 });
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var ComponentParams_1 = __webpack_require__(12);
-function attachChildComponentElements(childComponents) {
-    for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
-        var childComponent = childComponents_1[_i];
-        if (!childComponent._attached) {
-            childComponent._parentComponent = undefined;
-            if (!childComponent[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
-                ComponentParams_1.ComponentParams.init(childComponent);
-            }
-            childComponent.elementConnected();
-            childComponent._attach();
-        }
-    }
-}
-exports.attachChildComponentElements = attachChildComponentElements;
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(21);
-var map_set_polyfill_1 = __webpack_require__(0);
-var set_attribute_1 = __webpack_require__(36);
-var cellx_1 = __webpack_require__(2);
-var compileContentTextFragment_1 = __webpack_require__(37);
-var ContentTextFragmentParser_1 = __webpack_require__(22);
-var AttributeBindingCell = /** @class */ (function (_super) {
-    __extends(AttributeBindingCell, _super);
-    function AttributeBindingCell(pull, el, attrName, opts) {
-        var _this = _super.call(this, pull, opts) || this;
-        _this.element = el;
-        _this.attributeName = attrName;
-        return _this;
-    }
-    return AttributeBindingCell;
-}(cellx_1.Cell));
-exports.AttributeBindingCell = AttributeBindingCell;
-var TextNodeBindingCell = /** @class */ (function (_super) {
-    __extends(TextNodeBindingCell, _super);
-    function TextNodeBindingCell(pull, textNode, opts) {
-        var _this = _super.call(this, pull, opts) || this;
-        _this.textNode = textNode;
-        return _this;
-    }
-    return TextNodeBindingCell;
-}(cellx_1.Cell));
-exports.TextNodeBindingCell = TextNodeBindingCell;
-function onAttributeBindingCellChange(evt) {
-    set_attribute_1.setAttribute(evt.target.element, evt.target.attributeName, evt.data.value);
-}
-function onTextNodeBindingCellChange(evt) {
-    evt.target.textNode.nodeValue = evt.data.value;
-}
-function bindContent(node, ownerComponent, context, result) {
-    for (var child = node.firstChild; child; child = child.nextSibling) {
-        switch (child.nodeType) {
-            case Node.ELEMENT_NODE: {
-                var childComponent = child.$component;
-                var $specifiedParams = void 0;
-                if (childComponent) {
-                    $specifiedParams = new map_set_polyfill_1.Set();
-                }
-                var attrs = child.attributes;
-                for (var i = attrs.length; i;) {
-                    var attr = attrs.item(--i);
-                    if ($specifiedParams) {
-                        $specifiedParams.add(camelize_1.camelize(attr.name, true));
-                    }
-                    var value = attr.value;
-                    if (value.indexOf('{') != -1) {
-                        var contentTextFragment = new ContentTextFragmentParser_1.ContentTextFragmentParser(value).parse();
-                        if (contentTextFragment.length > 1 ||
-                            contentTextFragment[0].nodeType == ContentTextFragmentParser_1.ContentTextFragmentNodeType.BINDING) {
-                            var name_1 = attr.name;
-                            if (name_1.charAt(0) == '_') {
-                                name_1 = name_1.slice(1);
-                            }
-                            var cell = new AttributeBindingCell(compileContentTextFragment_1.compileContentTextFragment(contentTextFragment, value, contentTextFragment.length == 1), child, name_1, {
-                                context: context,
-                                onChange: onAttributeBindingCellChange
-                            });
-                            set_attribute_1.setAttribute(child, name_1, cell.get());
-                            (result[0] || (result[0] = [])).push(cell);
-                        }
-                    }
-                }
-                if (childComponent) {
-                    childComponent._ownerComponent = ownerComponent;
-                    childComponent.$context = context;
-                    childComponent.$specifiedParams = $specifiedParams;
-                    (result[1] || (result[1] = [])).push(childComponent);
-                }
-                if (child.firstChild &&
-                    (!childComponent ||
-                        childComponent.constructor.template == null)) {
-                    bindContent(child, ownerComponent, context, result);
-                }
-                break;
-            }
-            case Node.TEXT_NODE: {
-                for (var nextChild = void 0; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE;) {
-                    child.nodeValue += nextChild.nodeValue;
-                    node.removeChild(nextChild);
-                }
-                var value = child.nodeValue;
-                if (value.indexOf('{') != -1) {
-                    var contentTextFragment = new ContentTextFragmentParser_1.ContentTextFragmentParser(value).parse();
-                    if (contentTextFragment.length > 1 ||
-                        contentTextFragment[0].nodeType == ContentTextFragmentParser_1.ContentTextFragmentNodeType.BINDING) {
-                        var cell = new TextNodeBindingCell(compileContentTextFragment_1.compileContentTextFragment(contentTextFragment, value, false), child, {
-                            context: context,
-                            onChange: onTextNodeBindingCellChange
-                        });
-                        child.nodeValue = cell.get();
-                        (result[0] || (result[0] = [])).push(cell);
-                    }
-                }
-                break;
-            }
-        }
-    }
-    return result;
-}
-exports.bindContent = bindContent;
 
 
 /***/ }),
@@ -2266,7 +2264,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var hyphenize_1 = __webpack_require__(13);
 var symbol_polyfill_1 = __webpack_require__(6);
 var cellx_1 = __webpack_require__(2);
-var componentParamTypeSerializerMap_1 = __webpack_require__(33);
+var componentParamTypeSerializerMap_1 = __webpack_require__(34);
 exports.KEY_IS_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite.isComponentParamsInited');
 function initParam(component, config, name) {
     if (config == null) {
@@ -2446,7 +2444,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_17__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var next_uid_1 = __webpack_require__(30);
+var next_uid_1 = __webpack_require__(31);
 var cellx_1 = __webpack_require__(2);
 var DisposableMixin = /** @class */ (function () {
     function DisposableMixin() {
@@ -2606,7 +2604,7 @@ exports.DisposableMixin = DisposableMixin;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var gettext_1 = __webpack_require__(31);
+var gettext_1 = __webpack_require__(32);
 exports.formatters = {
     or: function (value, arg) {
         return value || arg;
@@ -3037,12 +3035,120 @@ exports.keypathToJSExpression = keypathToJSExpression;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var hyphenize_1 = __webpack_require__(13);
+var mixin_1 = __webpack_require__(44);
+var pascalize_1 = __webpack_require__(45);
+var nelm_1 = __webpack_require__(9);
+var componentConstructorMap_1 = __webpack_require__(25);
+var elementConstructorMap_1 = __webpack_require__(46);
+var ElementProtoMixin_1 = __webpack_require__(1);
+var push = Array.prototype.push;
+function inheritProperty(target, source, name, depth) {
+    var obj = target[name];
+    var parentObj = source[name];
+    if (obj && parentObj && obj != parentObj) {
+        var o = (target[name] = { __proto__: parentObj });
+        for (var key in obj) {
+            o[key] = obj[key];
+            if (depth) {
+                inheritProperty(o, parentObj, key, depth - 1);
+            }
+        }
+    }
+}
+function registerComponent(componentConstr) {
+    var elIs = componentConstr.elementIs;
+    if (!elIs) {
+        throw new TypeError('Static property "elementIs" is required');
+    }
+    var hyphenizedElIs = hyphenize_1.hyphenize(elIs, true);
+    if (componentConstructorMap_1.componentConstructorMap.has(hyphenizedElIs)) {
+        throw new TypeError("Component \"" + hyphenizedElIs + "\" already registered");
+    }
+    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
+        .constructor;
+    inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
+    inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
+    componentConstr._blockNamesString =
+        elIs + ' ' + (parentComponentConstr._blockNamesString || '');
+    componentConstr._elementBlockNames = [elIs];
+    if (parentComponentConstr._elementBlockNames) {
+        push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
+    }
+    var template = componentConstr.template;
+    if (template !== null) {
+        if (template === parentComponentConstr.template) {
+            componentConstr.template = template.extend('', {
+                blockName: elIs
+            });
+        }
+        else {
+            if (template instanceof nelm_1.Template) {
+                template.setBlockName(componentConstr._elementBlockNames);
+            }
+            else {
+                componentConstr.template = parentComponentConstr.template
+                    ? parentComponentConstr.template.extend(template, {
+                        blockName: elIs
+                    })
+                    : new nelm_1.Template(template, { blockName: componentConstr._elementBlockNames });
+            }
+        }
+    }
+    componentConstr._rawContent = undefined;
+    inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
+    inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
+    var elExtends = componentConstr.elementExtends;
+    var parentElConstr = (elExtends &&
+        (elementConstructorMap_1.elementConstructorMap.get(elExtends) ||
+            window["HTML" + pascalize_1.pascalize(elExtends) + "Element"])) ||
+        HTMLElement;
+    var elConstr = function (self) {
+        return parentElConstr.call(this, self);
+    };
+    elConstr._rioniteComponentConstructor = componentConstr;
+    Object.defineProperty(elConstr, 'observedAttributes', {
+        configurable: true,
+        enumerable: true,
+        get: function () {
+            var paramsConfig = componentConstr.params;
+            if (!paramsConfig) {
+                return [];
+            }
+            var observedAttrs = [];
+            for (var name_1 in paramsConfig) {
+                observedAttrs.push(hyphenize_1.hyphenize(name_1, true));
+            }
+            return observedAttrs;
+        }
+    });
+    var elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
+    elProto.constructor = elConstr;
+    mixin_1.mixin(elProto, ElementProtoMixin_1.ElementProtoMixin);
+    window.customElements.define(hyphenizedElIs, elConstr, elExtends ? { extends: elExtends } : null);
+    componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr);
+    elementConstructorMap_1.elementConstructorMap.set(elIs, elConstr);
+    if (hyphenizedElIs != elIs) {
+        componentConstructorMap_1.componentConstructorMap.set(hyphenizedElIs, componentConstr);
+    }
+    return componentConstr;
+}
+exports.registerComponent = registerComponent;
+
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
 exports.componentConstructorMap = new map_set_polyfill_1.Map();
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3064,14 +3170,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var next_tick_1 = __webpack_require__(26);
+var next_tick_1 = __webpack_require__(27);
 var cellx_1 = __webpack_require__(2);
-var attachChildComponentElements_1 = __webpack_require__(4);
-var bindContent_1 = __webpack_require__(5);
-var Component_1 = __webpack_require__(3);
+var attachChildComponentElements_1 = __webpack_require__(3);
+var bindContent_1 = __webpack_require__(4);
+var Component_1 = __webpack_require__(5);
 var ElementProtoMixin_1 = __webpack_require__(1);
 var ElementProtoMixin_2 = __webpack_require__(1);
-var compileKeypath_1 = __webpack_require__(27);
+var compileKeypath_1 = __webpack_require__(28);
 var Features_1 = __webpack_require__(7);
 var keypathPattern_1 = __webpack_require__(15);
 var slice = Array.prototype.slice;
@@ -3193,13 +3299,13 @@ exports.RtIfThen = RtIfThen;
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_26__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_27__;
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3215,7 +3321,7 @@ exports.compileKeypath = compileKeypath;
 
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3223,7 +3329,7 @@ exports.compileKeypath = compileKeypath;
 Object.defineProperty(exports, "__esModule", { value: true });
 var di_1 = __webpack_require__(8);
 var logger_1 = __webpack_require__(17);
-__webpack_require__(29);
+__webpack_require__(30);
 var nelm_1 = __webpack_require__(9);
 exports.NelmNodeType = nelm_1.NodeType;
 exports.NelmParser = nelm_1.Parser;
@@ -3232,11 +3338,11 @@ var DisposableMixin_1 = __webpack_require__(18);
 exports.DisposableMixin = DisposableMixin_1.DisposableMixin;
 var formatters_1 = __webpack_require__(19);
 exports.formatters = formatters_1.formatters;
-var rt_slot_1 = __webpack_require__(32);
+var rt_slot_1 = __webpack_require__(33);
 exports.RtSlot = rt_slot_1.RtSlot;
 var rt_content_1 = __webpack_require__(51);
 exports.RtContent = rt_content_1.RtContent;
-var Component_1 = __webpack_require__(3);
+var Component_1 = __webpack_require__(5);
 exports.Component = Component_1.Component;
 var ElementProtoMixin_1 = __webpack_require__(1);
 exports.KEY_IS_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_IS_ELEMENT_CONNECTED;
@@ -3246,7 +3352,9 @@ var componentParamValueMap_1 = __webpack_require__(14);
 exports.componentParamValueMap = componentParamValueMap_1.componentParamValueMap;
 var ComponentParamDecorator_1 = __webpack_require__(52);
 exports.Param = ComponentParamDecorator_1.ComponentParamDecorator;
-var rt_if_then_1 = __webpack_require__(25);
+var registerComponent_1 = __webpack_require__(24);
+exports.registerComponent = registerComponent_1.registerComponent;
+var rt_if_then_1 = __webpack_require__(26);
 exports.RtIfThen = rt_if_then_1.RtIfThen;
 var rt_if_else_1 = __webpack_require__(54);
 exports.RtIfElse = rt_if_else_1.RtIfElse;
@@ -3256,7 +3364,7 @@ di_1.Container.registerService('logger', logger_1.logger);
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3289,12 +3397,6 @@ var nelm_1 = __webpack_require__(9);
 
 
 /***/ }),
-/* 30 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_30__;
-
-/***/ }),
 /* 31 */
 /***/ (function(module, exports) {
 
@@ -3302,6 +3404,12 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_31__;
 
 /***/ }),
 /* 32 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_32__;
+
+/***/ }),
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3328,9 +3436,9 @@ var get_uid_1 = __webpack_require__(10);
 var map_set_polyfill_1 = __webpack_require__(0);
 var move_content_1 = __webpack_require__(11);
 var symbol_polyfill_1 = __webpack_require__(6);
-var attachChildComponentElements_1 = __webpack_require__(4);
-var bindContent_1 = __webpack_require__(5);
-var Component_1 = __webpack_require__(3);
+var attachChildComponentElements_1 = __webpack_require__(3);
+var bindContent_1 = __webpack_require__(4);
+var Component_1 = __webpack_require__(5);
 var ElementProtoMixin_1 = __webpack_require__(1);
 var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite.RtSlot.slotContentMap');
 var RtSlot = /** @class */ (function (_super) {
@@ -3480,14 +3588,14 @@ exports.RtSlot = RtSlot;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_html_1 = __webpack_require__(34);
-var is_regexp_1 = __webpack_require__(35);
+var escape_html_1 = __webpack_require__(35);
+var is_regexp_1 = __webpack_require__(36);
 var map_set_polyfill_1 = __webpack_require__(0);
 var componentParamValueMap_1 = __webpack_require__(14);
 exports.componentParamTypeSerializerMap = new map_set_polyfill_1.Map([
@@ -3566,12 +3674,6 @@ exports.componentParamTypeSerializerMap.set('object', exports.componentParamType
 
 
 /***/ }),
-/* 34 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_34__;
-
-/***/ }),
 /* 35 */
 /***/ (function(module, exports) {
 
@@ -3585,13 +3687,19 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_36__;
 
 /***/ }),
 /* 37 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_37__;
+
+/***/ }),
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(38);
-var bindingToJSExpression_1 = __webpack_require__(39);
+var escape_string_1 = __webpack_require__(39);
+var bindingToJSExpression_1 = __webpack_require__(40);
 var componentParamValueMap_1 = __webpack_require__(14);
 var ContentTextFragmentParser_1 = __webpack_require__(22);
 var formatters_1 = __webpack_require__(19);
@@ -3644,13 +3752,13 @@ exports.compileContentTextFragment = compileContentTextFragment;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_38__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_39__;
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3696,13 +3804,13 @@ exports.bindingToJSExpression = bindingToJSExpression;
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_40__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_41__;
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3755,13 +3863,13 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Component_1 = __webpack_require__(3);
+var registerComponent_1 = __webpack_require__(24);
 function ComponentConfigDecorator(config) {
     return function (componentConstr) {
         componentConstr.elementIs = config.elementIs;
@@ -3783,20 +3891,99 @@ function ComponentConfigDecorator(config) {
         if (config.domEvents !== undefined) {
             componentConstr.domEvents = config.domEvents;
         }
-        Component_1.Component.register(componentConstr);
+        registerComponent_1.registerComponent(componentConstr);
     };
 }
 exports.ComponentConfigDecorator = ComponentConfigDecorator;
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_43__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_44__;
 
 /***/ }),
-/* 44 */
+/* 45 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var camelize_1 = __webpack_require__(21);
+var cache = Object.create(null);
+function pascalize(str, useCache) {
+    str = String(str);
+    var value;
+    return ((useCache && cache[str]) ||
+        ((value = camelize_1.camelize(str)),
+            (value = value.charAt(0).toUpperCase() + value.slice(1)),
+            useCache ? (cache[str] = value) : value));
+}
+exports.pascalize = pascalize;
+
+
+/***/ }),
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var map_set_polyfill_1 = __webpack_require__(0);
+exports.elementConstructorMap = new map_set_polyfill_1.Map([
+    ['a', window.HTMLAnchorElement],
+    ['blockquote', window.HTMLQuoteElement],
+    ['br', window.HTMLBRElement],
+    ['caption', window.HTMLTableCaptionElement],
+    ['col', window.HTMLTableColElement],
+    ['colgroup', window.HTMLTableColElement],
+    ['datalist', window.HTMLDataListElement],
+    ['del', window.HTMLModElement],
+    ['dir', window.HTMLDirectoryElement],
+    ['dl', window.HTMLDListElement],
+    ['document', window.HTMLDocument],
+    ['element', Element],
+    ['fieldset', window.HTMLFieldSetElement],
+    ['frameset', window.HTMLFrameSetElement],
+    ['h1', window.HTMLHeadingElement],
+    ['h2', window.HTMLHeadingElement],
+    ['h3', window.HTMLHeadingElement],
+    ['h4', window.HTMLHeadingElement],
+    ['h5', window.HTMLHeadingElement],
+    ['h6', window.HTMLHeadingElement],
+    ['hr', window.HTMLHRElement],
+    ['iframe', window.HTMLIFrameElement],
+    ['img', window.HTMLImageElement],
+    ['ins', window.HTMLModElement],
+    ['li', window.HTMLLIElement],
+    ['menuitem', window.HTMLMenuItemElement],
+    ['ol', window.HTMLOListElement],
+    ['optgroup', window.HTMLOptGroupElement],
+    ['p', window.HTMLParagraphElement],
+    ['q', window.HTMLQuoteElement],
+    ['tbody', window.HTMLTableSectionElement],
+    ['td', window.HTMLTableCellElement],
+    ['template', window.HTMLTemplateElement],
+    ['textarea', window.HTMLTextAreaElement],
+    ['tfoot', window.HTMLTableSectionElement],
+    ['th', window.HTMLTableCellElement],
+    ['thead', window.HTMLTableSectionElement],
+    ['tr', window.HTMLTableRowElement],
+    ['ul', window.HTMLUListElement],
+    ['vhgroupv', window.HTMLUnknownElement],
+    ['vkeygen', window.HTMLUnknownElement]
+]);
+
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_47__;
+
+/***/ }),
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3816,7 +4003,7 @@ exports.handledEvents = [
 
 
 /***/ }),
-/* 45 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3871,7 +4058,7 @@ exports.handleDOMEvent = handleDOMEvent;
 
 
 /***/ }),
-/* 46 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3959,193 +4146,6 @@ exports.handleEvent = handleEvent;
 
 
 /***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var hyphenize_1 = __webpack_require__(13);
-var mixin_1 = __webpack_require__(48);
-var pascalize_1 = __webpack_require__(49);
-var nelm_1 = __webpack_require__(9);
-var componentConstructorMap_1 = __webpack_require__(24);
-var elementConstructorMap_1 = __webpack_require__(50);
-var ElementProtoMixin_1 = __webpack_require__(1);
-var push = Array.prototype.push;
-function inheritProperty(target, source, name, depth) {
-    var obj = target[name];
-    var parentObj = source[name];
-    if (obj && parentObj && obj != parentObj) {
-        var o = (target[name] = { __proto__: parentObj });
-        for (var key in obj) {
-            o[key] = obj[key];
-            if (depth) {
-                inheritProperty(o, parentObj, key, depth - 1);
-            }
-        }
-    }
-}
-function registerComponent(componentConstr) {
-    var elIs = componentConstr.elementIs;
-    if (!elIs) {
-        throw new TypeError('Static property "elementIs" is required');
-    }
-    var hyphenizedElIs = hyphenize_1.hyphenize(elIs, true);
-    if (componentConstructorMap_1.componentConstructorMap.has(hyphenizedElIs)) {
-        throw new TypeError("Component \"" + hyphenizedElIs + "\" already registered");
-    }
-    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
-        .constructor;
-    inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
-    inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
-    componentConstr._blockNamesString =
-        elIs + ' ' + (parentComponentConstr._blockNamesString || '');
-    componentConstr._elementBlockNames = [elIs];
-    if (parentComponentConstr._elementBlockNames) {
-        push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
-    }
-    var template = componentConstr.template;
-    if (template !== null) {
-        if (template === parentComponentConstr.template) {
-            componentConstr.template = template.extend('', {
-                blockName: elIs
-            });
-        }
-        else {
-            if (template instanceof nelm_1.Template) {
-                template.setBlockName(componentConstr._elementBlockNames);
-            }
-            else {
-                componentConstr.template = parentComponentConstr.template
-                    ? parentComponentConstr.template.extend(template, {
-                        blockName: elIs
-                    })
-                    : new nelm_1.Template(template, { blockName: componentConstr._elementBlockNames });
-            }
-        }
-    }
-    componentConstr._rawContent = undefined;
-    inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
-    inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
-    var elExtends = componentConstr.elementExtends;
-    var parentElConstr = (elExtends &&
-        (elementConstructorMap_1.elementConstructorMap.get(elExtends) ||
-            window["HTML" + pascalize_1.pascalize(elExtends) + "Element"])) ||
-        HTMLElement;
-    var elConstr = function (self) {
-        return parentElConstr.call(this, self);
-    };
-    elConstr._rioniteComponentConstructor = componentConstr;
-    Object.defineProperty(elConstr, 'observedAttributes', {
-        configurable: true,
-        enumerable: true,
-        get: function () {
-            var paramsConfig = componentConstr.params;
-            if (!paramsConfig) {
-                return [];
-            }
-            var observedAttrs = [];
-            for (var name_1 in paramsConfig) {
-                observedAttrs.push(hyphenize_1.hyphenize(name_1, true));
-            }
-            return observedAttrs;
-        }
-    });
-    var elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
-    elProto.constructor = elConstr;
-    mixin_1.mixin(elProto, ElementProtoMixin_1.ElementProtoMixin);
-    window.customElements.define(hyphenizedElIs, elConstr, elExtends ? { extends: elExtends } : null);
-    componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr);
-    elementConstructorMap_1.elementConstructorMap.set(elIs, elConstr);
-    if (hyphenizedElIs != elIs) {
-        componentConstructorMap_1.componentConstructorMap.set(hyphenizedElIs, componentConstr);
-    }
-    return componentConstr;
-}
-exports.registerComponent = registerComponent;
-
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_48__;
-
-/***/ }),
-/* 49 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(21);
-var cache = Object.create(null);
-function pascalize(str, useCache) {
-    str = String(str);
-    var value;
-    return ((useCache && cache[str]) ||
-        ((value = camelize_1.camelize(str)),
-            (value = value.charAt(0).toUpperCase() + value.slice(1)),
-            useCache ? (cache[str] = value) : value));
-}
-exports.pascalize = pascalize;
-
-
-/***/ }),
-/* 50 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var map_set_polyfill_1 = __webpack_require__(0);
-exports.elementConstructorMap = new map_set_polyfill_1.Map([
-    ['a', window.HTMLAnchorElement],
-    ['blockquote', window.HTMLQuoteElement],
-    ['br', window.HTMLBRElement],
-    ['caption', window.HTMLTableCaptionElement],
-    ['col', window.HTMLTableColElement],
-    ['colgroup', window.HTMLTableColElement],
-    ['datalist', window.HTMLDataListElement],
-    ['del', window.HTMLModElement],
-    ['dir', window.HTMLDirectoryElement],
-    ['dl', window.HTMLDListElement],
-    ['document', window.HTMLDocument],
-    ['element', Element],
-    ['fieldset', window.HTMLFieldSetElement],
-    ['frameset', window.HTMLFrameSetElement],
-    ['h1', window.HTMLHeadingElement],
-    ['h2', window.HTMLHeadingElement],
-    ['h3', window.HTMLHeadingElement],
-    ['h4', window.HTMLHeadingElement],
-    ['h5', window.HTMLHeadingElement],
-    ['h6', window.HTMLHeadingElement],
-    ['hr', window.HTMLHRElement],
-    ['iframe', window.HTMLIFrameElement],
-    ['img', window.HTMLImageElement],
-    ['ins', window.HTMLModElement],
-    ['li', window.HTMLLIElement],
-    ['menuitem', window.HTMLMenuItemElement],
-    ['ol', window.HTMLOListElement],
-    ['optgroup', window.HTMLOptGroupElement],
-    ['p', window.HTMLParagraphElement],
-    ['q', window.HTMLQuoteElement],
-    ['tbody', window.HTMLTableSectionElement],
-    ['td', window.HTMLTableCellElement],
-    ['template', window.HTMLTemplateElement],
-    ['textarea', window.HTMLTextAreaElement],
-    ['tfoot', window.HTMLTableSectionElement],
-    ['th', window.HTMLTableCellElement],
-    ['thead', window.HTMLTableSectionElement],
-    ['tr', window.HTMLTableRowElement],
-    ['ul', window.HTMLUListElement],
-    ['vhgroupv', window.HTMLUnknownElement],
-    ['vkeygen', window.HTMLUnknownElement]
-]);
-
-
-/***/ }),
 /* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -4173,9 +4173,9 @@ var get_uid_1 = __webpack_require__(10);
 var map_set_polyfill_1 = __webpack_require__(0);
 var move_content_1 = __webpack_require__(11);
 var symbol_polyfill_1 = __webpack_require__(6);
-var attachChildComponentElements_1 = __webpack_require__(4);
-var bindContent_1 = __webpack_require__(5);
-var Component_1 = __webpack_require__(3);
+var attachChildComponentElements_1 = __webpack_require__(3);
+var bindContent_1 = __webpack_require__(4);
+var Component_1 = __webpack_require__(5);
 var ElementProtoMixin_1 = __webpack_require__(1);
 var KEY_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite.RtContent.contentMap');
 var RtContent = /** @class */ (function (_super) {
@@ -4378,7 +4378,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var rt_if_then_1 = __webpack_require__(25);
+var rt_if_then_1 = __webpack_require__(26);
 var RtIfElse = /** @class */ (function (_super) {
     __extends(RtIfElse, _super);
     function RtIfElse() {
@@ -4421,14 +4421,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
-var next_tick_1 = __webpack_require__(26);
+var next_tick_1 = __webpack_require__(27);
 var cellx_1 = __webpack_require__(2);
-var attachChildComponentElements_1 = __webpack_require__(4);
-var bindContent_1 = __webpack_require__(5);
-var Component_1 = __webpack_require__(3);
+var attachChildComponentElements_1 = __webpack_require__(3);
+var bindContent_1 = __webpack_require__(4);
+var Component_1 = __webpack_require__(5);
 var ElementProtoMixin_1 = __webpack_require__(1);
 var ElementProtoMixin_2 = __webpack_require__(1);
-var compileKeypath_1 = __webpack_require__(27);
+var compileKeypath_1 = __webpack_require__(28);
 var Features_1 = __webpack_require__(7);
 var keypathPattern_1 = __webpack_require__(15);
 var namePattern_1 = __webpack_require__(16);
