@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.32.4",
+  "version": "0.32.5",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -46,7 +46,7 @@
     "@riim/hyphenize": "^1.0.2",
     "@riim/is-regexp": "^1.0.0",
     "@riim/logger": "^1.0.1",
-    "@riim/lower-case-first-word": "^1.0.0",
+    "@riim/lower-case-first-word": "^1.0.1",
     "@riim/map-set-polyfill": "^1.0.1",
     "@riim/mixin": "^1.0.0",
     "@riim/move-content": "^1.0.0",
