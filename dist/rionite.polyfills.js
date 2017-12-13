@@ -1926,7 +1926,7 @@ var BaseComponent = /** @class */ (function (_super) {
             el.className = constr._blockNamesString + el.className;
             if (constr.template == null) {
                 this._bindings = null;
-                var childComponents = findChildComponents(el, this.ownerComponent, this.$context);
+                var childComponents = findChildComponents(el, this.ownerComponent, this.$context || this.ownerComponent);
                 if (childComponents) {
                     attachChildComponentElements_1.attachChildComponentElements(childComponents);
                 }

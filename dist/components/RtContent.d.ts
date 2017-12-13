@@ -1,5 +1,8 @@
 import { BaseComponent } from '../BaseComponent';
 export declare class RtContent extends BaseComponent {
+    $context: {
+        [name: string]: any;
+    };
     paramSelect: string;
     paramClone: boolean;
     paramGetContext: (this: BaseComponent, context: {

@@ -1,5 +1,8 @@
 import { BaseComponent } from '../BaseComponent';
 export declare class RtSlot extends BaseComponent {
+    $context: {
+        [name: string]: any;
+    };
     paramForTag: string;
     paramFor: string;
     paramCloneContent: boolean;

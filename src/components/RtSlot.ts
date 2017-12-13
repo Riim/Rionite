@@ -23,6 +23,8 @@ let KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RtSlot.slotContentMap');
 	template: ''
 })
 export class RtSlot extends BaseComponent {
+	$context: { [name: string]: any };
+
 	paramForTag: string;
 	paramFor: string;
 	paramCloneContent: boolean;

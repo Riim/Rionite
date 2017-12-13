@@ -101,7 +101,7 @@ export class RtIfThen extends BaseComponent {
 			let [bindings, childComponents] = bindContent(
 				content,
 				this.ownerComponent,
-				this.$context,
+				this.$context!,
 				{ 0: null, 1: null } as any
 			);
 

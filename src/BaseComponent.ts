@@ -178,9 +178,9 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 	element: IComponentElement;
 
-	$content: DocumentFragment | null;
-	$context: { [name: string]: any };
-	$specifiedParams: Set<string>;
+	$content: DocumentFragment | undefined;
+	$context: { [name: string]: any } | undefined;
+	$specifiedParams: Set<string> | undefined;
 
 	_bindings: Array<IFreezableCell> | null;
 
@@ -342,7 +342,11 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 			if (constr.template == null) {
 				this._bindings = null;
 
-				let childComponents = findChildComponents(el, this.ownerComponent, this.$context);
+				let childComponents = findChildComponents(
+					el,
+					this.ownerComponent,
+					this.$context || this.ownerComponent
+				);
 
 				if (childComponents) {
 					attachChildComponentElements(childComponents);

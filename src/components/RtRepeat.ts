@@ -233,7 +233,7 @@ export class RtRepeat extends BaseComponent {
 				i += templates[i].content.querySelectorAll('template').length + 1;
 			}
 		}
-		let context = this.$context;
+		let context = this.$context!;
 		let [bindings, childComponents] = bindContent(
 			content,
 			this.ownerComponent,

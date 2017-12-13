@@ -42,11 +42,11 @@ export declare class BaseComponent extends EventEmitter implements DisposableMix
     _parentComponent: BaseComponent | null | undefined;
     readonly parentComponent: BaseComponent | null;
     element: IComponentElement;
-    $content: DocumentFragment | null;
+    $content: DocumentFragment | undefined;
     $context: {
         [name: string]: any;
-    };
-    $specifiedParams: Set<string>;
+    } | undefined;
+    $specifiedParams: Set<string> | undefined;
     _bindings: Array<IFreezableCell> | null;
     _elementListMap: Map<string, NodeListOf<Element>> | undefined;
     _attached: boolean;

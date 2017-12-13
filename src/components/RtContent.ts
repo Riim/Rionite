@@ -22,6 +22,8 @@ let KEY_CONTENT_MAP = Symbol('Rionite.RtContent.contentMap');
 	template: ''
 })
 export class RtContent extends BaseComponent {
+	$context: { [name: string]: any };
+
 	paramSelect: string;
 	paramClone: boolean;
 	paramGetContext: (
