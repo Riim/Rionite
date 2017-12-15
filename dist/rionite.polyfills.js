@@ -1617,9 +1617,7 @@ exports.ElementProtoMixin = (_a = {
         }
         var component = this.rioniteComponent;
         if (component) {
-            if (!component[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
-                ComponentParams_1.ComponentParams.init(component);
-            }
+            ComponentParams_1.ComponentParams.init(component);
             component.elementConnected();
             if (component._attached) {
                 if (component._parentComponent === null) {
@@ -1638,9 +1636,7 @@ exports.ElementProtoMixin = (_a = {
                     var component_1 = _this.$component;
                     component_1._parentComponent = undefined;
                     if (!component_1.parentComponent && !component_1._attached) {
-                        if (!component_1[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
-                            ComponentParams_1.ComponentParams.init(component_1);
-                        }
+                        ComponentParams_1.ComponentParams.init(component_1);
                         component_1.elementConnected();
                         component_1._attach();
                     }
@@ -2091,9 +2087,7 @@ function attachChildComponentElements(childComponents) {
         var childComponent = childComponents_1[_i];
         if (!childComponent._attached) {
             childComponent._parentComponent = undefined;
-            if (!childComponent[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
-                ComponentParams_1.ComponentParams.init(childComponent);
-            }
+            ComponentParams_1.ComponentParams.init(childComponent);
             childComponent.elementConnected();
             childComponent._attach();
         }
@@ -2296,7 +2290,7 @@ var hyphenize_1 = __webpack_require__(11);
 var symbol_polyfill_1 = __webpack_require__(7);
 var cellx_1 = __webpack_require__(2);
 var componentParamTypeSerializerMap_1 = __webpack_require__(38);
-exports.KEY_IS_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite.isComponentParamsInited');
+var KEY_IS_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite.isComponentParamsInited');
 function initParam(component, config, name) {
     if (config == null) {
         return;
@@ -2414,6 +2408,10 @@ function initParam(component, config, name) {
 }
 exports.ComponentParams = {
     init: function (component) {
+        if (component[KEY_IS_COMPONENT_PARAMS_INITED]) {
+            return;
+        }
+        component[KEY_IS_COMPONENT_PARAMS_INITED] = true;
         var config = component.constructor.params;
         if (config) {
             for (var name_1 in config) {

@@ -14,7 +14,7 @@ export type TComponentParamConfig =
 			readonly?: boolean;
 		};
 
-export let KEY_IS_COMPONENT_PARAMS_INITED = Symbol('Rionite.isComponentParamsInited');
+let KEY_IS_COMPONENT_PARAMS_INITED = Symbol('Rionite.isComponentParamsInited');
 
 function initParam(component: BaseComponent, config: TComponentParamConfig | null, name: string) {
 	if (config == null) {
@@ -159,6 +159,12 @@ function initParam(component: BaseComponent, config: TComponentParamConfig | nul
 
 export let ComponentParams = {
 	init(component: BaseComponent) {
+		if ((component as any)[KEY_IS_COMPONENT_PARAMS_INITED]) {
+			return;
+		}
+
+		(component as any)[KEY_IS_COMPONENT_PARAMS_INITED] = true;
+
 		let config = (component.constructor as typeof BaseComponent).params;
 
 		if (config) {

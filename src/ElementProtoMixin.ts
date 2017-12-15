@@ -2,7 +2,7 @@ import { defer } from '@riim/defer';
 import { Container } from '@riim/di';
 import { Symbol } from '@riim/symbol-polyfill';
 import { BaseComponent, IComponentElement } from './BaseComponent';
-import { ComponentParams, KEY_IS_COMPONENT_PARAMS_INITED } from './ComponentParams';
+import { ComponentParams } from './ComponentParams';
 import { nativeCustomElements as nativeCustomElementsFeature } from './lib/Features';
 
 export let KEY_IS_ELEMENT_CONNECTED = Symbol('Rionite.isElementConnected');
@@ -39,9 +39,7 @@ export let ElementProtoMixin = {
 		let component = this.rioniteComponent;
 
 		if (component) {
-			if (!(component as any)[KEY_IS_COMPONENT_PARAMS_INITED]) {
-				ComponentParams.init(component);
-			}
+			ComponentParams.init(component);
 
 			component.elementConnected();
 
@@ -62,9 +60,7 @@ export let ElementProtoMixin = {
 					component._parentComponent = undefined;
 
 					if (!component.parentComponent && !component._attached) {
-						if (!(component as any)[KEY_IS_COMPONENT_PARAMS_INITED]) {
-							ComponentParams.init(component);
-						}
+						ComponentParams.init(component);
 
 						component.elementConnected();
 						component._attach();
