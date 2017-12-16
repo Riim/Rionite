@@ -266,18 +266,23 @@ var handleDOMEvent_1 = __webpack_require__(50);
 var handleEvent_1 = __webpack_require__(51);
 var Features_1 = __webpack_require__(8);
 var map = Array.prototype.map;
-var reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)/g;
+var reClassBlockElement = / class="([a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b(?: [a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b)*)/g;
 function createClassBlockElementReplacer(blockName, events, evtAttrPrefix) {
-    return function (match, elBlockName, elName) {
-        var elEvents;
-        if (elBlockName == blockName && (elEvents = events[elName])) {
-            var evtAttrs = [];
-            for (var type in elEvents) {
-                evtAttrs.push(" " + evtAttrPrefix + (type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type) + "=\"/" + elName + "\"");
+    return function (match, classNames) {
+        var cls = classNames.split(' ');
+        var evtAttrs;
+        for (var _i = 0, cls_1 = cls; _i < cls_1.length; _i++) {
+            var cl = cls_1[_i];
+            var cll = cl.split('__');
+            var elName = cll[1];
+            var elEvents = void 0;
+            if (cll[0] == blockName && (elEvents = events[elName])) {
+                for (var type in elEvents) {
+                    (evtAttrs || (evtAttrs = [])).push(" " + evtAttrPrefix + (type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type) + "=\"/" + elName + "\"");
+                }
             }
-            return evtAttrs.join('') + match;
         }
-        return match;
+        return evtAttrs ? evtAttrs.join('') + match : match;
     };
 }
 function findChildComponents(node, ownerComponent, context, childComponents) {

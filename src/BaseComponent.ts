@@ -52,31 +52,34 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	};
 }
 
-let reClassBlockElement = / class="([a-zA-Z][\-\w]*)__([a-zA-Z][\-\w]*)/g;
+let reClassBlockElement = / class="([a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b(?: [a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b)*)/g;
 
 function createClassBlockElementReplacer(
 	blockName: string,
 	events: IComponentEvents,
 	evtAttrPrefix: string
-): (match: string, elBlockName: string, elName: string) => string {
-	return (match: string, elBlockName: string, elName: string): string => {
-		let elEvents: { [eventName: string]: TEventHandler };
+) {
+	return (match: string, classNames: string): string => {
+		let cls = classNames.split(' ');
+		let evtAttrs: Array<string> | undefined;
 
-		if (elBlockName == blockName && (elEvents = events[elName])) {
-			let evtAttrs = [];
+		for (let cl of cls) {
+			let cll = cl.split('__');
+			let elName = cll[1];
+			let elEvents: { [eventName: string]: TEventHandler };
 
-			for (let type in elEvents) {
-				evtAttrs.push(
-					` ${evtAttrPrefix}${
-						type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type
-					}="/${elName}"`
-				);
+			if (cll[0] == blockName && (elEvents = events[elName])) {
+				for (let type in elEvents) {
+					(evtAttrs || (evtAttrs = [])).push(
+						` ${evtAttrPrefix}${
+							type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type
+						}="/${elName}"`
+					);
+				}
 			}
-
-			return evtAttrs.join('') + match;
 		}
 
-		return match;
+		return evtAttrs ? evtAttrs.join('') + match : match;
 	};
 }
 
