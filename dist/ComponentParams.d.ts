@@ -1,11 +1,11 @@
 import { BaseComponent } from './BaseComponent';
-export declare type TComponentParamConfig = Function | {
+export interface IComponentParamConfig {
     property?: string;
     type?: Function;
     default?: any;
     required?: boolean;
     readonly?: boolean;
-};
+}
 export declare let ComponentParams: {
     init(component: BaseComponent): void;
 };

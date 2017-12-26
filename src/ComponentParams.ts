@@ -4,19 +4,21 @@ import { Cell, EventEmitter } from 'cellx';
 import { BaseComponent } from './BaseComponent';
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 
-export type TComponentParamConfig =
-	| Function
-	| {
-			property?: string;
-			type?: Function;
-			default?: any;
-			required?: boolean;
-			readonly?: boolean;
-		};
+export interface IComponentParamConfig {
+	property?: string;
+	type?: Function;
+	default?: any;
+	required?: boolean;
+	readonly?: boolean;
+}
 
 let KEY_IS_COMPONENT_PARAMS_INITED = Symbol('Rionite.isComponentParamsInited');
 
-function initParam(component: BaseComponent, config: TComponentParamConfig | null, name: string) {
+function initParam(
+	component: BaseComponent,
+	config: IComponentParamConfig | Function | null,
+	name: string
+) {
 	if (config == null) {
 		return;
 	}
@@ -32,7 +34,6 @@ function initParam(component: BaseComponent, config: TComponentParamConfig | nul
 		((config as any).type !== undefined || (config as any).default !== undefined);
 
 	propertyName = (isObject && (config as any).property) || name;
-
 	defaultValue = (component as any)[propertyName];
 
 	if (defaultValue === undefined) {

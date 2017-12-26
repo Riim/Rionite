@@ -4,23 +4,23 @@ import { AttributeBindingCell } from './bindContent';
 import { bindingToJSExpression } from './bindingToJSExpression';
 import { componentParamValueMap } from './componentParamValueMap';
 import {
-	ContentTextFragmentNodeType,
-	IContentTextFragmentBinding,
-	IContentTextFragmentTextNode,
-	TContentTextFragment
-	} from './ContentTextFragmentParser';
+	ContentNodeValueNodeType,
+	IContentNodeValueBinding,
+	IContentNodeValueText,
+	TContentNodeValue
+	} from './ContentNodeValueParser';
 import { formatters } from './lib/formatters';
 
 let valueMapKeyCounter = 0;
 
 let cache = Object.create(null);
 
-export function compileContentTextFragment(
-	contentTextFragment: TContentTextFragment,
-	contentTextFragmentString: string,
+export function compileContentNodeValue(
+	contentNodeValue: TContentNodeValue,
+	contentNodeValueString: string,
 	useValueMap: boolean
 ): TCellPull<any> {
-	let cacheKey = contentTextFragmentString + (useValueMap ? ',' : '.');
+	let cacheKey = contentNodeValueString + (useValueMap ? ',' : '.');
 
 	if (cache[cacheKey]) {
 		return cache[cacheKey];
@@ -28,23 +28,21 @@ export function compileContentTextFragment(
 
 	let inner: (formatters: { [name: string]: Function }) => any;
 
-	if (contentTextFragment.length == 1) {
+	if (contentNodeValue.length == 1) {
 		inner = Function(
 			'formatters',
 			`var temp; return ${
-				contentTextFragment[0].nodeType == ContentTextFragmentNodeType.TEXT
-					? `'${escapeString(
-							(contentTextFragment[0] as IContentTextFragmentTextNode).value
-						)}'`
-					: bindingToJSExpression(contentTextFragment[0] as IContentTextFragmentBinding)
+				contentNodeValue[0].nodeType == ContentNodeValueNodeType.TEXT
+					? `'${escapeString((contentNodeValue[0] as IContentNodeValueText).value)}'`
+					: bindingToJSExpression(contentNodeValue[0] as IContentNodeValueBinding)
 			};`
 		) as any;
 	} else {
 		let jsExpr: Array<string> = [];
 
-		for (let node of contentTextFragment) {
+		for (let node of contentNodeValue) {
 			jsExpr.push(
-				node.nodeType == ContentTextFragmentNodeType.TEXT
+				node.nodeType == ContentNodeValueNodeType.TEXT
 					? `'${escapeString(node.value)}'`
 					: bindingToJSExpression(node)
 			);

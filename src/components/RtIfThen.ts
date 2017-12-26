@@ -98,11 +98,11 @@ export class RtIfThen extends BaseComponent {
 					i += templates[i].content.querySelectorAll('template').length + 1;
 				}
 			}
-			let [bindings, childComponents] = bindContent(
+			let [bindings, backBindings, childComponents] = bindContent(
 				content,
 				this.ownerComponent,
 				this.$context!,
-				{ 0: null, 1: null } as any
+				{ 0: null, 1: null, 2: null } as any
 			);
 
 			this._nodes = slice.call(content.childNodes);
@@ -114,6 +114,13 @@ export class RtIfThen extends BaseComponent {
 
 			if (childComponents) {
 				attachChildComponentElements(childComponents);
+			}
+
+			if (backBindings) {
+				for (let i = backBindings.length; i; ) {
+					let backBinding = backBindings[--i];
+					backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+				}
 			}
 		} else {
 			let nodes = this._nodes;

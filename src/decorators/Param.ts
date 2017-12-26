@@ -1,7 +1,7 @@
 import { lowerCaseFirstWord } from '@riim/lower-case-first-word';
 import { Set } from '@riim/map-set-polyfill';
 import { BaseComponent } from '../BaseComponent';
-import { TComponentParamConfig } from '../ComponentParams';
+import { IComponentParamConfig } from '../ComponentParams';
 
 let types = new Set([Boolean, Number, String, Object]);
 
@@ -12,17 +12,17 @@ export function Param(
 ): void;
 export function Param(
 	name?: string,
-	config?: TComponentParamConfig
+	config?: IComponentParamConfig | Function
 ): (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor) => void;
 export function Param(
-	config?: TComponentParamConfig
+	config?: IComponentParamConfig | Function
 ): (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor) => void;
 export function Param(
-	target?: Object | string | TComponentParamConfig,
-	propertyName?: string | TComponentParamConfig,
+	target?: Object | string | IComponentParamConfig | Function,
+	propertyName?: string | IComponentParamConfig | Function,
 	propertyDesc?: PropertyDescriptor,
 	name?: string,
-	config?: TComponentParamConfig
+	config?: IComponentParamConfig | Function
 ): any {
 	if (typeof propertyName != 'string') {
 		if (target && typeof target != 'string') {

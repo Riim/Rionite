@@ -1,2 +1,2 @@
-import { IContentTextFragmentBinding } from './ContentTextFragmentParser';
-export declare function bindingToJSExpression(binding: IContentTextFragmentBinding): string;
+import { IContentNodeValueBinding } from './ContentNodeValueParser';
+export declare function bindingToJSExpression(binding: IContentNodeValueBinding): string;

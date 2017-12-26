@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.32.10",
+  "version": "0.32.11",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -19,7 +19,7 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "ajv": "^5.5.1",
+    "ajv": "^5.5.2",
     "awesome-typescript-loader": "^3.4.1",
     "benchmark": "^2.1.4",
     "document-register-element": "^1.7.0",

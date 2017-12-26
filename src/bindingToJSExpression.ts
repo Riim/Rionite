@@ -1,20 +1,18 @@
-import { IContentTextFragmentBinding, IContentTextFragmentBindingFormatter } from './ContentTextFragmentParser';
+import { IContentNodeValueBinding, IContentNodeValueBindingFormatter } from './ContentNodeValueParser';
 
 let cache: { [key: string]: string } = Object.create(null);
 
-function formattersReducer(
-	jsExpr: string,
-	formatter: IContentTextFragmentBindingFormatter
-): string {
+function formattersReducer(jsExpr: string, formatter: IContentNodeValueBindingFormatter): string {
 	let args = formatter.arguments;
 
-	return `(this.${formatter.name} || formatters.${formatter.name}).call(this.$component, ${jsExpr}${args &&
-	args.value.length
-		? ', ' + args.value.join(', ')
-		: ''})`;
+	return `(this.${formatter.name} || formatters.${
+		formatter.name
+	}).call(this.$component, ${jsExpr}${
+		args && args.value.length ? ', ' + args.value.join(', ') : ''
+	})`;
 }
 
-export function bindingToJSExpression(binding: IContentTextFragmentBinding): string {
+export function bindingToJSExpression(binding: IContentNodeValueBinding): string {
 	let bindingRaw = binding.raw;
 
 	if (cache[bindingRaw]) {
@@ -40,9 +38,9 @@ export function bindingToJSExpression(binding: IContentTextFragmentBinding): str
 			jsExprArr[--index] = ` && (temp = temp['${keys[index + 1]}'])`;
 		}
 
-		let jsExpr = `(temp = this['${keys[0]}'])${jsExprArr.join('')} && temp['${keys[
-			keyCount - 1
-		]}']`;
+		let jsExpr = `(temp = this['${keys[0]}'])${jsExprArr.join('')} && temp['${
+			keys[keyCount - 1]
+		}']`;
 
 		return (cache[bindingRaw] = formatters
 			? formatters.reduce(formattersReducer, jsExpr)

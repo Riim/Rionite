@@ -49,6 +49,7 @@ export class RtSlot extends BaseComponent {
 			let cloneContent = this.paramCloneContent;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
+			let backBindings: Array<[BaseComponent, string, (evt: any) => void]> | null | undefined;
 			let childComponents: Array<BaseComponent> | null | undefined;
 
 			if (!cloneContent || ownerComponentContent.firstChild) {
@@ -138,13 +139,13 @@ export class RtSlot extends BaseComponent {
 						).set(key, el);
 					}
 				} else {
-					content = ownerComponentContent.cloneNode(true) as DocumentFragment;
+					content = ownerComponentContent.cloneNode(true) as any;
 				}
 			}
 
 			if (bindings === undefined) {
 				if (content || el.firstChild) {
-					[this._bindings, childComponents] = content
+					[this._bindings, backBindings, childComponents] = content
 						? bindContent(
 								content,
 								contentOwnerComponent,
@@ -155,7 +156,7 @@ export class RtSlot extends BaseComponent {
 											this
 										)
 									: ownerComponent.$context,
-								{ 0: null, 1: null } as any
+								{ 0: null, 1: null, 2: null } as any
 							)
 						: bindContent(
 								el,
@@ -163,7 +164,7 @@ export class RtSlot extends BaseComponent {
 								this.paramGetContext
 									? this.paramGetContext.call(ownerComponent, this.$context, this)
 									: this.$context,
-								{ 0: null, 1: null } as any
+								{ 0: null, 1: null, 2: null } as any
 							);
 
 					this._childComponents = childComponents;
@@ -173,7 +174,7 @@ export class RtSlot extends BaseComponent {
 				}
 			} else {
 				this._bindings = bindings;
-				this._childComponents = childComponents as Array<BaseComponent> | null;
+				this._childComponents = childComponents as any;
 
 				this._unfreezeBindings();
 			}
@@ -192,6 +193,13 @@ export class RtSlot extends BaseComponent {
 
 			if (childComponents) {
 				attachChildComponentElements(childComponents);
+			}
+
+			if (backBindings) {
+				for (let i = backBindings.length; i; ) {
+					let backBinding = backBindings[--i];
+					backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+				}
 			}
 
 			this.isReady = true;

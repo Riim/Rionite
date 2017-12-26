@@ -234,7 +234,7 @@ export class RtRepeat extends BaseComponent {
 			}
 		}
 		let context = this.$context!;
-		let [bindings, childComponents] = bindContent(
+		let [bindings, backBindings, childComponents] = bindContent(
 			content,
 			this.ownerComponent,
 			Object.create(context, {
@@ -275,7 +275,7 @@ export class RtRepeat extends BaseComponent {
 					}
 				}
 			}),
-			{ 0: null, 1: null } as any
+			{ 0: null, 1: null, 2: null } as any
 		);
 
 		let newItem = {
@@ -299,6 +299,13 @@ export class RtRepeat extends BaseComponent {
 
 		if (childComponents) {
 			attachChildComponentElements(childComponents);
+		}
+
+		if (backBindings) {
+			for (let i = backBindings.length; i; ) {
+				let backBinding = backBindings[--i];
+				backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+			}
 		}
 
 		return true;

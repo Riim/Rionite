@@ -2,7 +2,7 @@ import { keypathPattern } from './lib/keypathPattern';
 import { keypathToJSExpression } from './lib/keypathToJSExpression';
 import { namePattern } from './lib/namePattern';
 
-export enum ContentTextFragmentNodeType {
+export enum ContentNodeValueNodeType {
 	TEXT = 1,
 	BINDING,
 	BINDING_KEYPATH,
@@ -10,39 +10,40 @@ export enum ContentTextFragmentNodeType {
 	BINDING_FORMATTER_ARGUMENTS
 }
 
-export interface IContentTextFragmentNode {
-	nodeType: ContentTextFragmentNodeType;
+export interface IContentNodeValueNode {
+	nodeType: ContentNodeValueNodeType;
 }
 
-export interface IContentTextFragmentTextNode extends IContentTextFragmentNode {
-	nodeType: ContentTextFragmentNodeType.TEXT;
+export interface IContentNodeValueText extends IContentNodeValueNode {
+	nodeType: ContentNodeValueNodeType.TEXT;
 	value: string;
 }
 
-export interface IContentTextFragmentBindingFormatterArguments extends IContentTextFragmentNode {
-	nodeType: ContentTextFragmentNodeType.BINDING_FORMATTER_ARGUMENTS;
+export interface IContentNodeValueBindingFormatterArguments extends IContentNodeValueNode {
+	nodeType: ContentNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS;
 	value: Array<string>;
 }
 
-export interface IContentTextFragmentBindingFormatter extends IContentTextFragmentNode {
-	nodeType: ContentTextFragmentNodeType.BINDING_FORMATTER;
+export interface IContentNodeValueBindingFormatter extends IContentNodeValueNode {
+	nodeType: ContentNodeValueNodeType.BINDING_FORMATTER;
 	name: string;
-	arguments: IContentTextFragmentBindingFormatterArguments | null;
+	arguments: IContentNodeValueBindingFormatterArguments | null;
 }
 
-export interface IContentTextFragmentBinding extends IContentTextFragmentNode {
-	nodeType: ContentTextFragmentNodeType.BINDING;
+export interface IContentNodeValueBinding extends IContentNodeValueNode {
+	nodeType: ContentNodeValueNodeType.BINDING;
+	prefix: string | null;
 	keypath: string | null;
 	value: string | null;
-	formatters: Array<IContentTextFragmentBindingFormatter> | null;
+	formatters: Array<IContentNodeValueBindingFormatter> | null;
 	raw: string;
 }
 
-export type TContentTextFragment = Array<
-	IContentTextFragmentTextNode | IContentTextFragmentBinding
->;
+export type TContentNodeValue = Array<IContentNodeValueText | IContentNodeValueBinding>;
 
 export type TNotValueAndNotKeypath = Object;
+
+let reWhitespace = /\s/;
 
 let reNameOrNothing = RegExp(namePattern + '|', 'g');
 let reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
@@ -50,32 +51,32 @@ let reBooleanOrNothing = /false|true|/g;
 let reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 let reVacuumOrNothing = /null|undefined|void 0|/g;
 
-export class ContentTextFragmentParser {
-	contentTextFragment: string;
+export class ContentNodeValueParser {
+	contentNodeValue: string;
 	at: number;
 	chr: string;
-	result: TContentTextFragment;
+	result: TContentNodeValue;
 
-	constructor(contentTextFragment: string) {
-		this.contentTextFragment = contentTextFragment;
+	constructor(contentNodeValue: string) {
+		this.contentNodeValue = contentNodeValue;
 	}
 
-	parse(): TContentTextFragment {
-		let contentTextFragment = this.contentTextFragment;
+	parse(): TContentNodeValue {
+		let contentNodeValue = this.contentNodeValue;
 
-		if (!contentTextFragment) {
+		if (!contentNodeValue) {
 			return [];
 		}
 
 		this.at = 0;
 
-		let result: TContentTextFragment = (this.result = []);
+		let result: TContentNodeValue = (this.result = []);
 
-		for (let index: number; (index = contentTextFragment.indexOf('{', this.at)) != -1; ) {
-			this._pushText(contentTextFragment.slice(this.at, index));
+		for (let index: number; (index = contentNodeValue.indexOf('{', this.at)) != -1; ) {
+			this._pushText(contentNodeValue.slice(this.at, index));
 
 			this.at = index;
-			this.chr = contentTextFragment.charAt(index);
+			this.chr = contentNodeValue.charAt(index);
 
 			let binding = this._readBinding();
 
@@ -87,7 +88,7 @@ export class ContentTextFragmentParser {
 			}
 		}
 
-		this._pushText(contentTextFragment.slice(this.at));
+		this._pushText(contentNodeValue.slice(this.at));
 
 		return result;
 	}
@@ -97,35 +98,39 @@ export class ContentTextFragmentParser {
 			let result = this.result;
 			let resultLen = result.length;
 
-			if (resultLen && result[resultLen - 1].nodeType == ContentTextFragmentNodeType.TEXT) {
-				(result[resultLen - 1] as IContentTextFragmentTextNode).value += value;
+			if (resultLen && result[resultLen - 1].nodeType == ContentNodeValueNodeType.TEXT) {
+				(result[resultLen - 1] as IContentNodeValueText).value += value;
 			} else {
 				result.push({
-					nodeType: ContentTextFragmentNodeType.TEXT,
+					nodeType: ContentNodeValueNodeType.TEXT,
 					value
 				});
 			}
 		}
 	}
 
-	_readBinding(): IContentTextFragmentBinding | null {
+	_readBinding(): IContentNodeValueBinding | null {
 		let at = this.at;
 
 		this._next('{');
 		this._skipWhitespaces();
 
+		let prefix = this._readPrefix();
+
+		this._skipWhitespaces();
+
 		let keypath = this._readKeypath();
 		let value: string | null | undefined;
 
-		if (!keypath) {
+		if (!prefix && !keypath) {
 			value = this._readValue();
 		}
 
 		if (keypath || value) {
-			let formatters: Array<IContentTextFragmentBindingFormatter> | undefined;
+			let formatters: Array<IContentNodeValueBindingFormatter> | undefined;
 
 			for (
-				let formatter: IContentTextFragmentBindingFormatter | null;
+				let formatter: IContentNodeValueBindingFormatter | null;
 				this._skipWhitespaces() == '|' && (formatter = this._readFormatter());
 
 			) {
@@ -136,22 +141,44 @@ export class ContentTextFragmentParser {
 				this._next();
 
 				return {
-					nodeType: ContentTextFragmentNodeType.BINDING,
+					nodeType: ContentNodeValueNodeType.BINDING,
+					prefix,
 					keypath,
 					value: value || null,
 					formatters: formatters || null,
-					raw: this.contentTextFragment.slice(at, this.at)
+					raw: this.contentNodeValue.slice(at, this.at)
 				};
 			}
 		}
 
 		this.at = at;
-		this.chr = this.contentTextFragment.charAt(at);
+		this.chr = this.contentNodeValue.charAt(at);
 
 		return null;
 	}
 
-	_readFormatter(): IContentTextFragmentBindingFormatter | null {
+	_readPrefix(): string | null {
+		if (this.chr == '<') {
+			let at = this.at;
+
+			if (this.contentNodeValue.charAt(at + 1) == '-') {
+				if (this.contentNodeValue.charAt(at + 2) == '>') {
+					this.chr = this.contentNodeValue.charAt((this.at = at + 3));
+					return '<->';
+				}
+
+				this.chr = this.contentNodeValue.charAt((this.at = at + 2));
+				return '<-';
+			}
+		} else if (this.chr == '-' && this.contentNodeValue.charAt(this.at + 1) == '>') {
+			this.chr = this.contentNodeValue.charAt((this.at += 2));
+			return '->';
+		}
+
+		return null;
+	}
+
+	_readFormatter(): IContentNodeValueBindingFormatter | null {
 		let at = this.at;
 
 		this._next('|');
@@ -163,19 +190,19 @@ export class ContentTextFragmentParser {
 			let args = this.chr == '(' ? this._readFormatterArguments() : null;
 
 			return {
-				nodeType: ContentTextFragmentNodeType.BINDING_FORMATTER,
+				nodeType: ContentNodeValueNodeType.BINDING_FORMATTER,
 				name,
 				arguments: args
 			};
 		}
 
 		this.at = at;
-		this.chr = this.contentTextFragment.charAt(at);
+		this.chr = this.contentNodeValue.charAt(at);
 
 		return null;
 	}
 
-	_readFormatterArguments(): IContentTextFragmentBindingFormatterArguments | null {
+	_readFormatterArguments(): IContentNodeValueBindingFormatterArguments | null {
 		let at = this.at;
 
 		this._next('(');
@@ -201,7 +228,7 @@ export class ContentTextFragmentParser {
 				}
 
 				this.at = at;
-				this.chr = this.contentTextFragment.charAt(at);
+				this.chr = this.contentNodeValue.charAt(at);
 
 				return null;
 			}
@@ -210,7 +237,7 @@ export class ContentTextFragmentParser {
 		this._next();
 
 		return {
-			nodeType: ContentTextFragmentNodeType.BINDING_FORMATTER_ARGUMENTS,
+			nodeType: ContentNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS,
 			value: args
 		};
 	}
@@ -272,7 +299,7 @@ export class ContentTextFragmentParser {
 			}
 
 			this.at = at;
-			this.chr = this.contentTextFragment.charAt(at);
+			this.chr = this.contentNodeValue.charAt(at);
 
 			return null;
 		}
@@ -304,7 +331,7 @@ export class ContentTextFragmentParser {
 					arr += valueOrKeypath;
 				} else {
 					this.at = at;
-					this.chr = this.contentTextFragment.charAt(at);
+					this.chr = this.contentNodeValue.charAt(at);
 
 					return null;
 				}
@@ -318,10 +345,10 @@ export class ContentTextFragmentParser {
 
 	_readBoolean(): string | null {
 		reBooleanOrNothing.lastIndex = this.at;
-		let bool = reBooleanOrNothing.exec(this.contentTextFragment)![0];
+		let bool = reBooleanOrNothing.exec(this.contentNodeValue)![0];
 
 		if (bool) {
-			this.chr = this.contentTextFragment.charAt((this.at += bool.length));
+			this.chr = this.contentNodeValue.charAt((this.at = reBooleanOrNothing.lastIndex));
 			return bool;
 		}
 
@@ -330,10 +357,10 @@ export class ContentTextFragmentParser {
 
 	_readNumber(): string | null {
 		reNumberOrNothing.lastIndex = this.at;
-		let num = reNumberOrNothing.exec(this.contentTextFragment)![0];
+		let num = reNumberOrNothing.exec(this.contentNodeValue)![0];
 
 		if (num) {
-			this.chr = this.contentTextFragment.charAt((this.at += num.length));
+			this.chr = this.contentNodeValue.charAt((this.at = reNumberOrNothing.lastIndex));
 			return num;
 		}
 
@@ -348,7 +375,7 @@ export class ContentTextFragmentParser {
 				name: 'SyntaxError',
 				message: `Expected "'" instead of "${this.chr}"`,
 				at: this.at,
-				contentTextFragment: this.contentTextFragment
+				contentNodeValue: this.contentNodeValue
 			};
 		}
 
@@ -373,17 +400,17 @@ export class ContentTextFragmentParser {
 		}
 
 		this.at = at;
-		this.chr = this.contentTextFragment.charAt(at);
+		this.chr = this.contentNodeValue.charAt(at);
 
 		return null;
 	}
 
 	_readVacuum(): string | null {
 		reVacuumOrNothing.lastIndex = this.at;
-		let vacuum = reVacuumOrNothing.exec(this.contentTextFragment)![0];
+		let vacuum = reVacuumOrNothing.exec(this.contentNodeValue)![0];
 
 		if (vacuum) {
-			this.chr = this.contentTextFragment.charAt((this.at += vacuum.length));
+			this.chr = this.contentNodeValue.charAt((this.at = reVacuumOrNothing.lastIndex));
 			return vacuum;
 		}
 
@@ -392,10 +419,10 @@ export class ContentTextFragmentParser {
 
 	_readKeypath(toJSExpression?: boolean): string | null {
 		reKeypathOrNothing.lastIndex = this.at;
-		let keypath = reKeypathOrNothing.exec(this.contentTextFragment)![0];
+		let keypath = reKeypathOrNothing.exec(this.contentNodeValue)![0];
 
 		if (keypath) {
-			this.chr = this.contentTextFragment.charAt((this.at += keypath.length));
+			this.chr = this.contentNodeValue.charAt((this.at = reKeypathOrNothing.lastIndex));
 			return toJSExpression ? keypathToJSExpression(keypath) : keypath;
 		}
 
@@ -404,10 +431,10 @@ export class ContentTextFragmentParser {
 
 	_readName(): string | null {
 		reNameOrNothing.lastIndex = this.at;
-		let name = reNameOrNothing.exec(this.contentTextFragment)![0];
+		let name = reNameOrNothing.exec(this.contentNodeValue)![0];
 
 		if (name) {
-			this.chr = this.contentTextFragment.charAt((this.at += name.length));
+			this.chr = this.contentNodeValue.charAt((this.at = reNameOrNothing.lastIndex));
 			return name;
 		}
 
@@ -417,7 +444,7 @@ export class ContentTextFragmentParser {
 	_skipWhitespaces(): string {
 		let chr = this.chr;
 
-		while (chr && chr <= ' ') {
+		while (chr && reWhitespace.test(chr)) {
 			chr = this._next();
 		}
 
@@ -430,10 +457,10 @@ export class ContentTextFragmentParser {
 				name: 'SyntaxError',
 				message: `Expected "${current}" instead of "${this.chr}"`,
 				at: this.at,
-				contentTextFragment: this.contentTextFragment
+				contentNodeValue: this.contentNodeValue
 			};
 		}
 
-		return (this.chr = this.contentTextFragment.charAt(++this.at));
+		return (this.chr = this.contentNodeValue.charAt(++this.at));
 	}
 }

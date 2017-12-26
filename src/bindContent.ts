@@ -5,12 +5,15 @@ import {
 	Cell,
 	ICellOptions,
 	IEvent,
-	TCellPull
+	TCellPull,
+	TListener
 	} from 'cellx';
 import { BaseComponent, IPossiblyComponentElement } from './BaseComponent';
-import { compileContentTextFragment } from './compileContentTextFragment';
+import { compileContentNodeValue } from './compileContentNodeValue';
 import { IFreezableCell } from './componentBinding';
-import { ContentTextFragmentNodeType, ContentTextFragmentParser } from './ContentTextFragmentParser';
+import { IComponentParamConfig } from './ComponentParams';
+import { ContentNodeValueNodeType, ContentNodeValueParser, IContentNodeValueBinding } from './ContentNodeValueParser';
+import { compileKeypath } from './lib/compileKeypath';
 
 export class AttributeBindingCell extends Cell {
 	prevValue: any;
@@ -46,49 +49,70 @@ export function bindContent(
 	node: Element | DocumentFragment,
 	ownerComponent: BaseComponent,
 	context: object,
-	result: [Array<IFreezableCell> | null, Array<BaseComponent> | null]
-): [Array<IFreezableCell> | null, Array<BaseComponent> | null] {
+	result: [
+		Array<IFreezableCell> | null,
+		Array<[BaseComponent, string, (evt: any) => void]> | null,
+		Array<BaseComponent> | null
+	]
+) {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		switch (child.nodeType) {
 			case Node.ELEMENT_NODE: {
 				let childComponent = (child as IPossiblyComponentElement).$component;
-				let $specifiedParams;
+				let params: { [name: string]: any } | null | undefined;
+				let $specifiedParams: Set<string> | undefined;
 
 				if (childComponent) {
-					$specifiedParams = new Set<string>();
+					params = (childComponent.constructor as typeof BaseComponent).params;
+					$specifiedParams = new Set();
 				}
 
 				let attrs = child.attributes;
 
 				for (let i = attrs.length; i; ) {
 					let attr = attrs.item(--i);
+					let name = attr.name;
 
-					if ($specifiedParams) {
-						$specifiedParams.add(camelize(attr.name, true));
+					if (name.charAt(0) == '_') {
+						name = name.slice(1);
+					}
+
+					let camelizedName: string | undefined;
+
+					if (params) {
+						camelizedName = camelize(name, true);
+
+						if (camelizedName in params) {
+							$specifiedParams!.add(camelizedName);
+						}
 					}
 
 					let value = attr.value;
 
-					if (value.indexOf('{') != -1) {
-						let contentTextFragment = new ContentTextFragmentParser(value).parse();
+					if (value.indexOf('{') == -1) {
+						continue;
+					}
 
-						if (
-							contentTextFragment.length > 1 ||
-							contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING
-						) {
-							let name = attr.name;
+					let contentNodeValue = new ContentNodeValueParser(value).parse();
+					let contentNodeValueLength = contentNodeValue.length;
 
-							if (name.charAt(0) == '_') {
-								name = name.slice(1);
-							}
+					if (
+						contentNodeValueLength > 1 ||
+						contentNodeValue[0].nodeType == ContentNodeValueNodeType.BINDING
+					) {
+						let prefix =
+							contentNodeValueLength == 1
+								? (contentNodeValue[0] as IContentNodeValueBinding).prefix
+								: null;
 
+						if (prefix !== '->') {
 							let cell = new AttributeBindingCell(
-								compileContentTextFragment(
-									contentTextFragment,
+								compileContentNodeValue(
+									contentNodeValue,
 									value,
-									contentTextFragment.length == 1
+									contentNodeValueLength == 1
 								),
-								child as Element,
+								child as any,
 								name,
 								{
 									context,
@@ -96,9 +120,56 @@ export function bindContent(
 								}
 							);
 
-							setAttribute(child as Element, name, cell.get());
+							setAttribute(child as any, name, cell.get());
 
-							(result[0] || (result[0] = [])).push((cell as any) as IFreezableCell);
+							(result[0] || (result[0] = [])).push(cell as any);
+						}
+
+						if (childComponent && (prefix === '->' || prefix === '<->')) {
+							let paramDesc = params && params[camelizedName || camelize(name, true)];
+
+							if (paramDesc != null) {
+								if (prefix == '->' && attr.name.charAt(0) != '_') {
+									(child as Element).removeAttribute(name);
+								}
+
+								let keypath = (contentNodeValue[0] as IContentNodeValueBinding)
+									.keypath!;
+								let keys = keypath.split('.');
+								let propertyName: string;
+								let handler: TListener;
+
+								if (keys.length == 1) {
+									propertyName = keys[0];
+
+									handler = function(evt) {
+										this.ownerComponent[propertyName] = evt.data.value;
+									};
+								} else {
+									propertyName = keys[keys.length - 1];
+									keys = keys.slice(0, -1);
+
+									let getPropertyHolder = compileKeypath(keys, keys.join('.'));
+
+									handler = function(evt) {
+										let propertyHolder = getPropertyHolder.call(
+											this.ownerComponent
+										);
+
+										if (propertyHolder) {
+											propertyHolder[propertyName] = evt.data.value;
+										}
+									};
+								}
+
+								(result[1] || (result[1] = [])).push([
+									childComponent,
+									(typeof paramDesc == 'object' &&
+										(paramDesc as IComponentParamConfig).property) ||
+										name,
+									handler
+								]);
+							}
 						}
 					}
 				}
@@ -106,9 +177,9 @@ export function bindContent(
 				if (childComponent) {
 					childComponent._ownerComponent = ownerComponent;
 					childComponent.$context = context;
-					childComponent.$specifiedParams = $specifiedParams!;
+					childComponent.$specifiedParams = $specifiedParams;
 
-					(result[1] || (result[1] = [])).push(childComponent);
+					(result[2] || (result[2] = [])).push(childComponent);
 				}
 
 				if (
@@ -133,26 +204,28 @@ export function bindContent(
 
 				let value = child.nodeValue!;
 
-				if (value.indexOf('{') != -1) {
-					let contentTextFragment = new ContentTextFragmentParser(value).parse();
+				if (value.indexOf('{') == -1) {
+					break;
+				}
 
-					if (
-						contentTextFragment.length > 1 ||
-						contentTextFragment[0].nodeType == ContentTextFragmentNodeType.BINDING
-					) {
-						let cell = new TextNodeBindingCell(
-							compileContentTextFragment(contentTextFragment, value, false),
-							child as Text,
-							{
-								context,
-								onChange: onTextNodeBindingCellChange
-							}
-						);
+				let contentNodeValue = new ContentNodeValueParser(value).parse();
 
-						child.nodeValue = cell.get();
+				if (
+					contentNodeValue.length > 1 ||
+					contentNodeValue[0].nodeType == ContentNodeValueNodeType.BINDING
+				) {
+					let cell = new TextNodeBindingCell(
+						compileContentNodeValue(contentNodeValue, value, false),
+						child as Text,
+						{
+							context,
+							onChange: onTextNodeBindingCellChange
+						}
+					);
 
-						(result[0] || (result[0] = [])).push((cell as any) as IFreezableCell);
-					}
+					child.nodeValue = cell.get();
+
+					(result[0] || (result[0] = [])).push(cell as any);
 				}
 
 				break;

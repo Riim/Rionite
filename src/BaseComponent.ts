@@ -401,9 +401,10 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 						i += templates[i].content.querySelectorAll('template').length + 1;
 					}
 				}
-				let [bindings, childComponents] = bindContent(content, this, this, {
+				let [bindings, backBindings, childComponents] = bindContent(content, this, this, {
 					0: null,
-					1: null
+					1: null,
+					2: null
 				} as any);
 
 				this._bindings = bindings;
@@ -414,6 +415,13 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 				if (childComponents) {
 					attachChildComponentElements(childComponents);
+				}
+
+				if (backBindings) {
+					for (let i = backBindings.length; i; ) {
+						let backBinding = backBindings[--i];
+						backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+					}
 				}
 			}
 
