@@ -11,6 +11,9 @@ export let formatters: { [name: string]: Function } = {
 	not(value: any): boolean {
 		return !value;
 	},
+	is(value: any): boolean {
+		return !!value;
+	},
 
 	eq(value: any, arg: any): boolean {
 		return value == arg;
@@ -60,7 +63,7 @@ export let formatters: { [name: string]: Function } = {
 		return getText(context, key, true, args);
 	},
 
-	json(value: any): string {
+	dump(value: any): string {
 		return JSON.stringify(value);
 	}
 };

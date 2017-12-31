@@ -2737,6 +2737,9 @@ exports.formatters = {
     not: function (value) {
         return !value;
     },
+    is: function (value) {
+        return !!value;
+    },
     eq: function (value, arg) {
         return value == arg;
     },
@@ -2786,7 +2789,7 @@ exports.formatters = {
         args.unshift(count);
         return gettext_1.getText(context, key, true, args);
     },
-    json: function (value) {
+    dump: function (value) {
         return JSON.stringify(value);
     }
 };
