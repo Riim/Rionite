@@ -2,7 +2,7 @@ import { hyphenize } from '@riim/hyphenize';
 import { mixin } from '@riim/mixin';
 import { pascalize } from '@riim/pascalize';
 import { Template } from 'nelm';
-import { BaseComponent, IComponentElement } from './BaseComponent';
+import { BaseComponent, IComponentElement, KEY_PARAMS } from './BaseComponent';
 import { componentConstructorMap } from './componentConstructorMap';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
@@ -50,6 +50,20 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		.constructor as typeof BaseComponent;
 
 	inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
+
+	let paramsConfig = componentConstr.params;
+
+	if (paramsConfig) {
+		for (let name in paramsConfig) {
+			(componentConstr[KEY_PARAMS] || (componentConstr[KEY_PARAMS] = Object.create(null)))[
+				name
+			] = componentConstr[KEY_PARAMS][name.toLowerCase()] = {
+				name,
+				config: paramsConfig[name]
+			};
+		}
+	}
+
 	inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
 
 	componentConstr._blockNamesString =
@@ -91,7 +105,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 	let parentElConstr =
 		(elExtends &&
 			(elementConstructorMap.get(elExtends) ||
-				(window as any)[`HTML${pascalize(elExtends)}Element`])) ||
+				window[`HTML${pascalize(elExtends)}Element`])) ||
 		HTMLElement;
 
 	let elConstr = function(self: HTMLElement | undefined): IComponentElement {
@@ -114,7 +128,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			let observedAttrs: Array<string> = [];
 
 			for (let name in paramsConfig) {
-				observedAttrs.push(hyphenize(name, true));
+				observedAttrs.push(name);
 			}
 
 			return observedAttrs;
@@ -126,10 +140,10 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 	elProto.constructor = elConstr;
 	mixin(elProto, ElementProtoMixin);
 
-	(window as any).customElements.define(
+	window.customElements.define(
 		hyphenizedElIs,
 		elConstr,
-		elExtends ? { extends: elExtends } : null
+		elExtends ? { extends: elExtends } : undefined
 	);
 
 	componentConstructorMap.set(elIs, componentConstr);

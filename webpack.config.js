@@ -41,7 +41,6 @@ module.exports = () => {
 		},
 
 		externals: [
-			'@riim/camelize',
 			'@riim/clear-node',
 			'@riim/defer',
 			'@riim/di',

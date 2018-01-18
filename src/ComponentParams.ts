@@ -1,4 +1,3 @@
-import { hyphenize } from '@riim/hyphenize';
 import { Symbol } from '@riim/symbol-polyfill';
 import { Cell, EventEmitter } from 'cellx';
 import { BaseComponent } from './BaseComponent';
@@ -31,28 +30,29 @@ function initParam(
 
 	let isObject =
 		type == 'object' &&
-		((config as any).type !== undefined || (config as any).default !== undefined);
+		((config as IComponentParamConfig).type !== undefined ||
+			(config as IComponentParamConfig).default !== undefined);
 
-	propertyName = (isObject && (config as any).property) || name;
-	defaultValue = (component as any)[propertyName];
+	propertyName = (isObject && (config as IComponentParamConfig).property) || name;
+	defaultValue = component[propertyName];
 
 	if (defaultValue === undefined) {
 		if (isObject) {
-			defaultValue = (config as any).default;
+			defaultValue = (config as IComponentParamConfig).default;
 		} else if (type != 'function') {
 			defaultValue = config;
 		}
 	}
 
-	type = isObject ? (config as any).type : config;
+	type = isObject ? (config as IComponentParamConfig).type : config;
 
 	if (defaultValue !== undefined && type !== eval) {
 		type = typeof defaultValue;
 	}
 
 	if (isObject) {
-		required = (config as any).required;
-		readonly = (config as any).readonly;
+		required = (config as IComponentParamConfig).required || false;
+		readonly = (config as IComponentParamConfig).readonly || false;
 	} else {
 		required = readonly = false;
 	}
@@ -64,8 +64,7 @@ function initParam(
 	}
 
 	let el = component.element;
-	let hyphenizedName = hyphenize(name, true);
-	let rawValue = el.getAttribute(hyphenizedName);
+	let rawValue = el.getAttribute(name);
 
 	if (rawValue === null) {
 		if (required) {
@@ -73,7 +72,7 @@ function initParam(
 		}
 
 		if (defaultValue != null && defaultValue !== false) {
-			el.setAttribute(hyphenizedName, typeSerializer.write(defaultValue)!);
+			el.setAttribute(name, typeSerializer.write(defaultValue)!);
 		}
 	}
 
@@ -98,7 +97,7 @@ function initParam(
 	} else {
 		let valueCell: Cell | undefined;
 
-		(component as any)['__setParam_' + hyphenizedName] = (rawValue: string | null) => {
+		component['__setParam_' + name] = (rawValue: string | null) => {
 			let val = typeSerializer!.read(rawValue, defaultValue);
 
 			if (valueCell) {
@@ -141,9 +140,9 @@ function initParam(
 				let rawValue = typeSerializer!.write(val, defaultValue);
 
 				if (rawValue === null) {
-					el.removeAttribute(hyphenizedName);
+					el.removeAttribute(name);
 				} else {
-					el.setAttribute(hyphenizedName, rawValue);
+					el.setAttribute(name, rawValue);
 				}
 
 				if (valueCell) {
@@ -160,11 +159,11 @@ function initParam(
 
 export let ComponentParams = {
 	init(component: BaseComponent) {
-		if ((component as any)[KEY_IS_COMPONENT_PARAMS_INITED]) {
+		if (component[KEY_IS_COMPONENT_PARAMS_INITED]) {
 			return;
 		}
 
-		(component as any)[KEY_IS_COMPONENT_PARAMS_INITED] = true;
+		component[KEY_IS_COMPONENT_PARAMS_INITED] = true;
 
 		let config = (component.constructor as typeof BaseComponent).params;
 

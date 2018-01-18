@@ -25,7 +25,7 @@ export interface IFreezableCell extends Cell {
 function freezeBinding(binding: IFreezableCell) {
 	let changeEvent = binding._events.get('change') as IRegisteredEvent;
 
-	(binding as any)._events.delete('change');
+	binding._events.delete('change');
 
 	binding._frozenState = {
 		changeEventListener: changeEvent.listener,

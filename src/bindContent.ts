@@ -1,4 +1,3 @@
-import { camelize } from '@riim/camelize';
 import { Set } from '@riim/map-set-polyfill';
 import { setAttribute } from '@riim/set-attribute';
 import {
@@ -8,7 +7,7 @@ import {
 	TCellPull,
 	TListener
 	} from 'cellx';
-import { BaseComponent, IPossiblyComponentElement } from './BaseComponent';
+import { BaseComponent, IPossiblyComponentElement, KEY_PARAMS } from './BaseComponent';
 import { compileContentNodeValue } from './compileContentNodeValue';
 import { IFreezableCell } from './componentBinding';
 import { IComponentParamConfig } from './ComponentParams';
@@ -59,11 +58,11 @@ export function bindContent(
 		switch (child.nodeType) {
 			case Node.ELEMENT_NODE: {
 				let childComponent = (child as IPossiblyComponentElement).$component;
-				let params: { [name: string]: any } | null | undefined;
+				let params: { [name: string]: { name: string; config: any } } | undefined;
 				let $specifiedParams: Set<string> | undefined;
 
 				if (childComponent) {
-					params = (childComponent.constructor as typeof BaseComponent).params;
+					params = childComponent.constructor[KEY_PARAMS];
 					$specifiedParams = new Set();
 				}
 
@@ -77,14 +76,8 @@ export function bindContent(
 						name = name.slice(1);
 					}
 
-					let camelizedName: string | undefined;
-
-					if (params) {
-						camelizedName = camelize(name, true);
-
-						if (camelizedName in params) {
-							$specifiedParams!.add(camelizedName);
-						}
+					if (params && params[name]) {
+						$specifiedParams!.add(params[name].name);
 					}
 
 					let value = attr.value;
@@ -126,9 +119,9 @@ export function bindContent(
 						}
 
 						if (childComponent && (prefix === '->' || prefix === '<->')) {
-							let paramDesc = params && params[camelizedName || camelize(name, true)];
+							let paramConfig = params && params[name].config;
 
-							if (paramDesc != null) {
+							if (paramConfig != null) {
 								if (prefix == '->' && attr.name.charAt(0) != '_') {
 									(child as Element).removeAttribute(name);
 								}
@@ -164,8 +157,8 @@ export function bindContent(
 
 								(result[1] || (result[1] = [])).push([
 									childComponent,
-									(typeof paramDesc == 'object' &&
-										(paramDesc as IComponentParamConfig).property) ||
+									(typeof paramConfig == 'object' &&
+										(paramConfig as IComponentParamConfig).property) ||
 										name,
 									handler
 								]);

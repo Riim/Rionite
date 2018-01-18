@@ -51,7 +51,7 @@ export function Param(
 
 	let constr = target!.constructor as typeof BaseComponent;
 
-	(constr.hasOwnProperty('params') ? constr.params! : (constr.params = {}))[
+	((constr.hasOwnProperty('params') && constr.params) || (constr.params = {}))[
 		(name ||
 			(propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
 				? propertyName

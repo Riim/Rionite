@@ -1,4 +1,4 @@
-import { IPossiblyComponentElement, TEventHandler } from './BaseComponent';
+import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 
 export function handleDOMEvent(evt: Event) {
 	let el = evt.target as Element;
@@ -20,7 +20,7 @@ export function handleDOMEvent(evt: Event) {
 				let handler: TEventHandler | undefined;
 
 				if (attrValue.charAt(0) == '/') {
-					let events = (component.constructor as any).domEvents;
+					let events: any = (component.constructor as typeof BaseComponent).domEvents;
 
 					if (events) {
 						events = events[attrValue.slice(1)];
@@ -30,7 +30,7 @@ export function handleDOMEvent(evt: Event) {
 						}
 					}
 				} else {
-					handler = (component as any)[attrValue];
+					handler = component[attrValue];
 				}
 
 				if (handler) {

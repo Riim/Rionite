@@ -259,7 +259,7 @@ export class ContentNodeValueParser {
 		let readers = ['_readBoolean', '_readNumber', '_readVacuum'];
 
 		for (let reader of readers) {
-			let value = (this as any)[reader]();
+			let value = this[reader]();
 
 			if (value) {
 				return value;

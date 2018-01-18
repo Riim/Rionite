@@ -62,7 +62,7 @@ export class RtSlot extends BaseComponent {
 
 					if (
 						!cloneContent &&
-						(contentMap = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP]) &&
+						(contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
 						contentMap.has(key)
 					) {
 						let container = contentMap.get(key)!;
@@ -110,18 +110,15 @@ export class RtSlot extends BaseComponent {
 							if (!cloneContent) {
 								(
 									contentMap ||
-									(contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] ||
-									((contentOwnerComponent as any)[
-										KEY_SLOT_CONTENT_MAP
-									] = new Map())
+									contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
+									(contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())
 								).set(key, el);
 							}
 						}
 					}
 				} else if (!cloneContent) {
-					let contentMap:
-						| Map<string, IComponentElement>
-						| undefined = (contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP];
+					let contentMap: Map<string, IComponentElement> | undefined =
+						contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
 						let container = contentMap.get(key)!;
@@ -134,8 +131,7 @@ export class RtSlot extends BaseComponent {
 					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
 						(
-							contentMap ||
-							((contentOwnerComponent as any)[KEY_SLOT_CONTENT_MAP] = new Map())
+							contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())
 						).set(key, el);
 					}
 				} else {
@@ -174,7 +170,7 @@ export class RtSlot extends BaseComponent {
 				}
 			} else {
 				this._bindings = bindings;
-				this._childComponents = childComponents as any;
+				this._childComponents = childComponents!;
 
 				this._unfreezeBindings();
 			}

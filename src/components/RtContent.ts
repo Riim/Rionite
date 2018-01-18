@@ -59,7 +59,7 @@ export class RtContent extends BaseComponent {
 
 					if (
 						!clone &&
-						(contentMap = (contentOwnerComponent as any)[KEY_CONTENT_MAP]) &&
+						(contentMap = contentOwnerComponent[KEY_CONTENT_MAP]) &&
 						contentMap.has(key)
 					) {
 						let container = contentMap.get(key)!;
@@ -90,15 +90,14 @@ export class RtContent extends BaseComponent {
 						if (!clone) {
 							(
 								contentMap ||
-								(contentOwnerComponent as any)[KEY_CONTENT_MAP] ||
-								((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
+								contentOwnerComponent[KEY_CONTENT_MAP] ||
+								(contentOwnerComponent[KEY_CONTENT_MAP] = new Map())
 							).set(key, el);
 						}
 					}
 				} else if (!clone) {
-					let contentMap:
-						| Map<string, IComponentElement>
-						| undefined = (contentOwnerComponent as any)[KEY_CONTENT_MAP];
+					let contentMap: Map<string, IComponentElement> | undefined =
+						contentOwnerComponent[KEY_CONTENT_MAP];
 
 					if (contentMap && contentMap.has(key)) {
 						let container = contentMap.get(key)!;
@@ -110,10 +109,10 @@ export class RtContent extends BaseComponent {
 						childComponents = (container.$component as RtContent)._childComponents;
 					} else if (ownerComponentContent.firstChild) {
 						content = ownerComponentContent;
-						(
-							contentMap ||
-							((contentOwnerComponent as any)[KEY_CONTENT_MAP] = new Map())
-						).set(key, el);
+						(contentMap || (contentOwnerComponent[KEY_CONTENT_MAP] = new Map())).set(
+							key,
+							el
+						);
 					}
 				} else {
 					content = ownerComponentContent.cloneNode(true) as any;
@@ -151,7 +150,7 @@ export class RtContent extends BaseComponent {
 				}
 			} else {
 				this._bindings = bindings;
-				this._childComponents = childComponents as any;
+				this._childComponents = childComponents!;
 
 				this._unfreezeBindings();
 			}

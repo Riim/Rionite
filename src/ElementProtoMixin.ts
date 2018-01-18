@@ -30,7 +30,7 @@ export let ElementProtoMixin = {
 	[KEY_IS_ELEMENT_CONNECTED]: false,
 
 	connectedCallback(this: IComponentElement) {
-		(this as any)[KEY_IS_ELEMENT_CONNECTED] = true;
+		this[KEY_IS_ELEMENT_CONNECTED] = true;
 
 		if (isConnectionStatusCallbacksSuppressed) {
 			return;
@@ -54,7 +54,7 @@ export let ElementProtoMixin = {
 			}
 		} else {
 			defer(() => {
-				if ((this as any)[KEY_IS_ELEMENT_CONNECTED]) {
+				if (this[KEY_IS_ELEMENT_CONNECTED]) {
 					let component = this.$component;
 
 					component._parentComponent = undefined;
@@ -71,7 +71,7 @@ export let ElementProtoMixin = {
 	},
 
 	disconnectedCallback(this: IComponentElement) {
-		(this as any)[KEY_IS_ELEMENT_CONNECTED] = false;
+		this[KEY_IS_ELEMENT_CONNECTED] = false;
 
 		if (isConnectionStatusCallbacksSuppressed) {
 			return;
@@ -103,8 +103,8 @@ export let ElementProtoMixin = {
 		if (component && component.isReady) {
 			let methodName = '__setParam_' + name;
 
-			if ((component as any)[methodName]) {
-				(component as any)[methodName](value);
+			if (component[methodName]) {
+				component[methodName](value);
 			} else if (nativeCustomElementsFeature) {
 				throw new TypeError(`Cannot write to readonly parameter "${name}"`);
 			}

@@ -4,6 +4,7 @@ import { hyphenize } from '@riim/hyphenize';
 import { Logger } from '@riim/logger';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
+import { Symbol } from '@riim/symbol-polyfill';
 import { EventEmitter, IEvent } from 'cellx';
 import { htmlToFragment } from 'html-to-fragment';
 import { IBlock, Template } from 'nelm';
@@ -51,6 +52,8 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 		[eventName: string]: TEventHandler<T, U>;
 	};
 }
+
+export let KEY_PARAMS = Symbol('params');
 
 let reClassBlockElement = / class="([a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b(?: [a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b)*)/g;
 

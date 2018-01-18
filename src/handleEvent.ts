@@ -66,7 +66,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 							attrValue.slice(1)
 						][(receiver == targetEl ? '' : '<*>') + evt.type];
 					} else {
-						handler = (ownerComponent as any)[attrValue];
+						handler = ownerComponent[attrValue];
 					}
 
 					if (handler && handler.call(ownerComponent, evt, receiver) === false) {
