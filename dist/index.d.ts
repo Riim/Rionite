@@ -1,3 +1,5 @@
+import './lib/firstElementChildPolyfill';
+import './lib/nextElementSiblingPolyfill';
 import './lib/templateHelpers';
 export { NodeType as NelmNodeType, IBlock as INelmBlock, Parser as NelmParser, Template } from 'nelm';
 export { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin } from './DisposableMixin';

@@ -1,5 +1,7 @@
 import { Container } from '@riim/di';
 import { logger } from '@riim/logger';
+import './lib/firstElementChildPolyfill';
+import './lib/nextElementSiblingPolyfill';
 import './lib/templateHelpers';
 
 export {
