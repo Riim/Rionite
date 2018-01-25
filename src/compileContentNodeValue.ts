@@ -74,6 +74,6 @@ export function compileContentNodeValue(
 			}
 		: function(): string {
 				let value = inner.call(this, formatters);
-				return value === undefined ? '' : value + '';
+				return value == null ? '' : value + '';
 			});
 }

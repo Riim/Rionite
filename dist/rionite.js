@@ -2302,7 +2302,7 @@ function compileContentNodeValue(contentNodeValue, contentNodeValueString, useVa
         }
         : function () {
             var value = inner.call(this, formatters_1.formatters);
-            return value === undefined ? '' : value + '';
+            return value == null ? '' : value + '';
         });
 }
 exports.compileContentNodeValue = compileContentNodeValue;
