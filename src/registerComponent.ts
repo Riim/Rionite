@@ -125,13 +125,13 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 				return [];
 			}
 
-			let observedAttrs: Array<string> = [];
+			let attrs: Array<string> = [];
 
 			for (let name in paramsConfig) {
-				observedAttrs.push(name);
+				attrs.push(name.toLowerCase());
 			}
 
-			return observedAttrs;
+			return attrs;
 		}
 	});
 

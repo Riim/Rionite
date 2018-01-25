@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.32.19",
+  "version": "0.32.21",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",

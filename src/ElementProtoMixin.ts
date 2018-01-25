@@ -1,7 +1,7 @@
 import { defer } from '@riim/defer';
 import { Container } from '@riim/di';
 import { Symbol } from '@riim/symbol-polyfill';
-import { BaseComponent, IComponentElement } from './BaseComponent';
+import { BaseComponent, IComponentElement, KEY_PARAMS } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
 import { nativeCustomElements as nativeCustomElementsFeature } from './lib/Features';
 
@@ -101,12 +101,18 @@ export let ElementProtoMixin = {
 		let component = this.rioniteComponent;
 
 		if (component && component.isReady) {
-			let methodName = '__setParam_' + name;
+			let methodName =
+				'__setParam_' +
+				(component.constructor as typeof BaseComponent)[KEY_PARAMS][name].name;
 
 			if (component[methodName]) {
 				component[methodName](value);
 			} else if (nativeCustomElementsFeature) {
-				throw new TypeError(`Cannot write to readonly parameter "${name}"`);
+				throw new TypeError(
+					`Cannot write to readonly parameter "${
+						(component.constructor as typeof BaseComponent)[KEY_PARAMS][name].name
+					}"`
+				);
 			}
 		}
 	}

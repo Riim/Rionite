@@ -7,7 +7,7 @@
 		exports["rionite"] = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/logger"), require("@riim/hyphenize"), require("@riim/next-tick"), require("@riim/clear-node"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/mixin"), require("html-to-fragment"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("@riim/defer"), require("@riim/lower-case-first-word"));
 	else
 		root["rionite"] = factory(root["@riim/map-set-polyfill"], root["cellx"], root["@riim/symbol-polyfill"], root["@riim/di"], root["nelm"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/logger"], root["@riim/hyphenize"], root["@riim/next-tick"], root["@riim/clear-node"], root["@riim/next-uid"], root["@riim/gettext"], root["@riim/mixin"], root["html-to-fragment"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["escape-string"], root["@riim/defer"], root["@riim/lower-case-first-word"]);
-})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_9__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_12__, __WEBPACK_EXTERNAL_MODULE_18__, __WEBPACK_EXTERNAL_MODULE_22__, __WEBPACK_EXTERNAL_MODULE_27__, __WEBPACK_EXTERNAL_MODULE_28__, __WEBPACK_EXTERNAL_MODULE_33__, __WEBPACK_EXTERNAL_MODULE_34__, __WEBPACK_EXTERNAL_MODULE_35__, __WEBPACK_EXTERNAL_MODULE_38__, __WEBPACK_EXTERNAL_MODULE_40__, __WEBPACK_EXTERNAL_MODULE_41__, __WEBPACK_EXTERNAL_MODULE_42__, __WEBPACK_EXTERNAL_MODULE_44__, __WEBPACK_EXTERNAL_MODULE_47__, __WEBPACK_EXTERNAL_MODULE_53__) {
+})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_9__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_12__, __WEBPACK_EXTERNAL_MODULE_18__, __WEBPACK_EXTERNAL_MODULE_22__, __WEBPACK_EXTERNAL_MODULE_27__, __WEBPACK_EXTERNAL_MODULE_28__, __WEBPACK_EXTERNAL_MODULE_33__, __WEBPACK_EXTERNAL_MODULE_34__, __WEBPACK_EXTERNAL_MODULE_35__, __WEBPACK_EXTERNAL_MODULE_38__, __WEBPACK_EXTERNAL_MODULE_40__, __WEBPACK_EXTERNAL_MODULE_41__, __WEBPACK_EXTERNAL_MODULE_42__, __WEBPACK_EXTERNAL_MODULE_44__, __WEBPACK_EXTERNAL_MODULE_47__, __WEBPACK_EXTERNAL_MODULE_53__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -89,6 +89,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var defer_1 = __webpack_require__(47);
 var di_1 = __webpack_require__(9);
 var symbol_polyfill_1 = __webpack_require__(5);
+var BaseComponent_1 = __webpack_require__(2);
 var ComponentParams_1 = __webpack_require__(13);
 var Features_1 = __webpack_require__(8);
 exports.KEY_IS_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite.isElementConnected');
@@ -163,12 +164,13 @@ exports.ElementProtoMixin = (_a = {
     _a.attributeChangedCallback = function (name, prev, value) {
         var component = this.rioniteComponent;
         if (component && component.isReady) {
-            var methodName = '__setParam_' + name;
+            var methodName = '__setParam_' +
+                component.constructor[BaseComponent_1.KEY_PARAMS][name].name;
             if (component[methodName]) {
                 component[methodName](value);
             }
             else if (Features_1.nativeCustomElements) {
-                throw new TypeError("Cannot write to readonly parameter \"" + name + "\"");
+                throw new TypeError("Cannot write to readonly parameter \"" + component.constructor[BaseComponent_1.KEY_PARAMS][name].name + "\"");
             }
         }
     },
@@ -178,12 +180,6 @@ var _a;
 
 /***/ }),
 /* 2 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
-
-/***/ }),
-/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -215,7 +211,7 @@ var logger_1 = __webpack_require__(18);
 var map_set_polyfill_1 = __webpack_require__(0);
 var move_content_1 = __webpack_require__(12);
 var symbol_polyfill_1 = __webpack_require__(5);
-var cellx_1 = __webpack_require__(2);
+var cellx_1 = __webpack_require__(3);
 var html_to_fragment_1 = __webpack_require__(38);
 var attachChildComponentElements_1 = __webpack_require__(6);
 var bindContent_1 = __webpack_require__(7);
@@ -550,6 +546,12 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 
 /***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+
+/***/ }),
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -635,8 +637,8 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
 var set_attribute_1 = __webpack_require__(42);
-var cellx_1 = __webpack_require__(2);
-var BaseComponent_1 = __webpack_require__(3);
+var cellx_1 = __webpack_require__(3);
+var BaseComponent_1 = __webpack_require__(2);
 var compileContentNodeValue_1 = __webpack_require__(43);
 var ContentNodeValueParser_1 = __webpack_require__(23);
 var compileKeypath_1 = __webpack_require__(17);
@@ -685,8 +687,15 @@ function bindContent(node, ownerComponent, context, result) {
                     if (name_1.charAt(0) == '_') {
                         name_1 = name_1.slice(1);
                     }
-                    if (params && params[name_1]) {
-                        $specifiedParams.add(params[name_1].name);
+                    var param = params && params[name_1];
+                    var paramName = void 0;
+                    var paramConfig = void 0;
+                    if (param) {
+                        paramName = param.name;
+                        paramConfig = param.config;
+                        if (paramConfig != null) {
+                            $specifiedParams.add(paramName);
+                        }
                     }
                     var value = attr.value;
                     if (value.indexOf('{') == -1) {
@@ -700,49 +709,46 @@ function bindContent(node, ownerComponent, context, result) {
                             ? contentNodeValue[0].prefix
                             : null;
                         if (prefix !== '->') {
-                            var cell = new AttributeBindingCell(compileContentNodeValue_1.compileContentNodeValue(contentNodeValue, value, contentNodeValueLength == 1), child, name_1, {
+                            var cell = new AttributeBindingCell(compileContentNodeValue_1.compileContentNodeValue(contentNodeValue, value, contentNodeValueLength == 1), child, paramName || name_1, {
                                 context: context,
                                 onChange: onAttributeBindingCellChange
                             });
-                            set_attribute_1.setAttribute(child, name_1, cell.get());
+                            set_attribute_1.setAttribute(child, paramName || name_1, cell.get());
                             (result[0] || (result[0] = [])).push(cell);
                         }
-                        if (childComponent && (prefix === '->' || prefix === '<->')) {
-                            var paramConfig = params && params[name_1].config;
-                            if (paramConfig != null) {
-                                if (prefix == '->' && attr.name.charAt(0) != '_') {
-                                    child.removeAttribute(name_1);
-                                }
-                                var keypath = contentNodeValue[0]
-                                    .keypath;
-                                var keys = keypath.split('.');
-                                var propertyName_1;
-                                var handler = void 0;
-                                if (keys.length == 1) {
-                                    propertyName_1 = keys[0];
-                                    handler = function (evt) {
-                                        this.ownerComponent[propertyName_1] = evt.data.value;
-                                    };
-                                }
-                                else {
-                                    propertyName_1 = keys[keys.length - 1];
-                                    keys = keys.slice(0, -1);
-                                    var getPropertyHolder_1 = compileKeypath_1.compileKeypath(keys, keys.join('.'));
-                                    handler = function (evt) {
-                                        var propertyHolder = getPropertyHolder_1.call(this.ownerComponent);
-                                        if (propertyHolder) {
-                                            propertyHolder[propertyName_1] = evt.data.value;
-                                        }
-                                    };
-                                }
-                                (result[1] || (result[1] = [])).push([
-                                    childComponent,
-                                    (typeof paramConfig == 'object' &&
-                                        paramConfig.property) ||
-                                        name_1,
-                                    handler
-                                ]);
+                        if (paramConfig != null && (prefix === '->' || prefix === '<->')) {
+                            if (prefix == '->' && attr.name.charAt(0) != '_') {
+                                child.removeAttribute(paramName);
                             }
+                            var keypath = contentNodeValue[0]
+                                .keypath;
+                            var keys = keypath.split('.');
+                            var propertyName_1;
+                            var handler = void 0;
+                            if (keys.length == 1) {
+                                propertyName_1 = keys[0];
+                                handler = function (evt) {
+                                    this.ownerComponent[propertyName_1] = evt.data.value;
+                                };
+                            }
+                            else {
+                                propertyName_1 = keys[keys.length - 1];
+                                keys = keys.slice(0, -1);
+                                var getPropertyHolder_1 = compileKeypath_1.compileKeypath(keys, keys.join('.'));
+                                handler = function (evt) {
+                                    var propertyHolder = getPropertyHolder_1.call(this.ownerComponent);
+                                    if (propertyHolder) {
+                                        propertyHolder[propertyName_1] = evt.data.value;
+                                    }
+                                };
+                            }
+                            (result[1] || (result[1] = [])).push([
+                                childComponent,
+                                (typeof paramConfig == 'object' &&
+                                    paramConfig.property) ||
+                                    paramName,
+                                handler
+                            ]);
                         }
                     }
                     out_i_1 = i;
@@ -861,7 +867,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_12__;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var symbol_polyfill_1 = __webpack_require__(5);
-var cellx_1 = __webpack_require__(2);
+var cellx_1 = __webpack_require__(3);
 var componentParamTypeSerializerMap_1 = __webpack_require__(39);
 var KEY_IS_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite.isComponentParamsInited');
 function initParam(component, config, name) {
@@ -1058,7 +1064,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_18__;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var next_uid_1 = __webpack_require__(33);
-var cellx_1 = __webpack_require__(2);
+var cellx_1 = __webpack_require__(3);
 var DisposableMixin = /** @class */ (function () {
     function DisposableMixin() {
         this._disposables = {};
@@ -1298,7 +1304,7 @@ var hyphenize_1 = __webpack_require__(22);
 var mixin_1 = __webpack_require__(35);
 var pascalize_1 = __webpack_require__(36);
 var nelm_1 = __webpack_require__(10);
-var BaseComponent_1 = __webpack_require__(3);
+var BaseComponent_1 = __webpack_require__(2);
 var componentConstructorMap_1 = __webpack_require__(25);
 var elementConstructorMap_1 = __webpack_require__(51);
 var ElementProtoMixin_1 = __webpack_require__(1);
@@ -1386,11 +1392,11 @@ function registerComponent(componentConstr) {
             if (!paramsConfig) {
                 return [];
             }
-            var observedAttrs = [];
+            var attrs = [];
             for (var name_2 in paramsConfig) {
-                observedAttrs.push(name_2);
+                attrs.push(name_2.toLowerCase());
             }
-            return observedAttrs;
+            return attrs;
         }
     });
     var elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
@@ -1816,9 +1822,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var next_tick_1 = __webpack_require__(27);
-var cellx_1 = __webpack_require__(2);
+var cellx_1 = __webpack_require__(3);
 var attachChildComponentElements_1 = __webpack_require__(6);
-var BaseComponent_1 = __webpack_require__(3);
+var BaseComponent_1 = __webpack_require__(2);
 var bindContent_1 = __webpack_require__(7);
 var Component_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(1);
@@ -1985,7 +1991,7 @@ var Component_1 = __webpack_require__(4);
 exports.Component = Component_1.Component;
 var Param_1 = __webpack_require__(52);
 exports.Param = Param_1.Param;
-var BaseComponent_1 = __webpack_require__(3);
+var BaseComponent_1 = __webpack_require__(2);
 exports.BaseComponent = BaseComponent_1.BaseComponent;
 var ElementProtoMixin_1 = __webpack_require__(1);
 exports.KEY_IS_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_IS_ELEMENT_CONNECTED;
@@ -2364,7 +2370,7 @@ exports.bindingToJSExpression = bindingToJSExpression;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var cellx_1 = __webpack_require__(2);
+var cellx_1 = __webpack_require__(3);
 function freezeBinding(binding) {
     var changeEvent = binding._events.get('change');
     binding._events.delete('change');
@@ -2748,9 +2754,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
 var next_tick_1 = __webpack_require__(27);
-var cellx_1 = __webpack_require__(2);
+var cellx_1 = __webpack_require__(3);
 var attachChildComponentElements_1 = __webpack_require__(6);
-var BaseComponent_1 = __webpack_require__(3);
+var BaseComponent_1 = __webpack_require__(2);
 var bindContent_1 = __webpack_require__(7);
 var Component_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(1);
@@ -3051,7 +3057,7 @@ var map_set_polyfill_1 = __webpack_require__(0);
 var move_content_1 = __webpack_require__(12);
 var symbol_polyfill_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(6);
-var BaseComponent_1 = __webpack_require__(3);
+var BaseComponent_1 = __webpack_require__(2);
 var bindContent_1 = __webpack_require__(7);
 var Component_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(1);
@@ -3236,7 +3242,7 @@ var map_set_polyfill_1 = __webpack_require__(0);
 var move_content_1 = __webpack_require__(12);
 var symbol_polyfill_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(6);
-var BaseComponent_1 = __webpack_require__(3);
+var BaseComponent_1 = __webpack_require__(2);
 var bindContent_1 = __webpack_require__(7);
 var Component_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(1);

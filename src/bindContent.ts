@@ -76,8 +76,17 @@ export function bindContent(
 						name = name.slice(1);
 					}
 
-					if (params && params[name]) {
-						$specifiedParams!.add(params[name].name);
+					let param = params && params[name];
+					let paramName: string | undefined;
+					let paramConfig: any;
+
+					if (param) {
+						paramName = param.name;
+						paramConfig = param.config;
+
+						if (paramConfig != null) {
+							$specifiedParams!.add(paramName!);
+						}
 					}
 
 					let value = attr.value;
@@ -106,63 +115,59 @@ export function bindContent(
 									contentNodeValueLength == 1
 								),
 								child as any,
-								name,
+								paramName || name,
 								{
 									context,
 									onChange: onAttributeBindingCellChange
 								}
 							);
 
-							setAttribute(child as any, name, cell.get());
+							setAttribute(child as any, paramName || name, cell.get());
 
 							(result[0] || (result[0] = [])).push(cell as any);
 						}
 
-						if (childComponent && (prefix === '->' || prefix === '<->')) {
-							let paramConfig = params && params[name].config;
-
-							if (paramConfig != null) {
-								if (prefix == '->' && attr.name.charAt(0) != '_') {
-									(child as Element).removeAttribute(name);
-								}
-
-								let keypath = (contentNodeValue[0] as IContentNodeValueBinding)
-									.keypath!;
-								let keys = keypath.split('.');
-								let propertyName: string;
-								let handler: TListener;
-
-								if (keys.length == 1) {
-									propertyName = keys[0];
-
-									handler = function(evt) {
-										this.ownerComponent[propertyName] = evt.data.value;
-									};
-								} else {
-									propertyName = keys[keys.length - 1];
-									keys = keys.slice(0, -1);
-
-									let getPropertyHolder = compileKeypath(keys, keys.join('.'));
-
-									handler = function(evt) {
-										let propertyHolder = getPropertyHolder.call(
-											this.ownerComponent
-										);
-
-										if (propertyHolder) {
-											propertyHolder[propertyName] = evt.data.value;
-										}
-									};
-								}
-
-								(result[1] || (result[1] = [])).push([
-									childComponent,
-									(typeof paramConfig == 'object' &&
-										(paramConfig as IComponentParamConfig).property) ||
-										name,
-									handler
-								]);
+						if (paramConfig != null && (prefix === '->' || prefix === '<->')) {
+							if (prefix == '->' && attr.name.charAt(0) != '_') {
+								(child as Element).removeAttribute(paramName!);
 							}
+
+							let keypath = (contentNodeValue[0] as IContentNodeValueBinding)
+								.keypath!;
+							let keys = keypath.split('.');
+							let propertyName: string;
+							let handler: TListener;
+
+							if (keys.length == 1) {
+								propertyName = keys[0];
+
+								handler = function(evt) {
+									this.ownerComponent[propertyName] = evt.data.value;
+								};
+							} else {
+								propertyName = keys[keys.length - 1];
+								keys = keys.slice(0, -1);
+
+								let getPropertyHolder = compileKeypath(keys, keys.join('.'));
+
+								handler = function(evt) {
+									let propertyHolder = getPropertyHolder.call(
+										this.ownerComponent
+									);
+
+									if (propertyHolder) {
+										propertyHolder[propertyName] = evt.data.value;
+									}
+								};
+							}
+
+							(result[1] || (result[1] = [])).push([
+								childComponent!,
+								(typeof paramConfig == 'object' &&
+									(paramConfig as IComponentParamConfig).property) ||
+									paramName!,
+								handler
+							]);
 						}
 					}
 				}
