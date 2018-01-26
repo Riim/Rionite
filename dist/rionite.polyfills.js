@@ -3492,6 +3492,7 @@ exports.Component = Component_1.Component;
 var Param_1 = __webpack_require__(52);
 exports.Param = Param_1.Param;
 var BaseComponent_1 = __webpack_require__(2);
+exports.KEY_PARAMS = BaseComponent_1.KEY_PARAMS;
 exports.BaseComponent = BaseComponent_1.BaseComponent;
 var ElementProtoMixin_1 = __webpack_require__(1);
 exports.KEY_IS_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_IS_ELEMENT_CONNECTED;

@@ -6,7 +6,7 @@ export { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInter
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
-export { IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TEventHandler, IComponentEvents, BaseComponent } from './BaseComponent';
+export { IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TEventHandler, IComponentEvents, KEY_PARAMS, BaseComponent } from './BaseComponent';
 export { KEY_IS_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export { componentParamValueMap } from './componentParamValueMap';

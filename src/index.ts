@@ -29,6 +29,7 @@ export {
 	IComponentElementClassNameMap,
 	TEventHandler,
 	IComponentEvents,
+	KEY_PARAMS,
 	BaseComponent
 } from './BaseComponent';
 export { KEY_IS_ELEMENT_CONNECTED } from './ElementProtoMixin';
