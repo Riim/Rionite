@@ -3,13 +3,12 @@ import { isRegExp } from '@riim/is-regexp';
 import { Map } from '@riim/map-set-polyfill';
 import { componentParamValueMap } from './componentParamValueMap';
 
-export let componentParamTypeSerializerMap = new Map<
-	any,
-	{
-		read: (value: string | null, defaultValue: any) => any;
-		write: (value: any, defaultValue?: any) => string | null;
-	}
->([
+export interface IComponentParamTypeSerializer {
+	read: (value: string | null, defaultValue: any) => any;
+	write: (value: any, defaultValue?: any) => string | null;
+}
+
+export let componentParamTypeSerializerMap = new Map<any, IComponentParamTypeSerializer>([
 	[
 		Boolean,
 		{

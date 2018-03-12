@@ -2,7 +2,25 @@ import { Logger } from '@riim/logger';
 import { EventEmitter, IEvent } from 'cellx';
 import { IBlock, Template } from 'nelm';
 import { IFreezableCell } from './componentBinding';
+import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
 import { DisposableMixin, IDisposableListening, TListener, TListeningTarget } from './DisposableMixin';
+export interface IComponentParamConfig {
+    property?: string;
+    type?: Function;
+    default?: any;
+    required?: boolean;
+    readonly?: boolean;
+}
+export interface I$ComponentParamConfig {
+    name: string;
+    property: string;
+    type: Function | undefined;
+    typeSerializer: IComponentParamTypeSerializer | undefined;
+    default: any;
+    required: boolean;
+    readonly: boolean;
+    paramConfig: IComponentParamConfig | Function;
+}
 export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
     rioniteComponent?: T | null;
     $component?: T;
@@ -20,6 +38,7 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
         [eventName: string]: TEventHandler<T, U>;
     };
 }
+export declare let KEY_PARAMS_CONFIG: symbol;
 export declare let KEY_PARAMS: symbol;
 export declare class BaseComponent extends EventEmitter implements DisposableMixin {
     static elementIs: string;

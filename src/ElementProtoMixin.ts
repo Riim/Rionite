@@ -1,7 +1,14 @@
 import { defer } from '@riim/defer';
 import { Container } from '@riim/di';
 import { Symbol } from '@riim/symbol-polyfill';
-import { BaseComponent, IComponentElement, KEY_PARAMS } from './BaseComponent';
+import { Cell } from 'cellx';
+import {
+	BaseComponent,
+	I$ComponentParamConfig,
+	IComponentElement,
+	KEY_PARAMS,
+	KEY_PARAMS_CONFIG
+	} from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
 import { nativeCustomElements as nativeCustomElementsFeature } from './lib/Features';
 
@@ -95,24 +102,30 @@ export let ElementProtoMixin = {
 	attributeChangedCallback(
 		this: IComponentElement,
 		name: string,
-		prev: string | null,
-		value: string | null
+		prevRawValue: string | null,
+		rawValue: string | null
 	) {
 		let component = this.rioniteComponent;
 
 		if (component && component.isReady) {
-			let methodName =
-				'__setParam_' +
-				(component.constructor as typeof BaseComponent)[KEY_PARAMS][name].name;
+			let $paramConfig: I$ComponentParamConfig =
+				component.constructor[KEY_PARAMS_CONFIG][name];
 
-			if (component[methodName]) {
-				component[methodName](value);
-			} else if (nativeCustomElementsFeature) {
-				throw new TypeError(
-					`Cannot write to readonly parameter "${
-						(component.constructor as typeof BaseComponent)[KEY_PARAMS][name].name
-					}"`
-				);
+			if ($paramConfig.readonly) {
+				if (nativeCustomElementsFeature) {
+					throw new TypeError(
+						`Cannot write to readonly parameter "${$paramConfig.name}"`
+					);
+				}
+			} else {
+				let valueCell: Cell | undefined = component[$paramConfig.property + 'Cell'];
+				let value = $paramConfig.typeSerializer!.read(rawValue, $paramConfig.default);
+
+				if (valueCell) {
+					valueCell.set(value);
+				} else {
+					component[KEY_PARAMS].set($paramConfig.name, value);
+				}
 			}
 		}
 	}

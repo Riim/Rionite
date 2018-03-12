@@ -7,10 +7,15 @@ import {
 	TCellPull,
 	TListener
 	} from 'cellx';
-import { BaseComponent, IPossiblyComponentElement, KEY_PARAMS } from './BaseComponent';
+import {
+	BaseComponent,
+	I$ComponentParamConfig,
+	IComponentParamConfig,
+	IPossiblyComponentElement,
+	KEY_PARAMS_CONFIG
+	} from './BaseComponent';
 import { compileContentNodeValue } from './compileContentNodeValue';
 import { IFreezableCell } from './componentBinding';
-import { IComponentParamConfig } from './ComponentParams';
 import { ContentNodeValueNodeType, ContentNodeValueParser, IContentNodeValueBinding } from './ContentNodeValueParser';
 import { compileKeypath } from './lib/compileKeypath';
 
@@ -58,11 +63,11 @@ export function bindContent(
 		switch (child.nodeType) {
 			case Node.ELEMENT_NODE: {
 				let childComponent = (child as IPossiblyComponentElement).$component;
-				let params: { [name: string]: { name: string; config: any } } | undefined;
+				let $paramsConfig: { [name: string]: I$ComponentParamConfig } | undefined;
 				let $specifiedParams: Set<string> | undefined;
 
 				if (childComponent) {
-					params = childComponent.constructor[KEY_PARAMS];
+					$paramsConfig = childComponent.constructor[KEY_PARAMS_CONFIG];
 					$specifiedParams = new Set();
 				}
 
@@ -76,17 +81,16 @@ export function bindContent(
 						name = name.slice(1);
 					}
 
-					let param = params && params[name];
+					let $paramConfig = $paramsConfig && $paramsConfig[name];
+
 					let paramName: string | undefined;
-					let paramConfig: any;
+					let paramConfig: IComponentParamConfig | Function | undefined;
 
-					if (param) {
-						paramName = param.name;
-						paramConfig = param.config;
+					if ($paramConfig) {
+						paramName = $paramConfig.name;
+						paramConfig = $paramConfig.paramConfig;
 
-						if (paramConfig != null) {
-							$specifiedParams!.add(paramName!);
-						}
+						$specifiedParams!.add(paramName!);
 					}
 
 					let value = attr.value;
@@ -127,7 +131,7 @@ export function bindContent(
 							(result[0] || (result[0] = [])).push(cell as any);
 						}
 
-						if (paramConfig != null && (prefix === '->' || prefix === '<->')) {
+						if (paramConfig !== undefined && (prefix === '->' || prefix === '<->')) {
 							if (prefix == '->' && attr.name.charAt(0) != '_') {
 								(child as Element).removeAttribute(paramName!);
 							}
@@ -164,7 +168,9 @@ export function bindContent(
 							(result[1] || (result[1] = [])).push([
 								childComponent!,
 								(typeof paramConfig == 'object' &&
-									(paramConfig as IComponentParamConfig).property) ||
+									(paramConfig.type !== undefined ||
+										paramConfig.default !== undefined) &&
+									paramConfig.property) ||
 									paramName!,
 								handler
 							]);

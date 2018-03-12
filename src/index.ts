@@ -1,7 +1,6 @@
 import { Container } from '@riim/di';
 import { logger } from '@riim/logger';
-import './lib/firstElementChildPolyfill';
-import './lib/nextElementSiblingPolyfill';
+import './lib/polyfills';
 import './lib/templateHelpers';
 
 export {
@@ -24,11 +23,14 @@ export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
 export {
+	IComponentParamConfig,
+	I$ComponentParamConfig,
 	IPossiblyComponentElement,
 	IComponentElement,
 	IComponentElementClassNameMap,
 	TEventHandler,
 	IComponentEvents,
+	KEY_PARAMS_CONFIG,
 	KEY_PARAMS,
 	BaseComponent
 } from './BaseComponent';

@@ -19,21 +19,21 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "ajv": "^6.0.1",
-    "awesome-typescript-loader": "^3.4.1",
+    "ajv": "^6.2.1",
+    "awesome-typescript-loader": "^4.0.1",
     "benchmark": "^2.1.4",
-    "document-register-element": "^1.7.0",
+    "document-register-element": "^1.7.2",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^3.0.0",
-    "pump": "^2.0.1",
-    "require-dir": "^0.3.2",
+    "pump": "^3.0.0",
+    "require-dir": "^1.0.0",
     "run-sequence": "^2.2.1",
     "tslint": "^5.9.1",
-    "tslint-loader": "^3.5.3",
-    "typescript": "^2.6.2",
-    "webpack": "^3.10.0"
+    "tslint-loader": "^3.6.0",
+    "typescript": "^2.7.2",
+    "webpack": "^3.11.0"
   },
   "dependencies": {
     "@riim/clear-node": "^1.0.0",
@@ -54,7 +54,7 @@
     "@riim/pascalize": "^1.0.1",
     "@riim/set-attribute": "^1.0.0",
     "@riim/symbol-polyfill": "^1.0.1",
-    "cellx": "^1.7.80",
+    "cellx": "^1.7.81",
     "escape-string": "^1.0.2",
     "html-to-fragment": "^1.0.1",
     "nelm": "^0.4.32"

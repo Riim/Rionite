@@ -7,7 +7,7 @@
 		exports["rionite"] = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/logger"), require("@riim/hyphenize"), require("@riim/next-tick"), require("@riim/clear-node"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/mixin"), require("html-to-fragment"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("escape-string"), require("@riim/defer"), require("@riim/lower-case-first-word"));
 	else
 		root["rionite"] = factory(root["@riim/map-set-polyfill"], root["cellx"], root["@riim/symbol-polyfill"], root["@riim/di"], root["nelm"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/logger"], root["@riim/hyphenize"], root["@riim/next-tick"], root["@riim/clear-node"], root["@riim/next-uid"], root["@riim/gettext"], root["@riim/mixin"], root["html-to-fragment"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["escape-string"], root["@riim/defer"], root["@riim/lower-case-first-word"]);
-})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_9__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_12__, __WEBPACK_EXTERNAL_MODULE_18__, __WEBPACK_EXTERNAL_MODULE_22__, __WEBPACK_EXTERNAL_MODULE_27__, __WEBPACK_EXTERNAL_MODULE_28__, __WEBPACK_EXTERNAL_MODULE_33__, __WEBPACK_EXTERNAL_MODULE_34__, __WEBPACK_EXTERNAL_MODULE_35__, __WEBPACK_EXTERNAL_MODULE_38__, __WEBPACK_EXTERNAL_MODULE_40__, __WEBPACK_EXTERNAL_MODULE_41__, __WEBPACK_EXTERNAL_MODULE_42__, __WEBPACK_EXTERNAL_MODULE_44__, __WEBPACK_EXTERNAL_MODULE_47__, __WEBPACK_EXTERNAL_MODULE_53__) {
+})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_12__, __WEBPACK_EXTERNAL_MODULE_13__, __WEBPACK_EXTERNAL_MODULE_18__, __WEBPACK_EXTERNAL_MODULE_22__, __WEBPACK_EXTERNAL_MODULE_27__, __WEBPACK_EXTERNAL_MODULE_28__, __WEBPACK_EXTERNAL_MODULE_32__, __WEBPACK_EXTERNAL_MODULE_33__, __WEBPACK_EXTERNAL_MODULE_34__, __WEBPACK_EXTERNAL_MODULE_37__, __WEBPACK_EXTERNAL_MODULE_39__, __WEBPACK_EXTERNAL_MODULE_40__, __WEBPACK_EXTERNAL_MODULE_41__, __WEBPACK_EXTERNAL_MODULE_43__, __WEBPACK_EXTERNAL_MODULE_46__, __WEBPACK_EXTERNAL_MODULE_52__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -85,105 +85,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_0__;
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-var defer_1 = __webpack_require__(47);
-var di_1 = __webpack_require__(9);
-var symbol_polyfill_1 = __webpack_require__(5);
-var BaseComponent_1 = __webpack_require__(2);
-var ComponentParams_1 = __webpack_require__(13);
-var Features_1 = __webpack_require__(8);
-exports.KEY_IS_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite.isElementConnected');
-var isConnectionStatusCallbacksSuppressed = false;
-function suppressConnectionStatusCallbacks() {
-    isConnectionStatusCallbacksSuppressed = true;
-}
-exports.suppressConnectionStatusCallbacks = suppressConnectionStatusCallbacks;
-function resumeConnectionStatusCallbacks() {
-    isConnectionStatusCallbacksSuppressed = false;
-}
-exports.resumeConnectionStatusCallbacks = resumeConnectionStatusCallbacks;
-exports.ElementProtoMixin = (_a = {
-        rioniteComponent: null,
-        get $component() {
-            return (this.rioniteComponent ||
-                di_1.Container.get(this.constructor._rioniteComponentConstructor, [this]));
-        }
-    },
-    _a[exports.KEY_IS_ELEMENT_CONNECTED] = false,
-    _a.connectedCallback = function () {
-        var _this = this;
-        this[exports.KEY_IS_ELEMENT_CONNECTED] = true;
-        if (isConnectionStatusCallbacksSuppressed) {
-            return;
-        }
-        var component = this.rioniteComponent;
-        if (component) {
-            ComponentParams_1.ComponentParams.init(component);
-            component.elementConnected();
-            if (component._attached) {
-                if (component._parentComponent === null) {
-                    component._parentComponent = undefined;
-                    component.elementMoved();
-                }
-            }
-            else {
-                component._parentComponent = undefined;
-                component._attach();
-            }
-        }
-        else {
-            defer_1.defer(function () {
-                if (_this[exports.KEY_IS_ELEMENT_CONNECTED]) {
-                    var component_1 = _this.$component;
-                    component_1._parentComponent = undefined;
-                    if (!component_1.parentComponent && !component_1._attached) {
-                        ComponentParams_1.ComponentParams.init(component_1);
-                        component_1.elementConnected();
-                        component_1._attach();
-                    }
-                }
-            });
-        }
-    },
-    _a.disconnectedCallback = function () {
-        this[exports.KEY_IS_ELEMENT_CONNECTED] = false;
-        if (isConnectionStatusCallbacksSuppressed) {
-            return;
-        }
-        var component = this.rioniteComponent;
-        if (component && component._attached) {
-            component._parentComponent = null;
-            component.elementDisconnected();
-            defer_1.defer(function () {
-                if (component._parentComponent === null && component._attached) {
-                    component._detach();
-                }
-            });
-        }
-    },
-    _a.attributeChangedCallback = function (name, prev, value) {
-        var component = this.rioniteComponent;
-        if (component && component.isReady) {
-            var methodName = '__setParam_' +
-                component.constructor[BaseComponent_1.KEY_PARAMS][name].name;
-            if (component[methodName]) {
-                component[methodName](value);
-            }
-            else if (Features_1.nativeCustomElements) {
-                throw new TypeError("Cannot write to readonly parameter \"" + component.constructor[BaseComponent_1.KEY_PARAMS][name].name + "\"");
-            }
-        }
-    },
-    _a);
-var _a;
-
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -204,26 +105,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var di_1 = __webpack_require__(9);
-var get_uid_1 = __webpack_require__(11);
+var di_1 = __webpack_require__(10);
+var get_uid_1 = __webpack_require__(12);
 var hyphenize_1 = __webpack_require__(22);
 var logger_1 = __webpack_require__(18);
 var map_set_polyfill_1 = __webpack_require__(0);
-var move_content_1 = __webpack_require__(12);
+var move_content_1 = __webpack_require__(13);
 var symbol_polyfill_1 = __webpack_require__(5);
 var cellx_1 = __webpack_require__(3);
-var html_to_fragment_1 = __webpack_require__(38);
+var html_to_fragment_1 = __webpack_require__(37);
 var attachChildComponentElements_1 = __webpack_require__(6);
 var bindContent_1 = __webpack_require__(7);
-var componentBinding_1 = __webpack_require__(46);
+var componentBinding_1 = __webpack_require__(45);
 var componentConstructorMap_1 = __webpack_require__(25);
 var DisposableMixin_1 = __webpack_require__(19);
-var ElementProtoMixin_1 = __webpack_require__(1);
-var handledEvents_1 = __webpack_require__(48);
-var handleDOMEvent_1 = __webpack_require__(49);
-var handleEvent_1 = __webpack_require__(50);
-var Features_1 = __webpack_require__(8);
+var ElementProtoMixin_1 = __webpack_require__(2);
+var handledEvents_1 = __webpack_require__(47);
+var handleDOMEvent_1 = __webpack_require__(48);
+var handleEvent_1 = __webpack_require__(49);
+var Features_1 = __webpack_require__(9);
 var map = Array.prototype.map;
+exports.KEY_PARAMS_CONFIG = symbol_polyfill_1.Symbol('paramsConfig');
 exports.KEY_PARAMS = symbol_polyfill_1.Symbol('params');
 var reClassBlockElement = / class="([a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b(?: [a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b)*)/g;
 function createClassBlockElementReplacer(blockName, events, evtAttrPrefix) {
@@ -281,6 +183,7 @@ var BaseComponent = /** @class */ (function (_super) {
         _this.element = el;
         el.rioniteComponent = _this;
         Object.defineProperty(el, '$component', { value: _this });
+        _this[exports.KEY_PARAMS] = new map_set_polyfill_1.Map();
         _this.created();
         return _this;
     }
@@ -546,6 +449,113 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 
 /***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var defer_1 = __webpack_require__(46);
+var di_1 = __webpack_require__(10);
+var symbol_polyfill_1 = __webpack_require__(5);
+var BaseComponent_1 = __webpack_require__(1);
+var ComponentParams_1 = __webpack_require__(8);
+var Features_1 = __webpack_require__(9);
+exports.KEY_IS_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite.isElementConnected');
+var isConnectionStatusCallbacksSuppressed = false;
+function suppressConnectionStatusCallbacks() {
+    isConnectionStatusCallbacksSuppressed = true;
+}
+exports.suppressConnectionStatusCallbacks = suppressConnectionStatusCallbacks;
+function resumeConnectionStatusCallbacks() {
+    isConnectionStatusCallbacksSuppressed = false;
+}
+exports.resumeConnectionStatusCallbacks = resumeConnectionStatusCallbacks;
+exports.ElementProtoMixin = (_a = {
+        rioniteComponent: null,
+        get $component() {
+            return (this.rioniteComponent ||
+                di_1.Container.get(this.constructor._rioniteComponentConstructor, [this]));
+        }
+    },
+    _a[exports.KEY_IS_ELEMENT_CONNECTED] = false,
+    _a.connectedCallback = function () {
+        var _this = this;
+        this[exports.KEY_IS_ELEMENT_CONNECTED] = true;
+        if (isConnectionStatusCallbacksSuppressed) {
+            return;
+        }
+        var component = this.rioniteComponent;
+        if (component) {
+            ComponentParams_1.ComponentParams.init(component);
+            component.elementConnected();
+            if (component._attached) {
+                if (component._parentComponent === null) {
+                    component._parentComponent = undefined;
+                    component.elementMoved();
+                }
+            }
+            else {
+                component._parentComponent = undefined;
+                component._attach();
+            }
+        }
+        else {
+            defer_1.defer(function () {
+                if (_this[exports.KEY_IS_ELEMENT_CONNECTED]) {
+                    var component_1 = _this.$component;
+                    component_1._parentComponent = undefined;
+                    if (!component_1.parentComponent && !component_1._attached) {
+                        ComponentParams_1.ComponentParams.init(component_1);
+                        component_1.elementConnected();
+                        component_1._attach();
+                    }
+                }
+            });
+        }
+    },
+    _a.disconnectedCallback = function () {
+        this[exports.KEY_IS_ELEMENT_CONNECTED] = false;
+        if (isConnectionStatusCallbacksSuppressed) {
+            return;
+        }
+        var component = this.rioniteComponent;
+        if (component && component._attached) {
+            component._parentComponent = null;
+            component.elementDisconnected();
+            defer_1.defer(function () {
+                if (component._parentComponent === null && component._attached) {
+                    component._detach();
+                }
+            });
+        }
+    },
+    _a.attributeChangedCallback = function (name, prevRawValue, rawValue) {
+        var component = this.rioniteComponent;
+        if (component && component.isReady) {
+            var $paramConfig = component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG][name];
+            if ($paramConfig.readonly) {
+                if (Features_1.nativeCustomElements) {
+                    throw new TypeError("Cannot write to readonly parameter \"" + $paramConfig.name + "\"");
+                }
+            }
+            else {
+                var valueCell = component[$paramConfig.property + 'Cell'];
+                var value = $paramConfig.typeSerializer.read(rawValue, $paramConfig.default);
+                if (valueCell) {
+                    valueCell.set(value);
+                }
+                else {
+                    component[BaseComponent_1.KEY_PARAMS].set($paramConfig.name, value);
+                }
+            }
+        }
+    },
+    _a);
+var _a;
+
+
+/***/ }),
 /* 3 */
 /***/ (function(module, exports) {
 
@@ -603,7 +613,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_5__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var ComponentParams_1 = __webpack_require__(13);
+var ComponentParams_1 = __webpack_require__(8);
 function attachChildComponentElements(childComponents) {
     for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
         var childComponent = childComponents_1[_i];
@@ -636,10 +646,10 @@ var __extends = (this && this.__extends) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(0);
-var set_attribute_1 = __webpack_require__(42);
+var set_attribute_1 = __webpack_require__(41);
 var cellx_1 = __webpack_require__(3);
-var BaseComponent_1 = __webpack_require__(2);
-var compileContentNodeValue_1 = __webpack_require__(43);
+var BaseComponent_1 = __webpack_require__(1);
+var compileContentNodeValue_1 = __webpack_require__(42);
 var ContentNodeValueParser_1 = __webpack_require__(23);
 var compileKeypath_1 = __webpack_require__(17);
 var AttributeBindingCell = /** @class */ (function (_super) {
@@ -674,10 +684,10 @@ function bindContent(node, ownerComponent, context, result) {
         switch (child.nodeType) {
             case Node.ELEMENT_NODE: {
                 var childComponent = child.$component;
-                var params = void 0;
+                var $paramsConfig = void 0;
                 var $specifiedParams = void 0;
                 if (childComponent) {
-                    params = childComponent.constructor[BaseComponent_1.KEY_PARAMS];
+                    $paramsConfig = childComponent.constructor[BaseComponent_1.KEY_PARAMS_CONFIG];
                     $specifiedParams = new map_set_polyfill_1.Set();
                 }
                 var attrs = child.attributes;
@@ -687,15 +697,13 @@ function bindContent(node, ownerComponent, context, result) {
                     if (name_1.charAt(0) == '_') {
                         name_1 = name_1.slice(1);
                     }
-                    var param = params && params[name_1];
+                    var $paramConfig = $paramsConfig && $paramsConfig[name_1];
                     var paramName = void 0;
                     var paramConfig = void 0;
-                    if (param) {
-                        paramName = param.name;
-                        paramConfig = param.config;
-                        if (paramConfig != null) {
-                            $specifiedParams.add(paramName);
-                        }
+                    if ($paramConfig) {
+                        paramName = $paramConfig.name;
+                        paramConfig = $paramConfig.paramConfig;
+                        $specifiedParams.add(paramName);
                     }
                     var value = attr.value;
                     if (value.indexOf('{') == -1) {
@@ -716,7 +724,7 @@ function bindContent(node, ownerComponent, context, result) {
                             set_attribute_1.setAttribute(child, paramName || name_1, cell.get());
                             (result[0] || (result[0] = [])).push(cell);
                         }
-                        if (paramConfig != null && (prefix === '->' || prefix === '<->')) {
+                        if (paramConfig !== undefined && (prefix === '->' || prefix === '<->')) {
                             if (prefix == '->' && attr.name.charAt(0) != '_') {
                                 child.removeAttribute(paramName);
                             }
@@ -745,6 +753,8 @@ function bindContent(node, ownerComponent, context, result) {
                             (result[1] || (result[1] = [])).push([
                                 childComponent,
                                 (typeof paramConfig == 'object' &&
+                                    (paramConfig.type !== undefined ||
+                                        paramConfig.default !== undefined) &&
                                     paramConfig.property) ||
                                     paramName,
                                 handler
@@ -806,6 +816,81 @@ exports.bindContent = bindContent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+var symbol_polyfill_1 = __webpack_require__(5);
+var BaseComponent_1 = __webpack_require__(1);
+var componentParamTypeSerializerMap_1 = __webpack_require__(38);
+exports.KEY_IS_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite.isComponentParamsInited');
+function initParam(component, $paramConfig, name) {
+    if ($paramConfig === null) {
+        return;
+    }
+    var typeSerializer = $paramConfig.typeSerializer;
+    var defaultValue;
+    if (typeSerializer) {
+        defaultValue = $paramConfig.default;
+    }
+    else {
+        var paramConfig = $paramConfig.paramConfig;
+        var type = typeof paramConfig;
+        defaultValue = component[$paramConfig.property];
+        var isObject = type == 'object' &&
+            (paramConfig.type !== undefined ||
+                paramConfig.default !== undefined);
+        if (defaultValue === undefined) {
+            if (isObject) {
+                defaultValue = paramConfig.default;
+            }
+            else if (type != 'function') {
+                defaultValue = paramConfig;
+            }
+        }
+        type = isObject ? paramConfig.type : paramConfig;
+        if (defaultValue !== undefined && type !== eval) {
+            type = typeof defaultValue;
+        }
+        typeSerializer = componentParamTypeSerializerMap_1.componentParamTypeSerializerMap.get(type);
+        if (!typeSerializer) {
+            throw new TypeError('Unsupported parameter type');
+        }
+        $paramConfig.type = type;
+        $paramConfig.typeSerializer = typeSerializer;
+        $paramConfig.default = defaultValue;
+    }
+    var rawValue = component.element.getAttribute(name);
+    if (rawValue === null) {
+        if ($paramConfig.required) {
+            throw new TypeError("Parameter \"" + name + "\" is required");
+        }
+        if (defaultValue != null && defaultValue !== false) {
+            component.element.setAttribute(name, typeSerializer.write(defaultValue));
+        }
+    }
+    component[BaseComponent_1.KEY_PARAMS].set(name, typeSerializer.read(rawValue, defaultValue));
+}
+exports.ComponentParams = {
+    init: function (component) {
+        if (component[exports.KEY_IS_COMPONENT_PARAMS_INITED]) {
+            return;
+        }
+        var paramsConfig = component.constructor.params;
+        if (paramsConfig) {
+            var $paramsConfig = component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG];
+            for (var name_1 in paramsConfig) {
+                initParam(component, $paramsConfig[name_1], name_1);
+            }
+        }
+        component[exports.KEY_IS_COMPONENT_PARAMS_INITED] = true;
+    }
+};
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 var dummyEl = document.createElement('div');
 dummyEl.innerHTML = '<template>1</template>';
 exports.templateTag = !dummyEl.firstChild.firstChild;
@@ -836,12 +921,6 @@ exports.nativeCustomElements = nativeCustomElementsFeature;
 
 
 /***/ }),
-/* 9 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_9__;
-
-/***/ }),
 /* 10 */
 /***/ (function(module, exports) {
 
@@ -861,145 +940,9 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_12__;
 
 /***/ }),
 /* 13 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var symbol_polyfill_1 = __webpack_require__(5);
-var cellx_1 = __webpack_require__(3);
-var componentParamTypeSerializerMap_1 = __webpack_require__(39);
-var KEY_IS_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite.isComponentParamsInited');
-function initParam(component, config, name) {
-    if (config == null) {
-        return;
-    }
-    var propertyName;
-    var type = typeof config;
-    var defaultValue;
-    var required;
-    var readonly;
-    var isObject = type == 'object' &&
-        (config.type !== undefined ||
-            config.default !== undefined);
-    propertyName = (isObject && config.property) || name;
-    defaultValue = component[propertyName];
-    if (defaultValue === undefined) {
-        if (isObject) {
-            defaultValue = config.default;
-        }
-        else if (type != 'function') {
-            defaultValue = config;
-        }
-    }
-    type = isObject ? config.type : config;
-    if (defaultValue !== undefined && type !== eval) {
-        type = typeof defaultValue;
-    }
-    if (isObject) {
-        required = config.required || false;
-        readonly = config.readonly || false;
-    }
-    else {
-        required = readonly = false;
-    }
-    var typeSerializer = componentParamTypeSerializerMap_1.componentParamTypeSerializerMap.get(type);
-    if (!typeSerializer) {
-        throw new TypeError('Unsupported parameter type');
-    }
-    var el = component.element;
-    var rawValue = el.getAttribute(name);
-    if (rawValue === null) {
-        if (required) {
-            throw new TypeError("Parameter \"" + name + "\" is required");
-        }
-        if (defaultValue != null && defaultValue !== false) {
-            el.setAttribute(name, typeSerializer.write(defaultValue));
-        }
-    }
-    var value = typeSerializer.read(rawValue, defaultValue);
-    var descriptor;
-    if (readonly) {
-        descriptor = {
-            configurable: true,
-            enumerable: true,
-            get: function () {
-                return value;
-            },
-            set: function (val) {
-                if (val !== value) {
-                    throw new TypeError("Parameter \"" + name + "\" is readonly");
-                }
-            }
-        };
-    }
-    else {
-        var valueCell_1;
-        component['__setParam_' + name] = function (rawValue) {
-            var val = typeSerializer.read(rawValue, defaultValue);
-            if (valueCell_1) {
-                valueCell_1.set(val);
-            }
-            else {
-                value = val;
-            }
-        };
-        descriptor = {
-            configurable: true,
-            enumerable: true,
-            get: function () {
-                if (valueCell_1) {
-                    return valueCell_1.get();
-                }
-                var currentlyPulling = cellx_1.Cell.currentlyPulling;
-                if (currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
-                    valueCell_1 = new cellx_1.Cell(value, { context: component });
-                    Object.defineProperty(component, propertyName + 'Cell', {
-                        configurable: true,
-                        enumerable: false,
-                        writable: true,
-                        value: valueCell_1
-                    });
-                    if (currentlyPulling) {
-                        return valueCell_1.get();
-                    }
-                }
-                return value;
-            },
-            set: function (val) {
-                var rawValue = typeSerializer.write(val, defaultValue);
-                if (rawValue === null) {
-                    el.removeAttribute(name);
-                }
-                else {
-                    el.setAttribute(name, rawValue);
-                }
-                if (valueCell_1) {
-                    valueCell_1.set(val);
-                }
-                else {
-                    value = val;
-                }
-            }
-        };
-    }
-    Object.defineProperty(component, propertyName, descriptor);
-}
-exports.ComponentParams = {
-    init: function (component) {
-        if (component[KEY_IS_COMPONENT_PARAMS_INITED]) {
-            return;
-        }
-        component[KEY_IS_COMPONENT_PARAMS_INITED] = true;
-        var config = component.constructor.params;
-        if (config) {
-            for (var name_1 in config) {
-                initParam(component, config[name_1], name_1);
-            }
-        }
-    }
-};
-
+module.exports = __WEBPACK_EXTERNAL_MODULE_13__;
 
 /***/ }),
 /* 14 */
@@ -1063,7 +1006,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_18__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var next_uid_1 = __webpack_require__(33);
+var next_uid_1 = __webpack_require__(32);
 var cellx_1 = __webpack_require__(3);
 var DisposableMixin = /** @class */ (function () {
     function DisposableMixin() {
@@ -1223,7 +1166,7 @@ exports.DisposableMixin = DisposableMixin;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var gettext_1 = __webpack_require__(34);
+var gettext_1 = __webpack_require__(33);
 exports.formatters = {
     or: function (value, arg) {
         return value || arg;
@@ -1301,13 +1244,15 @@ exports.formatters.seq = exports.formatters.identical;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var hyphenize_1 = __webpack_require__(22);
-var mixin_1 = __webpack_require__(35);
-var pascalize_1 = __webpack_require__(36);
-var nelm_1 = __webpack_require__(10);
-var BaseComponent_1 = __webpack_require__(2);
+var mixin_1 = __webpack_require__(34);
+var pascalize_1 = __webpack_require__(35);
+var cellx_1 = __webpack_require__(3);
+var nelm_1 = __webpack_require__(11);
+var BaseComponent_1 = __webpack_require__(1);
 var componentConstructorMap_1 = __webpack_require__(25);
-var elementConstructorMap_1 = __webpack_require__(51);
-var ElementProtoMixin_1 = __webpack_require__(1);
+var ComponentParams_1 = __webpack_require__(8);
+var elementConstructorMap_1 = __webpack_require__(50);
+var ElementProtoMixin_1 = __webpack_require__(2);
 var push = Array.prototype.push;
 function inheritProperty(target, source, name, depth) {
     var obj = target[name];
@@ -1333,16 +1278,132 @@ function registerComponent(componentConstr) {
     if (componentConstructorMap_1.componentConstructorMap.has(hyphenizedElIs)) {
         throw new TypeError("Component \"" + hyphenizedElIs + "\" already registered");
     }
-    var parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
+    var componentProto = componentConstr.prototype;
+    var parentComponentConstr = Object.getPrototypeOf(componentProto)
         .constructor;
     inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
     var paramsConfig = componentConstr.params;
     if (paramsConfig) {
+        var _loop_1 = function (name_1) {
+            var paramConfig = paramsConfig[name_1];
+            if (paramConfig === null) {
+                var parentParamConfig = parentComponentConstr.params && parentComponentConstr.params[name_1];
+                if (parentParamConfig != null) {
+                    Object.defineProperty(componentProto, (typeof parentParamConfig == 'object' &&
+                        (parentParamConfig.type !== undefined ||
+                            parentParamConfig.default !== undefined) &&
+                        parentParamConfig.property) ||
+                        name_1, {
+                        configurable: true,
+                        enumerable: true,
+                        writable: true,
+                        value: null
+                    });
+                }
+            }
+            else {
+                var isObject = typeof paramConfig == 'object' &&
+                    (paramConfig.type !== undefined || paramConfig.default !== undefined);
+                var propertyName_1 = (isObject && paramConfig.property) || name_1;
+                var required = void 0;
+                var readonly = void 0;
+                if (isObject) {
+                    required = paramConfig.required || false;
+                    readonly = paramConfig.readonly || false;
+                }
+                else {
+                    required = readonly = false;
+                }
+                var $paramConfig_1 = ((componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG] ||
+                    (componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG] = Object.create(null)))[name_1] = componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG][name_1.toLowerCase()] = {
+                    name: name_1,
+                    property: propertyName_1,
+                    type: undefined,
+                    typeSerializer: undefined,
+                    default: undefined,
+                    required: required,
+                    readonly: readonly,
+                    paramConfig: paramsConfig[name_1]
+                });
+                var descriptor = void 0;
+                if (readonly) {
+                    descriptor = {
+                        configurable: true,
+                        enumerable: true,
+                        get: function () {
+                            return this[BaseComponent_1.KEY_PARAMS].get(name_1);
+                        },
+                        set: function (value) {
+                            if (this[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
+                                if (value !== this[BaseComponent_1.KEY_PARAMS].get(name_1)) {
+                                    throw new TypeError("Parameter \"" + name_1 + "\" is readonly");
+                                }
+                            }
+                            else {
+                                this[BaseComponent_1.KEY_PARAMS].set(name_1, value);
+                            }
+                        }
+                    };
+                }
+                else {
+                    Object.defineProperty(componentProto, propertyName_1 + 'Cell', {
+                        configurable: true,
+                        enumerable: false,
+                        writable: true,
+                        value: undefined
+                    });
+                    descriptor = {
+                        configurable: true,
+                        enumerable: true,
+                        get: function () {
+                            var valueCell = this[propertyName_1 + 'Cell'];
+                            if (valueCell) {
+                                return valueCell.get();
+                            }
+                            var currentlyPulling = cellx_1.Cell.currentlyPulling;
+                            var value = this[BaseComponent_1.KEY_PARAMS].get(name_1);
+                            if (currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
+                                valueCell = new cellx_1.Cell(value, { context: this });
+                                Object.defineProperty(this, propertyName_1 + 'Cell', {
+                                    configurable: true,
+                                    enumerable: false,
+                                    writable: true,
+                                    value: valueCell
+                                });
+                                if (currentlyPulling) {
+                                    return valueCell.get();
+                                }
+                            }
+                            return value;
+                        },
+                        set: function (value) {
+                            if (this[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
+                                var rawValue = $paramConfig_1.typeSerializer.write(value, $paramConfig_1.default);
+                                if (rawValue === null) {
+                                    this.element.removeAttribute(name_1);
+                                }
+                                else {
+                                    this.element.setAttribute(name_1, rawValue);
+                                }
+                                var valueCell = this[propertyName_1 + 'Cell'];
+                                if (valueCell) {
+                                    valueCell.set(value);
+                                }
+                                else {
+                                    this[BaseComponent_1.KEY_PARAMS].set(name_1, value);
+                                }
+                            }
+                            else {
+                                this[BaseComponent_1.KEY_PARAMS].set(name_1, value);
+                            }
+                        }
+                    };
+                }
+                Object.defineProperty(componentProto, propertyName_1, descriptor);
+            }
+        };
         for (var name_1 in paramsConfig) {
-            (componentConstr[BaseComponent_1.KEY_PARAMS] || (componentConstr[BaseComponent_1.KEY_PARAMS] = Object.create(null)))[name_1] = componentConstr[BaseComponent_1.KEY_PARAMS][name_1.toLowerCase()] = {
-                name: name_1,
-                config: paramsConfig[name_1]
-            };
+            _loop_1(name_1);
         }
     }
     inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
@@ -1824,13 +1885,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var next_tick_1 = __webpack_require__(27);
 var cellx_1 = __webpack_require__(3);
 var attachChildComponentElements_1 = __webpack_require__(6);
-var BaseComponent_1 = __webpack_require__(2);
+var BaseComponent_1 = __webpack_require__(1);
 var bindContent_1 = __webpack_require__(7);
 var Component_1 = __webpack_require__(4);
-var ElementProtoMixin_1 = __webpack_require__(1);
-var ElementProtoMixin_2 = __webpack_require__(1);
+var ElementProtoMixin_1 = __webpack_require__(2);
+var ElementProtoMixin_2 = __webpack_require__(2);
 var compileKeypath_1 = __webpack_require__(17);
-var Features_1 = __webpack_require__(8);
+var Features_1 = __webpack_require__(9);
 var keypathPattern_1 = __webpack_require__(15);
 var slice = Array.prototype.slice;
 var reKeypath = RegExp("^" + keypathPattern_1.keypathPattern + "$");
@@ -1974,12 +2035,11 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_28__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var di_1 = __webpack_require__(9);
+var di_1 = __webpack_require__(10);
 var logger_1 = __webpack_require__(18);
 __webpack_require__(30);
 __webpack_require__(31);
-__webpack_require__(32);
-var nelm_1 = __webpack_require__(10);
+var nelm_1 = __webpack_require__(11);
 exports.NelmNodeType = nelm_1.NodeType;
 exports.NelmParser = nelm_1.Parser;
 exports.Template = nelm_1.Template;
@@ -1989,14 +2049,15 @@ var formatters_1 = __webpack_require__(20);
 exports.formatters = formatters_1.formatters;
 var Component_1 = __webpack_require__(4);
 exports.Component = Component_1.Component;
-var Param_1 = __webpack_require__(52);
+var Param_1 = __webpack_require__(51);
 exports.Param = Param_1.Param;
-var BaseComponent_1 = __webpack_require__(2);
+var BaseComponent_1 = __webpack_require__(1);
+exports.KEY_PARAMS_CONFIG = BaseComponent_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAMS = BaseComponent_1.KEY_PARAMS;
 exports.BaseComponent = BaseComponent_1.BaseComponent;
-var ElementProtoMixin_1 = __webpack_require__(1);
+var ElementProtoMixin_1 = __webpack_require__(2);
 exports.KEY_IS_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_IS_ELEMENT_CONNECTED;
-var ComponentParams_1 = __webpack_require__(13);
+var ComponentParams_1 = __webpack_require__(8);
 exports.ComponentParams = ComponentParams_1.ComponentParams;
 var componentParamValueMap_1 = __webpack_require__(14);
 exports.componentParamValueMap = componentParamValueMap_1.componentParamValueMap;
@@ -2004,13 +2065,13 @@ var registerComponent_1 = __webpack_require__(21);
 exports.registerComponent = registerComponent_1.registerComponent;
 var RtIfThen_1 = __webpack_require__(26);
 exports.RtIfThen = RtIfThen_1.RtIfThen;
-var RtIfElse_1 = __webpack_require__(54);
+var RtIfElse_1 = __webpack_require__(53);
 exports.RtIfElse = RtIfElse_1.RtIfElse;
-var RtRepeat_1 = __webpack_require__(55);
+var RtRepeat_1 = __webpack_require__(54);
 exports.RtRepeat = RtRepeat_1.RtRepeat;
-var RtSlot_1 = __webpack_require__(56);
+var RtSlot_1 = __webpack_require__(55);
 exports.RtSlot = RtSlot_1.RtSlot;
-var RtContent_1 = __webpack_require__(57);
+var RtContent_1 = __webpack_require__(56);
 exports.RtContent = RtContent_1.RtContent;
 di_1.Container.registerService('logger', logger_1.logger);
 
@@ -2033,12 +2094,6 @@ if (!('firstElementChild' in DocumentFragment.prototype)) {
         }
     });
 }
-
-
-/***/ }),
-/* 31 */
-/***/ (function(module, exports) {
-
 if (!('nextElementSibling' in DocumentFragment.prototype)) {
     Object.defineProperty(DocumentFragment.prototype, 'nextElementSibling', {
         configurable: true,
@@ -2056,13 +2111,13 @@ if (!('nextElementSibling' in DocumentFragment.prototype)) {
 
 
 /***/ }),
-/* 32 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var nelm_1 = __webpack_require__(10);
+var nelm_1 = __webpack_require__(11);
 ['if-then', 'if-else', 'repeat'].forEach(function (tagName) {
     nelm_1.Template.helpers[tagName] = function (el) {
         var attrs = el.attributes;
@@ -2089,6 +2144,12 @@ var nelm_1 = __webpack_require__(10);
 
 
 /***/ }),
+/* 32 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_32__;
+
+/***/ }),
 /* 33 */
 /***/ (function(module, exports) {
 
@@ -2102,18 +2163,12 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_34__;
 
 /***/ }),
 /* 35 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_35__;
-
-/***/ }),
-/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(37);
+var camelize_1 = __webpack_require__(36);
 var cache = Object.create(null);
 function pascalize(str, useCache) {
     str = String(str);
@@ -2127,7 +2182,7 @@ exports.pascalize = pascalize;
 
 
 /***/ }),
-/* 37 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2146,20 +2201,20 @@ exports.camelize = camelize;
 
 
 /***/ }),
-/* 38 */
+/* 37 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_38__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_37__;
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_html_1 = __webpack_require__(40);
-var is_regexp_1 = __webpack_require__(41);
+var escape_html_1 = __webpack_require__(39);
+var is_regexp_1 = __webpack_require__(40);
 var map_set_polyfill_1 = __webpack_require__(0);
 var componentParamValueMap_1 = __webpack_require__(14);
 exports.componentParamTypeSerializerMap = new map_set_polyfill_1.Map([
@@ -2238,6 +2293,12 @@ exports.componentParamTypeSerializerMap.set('object', exports.componentParamType
 
 
 /***/ }),
+/* 39 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_39__;
+
+/***/ }),
 /* 40 */
 /***/ (function(module, exports) {
 
@@ -2251,19 +2312,13 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_41__;
 
 /***/ }),
 /* 42 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_42__;
-
-/***/ }),
-/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(44);
-var bindingToJSExpression_1 = __webpack_require__(45);
+var escape_string_1 = __webpack_require__(43);
+var bindingToJSExpression_1 = __webpack_require__(44);
 var componentParamValueMap_1 = __webpack_require__(14);
 var ContentNodeValueParser_1 = __webpack_require__(23);
 var formatters_1 = __webpack_require__(20);
@@ -2316,13 +2371,13 @@ exports.compileContentNodeValue = compileContentNodeValue;
 
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_44__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_43__;
 
 /***/ }),
-/* 45 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2365,7 +2420,7 @@ exports.bindingToJSExpression = bindingToJSExpression;
 
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2418,13 +2473,13 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_47__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_46__;
 
 /***/ }),
-/* 48 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2444,7 +2499,7 @@ exports.handledEvents = [
 
 
 /***/ }),
-/* 49 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2499,7 +2554,7 @@ exports.handleDOMEvent = handleDOMEvent;
 
 
 /***/ }),
-/* 50 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2587,7 +2642,7 @@ exports.handleEvent = handleEvent;
 
 
 /***/ }),
-/* 51 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2640,15 +2695,17 @@ exports.elementConstructorMap = new map_set_polyfill_1.Map([
 
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var lower_case_first_word_1 = __webpack_require__(53);
+var lower_case_first_word_1 = __webpack_require__(52);
 var map_set_polyfill_1 = __webpack_require__(0);
 var types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
+var prefix = 'param';
+var prefixLength = prefix.length;
 function Param(target, propertyName, propertyDesc, name, config) {
     if (typeof propertyName != 'string') {
         if (target && typeof target != 'string') {
@@ -2675,7 +2732,7 @@ function Param(target, propertyName, propertyDesc, name, config) {
     }
     var constr = target.constructor;
     ((constr.hasOwnProperty('params') && constr.params) || (constr.params = {}))[(name ||
-        (propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
+        (propertyName.length <= prefixLength || propertyName.lastIndexOf(prefix, 0)
             ? propertyName
             : lower_case_first_word_1.lowerCaseFirstWord(propertyName.slice(5))))] = config;
 }
@@ -2683,13 +2740,13 @@ exports.Param = Param;
 
 
 /***/ }),
-/* 53 */
+/* 52 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE_53__;
+module.exports = __WEBPACK_EXTERNAL_MODULE_52__;
 
 /***/ }),
-/* 54 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2731,7 +2788,7 @@ exports.RtIfElse = RtIfElse;
 
 
 /***/ }),
-/* 55 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2757,13 +2814,13 @@ var map_set_polyfill_1 = __webpack_require__(0);
 var next_tick_1 = __webpack_require__(27);
 var cellx_1 = __webpack_require__(3);
 var attachChildComponentElements_1 = __webpack_require__(6);
-var BaseComponent_1 = __webpack_require__(2);
+var BaseComponent_1 = __webpack_require__(1);
 var bindContent_1 = __webpack_require__(7);
 var Component_1 = __webpack_require__(4);
-var ElementProtoMixin_1 = __webpack_require__(1);
-var ElementProtoMixin_2 = __webpack_require__(1);
+var ElementProtoMixin_1 = __webpack_require__(2);
+var ElementProtoMixin_2 = __webpack_require__(2);
 var compileKeypath_1 = __webpack_require__(17);
-var Features_1 = __webpack_require__(8);
+var Features_1 = __webpack_require__(9);
 var keypathPattern_1 = __webpack_require__(15);
 var namePattern_1 = __webpack_require__(16);
 var slice = Array.prototype.slice;
@@ -3030,7 +3087,7 @@ exports.RtRepeat = RtRepeat;
 
 
 /***/ }),
-/* 56 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3053,15 +3110,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var clear_node_1 = __webpack_require__(28);
-var get_uid_1 = __webpack_require__(11);
+var get_uid_1 = __webpack_require__(12);
 var map_set_polyfill_1 = __webpack_require__(0);
-var move_content_1 = __webpack_require__(12);
+var move_content_1 = __webpack_require__(13);
 var symbol_polyfill_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(6);
-var BaseComponent_1 = __webpack_require__(2);
+var BaseComponent_1 = __webpack_require__(1);
 var bindContent_1 = __webpack_require__(7);
 var Component_1 = __webpack_require__(4);
-var ElementProtoMixin_1 = __webpack_require__(1);
+var ElementProtoMixin_1 = __webpack_require__(2);
 var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite.RtSlot.slotContentMap');
 var RtSlot = /** @class */ (function (_super) {
     __extends(RtSlot, _super);
@@ -3215,7 +3272,7 @@ exports.RtSlot = RtSlot;
 
 
 /***/ }),
-/* 57 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3238,15 +3295,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var clear_node_1 = __webpack_require__(28);
-var get_uid_1 = __webpack_require__(11);
+var get_uid_1 = __webpack_require__(12);
 var map_set_polyfill_1 = __webpack_require__(0);
-var move_content_1 = __webpack_require__(12);
+var move_content_1 = __webpack_require__(13);
 var symbol_polyfill_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(6);
-var BaseComponent_1 = __webpack_require__(2);
+var BaseComponent_1 = __webpack_require__(1);
 var bindContent_1 = __webpack_require__(7);
 var Component_1 = __webpack_require__(4);
-var ElementProtoMixin_1 = __webpack_require__(1);
+var ElementProtoMixin_1 = __webpack_require__(2);
 var KEY_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite.RtContent.contentMap');
 var RtContent = /** @class */ (function (_super) {
     __extends(RtContent, _super);

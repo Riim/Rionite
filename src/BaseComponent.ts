@@ -12,6 +12,7 @@ import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructorMap } from './componentConstructorMap';
+import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
 import {
 	DisposableMixin,
 	IDisposableListening,
@@ -25,6 +26,29 @@ import { handleEvent } from './handleEvent';
 import { templateTag as templateTagFeature } from './lib/Features';
 
 let map = Array.prototype.map;
+
+export interface IComponentParamConfig {
+	property?: string;
+	type?: Function;
+	default?: any;
+	required?: boolean;
+	readonly?: boolean;
+}
+
+export interface I$ComponentParamConfig {
+	name: string;
+	property: string;
+
+	type: Function | undefined;
+	typeSerializer: IComponentParamTypeSerializer | undefined;
+
+	default: any;
+
+	required: boolean;
+	readonly: boolean;
+
+	paramConfig: IComponentParamConfig | Function;
+}
 
 export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent>
 	extends HTMLElement {
@@ -53,6 +77,7 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	};
 }
 
+export let KEY_PARAMS_CONFIG = Symbol('paramsConfig');
 export let KEY_PARAMS = Symbol('params');
 
 let reClassBlockElement = / class="([a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b(?: [a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b)*)/g;
@@ -126,12 +151,11 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 	static elementExtends: string | null = null;
 
 	static params: { [name: string]: any } | null = null;
-
 	static i18n: { [key: string]: any } | null = null;
 
 	static _blockNamesString: string;
-
 	static _elementBlockNames: Array<string>;
+
 	static template: string | IBlock | Template | null = null;
 
 	static _rawContent: DocumentFragment | undefined;
@@ -215,6 +239,8 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 		(el as IComponentElement).rioniteComponent = this;
 		Object.defineProperty(el, '$component', { value: this });
+
+		this[KEY_PARAMS] = new Map();
 
 		this.created();
 	}

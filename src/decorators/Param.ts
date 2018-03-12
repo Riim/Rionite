@@ -1,9 +1,11 @@
 import { lowerCaseFirstWord } from '@riim/lower-case-first-word';
 import { Set } from '@riim/map-set-polyfill';
-import { BaseComponent } from '../BaseComponent';
-import { IComponentParamConfig } from '../ComponentParams';
+import { BaseComponent, IComponentParamConfig } from '../BaseComponent';
 
 let types = new Set([Boolean, Number, String, Object]);
+
+let prefix = 'param';
+let prefixLength = prefix.length;
 
 export function Param(
 	target: Object,
@@ -53,7 +55,7 @@ export function Param(
 
 	((constr.hasOwnProperty('params') && constr.params) || (constr.params = {}))[
 		(name ||
-			(propertyName.length <= 5 || propertyName.lastIndexOf('param', 0)
+			(propertyName.length <= prefixLength || propertyName.lastIndexOf(prefix, 0)
 				? propertyName
 				: lowerCaseFirstWord(propertyName.slice(5)))) as string
 	] = config;

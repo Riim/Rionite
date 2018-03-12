@@ -1,9 +1,18 @@
 import { hyphenize } from '@riim/hyphenize';
 import { mixin } from '@riim/mixin';
 import { pascalize } from '@riim/pascalize';
+import { Cell, EventEmitter } from 'cellx';
 import { Template } from 'nelm';
-import { BaseComponent, IComponentElement, KEY_PARAMS } from './BaseComponent';
+import {
+	BaseComponent,
+	I$ComponentParamConfig,
+	IComponentElement,
+	IComponentParamConfig,
+	KEY_PARAMS,
+	KEY_PARAMS_CONFIG
+	} from './BaseComponent';
 import { componentConstructorMap } from './componentConstructorMap';
+import { KEY_IS_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
 
@@ -46,7 +55,8 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		throw new TypeError(`Component "${hyphenizedElIs}" already registered`);
 	}
 
-	let parentComponentConstr = Object.getPrototypeOf(componentConstr.prototype)
+	let componentProto = componentConstr.prototype;
+	let parentComponentConstr = Object.getPrototypeOf(componentProto)
 		.constructor as typeof BaseComponent;
 
 	inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
@@ -55,12 +65,153 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 	if (paramsConfig) {
 		for (let name in paramsConfig) {
-			(componentConstr[KEY_PARAMS] || (componentConstr[KEY_PARAMS] = Object.create(null)))[
-				name
-			] = componentConstr[KEY_PARAMS][name.toLowerCase()] = {
-				name,
-				config: paramsConfig[name]
-			};
+			let paramConfig: IComponentParamConfig = paramsConfig[name];
+
+			if (paramConfig === null) {
+				let parentParamConfig: IComponentParamConfig =
+					parentComponentConstr.params && parentComponentConstr.params[name];
+
+				if (parentParamConfig != null) {
+					Object.defineProperty(
+						componentProto,
+						(typeof parentParamConfig == 'object' &&
+							(parentParamConfig.type !== undefined ||
+								parentParamConfig.default !== undefined) &&
+							parentParamConfig.property) ||
+							name,
+						{
+							configurable: true,
+							enumerable: true,
+							writable: true,
+							value: null
+						}
+					);
+				}
+			} else {
+				let isObject =
+					typeof paramConfig == 'object' &&
+					(paramConfig.type !== undefined || paramConfig.default !== undefined);
+
+				let propertyName = (isObject && paramConfig.property) || name;
+
+				let required: boolean;
+				let readonly: boolean;
+
+				if (isObject) {
+					required = paramConfig.required || false;
+					readonly = paramConfig.readonly || false;
+				} else {
+					required = readonly = false;
+				}
+
+				let $paramConfig: I$ComponentParamConfig = ((componentConstr[KEY_PARAMS_CONFIG] ||
+					(componentConstr[KEY_PARAMS_CONFIG] = Object.create(null)))[
+					name
+				] = componentConstr[KEY_PARAMS_CONFIG][name.toLowerCase()] = {
+					name,
+					property: propertyName,
+
+					type: undefined,
+					typeSerializer: undefined,
+
+					default: undefined,
+
+					required,
+					readonly,
+
+					paramConfig: paramsConfig[name]
+				});
+
+				let descriptor: PropertyDescriptor;
+
+				if (readonly) {
+					descriptor = {
+						configurable: true,
+						enumerable: true,
+
+						get() {
+							return this[KEY_PARAMS].get(name);
+						},
+
+						set(this: BaseComponent, value: any) {
+							if (this[KEY_IS_COMPONENT_PARAMS_INITED]) {
+								if (value !== this[KEY_PARAMS].get(name)) {
+									throw new TypeError(`Parameter "${name}" is readonly`);
+								}
+							} else {
+								this[KEY_PARAMS].set(name, value);
+							}
+						}
+					};
+				} else {
+					Object.defineProperty(componentProto, propertyName + 'Cell', {
+						configurable: true,
+						enumerable: false,
+						writable: true,
+						value: undefined
+					});
+
+					descriptor = {
+						configurable: true,
+						enumerable: true,
+
+						get() {
+							let valueCell = this[propertyName + 'Cell'];
+
+							if (valueCell) {
+								return valueCell.get();
+							}
+
+							let currentlyPulling = Cell.currentlyPulling;
+							let value = this[KEY_PARAMS].get(name);
+
+							if (currentlyPulling || EventEmitter.currentlySubscribing) {
+								valueCell = new Cell(value, { context: this });
+
+								Object.defineProperty(this, propertyName + 'Cell', {
+									configurable: true,
+									enumerable: false,
+									writable: true,
+									value: valueCell
+								});
+
+								if (currentlyPulling) {
+									return valueCell.get();
+								}
+							}
+
+							return value;
+						},
+
+						set(this: BaseComponent, value: any) {
+							if (this[KEY_IS_COMPONENT_PARAMS_INITED]) {
+								let rawValue = $paramConfig.typeSerializer!.write(
+									value,
+									$paramConfig.default
+								);
+
+								if (rawValue === null) {
+									this.element.removeAttribute(name);
+								} else {
+									this.element.setAttribute(name, rawValue);
+								}
+
+								let valueCell = this[propertyName + 'Cell'];
+
+								if (valueCell) {
+									valueCell.set(value);
+								} else {
+									this[KEY_PARAMS].set(name, value);
+								}
+							} else {
+								this[KEY_PARAMS].set(name, value);
+							}
+						}
+					};
+				}
+
+				Object.defineProperty(componentProto, propertyName, descriptor);
+			}
 		}
 	}
 
@@ -89,7 +240,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 				componentConstr.template = parentComponentConstr.template
 					? (parentComponentConstr.template as Template).extend(template, {
 							blockName: elIs
-						})
+					  })
 					: new Template(template, { blockName: componentConstr._elementBlockNames });
 			}
 		}

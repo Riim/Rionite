@@ -42,10 +42,10 @@ class HelloUser extends BaseComponent {
 
 Элемент в приведённом примере отрендерится в следующий вид:
 ```html
-<hello-user name="Matroskin" class="hello-user">Hello, Matroskin!</hello-user>
+<hello-user name="Matroskin" class="HelloUser">Hello, Matroskin!</hello-user>
 ```
 
-Имя тега продублировалось в css-классе элемента, это необходимо для наследования стилей — имя тега элемента у наследуемого компонента будет другим, но оба имени добавятся в css-класс элемента:
+Имя компонента добавляется в css-класс элемента, это необходимо для наследования стилей — имя тега элемента у наследуемого компонента будет другим, но оба имени добавятся в css-класс элемента:
 ```html
 <hello-super-user name="Matroskin" class="HelloUser HelloSuperUser">Hello, Matroskin!</hello-super-user>
 ```
@@ -54,7 +54,7 @@ class HelloUser extends BaseComponent {
 .HelloSuperUser {
     color: red;
 
-    & .HelloUser__some-inner-element {
+    & .HelloUser__someInnerElement {
         font-width: bold;
     }
 }
@@ -85,7 +85,7 @@ super-select {
 
 <script src="...">
 
-import { Observable } from 'cellx';
+import { Observable } from 'cellx-decorators';
 import { BaseComponent, Component } from 'rionite';
 
 @Component({
@@ -110,7 +110,7 @@ class SimpleCounter extends BaseComponent {
 </script>
 ```
 
-Для управления потоком вычисления в шаблоне используются компоненты `RtIfThen`, `RtIfElse` и `RtRepeat`.
+Для управления потоком в шаблоне используются компоненты `RtIfThen`, `RtIfElse` и `RtRepeat`.
 
 TODO:
 - formatters
