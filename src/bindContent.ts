@@ -139,30 +139,28 @@ export function bindContent(
 							let keypath = (contentNodeValue[0] as IContentNodeValueBinding)
 								.keypath!;
 							let keys = keypath.split('.');
-							let propertyName: string;
 							let handler: TListener;
 
 							if (keys.length == 1) {
-								propertyName = keys[0];
-
-								handler = function(evt) {
-									this.ownerComponent[propertyName] = evt.data.value;
-								};
+								handler = (propertyName => {
+									return function(evt: IEvent) {
+										this.ownerComponent[propertyName] = evt.data.value;
+									};
+								})(keys[0]);
 							} else {
-								propertyName = keys[keys.length - 1];
-								keys = keys.slice(0, -1);
+								handler = ((propertyName, keys) => {
+									let getPropertyHolder = compileKeypath(keys, keys.join('.'));
 
-								let getPropertyHolder = compileKeypath(keys, keys.join('.'));
+									return function(evt: IEvent) {
+										let propertyHolder = getPropertyHolder.call(
+											this.ownerComponent
+										);
 
-								handler = function(evt) {
-									let propertyHolder = getPropertyHolder.call(
-										this.ownerComponent
-									);
-
-									if (propertyHolder) {
-										propertyHolder[propertyName] = evt.data.value;
-									}
-								};
+										if (propertyHolder) {
+											propertyHolder[propertyName] = evt.data.value;
+										}
+									};
+								})(keys[keys.length - 1], keys.slice(0, -1));
 							}
 
 							(result[1] || (result[1] = [])).push([

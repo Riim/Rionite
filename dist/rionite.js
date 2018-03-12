@@ -691,7 +691,7 @@ function bindContent(node, ownerComponent, context, result) {
                     $specifiedParams = new map_set_polyfill_1.Set();
                 }
                 var attrs = child.attributes;
-                var _loop_1 = function (i) {
+                for (var i = attrs.length; i;) {
                     var attr = attrs.item(--i);
                     var name_1 = attr.name;
                     if (name_1.charAt(0) == '_') {
@@ -707,7 +707,7 @@ function bindContent(node, ownerComponent, context, result) {
                     }
                     var value = attr.value;
                     if (value.indexOf('{') == -1) {
-                        return out_i_1 = i, "continue";
+                        continue;
                     }
                     var contentNodeValue = new ContentNodeValueParser_1.ContentNodeValueParser(value).parse();
                     var contentNodeValueLength = contentNodeValue.length;
@@ -731,24 +731,24 @@ function bindContent(node, ownerComponent, context, result) {
                             var keypath = contentNodeValue[0]
                                 .keypath;
                             var keys = keypath.split('.');
-                            var propertyName_1;
                             var handler = void 0;
                             if (keys.length == 1) {
-                                propertyName_1 = keys[0];
-                                handler = function (evt) {
-                                    this.ownerComponent[propertyName_1] = evt.data.value;
-                                };
+                                handler = (function (propertyName) {
+                                    return function (evt) {
+                                        this.ownerComponent[propertyName] = evt.data.value;
+                                    };
+                                })(keys[0]);
                             }
                             else {
-                                propertyName_1 = keys[keys.length - 1];
-                                keys = keys.slice(0, -1);
-                                var getPropertyHolder_1 = compileKeypath_1.compileKeypath(keys, keys.join('.'));
-                                handler = function (evt) {
-                                    var propertyHolder = getPropertyHolder_1.call(this.ownerComponent);
-                                    if (propertyHolder) {
-                                        propertyHolder[propertyName_1] = evt.data.value;
-                                    }
-                                };
+                                handler = (function (propertyName, keys) {
+                                    var getPropertyHolder = compileKeypath_1.compileKeypath(keys, keys.join('.'));
+                                    return function (evt) {
+                                        var propertyHolder = getPropertyHolder.call(this.ownerComponent);
+                                        if (propertyHolder) {
+                                            propertyHolder[propertyName] = evt.data.value;
+                                        }
+                                    };
+                                })(keys[keys.length - 1], keys.slice(0, -1));
                             }
                             (result[1] || (result[1] = [])).push([
                                 childComponent,
@@ -761,12 +761,6 @@ function bindContent(node, ownerComponent, context, result) {
                             ]);
                         }
                     }
-                    out_i_1 = i;
-                };
-                var out_i_1;
-                for (var i = attrs.length; i;) {
-                    _loop_1(i);
-                    i = out_i_1;
                 }
                 if (childComponent) {
                     childComponent._ownerComponent = ownerComponent;
