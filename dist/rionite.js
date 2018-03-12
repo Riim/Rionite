@@ -1314,8 +1314,9 @@ function registerComponent(componentConstr) {
                 else {
                     required = readonly = false;
                 }
-                var $paramConfig_1 = ((componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG] ||
-                    (componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG] = Object.create(null)))[name_1] = componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG][name_1.toLowerCase()] = {
+                var $paramConfig_1 = ((componentConstr.hasOwnProperty(BaseComponent_1.KEY_PARAMS_CONFIG)
+                    ? componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG]
+                    : (componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG] = Object.create(null)))[name_1] = componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG][name_1.toLowerCase()] = {
                     name: name_1,
                     property: propertyName_1,
                     type: undefined,

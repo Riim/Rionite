@@ -104,8 +104,11 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 					required = readonly = false;
 				}
 
-				let $paramConfig: I$ComponentParamConfig = ((componentConstr[KEY_PARAMS_CONFIG] ||
-					(componentConstr[KEY_PARAMS_CONFIG] = Object.create(null)))[
+				let $paramConfig: I$ComponentParamConfig = ((componentConstr.hasOwnProperty(
+					KEY_PARAMS_CONFIG
+				)
+					? componentConstr[KEY_PARAMS_CONFIG]
+					: (componentConstr[KEY_PARAMS_CONFIG] = Object.create(null)))[
 					name
 				] = componentConstr[KEY_PARAMS_CONFIG][name.toLowerCase()] = {
 					name,
