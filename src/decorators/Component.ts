@@ -1,7 +1,8 @@
 import { IEvent } from 'cellx';
-import { IBlock, Template } from 'nelm';
+import { IBlock } from 'nelm-parser';
 import { BaseComponent, IComponentEvents } from '../BaseComponent';
 import { registerComponent } from '../registerComponent';
+import { Template } from '../Template';
 
 export function Component<T extends BaseComponent>(config?: {
 	elementIs?: string;

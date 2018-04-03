@@ -2,7 +2,6 @@ import { hyphenize } from '@riim/hyphenize';
 import { mixin } from '@riim/mixin';
 import { pascalize } from '@riim/pascalize';
 import { Cell, EventEmitter } from 'cellx';
-import { Template } from 'nelm';
 import {
 	BaseComponent,
 	I$ComponentParamConfig,
@@ -15,6 +14,7 @@ import { componentConstructorMap } from './componentConstructorMap';
 import { KEY_IS_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
+import { Template } from './Template';
 
 let push = Array.prototype.push;
 

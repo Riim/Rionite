@@ -61,7 +61,7 @@ module.exports = () => {
 			'cellx',
 			'escape-string',
 			'html-to-fragment',
-			'nelm'
+			'nelm-parser'
 		],
 
 		plugins,

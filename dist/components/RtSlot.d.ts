@@ -3,6 +3,7 @@ export declare class RtSlot extends BaseComponent {
     $context: {
         [name: string]: any;
     };
+    paramName: string;
     paramForTag: string;
     paramFor: string;
     paramCloneContent: boolean;

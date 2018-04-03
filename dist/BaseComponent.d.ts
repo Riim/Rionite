@@ -1,9 +1,10 @@
 import { Logger } from '@riim/logger';
 import { EventEmitter, IEvent } from 'cellx';
-import { IBlock, Template } from 'nelm';
+import { IBlock } from 'nelm-parser';
 import { IFreezableCell } from './componentBinding';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
 import { DisposableMixin, IDisposableListening, TListener, TListeningTarget } from './DisposableMixin';
+import { Template } from './Template';
 export interface IComponentParamConfig {
     property?: string;
     type?: Function;

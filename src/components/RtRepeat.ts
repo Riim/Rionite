@@ -15,16 +15,16 @@ import { namePattern } from '../lib/namePattern';
 let slice = Array.prototype.slice;
 
 export type TListCell = Cell<ObservableList<any>>;
-export interface IItem {
+export interface I$Item {
 	item: Cell<any>;
 	index: Cell<number>;
 	nodes: Array<Node>;
 	bindings: Array<Cell> | null;
 }
-export type TItemList = Array<IItem>;
-export type TItemMap = Map<any, TItemList>;
+export type T$ItemList = Array<I$Item>;
+export type T$ItemMap = Map<any, T$ItemList>;
 
-let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+of\\s+(${keypathPattern})\\s*$`);
+let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+(?:in|of)\\s+(${keypathPattern})\\s*$`);
 
 @Component({
 	elementExtends: 'template',
@@ -46,8 +46,8 @@ export class RtRepeat extends BaseComponent {
 
 	_rawItemContent: DocumentFragment;
 
-	_itemMap: TItemMap;
-	_prevItemMap: TItemMap;
+	_$itemMap: T$ItemMap;
+	_prev$ItemMap: T$ItemMap;
 
 	_lastNode: Node;
 
@@ -100,7 +100,7 @@ export class RtRepeat extends BaseComponent {
 				}
 			}
 
-			this._itemMap = new Map<any, TItemList>();
+			this._$itemMap = new Map<any, T$ItemList>();
 
 			this.initialized = true;
 		}
@@ -132,8 +132,8 @@ export class RtRepeat extends BaseComponent {
 	}
 
 	_render(changed: boolean) {
-		let prevItemMap = (this._prevItemMap = this._itemMap);
-		this._itemMap = new Map<any, TItemList>();
+		let prevItemMap = (this._prev$ItemMap = this._$itemMap);
+		this._$itemMap = new Map<any, T$ItemList>();
 
 		let list = this._list.get();
 		let c: boolean;
@@ -164,35 +164,35 @@ export class RtRepeat extends BaseComponent {
 	_renderItem(item: any, index: number): boolean {
 		let trackBy = this._trackBy;
 		let value = trackBy ? (trackBy == '$index' ? index : item[trackBy]) : item;
-		let prevItems = this._prevItemMap.get(value);
-		let items = this._itemMap.get(value);
+		let prev$Items = this._prev$ItemMap.get(value);
+		let $items = this._$itemMap.get(value);
 
-		if (prevItems) {
-			let prevItem: IItem;
+		if (prev$Items) {
+			let $item: I$Item;
 
-			if (prevItems.length == 1) {
-				prevItem = prevItems[0];
-				this._prevItemMap.delete(value);
+			if (prev$Items.length == 1) {
+				$item = prev$Items[0];
+				this._prev$ItemMap.delete(value);
 			} else {
-				prevItem = prevItems.shift()!;
+				$item = prev$Items.shift()!;
 			}
 
-			if (items) {
-				items.push(prevItem);
+			if ($items) {
+				$items.push($item);
 			} else {
-				this._itemMap.set(value, [prevItem]);
+				this._$itemMap.set(value, [$item]);
 			}
 
-			prevItem.item.set(item);
+			$item.item.set(item);
 
-			let nodes = prevItem.nodes;
+			let nodes = $item.nodes;
 
-			if (index == prevItem.index.get()) {
+			if (index == $item.index.get()) {
 				this._lastNode = nodes[nodes.length - 1];
 				return false;
 			}
 
-			prevItem.index.set(index);
+			$item.index.set(index);
 
 			let nodeCount = nodes.length;
 
@@ -238,19 +238,13 @@ export class RtRepeat extends BaseComponent {
 			content,
 			this.ownerComponent,
 			Object.create(context, {
-				$component: {
+				'$/': {
 					configurable: false,
 					enumerable: false,
 					writable: false,
-					value: context.$component || context
+					value: context['$/'] || context
 				},
 
-				[this._itemName + 'Cell']: {
-					configurable: true,
-					enumerable: false,
-					writable: true,
-					value: itemCell
-				},
 				[this._itemName]: {
 					configurable: true,
 					enumerable: true,
@@ -260,12 +254,6 @@ export class RtRepeat extends BaseComponent {
 					}
 				},
 
-				$indexCell: {
-					configurable: true,
-					enumerable: false,
-					writable: true,
-					value: indexCell
-				},
 				$index: {
 					configurable: true,
 					enumerable: true,
@@ -278,17 +266,17 @@ export class RtRepeat extends BaseComponent {
 			{ 0: null, 1: null, 2: null } as any
 		);
 
-		let newItem = {
+		let new$Item = {
 			item: itemCell,
 			index: indexCell,
 			nodes: slice.call(content.childNodes),
 			bindings
 		};
 
-		if (items) {
-			items.push(newItem);
+		if ($items) {
+			$items.push(new$Item);
 		} else {
-			this._itemMap.set(value, [newItem]);
+			this._$itemMap.set(value, [new$Item]);
 		}
 
 		let newLastNode = content.lastChild!;
@@ -311,15 +299,15 @@ export class RtRepeat extends BaseComponent {
 		return true;
 	}
 
-	_clearByItemMap(itemMap: TItemMap) {
-		itemMap.forEach(this._clearByItems, this);
-		itemMap.clear();
+	_clearByItemMap($itemMap: T$ItemMap) {
+		$itemMap.forEach(this._clearByItems, this);
+		$itemMap.clear();
 	}
 
-	_clearByItems(items: TItemList) {
-		for (let i = items.length; i; ) {
-			let item = items[--i];
-			let bindings = item.bindings;
+	_clearByItems($items: T$ItemList) {
+		for (let i = $items.length; i; ) {
+			let $item = $items[--i];
+			let bindings = $item.bindings;
 
 			if (bindings) {
 				for (let i = bindings.length; i; ) {
@@ -327,7 +315,7 @@ export class RtRepeat extends BaseComponent {
 				}
 			}
 
-			let nodes = item.nodes;
+			let nodes = $item.nodes;
 
 			for (let i = nodes.length; i; ) {
 				let node = nodes[--i];
@@ -349,6 +337,6 @@ export class RtRepeat extends BaseComponent {
 
 		this._list.off('change', this._onListChange, this);
 
-		this._clearByItemMap(this._itemMap);
+		this._clearByItemMap(this._$itemMap);
 	}
 }

@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.32.25",
+  "version": "0.32.27",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/index.d.ts",
@@ -19,10 +19,10 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "ajv": "^6.2.1",
+    "ajv": "^6.4.0",
     "awesome-typescript-loader": "^4.0.1",
     "benchmark": "^2.1.4",
-    "document-register-element": "^1.7.2",
+    "document-register-element": "^1.8.0",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.2",
@@ -32,7 +32,7 @@
     "run-sequence": "^2.2.1",
     "tslint": "^5.9.1",
     "tslint-loader": "^3.6.0",
-    "typescript": "^2.7.2",
+    "typescript": "^2.8.1",
     "webpack": "^3.11.0"
   },
   "dependencies": {
@@ -52,11 +52,12 @@
     "@riim/next-tick": "^1.0.1",
     "@riim/next-uid": "^1.0.0",
     "@riim/pascalize": "^1.0.1",
+    "@riim/self-closing-tags": "^1.0.2",
     "@riim/set-attribute": "^1.0.0",
     "@riim/symbol-polyfill": "^1.0.1",
     "cellx": "^1.7.81",
     "escape-string": "^1.0.2",
     "html-to-fragment": "^1.0.1",
-    "nelm": "^0.4.32"
+    "nelm-parser": "^1.1.15"
   }
 }

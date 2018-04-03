@@ -7,7 +7,7 @@ import { moveContent } from '@riim/move-content';
 import { Symbol } from '@riim/symbol-polyfill';
 import { EventEmitter, IEvent } from 'cellx';
 import { htmlToFragment } from 'html-to-fragment';
-import { IBlock, Template } from 'nelm';
+import { IBlock } from 'nelm-parser';
 import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
@@ -24,6 +24,7 @@ import { handledEvents } from './handledEvents';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
 import { templateTag as templateTagFeature } from './lib/Features';
+import { Template } from './Template';
 
 let map = Array.prototype.map;
 
@@ -131,7 +132,7 @@ function findChildComponents(
 			if (
 				child.firstChild &&
 				(!childComponent ||
-					(childComponent.constructor as typeof BaseComponent).template == null)
+					(childComponent.constructor as typeof BaseComponent).template === null)
 			) {
 				childComponents = findChildComponents(
 					child,
@@ -371,7 +372,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 			el.className = constr._blockNamesString + el.className;
 
-			if (constr.template == null) {
+			if (constr.template === null) {
 				this._bindings = null;
 
 				let childComponents = findChildComponents(

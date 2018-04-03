@@ -7,7 +7,7 @@ function formattersReducer(jsExpr: string, formatter: IContentNodeValueBindingFo
 
 	return `(this.${formatter.name} || formatters.${
 		formatter.name
-	}).call(this.$component, ${jsExpr}${
+	}).call(this['$/'], ${jsExpr}${
 		args && args.value.length ? ', ' + args.value.join(', ') : ''
 	})`;
 }

@@ -1,34 +1,29 @@
 import { Cell, ObservableList } from 'cellx';
 import { BaseComponent } from '../BaseComponent';
-export declare type TListCell = Cell<ObservableList<any>>;
-export interface IItem {
+export declare type TList = Array<any> | ObservableList<any>;
+export declare type TListCell = Cell<TList>;
+export interface I$Item {
     item: Cell<any>;
     index: Cell<number>;
     nodes: Array<Node>;
     bindings: Array<Cell> | null;
 }
-export declare type TItemList = Array<IItem>;
-export declare type TItemMap = Map<any, TItemList>;
+export declare type T$ItemMap = Map<any, I$Item>;
 export declare class RtRepeat extends BaseComponent {
     paramFor: string;
     paramTrackBy: string;
-    paramStrip: boolean;
     _itemName: string;
+    _prevList: Array<any>;
     _list: TListCell;
+    _$itemMap: T$ItemMap;
     _trackBy: string | null;
     _rawItemContent: DocumentFragment;
-    _itemMap: TItemMap;
-    _prevItemMap: TItemMap;
-    _lastNode: Node;
     _active: boolean;
     elementConnected(): void;
     elementDisconnected(): void;
     _onListChange(): void;
     _attach(): void;
     _detach(): void;
-    _render(changed: boolean): void;
-    _renderItem(item: any, index: number): boolean;
-    _clearByItemMap(itemMap: TItemMap): void;
-    _clearByItems(items: TItemList): void;
+    _render(fromChangeEvent: boolean): void;
     _deactivate(): void;
 }

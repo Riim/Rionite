@@ -71,10 +71,10 @@ export function bindContent(
 					$specifiedParams = new Set();
 				}
 
-				let attrs = child.attributes;
+				let attrs = (child as Element).attributes;
 
 				for (let i = attrs.length; i; ) {
-					let attr = attrs.item(--i);
+					let attr = attrs.item(--i)!;
 					let name = attr.name;
 
 					if (name.charAt(0) == '_') {
@@ -187,7 +187,7 @@ export function bindContent(
 				if (
 					child.firstChild &&
 					(!childComponent ||
-						(childComponent.constructor as typeof BaseComponent).template == null)
+						(childComponent.constructor as typeof BaseComponent).template === null)
 				) {
 					bindContent(child as Element, ownerComponent, context, result);
 				}

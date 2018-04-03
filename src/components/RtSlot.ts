@@ -14,6 +14,7 @@ let KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RtSlot.slotContentMap');
 
 @Component({
 	params: {
+		name: { property: 'paramName', type: String, readonly: true },
 		forTag: { property: 'paramForTag', type: String, readonly: true },
 		for: { property: 'paramFor', type: String, readonly: true },
 		cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
@@ -25,6 +26,7 @@ let KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RtSlot.slotContentMap');
 export class RtSlot extends BaseComponent {
 	$context: { [name: string]: any };
 
+	paramName: string;
 	paramForTag: string;
 	paramFor: string;
 	paramCloneContent: boolean;
@@ -53,11 +55,26 @@ export class RtSlot extends BaseComponent {
 			let childComponents: Array<BaseComponent> | null | undefined;
 
 			if (!cloneContent || ownerComponentContent.firstChild) {
-				let tagName = this.paramForTag;
-				let for_ = this.paramFor;
-				let key = getUID(ownerComponent) + '/' + (tagName ? ':' + tagName : for_ || '');
+				let slotName: string | null = this.paramName;
+				let forTag: string | null | undefined;
+				let for_: string | null | undefined;
 
-				if (tagName || for_) {
+				if (!slotName) {
+					forTag = this.paramForTag;
+
+					if (forTag) {
+						forTag = forTag.toUpperCase();
+					} else {
+						for_ = this.paramFor;
+					}
+				}
+
+				let key =
+					getUID(ownerComponent) +
+					'/' +
+					(slotName ? '@' + slotName : forTag ? ':' + forTag : for_ || '');
+
+				if (slotName || forTag || for_) {
 					let contentMap: Map<string, IComponentElement> | undefined;
 
 					if (
@@ -74,46 +91,36 @@ export class RtSlot extends BaseComponent {
 							bindings = container.$component._bindings;
 							childComponents = (container.$component as RtSlot)._childComponents;
 						}
-					} else {
-						let contentEl = ownerComponentContent.firstElementChild;
+					} else if (ownerComponentContent.firstElementChild) {
+						if (for_ && for_.indexOf('__') == -1) {
+							let elementBlockNames = (ownerComponent.constructor as typeof BaseComponent)
+								._elementBlockNames;
+							for_ = elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
+						}
 
-						if (contentEl) {
-							if (tagName) {
-								tagName = tagName.toUpperCase();
-							} else if (for_!.indexOf('__') == -1) {
-								let elementBlockNames = (ownerComponent.constructor as typeof BaseComponent)
-									._elementBlockNames;
-								for_ =
-									elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
+						let selectedElements = ownerComponentContent.querySelectorAll(
+							slotName ? `[slot=${slotName}]` : forTag || '.' + for_
+						);
+						let selectedElementCount = selectedElements.length;
+
+						if (selectedElementCount) {
+							content = document.createDocumentFragment();
+
+							for (let i = 0; i < selectedElementCount; i++) {
+								content.appendChild(
+									cloneContent
+										? selectedElements[i].cloneNode(true)
+										: selectedElements[i]
+								);
 							}
+						}
 
-							do {
-								if (
-									tagName
-										? contentEl.tagName == tagName
-										: contentEl.classList.contains(for_!)
-								) {
-									let selectedEl = cloneContent
-										? (contentEl.cloneNode(true) as Element)
-										: contentEl;
-
-									contentEl = contentEl.nextElementSibling;
-
-									(
-										content || (content = document.createDocumentFragment())
-									).appendChild(selectedEl);
-								} else {
-									contentEl = contentEl.nextElementSibling;
-								}
-							} while (contentEl);
-
-							if (!cloneContent) {
-								(
-									contentMap ||
-									contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
-									(contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())
-								).set(key, el);
-							}
+						if (!cloneContent) {
+							(
+								contentMap ||
+								contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
+								(contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())
+							).set(key, el);
 						}
 					}
 				} else if (!cloneContent) {
@@ -150,10 +157,10 @@ export class RtSlot extends BaseComponent {
 											ownerComponent,
 											ownerComponent.$context,
 											this
-										)
+									  )
 									: ownerComponent.$context,
 								{ 0: null, 1: null, 2: null } as any
-							)
+						  )
 						: bindContent(
 								el,
 								ownerComponent,
@@ -161,7 +168,7 @@ export class RtSlot extends BaseComponent {
 									? this.paramGetContext.call(ownerComponent, this.$context, this)
 									: this.$context,
 								{ 0: null, 1: null, 2: null } as any
-							);
+						  );
 
 					this._childComponents = childComponents;
 				} else {
