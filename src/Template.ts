@@ -12,7 +12,7 @@ import {
 	TContent
 	} from 'nelm-parser';
 
-let join = Array.prototype.join;
+const join = Array.prototype.join;
 
 export interface IElement {
 	name: string | null;

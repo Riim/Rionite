@@ -43,13 +43,13 @@ export type TContentNodeValue = Array<IContentNodeValueText | IContentNodeValueB
 
 export type TNotValueAndNotKeypath = Object;
 
-let reWhitespace = /\s/;
+const reWhitespace = /\s/;
 
-let reNameOrNothing = RegExp(namePattern + '|', 'g');
-let reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
-let reBooleanOrNothing = /false|true|/g;
-let reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
-let reVacuumOrNothing = /null|undefined|void 0|/g;
+const reNameOrNothing = RegExp(namePattern + '|', 'g');
+const reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
+const reBooleanOrNothing = /false|true|/g;
+const reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+const reVacuumOrNothing = /null|undefined|void 0|/g;
 
 export class ContentNodeValueParser {
 	contentNodeValue: string;

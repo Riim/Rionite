@@ -26,7 +26,7 @@ import { handleEvent } from './handleEvent';
 import { templateTag as templateTagFeature } from './lib/Features';
 import { Template } from './Template';
 
-let map = Array.prototype.map;
+const map = Array.prototype.map;
 
 export interface IComponentParamConfig {
 	property?: string;
@@ -78,10 +78,10 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	};
 }
 
-export let KEY_PARAMS_CONFIG = Symbol('paramsConfig');
-export let KEY_PARAMS = Symbol('params');
+export const KEY_PARAMS_CONFIG = Symbol('paramsConfig');
+export const KEY_PARAMS = Symbol('params');
 
-let reClassBlockElement = / class="([a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b(?: [a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b)*)/g;
+const reClassBlockElement = / class="([a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b(?: [a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b)*)/g;
 
 function createClassBlockElementReplacer(
 	blockName: string,

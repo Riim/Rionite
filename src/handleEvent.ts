@@ -1,7 +1,7 @@
 import { IEvent } from 'cellx';
 import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 
-let ownerComponentStack: Array<[BaseComponent, Array<Element> | undefined]> = [];
+const ownerComponentStack: Array<[BaseComponent, Array<Element> | undefined]> = [];
 
 export function handleEvent(evt: IEvent<BaseComponent>) {
 	let target = evt.target;

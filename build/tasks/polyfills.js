@@ -1,7 +1,7 @@
-var gulp = require('gulp');
-var concat = require('gulp-concat');
+const gulp = require('gulp');
+const concat = require('gulp-concat');
 
-gulp.task('polyfills', function() {
+gulp.task('polyfills', () => {
 	return gulp
 		.src([
 			'polyfills/document-register-element.max.js',

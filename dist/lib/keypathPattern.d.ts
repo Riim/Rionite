@@ -1,1 +1,1 @@
-export declare let keypathPattern: string;
+export declare const keypathPattern: string;

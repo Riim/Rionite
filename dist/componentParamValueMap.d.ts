@@ -1,1 +1,1 @@
-export declare let componentParamValueMap: Map<string, object>;
+export declare const componentParamValueMap: Map<string, object>;

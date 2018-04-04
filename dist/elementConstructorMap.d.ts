@@ -1,1 +1,1 @@
-export declare let elementConstructorMap: Map<string, Function>;
+export declare const elementConstructorMap: Map<string, Function>;

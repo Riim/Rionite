@@ -1,4 +1,4 @@
-let cache = Object.create(null);
+const cache = Object.create(null);
 
 export function keypathToJSExpression(keypath: string, cacheKey?: string): string;
 export function keypathToJSExpression(keypath: string | Array<string>, cacheKey: string): string;

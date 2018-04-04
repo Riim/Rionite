@@ -1,6 +1,6 @@
 import { keypathToJSExpression } from './keypathToJSExpression';
 
-let cache = Object.create(null);
+const cache = Object.create(null);
 
 export function compileKeypath(keypath: string, cacheKey?: string): (this: object) => any;
 export function compileKeypath(

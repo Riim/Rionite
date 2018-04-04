@@ -13,7 +13,7 @@ import { formatters } from './lib/formatters';
 
 let valueMapKeyCounter = 0;
 
-let cache = Object.create(null);
+const cache = Object.create(null);
 
 export function compileContentNodeValue(
 	contentNodeValue: TContentNodeValue,
@@ -71,9 +71,9 @@ export function compileContentNodeValue(
 				}
 
 				return value;
-			}
+		  }
 		: function(): string {
 				let value = inner.call(this, formatters);
 				return value == null ? '' : value + '';
-			});
+		  });
 }

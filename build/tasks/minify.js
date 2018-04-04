@@ -1,9 +1,9 @@
-var pump = require('pump');
-var gulp = require('gulp');
-var uglify = require('gulp-uglify');
-var rename = require('gulp-rename');
+const pump = require('pump');
+const gulp = require('gulp');
+const uglify = require('gulp-uglify');
+const rename = require('gulp-rename');
 
-gulp.task('minify', function(done) {
+gulp.task('minify', done => {
 	pump(
 		[
 			gulp.src(['dist/rionite.js', 'dist/rionite.polyfills.js']),

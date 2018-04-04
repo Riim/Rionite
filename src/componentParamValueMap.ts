@@ -1,2 +1,2 @@
 import { Map } from '@riim/map-set-polyfill';
-export let componentParamValueMap = new Map<string, object>();
+export const componentParamValueMap = new Map<string, object>();

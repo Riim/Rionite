@@ -12,7 +12,7 @@ import {
 import { ComponentParams } from './ComponentParams';
 import { nativeCustomElements as nativeCustomElementsFeature } from './lib/Features';
 
-export let KEY_IS_ELEMENT_CONNECTED = Symbol('Rionite.isElementConnected');
+export const KEY_IS_ELEMENT_CONNECTED = Symbol('Rionite.isElementConnected');
 
 let isConnectionStatusCallbacksSuppressed = false;
 
@@ -24,7 +24,7 @@ export function resumeConnectionStatusCallbacks() {
 	isConnectionStatusCallbacksSuppressed = false;
 }
 
-export let ElementProtoMixin = {
+export const ElementProtoMixin = {
 	rioniteComponent: null,
 
 	get $component(): BaseComponent {

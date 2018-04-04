@@ -1,4 +1,4 @@
-export let handledEvents = [
+export const handledEvents = [
 	'change',
 	'click',
 	'dblclick',

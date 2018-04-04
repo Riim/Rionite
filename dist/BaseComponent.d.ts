@@ -39,8 +39,8 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
         [eventName: string]: TEventHandler<T, U>;
     };
 }
-export declare let KEY_PARAMS_CONFIG: symbol;
-export declare let KEY_PARAMS: symbol;
+export declare const KEY_PARAMS_CONFIG: symbol;
+export declare const KEY_PARAMS: symbol;
 export declare class BaseComponent extends EventEmitter implements DisposableMixin {
     static elementIs: string;
     static elementExtends: string | null;

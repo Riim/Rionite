@@ -1,1 +1,1 @@
-export declare let handledEvents: string[];
+export declare const handledEvents: string[];

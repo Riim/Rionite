@@ -12,7 +12,7 @@ import { templateTag as templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
 import { namePattern } from '../lib/namePattern';
 
-let slice = Array.prototype.slice;
+const slice = Array.prototype.slice;
 
 export type TListCell = Cell<ObservableList<any>>;
 export interface I$Item {
@@ -24,7 +24,7 @@ export interface I$Item {
 export type T$ItemList = Array<I$Item>;
 export type T$ItemMap = Map<any, T$ItemList>;
 
-let reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+(?:in|of)\\s+(${keypathPattern})\\s*$`);
+const reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+(?:in|of)\\s+(${keypathPattern})\\s*$`);
 
 @Component({
 	elementExtends: 'template',

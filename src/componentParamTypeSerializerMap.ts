@@ -8,7 +8,7 @@ export interface IComponentParamTypeSerializer {
 	write: (value: any, defaultValue?: any) => string | null;
 }
 
-export let componentParamTypeSerializerMap = new Map<any, IComponentParamTypeSerializer>([
+export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeSerializer>([
 	[
 		Boolean,
 		{

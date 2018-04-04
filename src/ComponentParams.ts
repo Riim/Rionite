@@ -8,7 +8,7 @@ import {
 	} from './BaseComponent';
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 
-export let KEY_IS_COMPONENT_PARAMS_INITED = Symbol('Rionite.isComponentParamsInited');
+export const KEY_IS_COMPONENT_PARAMS_INITED = Symbol('Rionite.isComponentParamsInited');
 
 function initParam(
 	component: BaseComponent,
@@ -75,7 +75,7 @@ function initParam(
 	component[KEY_PARAMS].set(name, typeSerializer.read(rawValue, defaultValue));
 }
 
-export let ComponentParams = {
+export const ComponentParams = {
 	init(component: BaseComponent) {
 		if (component[KEY_IS_COMPONENT_PARAMS_INITED]) {
 			return;

@@ -2,10 +2,10 @@ import { lowerCaseFirstWord } from '@riim/lower-case-first-word';
 import { Set } from '@riim/map-set-polyfill';
 import { BaseComponent, IComponentParamConfig } from '../BaseComponent';
 
-let types = new Set([Boolean, Number, String, Object]);
+const types = new Set([Boolean, Number, String, Object]);
 
-let prefix = 'param';
-let prefixLength = prefix.length;
+const prefix = 'param';
+const prefixLength = prefix.length;
 
 export function Param(
 	target: Object,

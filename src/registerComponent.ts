@@ -16,7 +16,7 @@ import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
 import { Template } from './Template';
 
-let push = Array.prototype.push;
+const push = Array.prototype.push;
 
 function inheritProperty(
 	target: { [name: string]: any },

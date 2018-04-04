@@ -1,1 +1,1 @@
-export let namePattern = '[$_a-zA-Z][$\\w]*';
+export const namePattern = '[$_a-zA-Z][$\\w]*';

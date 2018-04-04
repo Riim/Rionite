@@ -1,6 +1,6 @@
 import { Map } from '@riim/map-set-polyfill';
 
-export let elementConstructorMap = new Map<string, Function>([
+export const elementConstructorMap = new Map<string, Function>([
 	['a', (window as any).HTMLAnchorElement],
 	['blockquote', (window as any).HTMLQuoteElement],
 	['br', (window as any).HTMLBRElement],

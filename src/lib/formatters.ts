@@ -1,6 +1,6 @@
 import { getText } from '@riim/gettext';
 
-export let formatters: { [name: string]: Function } = {
+export const formatters: { [name: string]: Function } = {
 	or(value: any, arg: any): any {
 		return value || arg;
 	},

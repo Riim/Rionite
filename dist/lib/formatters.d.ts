@@ -1,3 +1,3 @@
-export declare let formatters: {
+export declare const formatters: {
     [name: string]: Function;
 };

@@ -10,11 +10,11 @@ import { compileKeypath } from '../lib/compileKeypath';
 import { templateTag as templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
 
-let slice = Array.prototype.slice;
+const slice = Array.prototype.slice;
 
 export type TIfCell = Cell<boolean>;
 
-let reKeypath = RegExp(`^${keypathPattern}$`);
+const reKeypath = RegExp(`^${keypathPattern}$`);
 
 @Component({
 	elementExtends: 'template',

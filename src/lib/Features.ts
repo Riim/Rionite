@@ -1,7 +1,7 @@
-let dummyEl = document.createElement('div');
+const dummyEl = document.createElement('div');
 
 dummyEl.innerHTML = '<template>1</template>';
-export let templateTag = !dummyEl.firstChild!.firstChild;
+export const templateTag = !dummyEl.firstChild!.firstChild;
 
 let nativeCustomElementsFeature = false;
 
@@ -30,7 +30,7 @@ TestNativeCustomElementsFeature.prototype.attributeChangedCallback = () => {
 	TestNativeCustomElementsFeature
 );
 
-let testNCEF = document.createElement('test-native-custom-elements-feature');
+const testNCEF = document.createElement('test-native-custom-elements-feature');
 testNCEF.setAttribute('test', '');
 
-export let nativeCustomElements = nativeCustomElementsFeature;
+export const nativeCustomElements = nativeCustomElementsFeature;

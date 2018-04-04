@@ -1,6 +1,6 @@
 import { IContentNodeValueBinding, IContentNodeValueBindingFormatter } from './ContentNodeValueParser';
 
-let cache: { [key: string]: string } = Object.create(null);
+const cache: { [key: string]: string } = Object.create(null);
 
 function formattersReducer(jsExpr: string, formatter: IContentNodeValueBindingFormatter): string {
 	let args = formatter.arguments;

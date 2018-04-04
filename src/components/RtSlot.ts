@@ -10,7 +10,7 @@ import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 
-let KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RtSlot.slotContentMap');
+const KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RtSlot.slotContentMap');
 
 @Component({
 	params: {
