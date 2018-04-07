@@ -109,7 +109,7 @@ export class RtIfThen extends BaseComponent {
 			this._bindings = bindings;
 
 			suppressConnectionStatusCallbacks();
-			this.element.parentNode!.insertBefore(content, this.element.nextSibling);
+			this.element.parentNode!.insertBefore(content, this.element);
 			resumeConnectionStatusCallbacks();
 
 			if (childComponents) {

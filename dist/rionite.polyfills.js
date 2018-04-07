@@ -692,8 +692,39 @@ THE SOFTWARE.
     // will check proto or the expando attribute
     // in order to setup the node once
     patchIfNotAlready,
-    patch
+    patch,
+  
+    // used for tests
+    tmp
   ;
+  
+  // IE11 disconnectedCallback issue #
+  // to be tested before any createElement patch
+  if (MutationObserver) {
+    tmp = document.createElement('div');
+    tmp.innerHTML = '<div><div></div></div>';
+    new MutationObserver(function (mutations, observer) {
+      if (
+        mutations[0] &&
+        mutations[0].type == 'childList' &&
+        !mutations[0].removedNodes[0].childNodes.length
+      ) {
+        tmp = gOPD(HTMLElementPrototype, 'innerHTML');
+        var set = tmp && tmp.set;
+        if (set)
+          defineProperty(HTMLElementPrototype, 'innerHTML', {
+            set: function (value) {
+              while (this.lastChild)
+                this.removeChild(this.lastChild);
+              set.call(this, value);
+            }
+          });
+      }
+      observer.disconnect();
+      tmp = null;
+    }).observe(tmp, {childList: true, subtree: true});
+    tmp.innerHTML = "";
+  }
   
   // only if needed
   if (!V0) {
@@ -3759,7 +3790,7 @@ var RtIfThen = /** @class */ (function (_super) {
             this._nodes = slice.call(content.childNodes);
             this._bindings = bindings;
             ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-            this.element.parentNode.insertBefore(content, this.element.nextSibling);
+            this.element.parentNode.insertBefore(content, this.element);
             ElementProtoMixin_1.resumeConnectionStatusCallbacks();
             if (childComponents) {
                 attachChildComponentElements_1.attachChildComponentElements(childComponents);
@@ -4764,18 +4795,7 @@ var RtRepeat = /** @class */ (function (_super) {
         var startIndex = 0;
         var changed = false;
         if (list) {
-            var lastNode = void 0;
-            if (prevList.length) {
-                var lastItem = prevList[prevListLength - 1];
-                var nodes = $itemMap.get(trackBy ? lastItem[trackBy] : lastItem).nodes;
-                lastNode = nodes[nodes.length - 1];
-                if (!lastNode.parentNode) {
-                    lastNode = this.element;
-                }
-            }
-            else {
-                lastNode = this.element;
-            }
+            var lastNode = this.element;
             var removedValues_1 = new map_set_polyfill_1.Set();
             for (var i = 0, l = list.length; i < l;) {
                 var item = getItem(list, i);
@@ -4795,6 +4815,7 @@ var RtRepeat = /** @class */ (function (_super) {
                             if (foundIndex === undefined) {
                                 if (value === (trackBy ? prevList[j][trackBy] : prevList[j])) {
                                     if (j == startIndex) {
+                                        lastNode = $item.nodes[$item.nodes.length - 1];
                                         startIndex++;
                                         i++;
                                         break;
@@ -4832,7 +4853,7 @@ var RtRepeat = /** @class */ (function (_super) {
                                     removedValues_1.add(value_1);
                                 }
                                 changed = true;
-                                startIndex += foundCount;
+                                startIndex = j;
                                 i = ii;
                                 break;
                             }
@@ -4894,7 +4915,6 @@ var RtRepeat = /** @class */ (function (_super) {
                         }
                     }
                     changed = true;
-                    startIndex++;
                     i++;
                 }
             }

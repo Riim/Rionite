@@ -164,21 +164,7 @@ export class RtRepeat extends BaseComponent {
 		let changed = false;
 
 		if (list) {
-			let lastNode: Node;
-
-			if (prevList.length) {
-				let lastItem = prevList[prevListLength - 1];
-				let nodes = $itemMap.get(trackBy ? lastItem[trackBy] : lastItem)!.nodes;
-
-				lastNode = nodes[nodes.length - 1];
-
-				if (!lastNode.parentNode) {
-					lastNode = this.element;
-				}
-			} else {
-				lastNode = this.element;
-			}
-
+			let lastNode: Node = this.element;
 			let removedValues = new Set<any>();
 
 			for (let i = 0, l = list.length; i < l; ) {
@@ -202,6 +188,7 @@ export class RtRepeat extends BaseComponent {
 							if (foundIndex === undefined) {
 								if (value === (trackBy ? prevList[j][trackBy] : prevList[j])) {
 									if (j == startIndex) {
+										lastNode = $item.nodes[$item.nodes.length - 1];
 										startIndex++;
 										i++;
 										break;
@@ -254,7 +241,7 @@ export class RtRepeat extends BaseComponent {
 
 								changed = true;
 
-								startIndex += foundCount;
+								startIndex = j;
 								i = ii;
 
 								break;
@@ -332,7 +319,6 @@ export class RtRepeat extends BaseComponent {
 
 					changed = true;
 
-					startIndex++;
 					i++;
 				}
 			}
