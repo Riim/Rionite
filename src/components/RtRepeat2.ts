@@ -11,6 +11,8 @@ import { compileKeypath } from '../lib/compileKeypath';
 import { templateTag as templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
 import { namePattern } from '../lib/namePattern';
+import { removeNodes } from '../lib/removeNodes';
+import { RtIfThen } from './RtIfThen';
 
 const slice = Array.prototype.slice;
 
@@ -21,6 +23,7 @@ export interface I$Item {
 	index: Cell<number>;
 	nodes: Array<Node>;
 	bindings: Array<Cell> | null;
+	childComponents: Array<BaseComponent> | null;
 }
 export type T$ItemMap = Map<any, I$Item>;
 
@@ -48,21 +51,21 @@ function insertNodes(nodes: Array<Node>, lastNode: Node): Node {
 	return nodes[nodeCount - 1];
 }
 
-function removeNodes(nodes: Array<Node>) {
-	let nodeCount = nodes.length;
-
-	if (nodeCount == 1) {
-		let node = nodes[0];
-
-		if (node.parentNode) {
-			node.parentNode.removeChild(node);
+function offBindings(bindings: Array<Cell> | null) {
+	if (bindings) {
+		for (let i = bindings.length; i; ) {
+			bindings[--i].off();
 		}
-	} else {
-		for (let i = 0; i < nodeCount; i++) {
-			let node = nodes[i];
+	}
+}
 
-			if (node.parentNode) {
-				node.parentNode.removeChild(node);
+function deactivateChildComponents(childComponents: Array<BaseComponent> | null) {
+	if (childComponents) {
+		for (let i = childComponents.length; i; ) {
+			let childComponent = childComponents[--i];
+
+			if (childComponent instanceof RtIfThen || childComponent instanceof RtRepeat) {
+				childComponent._deactivate();
 			}
 		}
 	}
@@ -297,7 +300,8 @@ export class RtRepeat extends BaseComponent {
 						item: itemCell,
 						index: indexCell,
 						nodes: slice.call(content.childNodes),
-						bindings
+						bindings,
+						childComponents
 					});
 
 					let newLastNode = content.lastChild!;
@@ -346,16 +350,10 @@ export class RtRepeat extends BaseComponent {
 				let $item = $itemMap.get(value)!;
 
 				removeNodes($item.nodes);
-
-				let bindings = $item.bindings;
-
-				if (bindings) {
-					for (let i = bindings.length; i; ) {
-						bindings[--i].off();
-					}
-				}
-
+				offBindings($item.bindings);
 				$itemMap.delete(value);
+
+				deactivateChildComponents($item.childComponents);
 			}
 		} else if (!changed) {
 			return;
@@ -387,16 +385,10 @@ export class RtRepeat extends BaseComponent {
 			let $item = $itemMap.get(value)!;
 
 			removeNodes($item.nodes);
-
-			let bindings = $item.bindings;
-
-			if (bindings) {
-				for (let i = bindings.length; i; ) {
-					bindings[--i].off();
-				}
-			}
-
+			offBindings($item.bindings);
 			$itemMap.delete(value);
+
+			deactivateChildComponents($item.childComponents);
 		}
 	}
 }

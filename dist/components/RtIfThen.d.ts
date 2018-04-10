@@ -6,6 +6,7 @@ export declare class RtIfThen extends BaseComponent {
     _elseMode: boolean;
     _if: TIfCell;
     _nodes: Array<Node> | null;
+    _childComponents: Array<BaseComponent> | null;
     _active: boolean;
     elementConnected(): void;
     elementDisconnected(): void;
@@ -14,4 +15,5 @@ export declare class RtIfThen extends BaseComponent {
     _detach(): void;
     _render(changed: boolean): void;
     _deactivate(): void;
+    _deactivateChildComponents(): void;
 }

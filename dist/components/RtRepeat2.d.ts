@@ -7,6 +7,7 @@ export interface I$Item {
     index: Cell<number>;
     nodes: Array<Node>;
     bindings: Array<Cell> | null;
+    childComponents: Array<BaseComponent> | null;
 }
 export declare type T$ItemMap = Map<any, I$Item>;
 export declare class RtRepeat extends BaseComponent {

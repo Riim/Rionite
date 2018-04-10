@@ -9,6 +9,8 @@ import { KEY_IS_ELEMENT_CONNECTED } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
 import { templateTag as templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
+import { removeNodes } from '../lib/removeNodes';
+import { RtRepeat } from './RtRepeat2';
 
 const slice = Array.prototype.slice;
 
@@ -30,7 +32,8 @@ export class RtIfThen extends BaseComponent {
 
 	_if: TIfCell;
 
-	_nodes: Array<Node> | null;
+	_nodes: Array<Node> | null = null;
+	_childComponents: Array<BaseComponent> | null = null;
 
 	_active = false;
 
@@ -107,6 +110,7 @@ export class RtIfThen extends BaseComponent {
 
 			this._nodes = slice.call(content.childNodes);
 			this._bindings = bindings;
+			this._childComponents = childComponents;
 
 			suppressConnectionStatusCallbacks();
 			this.element.parentNode!.insertBefore(content, this.element);
@@ -126,18 +130,11 @@ export class RtIfThen extends BaseComponent {
 			let nodes = this._nodes;
 
 			if (nodes) {
+				removeNodes(nodes);
 				this._destroyBindings();
-
-				for (let i = nodes.length; i; ) {
-					let node = nodes[--i];
-					let parentNode = node.parentNode;
-
-					if (parentNode) {
-						parentNode.removeChild(node);
-					}
-				}
-
 				this._nodes = null;
+
+				this._deactivateChildComponents();
 			}
 		}
 
@@ -159,16 +156,27 @@ export class RtIfThen extends BaseComponent {
 		let nodes = this._nodes;
 
 		if (nodes) {
+			removeNodes(nodes);
 			this._destroyBindings();
+			this._nodes = null;
 
-			for (let i = nodes.length; i; ) {
-				let node = nodes[--i];
-				let parentNode = node.parentNode;
+			this._deactivateChildComponents();
+		}
+	}
 
-				if (parentNode) {
-					parentNode.removeChild(node);
+	_deactivateChildComponents() {
+		let childComponents = this._childComponents;
+
+		if (childComponents) {
+			for (let i = childComponents.length; i; ) {
+				let childComponent = childComponents[--i];
+
+				if (childComponent instanceof RtIfThen || childComponent instanceof RtRepeat) {
+					childComponent._deactivate();
 				}
 			}
 		}
+
+		this._childComponents = null;
 	}
 }
