@@ -2405,7 +2405,7 @@ var RtIfThen_1 = __webpack_require__(17);
 var slice = Array.prototype.slice;
 var reForAttrValue = RegExp("^\\s*(" + namePattern_1.namePattern + ")\\s+(?:in|of)\\s+(" + keypathPattern_1.keypathPattern + ")\\s*$");
 function getItem(list, index) {
-    return list instanceof cellx_1.ObservableList ? list.get(index) : list[index];
+    return Array.isArray(list) ? list[index] : list.get(index);
 }
 function insertNodes(nodes, lastNode) {
     var nodeCount = nodes.length;
@@ -2646,7 +2646,7 @@ var RtRepeat = /** @class */ (function (_super) {
         else if (!changed) {
             return;
         }
-        this._prevList = list instanceof cellx_1.ObservableList ? list.toArray() : list.slice();
+        this._prevList = Array.isArray(list) ? list.slice() : list.toArray();
         if (fromChangeEvent) {
             cellx_1.Cell.forceRelease();
             this.emit('change');

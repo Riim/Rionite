@@ -30,7 +30,7 @@ export type T$ItemMap = Map<any, I$Item>;
 const reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+(?:in|of)\\s+(${keypathPattern})\\s*$`);
 
 function getItem(list: TList, index: number): any {
-	return list instanceof ObservableList ? list.get(index) : list[index];
+	return Array.isArray(list) ? list[index] : list.get(index);
 }
 
 function insertNodes(nodes: Array<Node>, lastNode: Node): Node {
@@ -359,7 +359,7 @@ export class RtRepeat extends BaseComponent {
 			return;
 		}
 
-		this._prevList = list instanceof ObservableList ? list.toArray() : list.slice();
+		this._prevList = Array.isArray(list) ? list.slice() : list.toArray();
 
 		if (fromChangeEvent) {
 			Cell.forceRelease();
