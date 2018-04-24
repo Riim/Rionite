@@ -182,12 +182,11 @@ export class RtRepeat extends BaseComponent {
 
 						lastNode = insertNodes($item.nodes, lastNode);
 
-						startIndex++;
 						i++;
 					} else {
 						let foundIndex: number | undefined;
 
-						for (let j = startIndex, m = prevList.length; ; j++) {
+						for (let j = startIndex; ; j++) {
 							if (foundIndex === undefined) {
 								if (value === (trackBy ? prevList[j][trackBy] : prevList[j])) {
 									if (j == startIndex) {
@@ -205,7 +204,7 @@ export class RtRepeat extends BaseComponent {
 
 								if (ii < l) {
 									if (
-										j < m && trackBy
+										j < prevListLength && trackBy
 											? getItem(list, ii)[trackBy] === prevList[j][trackBy]
 											: getItem(list, ii) === prevList[j]
 									) {
@@ -225,11 +224,10 @@ export class RtRepeat extends BaseComponent {
 										}
 
 										prevList.splice(foundIndex, foundCount);
-										m -= foundCount;
+										prevListLength -= foundCount;
 
 										changed = true;
 
-										startIndex += foundCount;
 										i = ii;
 
 										break;
@@ -241,6 +239,11 @@ export class RtRepeat extends BaseComponent {
 									removeNodes($itemMap.get(value)!.nodes);
 									removedValues.add(value);
 								}
+
+								let nodes = $itemMap.get(
+									trackBy ? prevList[j - 1][trackBy] : prevList[j - 1]
+								)!.nodes;
+								lastNode = nodes[nodes.length - 1];
 
 								changed = true;
 

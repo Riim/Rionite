@@ -2475,10 +2475,10 @@ var Template = /** @class */ (function () {
         var parent = (this.parent = (opts && opts.parent) || null);
         this.nelm = typeof nelm == 'string' ? new nelm_parser_1.Parser(nelm).parse() : nelm;
         var blockName = (opts && opts.blockName) || this.nelm.name;
-        if (this.parent) {
+        if (parent) {
             this._elementBlockNamesTemplate = [
                 blockName ? blockName + exports.ELEMENT_NAME_DELIMITER : ''
-            ].concat(this.parent._elementBlockNamesTemplate);
+            ].concat(parent._elementBlockNamesTemplate);
         }
         else if (blockName) {
             if (Array.isArray(blockName)) {
@@ -2537,7 +2537,7 @@ var Template = /** @class */ (function () {
                 var el = elMap[name];
                 this[name] = Function("return " + el.source.join(' + ') + ";");
                 if (el.superCall) {
-                    var inner_1 = Function('$super', "return " + (el.innerSource.join(' + ') || "''") + ";");
+                    var inner_1 = Function('$super', "return " + el.innerSource.join(' + ') + ";");
                     var parentElementRendererMap_1 = parent && parent._elementRendererMap;
                     this[name + '@content'] = function () {
                         return inner_1.call(this, parentElementRendererMap_1);
@@ -2733,9 +2733,9 @@ var Template = /** @class */ (function () {
                 break;
             }
             case nelm_parser_1.NodeType.SUPER_CALL: {
+                this._currentElement.superCall = true;
                 this._currentElement.innerSource.push("$super['" + (node.elementName ||
                     parentElName) + "@content'].call(this)");
-                this._currentElement.superCall = true;
                 break;
             }
         }
@@ -4037,12 +4037,11 @@ var RtRepeat = /** @class */ (function (_super) {
                         $item.item.set(item);
                         $item.index.set(i);
                         lastNode = insertNodes($item.nodes, lastNode);
-                        startIndex++;
                         i++;
                     }
                     else {
                         var foundIndex = void 0;
-                        for (var j = startIndex, m = prevList.length;; j++) {
+                        for (var j = startIndex;; j++) {
                             if (foundIndex === undefined) {
                                 if (value === (trackBy ? prevList[j][trackBy] : prevList[j])) {
                                     if (j == startIndex) {
@@ -4058,7 +4057,7 @@ var RtRepeat = /** @class */ (function (_super) {
                                 var foundCount = j - foundIndex;
                                 var ii = i + foundCount;
                                 if (ii < l) {
-                                    if (j < m && trackBy
+                                    if (j < prevListLength && trackBy
                                         ? getItem(list, ii)[trackBy] === prevList[j][trackBy]
                                         : getItem(list, ii) === prevList[j]) {
                                         continue;
@@ -4071,9 +4070,8 @@ var RtRepeat = /** @class */ (function (_super) {
                                             lastNode = insertNodes(k$Item.nodes, lastNode);
                                         }
                                         prevList.splice(foundIndex, foundCount);
-                                        m -= foundCount;
+                                        prevListLength -= foundCount;
                                         changed = true;
-                                        startIndex += foundCount;
                                         i = ii;
                                         break;
                                     }
@@ -4083,6 +4081,8 @@ var RtRepeat = /** @class */ (function (_super) {
                                     removeNodes_1.removeNodes($itemMap.get(value_1).nodes);
                                     removedValues_1.add(value_1);
                                 }
+                                var nodes = $itemMap.get(trackBy ? prevList[j - 1][trackBy] : prevList[j - 1]).nodes;
+                                lastNode = nodes[nodes.length - 1];
                                 changed = true;
                                 startIndex = j;
                                 i = ii;

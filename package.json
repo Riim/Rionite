@@ -1,9 +1,9 @@
 {
   "name": "rionite",
-  "version": "0.32.41",
+  "version": "0.32.42",
   "description": "",
   "main": "dist/rionite.polyfills.js",
-  "typings": "dist/index.d.ts",
+  "typings": "dist/src/index.d.ts",
   "scripts": {
     "build": "rm -rf dist && node_modules/.bin/webpack && node_modules/.bin/gulp",
     "test": "node_modules/.bin/jest"
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
+    "@types/jest": "^22.2.3",
     "ajv": "^6.4.0",
     "awesome-typescript-loader": "^4.0.1",
     "benchmark": "^2.1.4",
@@ -27,9 +28,11 @@
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.2",
     "gulp-uglify": "^3.0.0",
+    "jest": "^22.4.3",
     "pump": "^3.0.0",
     "require-dir": "^1.0.0",
     "run-sequence": "^2.2.1",
+    "ts-jest": "^22.4.4",
     "tslint": "^5.9.1",
     "tslint-loader": "^3.6.0",
     "typescript": "^2.8.1",
@@ -59,5 +62,19 @@
     "escape-string": "^1.0.2",
     "html-to-fragment": "^1.0.1",
     "nelm-parser": "^1.1.15"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(js|ts)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
   }
 }

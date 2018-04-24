@@ -10,7 +10,7 @@ export declare type TElementRenderer = (this: IElementRendererMap, $super?: IEle
 export interface IElementRendererMap {
     [elName: string]: TElementRenderer;
 }
-export declare let ELEMENT_NAME_DELIMITER: string;
+export declare const ELEMENT_NAME_DELIMITER = "__";
 export declare class Template {
     static helpers: {
         [name: string]: (el: INelmElement) => TContent | null;

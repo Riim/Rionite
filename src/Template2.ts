@@ -1,5 +1,4 @@
 import { escapeHTML } from '@riim/escape-html';
-import { map as selfClosingTagMap } from '@riim/self-closing-tags';
 import { escapeString } from 'escape-string';
 import {
 	IBlock,
@@ -21,7 +20,7 @@ export interface IElement {
 	innerSource: Array<string>;
 }
 
-export type TRenderer = (this: IElementRendererMap) => string;
+export type TRenderer = (this: IElementRendererMap) => DocumentFragment;
 
 export type TElementRenderer = (this: IElementRendererMap, $super?: IElementRendererMap) => string;
 
@@ -39,10 +38,9 @@ export class Template {
 	parent: Template | null;
 	nelm: IBlock;
 
-	_elementBlockNamesTemplate: Array<string>;
+	_blockNamesTemplate: Array<string>;
 
 	_tagNameMap: { [elName: string]: string };
-
 	_attributeListMap: { [elName: string]: Object };
 	_attributeCountMap: { [elName: string]: number };
 
@@ -66,21 +64,20 @@ export class Template {
 		let blockName = (opts && opts.blockName) || this.nelm.name;
 
 		if (parent) {
-			this._elementBlockNamesTemplate = [
+			this._blockNamesTemplate = [
 				blockName ? (blockName as string) + ELEMENT_NAME_DELIMITER : ''
-			].concat(parent._elementBlockNamesTemplate);
+			].concat(parent._blockNamesTemplate);
 		} else if (blockName) {
 			if (Array.isArray(blockName)) {
 				this.setBlockName(blockName);
 			} else {
-				this._elementBlockNamesTemplate = [blockName + ELEMENT_NAME_DELIMITER, ''];
+				this._blockNamesTemplate = [blockName + ELEMENT_NAME_DELIMITER, ''];
 			}
 		} else {
-			this._elementBlockNamesTemplate = ['', ''];
+			this._blockNamesTemplate = ['', ''];
 		}
 
 		this._tagNameMap = { __proto__: parent && parent._tagNameMap } as any;
-
 		this._attributeListMap = { __proto__: parent && parent._attributeListMap } as any;
 		this._attributeCountMap = { __proto__: parent && parent._attributeCountMap } as any;
 	}
@@ -91,29 +88,34 @@ export class Template {
 
 	setBlockName(blockName: string | Array<string>): Template {
 		if (Array.isArray(blockName)) {
-			(this._elementBlockNamesTemplate = blockName.map(
+			(this._blockNamesTemplate = blockName.map(
 				blockName => blockName + ELEMENT_NAME_DELIMITER
 			)).push('');
 		} else {
-			this._elementBlockNamesTemplate[0] = blockName + ELEMENT_NAME_DELIMITER;
+			this._blockNamesTemplate[0] = blockName + ELEMENT_NAME_DELIMITER;
 		}
 
 		return this;
 	}
 
-	render(): string {
-		return (this._renderer || this._compileRenderers())
-			.call(this._elementRendererMap)
-			.replace(/<<([^>]+)>>/g, (match: RegExpMatchArray, names: string): string =>
-				this._renderElementClasses(names.split(','))
-			);
+	render(): DocumentFragment {
+		return (this._renderer || this._compileRenderers()).call({
+			__proto__: this._elementRendererMap,
+			'@': this,
+			'@c': this._renderElementClasses
+		});
 	}
 
 	_compileRenderers(): TRenderer {
 		let parent = this.parent;
 
 		this._elements = [
-			(this._currentElement = { name: null, superCall: false, source: null, innerSource: [] })
+			(this._currentElement = {
+				name: null,
+				superCall: false,
+				source: null,
+				innerSource: []
+			})
 		];
 		let elMap = (this._elementMap = {} as { [elName: string]: IElement });
 
@@ -121,53 +123,68 @@ export class Template {
 			this._renderer = parent._renderer || parent._compileRenderers();
 		}
 
-		let elementRendererMap = (this._elementRendererMap = {
-			__proto__: parent && parent._elementRendererMap
-		} as any);
+		this._elementRendererMap = { __proto__: parent && parent._elementRendererMap } as any;
 
 		let content = this.nelm.content;
 		let contentLength = content.length;
 
 		if (contentLength) {
 			for (let i = 0; i < contentLength; i++) {
-				this._compileNode(content[i]);
+				this._compileNode(content[i], 'n', i);
 			}
 
 			Object.keys(elMap).forEach(function(this: IElementRendererMap, name: string) {
 				let el = elMap[name];
 
-				this[name] = Function(`return ${el.source!.join(' + ')};`) as any;
+				console.log(`[el(${el.name})]`, el.source!.join('\n'));
+				this[name] = Function('n', el.source!.join('\n')) as any;
 
+				console.log(
+					`[el(${el.name})@content]`,
+					el.innerSource.length ? el.innerSource.join('\n') + '\nreturn n;' : 'return n;'
+				);
 				if (el.superCall) {
 					let inner = Function(
+						'n',
 						'$super',
-						`return ${el.innerSource.join(' + ')};`
+						el.innerSource.join('\n') + '\nreturn n;'
 					) as TElementRenderer;
 					let parentElementRendererMap = parent && parent._elementRendererMap;
 
-					this[name + '@content'] = function() {
-						return inner.call(this, parentElementRendererMap);
+					this[name + '@content'] = function(n) {
+						return inner.call(this, n, parentElementRendererMap);
 					};
 				} else {
 					this[name + '@content'] = Function(
-						`return ${el.innerSource.join(' + ') || "''"};`
+						'n',
+						el.innerSource.length
+							? el.innerSource.join('\n') + '\nreturn n;'
+							: 'return n;'
 					) as any;
 				}
-			}, elementRendererMap);
+			}, this._elementRendererMap);
 
 			if (!parent) {
+				console.log(
+					'[root]',
+					`var n = document.createDocumentFragment();\n${this._currentElement.innerSource.join(
+						'\n'
+					) || ''}\nreturn n;`
+				);
 				return (this._renderer = Function(
-					`return ${this._currentElement.innerSource.join(' + ') || "''"};`
+					`var n = document.createDocumentFragment();\n${this._currentElement.innerSource.join(
+						'\n'
+					) || ''}\nreturn n;`
 				) as any);
 			}
 		} else if (!parent) {
-			return (this._renderer = () => '');
+			return (this._renderer = () => document.createDocumentFragment());
 		}
 
 		return this._renderer;
 	}
 
-	_compileNode(node: INode, parentElName?: string) {
+	_compileNode(node: INode, parentElVarName: string, nodeIndex: number, superElName?: string) {
 		switch (node.nodeType) {
 			case NodeType.ELEMENT: {
 				let parent = this.parent;
@@ -179,6 +196,7 @@ export class Template {
 				let elName = elNames && elNames[0];
 				let elAttrs = el.attributes;
 				let content = el.content;
+				let elVarName = isHelper ? parentElVarName : parentElVarName + '$' + nodeIndex;
 
 				if (elNames) {
 					if (elName) {
@@ -235,14 +253,16 @@ export class Template {
 								let value = attr.value;
 								let index = attrList[name];
 
+								attrList[index === undefined ? attrCount : index] =
+									name == 'class'
+										? `\ne.className = '${escapeString(value)}';`
+										: `\ne.setAttribute('${escapeString(
+												name
+										  )}', '${escapeString(value)}');`;
+
 								if (index === undefined) {
-									attrList[attrCount] = ` ${name}="${value &&
-										escapeHTML(escapeString(value))}"`;
 									attrList[name] = attrCount;
 									attrCountMap[elName] = ++attrCount;
-								} else {
-									attrList[index] = ` ${name}="${value &&
-										escapeHTML(escapeString(value))}"`;
 								}
 							}
 
@@ -254,32 +274,39 @@ export class Template {
 
 								if (attrList['class'] !== undefined) {
 									attrList[attrList['class']] =
-										` class="<<${elNames.join(',')}>> ` +
-										attrList[attrList['class']].slice(' class="'.length);
+										`\ne.className = this['@c'].call(this['@'], ['${elNames.join(
+											"','"
+										)}']) + ' ` +
+										attrList[attrList['class']].slice(
+											"\ne.className = '".length
+										);
 									renderedAttrs = join.call(attrList, '');
 								} else {
 									renderedAttrs =
-										` class="<<${elNames.join(',')}>>"` +
-										join.call(attrList, '');
+										`\ne.className = this['@c'].call(this['@'], ['${elNames.join(
+											"','"
+										)}']);` + join.call(attrList, '');
 								}
 							}
 						} else if (!isHelper) {
-							renderedAttrs = ` class="<<${elNames.join(',')}>>"`;
+							renderedAttrs = `\ne.className = this['@c'].call(this['@'], ['${elNames.join(
+								"','"
+							)}']);`;
 						}
 
 						let currentEl = {
 							name: elName,
 							superCall: false,
 							source: isHelper
-								? [`this['${elName}@content']()`]
+								? [`this['${elName}@content'](n);`]
 								: [
-										`'<${tagName || 'div'}${renderedAttrs}>'`,
-										content && content.length
-											? `this['${elName}@content']() + '</${tagName ||
-													'div'}>'`
-											: !content && tagName && selfClosingTagMap.has(tagName)
-												? "''"
-												: `'</${tagName || 'div'}>'`
+										`var e = n.appendChild(${
+											content && content.length
+												? `this['${elName}@content'](document.createElement('${tagName ||
+														'div'}'))`
+												: `document.createElement('${tagName || 'div'}')`
+										});` + renderedAttrs,
+										'return e;'
 								  ],
 							innerSource: []
 						};
@@ -296,41 +323,51 @@ export class Template {
 
 								if (attr.name == 'class') {
 									hasClassAttr = true;
-									attrs += ` class="<<${elNames.join(',').slice(1)}>>${
-										value ? ' ' + value : ''
-									}"`;
+									attrs += `\n${elVarName}.className = this['@c'].call(this['@'], ['${elNames
+										.join("','")
+										.slice(3)}']) + '${
+										value ? ' ' + escapeHTML(escapeString(value)) : ''
+									}';`;
 								} else {
-									attrs += ` ${attr.name}="${value &&
-										escapeHTML(escapeString(value))}"`;
+									attrs += `\n${elVarName}.setAttribute('${escapeString(
+										attr.name
+									)}', '${escapeString(value)}');`;
 								}
 							}
 
 							this._currentElement.innerSource.push(
-								`'<${tagName || 'div'}${
-									hasClassAttr
+								`var ${elVarName} = ${parentElVarName}.appendChild(document.createElement('${tagName ||
+									'div'}'));` +
+									(hasClassAttr
 										? attrs
-										: ` class="<<${elNames.join(',').slice(1)}>>"` + attrs
-								}>'`
+										: `\n${elVarName}.className = this['@c'].call(this['@'], ['${elNames
+												.join("','")
+												.slice(3)}']);` + attrs)
 							);
 						} else {
 							this._currentElement.innerSource.push(
-								`'<${tagName || 'div'} class="<<${elNames.join(',').slice(1)}>>">'`
+								`var ${elVarName} = ${parentElVarName}.appendChild(document.createElement('${tagName ||
+									'div'}'));`,
+								`${elVarName}.className = this['@c'].call(this['@'], ['${elNames
+									.join("','")
+									.slice(3)}']);`
 							);
 						}
 					}
 				} else if (!isHelper) {
 					this._currentElement.innerSource.push(
-						`'<${tagName || 'div'}${
-							elAttrs
+						`var ${elVarName} = ${parentElVarName}.appendChild(document.createElement('${tagName ||
+							'div'}'));` +
+							(elAttrs
 								? elAttrs.list
 										.map(
 											attr =>
-												` ${attr.name}="${attr.value &&
-													escapeHTML(escapeString(attr.value))}"`
+												`\n${elVarName}.setAttribute('${escapeString(
+													attr.name
+												)}', '${escapeString(attr.value)}');`
 										)
 										.join('')
-								: ''
-						}>'`
+								: '')
 					);
 				}
 
@@ -345,32 +382,33 @@ export class Template {
 						throw new TypeError(`Helper "${tagName}" is not defined`);
 					}
 
-					let content = helper(el);
+					content = helper(el);
+				}
 
-					if (content) {
-						for (let contentNode of content) {
-							this._compileNode(contentNode, elName || parentElName);
-						}
-					}
-				} else if (content) {
-					for (let contentNode of content) {
-						this._compileNode(contentNode, elName || parentElName);
+				if (content) {
+					for (let i = 0, l = content.length; i < l; i++) {
+						this._compileNode(
+							content[i],
+							elName ? 'n' : elVarName,
+							i,
+							elName || superElName
+						);
 					}
 				}
 
 				if (elName) {
 					els.pop();
 					this._currentElement = els[els.length - 1];
-					this._currentElement.innerSource.push(`this['${elName}']()`);
-				} else if (!isHelper && (content || !tagName || !selfClosingTagMap.has(tagName))) {
-					this._currentElement.innerSource.push(`'</${tagName || 'div'}>'`);
+					this._currentElement.innerSource.push(`this['${elName}'](${parentElVarName});`);
 				}
 
 				break;
 			}
 			case NodeType.TEXT: {
 				this._currentElement.innerSource.push(
-					`'${escapeString((node as ITextNode).value)}'`
+					`${parentElVarName}.appendChild(document.createTextNode('${escapeString(
+						(node as ITextNode).value
+					)}'));`
 				);
 
 				break;
@@ -379,7 +417,7 @@ export class Template {
 				this._currentElement.superCall = true;
 				this._currentElement.innerSource.push(
 					`$super['${(node as ISuperCall).elementName ||
-						parentElName}@content'].call(this)`
+						superElName}@content'].call(this, ${parentElVarName});`
 				);
 
 				break;
@@ -391,7 +429,7 @@ export class Template {
 		let elClasses = '';
 
 		for (let i = 0, l = elNames.length; i < l; i++) {
-			elClasses += this._elementBlockNamesTemplate.join(elNames[i] + ' ');
+			elClasses += this._blockNamesTemplate.join(elNames[i] + ' ');
 		}
 
 		return elClasses.slice(0, -1);
