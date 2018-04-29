@@ -18,6 +18,7 @@ export declare class Template {
     parent: Template | null;
     nelm: IBlock;
     _elementBlockNamesTemplate: Array<string>;
+    onBeforeNamedElementOpeningTagClosing: (elNames: Array<string>) => string;
     _tagNameMap: {
         [elName: string]: string;
     };
@@ -37,6 +38,7 @@ export declare class Template {
     constructor(nelm: string | IBlock, opts?: {
         parent?: Template;
         blockName?: string | Array<string>;
+        onBeforeNamedElementOpeningTagClosing?: (elNames: Array<string>) => string;
     });
     extend(nelm: string | IBlock, opts?: {
         blockName?: string;

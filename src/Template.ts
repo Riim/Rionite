@@ -41,6 +41,8 @@ export class Template {
 
 	_elementBlockNamesTemplate: Array<string>;
 
+	onBeforeNamedElementOpeningTagClosing: (elNames: Array<string>) => string;
+
 	_tagNameMap: { [elName: string]: string };
 
 	_attributeListMap: { [elName: string]: Object };
@@ -58,6 +60,7 @@ export class Template {
 		opts?: {
 			parent?: Template;
 			blockName?: string | Array<string>;
+			onBeforeNamedElementOpeningTagClosing?: (elNames: Array<string>) => string;
 		}
 	) {
 		let parent = (this.parent = (opts && opts.parent) || null);
@@ -78,6 +81,9 @@ export class Template {
 		} else {
 			this._elementBlockNamesTemplate = ['', ''];
 		}
+
+		this.onBeforeNamedElementOpeningTagClosing =
+			(opts && opts.onBeforeNamedElementOpeningTagClosing) || (() => '');
 
 		this._tagNameMap = { __proto__: parent && parent._tagNameMap } as any;
 
@@ -105,7 +111,8 @@ export class Template {
 		return (this._renderer || this._compileRenderers()).call({
 			__proto__: this._elementRendererMap,
 			'@': this,
-			'@renderElementClasses': this._renderElementClasses
+			'@renderElementClasses': this._renderElementClasses,
+			'@onBeforeNamedElementOpeningTagClosing': this.onBeforeNamedElementOpeningTagClosing
 		});
 	}
 
@@ -188,7 +195,7 @@ export class Template {
 						if (tagName) {
 							this._tagNameMap[elName] = tagName;
 						} else {
-							// Не надо добавлять в конец ` || 'div'`,
+							// Не надо добавлять ` || 'div'`,
 							// тк. ниже tagName используется как имя хелпера.
 							tagName = parent && parent._tagNameMap[elName];
 						}
@@ -280,7 +287,10 @@ export class Template {
 							source: isHelper
 								? [`this['${elName}/content']()`]
 								: [
-										`'<${tagName || 'div'}${renderedAttrs}>'`,
+										`'<${tagName ||
+											'div'}${renderedAttrs}' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames.join(
+											"','"
+										)}']) + '>'`,
 										content && content.length
 											? `this['${elName}/content']() + '</${tagName ||
 													'div'}>'`
@@ -321,14 +331,20 @@ export class Template {
 										: ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
 												.slice(1)
 												.join("','")}']) + '"` + attrs
-								}>'`
+								}' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames
+									.slice(1)
+									.join("','")}']) + '>'`
 							);
 						} else {
 							this._currentElement.innerSource.push(
 								`'<${tagName ||
 									'div'} class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
 									.slice(1)
-									.join("','")}']) + '">'`
+									.join(
+										"','"
+									)}']) + '"' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames
+									.slice(1)
+									.join("','")}']) + '>'`
 							);
 						}
 					}

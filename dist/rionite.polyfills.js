@@ -1658,24 +1658,6 @@ var Features_1 = __webpack_require__(9);
 var map = Array.prototype.map;
 exports.KEY_PARAMS_CONFIG = symbol_polyfill_1.Symbol('paramsConfig');
 exports.KEY_PARAMS = symbol_polyfill_1.Symbol('params');
-var reClassBlockElement = / class="([a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b(?: [a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b)*)/g;
-function createClassBlockElementReplacer(blockName, events, evtAttrPrefix) {
-    return function (match, classNames) {
-        var cls = classNames.split(' ');
-        var evtAttrs;
-        for (var _i = 0, cls_1 = cls; _i < cls_1.length; _i++) {
-            var cl = cls_1[_i];
-            var cll = cl.split('__');
-            var elName = cll[1];
-            if (cll[0] == blockName && events[elName]) {
-                for (var type in events[elName]) {
-                    (evtAttrs || (evtAttrs = [])).push(" " + evtAttrPrefix + (type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type) + "=\"/" + elName + "\"");
-                }
-            }
-        }
-        return evtAttrs ? evtAttrs.join('') + match : match;
-    };
-}
 function findChildComponents(node, ownerComponent, context, childComponents) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         if (child.nodeType == Node.ELEMENT_NODE) {
@@ -1833,17 +1815,8 @@ var BaseComponent = /** @class */ (function (_super) {
                 else {
                     this.$content = document.createDocumentFragment();
                 }
-                var rawContent = constr._rawContent;
-                if (!rawContent) {
-                    var contentHTML = constr.template.render();
-                    if (constr.events) {
-                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr.elementIs, constr.events, 'oncomponent-'));
-                    }
-                    if (constr.domEvents) {
-                        contentHTML = contentHTML.replace(reClassBlockElement, createClassBlockElementReplacer(constr.elementIs, constr.domEvents, 'on-'));
-                    }
-                    rawContent = constr._rawContent = html_to_fragment_1.htmlToFragment(contentHTML);
-                }
+                var rawContent = constr._rawContent ||
+                    (constr._rawContent = html_to_fragment_1.htmlToFragment(constr.template.render()));
                 var content = rawContent.cloneNode(true);
                 if (!Features_1.templateTag) {
                     var templates = content.querySelectorAll('template');
@@ -2490,6 +2463,8 @@ var Template = /** @class */ (function () {
         else {
             this._elementBlockNamesTemplate = ['', ''];
         }
+        this.onBeforeNamedElementOpeningTagClosing =
+            (opts && opts.onBeforeNamedElementOpeningTagClosing) || (function () { return ''; });
         this._tagNameMap = { __proto__: parent && parent._tagNameMap };
         this._attributeListMap = { __proto__: parent && parent._attributeListMap };
         this._attributeCountMap = { __proto__: parent && parent._attributeCountMap };
@@ -2510,7 +2485,8 @@ var Template = /** @class */ (function () {
         return (this._renderer || this._compileRenderers()).call({
             __proto__: this._elementRendererMap,
             '@': this,
-            '@renderElementClasses': this._renderElementClasses
+            '@renderElementClasses': this._renderElementClasses,
+            '@onBeforeNamedElementOpeningTagClosing': this.onBeforeNamedElementOpeningTagClosing
         });
     };
     Template.prototype._compileRenderers = function () {
@@ -2575,7 +2551,7 @@ var Template = /** @class */ (function () {
                             this._tagNameMap[elName] = tagName;
                         }
                         else {
-                            // Не надо добавлять в конец ` || 'div'`,
+                            // Не надо добавлять ` || 'div'`,
                             // тк. ниже tagName используется как имя хелпера.
                             tagName = parent_1 && parent_1._tagNameMap[elName];
                         }
@@ -2643,7 +2619,8 @@ var Template = /** @class */ (function () {
                             source: isHelper
                                 ? ["this['" + elName + "/content']()"]
                                 : [
-                                    "'<" + (tagName || 'div') + renderedAttrs + ">'",
+                                    "'<" + (tagName ||
+                                        'div') + renderedAttrs + "' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['" + elNames.join("','") + "']) + '>'",
                                     content && content.length
                                         ? "this['" + elName + "/content']() + '</" + (tagName ||
                                             'div') + ">'"
@@ -2678,13 +2655,17 @@ var Template = /** @class */ (function () {
                                 ? attrs
                                 : " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
                                     .slice(1)
-                                    .join("','") + "']) + '\"" + attrs) + ">'");
+                                    .join("','") + "']) + '\"" + attrs) + "' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['" + elNames
+                                .slice(1)
+                                .join("','") + "']) + '>'");
                         }
                         else {
                             this._currentElement.innerSource.push("'<" + (tagName ||
                                 'div') + " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
                                 .slice(1)
-                                .join("','") + "']) + '\">'");
+                                .join("','") + "']) + '\"' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['" + elNames
+                                .slice(1)
+                                .join("','") + "']) + '>'");
                         }
                     }
                 }
@@ -3407,22 +3388,43 @@ function registerComponent(componentConstr) {
                 blockName: elIs
             });
         }
+        else if (template instanceof Template_1.Template) {
+            template.setBlockName(componentConstr._elementBlockNames);
+        }
         else {
-            if (template instanceof Template_1.Template) {
-                template.setBlockName(componentConstr._elementBlockNames);
-            }
-            else {
-                componentConstr.template = parentComponentConstr.template
-                    ? parentComponentConstr.template.extend(template, {
-                        blockName: elIs
-                    })
-                    : new Template_1.Template(template, { blockName: componentConstr._elementBlockNames });
-            }
+            componentConstr.template = parentComponentConstr.template
+                ? parentComponentConstr.template.extend(template, {
+                    blockName: elIs
+                })
+                : new Template_1.Template(template, { blockName: componentConstr._elementBlockNames });
         }
     }
     componentConstr._rawContent = undefined;
     inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
     inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
+    if (template !== null) {
+        var events_1 = componentConstr.events;
+        var domEvents_1 = componentConstr.domEvents;
+        if (events_1 || domEvents_1) {
+            componentConstr.template.onBeforeNamedElementOpeningTagClosing = function (elNames) {
+                var attrs = '';
+                for (var _i = 0, elNames_1 = elNames; _i < elNames_1.length; _i++) {
+                    var elName = elNames_1[_i];
+                    if (events_1 && events_1[elName]) {
+                        for (var type in events_1[elName]) {
+                            attrs += " oncomponent-" + (type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type) + "=\"/" + elName + "\"";
+                        }
+                    }
+                    if (domEvents_1 && domEvents_1[elName]) {
+                        for (var type in domEvents_1[elName]) {
+                            attrs += " on-" + type + "=\"/" + elName + "\"";
+                        }
+                    }
+                }
+                return attrs;
+            };
+        }
+    }
     var elExtends = componentConstr.elementExtends;
     var parentElConstr = (elExtends &&
         (elementConstructorMap_1.elementConstructorMap.get(elExtends) ||

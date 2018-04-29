@@ -236,16 +236,14 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			componentConstr.template = (template as Template).extend('', {
 				blockName: elIs
 			});
+		} else if (template instanceof Template) {
+			template.setBlockName(componentConstr._elementBlockNames);
 		} else {
-			if (template instanceof Template) {
-				template.setBlockName(componentConstr._elementBlockNames);
-			} else {
-				componentConstr.template = parentComponentConstr.template
-					? (parentComponentConstr.template as Template).extend(template, {
-							blockName: elIs
-					  })
-					: new Template(template, { blockName: componentConstr._elementBlockNames });
-			}
+			componentConstr.template = parentComponentConstr.template
+				? (parentComponentConstr.template as Template).extend(template, {
+						blockName: elIs
+				  })
+				: new Template(template, { blockName: componentConstr._elementBlockNames });
 		}
 	}
 
@@ -253,6 +251,35 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 	inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
 	inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
+
+	if (template !== null) {
+		let events = componentConstr.events;
+		let domEvents = componentConstr.domEvents;
+
+		if (events || domEvents) {
+			(componentConstr.template as Template).onBeforeNamedElementOpeningTagClosing = elNames => {
+				let attrs = '';
+
+				for (let elName of elNames) {
+					if (events && events[elName]) {
+						for (let type in events[elName]) {
+							attrs += ` oncomponent-${
+								type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type
+							}="/${elName}"`;
+						}
+					}
+
+					if (domEvents && domEvents[elName]) {
+						for (let type in domEvents[elName]) {
+							attrs += ` on-${type}="/${elName}"`;
+						}
+					}
+				}
+
+				return attrs;
+			};
+		}
+	}
 
 	let elExtends = componentConstr.elementExtends;
 

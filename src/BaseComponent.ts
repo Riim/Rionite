@@ -81,36 +81,6 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 export const KEY_PARAMS_CONFIG = Symbol('paramsConfig');
 export const KEY_PARAMS = Symbol('params');
 
-const reClassBlockElement = / class="([a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b(?: [a-zA-Z][\-\w]*__[a-zA-Z][\-\w]*\b)*)/g;
-
-function createClassBlockElementReplacer(
-	blockName: string,
-	events: IComponentEvents,
-	evtAttrPrefix: string
-) {
-	return (match: string, classNames: string): string => {
-		let cls = classNames.split(' ');
-		let evtAttrs: Array<string> | undefined;
-
-		for (let cl of cls) {
-			let cll = cl.split('__');
-			let elName = cll[1];
-
-			if (cll[0] == blockName && events[elName]) {
-				for (let type in events[elName]) {
-					(evtAttrs || (evtAttrs = [])).push(
-						` ${evtAttrPrefix}${
-							type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type
-						}="/${elName}"`
-					);
-				}
-			}
-		}
-
-		return evtAttrs ? evtAttrs.join('') + match : match;
-	};
-}
-
 function findChildComponents(
 	node: Node,
 	ownerComponent: BaseComponent,
@@ -392,36 +362,9 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 					this.$content = document.createDocumentFragment();
 				}
 
-				let rawContent = constr._rawContent;
-
-				if (!rawContent) {
-					let contentHTML = (constr.template as Template).render();
-
-					if (constr.events) {
-						contentHTML = contentHTML.replace(
-							reClassBlockElement,
-							createClassBlockElementReplacer(
-								constr.elementIs,
-								constr.events,
-								'oncomponent-'
-							)
-						);
-					}
-
-					if (constr.domEvents) {
-						contentHTML = contentHTML.replace(
-							reClassBlockElement,
-							createClassBlockElementReplacer(
-								constr.elementIs,
-								constr.domEvents,
-								'on-'
-							)
-						);
-					}
-
-					rawContent = constr._rawContent = htmlToFragment(contentHTML);
-				}
-
+				let rawContent =
+					constr._rawContent ||
+					(constr._rawContent = htmlToFragment((constr.template as Template).render()));
 				let content = rawContent.cloneNode(true) as DocumentFragment;
 				if (!templateTagFeature) {
 					let templates = content.querySelectorAll('template');
