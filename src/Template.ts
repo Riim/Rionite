@@ -102,18 +102,23 @@ export class Template {
 	}
 
 	render(): string {
-		return (this._renderer || this._compileRenderers())
-			.call(this._elementRendererMap)
-			.replace(/<<([^>]+)>>/g, (match: RegExpMatchArray, names: string): string =>
-				this._renderElementClasses(names.split(','))
-			);
+		return (this._renderer || this._compileRenderers()).call({
+			__proto__: this._elementRendererMap,
+			'@': this,
+			'@renderElementClasses': this._renderElementClasses
+		});
 	}
 
 	_compileRenderers(): TRenderer {
 		let parent = this.parent;
 
 		this._elements = [
-			(this._currentElement = { name: null, superCall: false, source: null, innerSource: [] })
+			(this._currentElement = {
+				name: null,
+				superCall: false,
+				source: null,
+				innerSource: []
+			})
 		];
 		let elMap = (this._elementMap = {} as { [elName: string]: IElement });
 
@@ -121,9 +126,7 @@ export class Template {
 			this._renderer = parent._renderer || parent._compileRenderers();
 		}
 
-		let elementRendererMap = (this._elementRendererMap = {
-			__proto__: parent && parent._elementRendererMap
-		} as any);
+		this._elementRendererMap = { __proto__: parent && parent._elementRendererMap } as any;
 
 		let content = this.nelm.content;
 		let contentLength = content.length;
@@ -145,15 +148,15 @@ export class Template {
 					) as TElementRenderer;
 					let parentElementRendererMap = parent && parent._elementRendererMap;
 
-					this[name + '@content'] = function() {
+					this[name + '/content'] = function() {
 						return inner.call(this, parentElementRendererMap);
 					};
 				} else {
-					this[name + '@content'] = Function(
+					this[name + '/content'] = Function(
 						`return ${el.innerSource.join(' + ') || "''"};`
 					) as any;
 				}
-			}, elementRendererMap);
+			}, this._elementRendererMap);
 
 			if (!parent) {
 				return (this._renderer = Function(
@@ -235,14 +238,13 @@ export class Template {
 								let value = attr.value;
 								let index = attrList[name];
 
+								attrList[
+									index === undefined ? attrCount : index
+								] = ` ${name}="${value && escapeString(escapeHTML(value))}"`;
+
 								if (index === undefined) {
-									attrList[attrCount] = ` ${name}="${value &&
-										escapeHTML(escapeString(value))}"`;
 									attrList[name] = attrCount;
 									attrCountMap[elName] = ++attrCount;
-								} else {
-									attrList[index] = ` ${name}="${value &&
-										escapeHTML(escapeString(value))}"`;
 								}
 							}
 
@@ -254,28 +256,33 @@ export class Template {
 
 								if (attrList['class'] !== undefined) {
 									attrList[attrList['class']] =
-										` class="<<${elNames.join(',')}>> ` +
+										` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join(
+											"','"
+										)}']) + ' ` +
 										attrList[attrList['class']].slice(' class="'.length);
 									renderedAttrs = join.call(attrList, '');
 								} else {
 									renderedAttrs =
-										` class="<<${elNames.join(',')}>>"` +
-										join.call(attrList, '');
+										` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join(
+											"','"
+										)}']) + '"` + join.call(attrList, '');
 								}
 							}
 						} else if (!isHelper) {
-							renderedAttrs = ` class="<<${elNames.join(',')}>>"`;
+							renderedAttrs = ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join(
+								"','"
+							)}']) + '"`;
 						}
 
 						let currentEl = {
 							name: elName,
 							superCall: false,
 							source: isHelper
-								? [`this['${elName}@content']()`]
+								? [`this['${elName}/content']()`]
 								: [
 										`'<${tagName || 'div'}${renderedAttrs}>'`,
 										content && content.length
-											? `this['${elName}@content']() + '</${tagName ||
+											? `this['${elName}/content']() + '</${tagName ||
 													'div'}>'`
 											: !content && tagName && selfClosingTagMap.has(tagName)
 												? "''"
@@ -296,12 +303,14 @@ export class Template {
 
 								if (attr.name == 'class') {
 									hasClassAttr = true;
-									attrs += ` class="<<${elNames.join(',').slice(1)}>>${
-										value ? ' ' + value : ''
+									attrs += ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
+										.slice(1)
+										.join("','")}']) + '${
+										value ? ' ' + escapeString(escapeHTML(value)) : ''
 									}"`;
 								} else {
 									attrs += ` ${attr.name}="${value &&
-										escapeHTML(escapeString(value))}"`;
+										escapeString(escapeHTML(value))}"`;
 								}
 							}
 
@@ -309,12 +318,17 @@ export class Template {
 								`'<${tagName || 'div'}${
 									hasClassAttr
 										? attrs
-										: ` class="<<${elNames.join(',').slice(1)}>>"` + attrs
+										: ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
+												.slice(1)
+												.join("','")}']) + '"` + attrs
 								}>'`
 							);
 						} else {
 							this._currentElement.innerSource.push(
-								`'<${tagName || 'div'} class="<<${elNames.join(',').slice(1)}>>">'`
+								`'<${tagName ||
+									'div'} class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
+									.slice(1)
+									.join("','")}']) + '">'`
 							);
 						}
 					}
@@ -326,7 +340,7 @@ export class Template {
 										.map(
 											attr =>
 												` ${attr.name}="${attr.value &&
-													escapeHTML(escapeString(attr.value))}"`
+													escapeString(escapeHTML(attr.value))}"`
 										)
 										.join('')
 								: ''
@@ -345,14 +359,10 @@ export class Template {
 						throw new TypeError(`Helper "${tagName}" is not defined`);
 					}
 
-					let content = helper(el);
+					content = helper(el);
+				}
 
-					if (content) {
-						for (let contentNode of content) {
-							this._compileNode(contentNode, elName || parentElName);
-						}
-					}
-				} else if (content) {
+				if (content) {
 					for (let contentNode of content) {
 						this._compileNode(contentNode, elName || parentElName);
 					}
@@ -370,7 +380,7 @@ export class Template {
 			}
 			case NodeType.TEXT: {
 				this._currentElement.innerSource.push(
-					`'${escapeString((node as ITextNode).value)}'`
+					`'${(node as ITextNode).value && escapeString((node as ITextNode).value)}'`
 				);
 
 				break;
@@ -379,7 +389,7 @@ export class Template {
 				this._currentElement.superCall = true;
 				this._currentElement.innerSource.push(
 					`$super['${(node as ISuperCall).elementName ||
-						parentElName}@content'].call(this)`
+						parentElName}/content'].call(this)`
 				);
 
 				break;

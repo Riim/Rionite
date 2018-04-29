@@ -1,4 +1,3 @@
-import { escapeHTML } from '@riim/escape-html';
 import { escapeString } from 'escape-string';
 import {
 	IBlock,
@@ -30,6 +29,20 @@ export interface IElementRendererMap {
 
 export const ELEMENT_NAME_DELIMITER = '__';
 
+function createElement(tagName: string, isSVG: boolean): string {
+	return isSVG
+		? `document.createElementNS('http://www.w3.org/2000/svg', '${tagName}')`
+		: `document.createElement('${tagName}')`;
+}
+
+function setAttribute(name: string, value: string, isSVG: boolean): string {
+	return isSVG && name == 'xmlns'
+		? `setAttributeNS('http://www.w3.org/2000/xmlns/', '${escapeString(name)}', '${escapeString(
+				value
+		  )}')`
+		: `setAttribute('${escapeString(name)}', '${escapeString(value)}')`;
+}
+
 export class Template {
 	static helpers: { [name: string]: (el: INelmElement) => TContent | null } = {
 		section: el => el.content
@@ -38,7 +51,10 @@ export class Template {
 	parent: Template | null;
 	nelm: IBlock;
 
-	_blockNamesTemplate: Array<string>;
+	_elementBlockNamesTemplate: Array<string>;
+
+	onNamedElement: (el: Element) => void;
+	onBinding: () => void;
 
 	_tagNameMap: { [elName: string]: string };
 	_attributeListMap: { [elName: string]: Object };
@@ -56,6 +72,8 @@ export class Template {
 		opts?: {
 			parent?: Template;
 			blockName?: string | Array<string>;
+			onNamedElement?: () => void;
+			onBinding?: () => void;
 		}
 	) {
 		let parent = (this.parent = (opts && opts.parent) || null);
@@ -64,18 +82,21 @@ export class Template {
 		let blockName = (opts && opts.blockName) || this.nelm.name;
 
 		if (parent) {
-			this._blockNamesTemplate = [
+			this._elementBlockNamesTemplate = [
 				blockName ? (blockName as string) + ELEMENT_NAME_DELIMITER : ''
-			].concat(parent._blockNamesTemplate);
+			].concat(parent._elementBlockNamesTemplate);
 		} else if (blockName) {
 			if (Array.isArray(blockName)) {
 				this.setBlockName(blockName);
 			} else {
-				this._blockNamesTemplate = [blockName + ELEMENT_NAME_DELIMITER, ''];
+				this._elementBlockNamesTemplate = [blockName + ELEMENT_NAME_DELIMITER, ''];
 			}
 		} else {
-			this._blockNamesTemplate = ['', ''];
+			this._elementBlockNamesTemplate = ['', ''];
 		}
+
+		this.onNamedElement = (opts && opts.onNamedElement) || (() => {});
+		this.onBinding = (opts && opts.onBinding) || (() => {});
 
 		this._tagNameMap = { __proto__: parent && parent._tagNameMap } as any;
 		this._attributeListMap = { __proto__: parent && parent._attributeListMap } as any;
@@ -88,11 +109,11 @@ export class Template {
 
 	setBlockName(blockName: string | Array<string>): Template {
 		if (Array.isArray(blockName)) {
-			(this._blockNamesTemplate = blockName.map(
+			(this._elementBlockNamesTemplate = blockName.map(
 				blockName => blockName + ELEMENT_NAME_DELIMITER
 			)).push('');
 		} else {
-			this._blockNamesTemplate[0] = blockName + ELEMENT_NAME_DELIMITER;
+			this._elementBlockNamesTemplate[0] = blockName + ELEMENT_NAME_DELIMITER;
 		}
 
 		return this;
@@ -102,7 +123,9 @@ export class Template {
 		return (this._renderer || this._compileRenderers()).call({
 			__proto__: this._elementRendererMap,
 			'@': this,
-			'@c': this._renderElementClasses
+			'@renderElementClasses': this._renderElementClasses,
+			'@onNamedElement': this.onNamedElement,
+			'@onBinding': this.onBinding
 		});
 	}
 
@@ -130,7 +153,14 @@ export class Template {
 
 		if (contentLength) {
 			for (let i = 0; i < contentLength; i++) {
-				this._compileNode(content[i], 'n', i);
+				let node = content[i];
+
+				this._compileNode(
+					node,
+					'n',
+					i,
+					node.nodeType == NodeType.ELEMENT && (node as INelmElement).tagName == 'svg'
+				);
 			}
 
 			Object.keys(elMap).forEach(function(this: IElementRendererMap, name: string) {
@@ -140,7 +170,7 @@ export class Template {
 				this[name] = Function('n', el.source!.join('\n')) as any;
 
 				console.log(
-					`[el(${el.name})@content]`,
+					`[el(${el.name})/content]`,
 					el.innerSource.length ? el.innerSource.join('\n') + '\nreturn n;' : 'return n;'
 				);
 				if (el.superCall) {
@@ -151,11 +181,11 @@ export class Template {
 					) as TElementRenderer;
 					let parentElementRendererMap = parent && parent._elementRendererMap;
 
-					this[name + '@content'] = function(n) {
+					this[name + '/content'] = function(n) {
 						return inner.call(this, n, parentElementRendererMap);
 					};
 				} else {
-					this[name + '@content'] = Function(
+					this[name + '/content'] = Function(
 						'n',
 						el.innerSource.length
 							? el.innerSource.join('\n') + '\nreturn n;'
@@ -184,7 +214,13 @@ export class Template {
 		return this._renderer;
 	}
 
-	_compileNode(node: INode, parentElVarName: string, nodeIndex: number, superElName?: string) {
+	_compileNode(
+		node: INode,
+		parentElVarName: string,
+		nodeIndex: number,
+		isSVG: boolean,
+		superElName?: string
+	) {
 		switch (node.nodeType) {
 			case NodeType.ELEMENT: {
 				let parent = this.parent;
@@ -254,11 +290,9 @@ export class Template {
 								let index = attrList[name];
 
 								attrList[index === undefined ? attrCount : index] =
-									name == 'class'
+									!isSVG && name == 'class'
 										? `\ne.className = '${escapeString(value)}';`
-										: `\ne.setAttribute('${escapeString(
-												name
-										  )}', '${escapeString(value)}');`;
+										: `\ne.${setAttribute(name, value, isSVG)};`;
 
 								if (index === undefined) {
 									attrList[name] = attrCount;
@@ -274,7 +308,7 @@ export class Template {
 
 								if (attrList['class'] !== undefined) {
 									attrList[attrList['class']] =
-										`\ne.className = this['@c'].call(this['@'], ['${elNames.join(
+										`\ne.className = this['@renderElementClasses'].call(this['@'], ['${elNames.join(
 											"','"
 										)}']) + ' ` +
 										attrList[attrList['class']].slice(
@@ -283,13 +317,13 @@ export class Template {
 									renderedAttrs = join.call(attrList, '');
 								} else {
 									renderedAttrs =
-										`\ne.className = this['@c'].call(this['@'], ['${elNames.join(
+										`\ne.className = this['@renderElementClasses'].call(this['@'], ['${elNames.join(
 											"','"
 										)}']);` + join.call(attrList, '');
 								}
 							}
 						} else if (!isHelper) {
-							renderedAttrs = `\ne.className = this['@c'].call(this['@'], ['${elNames.join(
+							renderedAttrs = `\ne.className = this['@renderElementClasses'].call(this['@'], ['${elNames.join(
 								"','"
 							)}']);`;
 						}
@@ -298,14 +332,17 @@ export class Template {
 							name: elName,
 							superCall: false,
 							source: isHelper
-								? [`this['${elName}@content'](n);`]
+								? [`this['${elName}/content'](n);`]
 								: [
 										`var e = n.appendChild(${
 											content && content.length
-												? `this['${elName}@content'](document.createElement('${tagName ||
-														'div'}'))`
-												: `document.createElement('${tagName || 'div'}')`
+												? `this['${elName}/content'](${createElement(
+														tagName || 'div',
+														isSVG
+												  )})`
+												: createElement(tagName || 'div', isSVG)
 										});` + renderedAttrs,
+										"this['@onNamedElement'].call(this['@'], e);",
 										'return e;'
 								  ],
 							innerSource: []
@@ -319,52 +356,71 @@ export class Template {
 							let attrs = '';
 
 							for (let attr of elAttrs.list) {
-								let value = attr.value;
-
 								if (attr.name == 'class') {
 									hasClassAttr = true;
-									attrs += `\n${elVarName}.className = this['@c'].call(this['@'], ['${elNames
+
+									let value = `this['@renderElementClasses'].call(this['@'], ['${elNames
 										.join("','")
 										.slice(3)}']) + '${
-										value ? ' ' + escapeHTML(escapeString(value)) : ''
-									}';`;
+										attr.value ? ' ' + escapeString(attr.value) : ''
+									}'`;
+
+									attrs += isSVG
+										? `\n${elVarName}.setAttribute('${escapeString(
+												attr.name
+										  )}', ${value});`
+										: `\n${elVarName}.className = ${value};`;
 								} else {
-									attrs += `\n${elVarName}.setAttribute('${escapeString(
-										attr.name
-									)}', '${escapeString(value)}');`;
+									attrs += `\n${elVarName}.${setAttribute(
+										attr.name,
+										attr.value,
+										isSVG
+									)};`;
 								}
 							}
 
 							this._currentElement.innerSource.push(
-								`var ${elVarName} = ${parentElVarName}.appendChild(document.createElement('${tagName ||
-									'div'}'));` +
+								`var ${elVarName} = ${parentElVarName}.appendChild(${createElement(
+									tagName || 'div',
+									isSVG
+								)});` +
 									(hasClassAttr
 										? attrs
-										: `\n${elVarName}.className = this['@c'].call(this['@'], ['${elNames
+										: `\n${elVarName}.className = this['@renderElementClasses'].call(this['@'], ['${elNames
 												.join("','")
 												.slice(3)}']);` + attrs)
 							);
 						} else {
 							this._currentElement.innerSource.push(
-								`var ${elVarName} = ${parentElVarName}.appendChild(document.createElement('${tagName ||
-									'div'}'));`,
-								`${elVarName}.className = this['@c'].call(this['@'], ['${elNames
+								`var ${elVarName} = ${parentElVarName}.appendChild(${createElement(
+									tagName || 'div',
+									isSVG
+								)});`,
+								`${elVarName}.className = this['@renderElementClasses'].call(this['@'], ['${elNames
 									.join("','")
 									.slice(3)}']);`
 							);
 						}
+
+						this._currentElement.innerSource.push(
+							`this['@onNamedElement'].call(this['@'], ${elVarName});`
+						);
 					}
 				} else if (!isHelper) {
 					this._currentElement.innerSource.push(
-						`var ${elVarName} = ${parentElVarName}.appendChild(document.createElement('${tagName ||
-							'div'}'));` +
+						`var ${elVarName} = ${parentElVarName}.appendChild(${createElement(
+							tagName || 'div',
+							isSVG
+						)});` +
 							(elAttrs
 								? elAttrs.list
 										.map(
 											attr =>
-												`\n${elVarName}.setAttribute('${escapeString(
-													attr.name
-												)}', '${escapeString(attr.value)}');`
+												`\n${elVarName}.${setAttribute(
+													attr.name,
+													attr.value,
+													isSVG
+												)};`
 										)
 										.join('')
 								: '')
@@ -387,10 +443,15 @@ export class Template {
 
 				if (content) {
 					for (let i = 0, l = content.length; i < l; i++) {
+						let node = content[i];
+
 						this._compileNode(
-							content[i],
+							node,
 							elName ? 'n' : elVarName,
 							i,
+							isSVG ||
+								(node.nodeType == NodeType.ELEMENT &&
+									(node as INelmElement).tagName == 'svg'),
 							elName || superElName
 						);
 					}
@@ -417,7 +478,7 @@ export class Template {
 				this._currentElement.superCall = true;
 				this._currentElement.innerSource.push(
 					`$super['${(node as ISuperCall).elementName ||
-						superElName}@content'].call(this, ${parentElVarName});`
+						superElName}/content'].call(this, ${parentElVarName});`
 				);
 
 				break;
@@ -429,7 +490,7 @@ export class Template {
 		let elClasses = '';
 
 		for (let i = 0, l = elNames.length; i < l; i++) {
-			elClasses += this._blockNamesTemplate.join(elNames[i] + ' ');
+			elClasses += this._elementBlockNamesTemplate.join(elNames[i] + ' ');
 		}
 
 		return elClasses.slice(0, -1);

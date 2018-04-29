@@ -95,10 +95,9 @@ function createClassBlockElementReplacer(
 		for (let cl of cls) {
 			let cll = cl.split('__');
 			let elName = cll[1];
-			let elEvents: { [eventName: string]: TEventHandler };
 
-			if (cll[0] == blockName && (elEvents = events[elName])) {
-				for (let type in elEvents) {
+			if (cll[0] == blockName && events[elName]) {
+				for (let type in events[elName]) {
 					(evtAttrs || (evtAttrs = [])).push(
 						` ${evtAttrPrefix}${
 							type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type

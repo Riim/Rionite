@@ -136,9 +136,8 @@ function createClassBlockElementReplacer(blockName, events, evtAttrPrefix) {
             var cl = cls_1[_i];
             var cll = cl.split('__');
             var elName = cll[1];
-            var elEvents = void 0;
-            if (cll[0] == blockName && (elEvents = events[elName])) {
-                for (var type in elEvents) {
+            if (cll[0] == blockName && events[elName]) {
+                for (var type in events[elName]) {
                     (evtAttrs || (evtAttrs = [])).push(" " + evtAttrPrefix + (type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type) + "=\"/" + elName + "\"");
                 }
             }
@@ -977,25 +976,27 @@ var Template = /** @class */ (function () {
         return this;
     };
     Template.prototype.render = function () {
-        var _this = this;
-        return (this._renderer || this._compileRenderers())
-            .call(this._elementRendererMap)
-            .replace(/<<([^>]+)>>/g, function (match, names) {
-            return _this._renderElementClasses(names.split(','));
+        return (this._renderer || this._compileRenderers()).call({
+            __proto__: this._elementRendererMap,
+            '@': this,
+            '@renderElementClasses': this._renderElementClasses
         });
     };
     Template.prototype._compileRenderers = function () {
         var parent = this.parent;
         this._elements = [
-            (this._currentElement = { name: null, superCall: false, source: null, innerSource: [] })
+            (this._currentElement = {
+                name: null,
+                superCall: false,
+                source: null,
+                innerSource: []
+            })
         ];
         var elMap = (this._elementMap = {});
         if (parent) {
             this._renderer = parent._renderer || parent._compileRenderers();
         }
-        var elementRendererMap = (this._elementRendererMap = {
-            __proto__: parent && parent._elementRendererMap
-        });
+        this._elementRendererMap = { __proto__: parent && parent._elementRendererMap };
         var content = this.nelm.content;
         var contentLength = content.length;
         if (contentLength) {
@@ -1008,14 +1009,14 @@ var Template = /** @class */ (function () {
                 if (el.superCall) {
                     var inner_1 = Function('$super', "return " + el.innerSource.join(' + ') + ";");
                     var parentElementRendererMap_1 = parent && parent._elementRendererMap;
-                    this[name + '@content'] = function () {
+                    this[name + '/content'] = function () {
                         return inner_1.call(this, parentElementRendererMap_1);
                     };
                 }
                 else {
-                    this[name + '@content'] = Function("return " + (el.innerSource.join(' + ') || "''") + ";");
+                    this[name + '/content'] = Function("return " + (el.innerSource.join(' + ') || "''") + ";");
                 }
-            }, elementRendererMap);
+            }, this._elementRendererMap);
             if (!parent) {
                 return (this._renderer = Function("return " + (this._currentElement.innerSource.join(' + ') || "''") + ";"));
             }
@@ -1079,15 +1080,10 @@ var Template = /** @class */ (function () {
                                 var name_1 = attr.name;
                                 var value = attr.value;
                                 var index = attrList[name_1];
+                                attrList[index === undefined ? attrCount : index] = " " + name_1 + "=\"" + (value && escape_string_1.escapeString(escape_html_1.escapeHTML(value))) + "\"";
                                 if (index === undefined) {
-                                    attrList[attrCount] = " " + name_1 + "=\"" + (value &&
-                                        escape_html_1.escapeHTML(escape_string_1.escapeString(value))) + "\"";
                                     attrList[name_1] = attrCount;
                                     attrCountMap[elName] = ++attrCount;
-                                }
-                                else {
-                                    attrList[index] = " " + name_1 + "=\"" + (value &&
-                                        escape_html_1.escapeHTML(escape_string_1.escapeString(value))) + "\"";
                                 }
                             }
                             if (!isHelper) {
@@ -1097,29 +1093,28 @@ var Template = /** @class */ (function () {
                                 };
                                 if (attrList['class'] !== undefined) {
                                     attrList[attrList['class']] =
-                                        " class=\"<<" + elNames.join(',') + ">> " +
+                                        " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames.join("','") + "']) + ' " +
                                             attrList[attrList['class']].slice(' class="'.length);
                                     renderedAttrs = join.call(attrList, '');
                                 }
                                 else {
                                     renderedAttrs =
-                                        " class=\"<<" + elNames.join(',') + ">>\"" +
-                                            join.call(attrList, '');
+                                        " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames.join("','") + "']) + '\"" + join.call(attrList, '');
                                 }
                             }
                         }
                         else if (!isHelper) {
-                            renderedAttrs = " class=\"<<" + elNames.join(',') + ">>\"";
+                            renderedAttrs = " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames.join("','") + "']) + '\"";
                         }
                         var currentEl = {
                             name: elName,
                             superCall: false,
                             source: isHelper
-                                ? ["this['" + elName + "@content']()"]
+                                ? ["this['" + elName + "/content']()"]
                                 : [
                                     "'<" + (tagName || 'div') + renderedAttrs + ">'",
                                     content && content.length
-                                        ? "this['" + elName + "@content']() + '</" + (tagName ||
+                                        ? "this['" + elName + "/content']() + '</" + (tagName ||
                                             'div') + ">'"
                                         : !content && tagName && self_closing_tags_1.map.has(tagName)
                                             ? "''"
@@ -1139,19 +1134,26 @@ var Template = /** @class */ (function () {
                                 var value = attr.value;
                                 if (attr.name == 'class') {
                                     hasClassAttr = true;
-                                    attrs += " class=\"<<" + elNames.join(',').slice(1) + ">>" + (value ? ' ' + value : '') + "\"";
+                                    attrs += " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
+                                        .slice(1)
+                                        .join("','") + "']) + '" + (value ? ' ' + escape_string_1.escapeString(escape_html_1.escapeHTML(value)) : '') + "\"";
                                 }
                                 else {
                                     attrs += " " + attr.name + "=\"" + (value &&
-                                        escape_html_1.escapeHTML(escape_string_1.escapeString(value))) + "\"";
+                                        escape_string_1.escapeString(escape_html_1.escapeHTML(value))) + "\"";
                                 }
                             }
                             this._currentElement.innerSource.push("'<" + (tagName || 'div') + (hasClassAttr
                                 ? attrs
-                                : " class=\"<<" + elNames.join(',').slice(1) + ">>\"" + attrs) + ">'");
+                                : " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
+                                    .slice(1)
+                                    .join("','") + "']) + '\"" + attrs) + ">'");
                         }
                         else {
-                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + " class=\"<<" + elNames.join(',').slice(1) + ">>\">'");
+                            this._currentElement.innerSource.push("'<" + (tagName ||
+                                'div') + " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
+                                .slice(1)
+                                .join("','") + "']) + '\">'");
                         }
                     }
                 }
@@ -1160,7 +1162,7 @@ var Template = /** @class */ (function () {
                         ? elAttrs.list
                             .map(function (attr) {
                             return " " + attr.name + "=\"" + (attr.value &&
-                                escape_html_1.escapeHTML(escape_string_1.escapeString(attr.value))) + "\"";
+                                escape_string_1.escapeString(escape_html_1.escapeHTML(attr.value))) + "\"";
                         })
                             .join('')
                         : '') + ">'");
@@ -1173,17 +1175,11 @@ var Template = /** @class */ (function () {
                     if (!helper) {
                         throw new TypeError("Helper \"" + tagName + "\" is not defined");
                     }
-                    var content_1 = helper(el);
-                    if (content_1) {
-                        for (var _d = 0, content_2 = content_1; _d < content_2.length; _d++) {
-                            var contentNode = content_2[_d];
-                            this._compileNode(contentNode, elName || parentElName);
-                        }
-                    }
+                    content = helper(el);
                 }
-                else if (content) {
-                    for (var _e = 0, content_3 = content; _e < content_3.length; _e++) {
-                        var contentNode = content_3[_e];
+                if (content) {
+                    for (var _d = 0, content_1 = content; _d < content_1.length; _d++) {
+                        var contentNode = content_1[_d];
                         this._compileNode(contentNode, elName || parentElName);
                     }
                 }
@@ -1198,13 +1194,13 @@ var Template = /** @class */ (function () {
                 break;
             }
             case nelm_parser_1.NodeType.TEXT: {
-                this._currentElement.innerSource.push("'" + escape_string_1.escapeString(node.value) + "'");
+                this._currentElement.innerSource.push("'" + (node.value && escape_string_1.escapeString(node.value)) + "'");
                 break;
             }
             case nelm_parser_1.NodeType.SUPER_CALL: {
                 this._currentElement.superCall = true;
                 this._currentElement.innerSource.push("$super['" + (node.elementName ||
-                    parentElName) + "@content'].call(this)");
+                    parentElName) + "/content'].call(this)");
                 break;
             }
         }
