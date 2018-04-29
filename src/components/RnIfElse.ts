@@ -1,9 +1,9 @@
 import { Component } from '../decorators/Component';
-import { RtIfThen } from './RtIfThen';
+import { RnIfThen } from './RnIfThen';
 
 @Component({
 	elementExtends: 'template'
 })
-export class RtIfElse extends RtIfThen {
+export class RnIfElse extends RnIfThen {
 	_elseMode = true;
 }

@@ -33,7 +33,7 @@ import { Template } from '../Template';
 
 		attrs.list.push({
 			name: 'is',
-			value: 'rt-' + name
+			value: 'rn-' + name
 		});
 
 		return [

@@ -12,7 +12,7 @@ import { templateTag as templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
 import { namePattern } from '../lib/namePattern';
 import { removeNodes } from '../lib/removeNodes';
-import { RtIfThen } from './RtIfThen';
+import { RnIfThen } from './RnIfThen';
 
 const slice = Array.prototype.slice;
 
@@ -64,7 +64,7 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 		for (let i = childComponents.length; i; ) {
 			let childComponent = childComponents[--i];
 
-			if (childComponent instanceof RtIfThen || childComponent instanceof RtRepeat) {
+			if (childComponent instanceof RnIfThen || childComponent instanceof RnRepeat) {
 				childComponent._deactivate();
 			}
 		}
@@ -79,7 +79,7 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 		trackBy: { property: 'paramTrackBy', type: String, readonly: true }
 	}
 })
-export class RtRepeat extends BaseComponent {
+export class RnRepeat extends BaseComponent {
 	paramFor: string;
 	paramTrackBy: string;
 

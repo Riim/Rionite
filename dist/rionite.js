@@ -1285,12 +1285,12 @@ var compileKeypath_1 = __webpack_require__(16);
 var Features_1 = __webpack_require__(9);
 var keypathPattern_1 = __webpack_require__(14);
 var removeNodes_1 = __webpack_require__(31);
-var RtRepeat2_1 = __webpack_require__(32);
+var RnRepeat_1 = __webpack_require__(32);
 var slice = Array.prototype.slice;
 var reKeypath = RegExp("^" + keypathPattern_1.keypathPattern + "$");
-var RtIfThen = /** @class */ (function (_super) {
-    __extends(RtIfThen, _super);
-    function RtIfThen() {
+var RnIfThen = /** @class */ (function (_super) {
+    __extends(RnIfThen, _super);
+    function RnIfThen() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._elseMode = false;
         _this._nodes = null;
@@ -1298,8 +1298,8 @@ var RtIfThen = /** @class */ (function (_super) {
         _this._active = false;
         return _this;
     }
-    RtIfThen_1 = RtIfThen;
-    RtIfThen.prototype.elementConnected = function () {
+    RnIfThen_1 = RnIfThen;
+    RnIfThen.prototype.elementConnected = function () {
         if (this._active) {
             return;
         }
@@ -1318,7 +1318,7 @@ var RtIfThen = /** @class */ (function (_super) {
         this._if.on('change', this._onIfChange, this);
         this._render(false);
     };
-    RtIfThen.prototype.elementDisconnected = function () {
+    RnIfThen.prototype.elementDisconnected = function () {
         var _this = this;
         next_tick_1.nextTick(function () {
             if (!_this.element[ElementProtoMixin_2.KEY_IS_ELEMENT_CONNECTED]) {
@@ -1326,18 +1326,18 @@ var RtIfThen = /** @class */ (function (_super) {
             }
         });
     };
-    RtIfThen.prototype._onIfChange = function () {
+    RnIfThen.prototype._onIfChange = function () {
         if (this.element.parentNode) {
             this._render(true);
         }
     };
-    RtIfThen.prototype._attach = function () {
+    RnIfThen.prototype._attach = function () {
         this._attached = true;
     };
-    RtIfThen.prototype._detach = function () {
+    RnIfThen.prototype._detach = function () {
         this._attached = false;
     };
-    RtIfThen.prototype._render = function (changed) {
+    RnIfThen.prototype._render = function (changed) {
         if (this._elseMode ? !this._if.get() : this._if.get()) {
             var content = document.importNode(this.element.content, true);
             if (!Features_1.templateTag) {
@@ -1377,7 +1377,7 @@ var RtIfThen = /** @class */ (function (_super) {
             this.emit('change');
         }
     };
-    RtIfThen.prototype._deactivate = function () {
+    RnIfThen.prototype._deactivate = function () {
         if (!this._active) {
             return;
         }
@@ -1391,30 +1391,30 @@ var RtIfThen = /** @class */ (function (_super) {
             this._deactivateChildComponents();
         }
     };
-    RtIfThen.prototype._deactivateChildComponents = function () {
+    RnIfThen.prototype._deactivateChildComponents = function () {
         var childComponents = this._childComponents;
         if (childComponents) {
             for (var i = childComponents.length; i;) {
                 var childComponent = childComponents[--i];
-                if (childComponent instanceof RtIfThen_1 || childComponent instanceof RtRepeat2_1.RtRepeat) {
+                if (childComponent instanceof RnIfThen_1 || childComponent instanceof RnRepeat_1.RnRepeat) {
                     childComponent._deactivate();
                 }
             }
         }
         this._childComponents = null;
     };
-    RtIfThen = RtIfThen_1 = __decorate([
+    RnIfThen = RnIfThen_1 = __decorate([
         Component_1.Component({
             elementExtends: 'template',
             params: {
                 if: { property: 'paramIf', type: String, required: true, readonly: true }
             }
         })
-    ], RtIfThen);
-    return RtIfThen;
-    var RtIfThen_1;
+    ], RnIfThen);
+    return RnIfThen;
+    var RnIfThen_1;
 }(BaseComponent_1.BaseComponent));
-exports.RtIfThen = RtIfThen;
+exports.RnIfThen = RnIfThen;
 
 
 /***/ }),
@@ -1878,15 +1878,15 @@ function registerComponent(componentConstr) {
             componentConstr.template.onBeforeNamedElementOpeningTagClosing = function (elNames) {
                 var attrs = '';
                 for (var _i = 0, elNames_1 = elNames; _i < elNames_1.length; _i++) {
-                    var elName = elNames_1[_i];
-                    if (events_1 && events_1[elName]) {
-                        for (var type in events_1[elName]) {
-                            attrs += " oncomponent-" + (type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type) + "=\"/" + elName + "\"";
+                    var name_2 = elNames_1[_i];
+                    if (events_1 && events_1[name_2]) {
+                        for (var type in events_1[name_2]) {
+                            attrs += " oncomponent-" + (type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type) + "=\"/" + name_2 + "\"";
                         }
                     }
-                    if (domEvents_1 && domEvents_1[elName]) {
-                        for (var type in domEvents_1[elName]) {
-                            attrs += " on-" + type + "=\"/" + elName + "\"";
+                    if (domEvents_1 && domEvents_1[name_2]) {
+                        for (var type in domEvents_1[name_2]) {
+                            attrs += " on-" + type + "=\"/" + name_2 + "\"";
                         }
                     }
                 }
@@ -1912,8 +1912,8 @@ function registerComponent(componentConstr) {
                 return [];
             }
             var attrs = [];
-            for (var name_2 in paramsConfig) {
-                attrs.push(name_2.toLowerCase());
+            for (var name_3 in paramsConfig) {
+                attrs.push(name_3.toLowerCase());
             }
             return attrs;
         }
@@ -2399,7 +2399,7 @@ var Features_1 = __webpack_require__(9);
 var keypathPattern_1 = __webpack_require__(14);
 var namePattern_1 = __webpack_require__(15);
 var removeNodes_1 = __webpack_require__(31);
-var RtIfThen_1 = __webpack_require__(17);
+var RnIfThen_1 = __webpack_require__(17);
 var slice = Array.prototype.slice;
 var reForAttrValue = RegExp("^\\s*(" + namePattern_1.namePattern + ")\\s+(?:in|of)\\s+(" + keypathPattern_1.keypathPattern + ")\\s*$");
 function getItem(list, index) {
@@ -2429,20 +2429,20 @@ function deactivateChildComponents(childComponents) {
     if (childComponents) {
         for (var i = childComponents.length; i;) {
             var childComponent = childComponents[--i];
-            if (childComponent instanceof RtIfThen_1.RtIfThen || childComponent instanceof RtRepeat) {
+            if (childComponent instanceof RnIfThen_1.RnIfThen || childComponent instanceof RnRepeat) {
                 childComponent._deactivate();
             }
         }
     }
 }
-var RtRepeat = /** @class */ (function (_super) {
-    __extends(RtRepeat, _super);
-    function RtRepeat() {
+var RnRepeat = /** @class */ (function (_super) {
+    __extends(RnRepeat, _super);
+    function RnRepeat() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._active = false;
         return _this;
     }
-    RtRepeat.prototype.elementConnected = function () {
+    RnRepeat.prototype.elementConnected = function () {
         if (this._active) {
             return;
         }
@@ -2465,7 +2465,7 @@ var RtRepeat = /** @class */ (function (_super) {
         this._list.on('change', this._onListChange, this);
         this._render(false);
     };
-    RtRepeat.prototype.elementDisconnected = function () {
+    RnRepeat.prototype.elementDisconnected = function () {
         var _this = this;
         next_tick_1.nextTick(function () {
             if (!_this.element[ElementProtoMixin_2.KEY_IS_ELEMENT_CONNECTED]) {
@@ -2473,18 +2473,18 @@ var RtRepeat = /** @class */ (function (_super) {
             }
         });
     };
-    RtRepeat.prototype._onListChange = function () {
+    RnRepeat.prototype._onListChange = function () {
         if (this.element.parentNode) {
             this._render(true);
         }
     };
-    RtRepeat.prototype._attach = function () {
+    RnRepeat.prototype._attach = function () {
         this._attached = true;
     };
-    RtRepeat.prototype._detach = function () {
+    RnRepeat.prototype._detach = function () {
         this._attached = false;
     };
-    RtRepeat.prototype._render = function (fromChangeEvent) {
+    RnRepeat.prototype._render = function (fromChangeEvent) {
         var prevList = this._prevList;
         var prevListLength = prevList.length;
         var list = this._list.get();
@@ -2651,7 +2651,7 @@ var RtRepeat = /** @class */ (function (_super) {
         }
         var _b;
     };
-    RtRepeat.prototype._deactivate = function () {
+    RnRepeat.prototype._deactivate = function () {
         if (!this._active) {
             return;
         }
@@ -2669,7 +2669,7 @@ var RtRepeat = /** @class */ (function (_super) {
             deactivateChildComponents($item.childComponents);
         }
     };
-    RtRepeat = __decorate([
+    RnRepeat = __decorate([
         Component_1.Component({
             elementExtends: 'template',
             params: {
@@ -2677,10 +2677,10 @@ var RtRepeat = /** @class */ (function (_super) {
                 trackBy: { property: 'paramTrackBy', type: String, readonly: true }
             }
         })
-    ], RtRepeat);
-    return RtRepeat;
+    ], RnRepeat);
+    return RnRepeat;
 }(BaseComponent_1.BaseComponent));
-exports.RtRepeat = RtRepeat;
+exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
@@ -2719,14 +2719,14 @@ var componentParamValueMap_1 = __webpack_require__(13);
 exports.componentParamValueMap = componentParamValueMap_1.componentParamValueMap;
 var registerComponent_1 = __webpack_require__(23);
 exports.registerComponent = registerComponent_1.registerComponent;
-var RtIfThen_1 = __webpack_require__(17);
-exports.RtIfThen = RtIfThen_1.RtIfThen;
-var RtIfElse_1 = __webpack_require__(56);
-exports.RtIfElse = RtIfElse_1.RtIfElse;
-var RtRepeat2_1 = __webpack_require__(32);
-exports.RtRepeat = RtRepeat2_1.RtRepeat;
-var RtSlot_1 = __webpack_require__(57);
-exports.RtSlot = RtSlot_1.RtSlot;
+var RnIfThen_1 = __webpack_require__(17);
+exports.RnIfThen = RnIfThen_1.RnIfThen;
+var RnIfElse_1 = __webpack_require__(56);
+exports.RnIfElse = RnIfElse_1.RnIfElse;
+var RnRepeat_1 = __webpack_require__(32);
+exports.RnRepeat = RnRepeat_1.RnRepeat;
+var RnSlot_1 = __webpack_require__(57);
+exports.RnSlot = RnSlot_1.RnSlot;
 di_1.Container.registerService('logger', logger_1.logger);
 
 
@@ -2801,7 +2801,7 @@ var Template_1 = __webpack_require__(12);
         };
         attrs.list.push({
             name: 'is',
-            value: 'rt-' + name
+            value: 'rn-' + name
         });
         return [
             {
@@ -3295,9 +3295,9 @@ function handleEvent(evt) {
                         if (receiver != targetEl) {
                             var elementBlockNames = target.constructor
                                 ._elementBlockNames;
-                            for (var i_1 = 0, l_1 = elementBlockNames.length; i_1 < l_1; i_1++) {
+                            for (var j = 0, m = elementBlockNames.length; j < m; j++) {
                                 var typedHandler = ownerComponent.constructor
-                                    .events[attrValue.slice(1)]["<" + elementBlockNames[i_1] + ">" + evt.type];
+                                    .events[attrValue.slice(1)]["<" + elementBlockNames[j] + ">" + evt.type];
                                 if (typedHandler) {
                                     if (typedHandler &&
                                         typedHandler.call(ownerComponent, evt, receiver) === false) {
@@ -3473,22 +3473,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var Component_1 = __webpack_require__(4);
-var RtIfThen_1 = __webpack_require__(17);
-var RtIfElse = /** @class */ (function (_super) {
-    __extends(RtIfElse, _super);
-    function RtIfElse() {
+var RnIfThen_1 = __webpack_require__(17);
+var RnIfElse = /** @class */ (function (_super) {
+    __extends(RnIfElse, _super);
+    function RnIfElse() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
         _this._elseMode = true;
         return _this;
     }
-    RtIfElse = __decorate([
+    RnIfElse = __decorate([
         Component_1.Component({
             elementExtends: 'template'
         })
-    ], RtIfElse);
-    return RtIfElse;
-}(RtIfThen_1.RtIfThen));
-exports.RtIfElse = RtIfElse;
+    ], RnIfElse);
+    return RnIfElse;
+}(RnIfThen_1.RnIfThen));
+exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
@@ -3524,13 +3524,13 @@ var BaseComponent_1 = __webpack_require__(1);
 var bindContent_1 = __webpack_require__(8);
 var Component_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(2);
-var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite.RtSlot.slotContentMap');
-var RtSlot = /** @class */ (function (_super) {
-    __extends(RtSlot, _super);
-    function RtSlot() {
+var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite.RnSlot.slotContentMap');
+var RnSlot = /** @class */ (function (_super) {
+    __extends(RnSlot, _super);
+    function RnSlot() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    RtSlot.prototype._attach = function () {
+    RnSlot.prototype._attach = function () {
         this._attached = true;
         if (this.isReady) {
             this._unfreezeBindings();
@@ -3657,11 +3657,11 @@ var RtSlot = /** @class */ (function (_super) {
         }
         var _a;
     };
-    RtSlot.prototype._detach = function () {
+    RnSlot.prototype._detach = function () {
         this._attached = false;
         this._freezeBindings();
     };
-    RtSlot = __decorate([
+    RnSlot = __decorate([
         Component_1.Component({
             params: {
                 name: { property: 'paramName', type: String, readonly: true },
@@ -3672,10 +3672,10 @@ var RtSlot = /** @class */ (function (_super) {
             },
             template: ''
         })
-    ], RtSlot);
-    return RtSlot;
+    ], RnSlot);
+    return RnSlot;
 }(BaseComponent_1.BaseComponent));
-exports.RtSlot = RtSlot;
+exports.RnSlot = RnSlot;
 
 
 /***/ }),

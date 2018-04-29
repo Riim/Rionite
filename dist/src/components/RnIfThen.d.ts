@@ -1,7 +1,7 @@
 import { Cell } from 'cellx';
 import { BaseComponent } from '../BaseComponent';
 export declare type TIfCell = Cell<boolean>;
-export declare class RtIfThen extends BaseComponent {
+export declare class RnIfThen extends BaseComponent {
     paramIf: string;
     _elseMode: boolean;
     _if: TIfCell;

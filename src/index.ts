@@ -34,15 +34,15 @@ export { KEY_IS_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export { componentParamValueMap } from './componentParamValueMap';
 export { registerComponent } from './registerComponent';
-export { TIfCell as TRtIfThenIfCell, RtIfThen } from './components/RtIfThen';
-export { RtIfElse } from './components/RtIfElse';
+export { TIfCell as TRtIfThenIfCell, RnIfThen } from './components/RnIfThen';
+export { RnIfElse } from './components/RnIfElse';
 export {
 	TList as TRtRepeatList,
 	TListCell as TRtRepeatListCell,
 	I$Item as IRtRepeatItem,
 	T$ItemMap as TRtRepeatItemMap,
-	RtRepeat
-} from './components/RtRepeat2';
-export { RtSlot } from './components/RtSlot';
+	RnRepeat
+} from './components/RnRepeat';
+export { RnSlot } from './components/RnSlot';
 
 Container.registerService('logger', logger);

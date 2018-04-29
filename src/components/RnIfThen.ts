@@ -10,7 +10,7 @@ import { compileKeypath } from '../lib/compileKeypath';
 import { templateTag as templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
 import { removeNodes } from '../lib/removeNodes';
-import { RtRepeat } from './RtRepeat2';
+import { RnRepeat } from './RnRepeat';
 
 const slice = Array.prototype.slice;
 
@@ -25,7 +25,7 @@ const reKeypath = RegExp(`^${keypathPattern}$`);
 		if: { property: 'paramIf', type: String, required: true, readonly: true }
 	}
 })
-export class RtIfThen extends BaseComponent {
+export class RnIfThen extends BaseComponent {
 	paramIf: string;
 
 	_elseMode = false;
@@ -171,7 +171,7 @@ export class RtIfThen extends BaseComponent {
 			for (let i = childComponents.length; i; ) {
 				let childComponent = childComponents[--i];
 
-				if (childComponent instanceof RtIfThen || childComponent instanceof RtRepeat) {
+				if (childComponent instanceof RnIfThen || childComponent instanceof RnRepeat) {
 					childComponent._deactivate();
 				}
 			}

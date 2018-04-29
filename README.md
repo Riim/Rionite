@@ -110,11 +110,11 @@ class SimpleCounter extends BaseComponent {
 </script>
 ```
 
-Для управления потоком в шаблоне используются компоненты `RtIfThen`, `RtIfElse` и `RtRepeat`.
+Для управления потоком в шаблоне используются компоненты `RnIfThen`, `RnIfElse` и `RnRepeat`.
 
 TODO:
 - formatters
-- больше про `RtIfThen`, `RtIfElse` и `RtRepeat`
+- больше про `RnIfThen`, `RnIfElse` и `RnRepeat`
 - callbacks и `movedElement`
 - удаление атрибута биндингом
 - component vs element

@@ -260,18 +260,18 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			(componentConstr.template as Template).onBeforeNamedElementOpeningTagClosing = elNames => {
 				let attrs = '';
 
-				for (let elName of elNames) {
-					if (events && events[elName]) {
-						for (let type in events[elName]) {
+				for (let name of elNames) {
+					if (events && events[name]) {
+						for (let type in events[name]) {
 							attrs += ` oncomponent-${
 								type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type
-							}="/${elName}"`;
+							}="/${name}"`;
 						}
 					}
 
-					if (domEvents && domEvents[elName]) {
-						for (let type in domEvents[elName]) {
-							attrs += ` on-${type}="/${elName}"`;
+					if (domEvents && domEvents[name]) {
+						for (let type in domEvents[name]) {
+							attrs += ` on-${type}="/${name}"`;
 						}
 					}
 				}

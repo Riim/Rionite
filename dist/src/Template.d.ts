@@ -47,5 +47,5 @@ export declare class Template {
     render(): string;
     _compileRenderers(): TRenderer;
     _compileNode(node: INode, parentElName?: string): void;
-    _renderElementClasses(elNames: Array<string | null>): string;
+    _renderElementClasses(elNames: Array<string>): string;
 }

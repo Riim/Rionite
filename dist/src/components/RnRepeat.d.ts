@@ -10,7 +10,7 @@ export interface I$Item {
     childComponents: Array<BaseComponent> | null;
 }
 export declare type T$ItemMap = Map<any, I$Item>;
-export declare class RtRepeat extends BaseComponent {
+export declare class RnRepeat extends BaseComponent {
     paramFor: string;
     paramTrackBy: string;
     _itemName: string;

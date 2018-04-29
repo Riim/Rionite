@@ -43,10 +43,10 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 							let elementBlockNames = (target.constructor as typeof BaseComponent)
 								._elementBlockNames;
 
-							for (let i = 0, l = elementBlockNames.length; i < l; i++) {
+							for (let j = 0, m = elementBlockNames.length; j < m; j++) {
 								let typedHandler = (ownerComponent.constructor as typeof BaseComponent)
 									.events![attrValue.slice(1)][
-									`<${elementBlockNames[i]}>` + evt.type
+									`<${elementBlockNames[j]}>` + evt.type
 								];
 
 								if (typedHandler) {

@@ -413,7 +413,7 @@ export class Template {
 		}
 	}
 
-	_renderElementClasses(elNames: Array<string | null>): string {
+	_renderElementClasses(elNames: Array<string>): string {
 		let elClasses = '';
 
 		for (let i = 0, l = elNames.length; i < l; i++) {

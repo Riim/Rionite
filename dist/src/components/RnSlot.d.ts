@@ -1,5 +1,5 @@
 import { BaseComponent } from '../BaseComponent';
-export declare class RtSlot extends BaseComponent {
+export declare class RnSlot extends BaseComponent {
     $context: {
         [name: string]: any;
     };
@@ -9,7 +9,7 @@ export declare class RtSlot extends BaseComponent {
     paramCloneContent: boolean;
     paramGetContext: (this: BaseComponent, context: {
         [name: string]: any;
-    }, slot: RtSlot) => {
+    }, slot: RnSlot) => {
         [name: string]: any;
     };
     _childComponents: Array<BaseComponent> | null;
