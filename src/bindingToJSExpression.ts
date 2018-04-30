@@ -1,24 +1,14 @@
 import { IContentNodeValueBinding, IContentNodeValueBindingFormatter } from './ContentNodeValueParser';
 
-const cache: { [key: string]: string } = Object.create(null);
-
 function formattersReducer(jsExpr: string, formatter: IContentNodeValueBindingFormatter): string {
 	let args = formatter.arguments;
 
-	return `(this.${formatter.name} || formatters.${
-		formatter.name
-	}).call(this['$/'], ${jsExpr}${
+	return `(this.${formatter.name} || formatters.${formatter.name}).call(this['$/'], ${jsExpr}${
 		args && args.value.length ? ', ' + args.value.join(', ') : ''
 	})`;
 }
 
 export function bindingToJSExpression(binding: IContentNodeValueBinding): string {
-	let bindingRaw = binding.raw;
-
-	if (cache[bindingRaw]) {
-		return cache[bindingRaw];
-	}
-
 	let formatters = binding.formatters;
 
 	if (binding.keypath) {
@@ -26,9 +16,9 @@ export function bindingToJSExpression(binding: IContentNodeValueBinding): string
 		let keyCount = keys.length;
 
 		if (keyCount == 1) {
-			return (cache[bindingRaw] = formatters
+			return formatters
 				? formatters.reduce(formattersReducer, `this['${keys[0]}']`)
-				: `this['${keys[0]}']`);
+				: `this['${keys[0]}']`;
 		}
 
 		let index = keyCount - 2;
@@ -42,12 +32,8 @@ export function bindingToJSExpression(binding: IContentNodeValueBinding): string
 			keys[keyCount - 1]
 		}']`;
 
-		return (cache[bindingRaw] = formatters
-			? formatters.reduce(formattersReducer, jsExpr)
-			: jsExpr);
+		return formatters ? formatters.reduce(formattersReducer, jsExpr) : jsExpr;
 	}
 
-	return (cache[bindingRaw] = formatters
-		? formatters.reduce(formattersReducer, binding.value!)
-		: binding.value!);
+	return formatters ? formatters.reduce(formattersReducer, binding.value!) : binding.value!;
 }

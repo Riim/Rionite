@@ -64,9 +64,9 @@ export class ContentNodeValueParser {
 	parse(): TContentNodeValue {
 		let contentNodeValue = this.contentNodeValue;
 
-		if (!contentNodeValue) {
-			return [];
-		}
+		// if (!contentNodeValue) {
+		// 	return [];
+		// }
 
 		this.at = 0;
 

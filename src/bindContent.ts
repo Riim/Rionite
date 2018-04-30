@@ -19,6 +19,8 @@ import { IFreezableCell } from './componentBinding';
 import { ContentNodeValueNodeType, ContentNodeValueParser, IContentNodeValueBinding } from './ContentNodeValueParser';
 import { compileKeypath } from './lib/compileKeypath';
 
+const contentNodeValueCache = Object.create(null);
+
 export class AttributeBindingCell extends Cell {
 	prevValue: any;
 
@@ -95,11 +97,13 @@ export function bindContent(
 
 					let value = attr.value;
 
-					if (value.indexOf('{') == -1) {
+					if (!value) {
 						continue;
 					}
 
-					let contentNodeValue = new ContentNodeValueParser(value).parse();
+					let contentNodeValue =
+						contentNodeValueCache[value] ||
+						(contentNodeValueCache[value] = new ContentNodeValueParser(value).parse());
 					let contentNodeValueLength = contentNodeValue.length;
 
 					if (
@@ -205,12 +209,9 @@ export function bindContent(
 				}
 
 				let value = child.nodeValue!;
-
-				if (value.indexOf('{') == -1) {
-					break;
-				}
-
-				let contentNodeValue = new ContentNodeValueParser(value).parse();
+				let contentNodeValue =
+					contentNodeValueCache[value] ||
+					(contentNodeValueCache[value] = new ContentNodeValueParser(value).parse());
 
 				if (
 					contentNodeValue.length > 1 ||
