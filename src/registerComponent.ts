@@ -283,11 +283,18 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 	let elExtends = componentConstr.elementExtends;
 
-	let parentElConstr =
-		(elExtends &&
-			(elementConstructorMap.get(elExtends) ||
-				window[`HTML${pascalize(elExtends)}Element`])) ||
-		HTMLElement;
+	let parentElConstr: Function;
+
+	if (elExtends) {
+		parentElConstr =
+			elementConstructorMap.get(elExtends) || window[`HTML${pascalize(elExtends)}Element`];
+
+		if (!parentElConstr) {
+			throw new TypeError(`Component "${elExtends}" is not registered`);
+		}
+	} else {
+		parentElConstr = HTMLElement;
+	}
 
 	let elConstr = function(self: HTMLElement | undefined): IComponentElement {
 		return parentElConstr.call(this, self);
@@ -327,12 +334,11 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		elExtends ? { extends: elExtends } : undefined
 	);
 
-	componentConstructorMap.set(elIs, componentConstr);
+	componentConstructorMap
+		.set(elIs, componentConstr)
+		.set(hyphenizedElIs, componentConstr)
+		.set(hyphenizedElIs.toUpperCase(), componentConstr);
 	elementConstructorMap.set(elIs, elConstr);
-
-	if (hyphenizedElIs != elIs) {
-		componentConstructorMap.set(hyphenizedElIs, componentConstr);
-	}
 
 	return componentConstr;
 }

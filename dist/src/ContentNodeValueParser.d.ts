@@ -37,7 +37,7 @@ export declare class ContentNodeValueParser {
     chr: string;
     result: TContentNodeValue;
     constructor(contentNodeValue: string);
-    parse(): TContentNodeValue;
+    parse(index: number): TContentNodeValue;
     _pushText(value: string): void;
     _readBinding(): IContentNodeValueBinding | null;
     _readPrefix(): string | null;

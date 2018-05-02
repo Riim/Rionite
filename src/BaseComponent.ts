@@ -9,7 +9,7 @@ import { EventEmitter, IEvent } from 'cellx';
 import { htmlToFragment } from 'html-to-fragment';
 import { IBlock } from 'nelm-parser';
 import { attachChildComponentElements } from './attachChildComponentElements';
-import { bindContent } from './bindContent';
+import { bindContent, prepareContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructorMap } from './componentConstructorMap';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
@@ -19,6 +19,7 @@ import {
 	TListener,
 	TListeningTarget
 	} from './DisposableMixin';
+import { elementConstructorMap } from './elementConstructorMap';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { handledEvents } from './handledEvents';
 import { handleDOMEvent } from './handleDOMEvent';
@@ -197,7 +198,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 		let constr = this.constructor as typeof BaseComponent;
 
-		if (!componentConstructorMap.has(constr.elementIs)) {
+		if (!elementConstructorMap.has(constr.elementIs)) {
 			throw new TypeError('Component must be registered');
 		}
 
@@ -273,7 +274,9 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 				let targetType = type.slice(1, index);
 
 				if (targetType != '*') {
-					let targetConstr = componentConstructorMap.get(targetType);
+					let targetConstr =
+						elementConstructorMap.has(targetType) &&
+						componentConstructorMap.get(targetType);
 
 					if (!targetConstr) {
 						throw new TypeError(`Component "${targetType}" is not defined`);
@@ -282,7 +285,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 					let inner = listener;
 
 					listener = function(evt) {
-						if (evt.target instanceof targetConstr!) {
+						if (evt.target instanceof (targetConstr as typeof BaseComponent)) {
 							return inner.call(this, evt);
 						}
 					};
@@ -364,7 +367,9 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 				let rawContent =
 					constr._rawContent ||
-					(constr._rawContent = htmlToFragment((constr.template as Template).render()));
+					(constr._rawContent = prepareContent(
+						htmlToFragment((constr.template as Template).render())
+					));
 				let content = rawContent.cloneNode(true) as DocumentFragment;
 				if (!templateTagFeature) {
 					let templates = content.querySelectorAll('template');

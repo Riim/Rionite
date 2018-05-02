@@ -61,18 +61,14 @@ export class ContentNodeValueParser {
 		this.contentNodeValue = contentNodeValue;
 	}
 
-	parse(): TContentNodeValue {
+	parse(index: number): TContentNodeValue {
 		let contentNodeValue = this.contentNodeValue;
-
-		// if (!contentNodeValue) {
-		// 	return [];
-		// }
 
 		this.at = 0;
 
 		let result: TContentNodeValue = (this.result = []);
 
-		for (let index: number; (index = contentNodeValue.indexOf('{', this.at)) != -1; ) {
+		do {
 			this._pushText(contentNodeValue.slice(this.at, index));
 
 			this.at = index;
@@ -86,7 +82,9 @@ export class ContentNodeValueParser {
 				this._pushText(this.chr);
 				this._next('{');
 			}
-		}
+
+			index = contentNodeValue.indexOf('{', this.at);
+		} while (index != -1);
 
 		this._pushText(contentNodeValue.slice(this.at));
 
