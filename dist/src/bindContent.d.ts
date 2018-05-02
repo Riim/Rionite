@@ -1,7 +1,6 @@
 import { Cell, ICellOptions, TCellPull } from 'cellx';
 import { BaseComponent } from './BaseComponent';
 import { IFreezableCell } from './componentBinding';
-export declare function prepareContent<T = Element | DocumentFragment>(node: T): T;
 export declare class AttributeBindingCell extends Cell {
     prevValue: any;
     element: Element;

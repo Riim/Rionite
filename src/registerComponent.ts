@@ -334,10 +334,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		elExtends ? { extends: elExtends } : undefined
 	);
 
-	componentConstructorMap
-		.set(elIs, componentConstr)
-		.set(hyphenizedElIs, componentConstr)
-		.set(hyphenizedElIs.toUpperCase(), componentConstr);
+	componentConstructorMap.set(elIs, componentConstr).set(hyphenizedElIs, componentConstr);
 	elementConstructorMap.set(elIs, elConstr);
 
 	return componentConstr;

@@ -9,7 +9,7 @@ import { EventEmitter, IEvent } from 'cellx';
 import { htmlToFragment } from 'html-to-fragment';
 import { IBlock } from 'nelm-parser';
 import { attachChildComponentElements } from './attachChildComponentElements';
-import { bindContent, prepareContent } from './bindContent';
+import { bindContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructorMap } from './componentConstructorMap';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
@@ -285,7 +285,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 					let inner = listener;
 
 					listener = function(evt) {
-						if (evt.target instanceof (targetConstr as typeof BaseComponent)) {
+						if (evt.target instanceof (targetConstr as any)) {
 							return inner.call(this, evt);
 						}
 					};
@@ -367,9 +367,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 				let rawContent =
 					constr._rawContent ||
-					(constr._rawContent = prepareContent(
-						htmlToFragment((constr.template as Template).render())
-					));
+					(constr._rawContent = htmlToFragment((constr.template as Template).render()));
 				let content = rawContent.cloneNode(true) as DocumentFragment;
 				if (!templateTagFeature) {
 					let templates = content.querySelectorAll('template');

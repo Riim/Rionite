@@ -1538,7 +1538,7 @@ THE SOFTWARE.
 		exports["rionite"] = factory(require("@riim/map-set-polyfill"), require("cellx"), require("@riim/symbol-polyfill"), require("@riim/di"), require("nelm-parser"), require("@riim/logger"), require("@riim/escape-html"), require("escape-string"), require("@riim/hyphenize"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/next-tick"), require("@riim/next-uid"), require("@riim/gettext"), require("@riim/mixin"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/clear-node"));
 	else
 		root["rionite"] = factory(root["@riim/map-set-polyfill"], root["cellx"], root["@riim/symbol-polyfill"], root["@riim/di"], root["nelm-parser"], root["@riim/logger"], root["@riim/escape-html"], root["escape-string"], root["@riim/hyphenize"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/next-tick"], root["@riim/next-uid"], root["@riim/gettext"], root["@riim/mixin"], root["html-to-fragment"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/clear-node"]);
-})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_19__, __WEBPACK_EXTERNAL_MODULE_20__, __WEBPACK_EXTERNAL_MODULE_21__, __WEBPACK_EXTERNAL_MODULE_25__, __WEBPACK_EXTERNAL_MODULE_26__, __WEBPACK_EXTERNAL_MODULE_27__, __WEBPACK_EXTERNAL_MODULE_31__, __WEBPACK_EXTERNAL_MODULE_38__, __WEBPACK_EXTERNAL_MODULE_39__, __WEBPACK_EXTERNAL_MODULE_40__, __WEBPACK_EXTERNAL_MODULE_43__, __WEBPACK_EXTERNAL_MODULE_45__, __WEBPACK_EXTERNAL_MODULE_46__, __WEBPACK_EXTERNAL_MODULE_50__, __WEBPACK_EXTERNAL_MODULE_55__, __WEBPACK_EXTERNAL_MODULE_58__) {
+})(typeof self !== 'undefined' ? self : this, function(__WEBPACK_EXTERNAL_MODULE_0__, __WEBPACK_EXTERNAL_MODULE_3__, __WEBPACK_EXTERNAL_MODULE_5__, __WEBPACK_EXTERNAL_MODULE_10__, __WEBPACK_EXTERNAL_MODULE_11__, __WEBPACK_EXTERNAL_MODULE_18__, __WEBPACK_EXTERNAL_MODULE_19__, __WEBPACK_EXTERNAL_MODULE_20__, __WEBPACK_EXTERNAL_MODULE_24__, __WEBPACK_EXTERNAL_MODULE_25__, __WEBPACK_EXTERNAL_MODULE_26__, __WEBPACK_EXTERNAL_MODULE_31__, __WEBPACK_EXTERNAL_MODULE_38__, __WEBPACK_EXTERNAL_MODULE_39__, __WEBPACK_EXTERNAL_MODULE_40__, __WEBPACK_EXTERNAL_MODULE_43__, __WEBPACK_EXTERNAL_MODULE_45__, __WEBPACK_EXTERNAL_MODULE_46__, __WEBPACK_EXTERNAL_MODULE_50__, __WEBPACK_EXTERNAL_MODULE_55__, __WEBPACK_EXTERNAL_MODULE_58__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1637,19 +1637,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var di_1 = __webpack_require__(10);
-var get_uid_1 = __webpack_require__(26);
-var hyphenize_1 = __webpack_require__(25);
-var logger_1 = __webpack_require__(19);
+var get_uid_1 = __webpack_require__(25);
+var hyphenize_1 = __webpack_require__(24);
+var logger_1 = __webpack_require__(18);
 var map_set_polyfill_1 = __webpack_require__(0);
-var move_content_1 = __webpack_require__(27);
+var move_content_1 = __webpack_require__(26);
 var symbol_polyfill_1 = __webpack_require__(5);
 var cellx_1 = __webpack_require__(3);
 var html_to_fragment_1 = __webpack_require__(43);
 var attachChildComponentElements_1 = __webpack_require__(6);
 var bindContent_1 = __webpack_require__(8);
 var componentBinding_1 = __webpack_require__(49);
-var componentConstructorMap_1 = __webpack_require__(16);
-var DisposableMixin_1 = __webpack_require__(22);
+var componentConstructorMap_1 = __webpack_require__(29);
+var DisposableMixin_1 = __webpack_require__(21);
 var elementConstructorMap_1 = __webpack_require__(30);
 var ElementProtoMixin_1 = __webpack_require__(2);
 var handledEvents_1 = __webpack_require__(51);
@@ -1818,7 +1818,7 @@ var BaseComponent = /** @class */ (function (_super) {
                     this.$content = document.createDocumentFragment();
                 }
                 var rawContent = constr._rawContent ||
-                    (constr._rawContent = bindContent_1.prepareContent(html_to_fragment_1.htmlToFragment(constr.template.render())));
+                    (constr._rawContent = html_to_fragment_1.htmlToFragment(constr.template.render()));
                 var content = rawContent.cloneNode(true);
                 if (!Features_1.templateTag) {
                     var templates = content.querySelectorAll('template');
@@ -2073,7 +2073,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var registerComponent_1 = __webpack_require__(24);
+var registerComponent_1 = __webpack_require__(23);
 function Component(config) {
     return function (componentConstr) {
         if (config) {
@@ -2230,118 +2230,9 @@ var set_attribute_1 = __webpack_require__(46);
 var cellx_1 = __webpack_require__(3);
 var BaseComponent_1 = __webpack_require__(1);
 var compileContentNodeValue_1 = __webpack_require__(47);
-var componentConstructorMap_1 = __webpack_require__(16);
-var ContentNodeValueParser_1 = __webpack_require__(28);
-var compileKeypath_1 = __webpack_require__(17);
-var FLAG_SKIP_ATTRIBUTES = String(1);
-var FLAG_SKIP_CONTENT = String(2);
-var FLAG_SKIP_ALL = String(+FLAG_SKIP_ATTRIBUTES | +FLAG_SKIP_CONTENT);
-var KEY_SKIP_ATTRIBUTES = Symbol('skipAttributes');
-var KEY_SKIP_CONTENT = Symbol('skipContent');
+var ContentNodeValueParser_1 = __webpack_require__(27);
+var compileKeypath_1 = __webpack_require__(16);
 var contentNodeValueCache = Object.create(null);
-function prepareContent(node) {
-    _prepareContent(node, true);
-    return node;
-}
-exports.prepareContent = prepareContent;
-function _prepareContent(node, isRoot) {
-    var containsBindingsOrComponents = false;
-    for (var child = node.firstChild; child; child = child.nextSibling) {
-        switch (child.nodeType) {
-            case Node.ELEMENT_NODE: {
-                var componentConstr = componentConstructorMap_1.componentConstructorMap.get(child.getAttribute('is') || child.tagName);
-                var attrs = child.attributes;
-                var skipAttributes = true;
-                var skipContent = true;
-                for (var i = attrs.length; i;) {
-                    var value = attrs[--i].value;
-                    if (!value) {
-                        continue;
-                    }
-                    var contentNodeValue = contentNodeValueCache[value];
-                    if (!contentNodeValue) {
-                        if (contentNodeValue === null) {
-                            continue;
-                        }
-                        var bracketIndex = value.indexOf('{');
-                        if (bracketIndex == -1) {
-                            contentNodeValueCache[value] = null;
-                            continue;
-                        }
-                        contentNodeValue = contentNodeValueCache[value] = new ContentNodeValueParser_1.ContentNodeValueParser(value).parse(bracketIndex);
-                    }
-                    var contentNodeValueLength = contentNodeValue.length;
-                    if (contentNodeValueLength > 1 ||
-                        contentNodeValue[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.BINDING) {
-                        containsBindingsOrComponents = true;
-                        skipAttributes = false;
-                    }
-                }
-                if (child.firstChild || child instanceof HTMLTemplateElement) {
-                    if (componentConstr &&
-                        componentConstr.template !== null) {
-                        containsBindingsOrComponents = true;
-                        _prepareContent(child instanceof HTMLTemplateElement
-                            ? child.content
-                            : child, true);
-                    }
-                    else if (_prepareContent(child, false)) {
-                        containsBindingsOrComponents = true;
-                        skipContent = false;
-                    }
-                    else if (componentConstr) {
-                        containsBindingsOrComponents = true;
-                    }
-                }
-                else if (componentConstr) {
-                    containsBindingsOrComponents = true;
-                }
-                if (isRoot) {
-                    if (skipContent) {
-                        child.setAttribute('_rn', skipAttributes ? FLAG_SKIP_ALL : FLAG_SKIP_CONTENT);
-                    }
-                }
-                else {
-                    child[KEY_SKIP_ATTRIBUTES] = skipAttributes;
-                    child[KEY_SKIP_CONTENT] = skipContent;
-                }
-                break;
-            }
-            case Node.TEXT_NODE: {
-                for (var nextChild = void 0; (nextChild = child.nextSibling) && nextChild.nodeType == Node.TEXT_NODE;) {
-                    child.nodeValue += nextChild.nodeValue;
-                    node.removeChild(nextChild);
-                }
-                var value = child.nodeValue;
-                var contentNodeValue = contentNodeValueCache[value];
-                if (!contentNodeValue) {
-                    if (contentNodeValue === null) {
-                        continue;
-                    }
-                    var bracketIndex = value.indexOf('{');
-                    if (bracketIndex == -1) {
-                        contentNodeValueCache[value] = null;
-                        continue;
-                    }
-                    contentNodeValue = contentNodeValueCache[value] = new ContentNodeValueParser_1.ContentNodeValueParser(value).parse(bracketIndex);
-                }
-                if (contentNodeValue.length > 1 ||
-                    contentNodeValue[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.BINDING) {
-                    containsBindingsOrComponents = true;
-                }
-                break;
-            }
-        }
-    }
-    if (!isRoot && containsBindingsOrComponents) {
-        for (var child = node.firstElementChild; child; child = child.nextElementSibling) {
-            if (child[KEY_SKIP_CONTENT]) {
-                child.setAttribute('_rn', child[KEY_SKIP_ATTRIBUTES] ? FLAG_SKIP_ALL : FLAG_SKIP_CONTENT);
-            }
-        }
-    }
-    return containsBindingsOrComponents;
-}
 var AttributeBindingCell = /** @class */ (function (_super) {
     __extends(AttributeBindingCell, _super);
     function AttributeBindingCell(pull, el, attrName, opts) {
@@ -2373,7 +2264,6 @@ function bindContent(node, ownerComponent, context, result) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         switch (child.nodeType) {
             case Node.ELEMENT_NODE: {
-                var flags = child.getAttribute('_rn');
                 var childComponent = child.$component;
                 var $paramsConfig = void 0;
                 var $specifiedParams = void 0;
@@ -2381,89 +2271,86 @@ function bindContent(node, ownerComponent, context, result) {
                     $paramsConfig = childComponent.constructor[BaseComponent_1.KEY_PARAMS_CONFIG];
                     $specifiedParams = new map_set_polyfill_1.Set();
                 }
-                if (flags !== FLAG_SKIP_ALL) {
-                    var attrs = child.attributes;
-                    for (var i = attrs.length; i;) {
-                        var attr = attrs[--i];
-                        var name_1 = attr.name;
-                        if (name_1.charAt(0) == '_') {
-                            name_1 = name_1.slice(1);
-                        }
-                        var $paramConfig = $paramsConfig && $paramsConfig[name_1];
-                        var paramName = void 0;
-                        var paramConfig = void 0;
-                        if ($paramConfig) {
-                            paramName = $paramConfig.name;
-                            paramConfig = $paramConfig.paramConfig;
-                            $specifiedParams.add(paramName);
-                        }
-                        var value = attr.value;
-                        if (!value) {
+                var attrs = child.attributes;
+                for (var i = attrs.length; i;) {
+                    var attr = attrs[--i];
+                    var name_1 = attr.name;
+                    if (name_1.charAt(0) == '_') {
+                        name_1 = name_1.slice(1);
+                    }
+                    var $paramConfig = $paramsConfig && $paramsConfig[name_1];
+                    var paramName = void 0;
+                    var paramConfig = void 0;
+                    if ($paramConfig) {
+                        paramName = $paramConfig.name;
+                        paramConfig = $paramConfig.paramConfig;
+                        $specifiedParams.add(paramName);
+                    }
+                    var value = attr.value;
+                    if (!value) {
+                        continue;
+                    }
+                    var contentNodeValue = contentNodeValueCache[value];
+                    if (!contentNodeValue) {
+                        if (contentNodeValue === null) {
                             continue;
                         }
-                        var contentNodeValue = contentNodeValueCache[value];
-                        if (!contentNodeValue) {
-                            if (contentNodeValue === null) {
-                                continue;
-                            }
-                            var bracketIndex = value.indexOf('{');
-                            if (bracketIndex == -1) {
-                                contentNodeValueCache[value] = null;
-                                continue;
-                            }
-                            contentNodeValue = contentNodeValueCache[value] = new ContentNodeValueParser_1.ContentNodeValueParser(value).parse(bracketIndex);
+                        var bracketIndex = value.indexOf('{');
+                        if (bracketIndex == -1) {
+                            contentNodeValueCache[value] = null;
+                            continue;
                         }
-                        var contentNodeValueLength = contentNodeValue.length;
-                        if (contentNodeValueLength > 1 ||
-                            contentNodeValue[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.BINDING) {
-                            var prefix = contentNodeValueLength == 1
-                                ? contentNodeValue[0].prefix
-                                : null;
-                            if (prefix !== '->') {
-                                var cell = new AttributeBindingCell(compileContentNodeValue_1.compileContentNodeValue(contentNodeValue, value, contentNodeValueLength == 1), child, paramName || name_1, {
-                                    context: context,
-                                    onChange: onAttributeBindingCellChange
-                                });
-                                set_attribute_1.setAttribute(child, paramName || name_1, cell.get());
-                                (result[0] || (result[0] = [])).push(cell);
+                        contentNodeValue = contentNodeValueCache[value] = new ContentNodeValueParser_1.ContentNodeValueParser(value).parse(bracketIndex);
+                    }
+                    var contentNodeValueLength = contentNodeValue.length;
+                    if (contentNodeValueLength > 1 ||
+                        contentNodeValue[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.BINDING) {
+                        var prefix = contentNodeValueLength == 1
+                            ? contentNodeValue[0].prefix
+                            : null;
+                        if (prefix !== '->') {
+                            var cell = new AttributeBindingCell(compileContentNodeValue_1.compileContentNodeValue(contentNodeValue, value, contentNodeValueLength == 1), child, paramName || name_1, {
+                                context: context,
+                                onChange: onAttributeBindingCellChange
+                            });
+                            set_attribute_1.setAttribute(child, paramName || name_1, cell.get());
+                            (result[0] || (result[0] = [])).push(cell);
+                        }
+                        if (paramConfig !== undefined && (prefix === '->' || prefix === '<->')) {
+                            if (prefix == '->' && attr.name.charAt(0) != '_') {
+                                child.removeAttribute(paramName);
                             }
-                            if (paramConfig !== undefined &&
-                                (prefix === '->' || prefix === '<->')) {
-                                if (prefix == '->' && attr.name.charAt(0) != '_') {
-                                    child.removeAttribute(paramName);
-                                }
-                                var keypath = contentNodeValue[0]
-                                    .keypath;
-                                var keys = keypath.split('.');
-                                var handler = void 0;
-                                if (keys.length == 1) {
-                                    handler = (function (propertyName) {
-                                        return function (evt) {
-                                            this.ownerComponent[propertyName] = evt.data.value;
-                                        };
-                                    })(keys[0]);
-                                }
-                                else {
-                                    handler = (function (propertyName, keys) {
-                                        var getPropertyHolder = compileKeypath_1.compileKeypath(keys, keys.join('.'));
-                                        return function (evt) {
-                                            var propertyHolder = getPropertyHolder.call(this.ownerComponent);
-                                            if (propertyHolder) {
-                                                propertyHolder[propertyName] = evt.data.value;
-                                            }
-                                        };
-                                    })(keys[keys.length - 1], keys.slice(0, -1));
-                                }
-                                (result[1] || (result[1] = [])).push([
-                                    childComponent,
-                                    (typeof paramConfig == 'object' &&
-                                        (paramConfig.type !== undefined ||
-                                            paramConfig.default !== undefined) &&
-                                        paramConfig.property) ||
-                                        paramName,
-                                    handler
-                                ]);
+                            var keypath = contentNodeValue[0]
+                                .keypath;
+                            var keys = keypath.split('.');
+                            var handler = void 0;
+                            if (keys.length == 1) {
+                                handler = (function (propertyName) {
+                                    return function (evt) {
+                                        this.ownerComponent[propertyName] = evt.data.value;
+                                    };
+                                })(keys[0]);
                             }
+                            else {
+                                handler = (function (propertyName, keys) {
+                                    var getPropertyHolder = compileKeypath_1.compileKeypath(keys, keys.join('.'));
+                                    return function (evt) {
+                                        var propertyHolder = getPropertyHolder.call(this.ownerComponent);
+                                        if (propertyHolder) {
+                                            propertyHolder[propertyName] = evt.data.value;
+                                        }
+                                    };
+                                })(keys[keys.length - 1], keys.slice(0, -1));
+                            }
+                            (result[1] || (result[1] = [])).push([
+                                childComponent,
+                                (typeof paramConfig == 'object' &&
+                                    (paramConfig.type !== undefined ||
+                                        paramConfig.default !== undefined) &&
+                                    paramConfig.property) ||
+                                    paramName,
+                                handler
+                            ]);
                         }
                     }
                 }
@@ -2473,9 +2360,7 @@ function bindContent(node, ownerComponent, context, result) {
                     childComponent.$specifiedParams = $specifiedParams;
                     (result[2] || (result[2] = [])).push(childComponent);
                 }
-                if (flags !== FLAG_SKIP_CONTENT &&
-                    flags !== FLAG_SKIP_ALL &&
-                    child.firstChild &&
+                if (child.firstChild &&
                     (!childComponent ||
                         childComponent.constructor.template === null)) {
                     bindContent(child, ownerComponent, context, result);
@@ -2483,6 +2368,14 @@ function bindContent(node, ownerComponent, context, result) {
                 break;
             }
             case Node.TEXT_NODE: {
+                var nextChild = child.nextSibling;
+                if (nextChild && nextChild.nodeType == Node.TEXT_NODE) {
+                    do {
+                        child.nodeValue += nextChild.nodeValue;
+                        node.removeChild(nextChild);
+                        nextChild = child.nextSibling;
+                    } while (nextChild && nextChild.nodeType == Node.TEXT_NODE);
+                }
                 var value = child.nodeValue;
                 var contentNodeValue = contentNodeValueCache[value];
                 if (!contentNodeValue) {
@@ -2569,9 +2462,9 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_11__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_html_1 = __webpack_require__(20);
+var escape_html_1 = __webpack_require__(19);
 var self_closing_tags_1 = __webpack_require__(37);
-var escape_string_1 = __webpack_require__(21);
+var escape_string_1 = __webpack_require__(20);
 var nelm_parser_1 = __webpack_require__(11);
 var join = Array.prototype.join;
 exports.ELEMENT_NAME_DELIMITER = '__';
@@ -2904,18 +2797,7 @@ exports.namePattern = '[$_a-zA-Z][$\\w]*';
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var map_set_polyfill_1 = __webpack_require__(0);
-exports.componentConstructorMap = new map_set_polyfill_1.Map();
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(29);
+var keypathToJSExpression_1 = __webpack_require__(28);
 var cache = Object.create(null);
 function compileKeypath(keypath, cacheKey) {
     if (cacheKey === void 0) { cacheKey = keypath; }
@@ -2926,7 +2808,7 @@ exports.compileKeypath = compileKeypath;
 
 
 /***/ }),
-/* 18 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2956,7 +2838,7 @@ var bindContent_1 = __webpack_require__(8);
 var Component_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(2);
 var ElementProtoMixin_2 = __webpack_require__(2);
-var compileKeypath_1 = __webpack_require__(17);
+var compileKeypath_1 = __webpack_require__(16);
 var Features_1 = __webpack_require__(9);
 var keypathPattern_1 = __webpack_require__(14);
 var removeNodes_1 = __webpack_require__(32);
@@ -3094,6 +2976,12 @@ exports.RnIfThen = RnIfThen;
 
 
 /***/ }),
+/* 18 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_18__;
+
+/***/ }),
 /* 19 */
 /***/ (function(module, exports) {
 
@@ -3107,12 +2995,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_20__;
 
 /***/ }),
 /* 21 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_21__;
-
-/***/ }),
-/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3272,7 +3154,7 @@ exports.DisposableMixin = DisposableMixin;
 
 
 /***/ }),
-/* 23 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3349,18 +3231,18 @@ exports.formatters.seq = exports.formatters.identical;
 
 
 /***/ }),
-/* 24 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var hyphenize_1 = __webpack_require__(25);
+var hyphenize_1 = __webpack_require__(24);
 var mixin_1 = __webpack_require__(40);
 var pascalize_1 = __webpack_require__(41);
 var cellx_1 = __webpack_require__(3);
 var BaseComponent_1 = __webpack_require__(1);
-var componentConstructorMap_1 = __webpack_require__(16);
+var componentConstructorMap_1 = __webpack_require__(29);
 var ComponentParams_1 = __webpack_require__(7);
 var elementConstructorMap_1 = __webpack_require__(30);
 var ElementProtoMixin_1 = __webpack_require__(2);
@@ -3605,15 +3487,18 @@ function registerComponent(componentConstr) {
     elProto.constructor = elConstr;
     mixin_1.mixin(elProto, ElementProtoMixin_1.ElementProtoMixin);
     window.customElements.define(hyphenizedElIs, elConstr, elExtends ? { extends: elExtends } : undefined);
-    componentConstructorMap_1.componentConstructorMap
-        .set(elIs, componentConstr)
-        .set(hyphenizedElIs, componentConstr)
-        .set(hyphenizedElIs.toUpperCase(), componentConstr);
+    componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr).set(hyphenizedElIs, componentConstr);
     elementConstructorMap_1.elementConstructorMap.set(elIs, elConstr);
     return componentConstr;
 }
 exports.registerComponent = registerComponent;
 
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_24__;
 
 /***/ }),
 /* 25 */
@@ -3629,19 +3514,13 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_26__;
 
 /***/ }),
 /* 27 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE_27__;
-
-/***/ }),
-/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var keypathPattern_1 = __webpack_require__(14);
-var keypathToJSExpression_1 = __webpack_require__(29);
+var keypathToJSExpression_1 = __webpack_require__(28);
 var namePattern_1 = __webpack_require__(15);
 var ContentNodeValueNodeType;
 (function (ContentNodeValueNodeType) {
@@ -3972,7 +3851,7 @@ exports.ContentNodeValueParser = ContentNodeValueParser;
 
 
 /***/ }),
-/* 29 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3997,6 +3876,17 @@ function keypathToJSExpression(keypath, cacheKey) {
     return (cache[cacheKey] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && temp['" + keys[keyCount - 1] + "']");
 }
 exports.keypathToJSExpression = keypathToJSExpression;
+
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var map_set_polyfill_1 = __webpack_require__(0);
+exports.componentConstructorMap = new map_set_polyfill_1.Map();
 
 
 /***/ }),
@@ -4117,12 +4007,12 @@ var bindContent_1 = __webpack_require__(8);
 var Component_1 = __webpack_require__(4);
 var ElementProtoMixin_1 = __webpack_require__(2);
 var ElementProtoMixin_2 = __webpack_require__(2);
-var compileKeypath_1 = __webpack_require__(17);
+var compileKeypath_1 = __webpack_require__(16);
 var Features_1 = __webpack_require__(9);
 var keypathPattern_1 = __webpack_require__(14);
 var namePattern_1 = __webpack_require__(15);
 var removeNodes_1 = __webpack_require__(32);
-var RnIfThen_1 = __webpack_require__(18);
+var RnIfThen_1 = __webpack_require__(17);
 var slice = Array.prototype.slice;
 var reForAttrValue = RegExp("^\\s*(" + namePattern_1.namePattern + ")\\s+(?:in|of)\\s+(" + keypathPattern_1.keypathPattern + ")\\s*$");
 function getItem(list, index) {
@@ -4414,7 +4304,7 @@ exports.RnRepeat = RnRepeat;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var di_1 = __webpack_require__(10);
-var logger_1 = __webpack_require__(19);
+var logger_1 = __webpack_require__(18);
 __webpack_require__(35);
 __webpack_require__(36);
 var nelm_parser_1 = __webpack_require__(11);
@@ -4422,9 +4312,9 @@ exports.NelmNodeType = nelm_parser_1.NodeType;
 exports.NelmParser = nelm_parser_1.Parser;
 var Template_1 = __webpack_require__(12);
 exports.Template = Template_1.Template;
-var DisposableMixin_1 = __webpack_require__(22);
+var DisposableMixin_1 = __webpack_require__(21);
 exports.DisposableMixin = DisposableMixin_1.DisposableMixin;
-var formatters_1 = __webpack_require__(23);
+var formatters_1 = __webpack_require__(22);
 exports.formatters = formatters_1.formatters;
 var Component_1 = __webpack_require__(4);
 exports.Component = Component_1.Component;
@@ -4440,9 +4330,9 @@ var ComponentParams_1 = __webpack_require__(7);
 exports.ComponentParams = ComponentParams_1.ComponentParams;
 var componentParamValueMap_1 = __webpack_require__(13);
 exports.componentParamValueMap = componentParamValueMap_1.componentParamValueMap;
-var registerComponent_1 = __webpack_require__(24);
+var registerComponent_1 = __webpack_require__(23);
 exports.registerComponent = registerComponent_1.registerComponent;
-var RnIfThen_1 = __webpack_require__(18);
+var RnIfThen_1 = __webpack_require__(17);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
 var RnIfElse_1 = __webpack_require__(56);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
@@ -4652,7 +4542,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_43__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_html_1 = __webpack_require__(20);
+var escape_html_1 = __webpack_require__(19);
 var is_regexp_1 = __webpack_require__(45);
 var map_set_polyfill_1 = __webpack_require__(0);
 var componentParamValueMap_1 = __webpack_require__(13);
@@ -4750,11 +4640,11 @@ module.exports = __WEBPACK_EXTERNAL_MODULE_46__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(21);
+var escape_string_1 = __webpack_require__(20);
 var bindingToJSExpression_1 = __webpack_require__(48);
 var componentParamValueMap_1 = __webpack_require__(13);
-var ContentNodeValueParser_1 = __webpack_require__(28);
-var formatters_1 = __webpack_require__(23);
+var ContentNodeValueParser_1 = __webpack_require__(27);
+var formatters_1 = __webpack_require__(22);
 var valueMapKeyCounter = 0;
 var cache = Object.create(null);
 function compileContentNodeValue(contentNodeValue, contentNodeValueString, useValueMap) {
@@ -5134,7 +5024,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var Component_1 = __webpack_require__(4);
-var RnIfThen_1 = __webpack_require__(18);
+var RnIfThen_1 = __webpack_require__(17);
 var RnIfElse = /** @class */ (function (_super) {
     __extends(RnIfElse, _super);
     function RnIfElse() {
@@ -5176,9 +5066,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var clear_node_1 = __webpack_require__(58);
-var get_uid_1 = __webpack_require__(26);
+var get_uid_1 = __webpack_require__(25);
 var map_set_polyfill_1 = __webpack_require__(0);
-var move_content_1 = __webpack_require__(27);
+var move_content_1 = __webpack_require__(26);
 var symbol_polyfill_1 = __webpack_require__(5);
 var attachChildComponentElements_1 = __webpack_require__(6);
 var BaseComponent_1 = __webpack_require__(1);
