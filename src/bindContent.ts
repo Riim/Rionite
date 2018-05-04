@@ -213,8 +213,10 @@ export function bindContent(
 
 				if (
 					child.firstChild &&
-					(!childComponent ||
-						(childComponent.constructor as typeof BaseComponent).template === null)
+					!(
+						childComponent &&
+						(childComponent.constructor as typeof BaseComponent).bindsInputContent
+					)
 				) {
 					bindContent(child as Element, ownerComponent, context, result);
 				}

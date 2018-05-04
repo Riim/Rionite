@@ -79,8 +79,10 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	};
 }
 
-export const KEY_PARAMS_CONFIG = Symbol('paramsConfig');
-export const KEY_PARAMS = Symbol('params');
+export const KEY_PARAMS_CONFIG = Symbol('Rionite/BaseComponent/paramsConfig');
+export const KEY_PARAMS = Symbol('Rionite/BaseComponent/params');
+
+export const KEY_IS_SLOT = Symbol('Rionite/BaseComponent/isSlot');
 
 function findChildComponents(
 	node: Node,
@@ -101,8 +103,10 @@ function findChildComponents(
 
 			if (
 				child.firstChild &&
-				(!childComponent ||
-					(childComponent.constructor as typeof BaseComponent).template === null)
+				!(
+					childComponent &&
+					(childComponent.constructor as typeof BaseComponent).bindsInputContent
+				)
 			) {
 				childComponents = findChildComponents(
 					child,
@@ -130,6 +134,10 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 	static template: string | IBlock | Template | null = null;
 
 	static _rawContent: DocumentFragment | undefined;
+
+	static get bindsInputContent() {
+		return this.template !== null;
+	}
 
 	static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null = null;
 	static domEvents: IComponentEvents<BaseComponent, Event> | null = null;
@@ -179,7 +187,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 	element: IComponentElement;
 
-	$content: DocumentFragment | undefined;
+	$inputContent: DocumentFragment | undefined;
 	$context: { [name: string]: any } | undefined;
 	$specifiedParams: Set<string> | undefined;
 
@@ -359,10 +367,14 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 			} else {
 				if (el.firstChild) {
 					suppressConnectionStatusCallbacks();
-					this.$content = moveContent(document.createDocumentFragment(), el);
+					moveContent(
+						this.$inputContent ||
+							(this.$inputContent = document.createDocumentFragment()),
+						el
+					);
 					resumeConnectionStatusCallbacks();
-				} else {
-					this.$content = document.createDocumentFragment();
+				} else if (!this.$inputContent) {
+					this.$inputContent = document.createDocumentFragment();
 				}
 
 				let rawContent =
@@ -383,6 +395,24 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 				} as any);
 
 				this._bindings = bindings;
+
+				if (childComponents) {
+					for (let i = childComponents.length; i; ) {
+						let childComponent = childComponents[--i];
+
+						if (
+							childComponent.element.firstChild &&
+							(childComponent.constructor as typeof BaseComponent)
+								.bindsInputContent &&
+							!childComponent.constructor[KEY_IS_SLOT]
+						) {
+							childComponent.$inputContent = moveContent(
+								document.createDocumentFragment(),
+								childComponent.element
+							);
+						}
+					}
+				}
 
 				suppressConnectionStatusCallbacks();
 				this.element.appendChild(content);

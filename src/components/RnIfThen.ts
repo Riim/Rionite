@@ -4,8 +4,7 @@ import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
 import { bindContent } from '../bindContent';
 import { Component } from '../decorators/Component';
-import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
-import { KEY_IS_ELEMENT_CONNECTED } from '../ElementProtoMixin';
+import { KEY_IS_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
 import { templateTag as templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
@@ -23,11 +22,13 @@ const reKeypath = RegExp(`^${keypathPattern}$`);
 
 	params: {
 		if: { property: 'paramIf', type: String, required: true, readonly: true }
-	},
-
-	template: ''
+	}
 })
 export class RnIfThen extends BaseComponent {
+	static get bindsInputContent() {
+		return true;
+	}
+
 	paramIf: string;
 
 	_elseMode = false;

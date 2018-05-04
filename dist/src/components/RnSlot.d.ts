@@ -1,5 +1,6 @@
 import { BaseComponent } from '../BaseComponent';
 export declare class RnSlot extends BaseComponent {
+    static readonly bindsInputContent: boolean;
     $context: {
         [name: string]: any;
     };

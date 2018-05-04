@@ -41,6 +41,7 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 }
 export declare const KEY_PARAMS_CONFIG: symbol;
 export declare const KEY_PARAMS: symbol;
+export declare const KEY_IS_SLOT: symbol;
 export declare class BaseComponent extends EventEmitter implements DisposableMixin {
     static elementIs: string;
     static elementExtends: string | null;
@@ -54,6 +55,7 @@ export declare class BaseComponent extends EventEmitter implements DisposableMix
     static _elementBlockNames: Array<string>;
     static template: string | IBlock | Template | null;
     static _rawContent: DocumentFragment | undefined;
+    static readonly bindsInputContent: boolean;
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
     static domEvents: IComponentEvents<BaseComponent, Event> | null;
     logger: Logger;
@@ -63,7 +65,7 @@ export declare class BaseComponent extends EventEmitter implements DisposableMix
     _parentComponent: BaseComponent | null | undefined;
     readonly parentComponent: BaseComponent | null;
     element: IComponentElement;
-    $content: DocumentFragment | undefined;
+    $inputContent: DocumentFragment | undefined;
     $context: {
         [name: string]: any;
     } | undefined;

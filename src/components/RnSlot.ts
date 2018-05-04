@@ -4,13 +4,13 @@ import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
 import { Symbol } from '@riim/symbol-polyfill';
 import { attachChildComponentElements } from '../attachChildComponentElements';
-import { BaseComponent, IComponentElement } from '../BaseComponent';
+import { BaseComponent, IComponentElement, KEY_IS_SLOT } from '../BaseComponent';
 import { bindContent } from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 
-const KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RnSlot.slotContentMap');
+const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot/slotContentMap');
 
 @Component({
 	params: {
@@ -19,11 +19,13 @@ const KEY_SLOT_CONTENT_MAP = Symbol('Rionite.RnSlot.slotContentMap');
 		for: { property: 'paramFor', type: String, readonly: true },
 		cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
 		getContext: { property: 'paramGetContext', type: Object, readonly: true }
-	},
-
-	template: ''
+	}
 })
 export class RnSlot extends BaseComponent {
+	static get bindsInputContent() {
+		return true;
+	}
+
 	$context: { [name: string]: any };
 
 	paramName: string;
@@ -47,7 +49,7 @@ export class RnSlot extends BaseComponent {
 			let ownerComponent = this.ownerComponent;
 			let el = this.element;
 			let contentOwnerComponent = ownerComponent.ownerComponent;
-			let ownerComponentContent = ownerComponent.$content!;
+			let ownerComponentContent = ownerComponent.$inputContent!;
 			let cloneContent = this.paramCloneContent;
 			let content: DocumentFragment | undefined;
 			let bindings: Array<IFreezableCell> | null | undefined;
@@ -214,3 +216,5 @@ export class RnSlot extends BaseComponent {
 		this._freezeBindings();
 	}
 }
+
+RnSlot[KEY_IS_SLOT] = true;
