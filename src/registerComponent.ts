@@ -265,13 +265,13 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 						for (let type in events[name]) {
 							attrs += ` oncomponent-${
 								type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type
-							}="/${name}"`;
+							}=":${name}"`;
 						}
 					}
 
 					if (domEvents && domEvents[name]) {
 						for (let type in domEvents[name]) {
-							attrs += ` on-${type}="/${name}"`;
+							attrs += ` on-${type}=":${name}"`;
 						}
 					}
 				}

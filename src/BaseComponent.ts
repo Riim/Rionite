@@ -70,6 +70,7 @@ export interface IComponentElementClassNameMap {
 export type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (
 	this: T,
 	evt: U,
+	context: { [name: string]: any },
 	receiver: Element
 ) => boolean | void;
 

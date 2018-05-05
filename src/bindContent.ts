@@ -24,6 +24,8 @@ import {
 	} from './ContentNodeValueParser';
 import { compileKeypath } from './lib/compileKeypath';
 
+export const KEY_CONTEXT = Symbol('Rionite/bindContent/context');
+
 const contentNodeValueCache: { [nodeValue: string]: TContentNodeValue | null } = Object.create(
 	null
 );
@@ -88,6 +90,11 @@ export function bindContent(
 
 					if (name.charAt(0) == '_') {
 						name = name.slice(1);
+					} else if (
+						!name.lastIndexOf('oncomponent-', 0) ||
+						!name.lastIndexOf('on-', 0)
+					) {
+						child[KEY_CONTEXT] = context;
 					}
 
 					let $paramConfig = $paramsConfig && $paramsConfig[name];

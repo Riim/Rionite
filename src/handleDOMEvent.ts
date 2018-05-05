@@ -1,4 +1,5 @@
 import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
+import { KEY_CONTEXT } from './bindContent';
 
 export function handleDOMEvent(evt: Event) {
 	let el = evt.target as Element;
@@ -16,10 +17,11 @@ export function handleDOMEvent(evt: Event) {
 
 		if (component && receivers && receivers.length) {
 			for (let i = 0; ; ) {
-				let attrValue = receivers[i].getAttribute(attrName)!;
+				let receiver = receivers[i];
+				let attrValue = receiver.getAttribute(attrName)!;
 				let handler: TEventHandler | undefined;
 
-				if (attrValue.charAt(0) == '/') {
+				if (attrValue.charAt(0) == ':') {
 					let events: any = (component.constructor as typeof BaseComponent).domEvents;
 
 					if (events) {
@@ -34,7 +36,7 @@ export function handleDOMEvent(evt: Event) {
 				}
 
 				if (handler) {
-					if (handler.call(component, evt, receivers[i]) === false) {
+					if (handler.call(component, evt, receiver[KEY_CONTEXT], receiver) === false) {
 						return;
 					}
 

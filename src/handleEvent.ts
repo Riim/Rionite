@@ -1,5 +1,6 @@
 import { IEvent } from 'cellx';
 import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
+import { KEY_CONTEXT } from './bindContent';
 
 const ownerComponentStack: Array<[BaseComponent, Array<Element> | undefined]> = [];
 
@@ -38,7 +39,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 					let attrValue = receiver.getAttribute(attrName)!;
 					let handler: TEventHandler | undefined;
 
-					if (attrValue.charAt(0) == '/') {
+					if (attrValue.charAt(0) == ':') {
 						if (receiver != targetEl) {
 							let elementBlockNames = (target.constructor as typeof BaseComponent)
 								._elementBlockNames;
@@ -52,7 +53,12 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 								if (typedHandler) {
 									if (
 										typedHandler &&
-										typedHandler.call(ownerComponent, evt, receiver) === false
+										typedHandler.call(
+											ownerComponent,
+											evt,
+											receiver[KEY_CONTEXT],
+											receiver
+										) === false
 									) {
 										return;
 									}
@@ -69,7 +75,10 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 						handler = ownerComponent[attrValue];
 					}
 
-					if (handler && handler.call(ownerComponent, evt, receiver) === false) {
+					if (
+						handler &&
+						handler.call(ownerComponent, evt, receiver[KEY_CONTEXT], receiver) === false
+					) {
 						return;
 					}
 				}

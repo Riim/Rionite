@@ -1,6 +1,7 @@
 import { Cell, ICellOptions, TCellPull } from 'cellx';
 import { BaseComponent } from './BaseComponent';
 import { IFreezableCell } from './componentBinding';
+export declare const KEY_CONTEXT: unique symbol;
 export declare class AttributeBindingCell extends Cell {
     prevValue: any;
     element: Element;
