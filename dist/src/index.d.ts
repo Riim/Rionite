@@ -1,7 +1,6 @@
 import './lib/polyfills';
 import './lib/templateHelpers';
 export { NodeType as NelmNodeType, IBlock as INelmBlock, Parser as NelmParser } from 'nelm-parser';
-export { Template } from './Template';
 export { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin } from './DisposableMixin';
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
@@ -10,6 +9,7 @@ export { IComponentParamConfig, I$ComponentParamConfig, IPossiblyComponentElemen
 export { KEY_IS_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export { componentParamValueMap } from './componentParamValueMap';
+export { Template } from './Template';
 export { registerComponent } from './registerComponent';
 export { TIfCell as TRtIfThenIfCell, RnIfThen } from './components/RnIfThen';
 export { RnIfElse } from './components/RnIfElse';

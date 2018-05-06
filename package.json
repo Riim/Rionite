@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.32.59",
+  "version": "0.32.70",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/src/index.d.ts",
@@ -55,6 +55,7 @@
     "@riim/next-tick": "^1.0.1",
     "@riim/next-uid": "^1.0.0",
     "@riim/pascalize": "^1.0.1",
+    "@riim/rionite-snake-case-attribute-name": "^1.0.1",
     "@riim/self-closing-tags": "^1.0.2",
     "@riim/set-attribute": "^1.0.0",
     "@riim/symbol-polyfill": "^1.0.1",

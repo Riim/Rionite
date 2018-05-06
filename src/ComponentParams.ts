@@ -1,3 +1,4 @@
+import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
 import { Symbol } from '@riim/symbol-polyfill';
 import {
 	BaseComponent,
@@ -62,7 +63,8 @@ function initParam(
 		$paramConfig.default = defaultValue;
 	}
 
-	let rawValue = component.element.getAttribute(name);
+	let snakeCaseName = snakeCaseAttributeName(name, true);
+	let rawValue = component.element.getAttribute(snakeCaseName);
 
 	if (rawValue === null) {
 		if ($paramConfig.required) {
@@ -70,7 +72,7 @@ function initParam(
 		}
 
 		if (defaultValue != null && defaultValue !== false) {
-			component.element.setAttribute(name, typeSerializer.write(defaultValue)!);
+			component.element.setAttribute(snakeCaseName, typeSerializer.write(defaultValue)!);
 		}
 	}
 

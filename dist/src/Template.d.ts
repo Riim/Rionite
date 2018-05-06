@@ -46,6 +46,6 @@ export declare class Template {
     setBlockName(blockName: string | Array<string>): Template;
     render(): string;
     _compileRenderers(): TRenderer;
-    _compileNode(node: INode, parentElName?: string): void;
+    _compileNode(node: INode, isSVG: boolean, parentElName?: string): void;
     _renderElementClasses(elNames: Array<string>): string;
 }

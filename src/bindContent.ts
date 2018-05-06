@@ -153,21 +153,21 @@ export function bindContent(
 									contentNodeValueLength == 1
 								),
 								child as any,
-								paramName || name,
+								name,
 								{
 									context,
 									onChange: onAttributeBindingCellChange
 								}
 							);
 
-							setAttribute(child as any, paramName || name, cell.get());
+							setAttribute(child as any, name, cell.get());
 
 							(result[0] || (result[0] = [])).push(cell as any);
 						}
 
 						if (paramConfig !== undefined && (prefix === '->' || prefix === '<->')) {
 							if (prefix == '->' && attr.name.charAt(0) != '_') {
-								(child as Element).removeAttribute(paramName!);
+								(child as Element).removeAttribute(name);
 							}
 
 							let keypath = (contentNodeValue[0] as IContentNodeValueBinding)

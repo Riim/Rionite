@@ -1,4 +1,5 @@
 import { escapeHTML } from '@riim/escape-html';
+import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
 import { map as selfClosingTagMap } from '@riim/self-closing-tags';
 import { escapeString } from 'escape-string';
 import {
@@ -140,7 +141,13 @@ export class Template {
 
 		if (contentLength) {
 			for (let i = 0; i < contentLength; i++) {
-				this._compileNode(content[i]);
+				let node = content[i];
+				this._compileNode(
+					node,
+					node.nodeType == NodeType.ELEMENT
+						? (node as INelmElement).tagName == 'svg'
+						: false
+				);
 			}
 
 			Object.keys(elMap).forEach(function(this: IElementRendererMap, name: string) {
@@ -177,7 +184,7 @@ export class Template {
 		return this._renderer;
 	}
 
-	_compileNode(node: INode, parentElName?: string) {
+	_compileNode(node: INode, isSVG: boolean, parentElName?: string) {
 		switch (node.nodeType) {
 			case NodeType.ELEMENT: {
 				let parent = this.parent;
@@ -241,7 +248,9 @@ export class Template {
 							}
 
 							for (let attr of elAttrs.list) {
-								let name = attr.name;
+								let name = isSVG
+									? attr.name
+									: snakeCaseAttributeName(attr.name, true);
 								let value = attr.value;
 								let index = attrList[name];
 
@@ -319,8 +328,9 @@ export class Template {
 										value ? ' ' + escapeString(escapeHTML(value)) : ''
 									}"`;
 								} else {
-									attrs += ` ${attr.name}="${value &&
-										escapeString(escapeHTML(value))}"`;
+									attrs += ` ${
+										isSVG ? attr.name : snakeCaseAttributeName(attr.name, true)
+									}="${value && escapeString(escapeHTML(value))}"`;
 								}
 							}
 
@@ -355,7 +365,11 @@ export class Template {
 								? elAttrs.list
 										.map(
 											attr =>
-												` ${attr.name}="${attr.value &&
+												` ${
+													isSVG
+														? attr.name
+														: snakeCaseAttributeName(attr.name, true)
+												}="${attr.value &&
 													escapeString(escapeHTML(attr.value))}"`
 										)
 										.join('')
@@ -379,8 +393,15 @@ export class Template {
 				}
 
 				if (content) {
-					for (let contentNode of content) {
-						this._compileNode(contentNode, elName || parentElName);
+					for (let node of content) {
+						this._compileNode(
+							node,
+							isSVG ||
+								(node.nodeType == NodeType.ELEMENT
+									? (node as INelmElement).tagName == 'svg'
+									: false),
+							elName || parentElName
+						);
 					}
 				}
 

@@ -1,6 +1,7 @@
 import { hyphenize } from '@riim/hyphenize';
 import { mixin } from '@riim/mixin';
 import { pascalize } from '@riim/pascalize';
+import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
 import { Cell, EventEmitter } from 'cellx';
 import {
 	BaseComponent,
@@ -68,7 +69,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			let paramConfig: IComponentParamConfig = paramsConfig[name];
 
 			if (paramConfig === null) {
-				let parentParamConfig: IComponentParamConfig =
+				let parentParamConfig: IComponentParamConfig | null | undefined =
 					parentComponentConstr.params && parentComponentConstr.params[name];
 
 				if (parentParamConfig != null) {
@@ -88,6 +89,8 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 					);
 				}
 			} else {
+				let snakeCaseName = snakeCaseAttributeName(name, true);
+
 				let isObject =
 					typeof paramConfig == 'object' &&
 					(paramConfig.type !== undefined || paramConfig.default !== undefined);
@@ -110,7 +113,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 					? componentConstr[KEY_PARAMS_CONFIG]
 					: (componentConstr[KEY_PARAMS_CONFIG] = Object.create(null)))[
 					name
-				] = componentConstr[KEY_PARAMS_CONFIG][name.toLowerCase()] = {
+				] = componentConstr[KEY_PARAMS_CONFIG][snakeCaseName] = {
 					name,
 					property: propertyName,
 
@@ -194,9 +197,9 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 								);
 
 								if (rawValue === null) {
-									this.element.removeAttribute(name);
+									this.element.removeAttribute(snakeCaseName);
 								} else {
-									this.element.setAttribute(name, rawValue);
+									this.element.setAttribute(snakeCaseName, rawValue);
 								}
 
 								let valueCell = this[propertyName + 'Cell'];
@@ -316,7 +319,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			let attrs: Array<string> = [];
 
 			for (let name in paramsConfig) {
-				attrs.push(name.toLowerCase());
+				attrs.push(snakeCaseAttributeName(name, true));
 			}
 
 			return attrs;
