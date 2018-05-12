@@ -160,10 +160,10 @@ export class Template {
 						'$super',
 						`return ${el.innerSource.join(' + ')};`
 					) as TElementRenderer;
-					let parentElementRendererMap = parent && parent._elementRendererMap;
+					let parentElRendererMap = parent && parent._elementRendererMap;
 
 					this[name + '/content'] = function() {
-						return inner.call(this, parentElementRendererMap);
+						return inner.call(this, parentElRendererMap);
 					};
 				} else {
 					this[name + '/content'] = Function(

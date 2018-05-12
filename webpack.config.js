@@ -9,13 +9,15 @@ module.exports = () => {
 	];
 
 	return {
+		mode: 'none',
+
 		entry: {
 			rionite: './src/index.ts'
 		},
 
 		output: {
-			filename: '[name].js',
 			path: path.join(__dirname, 'dist'),
+			filename: '[name].js',
 			library: '[name]',
 			libraryTarget: 'umd'
 		},
@@ -71,9 +73,9 @@ module.exports = () => {
 			console: false,
 			global: false,
 			process: false,
-			Buffer: false,
 			__filename: false,
 			__dirname: false,
+			Buffer: false,
 			setImmediate: false
 		}
 	};

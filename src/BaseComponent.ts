@@ -558,8 +558,8 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
 	handledEvents.forEach(type => {
-		document.documentElement.addEventListener(type, evt => {
-			if (evt.target != document.documentElement) {
+		document.body.addEventListener(type, evt => {
+			if (evt.target != document.body) {
 				handleDOMEvent(evt);
 			}
 		});

@@ -2,7 +2,7 @@ import { IEvent } from 'cellx';
 import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 import { KEY_CONTEXT } from './bindContent';
 
-const ownerComponentStack: Array<[BaseComponent, Array<Element> | undefined]> = [];
+const stack: Array<[BaseComponent, Array<Element> | undefined]> = [];
 
 export function handleEvent(evt: IEvent<BaseComponent>) {
 	let target = evt.target;
@@ -13,15 +13,16 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 	}
 
 	let targetEl: Element = target.element;
+	let el = targetEl;
+	let parentEl = el.parentElement;
 
-	if (!targetEl.parentNode) {
+	if (!parentEl) {
 		return;
 	}
 
-	ownerComponentStack.length = 0;
+	stack.length = 0;
 
 	let attrName = 'oncomponent-' + evt.type;
-	let el = targetEl;
 	let ownerComponentEl = ownerComponent.element;
 	let receivers: Array<Element> | undefined;
 
@@ -30,49 +31,45 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 			(receivers || (receivers = [])).push(el);
 		}
 
-		el = el.parentNode as Element;
-
-		if (el == ownerComponentEl) {
+		if (parentEl == ownerComponentEl) {
 			if (receivers) {
 				for (let i = 0, l = receivers.length; i < l; i++) {
 					let receiver = receivers[i];
-					let attrValue = receiver.getAttribute(attrName)!;
+					let handlerName = receiver.getAttribute(attrName)!;
 					let handler: TEventHandler | undefined;
 
-					if (attrValue.charAt(0) == ':') {
-						if (receiver != targetEl) {
+					if (handlerName.charAt(0) == ':') {
+						let events = (ownerComponent.constructor as typeof BaseComponent).events!;
+
+						if (receiver == targetEl) {
+							handler = events[handlerName.slice(1)][evt.type];
+						} else {
 							let elementBlockNames = (target.constructor as typeof BaseComponent)
 								._elementBlockNames;
 
 							for (let j = 0, m = elementBlockNames.length; j < m; j++) {
-								let typedHandler = (ownerComponent.constructor as typeof BaseComponent)
-									.events![attrValue.slice(1)][
-									`<${elementBlockNames[j]}>` + evt.type
-								];
+								let typedHandler =
+									events[handlerName.slice(1)][
+										`<${elementBlockNames[j]}>` + evt.type
+									];
 
-								if (typedHandler) {
-									if (
-										typedHandler &&
-										typedHandler.call(
-											ownerComponent,
-											evt,
-											receiver[KEY_CONTEXT],
-											receiver
-										) === false
-									) {
-										return;
-									}
-
-									break;
+								if (
+									typedHandler &&
+									typedHandler.call(
+										ownerComponent,
+										evt,
+										receiver[KEY_CONTEXT],
+										receiver
+									) === false
+								) {
+									return;
 								}
 							}
-						}
 
-						handler = (ownerComponent.constructor as typeof BaseComponent).events![
-							attrValue.slice(1)
-						][(receiver == targetEl ? '' : '<*>') + evt.type];
+							handler = events[handlerName.slice(1)]['<*>' + evt.type];
+						}
 					} else {
-						handler = ownerComponent[attrValue];
+						handler = ownerComponent[handlerName];
 					}
 
 					if (
@@ -84,31 +81,35 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 				}
 			}
 
-			if (ownerComponentStack.length) {
-				if (!el.parentNode) {
-					break;
-				}
-
-				[ownerComponent, receivers] = ownerComponentStack.pop()!;
-				ownerComponentEl = ownerComponent.element;
-
-				continue;
-			} else {
+			if (!stack.length) {
 				break;
 			}
-		}
 
-		if (!el.parentNode) {
-			break;
-		}
+			el = parentEl;
+			parentEl = el.parentElement;
 
-		component = (el as IPossiblyComponentElement).$component;
+			if (!parentEl) {
+				break;
+			}
 
-		if (component && component.ownerComponent != ownerComponent) {
-			ownerComponentStack.push([ownerComponent, receivers]);
-			ownerComponent = component.ownerComponent;
+			[ownerComponent, receivers] = stack.pop()!;
 			ownerComponentEl = ownerComponent.element;
-			receivers = undefined;
+		} else {
+			el = parentEl;
+			parentEl = el.parentElement;
+
+			if (!parentEl) {
+				break;
+			}
+
+			component = (el as IPossiblyComponentElement).$component;
+
+			if (component && component.ownerComponent != ownerComponent) {
+				stack.push([ownerComponent, receivers]);
+				ownerComponent = component.ownerComponent;
+				ownerComponentEl = ownerComponent.element;
+				receivers = undefined;
+			}
 		}
 	}
 }
