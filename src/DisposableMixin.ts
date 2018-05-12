@@ -30,7 +30,7 @@ export type TListeningTarget =
 	| NodeList
 	| HTMLCollection;
 
-export type TListener = (evt: IEvent | Event) => boolean | void;
+export type TListener = (evt: IEvent | Event) => any;
 
 export class DisposableMixin implements IDisposable {
 	_disposables: { [id: string]: IDisposable } = {};

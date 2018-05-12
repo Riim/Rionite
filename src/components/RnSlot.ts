@@ -13,6 +13,8 @@ import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } fr
 const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot/slotContentMap');
 
 @Component({
+	elementIs: 'RnSlot',
+
 	params: {
 		name: { property: 'paramName', type: String, readonly: true },
 		forTag: { property: 'paramForTag', type: String, readonly: true },

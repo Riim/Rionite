@@ -71,6 +71,7 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 }
 
 @Component({
+	elementIs: 'RnRepeat',
 	elementExtends: 'template',
 
 	params: {

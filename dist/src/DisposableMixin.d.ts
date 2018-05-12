@@ -17,7 +17,7 @@ export interface IDisposableCallback extends IDisposable {
     cancel(): void;
 }
 export declare type TListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList | HTMLCollection;
-export declare type TListener = (evt: IEvent | Event) => boolean | void;
+export declare type TListener = (evt: IEvent | Event) => any;
 export declare class DisposableMixin implements IDisposable {
     _disposables: {
         [id: string]: IDisposable;

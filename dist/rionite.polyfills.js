@@ -4689,6 +4689,7 @@ var RnIfThen = /** @class */ (function (_super) {
     };
     RnIfThen = RnIfThen_1 = __decorate([
         Component_1.Component({
+            elementIs: 'RnIfThen',
             elementExtends: 'template',
             params: {
                 if: { property: 'paramIf', type: String, required: true, readonly: true }
@@ -5042,6 +5043,7 @@ var RnRepeat = /** @class */ (function (_super) {
     };
     RnRepeat = __decorate([
         Component_1.Component({
+            elementIs: 'RnRepeat',
             elementExtends: 'template',
             params: {
                 for: { property: 'paramFor', type: String, required: true, readonly: true },
@@ -5088,6 +5090,7 @@ var RnIfElse = /** @class */ (function (_super) {
     }
     RnIfElse = __decorate([
         Component_1.Component({
+            elementIs: 'RnIfElse',
             elementExtends: 'template'
         })
     ], RnIfElse);
@@ -5275,6 +5278,7 @@ var RnSlot = /** @class */ (function (_super) {
     };
     RnSlot = __decorate([
         Component_1.Component({
+            elementIs: 'RnSlot',
             params: {
                 name: { property: 'paramName', type: String, readonly: true },
                 forTag: { property: 'paramForTag', type: String, readonly: true },

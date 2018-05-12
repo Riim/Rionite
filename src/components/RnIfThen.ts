@@ -18,6 +18,7 @@ export type TIfCell = Cell<boolean>;
 const reKeypath = RegExp(`^${keypathPattern}$`);
 
 @Component({
+	elementIs: 'RnIfThen',
 	elementExtends: 'template',
 
 	params: {

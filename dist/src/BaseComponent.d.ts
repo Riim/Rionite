@@ -35,7 +35,7 @@ export interface IComponentElementClassNameMap {
 }
 export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (this: T, evt: U, context: {
     [name: string]: any;
-}, receiver: Element) => boolean | void;
+}, receiver: Element) => any;
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
     [name: string]: {
         [eventName: string]: TEventHandler<T, U>;

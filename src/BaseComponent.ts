@@ -72,7 +72,7 @@ export type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | 
 	evt: U,
 	context: { [name: string]: any },
 	receiver: Element
-) => boolean | void;
+) => any;
 
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
 	[name: string]: {
