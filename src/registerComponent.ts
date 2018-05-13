@@ -1,4 +1,4 @@
-import { hyphenize } from '@riim/hyphenize';
+import { kebabCase } from '@riim/kebab-case';
 import { mixin } from '@riim/mixin';
 import { pascalize } from '@riim/pascalize';
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
@@ -50,10 +50,10 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		throw new TypeError('Static property "elementIs" is required');
 	}
 
-	let hyphenizedElIs = hyphenize(elIs, true);
+	let kebabCaseElIs = kebabCase(elIs, true);
 
-	if (componentConstructorMap.has(hyphenizedElIs)) {
-		throw new TypeError(`Component "${hyphenizedElIs}" already registered`);
+	if (componentConstructorMap.has(kebabCaseElIs)) {
+		throw new TypeError(`Component "${kebabCaseElIs}" already registered`);
 	}
 
 	let componentProto = componentConstr.prototype;
@@ -332,12 +332,12 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 	mixin(elProto, ElementProtoMixin);
 
 	window.customElements.define(
-		hyphenizedElIs,
+		kebabCaseElIs,
 		elConstr,
 		elExtends ? { extends: elExtends } : undefined
 	);
 
-	componentConstructorMap.set(elIs, componentConstr).set(hyphenizedElIs, componentConstr);
+	componentConstructorMap.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
 	elementConstructorMap.set(elIs, elConstr);
 
 	return componentConstr;

@@ -1531,13 +1531,13 @@ THE SOFTWARE.
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/hyphenize"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"), require("@riim/clear-node"));
+		module.exports = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"), require("@riim/clear-node"));
 	else if(typeof define === 'function' && define.amd)
-		define(["@riim/di", "@riim/logger", "nelm-parser", "@riim/escape-html", "@riim/rionite-snake-case-attribute-name", "@riim/map-set-polyfill", "escape-string", "@riim/next-uid", "cellx", "@riim/gettext", "@riim/hyphenize", "@riim/mixin", "@riim/get-uid", "@riim/move-content", "@riim/symbol-polyfill", "html-to-fragment", "@riim/is-regexp", "@riim/set-attribute", "@riim/defer", "@riim/lower-case-first-word", "@riim/next-tick", "@riim/clear-node"], factory);
+		define(["@riim/di", "@riim/logger", "nelm-parser", "@riim/escape-html", "@riim/rionite-snake-case-attribute-name", "@riim/map-set-polyfill", "escape-string", "@riim/next-uid", "cellx", "@riim/gettext", "@riim/kebab-case", "@riim/mixin", "@riim/get-uid", "@riim/move-content", "@riim/symbol-polyfill", "html-to-fragment", "@riim/is-regexp", "@riim/set-attribute", "@riim/defer", "@riim/lower-case-first-word", "@riim/next-tick", "@riim/clear-node"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/hyphenize"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"), require("@riim/clear-node"));
+		exports["rionite"] = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"), require("@riim/clear-node"));
 	else
-		root["rionite"] = factory(root["@riim/di"], root["@riim/logger"], root["nelm-parser"], root["@riim/escape-html"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["escape-string"], root["@riim/next-uid"], root["cellx"], root["@riim/gettext"], root["@riim/hyphenize"], root["@riim/mixin"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/symbol-polyfill"], root["html-to-fragment"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/next-tick"], root["@riim/clear-node"]);
+		root["rionite"] = factory(root["@riim/di"], root["@riim/logger"], root["nelm-parser"], root["@riim/escape-html"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["escape-string"], root["@riim/next-uid"], root["cellx"], root["@riim/gettext"], root["@riim/kebab-case"], root["@riim/mixin"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/symbol-polyfill"], root["html-to-fragment"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/next-tick"], root["@riim/clear-node"]);
 })(window, function(__WEBPACK_EXTERNAL_MODULE__1__, __WEBPACK_EXTERNAL_MODULE__2__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__10__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__13__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__19__, __WEBPACK_EXTERNAL_MODULE__20__, __WEBPACK_EXTERNAL_MODULE__24__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__26__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__34__, __WEBPACK_EXTERNAL_MODULE__46__, __WEBPACK_EXTERNAL_MODULE__52__, __WEBPACK_EXTERNAL_MODULE__54__, __WEBPACK_EXTERNAL_MODULE__59__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -2442,7 +2442,7 @@ exports.Component = Component;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var hyphenize_1 = __webpack_require__(19);
+var kebab_case_1 = __webpack_require__(19);
 var mixin_1 = __webpack_require__(20);
 var pascalize_1 = __webpack_require__(21);
 var rionite_snake_case_attribute_name_1 = __webpack_require__(8);
@@ -2474,9 +2474,9 @@ function registerComponent(componentConstr) {
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
-    var hyphenizedElIs = hyphenize_1.hyphenize(elIs, true);
-    if (componentConstructorMap_1.componentConstructorMap.has(hyphenizedElIs)) {
-        throw new TypeError("Component \"" + hyphenizedElIs + "\" already registered");
+    var kebabCaseElIs = kebab_case_1.kebabCase(elIs, true);
+    if (componentConstructorMap_1.componentConstructorMap.has(kebabCaseElIs)) {
+        throw new TypeError("Component \"" + kebabCaseElIs + "\" already registered");
     }
     var componentProto = componentConstr.prototype;
     var parentComponentConstr = Object.getPrototypeOf(componentProto)
@@ -2693,8 +2693,8 @@ function registerComponent(componentConstr) {
     var elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
     elProto.constructor = elConstr;
     mixin_1.mixin(elProto, ElementProtoMixin_1.ElementProtoMixin);
-    window.customElements.define(hyphenizedElIs, elConstr, elExtends ? { extends: elExtends } : undefined);
-    componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr).set(hyphenizedElIs, componentConstr);
+    window.customElements.define(kebabCaseElIs, elConstr, elExtends ? { extends: elExtends } : undefined);
+    componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
     elementConstructorMap_1.elementConstructorMap.set(elIs, elConstr);
     return componentConstr;
 }
@@ -2780,7 +2780,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var di_1 = __webpack_require__(1);
 var get_uid_1 = __webpack_require__(24);
-var hyphenize_1 = __webpack_require__(19);
+var kebab_case_1 = __webpack_require__(19);
 var logger_1 = __webpack_require__(2);
 var map_set_polyfill_1 = __webpack_require__(10);
 var move_content_1 = __webpack_require__(25);
@@ -2834,7 +2834,7 @@ var BaseComponent = /** @class */ (function (_super) {
             throw new TypeError('Component must be registered');
         }
         if (!el) {
-            el = document.createElement(hyphenize_1.hyphenize(constr.elementIs, true));
+            el = document.createElement(kebab_case_1.kebabCase(constr.elementIs, true));
         }
         _this.element = el;
         el.rioniteComponent = _this;
@@ -4357,9 +4357,19 @@ function handleDOMEvent(evt) {
             for (var i = 0;;) {
                 var receiver = receivers[i];
                 var handlerName = receiver.getAttribute(attrName);
-                var handler = handlerName.charAt(0) == ':'
-                    ? component.constructor.domEvents[handlerName.slice(1)][evt.type]
-                    : component[handlerName];
+                var handler = void 0;
+                if (handlerName.charAt(0) == ':') {
+                    var events = component.constructor.domEvents;
+                    if (events) {
+                        events = events[handlerName.slice(1)];
+                        if (events) {
+                            handler = events[evt.type];
+                        }
+                    }
+                }
+                else {
+                    handler = component[handlerName];
+                }
                 if (handler) {
                     if (handler.call(component, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
                         return;

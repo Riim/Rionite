@@ -18,12 +18,21 @@ export function handleDOMEvent(evt: Event) {
 			for (let i = 0; ; ) {
 				let receiver = receivers[i];
 				let handlerName = receiver.getAttribute(attrName)!;
-				let handler: TEventHandler | undefined =
-					handlerName.charAt(0) == ':'
-						? (component.constructor as typeof BaseComponent).domEvents![
-								handlerName.slice(1)
-						  ][evt.type]
-						: component[handlerName];
+				let handler: TEventHandler | undefined;
+
+				if (handlerName.charAt(0) == ':') {
+					let events: any = (component.constructor as typeof BaseComponent).domEvents;
+
+					if (events) {
+						events = events[handlerName.slice(1)];
+
+						if (events) {
+							handler = events[evt.type];
+						}
+					}
+				} else {
+					handler = component[handlerName];
+				}
 
 				if (handler) {
 					if (handler.call(component, evt, receiver[KEY_CONTEXT], receiver) === false) {

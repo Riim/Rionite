@@ -1,6 +1,6 @@
 import { Inject } from '@riim/di';
 import { getUID } from '@riim/get-uid';
-import { hyphenize } from '@riim/hyphenize';
+import { kebabCase } from '@riim/kebab-case';
 import { Logger } from '@riim/logger';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
@@ -212,7 +212,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 		}
 
 		if (!el) {
-			el = document.createElement(hyphenize(constr.elementIs, true));
+			el = document.createElement(kebabCase(constr.elementIs, true));
 		}
 
 		this.element = el as IComponentElement;
