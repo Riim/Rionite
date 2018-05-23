@@ -10,7 +10,7 @@ import {
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 
 export const KEY_IS_COMPONENT_PARAMS_INITED = Symbol(
-	'Rionite/ComponentParams/isComponentParamsInited'
+	'Rionite/ComponentParams[isComponentParamsInited]'
 );
 
 function initParam(

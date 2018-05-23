@@ -184,7 +184,8 @@ var Template_1 = __webpack_require__(6);
 ['if-then', 'if-else', 'repeat'].forEach(function (name) {
     Template_1.Template.helpers[name] = function (el) {
         var attrs = el.attributes;
-        if (name != 'repeat') {
+        // проверка на attrs для @*/name // ...
+        if (attrs && name != 'repeat') {
             var list = attrs.list;
             var index = list.length - 1;
             var foundIndex = void 0;
@@ -1268,9 +1269,9 @@ var handleDOMEvent_1 = __webpack_require__(49);
 var handleEvent_1 = __webpack_require__(50);
 var Features_1 = __webpack_require__(47);
 var map = Array.prototype.map;
-exports.KEY_PARAMS_CONFIG = symbol_polyfill_1.Symbol('Rionite/BaseComponent/paramsConfig');
-exports.KEY_PARAMS = symbol_polyfill_1.Symbol('Rionite/BaseComponent/params');
-exports.KEY_IS_SLOT = symbol_polyfill_1.Symbol('Rionite/BaseComponent/isSlot');
+exports.KEY_PARAMS_CONFIG = symbol_polyfill_1.Symbol('Rionite/BaseComponent[paramsConfig]');
+exports.KEY_PARAMS = symbol_polyfill_1.Symbol('Rionite/BaseComponent[params]');
+exports.KEY_IS_SLOT = symbol_polyfill_1.Symbol('Rionite/BaseComponent[isSlot]');
 function findChildComponents(node, ownerComponent, context, childComponents) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         if (child.nodeType == Node.ELEMENT_NODE) {
@@ -1641,7 +1642,7 @@ var rionite_snake_case_attribute_name_1 = __webpack_require__(8);
 var symbol_polyfill_1 = __webpack_require__(26);
 var BaseComponent_1 = __webpack_require__(23);
 var componentParamTypeSerializerMap_1 = __webpack_require__(30);
-exports.KEY_IS_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite/ComponentParams/isComponentParamsInited');
+exports.KEY_IS_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite/ComponentParams[isComponentParamsInited]');
 function initParam(component, $paramConfig, name) {
     if ($paramConfig === null) {
         return;
@@ -1834,7 +1835,7 @@ var BaseComponent_1 = __webpack_require__(23);
 var compileContentNodeValue_1 = __webpack_require__(35);
 var ContentNodeValueParser_1 = __webpack_require__(37);
 var compileKeypath_1 = __webpack_require__(41);
-exports.KEY_CONTEXT = Symbol('Rionite/bindContent/context');
+exports.KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 var contentNodeValueCache = Object.create(null);
 var AttributeBindingCell = /** @class */ (function (_super) {
     __extends(AttributeBindingCell, _super);
@@ -2648,7 +2649,7 @@ var symbol_polyfill_1 = __webpack_require__(26);
 var BaseComponent_1 = __webpack_require__(23);
 var ComponentParams_1 = __webpack_require__(29);
 var Features_1 = __webpack_require__(47);
-exports.KEY_IS_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite/ElementProtoMixin/isElementConnected');
+exports.KEY_IS_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite/ElementProtoMixin[isElementConnected]');
 var isConnectionStatusCallbacksSuppressed = false;
 function suppressConnectionStatusCallbacks() {
     isConnectionStatusCallbacksSuppressed = true;
@@ -3611,7 +3612,7 @@ var BaseComponent_1 = __webpack_require__(23);
 var bindContent_1 = __webpack_require__(33);
 var Component_1 = __webpack_require__(17);
 var ElementProtoMixin_1 = __webpack_require__(45);
-var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot/slotContentMap');
+var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot[slotContentMap]');
 var RnSlot = /** @class */ (function (_super) {
     __extends(RnSlot, _super);
     function RnSlot() {

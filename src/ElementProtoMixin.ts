@@ -12,7 +12,7 @@ import {
 import { ComponentParams } from './ComponentParams';
 import { nativeCustomElements as nativeCustomElementsFeature } from './lib/Features';
 
-export const KEY_IS_ELEMENT_CONNECTED = Symbol('Rionite/ElementProtoMixin/isElementConnected');
+export const KEY_IS_ELEMENT_CONNECTED = Symbol('Rionite/ElementProtoMixin[isElementConnected]');
 
 let isConnectionStatusCallbacksSuppressed = false;
 

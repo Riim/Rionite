@@ -5,8 +5,9 @@ import { Template } from '../Template';
 	Template.helpers[name] = el => {
 		let attrs = el.attributes;
 
-		if (name != 'repeat') {
-			let list = attrs!.list;
+		// проверка на attrs для @*/name // ...
+		if (attrs && name != 'repeat') {
+			let list = attrs.list;
 			let index = list.length - 1;
 			let foundIndex: number | undefined;
 

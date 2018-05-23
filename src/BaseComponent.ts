@@ -80,10 +80,10 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	};
 }
 
-export const KEY_PARAMS_CONFIG = Symbol('Rionite/BaseComponent/paramsConfig');
-export const KEY_PARAMS = Symbol('Rionite/BaseComponent/params');
+export const KEY_PARAMS_CONFIG = Symbol('Rionite/BaseComponent[paramsConfig]');
+export const KEY_PARAMS = Symbol('Rionite/BaseComponent[params]');
 
-export const KEY_IS_SLOT = Symbol('Rionite/BaseComponent/isSlot');
+export const KEY_IS_SLOT = Symbol('Rionite/BaseComponent[isSlot]');
 
 function findChildComponents(
 	node: Node,

@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.32.75",
+  "version": "0.32.77",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/src/index.d.ts",
@@ -26,9 +26,9 @@
     "document-register-element": "^1.8.1",
     "gulp": "^3.9.1",
     "gulp-concat": "^2.6.1",
-    "gulp-rename": "^1.2.2",
+    "gulp-rename": "^1.2.3",
     "gulp-uglify": "^3.0.0",
-    "jest": "^22.4.3",
+    "jest": "^22.4.4",
     "pump": "^3.0.0",
     "require-dir": "^1.0.0",
     "run-sequence": "^2.2.1",
@@ -72,9 +72,7 @@
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(js|ts)$",
     "moduleFileExtensions": [
       "ts",
-      "tsx",
       "js",
-      "jsx",
       "json",
       "node"
     ]

@@ -24,7 +24,7 @@ import {
 	} from './ContentNodeValueParser';
 import { compileKeypath } from './lib/compileKeypath';
 
-export const KEY_CONTEXT = Symbol('Rionite/bindContent/context');
+export const KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 
 const contentNodeValueCache: { [nodeValue: string]: TContentNodeValue | null } = Object.create(
 	null
