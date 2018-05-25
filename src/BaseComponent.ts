@@ -9,7 +9,7 @@ import { EventEmitter, IEvent } from 'cellx';
 import { htmlToFragment } from 'html-to-fragment';
 import { IBlock } from 'nelm-parser';
 import { attachChildComponentElements } from './attachChildComponentElements';
-import { bindContent } from './bindContent';
+import { bindContent, KEY_CHILD_COMPONENTS } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructorMap } from './componentConstructorMap';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
@@ -84,43 +84,6 @@ export const KEY_PARAMS_CONFIG = Symbol('Rionite/BaseComponent[paramsConfig]');
 export const KEY_PARAMS = Symbol('Rionite/BaseComponent[params]');
 
 export const KEY_IS_SLOT = Symbol('Rionite/BaseComponent[isSlot]');
-
-function findChildComponents(
-	node: Node,
-	ownerComponent: BaseComponent,
-	context: object,
-	childComponents?: Array<BaseComponent> | null | undefined
-): Array<BaseComponent> | null {
-	for (let child = node.firstChild; child; child = child.nextSibling) {
-		if (child.nodeType == Node.ELEMENT_NODE) {
-			let childComponent = (child as IPossiblyComponentElement).$component;
-
-			if (childComponent) {
-				childComponent._ownerComponent = ownerComponent;
-				childComponent.$context = context;
-
-				(childComponents || (childComponents = [])).push(childComponent);
-			}
-
-			if (
-				child.firstChild &&
-				!(
-					childComponent &&
-					(childComponent.constructor as typeof BaseComponent).bindsInputContent
-				)
-			) {
-				childComponents = findChildComponents(
-					child,
-					ownerComponent,
-					context,
-					childComponents
-				);
-			}
-		}
-	}
-
-	return childComponents || null;
-}
 
 export class BaseComponent extends EventEmitter implements DisposableMixin {
 	static elementIs: string;
@@ -354,16 +317,31 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 			el.className = constr._blockNamesString + el.className;
 
 			if (constr.template === null) {
-				this._bindings = null;
+				if (this.ownerComponent == this) {
+					let [bindings, backBindings, childComponents] = bindContent(el, this, this, {
+						0: null,
+						1: null,
+						2: null
+					} as any);
 
-				let childComponents = findChildComponents(
-					el,
-					this.ownerComponent,
-					this.$context || this.ownerComponent
-				);
+					this._bindings = bindings;
 
-				if (childComponents) {
-					attachChildComponentElements(childComponents);
+					if (childComponents) {
+						attachChildComponentElements(childComponents);
+					}
+
+					if (backBindings) {
+						for (let i = backBindings.length; i; ) {
+							let backBinding = backBindings[--i];
+							backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+						}
+					}
+				} else {
+					this._bindings = null;
+
+					if (this[KEY_CHILD_COMPONENTS]) {
+						attachChildComponentElements(this[KEY_CHILD_COMPONENTS]);
+					}
 				}
 			} else {
 				if (el.firstChild) {

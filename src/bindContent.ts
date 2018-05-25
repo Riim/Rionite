@@ -24,6 +24,7 @@ import {
 	} from './ContentNodeValueParser';
 import { compileKeypath } from './lib/compileKeypath';
 
+export const KEY_CHILD_COMPONENTS = Symbol('Rionite/bindContent[childComponents]');
 export const KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 
 const contentNodeValueCache: { [nodeValue: string]: TContentNodeValue | null } = Object.create(
@@ -68,7 +69,8 @@ export function bindContent(
 		Array<IFreezableCell> | null,
 		Array<[BaseComponent, string, (evt: any) => void]> | null,
 		Array<BaseComponent> | null
-	]
+	],
+	parentComponent?: BaseComponent
 ) {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		switch (child.nodeType) {
@@ -215,17 +217,22 @@ export function bindContent(
 					childComponent.$context = context;
 					childComponent.$specifiedParams = $specifiedParams;
 
-					(result[2] || (result[2] = [])).push(childComponent);
+					if (parentComponent) {
+						(
+							parentComponent[KEY_CHILD_COMPONENTS] ||
+							(parentComponent[KEY_CHILD_COMPONENTS] = [])
+						).push(childComponent);
+					} else {
+						(result[2] || (result[2] = [])).push(childComponent);
+					}
 				}
 
 				if (
 					child.firstChild &&
-					!(
-						childComponent &&
-						(childComponent.constructor as typeof BaseComponent).bindsInputContent
-					)
+					(!childComponent ||
+						!(childComponent.constructor as typeof BaseComponent).bindsInputContent)
 				) {
-					bindContent(child as Element, ownerComponent, context, result);
+					bindContent(child as Element, ownerComponent, context, result, childComponent);
 				}
 
 				break;
