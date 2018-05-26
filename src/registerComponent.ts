@@ -12,7 +12,7 @@ import {
 	KEY_PARAMS_CONFIG
 	} from './BaseComponent';
 import { componentConstructorMap } from './componentConstructorMap';
-import { KEY_IS_COMPONENT_PARAMS_INITED } from './ComponentParams';
+import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
 import { Template } from './Template';
@@ -140,7 +140,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 						},
 
 						set(this: BaseComponent, value: any) {
-							if (this[KEY_IS_COMPONENT_PARAMS_INITED]) {
+							if (this[KEY_COMPONENT_PARAMS_INITED]) {
 								if (value !== this[KEY_PARAMS].get(name)) {
 									throw new TypeError(`Parameter "${name}" is readonly`);
 								}
@@ -190,7 +190,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 						},
 
 						set(this: BaseComponent, value: any) {
-							if (this[KEY_IS_COMPONENT_PARAMS_INITED]) {
+							if (this[KEY_COMPONENT_PARAMS_INITED]) {
 								let rawValue = $paramConfig.typeSerializer!.write(
 									value,
 									$paramConfig.default

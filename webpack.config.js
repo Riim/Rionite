@@ -39,8 +39,10 @@ module.exports = () => {
 		},
 
 		resolve: {
-			extensions: ['.ts', '.tsx', '.js', '.jsx']
+			extensions: ['.ts', '.js']
 		},
+
+		context: __dirname,
 
 		externals: [
 			'@riim/clear-node',

@@ -1637,7 +1637,7 @@ exports.KEY_PARAMS_CONFIG = BaseComponent_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAMS = BaseComponent_1.KEY_PARAMS;
 exports.BaseComponent = BaseComponent_1.BaseComponent;
 var ElementProtoMixin_1 = __webpack_require__(33);
-exports.KEY_IS_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_IS_ELEMENT_CONNECTED;
+exports.KEY_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_ELEMENT_CONNECTED;
 var ComponentParams_1 = __webpack_require__(29);
 exports.ComponentParams = ComponentParams_1.ComponentParams;
 var componentParamValueMap_1 = __webpack_require__(32);
@@ -2537,7 +2537,7 @@ function registerComponent(componentConstr) {
                             return this[BaseComponent_1.KEY_PARAMS].get(name_1);
                         },
                         set: function (value) {
-                            if (this[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
+                            if (this[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
                                 if (value !== this[BaseComponent_1.KEY_PARAMS].get(name_1)) {
                                     throw new TypeError("Parameter \"" + name_1 + "\" is readonly");
                                 }
@@ -2580,7 +2580,7 @@ function registerComponent(componentConstr) {
                             return value;
                         },
                         set: function (value) {
-                            if (this[ComponentParams_1.KEY_IS_COMPONENT_PARAMS_INITED]) {
+                            if (this[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
                                 var rawValue = $paramConfig_1.typeSerializer.write(value, $paramConfig_1.default);
                                 if (rawValue === null) {
                                     this.element.removeAttribute(snakeCaseName_1);
@@ -2870,7 +2870,7 @@ var BaseComponent = /** @class */ (function (_super) {
     });
     BaseComponent.prototype.handleEvent = function (evt) {
         _super.prototype.handleEvent.call(this, evt);
-        if (evt.bubbles !== false && !evt.isPropagationStopped) {
+        if (evt.bubbles !== false && !evt.propagationStopped) {
             var parentComponent = this.parentComponent;
             if (parentComponent) {
                 parentComponent.handleEvent(evt);
@@ -3152,7 +3152,7 @@ var ElementProtoMixin_1 = __webpack_require__(33);
 function attachChildComponentElements(childComponents) {
     for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
         var childComponent = childComponents_1[_i];
-        if (childComponent.element[ElementProtoMixin_1.KEY_IS_ELEMENT_CONNECTED]) {
+        if (childComponent.element[ElementProtoMixin_1.KEY_ELEMENT_CONNECTED]) {
             childComponent._parentComponent = undefined;
             ComponentParams_1.ComponentParams.init(childComponent);
             childComponent.elementConnected();
@@ -3174,7 +3174,7 @@ var rionite_snake_case_attribute_name_1 = __webpack_require__(8);
 var symbol_polyfill_1 = __webpack_require__(26);
 var BaseComponent_1 = __webpack_require__(23);
 var componentParamTypeSerializerMap_1 = __webpack_require__(30);
-exports.KEY_IS_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite/ComponentParams[isComponentParamsInited]');
+exports.KEY_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite/ComponentParams[componentParamsInited]');
 function initParam(component, $paramConfig, name) {
     if ($paramConfig === null) {
         return;
@@ -3225,7 +3225,7 @@ function initParam(component, $paramConfig, name) {
 }
 exports.ComponentParams = {
     init: function (component) {
-        if (component[exports.KEY_IS_COMPONENT_PARAMS_INITED]) {
+        if (component[exports.KEY_COMPONENT_PARAMS_INITED]) {
             return;
         }
         var paramsConfig = component.constructor.params;
@@ -3235,7 +3235,7 @@ exports.ComponentParams = {
                 initParam(component, $paramsConfig[name_1], name_1);
             }
         }
-        component[exports.KEY_IS_COMPONENT_PARAMS_INITED] = true;
+        component[exports.KEY_COMPONENT_PARAMS_INITED] = true;
     }
 };
 
@@ -3356,14 +3356,14 @@ var symbol_polyfill_1 = __webpack_require__(26);
 var BaseComponent_1 = __webpack_require__(23);
 var ComponentParams_1 = __webpack_require__(29);
 var Features_1 = __webpack_require__(35);
-exports.KEY_IS_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite/ElementProtoMixin[isElementConnected]');
-var isConnectionStatusCallbacksSuppressed = false;
+exports.KEY_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite/ElementProtoMixin[elementConnected]');
+var connectionStatusCallbacksSuppressed = false;
 function suppressConnectionStatusCallbacks() {
-    isConnectionStatusCallbacksSuppressed = true;
+    connectionStatusCallbacksSuppressed = true;
 }
 exports.suppressConnectionStatusCallbacks = suppressConnectionStatusCallbacks;
 function resumeConnectionStatusCallbacks() {
-    isConnectionStatusCallbacksSuppressed = false;
+    connectionStatusCallbacksSuppressed = false;
 }
 exports.resumeConnectionStatusCallbacks = resumeConnectionStatusCallbacks;
 exports.ElementProtoMixin = (_a = {
@@ -3373,11 +3373,11 @@ exports.ElementProtoMixin = (_a = {
                 di_1.Container.get(this.constructor._rioniteComponentConstructor, [this]));
         }
     },
-    _a[exports.KEY_IS_ELEMENT_CONNECTED] = false,
+    _a[exports.KEY_ELEMENT_CONNECTED] = false,
     _a.connectedCallback = function () {
         var _this = this;
-        this[exports.KEY_IS_ELEMENT_CONNECTED] = true;
-        if (isConnectionStatusCallbacksSuppressed) {
+        this[exports.KEY_ELEMENT_CONNECTED] = true;
+        if (connectionStatusCallbacksSuppressed) {
             return;
         }
         var component = this.rioniteComponent;
@@ -3397,7 +3397,7 @@ exports.ElementProtoMixin = (_a = {
         }
         else {
             defer_1.defer(function () {
-                if (_this[exports.KEY_IS_ELEMENT_CONNECTED]) {
+                if (_this[exports.KEY_ELEMENT_CONNECTED]) {
                     var component_1 = _this.$component;
                     component_1._parentComponent = undefined;
                     if (!component_1.parentComponent && !component_1._attached) {
@@ -3410,8 +3410,8 @@ exports.ElementProtoMixin = (_a = {
         }
     },
     _a.disconnectedCallback = function () {
-        this[exports.KEY_IS_ELEMENT_CONNECTED] = false;
-        if (isConnectionStatusCallbacksSuppressed) {
+        this[exports.KEY_ELEMENT_CONNECTED] = false;
+        if (connectionStatusCallbacksSuppressed) {
             return;
         }
         var component = this.rioniteComponent;
@@ -4624,7 +4624,7 @@ var RnIfThen = /** @class */ (function (_super) {
     RnIfThen.prototype.elementDisconnected = function () {
         var _this = this;
         next_tick_1.nextTick(function () {
-            if (!_this.element[ElementProtoMixin_1.KEY_IS_ELEMENT_CONNECTED]) {
+            if (!_this.element[ElementProtoMixin_1.KEY_ELEMENT_CONNECTED]) {
                 _this._deactivate();
             }
         });
@@ -4859,7 +4859,7 @@ var RnRepeat = /** @class */ (function (_super) {
     RnRepeat.prototype.elementDisconnected = function () {
         var _this = this;
         next_tick_1.nextTick(function () {
-            if (!_this.element[ElementProtoMixin_1.KEY_IS_ELEMENT_CONNECTED]) {
+            if (!_this.element[ElementProtoMixin_1.KEY_ELEMENT_CONNECTED]) {
                 _this._deactivate();
             }
         });

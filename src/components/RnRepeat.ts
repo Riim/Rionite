@@ -5,7 +5,7 @@ import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
 import { bindContent } from '../bindContent';
 import { Component } from '../decorators/Component';
-import { KEY_IS_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
+import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
 import { templateTag as templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
@@ -136,7 +136,7 @@ export class RnRepeat extends BaseComponent {
 
 	elementDisconnected() {
 		nextTick(() => {
-			if (!this.element[KEY_IS_ELEMENT_CONNECTED]) {
+			if (!this.element[KEY_ELEMENT_CONNECTED]) {
 				this._deactivate();
 			}
 		});

@@ -1,5 +1,5 @@
 import { BaseComponent, IComponentElement } from './BaseComponent';
-export declare const KEY_IS_ELEMENT_CONNECTED: symbol;
+export declare const KEY_ELEMENT_CONNECTED: symbol;
 export declare function suppressConnectionStatusCallbacks(): void;
 export declare function resumeConnectionStatusCallbacks(): void;
 export declare const ElementProtoMixin: {

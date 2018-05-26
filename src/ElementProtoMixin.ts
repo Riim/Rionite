@@ -12,16 +12,16 @@ import {
 import { ComponentParams } from './ComponentParams';
 import { nativeCustomElements as nativeCustomElementsFeature } from './lib/Features';
 
-export const KEY_IS_ELEMENT_CONNECTED = Symbol('Rionite/ElementProtoMixin[isElementConnected]');
+export const KEY_ELEMENT_CONNECTED = Symbol('Rionite/ElementProtoMixin[elementConnected]');
 
-let isConnectionStatusCallbacksSuppressed = false;
+let connectionStatusCallbacksSuppressed = false;
 
 export function suppressConnectionStatusCallbacks() {
-	isConnectionStatusCallbacksSuppressed = true;
+	connectionStatusCallbacksSuppressed = true;
 }
 
 export function resumeConnectionStatusCallbacks() {
-	isConnectionStatusCallbacksSuppressed = false;
+	connectionStatusCallbacksSuppressed = false;
 }
 
 export const ElementProtoMixin = {
@@ -34,12 +34,12 @@ export const ElementProtoMixin = {
 		);
 	},
 
-	[KEY_IS_ELEMENT_CONNECTED]: false,
+	[KEY_ELEMENT_CONNECTED]: false,
 
 	connectedCallback(this: IComponentElement) {
-		this[KEY_IS_ELEMENT_CONNECTED] = true;
+		this[KEY_ELEMENT_CONNECTED] = true;
 
-		if (isConnectionStatusCallbacksSuppressed) {
+		if (connectionStatusCallbacksSuppressed) {
 			return;
 		}
 
@@ -61,7 +61,7 @@ export const ElementProtoMixin = {
 			}
 		} else {
 			defer(() => {
-				if (this[KEY_IS_ELEMENT_CONNECTED]) {
+				if (this[KEY_ELEMENT_CONNECTED]) {
 					let component = this.$component;
 
 					component._parentComponent = undefined;
@@ -78,9 +78,9 @@ export const ElementProtoMixin = {
 	},
 
 	disconnectedCallback(this: IComponentElement) {
-		this[KEY_IS_ELEMENT_CONNECTED] = false;
+		this[KEY_ELEMENT_CONNECTED] = false;
 
-		if (isConnectionStatusCallbacksSuppressed) {
+		if (connectionStatusCallbacksSuppressed) {
 			return;
 		}
 

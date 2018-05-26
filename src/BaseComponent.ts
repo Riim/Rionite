@@ -191,7 +191,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 	handleEvent(evt: IEvent<BaseComponent>) {
 		super.handleEvent(evt);
 
-		if (evt.bubbles !== false && !evt.isPropagationStopped) {
+		if (evt.bubbles !== false && !evt.propagationStopped) {
 			let parentComponent = this.parentComponent;
 
 			if (parentComponent) {
