@@ -119,7 +119,7 @@ export const ElementProtoMixin = {
 				}
 			} else {
 				let valueCell: Cell | undefined = component[$paramConfig.property + 'Cell'];
-				let value = $paramConfig.typeSerializer!.read(rawValue, $paramConfig.default);
+				let value = $paramConfig.typeSerializer!.read(rawValue, $paramConfig.default, this);
 
 				if (valueCell) {
 					valueCell.set(value);

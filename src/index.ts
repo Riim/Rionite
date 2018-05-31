@@ -31,7 +31,6 @@ export {
 } from './BaseComponent';
 export { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
-export { componentParamValueMap } from './componentParamValueMap';
 export { Template } from './Template';
 export { registerComponent } from './registerComponent';
 export { TIfCell as TRtIfThenIfCell, RnIfThen } from './components/RnIfThen';

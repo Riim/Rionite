@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.32.83",
+  "version": "0.32.84",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/src/index.d.ts",
@@ -29,14 +29,14 @@
     "gulp-concat": "^2.6.1",
     "gulp-rename": "^1.2.3",
     "gulp-uglify": "^3.0.0",
-    "jest": "^23.0.0",
+    "jest": "^23.1.0",
     "pump": "^3.0.0",
     "require-dir": "^1.0.0",
     "run-sequence": "^2.2.1",
     "ts-jest": "^22.4.6",
     "tslint": "^5.10.0",
     "tslint-loader": "^3.6.0",
-    "typescript": "^2.8.3",
+    "typescript": "^2.8.4",
     "webpack": "^4.9.1",
     "webpack-command": "^0.2.0"
   },
@@ -61,7 +61,7 @@
     "@riim/self-closing-tags": "^1.0.2",
     "@riim/set-attribute": "^1.0.0",
     "@riim/symbol-polyfill": "^1.0.1",
-    "cellx": "^1.7.88",
+    "cellx": "^1.7.89",
     "escape-string": "^1.0.2",
     "html-to-fragment": "^1.0.1",
     "nelm-parser": "^1.1.17"

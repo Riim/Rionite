@@ -1,12 +1,6 @@
 import { Set } from '@riim/map-set-polyfill';
 import { setAttribute } from '@riim/set-attribute';
-import {
-	Cell,
-	ICellOptions,
-	IEvent,
-	TCellPull,
-	TListener
-	} from 'cellx';
+import { Cell, IEvent, TListener } from 'cellx';
 import {
 	BaseComponent,
 	I$ComponentParamConfig,
@@ -31,34 +25,17 @@ const contentNodeValueCache: { [nodeValue: string]: TContentNodeValue | null } =
 	null
 );
 
-export class AttributeBindingCell extends Cell {
-	prevValue: any;
-
+export interface IAttributeBindingCellMeta {
 	element: Element;
 	attributeName: string;
-
-	constructor(pull: TCellPull<any>, el: Element, attrName: string, opts?: ICellOptions<any>) {
-		super(pull, opts);
-		this.element = el;
-		this.attributeName = attrName;
-	}
 }
 
-export class TextNodeBindingCell extends Cell {
-	textNode: Text;
-
-	constructor(pull: TCellPull<string>, textNode: Text, opts?: ICellOptions<string>) {
-		super(pull, opts);
-		this.textNode = textNode;
-	}
+function onAttributeBindingCellChange(evt: IEvent<Cell<any, IAttributeBindingCellMeta>>) {
+	setAttribute(evt.target.meta!.element, evt.target.meta!.attributeName, evt.data.value);
 }
 
-function onAttributeBindingCellChange(evt: IEvent<AttributeBindingCell>) {
-	setAttribute(evt.target.element, evt.target.attributeName, evt.data.value);
-}
-
-function onTextNodeBindingCellChange(evt: IEvent<TextNodeBindingCell>) {
-	evt.target.textNode.nodeValue = evt.data.value;
+function onTextNodeBindingCellChange(evt: IEvent<Cell<string, { textNode: Text }>>) {
+	evt.target.meta!.textNode.nodeValue = evt.data.value;
 }
 
 export function bindContent(
@@ -148,16 +125,18 @@ export function bindContent(
 								: null;
 
 						if (prefix !== '->') {
-							let cell = new AttributeBindingCell(
+							let cell = new Cell<any, IAttributeBindingCellMeta>(
 								compileContentNodeValue(
 									contentNodeValue,
 									value,
 									contentNodeValueLength == 1
 								),
-								child as any,
-								name,
 								{
 									context,
+									meta: {
+										element: child as any,
+										attributeName: name
+									},
 									onChange: onAttributeBindingCellChange
 								}
 							);
@@ -272,11 +251,13 @@ export function bindContent(
 					contentNodeValue.length > 1 ||
 					contentNodeValue[0].nodeType == ContentNodeValueNodeType.BINDING
 				) {
-					let cell = new TextNodeBindingCell(
+					let cell = new Cell<string, { textNode: Text }>(
 						compileContentNodeValue(contentNodeValue, value, false),
-						child as Text,
 						{
 							context,
+							meta: {
+								textNode: child as any
+							},
 							onChange: onTextNodeBindingCellChange
 						}
 					);

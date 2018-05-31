@@ -61,8 +61,9 @@ function initParam(
 		$paramConfig.default = defaultValue;
 	}
 
+	let el = component.element;
 	let snakeCaseName = snakeCaseAttributeName(name, true);
-	let rawValue = component.element.getAttribute(snakeCaseName);
+	let rawValue = el.getAttribute(snakeCaseName);
 
 	if (rawValue === null) {
 		if ($paramConfig.required) {
@@ -70,11 +71,11 @@ function initParam(
 		}
 
 		if (defaultValue != null && defaultValue !== false) {
-			component.element.setAttribute(snakeCaseName, typeSerializer.write(defaultValue)!);
+			el.setAttribute(snakeCaseName, typeSerializer.write(defaultValue)!);
 		}
 	}
 
-	component[KEY_PARAMS].set(name, typeSerializer.read(rawValue, defaultValue));
+	component[KEY_PARAMS].set(name, typeSerializer.read(rawValue, defaultValue, el));
 }
 
 export const ComponentParams = {

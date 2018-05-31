@@ -1,19 +1,23 @@
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import { isRegExp } from '@riim/is-regexp';
 import { Map } from '@riim/map-set-polyfill';
-import { componentParamValueMap } from './componentParamValueMap';
+import { Symbol } from '@riim/symbol-polyfill';
 
 export interface IComponentParamTypeSerializer {
-	read: (value: string | null, defaultValue: any) => any;
+	read: (value: string | null, defaultValue: any, el?: Element) => any;
 	write: (value: any, defaultValue?: any) => string | null;
 }
+
+export const KEY_COMPONENT_PARAM_VALUE_MAP = Symbol(
+	'Rionite/componentParamTypeSerializerMap[componentParamValueMap]'
+);
 
 export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeSerializer>([
 	[
 		Boolean,
 		{
-			read: (value: string | null, defaultValue: boolean | undefined): boolean => {
-				return value !== null ? value != 'no' : !!defaultValue;
+			read: (rawValue: string | null, defaultValue: boolean | undefined): boolean => {
+				return rawValue !== null ? rawValue != 'no' : !!defaultValue;
 			},
 
 			write: (value: any, defaultValue: boolean | undefined): string | null => {
@@ -25,8 +29,12 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 	[
 		Number,
 		{
-			read: (value: string | null, defaultValue: number | undefined): number | null => {
-				return value !== null ? +value : defaultValue !== undefined ? defaultValue : null;
+			read: (rawValue: string | null, defaultValue: number | undefined): number | null => {
+				return rawValue !== null
+					? +rawValue
+					: defaultValue !== undefined
+						? defaultValue
+						: null;
 			},
 
 			write: (value: any): string | null => {
@@ -38,8 +46,12 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 	[
 		String,
 		{
-			read: (value: string | null, defaultValue: string | undefined): string | null => {
-				return value !== null ? value : defaultValue !== undefined ? defaultValue : null;
+			read: (rawValue: string | null, defaultValue: string | undefined): string | null => {
+				return rawValue !== null
+					? rawValue
+					: defaultValue !== undefined
+						? defaultValue
+						: null;
 			},
 
 			write: (value: any): string | null => {
@@ -52,20 +64,21 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 		Object,
 		{
 			read: (
-				value: string | null,
-				defaultValue: object | null | undefined
+				rawValue: string | null,
+				defaultValue: object | null | undefined,
+				el: Element
 			): object | null => {
-				if (value === null) {
+				if (!rawValue) {
 					return defaultValue || null;
 				}
 
-				if (!componentParamValueMap.has(value)) {
+				let value = (el[KEY_COMPONENT_PARAM_VALUE_MAP] || Object.create(null))[rawValue];
+
+				if (!value) {
 					throw new TypeError('Value is not an object');
 				}
 
-				let val = componentParamValueMap.get(value)!;
-				componentParamValueMap.delete(value);
-				return val;
+				return value;
 			},
 
 			write: (value: any): string | null => {
@@ -77,10 +90,12 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 	[
 		eval,
 		{
-			read: (value: string | null, defaultValue: any): any => {
-				return value !== null
-					? Function(`return ${unescapeHTML(value)};`)()
-					: defaultValue !== undefined ? defaultValue : null;
+			read: (rawValue: string | null, defaultValue: any): any => {
+				return rawValue !== null
+					? Function(`return ${unescapeHTML(rawValue)};`)()
+					: defaultValue !== undefined
+						? defaultValue
+						: null;
 			},
 
 			write: (value: any): string | null => {

@@ -1,8 +1,8 @@
-import { TCellPull } from 'cellx/dist/Cell';
+import { Cell, TCellPull } from 'cellx/dist/Cell';
 import { escapeString } from 'escape-string';
-import { AttributeBindingCell } from './bindContent';
+import { IAttributeBindingCellMeta } from './bindContent';
 import { bindingToJSExpression } from './bindingToJSExpression';
-import { componentParamValueMap } from './componentParamValueMap';
+import { KEY_COMPONENT_PARAM_VALUE_MAP } from './componentParamTypeSerializerMap';
 import {
 	ContentNodeValueNodeType,
 	IContentNodeValueBinding,
@@ -10,8 +10,6 @@ import {
 	TContentNodeValue
 	} from './ContentNodeValueParser';
 import { formatters } from './lib/formatters';
-
-let valueMapKeyCounter = 0;
 
 const cache = Object.create(null);
 
@@ -52,21 +50,21 @@ export function compileContentNodeValue(
 	}
 
 	return (cache[cacheKey] = useValueMap
-		? function(cell: AttributeBindingCell, next: string): any {
+		? function(cell: Cell<any, IAttributeBindingCellMeta>): any {
 				let value = inner.call(this, formatters);
 
 				if (value) {
-					if (value === cell.prevValue) {
-						return next;
-					}
-
 					let valueType = typeof value;
 
 					if (valueType == 'object' || valueType == 'function') {
-						let key = ++valueMapKeyCounter + '';
-						componentParamValueMap.set(key, value);
-						cell.prevValue = value;
-						return key;
+						let meta = cell.meta!;
+
+						(meta.element[KEY_COMPONENT_PARAM_VALUE_MAP] ||
+							(meta.element[KEY_COMPONENT_PARAM_VALUE_MAP] = Object.create(null)))[
+							meta.attributeName
+						] = value;
+
+						return meta.attributeName;
 					}
 				}
 
