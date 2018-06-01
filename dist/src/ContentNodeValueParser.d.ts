@@ -3,7 +3,7 @@ export declare enum ContentNodeValueNodeType {
     BINDING = 2,
     BINDING_KEYPATH = 3,
     BINDING_FORMATTER = 4,
-    BINDING_FORMATTER_ARGUMENTS = 5,
+    BINDING_FORMATTER_ARGUMENTS = 5
 }
 export interface IContentNodeValueNode {
     nodeType: ContentNodeValueNodeType;

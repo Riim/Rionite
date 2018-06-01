@@ -455,10 +455,10 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 	// Callbacks
 
 	created() {}
-	initialize(): Promise<any> | void {}
-	ready() {}
 	elementConnected() {}
 	elementDisconnected() {}
+	initialize(): Promise<any> | void {}
+	ready() {}
 	elementAttached() {}
 	elementDetached() {}
 	elementMoved() {}
