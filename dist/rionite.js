@@ -814,7 +814,7 @@ exports.formatters = {
     not: function (value) {
         return !value;
     },
-    is: function (value) {
+    notnot: function (value) {
         return !!value;
     },
     eq: function (value, arg) {
@@ -848,6 +848,9 @@ exports.formatters = {
         if (separator === void 0) { separator = ', '; }
         return arr && arr.join(separator);
     },
+    dump: function (value) {
+        return value == null ? value : JSON.stringify(value);
+    },
     t: gettext_1.getText.t,
     pt: gettext_1.getText.pt,
     nt: function (count, key) {
@@ -865,9 +868,6 @@ exports.formatters = {
         }
         args.unshift(count);
         return gettext_1.getText(context, key, true, args);
-    },
-    dump: function (value) {
-        return JSON.stringify(value);
     }
 };
 exports.formatters.seq = exports.formatters.identical;
@@ -1399,9 +1399,9 @@ var BaseComponent = /** @class */ (function (_super) {
         var _this = this;
         this._attached = true;
         if (!this.initialized) {
-            var result = this.initialize();
-            if (result) {
-                result.then(function () {
+            var initializationResult = this.initialize();
+            if (initializationResult) {
+                initializationResult.then(function () {
                     _this.initialized = true;
                     _this._attach();
                 });
@@ -1418,19 +1418,17 @@ var BaseComponent = /** @class */ (function (_super) {
             el.className = constr._blockNamesString + el.className;
             if (constr.template === null) {
                 if (this.ownerComponent == this) {
-                    var _a = bindContent_1.bindContent(el, this, this, {
-                        0: null,
-                        1: null,
-                        2: null
-                    }), bindings = _a[0], backBindings = _a[1], childComponents = _a[2];
-                    this._bindings = bindings;
+                    var contentBindingResult = [null, null, null];
+                    bindContent_1.bindContent(el, this, this, contentBindingResult);
+                    var childComponents = contentBindingResult[0];
+                    var backBindings = contentBindingResult[2];
+                    this._bindings = contentBindingResult[1];
                     if (childComponents) {
                         attachChildComponentElements_1.attachChildComponentElements(childComponents);
                     }
                     if (backBindings) {
-                        for (var i = backBindings.length; i;) {
-                            var backBinding = backBindings[--i];
-                            backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+                        for (var i = backBindings.length; i; i -= 3) {
+                            backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
                         }
                     }
                 }
@@ -1460,12 +1458,11 @@ var BaseComponent = /** @class */ (function (_super) {
                         i += templates[i].content.querySelectorAll('template').length + 1;
                     }
                 }
-                var _b = bindContent_1.bindContent(content, this, this, {
-                    0: null,
-                    1: null,
-                    2: null
-                }), bindings = _b[0], backBindings = _b[1], childComponents = _b[2];
-                this._bindings = bindings;
+                var contentBindingResult = [null, null, null];
+                bindContent_1.bindContent(content, this, this, contentBindingResult);
+                var childComponents = contentBindingResult[0];
+                var backBindings = contentBindingResult[2];
+                this._bindings = contentBindingResult[1];
                 if (childComponents) {
                     for (var i = childComponents.length; i;) {
                         var childComponent = childComponents[--i];
@@ -1484,9 +1481,8 @@ var BaseComponent = /** @class */ (function (_super) {
                     attachChildComponentElements_1.attachChildComponentElements(childComponents);
                 }
                 if (backBindings) {
-                    for (var i = backBindings.length; i;) {
-                        var backBinding = backBindings[--i];
-                        backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+                    for (var i = backBindings.length; i; i -= 3) {
+                        backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
                     }
                 }
             }
@@ -2059,7 +2055,7 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                                 onChange: onAttributeBindingCellChange
                             });
                             set_attribute_1.setAttribute(child, name_1, cell.get());
-                            (result[0] || (result[0] = [])).push(cell);
+                            (result[1] || (result[1] = [])).push(cell);
                         }
                         if (paramConfig !== undefined && (prefix === '->' || prefix === '<->')) {
                             if (prefix == '->' && attr.name.charAt(0) != '_') {
@@ -2087,15 +2083,11 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                                     };
                                 })(keys[keys.length - 1], keys.slice(0, -1));
                             }
-                            (result[1] || (result[1] = [])).push([
-                                childComponent,
-                                (typeof paramConfig == 'object' &&
-                                    (paramConfig.type !== undefined ||
-                                        paramConfig.default !== undefined) &&
-                                    paramConfig.property) ||
-                                    paramName,
-                                handler
-                            ]);
+                            (result[2] || (result[2] = [])).push(childComponent, (typeof paramConfig == 'object' &&
+                                (paramConfig.type !== undefined ||
+                                    paramConfig.default !== undefined) &&
+                                paramConfig.property) ||
+                                paramName, handler);
                         }
                     }
                 }
@@ -2108,7 +2100,7 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                             (parentComponent[exports.KEY_CHILD_COMPONENTS] = [])).push(childComponent);
                     }
                     else {
-                        (result[2] || (result[2] = [])).push(childComponent);
+                        (result[0] || (result[0] = [])).push(childComponent);
                     }
                 }
                 if (child.firstChild &&
@@ -2150,13 +2142,12 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                         onChange: onTextNodeBindingCellChange
                     });
                     child.nodeValue = cell.get();
-                    (result[0] || (result[0] = [])).push(cell);
+                    (result[1] || (result[1] = [])).push(cell);
                 }
                 break;
             }
         }
     }
-    return result;
 }
 exports.bindContent = bindContent;
 
@@ -3103,10 +3094,13 @@ var RnIfThen = /** @class */ (function (_super) {
                     i += templates[i].content.querySelectorAll('template').length + 1;
                 }
             }
-            var _a = bindContent_1.bindContent(content, this.ownerComponent, this.$context, { 0: null, 1: null, 2: null }), bindings = _a[0], backBindings = _a[1], childComponents = _a[2];
+            var contentBindingResult = [null, null, null];
+            bindContent_1.bindContent(content, this.ownerComponent, this.$context, contentBindingResult);
+            var childComponents = contentBindingResult[0];
+            var backBindings = contentBindingResult[2];
             this._nodes = slice.call(content.childNodes);
-            this._bindings = bindings;
             this._childComponents = childComponents;
+            this._bindings = contentBindingResult[1];
             ElementProtoMixin_1.suppressConnectionStatusCallbacks();
             this.element.parentNode.insertBefore(content, this.element);
             ElementProtoMixin_1.resumeConnectionStatusCallbacks();
@@ -3114,9 +3108,8 @@ var RnIfThen = /** @class */ (function (_super) {
                 attachChildComponentElements_1.attachChildComponentElements(childComponents);
             }
             if (backBindings) {
-                for (var i = backBindings.length; i;) {
-                    var backBinding = backBindings[--i];
-                    backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+                for (var i = backBindings.length; i; i -= 3) {
+                    backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
                 }
             }
         }
@@ -3415,7 +3408,8 @@ var RnRepeat = /** @class */ (function (_super) {
                         }
                     }
                     var context = this.$context;
-                    var _b = bindContent_1.bindContent(content, this.ownerComponent, Object.create(context, (_a = {
+                    var contentBindingResult = [null, null, null];
+                    bindContent_1.bindContent(content, this.ownerComponent, Object.create(context, (_a = {
                             '$/': {
                                 configurable: false,
                                 enumerable: false,
@@ -3437,12 +3431,14 @@ var RnRepeat = /** @class */ (function (_super) {
                                 return indexCell.get();
                             }; })(indexCell)
                         },
-                        _a)), { 0: null, 1: null, 2: null }), bindings = _b[0], backBindings = _b[1], childComponents = _b[2];
+                        _a)), contentBindingResult);
+                    var childComponents = contentBindingResult[0];
+                    var backBindings = contentBindingResult[2];
                     $itemMap.set(value, {
                         item: itemCell,
                         index: indexCell,
                         nodes: slice.call(content.childNodes),
-                        bindings: bindings,
+                        bindings: contentBindingResult[1],
                         childComponents: childComponents
                     });
                     var newLastNode = content.lastChild;
@@ -3454,9 +3450,8 @@ var RnRepeat = /** @class */ (function (_super) {
                         attachChildComponentElements_1.attachChildComponentElements(childComponents);
                     }
                     if (backBindings) {
-                        for (var i_2 = backBindings.length; i_2;) {
-                            var backBinding = backBindings[--i_2];
-                            backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+                        for (var i_2 = backBindings.length; i_2; i_2 -= 3) {
+                            backBindings[i_2 - 3].on('change:' + backBindings[i_2 - 2], backBindings[i_2 - 1]);
                         }
                     }
                     changed = true;
@@ -3619,7 +3614,6 @@ var RnSlot = /** @class */ (function (_super) {
         configurable: true
     });
     RnSlot.prototype._attach = function () {
-        var _a;
         this._attached = true;
         if (this.isReady) {
             this._unfreezeBindings();
@@ -3659,8 +3653,8 @@ var RnSlot = /** @class */ (function (_super) {
                         if (container.firstChild) {
                             content = move_content_1.moveContent(document.createDocumentFragment(), container);
                             contentMap.set(key, el);
-                            bindings = container.$component._bindings;
                             childComponents = container.$component._childComponents;
+                            bindings = container.$component._bindings;
                         }
                     }
                     else if (ownerComponentContent.firstElementChild) {
@@ -3692,8 +3686,8 @@ var RnSlot = /** @class */ (function (_super) {
                         var container = contentMap.get(key);
                         content = move_content_1.moveContent(document.createDocumentFragment(), container);
                         contentMap.set(key, el);
-                        bindings = container.$component._bindings;
                         childComponents = container.$component._childComponents;
+                        bindings = container.$component._bindings;
                     }
                     else if (ownerComponentContent.firstChild) {
                         content = ownerComponentContent;
@@ -3706,23 +3700,29 @@ var RnSlot = /** @class */ (function (_super) {
             }
             if (bindings === undefined) {
                 if (content || el.firstChild) {
-                    _a = content
-                        ? bindContent_1.bindContent(content, contentOwnerComponent, this.paramGetContext
+                    var contentBindingResult = [null, null, null];
+                    if (content) {
+                        bindContent_1.bindContent(content, contentOwnerComponent, this.paramGetContext
                             ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
-                            : ownerComponent.$context, { 0: null, 1: null, 2: null })
-                        : bindContent_1.bindContent(el, ownerComponent, this.paramGetContext
+                            : ownerComponent.$context, contentBindingResult);
+                    }
+                    else {
+                        bindContent_1.bindContent(el, ownerComponent, this.paramGetContext
                             ? this.paramGetContext.call(ownerComponent, this.$context, this)
-                            : this.$context, { 0: null, 1: null, 2: null }), this._bindings = _a[0], backBindings = _a[1], childComponents = _a[2];
-                    this._childComponents = childComponents;
+                            : this.$context, contentBindingResult);
+                    }
+                    childComponents = this._childComponents = contentBindingResult[0];
+                    this._bindings = contentBindingResult[1];
+                    backBindings = contentBindingResult[2];
                 }
                 else {
+                    this._childComponents = null;
                     this._bindings = null;
-                    childComponents = this._childComponents = null;
                 }
             }
             else {
-                this._bindings = bindings;
                 this._childComponents = childComponents;
+                this._bindings = bindings;
                 this._unfreezeBindings();
             }
             if (content) {
@@ -3737,9 +3737,8 @@ var RnSlot = /** @class */ (function (_super) {
                 attachChildComponentElements_1.attachChildComponentElements(childComponents);
             }
             if (backBindings) {
-                for (var i = backBindings.length; i;) {
-                    var backBinding = backBindings[--i];
-                    backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+                for (var i = backBindings.length; i; i -= 3) {
+                    backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
                 }
             }
             this.isReady = true;

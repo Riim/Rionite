@@ -41,8 +41,6 @@ export interface IContentNodeValueBinding extends IContentNodeValueNode {
 
 export type TContentNodeValue = Array<IContentNodeValueText | IContentNodeValueBinding>;
 
-export type TNotValueAndNotKeypath = Object;
-
 const reWhitespace = /\s/;
 
 const reNameOrNothing = RegExp(namePattern + '|', 'g');

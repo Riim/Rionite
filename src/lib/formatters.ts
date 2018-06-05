@@ -4,6 +4,7 @@ export const formatters: { [name: string]: Function } = {
 	or(value: any, arg: any): any {
 		return value || arg;
 	},
+
 	default(value: any, arg: any): any {
 		return value === undefined ? arg : value;
 	},
@@ -11,13 +12,15 @@ export const formatters: { [name: string]: Function } = {
 	not(value: any): boolean {
 		return !value;
 	},
-	is(value: any): boolean {
+
+	notnot(value: any): boolean {
 		return !!value;
 	},
 
 	eq(value: any, arg: any): boolean {
 		return value == arg;
 	},
+
 	identical(value: any, arg: any): boolean {
 		return value === arg;
 	},
@@ -25,12 +28,15 @@ export const formatters: { [name: string]: Function } = {
 	lt(value: number, arg: number): boolean {
 		return value < arg;
 	},
+
 	lte(value: number, arg: number): boolean {
 		return value <= arg;
 	},
+
 	gt(value: number, arg: number): boolean {
 		return value > arg;
 	},
+
 	gte(value: number, arg: number): boolean {
 		return value >= arg;
 	},
@@ -51,6 +57,10 @@ export const formatters: { [name: string]: Function } = {
 		return arr && arr.join(separator);
 	},
 
+	dump(value: any): string | null | undefined {
+		return value == null ? value : JSON.stringify(value);
+	},
+
 	t: getText.t,
 	pt: getText.pt,
 
@@ -58,13 +68,10 @@ export const formatters: { [name: string]: Function } = {
 		args.unshift(count);
 		return getText('', key, true, args);
 	},
+
 	npt(count: number, key: string, context: string, ...args: Array<any>): string {
 		args.unshift(count);
 		return getText(context, key, true, args);
-	},
-
-	dump(value: any): string {
-		return JSON.stringify(value);
 	}
 };
 

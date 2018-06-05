@@ -1,8 +1,9 @@
 import { nextTick } from '@riim/next-tick';
-import { Cell } from 'cellx';
+import { Cell, TListener } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
 import { bindContent } from '../bindContent';
+import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
@@ -105,16 +106,20 @@ export class RnIfThen extends BaseComponent {
 					i += templates[i].content.querySelectorAll('template').length + 1;
 				}
 			}
-			let [bindings, backBindings, childComponents] = bindContent(
-				content,
-				this.ownerComponent,
-				this.$context!,
-				{ 0: null, 1: null, 2: null } as any
-			);
+			let contentBindingResult: [
+				Array<BaseComponent> | null,
+				Array<IFreezableCell> | null,
+				Array<BaseComponent | string | TListener> | null
+			] = [null, null, null];
+
+			bindContent(content, this.ownerComponent, this.$context!, contentBindingResult);
+
+			let childComponents = contentBindingResult[0];
+			let backBindings = contentBindingResult[2];
 
 			this._nodes = slice.call(content.childNodes);
-			this._bindings = bindings;
 			this._childComponents = childComponents;
+			this._bindings = contentBindingResult[1];
 
 			suppressConnectionStatusCallbacks();
 			this.element.parentNode!.insertBefore(content, this.element);
@@ -125,9 +130,11 @@ export class RnIfThen extends BaseComponent {
 			}
 
 			if (backBindings) {
-				for (let i = backBindings.length; i; ) {
-					let backBinding = backBindings[--i];
-					backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+				for (let i = backBindings.length; i; i -= 3) {
+					(backBindings[i - 3] as BaseComponent).on(
+						'change:' + backBindings[i - 2],
+						backBindings[i - 1] as TListener
+					);
 				}
 			}
 		} else {

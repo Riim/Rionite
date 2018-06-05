@@ -30,7 +30,6 @@ export interface IContentNodeValueBinding extends IContentNodeValueNode {
     raw: string;
 }
 export declare type TContentNodeValue = Array<IContentNodeValueText | IContentNodeValueBinding>;
-export declare type TNotValueAndNotKeypath = Object;
 export declare class ContentNodeValueParser {
     contentNodeValue: string;
     at: number;

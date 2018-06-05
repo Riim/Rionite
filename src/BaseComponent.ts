@@ -5,7 +5,7 @@ import { Logger } from '@riim/logger';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
 import { Symbol } from '@riim/symbol-polyfill';
-import { EventEmitter, IEvent } from 'cellx';
+import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
 import { htmlToFragment } from 'html-to-fragment';
 import { IBlock } from 'nelm-parser';
 import { attachChildComponentElements } from './attachChildComponentElements';
@@ -293,10 +293,10 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 		this._attached = true;
 
 		if (!this.initialized) {
-			let result = this.initialize();
+			let initializationResult = this.initialize();
 
-			if (result) {
-				result.then(() => {
+			if (initializationResult) {
+				initializationResult.then(() => {
 					this.initialized = true;
 					this._attach();
 				});
@@ -318,22 +318,29 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 			if (constr.template === null) {
 				if (this.ownerComponent == this) {
-					let [bindings, backBindings, childComponents] = bindContent(el, this, this, {
-						0: null,
-						1: null,
-						2: null
-					} as any);
+					let contentBindingResult: [
+						Array<BaseComponent> | null,
+						Array<IFreezableCell> | null,
+						Array<BaseComponent | string | TEventEmitterListener> | null
+					] = [null, null, null];
 
-					this._bindings = bindings;
+					bindContent(el, this, this, contentBindingResult);
+
+					let childComponents = contentBindingResult[0];
+					let backBindings = contentBindingResult[2];
+
+					this._bindings = contentBindingResult[1];
 
 					if (childComponents) {
 						attachChildComponentElements(childComponents);
 					}
 
 					if (backBindings) {
-						for (let i = backBindings.length; i; ) {
-							let backBinding = backBindings[--i];
-							backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+						for (let i = backBindings.length; i; i -= 3) {
+							(backBindings[i - 3] as BaseComponent).on(
+								'change:' + backBindings[i - 2],
+								backBindings[i - 1] as TEventEmitterListener
+							);
 						}
 					}
 				} else {
@@ -367,13 +374,18 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 						i += templates[i].content.querySelectorAll('template').length + 1;
 					}
 				}
-				let [bindings, backBindings, childComponents] = bindContent(content, this, this, {
-					0: null,
-					1: null,
-					2: null
-				} as any);
+				let contentBindingResult: [
+					Array<BaseComponent> | null,
+					Array<IFreezableCell> | null,
+					Array<BaseComponent | string | TEventEmitterListener> | null
+				] = [null, null, null];
 
-				this._bindings = bindings;
+				bindContent(content, this, this, contentBindingResult);
+
+				let childComponents = contentBindingResult[0];
+				let backBindings = contentBindingResult[2];
+
+				this._bindings = contentBindingResult[1];
 
 				if (childComponents) {
 					for (let i = childComponents.length; i; ) {
@@ -402,9 +414,11 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 				}
 
 				if (backBindings) {
-					for (let i = backBindings.length; i; ) {
-						let backBinding = backBindings[--i];
-						backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+					for (let i = backBindings.length; i; i -= 3) {
+						(backBindings[i - 3] as BaseComponent).on(
+							'change:' + backBindings[i - 2],
+							backBindings[i - 1] as TEventEmitterListener
+						);
 					}
 				}
 			}

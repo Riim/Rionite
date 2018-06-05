@@ -43,9 +43,9 @@ export function bindContent(
 	ownerComponent: BaseComponent,
 	context: object,
 	result: [
+		Array<BaseComponent> | null,
 		Array<IFreezableCell> | null,
-		Array<[BaseComponent, string, (evt: any) => void]> | null,
-		Array<BaseComponent> | null
+		Array<BaseComponent | string | TListener> | null
 	],
 	parentComponent?: BaseComponent
 ) {
@@ -143,7 +143,7 @@ export function bindContent(
 
 							setAttribute(child as any, name, cell.get());
 
-							(result[0] || (result[0] = [])).push(cell as any);
+							(result[1] || (result[1] = [])).push(cell as any);
 						}
 
 						if (paramConfig !== undefined && (prefix === '->' || prefix === '<->')) {
@@ -178,7 +178,7 @@ export function bindContent(
 								})(keys[keys.length - 1], keys.slice(0, -1));
 							}
 
-							(result[1] || (result[1] = [])).push([
+							(result[2] || (result[2] = [])).push(
 								childComponent!,
 								(typeof paramConfig == 'object' &&
 									(paramConfig.type !== undefined ||
@@ -186,7 +186,7 @@ export function bindContent(
 									paramConfig.property) ||
 									paramName!,
 								handler
-							]);
+							);
 						}
 					}
 				}
@@ -202,7 +202,7 @@ export function bindContent(
 							(parentComponent[KEY_CHILD_COMPONENTS] = [])
 						).push(childComponent);
 					} else {
-						(result[2] || (result[2] = [])).push(childComponent);
+						(result[0] || (result[0] = [])).push(childComponent);
 					}
 				}
 
@@ -264,13 +264,11 @@ export function bindContent(
 
 					child.nodeValue = cell.get();
 
-					(result[0] || (result[0] = [])).push(cell as any);
+					(result[1] || (result[1] = [])).push(cell as any);
 				}
 
 				break;
 			}
 		}
 	}
-
-	return result;
 }

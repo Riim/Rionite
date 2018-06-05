@@ -1,9 +1,10 @@
 import { Map, Set } from '@riim/map-set-polyfill';
 import { nextTick } from '@riim/next-tick';
-import { Cell, ObservableList } from 'cellx';
+import { Cell, ObservableList, TListener } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
 import { bindContent } from '../bindContent';
+import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
@@ -267,7 +268,13 @@ export class RnRepeat extends BaseComponent {
 						}
 					}
 					let context = this.$context!;
-					let [bindings, backBindings, childComponents] = bindContent(
+					let contentBindingResult: [
+						Array<BaseComponent> | null,
+						Array<IFreezableCell> | null,
+						Array<BaseComponent | string | TListener> | null
+					] = [null, null, null];
+
+					bindContent(
 						content,
 						this.ownerComponent,
 						Object.create(context, {
@@ -296,14 +303,17 @@ export class RnRepeat extends BaseComponent {
 								})(indexCell)
 							}
 						}),
-						{ 0: null, 1: null, 2: null } as any
+						contentBindingResult
 					);
+
+					let childComponents = contentBindingResult[0];
+					let backBindings = contentBindingResult[2];
 
 					$itemMap.set(value, {
 						item: itemCell,
 						index: indexCell,
 						nodes: slice.call(content.childNodes),
-						bindings,
+						bindings: contentBindingResult[1],
 						childComponents
 					});
 
@@ -318,9 +328,11 @@ export class RnRepeat extends BaseComponent {
 					}
 
 					if (backBindings) {
-						for (let i = backBindings.length; i; ) {
-							let backBinding = backBindings[--i];
-							backBinding[0].on('change:' + backBinding[1], backBinding[2]);
+						for (let i = backBindings.length; i; i -= 3) {
+							(backBindings[i - 3] as BaseComponent).on(
+								'change:' + backBindings[i - 2],
+								backBindings[i - 1] as TListener
+							);
 						}
 					}
 
