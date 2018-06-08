@@ -25,6 +25,7 @@ import { handledEvents } from './handledEvents';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
 import { templateTag as templateTagFeature } from './lib/Features';
+import { prepareContent } from './prepareContent';
 import { Template } from './Template';
 
 const map = Array.prototype.map;
@@ -365,7 +366,9 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 				let rawContent =
 					constr._rawContent ||
-					(constr._rawContent = htmlToFragment((constr.template as Template).render()));
+					(constr._rawContent = prepareContent(
+						htmlToFragment((constr.template as Template).render())
+					));
 				let content = rawContent.cloneNode(true) as DocumentFragment;
 				if (!templateTagFeature) {
 					let templates = content.querySelectorAll('template');
