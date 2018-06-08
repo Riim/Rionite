@@ -275,6 +275,7 @@ export class RnRepeat extends BaseComponent {
 					] = [null, null, null];
 
 					bindContent(
+						null,
 						content,
 						this.ownerComponent,
 						Object.create(context, {

@@ -14,7 +14,7 @@ import { formatters } from './lib/formatters';
 const cache = Object.create(null);
 
 export function compileContentNodeValue(
-	contentNodeValue: TContentNodeValue,
+	contentNodeValueAST: TContentNodeValue,
 	contentNodeValueString: string,
 	useValueMap: boolean
 ): TCellPull<any> {
@@ -26,19 +26,19 @@ export function compileContentNodeValue(
 
 	let inner: (formatters: { [name: string]: Function }) => any;
 
-	if (contentNodeValue.length == 1) {
+	if (contentNodeValueAST.length == 1) {
 		inner = Function(
 			'formatters',
 			`var temp; return ${
-				contentNodeValue[0].nodeType == ContentNodeValueNodeType.TEXT
-					? `'${escapeString((contentNodeValue[0] as IContentNodeValueText).value)}'`
-					: bindingToJSExpression(contentNodeValue[0] as IContentNodeValueBinding)
+				contentNodeValueAST[0].nodeType == ContentNodeValueNodeType.TEXT
+					? `'${escapeString((contentNodeValueAST[0] as IContentNodeValueText).value)}'`
+					: bindingToJSExpression(contentNodeValueAST[0] as IContentNodeValueBinding)
 			};`
 		) as any;
 	} else {
 		let jsExpr: Array<string> = [];
 
-		for (let node of contentNodeValue) {
+		for (let node of contentNodeValueAST) {
 			jsExpr.push(
 				node.nodeType == ContentNodeValueNodeType.TEXT
 					? `'${escapeString(node.value)}'`

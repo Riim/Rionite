@@ -15,6 +15,7 @@ import { componentConstructorMap } from './componentConstructorMap';
 import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
+import { reflectConstruct } from './lib/Features';
 import { Template } from './Template';
 
 const push = Array.prototype.push;
@@ -299,9 +300,13 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		parentElConstr = HTMLElement;
 	}
 
-	let elConstr = function(self: HTMLElement | undefined): IComponentElement {
-		return parentElConstr.call(this, self);
-	};
+	let elConstr = reflectConstruct
+		? function _(self: HTMLElement | undefined): IComponentElement {
+				return Reflect.construct(parentElConstr, [self], _);
+		  }
+		: function(self: HTMLElement | undefined): IComponentElement {
+				return parentElConstr.call(this, self);
+		  };
 
 	(elConstr as any)._rioniteComponentConstructor = componentConstr;
 

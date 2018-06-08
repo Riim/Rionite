@@ -9,7 +9,7 @@ import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx'
 import { htmlToFragment } from 'html-to-fragment';
 import { IBlock } from 'nelm-parser';
 import { attachChildComponentElements } from './attachChildComponentElements';
-import { bindContent, KEY_CHILD_COMPONENTS } from './bindContent';
+import { bindContent, KEY_CHILD_COMPONENTS, prepareContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructorMap } from './componentConstructorMap';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
@@ -25,7 +25,6 @@ import { handledEvents } from './handledEvents';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
 import { templateTag as templateTagFeature } from './lib/Features';
-import { prepareContent } from './prepareContent';
 import { Template } from './Template';
 
 const map = Array.prototype.map;
@@ -325,7 +324,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 						Array<BaseComponent | string | TEventEmitterListener> | null
 					] = [null, null, null];
 
-					bindContent(el, this, this, contentBindingResult);
+					bindContent(this, el, this, this, contentBindingResult);
 
 					let childComponents = contentBindingResult[0];
 					let backBindings = contentBindingResult[2];
@@ -383,7 +382,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 					Array<BaseComponent | string | TEventEmitterListener> | null
 				] = [null, null, null];
 
-				bindContent(content, this, this, contentBindingResult);
+				bindContent(this, content, this, this, contentBindingResult);
 
 				let childComponents = contentBindingResult[0];
 				let backBindings = contentBindingResult[2];

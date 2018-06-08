@@ -161,6 +161,7 @@ export class RnSlot extends BaseComponent {
 
 					if (content) {
 						bindContent(
+							null,
 							content,
 							contentOwnerComponent,
 							this.paramGetContext
@@ -174,6 +175,7 @@ export class RnSlot extends BaseComponent {
 						);
 					} else {
 						bindContent(
+							null,
 							el,
 							ownerComponent,
 							this.paramGetContext

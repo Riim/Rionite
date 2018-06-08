@@ -112,7 +112,7 @@ export class RnIfThen extends BaseComponent {
 				Array<BaseComponent | string | TListener> | null
 			] = [null, null, null];
 
-			bindContent(content, this.ownerComponent, this.$context!, contentBindingResult);
+			bindContent(null, content, this.ownerComponent, this.$context!, contentBindingResult);
 
 			let childComponents = contentBindingResult[0];
 			let backBindings = contentBindingResult[2];

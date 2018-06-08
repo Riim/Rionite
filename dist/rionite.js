@@ -7,7 +7,7 @@
 		exports["rionite"] = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"), require("@riim/clear-node"));
 	else
 		root["rionite"] = factory(root["@riim/di"], root["@riim/logger"], root["nelm-parser"], root["@riim/escape-html"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["escape-string"], root["@riim/next-uid"], root["cellx"], root["@riim/gettext"], root["@riim/kebab-case"], root["@riim/mixin"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/symbol-polyfill"], root["html-to-fragment"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/next-tick"], root["@riim/clear-node"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__1__, __WEBPACK_EXTERNAL_MODULE__2__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__10__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__13__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__19__, __WEBPACK_EXTERNAL_MODULE__20__, __WEBPACK_EXTERNAL_MODULE__24__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__26__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__33__, __WEBPACK_EXTERNAL_MODULE__45__, __WEBPACK_EXTERNAL_MODULE__52__, __WEBPACK_EXTERNAL_MODULE__54__, __WEBPACK_EXTERNAL_MODULE__59__) {
+})(window, function(__WEBPACK_EXTERNAL_MODULE__1__, __WEBPACK_EXTERNAL_MODULE__2__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__10__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__13__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__19__, __WEBPACK_EXTERNAL_MODULE__20__, __WEBPACK_EXTERNAL_MODULE__24__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__26__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__33__, __WEBPACK_EXTERNAL_MODULE__45__, __WEBPACK_EXTERNAL_MODULE__51__, __WEBPACK_EXTERNAL_MODULE__53__, __WEBPACK_EXTERNAL_MODULE__58__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -114,7 +114,7 @@ var formatters_1 = __webpack_require__(15);
 exports.formatters = formatters_1.formatters;
 var Component_1 = __webpack_require__(17);
 exports.Component = Component_1.Component;
-var Param_1 = __webpack_require__(51);
+var Param_1 = __webpack_require__(50);
 exports.Param = Param_1.Param;
 var BaseComponent_1 = __webpack_require__(23);
 exports.KEY_PARAMS_CONFIG = BaseComponent_1.KEY_PARAMS_CONFIG;
@@ -128,13 +128,13 @@ var Template_1 = __webpack_require__(6);
 exports.Template = Template_1.Template;
 var registerComponent_1 = __webpack_require__(18);
 exports.registerComponent = registerComponent_1.registerComponent;
-var RnIfThen_1 = __webpack_require__(53);
+var RnIfThen_1 = __webpack_require__(52);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
-var RnIfElse_1 = __webpack_require__(57);
+var RnIfElse_1 = __webpack_require__(56);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
-var RnRepeat_1 = __webpack_require__(56);
+var RnRepeat_1 = __webpack_require__(55);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
-var RnSlot_1 = __webpack_require__(58);
+var RnSlot_1 = __webpack_require__(57);
 exports.RnSlot = RnSlot_1.RnSlot;
 di_1.Container.registerService('logger', logger_1.logger);
 
@@ -935,6 +935,7 @@ var componentConstructorMap_1 = __webpack_require__(42);
 var ComponentParams_1 = __webpack_require__(29);
 var elementConstructorMap_1 = __webpack_require__(43);
 var ElementProtoMixin_1 = __webpack_require__(44);
+var Features_1 = __webpack_require__(46);
 var Template_1 = __webpack_require__(6);
 var push = Array.prototype.push;
 function inheritProperty(target, source, name, depth) {
@@ -1154,9 +1155,13 @@ function registerComponent(componentConstr) {
     else {
         parentElConstr = HTMLElement;
     }
-    var elConstr = function (self) {
-        return parentElConstr.call(this, self);
-    };
+    var elConstr = Features_1.reflectConstruct
+        ? function _(self) {
+            return Reflect.construct(parentElConstr, [self], _);
+        }
+        : function (self) {
+            return parentElConstr.call(this, self);
+        };
     elConstr._rioniteComponentConstructor = componentConstr;
     Object.defineProperty(elConstr, 'observedAttributes', {
         configurable: true,
@@ -1281,7 +1286,6 @@ var handledEvents_1 = __webpack_require__(47);
 var handleDOMEvent_1 = __webpack_require__(48);
 var handleEvent_1 = __webpack_require__(49);
 var Features_1 = __webpack_require__(46);
-var prepareContent_1 = __webpack_require__(50);
 var map = Array.prototype.map;
 exports.KEY_PARAMS_CONFIG = symbol_polyfill_1.Symbol('Rionite/BaseComponent[paramsConfig]');
 exports.KEY_PARAMS = symbol_polyfill_1.Symbol('Rionite/BaseComponent[params]');
@@ -1420,7 +1424,7 @@ var BaseComponent = /** @class */ (function (_super) {
             if (constr.template === null) {
                 if (this.ownerComponent == this) {
                     var contentBindingResult = [null, null, null];
-                    bindContent_1.bindContent(el, this, this, contentBindingResult);
+                    bindContent_1.bindContent(this, el, this, this, contentBindingResult);
                     var childComponents = contentBindingResult[0];
                     var backBindings = contentBindingResult[2];
                     this._bindings = contentBindingResult[1];
@@ -1451,7 +1455,7 @@ var BaseComponent = /** @class */ (function (_super) {
                     this.$inputContent = document.createDocumentFragment();
                 }
                 var rawContent = constr._rawContent ||
-                    (constr._rawContent = prepareContent_1.prepareContent(html_to_fragment_1.htmlToFragment(constr.template.render())));
+                    (constr._rawContent = bindContent_1.prepareContent(html_to_fragment_1.htmlToFragment(constr.template.render())));
                 var content = rawContent.cloneNode(true);
                 if (!Features_1.templateTag) {
                     var templates = content.querySelectorAll('template');
@@ -1460,7 +1464,7 @@ var BaseComponent = /** @class */ (function (_super) {
                     }
                 }
                 var contentBindingResult = [null, null, null];
-                bindContent_1.bindContent(content, this, this, contentBindingResult);
+                bindContent_1.bindContent(this, content, this, this, contentBindingResult);
                 var childComponents = contentBindingResult[0];
                 var backBindings = contentBindingResult[2];
                 this._bindings = contentBindingResult[1];
@@ -1830,23 +1834,65 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__31__;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(10);
+var next_uid_1 = __webpack_require__(13);
 var set_attribute_1 = __webpack_require__(33);
 var cellx_1 = __webpack_require__(14);
 var BaseComponent_1 = __webpack_require__(23);
 var compileContentNodeValue_1 = __webpack_require__(34);
 var ContentNodeValueParser_1 = __webpack_require__(36);
 var compileKeypath_1 = __webpack_require__(40);
+exports.KEY_NODE_BINDING_SCHEMA = Symbol('Rionite/bindContent[nodeBindingSchema]');
 exports.KEY_CHILD_COMPONENTS = Symbol('Rionite/bindContent[childComponents]');
 exports.KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
-var contentNodeValueCache = Object.create(null);
+var contentNodeValueASTCache = Object.create(null);
 function onAttributeBindingCellChange(evt) {
     set_attribute_1.setAttribute(evt.target.meta.element, evt.target.meta.attributeName, evt.data.value);
 }
 function onTextNodeBindingCellChange(evt) {
     evt.target.meta.textNode.nodeValue = evt.data.value;
 }
-function bindContent(node, ownerComponent, context, result, parentComponent) {
+function prepareContent(node) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
+        if (child.nodeType == Node.ELEMENT_NODE) {
+            if (child.firstChild) {
+                if (child instanceof HTMLTemplateElement) {
+                    child.setAttribute('pid', next_uid_1.nextUID());
+                }
+                prepareContent(child);
+            }
+            else if (child instanceof HTMLTemplateElement) {
+                child.setAttribute('pid', next_uid_1.nextUID());
+                prepareContent(child.content);
+            }
+        }
+    }
+    return node;
+}
+exports.prepareContent = prepareContent;
+function bindContent(component, node, ownerComponent, context, result, parentComponent) {
+    var schema;
+    if (component) {
+        schema = component.constructor[exports.KEY_NODE_BINDING_SCHEMA];
+        if (schema !== undefined) {
+            if (schema) {
+                bindContentBySchema(node, schema, ownerComponent, context, result, parentComponent);
+            }
+            return null;
+        }
+    }
+    schema = bindContent$(node, -1, ownerComponent, context, result);
+    if (component) {
+        component.constructor.template[exports.KEY_NODE_BINDING_SCHEMA] =
+            schema || null;
+    }
+    return schema || null;
+}
+exports.bindContent = bindContent;
+function bindContent$(node, index, ownerComponent, context, result, schema, parentComponent) {
+    var children = node.childNodes;
+    for (var i = 0, l = children.length; i < l; i++) {
+        var child = children[i];
+        var childSchema = void 0;
         switch (child.nodeType) {
             case Node.ELEMENT_NODE: {
                 var childComponent = child.$component;
@@ -1857,89 +1903,68 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                     $specifiedParams = new map_set_polyfill_1.Set();
                 }
                 var attrs = child.attributes;
-                for (var i = attrs.length; i;) {
-                    var attr = attrs[--i];
+                for (var j = attrs.length; j;) {
+                    var attr = attrs[--j];
                     var name_1 = attr.name;
+                    var targetName = void 0;
                     if (name_1.charAt(0) == '_') {
-                        name_1 = name_1.slice(1);
+                        targetName = name_1.slice(1);
                     }
-                    else if (!name_1.lastIndexOf('oncomponent-', 0) ||
-                        !name_1.lastIndexOf('on-', 0)) {
-                        child[exports.KEY_CONTEXT] = context;
+                    else {
+                        targetName = name_1;
+                        if (!name_1.lastIndexOf('oncomponent-', 0) || !name_1.lastIndexOf('on-', 0)) {
+                            child[exports.KEY_CONTEXT] = context;
+                            if (!((schema ||
+                                (schema = {
+                                    index: index,
+                                    specifiedParams: null,
+                                    childComponents: null,
+                                    attributes: null,
+                                    textChildren: null,
+                                    context: [],
+                                    childSchemas: null
+                                })).context || (schema.context = [])).length ||
+                                schema.context[schema.context.length - 1] != i) {
+                                schema.context.push(i);
+                            }
+                        }
                     }
-                    var $paramConfig = $paramsConfig && $paramsConfig[name_1];
-                    var paramName = void 0;
-                    var paramConfig = void 0;
+                    var $paramConfig = $paramsConfig && $paramsConfig[targetName];
                     if ($paramConfig) {
-                        paramName = $paramConfig.name;
-                        paramConfig = $paramConfig.paramConfig;
-                        $specifiedParams.add(paramName);
+                        $specifiedParams.add($paramConfig.name);
                     }
                     var value = attr.value;
                     if (!value) {
                         continue;
                     }
-                    var contentNodeValue = contentNodeValueCache[value];
-                    if (!contentNodeValue) {
-                        if (contentNodeValue === null) {
+                    var valueAST = contentNodeValueASTCache[value];
+                    if (!valueAST) {
+                        if (valueAST === null) {
                             continue;
                         }
                         var bracketIndex = value.indexOf('{');
                         if (bracketIndex == -1) {
-                            contentNodeValueCache[value] = null;
+                            contentNodeValueASTCache[value] = null;
                             continue;
                         }
-                        contentNodeValue = contentNodeValueCache[value] = new ContentNodeValueParser_1.ContentNodeValueParser(value).parse(bracketIndex);
+                        valueAST = contentNodeValueASTCache[value] = new ContentNodeValueParser_1.ContentNodeValueParser(value).parse(bracketIndex);
                     }
-                    var contentNodeValueLength = contentNodeValue.length;
-                    if (contentNodeValueLength > 1 ||
-                        contentNodeValue[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.BINDING) {
-                        var prefix = contentNodeValueLength == 1
-                            ? contentNodeValue[0].prefix
-                            : null;
-                        if (prefix !== '->') {
-                            var cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(contentNodeValue, value, contentNodeValueLength == 1), {
-                                context: context,
-                                meta: {
-                                    element: child,
-                                    attributeName: name_1
-                                },
-                                onChange: onAttributeBindingCellChange
-                            });
-                            set_attribute_1.setAttribute(child, name_1, cell.get());
-                            (result[1] || (result[1] = [])).push(cell);
-                        }
-                        if (paramConfig !== undefined && (prefix === '->' || prefix === '<->')) {
-                            if (prefix == '->' && attr.name.charAt(0) != '_') {
-                                child.removeAttribute(name_1);
-                            }
-                            var keypath = contentNodeValue[0]
-                                .keypath;
-                            var keys = keypath.split('.');
-                            var handler = void 0;
-                            if (keys.length == 1) {
-                                handler = (function (propertyName) {
-                                    return function (evt) {
-                                        this.ownerComponent[propertyName] = evt.data.value;
-                                    };
-                                })(keys[0]);
-                            }
-                            else {
-                                handler = (function (propertyName, keys) {
-                                    var getPropertyHolder = compileKeypath_1.compileKeypath(keys, keys.join('.'));
-                                    return function (evt) {
-                                        var propertyHolder = getPropertyHolder.call(this.ownerComponent);
-                                        if (propertyHolder) {
-                                            propertyHolder[propertyName] = evt.data.value;
-                                        }
-                                    };
-                                })(keys[keys.length - 1], keys.slice(0, -1));
-                            }
-                            (result[2] || (result[2] = [])).push(childComponent, (typeof paramConfig == 'object' &&
-                                (paramConfig.type !== undefined ||
-                                    paramConfig.default !== undefined) &&
-                                paramConfig.property) ||
-                                paramName, handler);
+                    var valueASTLength = valueAST.length;
+                    if (valueASTLength > 1 ||
+                        valueAST[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.BINDING) {
+                        bindAttribute(child, name_1, targetName, value, valueAST, $paramConfig, context, result);
+                        if (!((childSchema ||
+                            (childSchema = {
+                                index: i,
+                                specifiedParams: null,
+                                childComponents: null,
+                                attributes: [],
+                                textChildren: null,
+                                context: null,
+                                childSchemas: null
+                            })).attributes || (childSchema.attributes = [])).length ||
+                            childSchema.attributes[childSchema.attributes.length - 1] != name_1) {
+                            childSchema.attributes.push(name_1);
                         }
                     }
                 }
@@ -1947,6 +1972,20 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                     childComponent._ownerComponent = ownerComponent;
                     childComponent.$context = context;
                     childComponent.$specifiedParams = $specifiedParams;
+                    if (childSchema) {
+                        childSchema.specifiedParams = $specifiedParams;
+                    }
+                    else {
+                        childSchema = {
+                            index: i,
+                            specifiedParams: $specifiedParams,
+                            childComponents: null,
+                            attributes: null,
+                            textChildren: null,
+                            context: null,
+                            childSchemas: null
+                        };
+                    }
                     if (parentComponent) {
                         (parentComponent[exports.KEY_CHILD_COMPONENTS] ||
                             (parentComponent[exports.KEY_CHILD_COMPONENTS] = [])).push(childComponent);
@@ -1954,11 +1993,21 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                     else {
                         (result[0] || (result[0] = [])).push(childComponent);
                     }
+                    ((schema ||
+                        (schema = {
+                            index: index,
+                            specifiedParams: null,
+                            childComponents: [],
+                            attributes: null,
+                            textChildren: null,
+                            context: null,
+                            childSchemas: null
+                        })).childComponents || (schema.childComponents = [])).push(i);
                 }
                 if (child.firstChild &&
                     (!childComponent ||
                         !childComponent.constructor.bindsInputContent)) {
-                    bindContent(child, ownerComponent, context, result, childComponent);
+                    childSchema = bindContent$(child, i, ownerComponent, context, result, childSchema, childComponent);
                 }
                 break;
             }
@@ -1969,39 +2018,173 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                         child.nodeValue += nextChild.nodeValue;
                         node.removeChild(nextChild);
                         nextChild = child.nextSibling;
+                        l--;
                     } while (nextChild && nextChild.nodeType == Node.TEXT_NODE);
                 }
                 var value = child.nodeValue;
-                var contentNodeValue = contentNodeValueCache[value];
-                if (!contentNodeValue) {
-                    if (contentNodeValue === null) {
+                var valueAST = contentNodeValueASTCache[value];
+                if (!valueAST) {
+                    if (valueAST === null) {
                         continue;
                     }
                     var bracketIndex = value.indexOf('{');
                     if (bracketIndex == -1) {
-                        contentNodeValueCache[value] = null;
+                        contentNodeValueASTCache[value] = null;
                         continue;
                     }
-                    contentNodeValue = contentNodeValueCache[value] = new ContentNodeValueParser_1.ContentNodeValueParser(value).parse(bracketIndex);
+                    valueAST = contentNodeValueASTCache[value] = new ContentNodeValueParser_1.ContentNodeValueParser(value).parse(bracketIndex);
                 }
-                if (contentNodeValue.length > 1 ||
-                    contentNodeValue[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.BINDING) {
-                    var cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(contentNodeValue, value, false), {
-                        context: context,
-                        meta: {
-                            textNode: child
-                        },
-                        onChange: onTextNodeBindingCellChange
-                    });
-                    child.nodeValue = cell.get();
-                    (result[1] || (result[1] = [])).push(cell);
+                if (valueAST.length > 1 ||
+                    valueAST[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.BINDING) {
+                    bindTextNode(child, valueAST, context, result);
+                    ((schema ||
+                        (schema = {
+                            index: index,
+                            specifiedParams: null,
+                            childComponents: null,
+                            attributes: null,
+                            textChildren: [],
+                            context: null,
+                            childSchemas: null
+                        })).textChildren || (schema.textChildren = [])).push(i);
                 }
                 break;
             }
         }
+        if (childSchema) {
+            ((schema ||
+                (schema = {
+                    index: index,
+                    specifiedParams: null,
+                    childComponents: null,
+                    attributes: null,
+                    textChildren: null,
+                    context: null,
+                    childSchemas: []
+                })).childSchemas || (schema.childSchemas = [])).push(childSchema);
+        }
+    }
+    return schema || null;
+}
+function bindContentBySchema(node, schema, ownerComponent, context, result, parentComponent) {
+    var component = node.$component;
+    var $paramsConfig;
+    if (component) {
+        $paramsConfig = component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG];
+    }
+    var children = node.childNodes;
+    if (schema.textChildren) {
+        for (var _i = 0, _a = schema.textChildren; _i < _a.length; _i++) {
+            var index = _a[_i];
+            var child = children[index];
+            var nextChild = child.nextSibling;
+            if (nextChild && nextChild.nodeType == Node.TEXT_NODE) {
+                do {
+                    child.nodeValue += nextChild.nodeValue;
+                    node.removeChild(nextChild);
+                    nextChild = child.nextSibling;
+                } while (nextChild && nextChild.nodeType == Node.TEXT_NODE);
+            }
+            bindTextNode(child, contentNodeValueASTCache[child.nodeValue], context, result);
+        }
+    }
+    if (schema.specifiedParams) {
+        node.$component.$specifiedParams = schema.specifiedParams;
+    }
+    if (schema.childComponents) {
+        for (var _b = 0, _c = schema.childComponents; _b < _c.length; _b++) {
+            var index = _c[_b];
+            var childComponent = children[index].$component;
+            childComponent._ownerComponent = ownerComponent;
+            childComponent.$context = context;
+            if (parentComponent) {
+                (parentComponent[exports.KEY_CHILD_COMPONENTS] ||
+                    (parentComponent[exports.KEY_CHILD_COMPONENTS] = [])).push(childComponent);
+            }
+            else {
+                (result[0] || (result[0] = [])).push(childComponent);
+            }
+        }
+    }
+    if (schema.attributes) {
+        for (var _d = 0, _e = schema.attributes; _d < _e.length; _d++) {
+            var name_2 = _e[_d];
+            var targetName = name_2.charAt(0) == '_' ? name_2.slice(1) : name_2;
+            var value = node.getAttribute(name_2);
+            bindAttribute(node, name_2, targetName, value, contentNodeValueASTCache[value], $paramsConfig && $paramsConfig[targetName], context, result);
+        }
+    }
+    if (schema.context) {
+        for (var _f = 0, _g = schema.context; _f < _g.length; _f++) {
+            var index = _g[_f];
+            children[index][exports.KEY_CONTEXT] = context;
+        }
+    }
+    if (schema.childSchemas) {
+        for (var _h = 0, _j = schema.childSchemas; _h < _j.length; _h++) {
+            var childSchema = _j[_h];
+            bindContentBySchema(children[childSchema.index], childSchema, ownerComponent, context, result, component);
+        }
     }
 }
-exports.bindContent = bindContent;
+function bindAttribute(el, name, targetName, value, valueAST, $paramConfig, context, result) {
+    var prefix = valueAST.length == 1 ? valueAST[0].prefix : null;
+    if (prefix !== '->') {
+        var cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(valueAST, value, valueAST.length == 1), {
+            context: context,
+            meta: {
+                element: el,
+                attributeName: targetName
+            },
+            onChange: onAttributeBindingCellChange
+        });
+        set_attribute_1.setAttribute(el, targetName, cell.get());
+        (result[1] || (result[1] = [])).push(cell);
+    }
+    var paramConfig;
+    if ($paramConfig) {
+        paramConfig = $paramConfig.paramConfig;
+    }
+    if (paramConfig !== undefined && (prefix === '->' || prefix === '<->')) {
+        if (prefix == '->' && name.charAt(0) != '_') {
+            el.removeAttribute(name);
+        }
+        var keypath = valueAST[0].keypath;
+        var keys = keypath.split('.');
+        var handler = void 0;
+        if (keys.length == 1) {
+            handler = (function (propertyName) {
+                return function (evt) {
+                    this.ownerComponent[propertyName] = evt.data.value;
+                };
+            })(keys[0]);
+        }
+        else {
+            handler = (function (propertyName, keys) {
+                var getPropertyHolder = compileKeypath_1.compileKeypath(keys, keys.join('.'));
+                return function (evt) {
+                    var propertyHolder = getPropertyHolder.call(this.ownerComponent);
+                    if (propertyHolder) {
+                        propertyHolder[propertyName] = evt.data.value;
+                    }
+                };
+            })(keys[keys.length - 1], keys.slice(0, -1));
+        }
+        (result[2] || (result[2] = [])).push(el.$component, (typeof paramConfig == 'object' &&
+            (paramConfig.type !== undefined || paramConfig.default !== undefined) &&
+            paramConfig.property) ||
+            $paramConfig.name, handler);
+    }
+}
+function bindTextNode(textNode, valueAST, context, result) {
+    var cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(valueAST, textNode.nodeValue, false), {
+        context: context,
+        meta: { textNode: textNode },
+        onChange: onTextNodeBindingCellChange
+    });
+    textNode.nodeValue = cell.get();
+    (result[1] || (result[1] = [])).push(cell);
+}
 
 
 /***/ }),
@@ -2023,21 +2206,21 @@ var componentParamTypeSerializerMap_1 = __webpack_require__(30);
 var ContentNodeValueParser_1 = __webpack_require__(36);
 var formatters_1 = __webpack_require__(15);
 var cache = Object.create(null);
-function compileContentNodeValue(contentNodeValue, contentNodeValueString, useValueMap) {
+function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, useValueMap) {
     var cacheKey = contentNodeValueString + (useValueMap ? ',' : '.');
     if (cache[cacheKey]) {
         return cache[cacheKey];
     }
     var inner;
-    if (contentNodeValue.length == 1) {
-        inner = Function('formatters', "var temp; return " + (contentNodeValue[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.TEXT
-            ? "'" + escape_string_1.escapeString(contentNodeValue[0].value) + "'"
-            : bindingToJSExpression_1.bindingToJSExpression(contentNodeValue[0])) + ";");
+    if (contentNodeValueAST.length == 1) {
+        inner = Function('formatters', "var temp; return " + (contentNodeValueAST[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.TEXT
+            ? "'" + escape_string_1.escapeString(contentNodeValueAST[0].value) + "'"
+            : bindingToJSExpression_1.bindingToJSExpression(contentNodeValueAST[0])) + ";");
     }
     else {
         var jsExpr = [];
-        for (var _i = 0, contentNodeValue_1 = contentNodeValue; _i < contentNodeValue_1.length; _i++) {
-            var node = contentNodeValue_1[_i];
+        for (var _i = 0, contentNodeValueAST_1 = contentNodeValueAST; _i < contentNodeValueAST_1.length; _i++) {
+            var node = contentNodeValueAST_1[_i];
             jsExpr.push(node.nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.TEXT
                 ? "'" + escape_string_1.escapeString(node.value) + "'"
                 : bindingToJSExpression_1.bindingToJSExpression(node));
@@ -2704,7 +2887,7 @@ exports.ElementProtoMixin = (_a = {
             });
         }
     },
-    _a.attributeChangedCallback = function (name, prevRawValue, rawValue) {
+    _a.attributeChangedCallback = function (name, _prevRawValue, rawValue) {
         var component = this.rioniteComponent;
         if (component && component.isReady) {
             var $paramConfig = component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG][name];
@@ -2741,32 +2924,33 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__45__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dummyEl = document.createElement('div');
-dummyEl.innerHTML = '<template>1</template>';
-exports.templateTag = !dummyEl.firstChild.firstChild;
+exports.reflectConstruct = Reflect &&
+    typeof Reflect == 'object' &&
+    Reflect.construct &&
+    Reflect.construct.toString().indexOf('[native code]') != -1;
+var templateTagContainer = document.createElement('div');
+templateTagContainer.innerHTML = '<template>1</template>';
+exports.templateTag = !templateTagContainer.firstChild.firstChild;
 var nativeCustomElementsFeature = false;
-function TestNativeCustomElementsFeature(self) {
-    return HTMLElement.call(this, self);
-}
+var TestNativeCustomElementsFeature = exports.reflectConstruct
+    ? function TestNativeCustomElementsFeature(self) {
+        return Reflect.construct(HTMLElement, [self], TestNativeCustomElementsFeature);
+    }
+    : function TestNativeCustomElementsFeature(self) {
+        return HTMLElement.call(this, self);
+    };
 Object.defineProperty(TestNativeCustomElementsFeature, 'observedAttributes', {
     get: function () {
         return ['test'];
     }
 });
-TestNativeCustomElementsFeature.prototype = Object.create(HTMLElement.prototype, {
-    constructor: {
-        configurable: true,
-        enumerable: false,
-        writable: true,
-        value: TestNativeCustomElementsFeature
-    }
-});
+TestNativeCustomElementsFeature.prototype = Object.create(HTMLElement.prototype);
+TestNativeCustomElementsFeature.prototype.constructor = TestNativeCustomElementsFeature;
 TestNativeCustomElementsFeature.prototype.attributeChangedCallback = function () {
     nativeCustomElementsFeature = true;
 };
 window.customElements.define('test-native-custom-elements-feature', TestNativeCustomElementsFeature);
-var testNCEF = document.createElement('test-native-custom-elements-feature');
-testNCEF.setAttribute('test', '');
+document.createElement('test-native-custom-elements-feature').setAttribute('test', '');
 exports.nativeCustomElements = nativeCustomElementsFeature;
 
 
@@ -2949,45 +3133,7 @@ exports.handleEvent = handleEvent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-function prepareContent(node) {
-    // for (let child = node.firstChild; child; ) {
-    // 	switch (child.nodeType) {
-    // 		case Node.ELEMENT_NODE: {
-    // 			if (child.firstChild) {
-    // 				prepareContent(child);
-    // 			} else if (child instanceof HTMLTemplateElement) {
-    // 				prepareContent(child.content);
-    // 			}
-    // 			child = child.nextSibling;
-    // 			break;
-    // 		}
-    // 		case Node.TEXT_NODE: {
-    // 			let nextChild = child.nextSibling;
-    // 			if (nextChild && nextChild.nodeType == Node.TEXT_NODE) {
-    // 				do {
-    // 					child.nodeValue += nextChild.nodeValue!;
-    // 					node.removeChild(nextChild);
-    // 					nextChild = child.nextSibling;
-    // 				} while (nextChild && nextChild.nodeType == Node.TEXT_NODE);
-    // 			}
-    // 			child = nextChild;
-    // 			break;
-    // 		}
-    // 	}
-    // }
-    return node;
-}
-exports.prepareContent = prepareContent;
-
-
-/***/ }),
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var lower_case_first_word_1 = __webpack_require__(52);
+var lower_case_first_word_1 = __webpack_require__(51);
 var map_set_polyfill_1 = __webpack_require__(10);
 var types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
 var prefix = 'param';
@@ -3026,13 +3172,13 @@ exports.Param = Param;
 
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__52__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__51__;
 
 /***/ }),
-/* 53 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3054,7 +3200,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var next_tick_1 = __webpack_require__(54);
+var next_tick_1 = __webpack_require__(53);
 var cellx_1 = __webpack_require__(14);
 var attachChildComponentElements_1 = __webpack_require__(28);
 var BaseComponent_1 = __webpack_require__(23);
@@ -3064,8 +3210,8 @@ var ElementProtoMixin_1 = __webpack_require__(44);
 var compileKeypath_1 = __webpack_require__(40);
 var Features_1 = __webpack_require__(46);
 var keypathPattern_1 = __webpack_require__(37);
-var removeNodes_1 = __webpack_require__(55);
-var RnRepeat_1 = __webpack_require__(56);
+var removeNodes_1 = __webpack_require__(54);
+var RnRepeat_1 = __webpack_require__(55);
 var slice = Array.prototype.slice;
 var reKeypath = RegExp("^" + keypathPattern_1.keypathPattern + "$");
 var RnIfThen = /** @class */ (function (_super) {
@@ -3134,7 +3280,7 @@ var RnIfThen = /** @class */ (function (_super) {
                 }
             }
             var contentBindingResult = [null, null, null];
-            bindContent_1.bindContent(content, this.ownerComponent, this.$context, contentBindingResult);
+            bindContent_1.bindContent(null, content, this.ownerComponent, this.$context, contentBindingResult);
             var childComponents = contentBindingResult[0];
             var backBindings = contentBindingResult[2];
             this._nodes = slice.call(content.childNodes);
@@ -3208,13 +3354,13 @@ exports.RnIfThen = RnIfThen;
 
 
 /***/ }),
-/* 54 */
+/* 53 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__54__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__53__;
 
 /***/ }),
-/* 55 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3241,7 +3387,7 @@ exports.removeNodes = removeNodes;
 
 
 /***/ }),
-/* 56 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3264,7 +3410,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(10);
-var next_tick_1 = __webpack_require__(54);
+var next_tick_1 = __webpack_require__(53);
 var cellx_1 = __webpack_require__(14);
 var attachChildComponentElements_1 = __webpack_require__(28);
 var BaseComponent_1 = __webpack_require__(23);
@@ -3275,8 +3421,8 @@ var compileKeypath_1 = __webpack_require__(40);
 var Features_1 = __webpack_require__(46);
 var keypathPattern_1 = __webpack_require__(37);
 var namePattern_1 = __webpack_require__(38);
-var removeNodes_1 = __webpack_require__(55);
-var RnIfThen_1 = __webpack_require__(53);
+var removeNodes_1 = __webpack_require__(54);
+var RnIfThen_1 = __webpack_require__(52);
 var slice = Array.prototype.slice;
 var reForAttrValue = RegExp("^\\s*(" + namePattern_1.namePattern + ")\\s+(?:in|of)\\s+(" + keypathPattern_1.keypathPattern + ")\\s*$");
 function getItem(list, index) {
@@ -3448,7 +3594,7 @@ var RnRepeat = /** @class */ (function (_super) {
                     }
                     var context = this.$context;
                     var contentBindingResult = [null, null, null];
-                    bindContent_1.bindContent(content, this.ownerComponent, Object.create(context, (_a = {
+                    bindContent_1.bindContent(null, content, this.ownerComponent, Object.create(context, (_a = {
                             '$/': {
                                 configurable: false,
                                 enumerable: false,
@@ -3564,7 +3710,7 @@ exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
-/* 57 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3587,7 +3733,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var Component_1 = __webpack_require__(17);
-var RnIfThen_1 = __webpack_require__(53);
+var RnIfThen_1 = __webpack_require__(52);
 var RnIfElse = /** @class */ (function (_super) {
     __extends(RnIfElse, _super);
     function RnIfElse() {
@@ -3607,7 +3753,7 @@ exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
-/* 58 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3629,7 +3775,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var clear_node_1 = __webpack_require__(59);
+var clear_node_1 = __webpack_require__(58);
 var get_uid_1 = __webpack_require__(24);
 var map_set_polyfill_1 = __webpack_require__(10);
 var move_content_1 = __webpack_require__(25);
@@ -3741,12 +3887,12 @@ var RnSlot = /** @class */ (function (_super) {
                 if (content || el.firstChild) {
                     var contentBindingResult = [null, null, null];
                     if (content) {
-                        bindContent_1.bindContent(content, contentOwnerComponent, this.paramGetContext
+                        bindContent_1.bindContent(null, content, contentOwnerComponent, this.paramGetContext
                             ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
                             : ownerComponent.$context, contentBindingResult);
                     }
                     else {
-                        bindContent_1.bindContent(el, ownerComponent, this.paramGetContext
+                        bindContent_1.bindContent(null, el, ownerComponent, this.paramGetContext
                             ? this.paramGetContext.call(ownerComponent, this.$context, this)
                             : this.$context, contentBindingResult);
                     }
@@ -3806,10 +3952,10 @@ RnSlot[BaseComponent_1.KEY_IS_SLOT] = true;
 
 
 /***/ }),
-/* 59 */
+/* 58 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__59__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__58__;
 
 /***/ })
 /******/ ]);

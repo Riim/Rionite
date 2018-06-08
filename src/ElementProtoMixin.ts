@@ -102,7 +102,7 @@ export const ElementProtoMixin = {
 	attributeChangedCallback(
 		this: IComponentElement,
 		name: string,
-		prevRawValue: string | null,
+		_prevRawValue: string | null,
 		rawValue: string | null
 	) {
 		let component = this.rioniteComponent;

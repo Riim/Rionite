@@ -1,36 +1,42 @@
-const dummyEl = document.createElement('div');
+export const reflectConstruct =
+	Reflect &&
+	typeof Reflect == 'object' &&
+	Reflect.construct &&
+	Reflect.construct.toString().indexOf('[native code]') != -1;
 
-dummyEl.innerHTML = '<template>1</template>';
-export const templateTag = !dummyEl.firstChild!.firstChild;
+const templateTagContainer = document.createElement('div');
+templateTagContainer.innerHTML = '<template>1</template>';
+
+export const templateTag = !templateTagContainer.firstChild!.firstChild;
 
 let nativeCustomElementsFeature = false;
 
-function TestNativeCustomElementsFeature(self: any): HTMLElement {
-	return HTMLElement.call(this, self);
-}
+const TestNativeCustomElementsFeature = reflectConstruct
+	? function TestNativeCustomElementsFeature(self: HTMLElement | undefined): HTMLElement {
+			return Reflect.construct(HTMLElement, [self], TestNativeCustomElementsFeature);
+	  }
+	: function TestNativeCustomElementsFeature(self: HTMLElement | undefined): HTMLElement {
+			return HTMLElement.call(this, self);
+	  };
+
 Object.defineProperty(TestNativeCustomElementsFeature, 'observedAttributes', {
 	get() {
 		return ['test'];
 	}
 });
-TestNativeCustomElementsFeature.prototype = Object.create(HTMLElement.prototype, {
-	constructor: {
-		configurable: true,
-		enumerable: false,
-		writable: true,
-		value: TestNativeCustomElementsFeature
-	}
-});
+
+TestNativeCustomElementsFeature.prototype = Object.create(HTMLElement.prototype);
+TestNativeCustomElementsFeature.prototype.constructor = TestNativeCustomElementsFeature;
+
 TestNativeCustomElementsFeature.prototype.attributeChangedCallback = () => {
 	nativeCustomElementsFeature = true;
 };
 
-(window as any).customElements.define(
+window.customElements.define(
 	'test-native-custom-elements-feature',
 	TestNativeCustomElementsFeature
 );
 
-const testNCEF = document.createElement('test-native-custom-elements-feature');
-testNCEF.setAttribute('test', '');
+document.createElement('test-native-custom-elements-feature').setAttribute('test', '');
 
 export const nativeCustomElements = nativeCustomElementsFeature;
