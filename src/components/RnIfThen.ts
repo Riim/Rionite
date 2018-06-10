@@ -2,7 +2,7 @@ import { nextTick } from '@riim/next-tick';
 import { Cell, TListener } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
-import { bindContent } from '../bindContent';
+import { bindComponentContent2 } from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
@@ -112,7 +112,13 @@ export class RnIfThen extends BaseComponent {
 				Array<BaseComponent | string | TListener> | null
 			] = [null, null, null];
 
-			bindContent(null, content, this.ownerComponent, this.$context!, contentBindingResult);
+			bindComponentContent2(
+				this,
+				content,
+				this.ownerComponent,
+				this.$context!,
+				contentBindingResult
+			);
 
 			let childComponents = contentBindingResult[0];
 			let backBindings = contentBindingResult[2];

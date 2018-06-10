@@ -8,6 +8,7 @@ import {
 	IComponentElement,
 	IComponentParamConfig,
 	IPossiblyComponentElement,
+	KEY_IS_SLOT,
 	KEY_PARAMS_CONFIG
 	} from './BaseComponent';
 import { compileContentNodeValue } from './compileContentNodeValue';
@@ -31,6 +32,7 @@ export interface INodeBindingSchema {
 }
 
 export const KEY_NODE_BINDING_SCHEMA = Symbol('Rionite/bindContent[nodeBindingSchema]');
+export const KEY_NODE_BINDING_SCHEMAS = Symbol('Rionite/bindContent[nodeBindingSchemas]');
 export const KEY_CHILD_COMPONENTS = Symbol('Rionite/bindContent[childComponents]');
 export const KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 
@@ -54,24 +56,29 @@ function onTextNodeBindingCellChange(evt: IEvent<Cell<string, { textNode: Text }
 export function prepareContent<T extends Node = DocumentFragment | Element>(node: T): T {
 	for (let child = node.firstChild; child; child = child.nextSibling) {
 		if (child.nodeType == Node.ELEMENT_NODE) {
-			if (child.firstChild) {
-				if (child instanceof HTMLTemplateElement) {
-					child.setAttribute('pid', nextUID());
-				}
-
-				prepareContent(child);
-			} else if (child instanceof HTMLTemplateElement) {
+			if (child instanceof HTMLTemplateElement) {
 				child.setAttribute('pid', nextUID());
-				prepareContent(child.content);
+
+				if (!child.firstChild) {
+					prepareContent(child.content);
+					continue;
+				}
+			} else if (
+				(child as IPossiblyComponentElement).$component &&
+				(child as IComponentElement).$component.constructor[KEY_IS_SLOT]
+			) {
+				(child as Element).setAttribute('pid', nextUID());
 			}
+
+			prepareContent(child);
 		}
 	}
 
 	return node;
 }
 
-export function bindContent(
-	component: BaseComponent | null,
+export function bindComponentContent(
+	component: BaseComponent,
 	node: Element | DocumentFragment,
 	ownerComponent: BaseComponent,
 	context: object,
@@ -79,34 +86,65 @@ export function bindContent(
 		Array<BaseComponent> | null,
 		Array<IFreezableCell> | null,
 		Array<BaseComponent | string | TListener> | null
-	],
-	parentComponent?: BaseComponent
-): INodeBindingSchema | null {
-	let schema: INodeBindingSchema | null | undefined;
+	]
+): [
+	Array<BaseComponent> | null,
+	Array<IFreezableCell> | null,
+	Array<BaseComponent | string | TListener> | null
+] {
+	let schema = (component.constructor as typeof BaseComponent).template![KEY_NODE_BINDING_SCHEMA];
 
-	if (component) {
-		schema = (component.constructor as typeof BaseComponent)[KEY_NODE_BINDING_SCHEMA];
-
-		if (schema !== undefined) {
-			if (schema) {
-				bindContentBySchema(node, schema, ownerComponent, context, result, parentComponent);
-			}
-
-			return null;
-		}
+	if (schema === undefined) {
+		(component.constructor as typeof BaseComponent).template![
+			KEY_NODE_BINDING_SCHEMA
+		] = bindContent(node, -1, ownerComponent, context, result);
+	} else if (schema) {
+		bindContentBySchema(node, schema, ownerComponent, context, result);
 	}
 
-	schema = bindContent$(node, -1, ownerComponent, context, result);
-
-	if (component) {
-		(component.constructor as typeof BaseComponent).template![KEY_NODE_BINDING_SCHEMA] =
-			schema || null;
-	}
-
-	return schema || null;
+	return result;
 }
 
-function bindContent$(
+export function bindComponentContent2(
+	component: BaseComponent,
+	node: Element | DocumentFragment,
+	ownerComponent: BaseComponent,
+	context: object,
+	result: [
+		Array<BaseComponent> | null,
+		Array<IFreezableCell> | null,
+		Array<BaseComponent | string | TListener> | null
+	]
+): [
+	Array<BaseComponent> | null,
+	Array<IFreezableCell> | null,
+	Array<BaseComponent | string | TListener> | null
+] {
+	let pid = component.element.getAttribute('pid');
+
+	if (pid) {
+		let schema = ((component.ownerComponent.constructor as typeof BaseComponent).template![
+			KEY_NODE_BINDING_SCHEMAS
+		] ||
+			((component.ownerComponent.constructor as typeof BaseComponent).template![
+				KEY_NODE_BINDING_SCHEMAS
+			] = {}))[pid];
+
+		if (schema === undefined) {
+			(component.ownerComponent.constructor as typeof BaseComponent).template![
+				KEY_NODE_BINDING_SCHEMAS
+			][pid] = bindContent(node, -1, ownerComponent, context, result);
+		} else if (schema) {
+			bindContentBySchema(node, schema, ownerComponent, context, result);
+		}
+	} else {
+		bindContent(node, -1, ownerComponent, context, result);
+	}
+
+	return result;
+}
+
+export function bindContent(
 	node: Element | DocumentFragment,
 	index: number,
 	ownerComponent: BaseComponent,
@@ -292,7 +330,7 @@ function bindContent$(
 					(!childComponent ||
 						!(childComponent.constructor as typeof BaseComponent).bindsInputContent)
 				) {
-					childSchema = bindContent$(
+					childSchema = bindContent(
 						child as Element,
 						i,
 						ownerComponent,
@@ -396,13 +434,6 @@ function bindContentBySchema(
 	],
 	parentComponent?: BaseComponent
 ) {
-	let component = (node as IPossiblyComponentElement).$component;
-	let $paramsConfig: { [name: string]: I$ComponentParamConfig } | undefined;
-
-	if (component) {
-		$paramsConfig = component.constructor[KEY_PARAMS_CONFIG];
-	}
-
 	let children = node.childNodes;
 
 	if (schema.textChildren) {
@@ -449,6 +480,14 @@ function bindContentBySchema(
 	}
 
 	if (schema.attributes) {
+		let $paramsConfig: { [name: string]: I$ComponentParamConfig } | undefined;
+
+		if ((node as IPossiblyComponentElement).$component) {
+			$paramsConfig = (node as IPossiblyComponentElement).$component!.constructor[
+				KEY_PARAMS_CONFIG
+			];
+		}
+
 		for (let name of schema.attributes) {
 			let targetName = name.charAt(0) == '_' ? name.slice(1) : name;
 			let value = (node as Element).getAttribute(name)!;
@@ -474,13 +513,15 @@ function bindContentBySchema(
 
 	if (schema.childSchemas) {
 		for (let childSchema of schema.childSchemas) {
+			let child = children[childSchema.index] as IComponentElement;
+
 			bindContentBySchema(
-				children[childSchema.index] as Element,
+				child,
 				childSchema,
 				ownerComponent,
 				context,
 				result,
-				component
+				child.$component
 			);
 		}
 	}
@@ -536,23 +577,22 @@ function bindAttribute(
 		let handler: TListener;
 
 		if (keys.length == 1) {
-			handler = (propertyName => {
-				return function(evt: IEvent) {
-					this.ownerComponent[propertyName] = evt.data.value;
-				};
-			})(keys[0]);
+			let propertyName = keys[0];
+
+			handler = function(evt: IEvent) {
+				this.ownerComponent[propertyName] = evt.data.value;
+			};
 		} else {
-			handler = ((propertyName, keys) => {
-				let getPropertyHolder = compileKeypath(keys, keys.join('.'));
+			let propertyName = keys[keys.length - 1];
+			let getPropertyHolder = compileKeypath((keys = keys.slice(0, -1)), keys.join('.'));
 
-				return function(evt: IEvent) {
-					let propertyHolder = getPropertyHolder.call(this.ownerComponent);
+			handler = function(evt: IEvent) {
+				let propertyHolder = getPropertyHolder.call(this.ownerComponent);
 
-					if (propertyHolder) {
-						propertyHolder[propertyName] = evt.data.value;
-					}
-				};
-			})(keys[keys.length - 1], keys.slice(0, -1));
+				if (propertyHolder) {
+					propertyHolder[propertyName] = evt.data.value;
+				}
+			};
 		}
 
 		(result[2] || (result[2] = [])).push(

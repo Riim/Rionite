@@ -3,7 +3,7 @@ import { nextTick } from '@riim/next-tick';
 import { Cell, ObservableList, TListener } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
-import { bindContent } from '../bindContent';
+import { bindComponentContent2 } from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
@@ -274,8 +274,8 @@ export class RnRepeat extends BaseComponent {
 						Array<BaseComponent | string | TListener> | null
 					] = [null, null, null];
 
-					bindContent(
-						null,
+					bindComponentContent2(
+						this,
 						content,
 						this.ownerComponent,
 						Object.create(context, {

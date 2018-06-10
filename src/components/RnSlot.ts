@@ -6,7 +6,7 @@ import { Symbol } from '@riim/symbol-polyfill';
 import { TListener } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent, IComponentElement, KEY_IS_SLOT } from '../BaseComponent';
-import { bindContent } from '../bindContent';
+import { bindComponentContent2, bindContent } from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
@@ -161,8 +161,8 @@ export class RnSlot extends BaseComponent {
 
 					if (content) {
 						bindContent(
-							null,
 							content,
+							-1,
 							contentOwnerComponent,
 							this.paramGetContext
 								? this.paramGetContext.call(
@@ -174,8 +174,8 @@ export class RnSlot extends BaseComponent {
 							contentBindingResult
 						);
 					} else {
-						bindContent(
-							null,
+						bindComponentContent2(
+							this,
 							el,
 							ownerComponent,
 							this.paramGetContext

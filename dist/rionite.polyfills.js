@@ -2953,7 +2953,7 @@ var BaseComponent = /** @class */ (function (_super) {
             if (constr.template === null) {
                 if (this.ownerComponent == this) {
                     var contentBindingResult = [null, null, null];
-                    bindContent_1.bindContent(this, el, this, this, contentBindingResult);
+                    bindContent_1.bindContent(el, -1, this, this, contentBindingResult);
                     var childComponents = contentBindingResult[0];
                     var backBindings = contentBindingResult[2];
                     this._bindings = contentBindingResult[1];
@@ -2993,7 +2993,7 @@ var BaseComponent = /** @class */ (function (_super) {
                     }
                 }
                 var contentBindingResult = [null, null, null];
-                bindContent_1.bindContent(this, content, this, this, contentBindingResult);
+                bindContent_1.bindComponentContent(this, content, this, this, contentBindingResult);
                 var childComponents = contentBindingResult[0];
                 var backBindings = contentBindingResult[2];
                 this._bindings = contentBindingResult[1];
@@ -3371,6 +3371,7 @@ var compileContentNodeValue_1 = __webpack_require__(34);
 var ContentNodeValueParser_1 = __webpack_require__(36);
 var compileKeypath_1 = __webpack_require__(40);
 exports.KEY_NODE_BINDING_SCHEMA = Symbol('Rionite/bindContent[nodeBindingSchema]');
+exports.KEY_NODE_BINDING_SCHEMAS = Symbol('Rionite/bindContent[nodeBindingSchemas]');
 exports.KEY_CHILD_COMPONENTS = Symbol('Rionite/bindContent[childComponents]');
 exports.KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 var contentNodeValueASTCache = Object.create(null);
@@ -3383,41 +3384,53 @@ function onTextNodeBindingCellChange(evt) {
 function prepareContent(node) {
     for (var child = node.firstChild; child; child = child.nextSibling) {
         if (child.nodeType == Node.ELEMENT_NODE) {
-            if (child.firstChild) {
-                if (child instanceof HTMLTemplateElement) {
-                    child.setAttribute('pid', next_uid_1.nextUID());
-                }
-                prepareContent(child);
-            }
-            else if (child instanceof HTMLTemplateElement) {
+            if (child instanceof HTMLTemplateElement) {
                 child.setAttribute('pid', next_uid_1.nextUID());
-                prepareContent(child.content);
+                if (!child.firstChild) {
+                    prepareContent(child.content);
+                    continue;
+                }
             }
+            else if (child.$component &&
+                child.$component.constructor[BaseComponent_1.KEY_IS_SLOT]) {
+                child.setAttribute('pid', next_uid_1.nextUID());
+            }
+            prepareContent(child);
         }
     }
     return node;
 }
 exports.prepareContent = prepareContent;
-function bindContent(component, node, ownerComponent, context, result, parentComponent) {
-    var schema;
-    if (component) {
-        schema = component.constructor[exports.KEY_NODE_BINDING_SCHEMA];
-        if (schema !== undefined) {
-            if (schema) {
-                bindContentBySchema(node, schema, ownerComponent, context, result, parentComponent);
-            }
-            return null;
+function bindComponentContent(component, node, ownerComponent, context, result) {
+    var schema = component.constructor.template[exports.KEY_NODE_BINDING_SCHEMA];
+    if (schema === undefined) {
+        component.constructor.template[exports.KEY_NODE_BINDING_SCHEMA] = bindContent(node, -1, ownerComponent, context, result);
+    }
+    else if (schema) {
+        bindContentBySchema(node, schema, ownerComponent, context, result);
+    }
+    return result;
+}
+exports.bindComponentContent = bindComponentContent;
+function bindComponentContent2(component, node, ownerComponent, context, result) {
+    var pid = component.element.getAttribute('pid');
+    if (pid) {
+        var schema = (component.ownerComponent.constructor.template[exports.KEY_NODE_BINDING_SCHEMAS] ||
+            (component.ownerComponent.constructor.template[exports.KEY_NODE_BINDING_SCHEMAS] = {}))[pid];
+        if (schema === undefined) {
+            component.ownerComponent.constructor.template[exports.KEY_NODE_BINDING_SCHEMAS][pid] = bindContent(node, -1, ownerComponent, context, result);
+        }
+        else if (schema) {
+            bindContentBySchema(node, schema, ownerComponent, context, result);
         }
     }
-    schema = bindContent$(node, -1, ownerComponent, context, result);
-    if (component) {
-        component.constructor.template[exports.KEY_NODE_BINDING_SCHEMA] =
-            schema || null;
+    else {
+        bindContent(node, -1, ownerComponent, context, result);
     }
-    return schema || null;
+    return result;
 }
-exports.bindContent = bindContent;
-function bindContent$(node, index, ownerComponent, context, result, schema, parentComponent) {
+exports.bindComponentContent2 = bindComponentContent2;
+function bindContent(node, index, ownerComponent, context, result, schema, parentComponent) {
     var children = node.childNodes;
     for (var i = 0, l = children.length; i < l; i++) {
         var child = children[i];
@@ -3536,7 +3549,7 @@ function bindContent$(node, index, ownerComponent, context, result, schema, pare
                 if (child.firstChild &&
                     (!childComponent ||
                         !childComponent.constructor.bindsInputContent)) {
-                    childSchema = bindContent$(child, i, ownerComponent, context, result, childSchema, childComponent);
+                    childSchema = bindContent(child, i, ownerComponent, context, result, childSchema, childComponent);
                 }
                 break;
             }
@@ -3595,12 +3608,8 @@ function bindContent$(node, index, ownerComponent, context, result, schema, pare
     }
     return schema || null;
 }
+exports.bindContent = bindContent;
 function bindContentBySchema(node, schema, ownerComponent, context, result, parentComponent) {
-    var component = node.$component;
-    var $paramsConfig;
-    if (component) {
-        $paramsConfig = component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG];
-    }
     var children = node.childNodes;
     if (schema.textChildren) {
         for (var _i = 0, _a = schema.textChildren; _i < _a.length; _i++) {
@@ -3636,6 +3645,10 @@ function bindContentBySchema(node, schema, ownerComponent, context, result, pare
         }
     }
     if (schema.attributes) {
+        var $paramsConfig = void 0;
+        if (node.$component) {
+            $paramsConfig = node.$component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG];
+        }
         for (var _d = 0, _e = schema.attributes; _d < _e.length; _d++) {
             var name_2 = _e[_d];
             var targetName = name_2.charAt(0) == '_' ? name_2.slice(1) : name_2;
@@ -3652,7 +3665,8 @@ function bindContentBySchema(node, schema, ownerComponent, context, result, pare
     if (schema.childSchemas) {
         for (var _h = 0, _j = schema.childSchemas; _h < _j.length; _h++) {
             var childSchema = _j[_h];
-            bindContentBySchema(children[childSchema.index], childSchema, ownerComponent, context, result, component);
+            var child = children[childSchema.index];
+            bindContentBySchema(child, childSchema, ownerComponent, context, result, child.$component);
         }
     }
 }
@@ -3682,22 +3696,20 @@ function bindAttribute(el, name, targetName, value, valueAST, $paramConfig, cont
         var keys = keypath.split('.');
         var handler = void 0;
         if (keys.length == 1) {
-            handler = (function (propertyName) {
-                return function (evt) {
-                    this.ownerComponent[propertyName] = evt.data.value;
-                };
-            })(keys[0]);
+            var propertyName_1 = keys[0];
+            handler = function (evt) {
+                this.ownerComponent[propertyName_1] = evt.data.value;
+            };
         }
         else {
-            handler = (function (propertyName, keys) {
-                var getPropertyHolder = compileKeypath_1.compileKeypath(keys, keys.join('.'));
-                return function (evt) {
-                    var propertyHolder = getPropertyHolder.call(this.ownerComponent);
-                    if (propertyHolder) {
-                        propertyHolder[propertyName] = evt.data.value;
-                    }
-                };
-            })(keys[keys.length - 1], keys.slice(0, -1));
+            var propertyName_2 = keys[keys.length - 1];
+            var getPropertyHolder_1 = compileKeypath_1.compileKeypath((keys = keys.slice(0, -1)), keys.join('.'));
+            handler = function (evt) {
+                var propertyHolder = getPropertyHolder_1.call(this.ownerComponent);
+                if (propertyHolder) {
+                    propertyHolder[propertyName_2] = evt.data.value;
+                }
+            };
         }
         (result[2] || (result[2] = [])).push(el.$component, (typeof paramConfig == 'object' &&
             (paramConfig.type !== undefined || paramConfig.default !== undefined) &&
@@ -4809,7 +4821,7 @@ var RnIfThen = /** @class */ (function (_super) {
                 }
             }
             var contentBindingResult = [null, null, null];
-            bindContent_1.bindContent(null, content, this.ownerComponent, this.$context, contentBindingResult);
+            bindContent_1.bindComponentContent2(this, content, this.ownerComponent, this.$context, contentBindingResult);
             var childComponents = contentBindingResult[0];
             var backBindings = contentBindingResult[2];
             this._nodes = slice.call(content.childNodes);
@@ -5123,7 +5135,7 @@ var RnRepeat = /** @class */ (function (_super) {
                     }
                     var context = this.$context;
                     var contentBindingResult = [null, null, null];
-                    bindContent_1.bindContent(null, content, this.ownerComponent, Object.create(context, (_a = {
+                    bindContent_1.bindComponentContent2(this, content, this.ownerComponent, Object.create(context, (_a = {
                             '$/': {
                                 configurable: false,
                                 enumerable: false,
@@ -5416,12 +5428,12 @@ var RnSlot = /** @class */ (function (_super) {
                 if (content || el.firstChild) {
                     var contentBindingResult = [null, null, null];
                     if (content) {
-                        bindContent_1.bindContent(null, content, contentOwnerComponent, this.paramGetContext
+                        bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
                             ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
                             : ownerComponent.$context, contentBindingResult);
                     }
                     else {
-                        bindContent_1.bindContent(null, el, ownerComponent, this.paramGetContext
+                        bindContent_1.bindComponentContent2(this, el, ownerComponent, this.paramGetContext
                             ? this.paramGetContext.call(ownerComponent, this.$context, this)
                             : this.$context, contentBindingResult);
                     }
