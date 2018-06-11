@@ -154,7 +154,14 @@ export class ContentNodeValueParser {
 	}
 
 	_readPrefix(): string | null {
-		if (this.chr == '<') {
+		let chr = this.chr;
+
+		if (chr == '=') {
+			this._next();
+			return '=';
+		}
+
+		if (chr == '<') {
 			let at = this.at;
 
 			if (this.contentNodeValue.charAt(at + 1) == '-') {
@@ -166,7 +173,7 @@ export class ContentNodeValueParser {
 				this.chr = this.contentNodeValue.charAt((this.at = at + 2));
 				return '<-';
 			}
-		} else if (this.chr == '-' && this.contentNodeValue.charAt(this.at + 1) == '>') {
+		} else if (chr == '-' && this.contentNodeValue.charAt(this.at + 1) == '>') {
 			this.chr = this.contentNodeValue.charAt((this.at += 2));
 			return '->';
 		}

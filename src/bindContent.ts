@@ -543,6 +543,11 @@ function bindAttribute(
 ) {
 	let prefix = valueAST.length == 1 ? (valueAST[0] as IContentNodeValueBinding).prefix : null;
 
+	if (prefix === '=') {
+		setAttribute(el, targetName, compileContentNodeValue(valueAST, value, true).call(context));
+		return;
+	}
+
 	if (prefix !== '->') {
 		let cell = new Cell<any, IAttributeBindingCellMeta>(
 			compileContentNodeValue(valueAST, value, valueAST.length == 1),
@@ -616,16 +621,22 @@ function bindTextNode(
 		Array<BaseComponent | string | TListener> | null
 	]
 ) {
-	let cell = new Cell<string, { textNode: Text }>(
-		compileContentNodeValue(valueAST, textNode.nodeValue!, false),
-		{
-			context,
-			meta: { textNode },
-			onChange: onTextNodeBindingCellChange
-		}
-	);
+	if (valueAST.length == 1 && (valueAST[0] as IContentNodeValueBinding).prefix === '=') {
+		textNode.nodeValue = compileContentNodeValue(valueAST, textNode.nodeValue!, false).call(
+			context
+		);
+	} else {
+		let cell = new Cell<string, { textNode: Text }>(
+			compileContentNodeValue(valueAST, textNode.nodeValue!, false),
+			{
+				context,
+				meta: { textNode },
+				onChange: onTextNodeBindingCellChange
+			}
+		);
 
-	textNode.nodeValue = cell.get();
+		textNode.nodeValue = cell.get();
 
-	(result[1] || (result[1] = [])).push(cell as IFreezableCell);
+		(result[1] || (result[1] = [])).push(cell as IFreezableCell);
+	}
 }

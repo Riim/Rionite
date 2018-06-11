@@ -3672,6 +3672,10 @@ function bindContentBySchema(node, schema, ownerComponent, context, result, pare
 }
 function bindAttribute(el, name, targetName, value, valueAST, $paramConfig, context, result) {
     var prefix = valueAST.length == 1 ? valueAST[0].prefix : null;
+    if (prefix === '=') {
+        set_attribute_1.setAttribute(el, targetName, compileContentNodeValue_1.compileContentNodeValue(valueAST, value, true).call(context));
+        return;
+    }
     if (prefix !== '->') {
         var cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(valueAST, value, valueAST.length == 1), {
             context: context,
@@ -3718,13 +3722,18 @@ function bindAttribute(el, name, targetName, value, valueAST, $paramConfig, cont
     }
 }
 function bindTextNode(textNode, valueAST, context, result) {
-    var cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(valueAST, textNode.nodeValue, false), {
-        context: context,
-        meta: { textNode: textNode },
-        onChange: onTextNodeBindingCellChange
-    });
-    textNode.nodeValue = cell.get();
-    (result[1] || (result[1] = [])).push(cell);
+    if (valueAST.length == 1 && valueAST[0].prefix === '=') {
+        textNode.nodeValue = compileContentNodeValue_1.compileContentNodeValue(valueAST, textNode.nodeValue, false).call(context);
+    }
+    else {
+        var cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(valueAST, textNode.nodeValue, false), {
+            context: context,
+            meta: { textNode: textNode },
+            onChange: onTextNodeBindingCellChange
+        });
+        textNode.nodeValue = cell.get();
+        (result[1] || (result[1] = [])).push(cell);
+    }
 }
 
 
@@ -3747,16 +3756,14 @@ var componentParamTypeSerializerMap_1 = __webpack_require__(30);
 var ContentNodeValueParser_1 = __webpack_require__(36);
 var formatters_1 = __webpack_require__(15);
 var cache = Object.create(null);
-function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, useValueMap) {
-    var cacheKey = contentNodeValueString + (useValueMap ? ',' : '.');
+function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, useComponentParamValueMap) {
+    var cacheKey = contentNodeValueString + (useComponentParamValueMap ? ',' : '.');
     if (cache[cacheKey]) {
         return cache[cacheKey];
     }
     var inner;
     if (contentNodeValueAST.length == 1) {
-        inner = Function('formatters', "var temp; return " + (contentNodeValueAST[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.TEXT
-            ? "'" + escape_string_1.escapeString(contentNodeValueAST[0].value) + "'"
-            : bindingToJSExpression_1.bindingToJSExpression(contentNodeValueAST[0])) + ";");
+        inner = Function('formatters', "var temp; return " + bindingToJSExpression_1.bindingToJSExpression(contentNodeValueAST[0]) + ";");
     }
     else {
         var jsExpr = [];
@@ -3768,7 +3775,7 @@ function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, us
         }
         inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
     }
-    return (cache[cacheKey] = useValueMap
+    return (cache[cacheKey] = useComponentParamValueMap
         ? function (cell) {
             var value = inner.call(this, formatters_1.formatters);
             if (value) {
@@ -3921,7 +3928,12 @@ var ContentNodeValueParser = /** @class */ (function () {
         return null;
     };
     ContentNodeValueParser.prototype._readPrefix = function () {
-        if (this.chr == '<') {
+        var chr = this.chr;
+        if (chr == '=') {
+            this._next();
+            return '=';
+        }
+        if (chr == '<') {
             var at = this.at;
             if (this.contentNodeValue.charAt(at + 1) == '-') {
                 if (this.contentNodeValue.charAt(at + 2) == '>') {
@@ -3932,7 +3944,7 @@ var ContentNodeValueParser = /** @class */ (function () {
                 return '<-';
             }
         }
-        else if (this.chr == '-' && this.contentNodeValue.charAt(this.at + 1) == '>') {
+        else if (chr == '-' && this.contentNodeValue.charAt(this.at + 1) == '>') {
             this.chr = this.contentNodeValue.charAt((this.at += 2));
             return '->';
         }

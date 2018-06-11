@@ -3,12 +3,7 @@ import { escapeString } from 'escape-string';
 import { IAttributeBindingCellMeta } from './bindContent';
 import { bindingToJSExpression } from './bindingToJSExpression';
 import { KEY_COMPONENT_PARAM_VALUE_MAP } from './componentParamTypeSerializerMap';
-import {
-	ContentNodeValueNodeType,
-	IContentNodeValueBinding,
-	IContentNodeValueText,
-	TContentNodeValue
-	} from './ContentNodeValueParser';
+import { ContentNodeValueNodeType, IContentNodeValueBinding, TContentNodeValue } from './ContentNodeValueParser';
 import { formatters } from './lib/formatters';
 
 const cache = Object.create(null);
@@ -16,9 +11,9 @@ const cache = Object.create(null);
 export function compileContentNodeValue(
 	contentNodeValueAST: TContentNodeValue,
 	contentNodeValueString: string,
-	useValueMap: boolean
+	useComponentParamValueMap: boolean
 ): TCellPull<any> {
-	let cacheKey = contentNodeValueString + (useValueMap ? ',' : '.');
+	let cacheKey = contentNodeValueString + (useComponentParamValueMap ? ',' : '.');
 
 	if (cache[cacheKey]) {
 		return cache[cacheKey];
@@ -29,11 +24,9 @@ export function compileContentNodeValue(
 	if (contentNodeValueAST.length == 1) {
 		inner = Function(
 			'formatters',
-			`var temp; return ${
-				contentNodeValueAST[0].nodeType == ContentNodeValueNodeType.TEXT
-					? `'${escapeString((contentNodeValueAST[0] as IContentNodeValueText).value)}'`
-					: bindingToJSExpression(contentNodeValueAST[0] as IContentNodeValueBinding)
-			};`
+			`var temp; return ${bindingToJSExpression(
+				contentNodeValueAST[0] as IContentNodeValueBinding
+			)};`
 		) as any;
 	} else {
 		let jsExpr: Array<string> = [];
@@ -49,7 +42,7 @@ export function compileContentNodeValue(
 		inner = Function('formatters', `var temp; return [${jsExpr.join(', ')}].join('');`) as any;
 	}
 
-	return (cache[cacheKey] = useValueMap
+	return (cache[cacheKey] = useComponentParamValueMap
 		? function(cell: Cell<any, IAttributeBindingCellMeta>): any {
 				let value = inner.call(this, formatters);
 
