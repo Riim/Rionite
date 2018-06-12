@@ -1,7 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 
-module.exports = () => {
+module.exports = (env = {}) => {
 	let plugins = [
 		new webpack.DefinePlugin({
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
@@ -17,7 +17,7 @@ module.exports = () => {
 
 		output: {
 			path: path.join(__dirname, 'dist'),
-			filename: '[name].js',
+			filename: env.es6 ? '[name].es6.js' : '[name].js',
 			library: '[name]',
 			libraryTarget: 'umd'
 		},
@@ -33,7 +33,10 @@ module.exports = () => {
 				{
 					test: /\.ts$/,
 					exclude: /(?:node_modules|bower_components)/,
-					loader: 'awesome-typescript-loader'
+					loader: 'awesome-typescript-loader',
+					options: {
+						configFileName: env.es6 ? 'tsconfig.es6.json' : 'tsconfig.json'
+					}
 				}
 			]
 		},

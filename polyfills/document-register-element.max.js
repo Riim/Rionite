@@ -976,7 +976,7 @@ PERFORMANCE OF THIS SOFTWARE.
   
         [HTMLElementPrototype, DocumentFragment.prototype].forEach(function(proto) {
           var origCloneNode = proto.cloneNode;
-
+  
           proto.cloneNode = function (deep) {
             var
               node = origCloneNode.call(this, !!deep),
@@ -990,9 +990,9 @@ PERFORMANCE OF THIS SOFTWARE.
             return node;
           };
         });
-
+  
         var origImportNode = document.importNode;
-
+  
         document.importNode = function (node, deep) {
           var
             importedNode = origImportNode.call(this, node, !!deep),
@@ -1006,7 +1006,7 @@ PERFORMANCE OF THIS SOFTWARE.
           return importedNode;
         };
       }
-
+  
       if (justSetup) return (justSetup = false);
   
       if (-2 < (

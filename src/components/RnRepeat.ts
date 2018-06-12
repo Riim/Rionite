@@ -33,21 +33,20 @@ function getItem(list: TList, index: number): any {
 	return Array.isArray(list) ? list[index] : list.get(index);
 }
 
-function insertNodes(nodes: Array<Node>, lastNode: Node): Node {
+function insertBefore(nodes: Array<Node>, beforeNode: Node): Node {
 	let nodeCount = nodes.length;
 
 	if (nodeCount == 1) {
-		lastNode.parentNode!.insertBefore(nodes[0], lastNode.nextSibling);
+		beforeNode.parentNode!.insertBefore(nodes[0], beforeNode);
 		return nodes[0];
 	}
 
-	let df = document.createDocumentFragment();
+	let parent = beforeNode.parentNode!;
 
 	for (let i = 0; i < nodeCount; i++) {
-		df.appendChild(nodes[i]);
+		parent.insertBefore(nodes[i], beforeNode);
 	}
 
-	lastNode.parentNode!.insertBefore(df, lastNode.nextSibling);
 	return nodes[nodeCount - 1];
 }
 
@@ -168,7 +167,8 @@ export class RnRepeat extends BaseComponent {
 		let changed = false;
 
 		if (list) {
-			let lastNode: Node = this.element;
+			let el = this.element;
+			let lastNode: Node = el;
 			let removedValues = new Set<any>();
 
 			for (let i = 0, l = list.length; i < l; ) {
@@ -181,7 +181,10 @@ export class RnRepeat extends BaseComponent {
 						$item.item.set(item);
 						$item.index.set(i);
 
-						lastNode = insertNodes($item.nodes, lastNode);
+						lastNode = insertBefore(
+							$item.nodes,
+							lastNode == el ? lastNode : lastNode.nextSibling!
+						);
 
 						i++;
 					} else {
@@ -221,7 +224,10 @@ export class RnRepeat extends BaseComponent {
 											k$Item.item.set(item);
 											k$Item.index.set(i);
 
-											lastNode = insertNodes(k$Item.nodes, lastNode);
+											lastNode = insertBefore(
+												k$Item.nodes,
+												lastNode == el ? lastNode : lastNode.nextSibling!
+											);
 										}
 
 										prevList.splice(foundIndex, foundCount);
@@ -289,19 +295,13 @@ export class RnRepeat extends BaseComponent {
 							[this._itemName]: {
 								configurable: true,
 								enumerable: true,
-
-								get: (itemCell => () => {
-									return itemCell.get();
-								})(itemCell)
+								get: (itemCell => () => itemCell.get())(itemCell)
 							},
 
 							$index: {
 								configurable: true,
 								enumerable: true,
-
-								get: (indexCell => () => {
-									return indexCell.get();
-								})(indexCell)
+								get: (indexCell => () => indexCell.get())(indexCell)
 							}
 						}),
 						contentBindingResult
@@ -320,7 +320,10 @@ export class RnRepeat extends BaseComponent {
 
 					let newLastNode = content.lastChild!;
 					suppressConnectionStatusCallbacks();
-					lastNode.parentNode!.insertBefore(content, lastNode.nextSibling);
+					lastNode.parentNode!.insertBefore(
+						content,
+						lastNode == el ? lastNode : lastNode.nextSibling
+					);
 					resumeConnectionStatusCallbacks();
 					lastNode = newLastNode;
 

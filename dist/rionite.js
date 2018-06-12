@@ -3452,17 +3452,16 @@ var reForAttrValue = RegExp("^\\s*(" + namePattern_1.namePattern + ")\\s+(?:in|o
 function getItem(list, index) {
     return Array.isArray(list) ? list[index] : list.get(index);
 }
-function insertNodes(nodes, lastNode) {
+function insertBefore(nodes, beforeNode) {
     var nodeCount = nodes.length;
     if (nodeCount == 1) {
-        lastNode.parentNode.insertBefore(nodes[0], lastNode.nextSibling);
+        beforeNode.parentNode.insertBefore(nodes[0], beforeNode);
         return nodes[0];
     }
-    var df = document.createDocumentFragment();
+    var parent = beforeNode.parentNode;
     for (var i = 0; i < nodeCount; i++) {
-        df.appendChild(nodes[i]);
+        parent.insertBefore(nodes[i], beforeNode);
     }
-    lastNode.parentNode.insertBefore(df, lastNode.nextSibling);
     return nodes[nodeCount - 1];
 }
 function offBindings(bindings) {
@@ -3541,7 +3540,8 @@ var RnRepeat = /** @class */ (function (_super) {
         var startIndex = 0;
         var changed = false;
         if (list) {
-            var lastNode = this.element;
+            var el = this.element;
+            var lastNode = el;
             var removedValues_1 = new map_set_polyfill_1.Set();
             for (var i = 0, l = list.length; i < l;) {
                 var item = getItem(list, i);
@@ -3551,7 +3551,7 @@ var RnRepeat = /** @class */ (function (_super) {
                     if (removedValues_1.delete(value)) {
                         $item.item.set(item);
                         $item.index.set(i);
-                        lastNode = insertNodes($item.nodes, lastNode);
+                        lastNode = insertBefore($item.nodes, lastNode == el ? lastNode : lastNode.nextSibling);
                         i++;
                     }
                     else {
@@ -3582,7 +3582,7 @@ var RnRepeat = /** @class */ (function (_super) {
                                             var k$Item = $itemMap.get(trackBy ? prevList[k][trackBy] : prevList[k]);
                                             k$Item.item.set(item);
                                             k$Item.index.set(i);
-                                            lastNode = insertNodes(k$Item.nodes, lastNode);
+                                            lastNode = insertBefore(k$Item.nodes, lastNode == el ? lastNode : lastNode.nextSibling);
                                         }
                                         prevList.splice(foundIndex, foundCount);
                                         prevListLength -= foundCount;
@@ -3629,16 +3629,12 @@ var RnRepeat = /** @class */ (function (_super) {
                         _a[this._itemName] = {
                             configurable: true,
                             enumerable: true,
-                            get: (function (itemCell) { return function () {
-                                return itemCell.get();
-                            }; })(itemCell)
+                            get: (function (itemCell) { return function () { return itemCell.get(); }; })(itemCell)
                         },
                         _a.$index = {
                             configurable: true,
                             enumerable: true,
-                            get: (function (indexCell) { return function () {
-                                return indexCell.get();
-                            }; })(indexCell)
+                            get: (function (indexCell) { return function () { return indexCell.get(); }; })(indexCell)
                         },
                         _a)), contentBindingResult);
                     var childComponents = contentBindingResult[0];
@@ -3652,7 +3648,7 @@ var RnRepeat = /** @class */ (function (_super) {
                     });
                     var newLastNode = content.lastChild;
                     ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                    lastNode.parentNode.insertBefore(content, lastNode.nextSibling);
+                    lastNode.parentNode.insertBefore(content, lastNode == el ? lastNode : lastNode.nextSibling);
                     ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                     lastNode = newLastNode;
                     if (childComponents) {

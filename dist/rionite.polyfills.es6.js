@@ -1630,8 +1630,8 @@ return /******/ (function(modules) { // webpackBootstrap
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var di_1 = __webpack_require__(1);
-var logger_1 = __webpack_require__(2);
+const di_1 = __webpack_require__(1);
+const logger_1 = __webpack_require__(2);
 __webpack_require__(3);
 __webpack_require__(4);
 var nelm_parser_1 = __webpack_require__(5);
@@ -1688,8 +1688,8 @@ if (!('firstElementChild' in DocumentFragment.prototype)) {
     Object.defineProperty(DocumentFragment.prototype, 'firstElementChild', {
         configurable: true,
         enumerable: false,
-        get: function () {
-            for (var child = this.firstChild; child; child = child.nextSibling) {
+        get() {
+            for (let child = this.firstChild; child; child = child.nextSibling) {
                 if (child.nodeType == Node.ELEMENT_NODE) {
                     return child;
                 }
@@ -1702,8 +1702,8 @@ if (!('nextElementSibling' in DocumentFragment.prototype)) {
     Object.defineProperty(DocumentFragment.prototype, 'nextElementSibling', {
         configurable: true,
         enumerable: false,
-        get: function () {
-            for (var child = this.nextSibling; child; child = child.nextSibling) {
+        get() {
+            for (let child = this.nextSibling; child; child = child.nextSibling) {
                 if (child.nodeType == Node.ELEMENT_NODE) {
                     return child;
                 }
@@ -1721,16 +1721,16 @@ if (!('nextElementSibling' in DocumentFragment.prototype)) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var nelm_parser_1 = __webpack_require__(5);
-var Template_1 = __webpack_require__(6);
-['if-then', 'if-else', 'repeat'].forEach(function (name) {
-    Template_1.Template.helpers[name] = function (el) {
-        var attrs = el.attributes;
+const nelm_parser_1 = __webpack_require__(5);
+const Template_1 = __webpack_require__(6);
+['if-then', 'if-else', 'repeat'].forEach(name => {
+    Template_1.Template.helpers[name] = el => {
+        let attrs = el.attributes;
         // проверка на attrs для @*/name // ...
         if (attrs && name != 'repeat') {
-            var list = attrs.list;
-            var index = list.length - 1;
-            var foundIndex = void 0;
+            let list = attrs.list;
+            let index = list.length - 1;
+            let foundIndex;
             for (; index >= 0; index--) {
                 if (list[index].value == '') {
                     foundIndex = index;
@@ -1759,7 +1759,7 @@ var Template_1 = __webpack_require__(6);
                 nodeType: nelm_parser_1.NodeType.ELEMENT,
                 isHelper: false,
                 tagName: 'template',
-                names: el.names && el.names[0] ? ['$' + el.names[0]].concat(el.names) : null,
+                names: el.names && el.names[0] ? ['$' + el.names[0], ...el.names] : null,
                 attributes: attrs,
                 content: el.content
             }
@@ -1781,18 +1781,18 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__5__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_html_1 = __webpack_require__(7);
-var rionite_snake_case_attribute_name_1 = __webpack_require__(8);
-var self_closing_tags_1 = __webpack_require__(9);
-var escape_string_1 = __webpack_require__(11);
-var nelm_parser_1 = __webpack_require__(5);
-var join = Array.prototype.join;
+const escape_html_1 = __webpack_require__(7);
+const rionite_snake_case_attribute_name_1 = __webpack_require__(8);
+const self_closing_tags_1 = __webpack_require__(9);
+const escape_string_1 = __webpack_require__(11);
+const nelm_parser_1 = __webpack_require__(5);
+const join = Array.prototype.join;
 exports.ELEMENT_NAME_DELIMITER = '__';
-var Template = /** @class */ (function () {
-    function Template(nelm, opts) {
-        var parent = (this.parent = (opts && opts.parent) || null);
+class Template {
+    constructor(nelm, opts) {
+        let parent = (this.parent = (opts && opts.parent) || null);
         this.nelm = typeof nelm == 'string' ? new nelm_parser_1.Parser(nelm).parse() : nelm;
-        var blockName = (opts && opts.blockName) || this.nelm.name;
+        let blockName = (opts && opts.blockName) || this.nelm.name;
         if (parent) {
             this._elementBlockNamesTemplate = [
                 blockName ? blockName + exports.ELEMENT_NAME_DELIMITER : ''
@@ -1810,33 +1810,33 @@ var Template = /** @class */ (function () {
             this._elementBlockNamesTemplate = ['', ''];
         }
         this.onBeforeNamedElementOpeningTagClosing =
-            (opts && opts.onBeforeNamedElementOpeningTagClosing) || (function () { return ''; });
+            (opts && opts.onBeforeNamedElementOpeningTagClosing) || (() => '');
         this._tagNameMap = { __proto__: parent && parent._tagNameMap };
         this._attributeListMap = { __proto__: parent && parent._attributeListMap };
         this._attributeCountMap = { __proto__: parent && parent._attributeCountMap };
     }
-    Template.prototype.extend = function (nelm, opts) {
+    extend(nelm, opts) {
         return new Template(nelm, { __proto__: opts || null, parent: this });
-    };
-    Template.prototype.setBlockName = function (blockName) {
+    }
+    setBlockName(blockName) {
         if (Array.isArray(blockName)) {
-            (this._elementBlockNamesTemplate = blockName.map(function (blockName) { return blockName + exports.ELEMENT_NAME_DELIMITER; })).push('');
+            (this._elementBlockNamesTemplate = blockName.map(blockName => blockName + exports.ELEMENT_NAME_DELIMITER)).push('');
         }
         else {
             this._elementBlockNamesTemplate[0] = blockName + exports.ELEMENT_NAME_DELIMITER;
         }
         return this;
-    };
-    Template.prototype.render = function () {
+    }
+    render() {
         return (this._renderer || this._compileRenderers()).call({
             __proto__: this._elementRendererMap,
             '@': this,
             '@renderElementClasses': this._renderElementClasses,
             '@onBeforeNamedElementOpeningTagClosing': this.onBeforeNamedElementOpeningTagClosing
         });
-    };
-    Template.prototype._compileRenderers = function () {
-        var parent = this.parent;
+    }
+    _compileRenderers() {
+        let parent = this.parent;
         this._elements = [
             (this._currentElement = {
                 name: null,
@@ -1845,55 +1845,55 @@ var Template = /** @class */ (function () {
                 innerSource: []
             })
         ];
-        var elMap = (this._elementMap = {});
+        let elMap = (this._elementMap = {});
         if (parent) {
             this._renderer = parent._renderer || parent._compileRenderers();
         }
         this._elementRendererMap = { __proto__: parent && parent._elementRendererMap };
-        var content = this.nelm.content;
-        var contentLength = content.length;
+        let content = this.nelm.content;
+        let contentLength = content.length;
         if (contentLength) {
-            for (var i = 0; i < contentLength; i++) {
-                var node = content[i];
+            for (let i = 0; i < contentLength; i++) {
+                let node = content[i];
                 this._compileNode(node, node.nodeType == nelm_parser_1.NodeType.ELEMENT
                     ? node.tagName == 'svg'
                     : false);
             }
             Object.keys(elMap).forEach(function (name) {
-                var el = elMap[name];
-                this[name] = Function("return " + el.source.join(' + ') + ";");
+                let el = elMap[name];
+                this[name] = Function(`return ${el.source.join(' + ')};`);
                 if (el.superCall) {
-                    var inner_1 = Function('$super', "return " + el.innerSource.join(' + ') + ";");
-                    var parentElRendererMap_1 = parent && parent._elementRendererMap;
+                    let inner = Function('$super', `return ${el.innerSource.join(' + ')};`);
+                    let parentElRendererMap = parent && parent._elementRendererMap;
                     this[name + '/content'] = function () {
-                        return inner_1.call(this, parentElRendererMap_1);
+                        return inner.call(this, parentElRendererMap);
                     };
                 }
                 else {
-                    this[name + '/content'] = Function("return " + (el.innerSource.join(' + ') || "''") + ";");
+                    this[name + '/content'] = Function(`return ${el.innerSource.join(' + ') || "''"};`);
                 }
             }, this._elementRendererMap);
             if (!parent) {
-                return (this._renderer = Function("return " + (this._currentElement.innerSource.join(' + ') || "''") + ";"));
+                return (this._renderer = Function(`return ${this._currentElement.innerSource.join(' + ') || "''"};`));
             }
         }
         else if (!parent) {
-            return (this._renderer = function () { return ''; });
+            return (this._renderer = () => '');
         }
         return this._renderer;
-    };
-    Template.prototype._compileNode = function (node, isSVG, parentElName) {
+    }
+    _compileNode(node, isSVG, parentElName) {
         switch (node.nodeType) {
             case nelm_parser_1.NodeType.ELEMENT: {
-                var parent_1 = this.parent;
-                var els = this._elements;
-                var el = node;
-                var tagName = el.tagName;
-                var isHelper = el.isHelper;
-                var elNames = el.names;
-                var elName = elNames && elNames[0];
-                var elAttrs = el.attributes;
-                var content = el.content;
+                let parent = this.parent;
+                let els = this._elements;
+                let el = node;
+                let tagName = el.tagName;
+                let isHelper = el.isHelper;
+                let elNames = el.names;
+                let elName = elNames && elNames[0];
+                let elAttrs = el.attributes;
+                let content = el.content;
                 if (elNames) {
                     if (elName) {
                         if (tagName) {
@@ -1902,45 +1902,44 @@ var Template = /** @class */ (function () {
                         else {
                             // Не надо добавлять ` || 'div'`,
                             // тк. ниже tagName используется как имя хелпера.
-                            tagName = parent_1 && parent_1._tagNameMap[elName];
+                            tagName = parent && parent._tagNameMap[elName];
                         }
-                        var renderedAttrs = void 0;
+                        let renderedAttrs;
                         if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
-                            var attrListMap = this._attributeListMap ||
+                            let attrListMap = this._attributeListMap ||
                                 (this._attributeListMap = {
-                                    __proto__: (parent_1 && parent_1._attributeListMap) || null
+                                    __proto__: (parent && parent._attributeListMap) || null
                                 });
-                            var attrCountMap = this._attributeCountMap ||
+                            let attrCountMap = this._attributeCountMap ||
                                 (this._attributeCountMap = {
-                                    __proto__: (parent_1 && parent_1._attributeCountMap) || null
+                                    __proto__: (parent && parent._attributeCountMap) || null
                                 });
-                            var elAttrsSuperCall = elAttrs.superCall;
-                            var attrList = void 0;
-                            var attrCount = void 0;
+                            let elAttrsSuperCall = elAttrs.superCall;
+                            let attrList;
+                            let attrCount;
                             if (elAttrsSuperCall) {
-                                if (!parent_1) {
+                                if (!parent) {
                                     throw new TypeError('Parent template is required when using super');
                                 }
                                 attrList = attrListMap[elName] = {
-                                    __proto__: parent_1._attributeListMap[elAttrsSuperCall.elementName || elName] || null
+                                    __proto__: parent._attributeListMap[elAttrsSuperCall.elementName || elName] || null
                                 };
                                 attrCount = attrCountMap[elName] =
-                                    parent_1._attributeCountMap[elAttrsSuperCall.elementName || elName] || 0;
+                                    parent._attributeCountMap[elAttrsSuperCall.elementName || elName] || 0;
                             }
                             else {
                                 attrList = attrListMap[elName] = { __proto__: null };
                                 attrCount = attrCountMap[elName] = 0;
                             }
-                            for (var _i = 0, _a = elAttrs.list; _i < _a.length; _i++) {
-                                var attr = _a[_i];
-                                var name_1 = isSVG
+                            for (let attr of elAttrs.list) {
+                                let name = isSVG
                                     ? attr.name
                                     : rionite_snake_case_attribute_name_1.snakeCaseAttributeName(attr.name, true);
-                                var value = attr.value;
-                                var index = attrList[name_1];
-                                attrList[index === undefined ? attrCount : index] = " " + name_1 + "=\"" + (value && escape_string_1.escapeString(escape_html_1.escapeHTML(value))) + "\"";
+                                let value = attr.value;
+                                let index = attrList[name];
+                                attrList[index === undefined ? attrCount : index] = ` ${name}="${value && escape_string_1.escapeString(escape_html_1.escapeHTML(value))}"`;
                                 if (index === undefined) {
-                                    attrList[name_1] = attrCount;
+                                    attrList[name] = attrCount;
                                     attrCountMap[elName] = ++attrCount;
                                 }
                             }
@@ -1951,33 +1950,33 @@ var Template = /** @class */ (function () {
                                 };
                                 if (attrList['class'] !== undefined) {
                                     attrList[attrList['class']] =
-                                        " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames.join("','") + "']) + ' " +
+                                        ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join("','")}']) + ' ` +
                                             attrList[attrList['class']].slice(' class="'.length);
                                     renderedAttrs = join.call(attrList, '');
                                 }
                                 else {
                                     renderedAttrs =
-                                        " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames.join("','") + "']) + '\"" + join.call(attrList, '');
+                                        ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join("','")}']) + '"` + join.call(attrList, '');
                                 }
                             }
                         }
                         else if (!isHelper) {
-                            renderedAttrs = " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames.join("','") + "']) + '\"";
+                            renderedAttrs = ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join("','")}']) + '"`;
                         }
-                        var currentEl = {
+                        let currentEl = {
                             name: elName,
                             superCall: false,
                             source: isHelper
-                                ? ["this['" + elName + "/content']()"]
+                                ? [`this['${elName}/content']()`]
                                 : [
-                                    "'<" + (tagName ||
-                                        'div') + renderedAttrs + "' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['" + elNames.join("','") + "']) + '>'",
+                                    `'<${tagName ||
+                                        'div'}${renderedAttrs}' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames.join("','")}']) + '>'`,
                                     content && content.length
-                                        ? "this['" + elName + "/content']() + '</" + (tagName ||
-                                            'div') + ">'"
+                                        ? `this['${elName}/content']() + '</${tagName ||
+                                            'div'}>'`
                                         : !content && tagName && self_closing_tags_1.map.has(tagName)
                                             ? "''"
-                                            : "'</" + (tagName || 'div') + ">'"
+                                            : `'</${tagName || 'div'}>'`
                                 ],
                             innerSource: []
                         };
@@ -1986,104 +1985,99 @@ var Template = /** @class */ (function () {
                     }
                     else if (!isHelper) {
                         if (elAttrs && elAttrs.list.length) {
-                            var hasClassAttr = false;
-                            var attrs = '';
-                            for (var _b = 0, _c = elAttrs.list; _b < _c.length; _b++) {
-                                var attr = _c[_b];
-                                var value = attr.value;
+                            let hasClassAttr = false;
+                            let attrs = '';
+                            for (let attr of elAttrs.list) {
+                                let value = attr.value;
                                 if (attr.name == 'class') {
                                     hasClassAttr = true;
-                                    attrs += " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
+                                    attrs += ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
                                         .slice(1)
-                                        .join("','") + "']) + '" + (value ? ' ' + escape_string_1.escapeString(escape_html_1.escapeHTML(value)) : '') + "\"";
+                                        .join("','")}']) + '${value ? ' ' + escape_string_1.escapeString(escape_html_1.escapeHTML(value)) : ''}"`;
                                 }
                                 else {
-                                    attrs += " " + (isSVG ? attr.name : rionite_snake_case_attribute_name_1.snakeCaseAttributeName(attr.name, true)) + "=\"" + (value && escape_string_1.escapeString(escape_html_1.escapeHTML(value))) + "\"";
+                                    attrs += ` ${isSVG ? attr.name : rionite_snake_case_attribute_name_1.snakeCaseAttributeName(attr.name, true)}="${value && escape_string_1.escapeString(escape_html_1.escapeHTML(value))}"`;
                                 }
                             }
-                            this._currentElement.innerSource.push("'<" + (tagName || 'div') + (hasClassAttr
+                            this._currentElement.innerSource.push(`'<${tagName || 'div'}${hasClassAttr
                                 ? attrs
-                                : " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
+                                : ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
                                     .slice(1)
-                                    .join("','") + "']) + '\"" + attrs) + "' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['" + elNames
+                                    .join("','")}']) + '"` + attrs}' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames
                                 .slice(1)
-                                .join("','") + "']) + '>'");
+                                .join("','")}']) + '>'`);
                         }
                         else {
-                            this._currentElement.innerSource.push("'<" + (tagName ||
-                                'div') + " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
+                            this._currentElement.innerSource.push(`'<${tagName ||
+                                'div'} class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
                                 .slice(1)
-                                .join("','") + "']) + '\"' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['" + elNames
+                                .join("','")}']) + '"' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames
                                 .slice(1)
-                                .join("','") + "']) + '>'");
+                                .join("','")}']) + '>'`);
                         }
                     }
                 }
                 else if (!isHelper) {
-                    this._currentElement.innerSource.push("'<" + (tagName || 'div') + (elAttrs
+                    this._currentElement.innerSource.push(`'<${tagName || 'div'}${elAttrs
                         ? elAttrs.list
-                            .map(function (attr) {
-                            return " " + (isSVG
-                                ? attr.name
-                                : rionite_snake_case_attribute_name_1.snakeCaseAttributeName(attr.name, true)) + "=\"" + (attr.value &&
-                                escape_string_1.escapeString(escape_html_1.escapeHTML(attr.value))) + "\"";
-                        })
+                            .map(attr => ` ${isSVG
+                            ? attr.name
+                            : rionite_snake_case_attribute_name_1.snakeCaseAttributeName(attr.name, true)}="${attr.value &&
+                            escape_string_1.escapeString(escape_html_1.escapeHTML(attr.value))}"`)
                             .join('')
-                        : '') + ">'");
+                        : ''}>'`);
                 }
                 if (isHelper) {
                     if (!tagName) {
                         throw new TypeError('"tagName" is required');
                     }
-                    var helper = Template.helpers[tagName];
+                    let helper = Template.helpers[tagName];
                     if (!helper) {
-                        throw new TypeError("Helper \"" + tagName + "\" is not defined");
+                        throw new TypeError(`Helper "${tagName}" is not defined`);
                     }
                     content = helper(el);
                 }
                 if (content) {
-                    for (var _d = 0, content_1 = content; _d < content_1.length; _d++) {
-                        var node_1 = content_1[_d];
-                        this._compileNode(node_1, isSVG ||
-                            (node_1.nodeType == nelm_parser_1.NodeType.ELEMENT
-                                ? node_1.tagName == 'svg'
+                    for (let node of content) {
+                        this._compileNode(node, isSVG ||
+                            (node.nodeType == nelm_parser_1.NodeType.ELEMENT
+                                ? node.tagName == 'svg'
                                 : false), elName || parentElName);
                     }
                 }
                 if (elName) {
                     els.pop();
                     this._currentElement = els[els.length - 1];
-                    this._currentElement.innerSource.push("this['" + elName + "']()");
+                    this._currentElement.innerSource.push(`this['${elName}']()`);
                 }
                 else if (!isHelper && (content || !tagName || !self_closing_tags_1.map.has(tagName))) {
-                    this._currentElement.innerSource.push("'</" + (tagName || 'div') + ">'");
+                    this._currentElement.innerSource.push(`'</${tagName || 'div'}>'`);
                 }
                 break;
             }
             case nelm_parser_1.NodeType.TEXT: {
-                this._currentElement.innerSource.push("'" + (node.value && escape_string_1.escapeString(node.value)) + "'");
+                this._currentElement.innerSource.push(`'${node.value && escape_string_1.escapeString(node.value)}'`);
                 break;
             }
             case nelm_parser_1.NodeType.SUPER_CALL: {
                 this._currentElement.superCall = true;
-                this._currentElement.innerSource.push("$super['" + (node.elementName ||
-                    parentElName) + "/content'].call(this)");
+                this._currentElement.innerSource.push(`$super['${node.elementName ||
+                    parentElName}/content'].call(this)`);
                 break;
             }
         }
-    };
-    Template.prototype._renderElementClasses = function (elNames) {
-        var elClasses = '';
-        for (var i = 0, l = elNames.length; i < l; i++) {
+    }
+    _renderElementClasses(elNames) {
+        let elClasses = '';
+        for (let i = 0, l = elNames.length; i < l; i++) {
             elClasses += this._elementBlockNamesTemplate.join(elNames[i] + ' ');
         }
         return elClasses.slice(0, -1);
-    };
-    Template.helpers = {
-        section: function (el) { return el.content; }
-    };
-    return Template;
-}());
+    }
+}
+Template.helpers = {
+    section: el => el.content
+};
 exports.Template = Template;
 
 
@@ -2160,25 +2154,24 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__11__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var next_uid_1 = __webpack_require__(13);
-var cellx_1 = __webpack_require__(14);
-var DisposableMixin = /** @class */ (function () {
-    function DisposableMixin() {
+const next_uid_1 = __webpack_require__(13);
+const cellx_1 = __webpack_require__(14);
+class DisposableMixin {
+    constructor() {
         this._disposables = {};
     }
-    DisposableMixin.prototype.listenTo = function (target, type, listener, context, useCapture) {
-        var _this = this;
-        var listenings;
+    listenTo(target, type, listener, context, useCapture) {
+        let listenings;
         if (typeof type == 'object') {
             listenings = [];
             if (Array.isArray(type)) {
-                for (var i = 0, l = type.length; i < l; i++) {
+                for (let i = 0, l = type.length; i < l; i++) {
                     listenings.push(this.listenTo(target, type[i], listener, context, useCapture));
                 }
             }
             else {
-                for (var name_1 in type) {
-                    listenings.push(this.listenTo(target, name_1, type[name_1], listener, context));
+                for (let name in type) {
+                    listenings.push(this.listenTo(target, name, type[name], listener, context));
                 }
             }
         }
@@ -2187,13 +2180,13 @@ var DisposableMixin = /** @class */ (function () {
                 target instanceof NodeList ||
                 target instanceof HTMLCollection) {
                 listenings = [];
-                for (var i = 0, l = target.length; i < l; i++) {
+                for (let i = 0, l = target.length; i < l; i++) {
                     listenings.push(this.listenTo(target[i], type, listener, context, useCapture));
                 }
             }
             else if (Array.isArray(listener)) {
                 listenings = [];
-                for (var i = 0, l = listener.length; i < l; i++) {
+                for (let i = 0, l = listener.length; i < l; i++) {
                     listenings.push(this.listenTo(target, type, listener[i], context, useCapture));
                 }
             }
@@ -2201,21 +2194,20 @@ var DisposableMixin = /** @class */ (function () {
                 return this._listenTo(target, type, listener, context !== undefined ? context : this, useCapture || false);
             }
         }
-        var id = next_uid_1.nextUID();
-        var stopListening = function () {
-            for (var i = listenings.length; i;) {
+        let id = next_uid_1.nextUID();
+        let stopListening = () => {
+            for (let i = listenings.length; i;) {
                 listenings[--i].stop();
             }
-            delete _this._disposables[id];
+            delete this._disposables[id];
         };
-        var listening = (this._disposables[id] = {
+        let listening = (this._disposables[id] = {
             stop: stopListening,
             dispose: stopListening
         });
         return listening;
-    };
-    DisposableMixin.prototype._listenTo = function (target, type, listener, context, useCapture) {
-        var _this = this;
+    }
+    _listenTo(target, type, listener, context, useCapture) {
         if (target instanceof cellx_1.EventEmitter) {
             target.on(type, listener, context);
         }
@@ -2228,69 +2220,66 @@ var DisposableMixin = /** @class */ (function () {
         else {
             throw new TypeError('Unable to add a listener');
         }
-        var id = next_uid_1.nextUID();
-        var stopListening = function () {
-            if (_this._disposables[id]) {
+        let id = next_uid_1.nextUID();
+        let stopListening = () => {
+            if (this._disposables[id]) {
                 if (target instanceof cellx_1.EventEmitter) {
                     target.off(type, listener, context);
                 }
                 else {
                     target.removeEventListener(type, listener, useCapture);
                 }
-                delete _this._disposables[id];
+                delete this._disposables[id];
             }
         };
-        var listening = (this._disposables[id] = {
+        let listening = (this._disposables[id] = {
             stop: stopListening,
             dispose: stopListening
         });
         return listening;
-    };
-    DisposableMixin.prototype.setTimeout = function (callback, delay) {
-        var _this = this;
-        var id = next_uid_1.nextUID();
-        var timeoutId = setTimeout(function () {
-            delete _this._disposables[id];
-            callback.call(_this);
+    }
+    setTimeout(callback, delay) {
+        let id = next_uid_1.nextUID();
+        let timeoutId = setTimeout(() => {
+            delete this._disposables[id];
+            callback.call(this);
         }, delay);
-        var clearTimeout_ = function () {
-            if (_this._disposables[id]) {
+        let clearTimeout_ = () => {
+            if (this._disposables[id]) {
                 clearTimeout(timeoutId);
-                delete _this._disposables[id];
+                delete this._disposables[id];
             }
         };
-        var timeout = (this._disposables[id] = {
+        let timeout = (this._disposables[id] = {
             clear: clearTimeout_,
             dispose: clearTimeout_
         });
         return timeout;
-    };
-    DisposableMixin.prototype.setInterval = function (callback, delay) {
-        var _this = this;
-        var id = next_uid_1.nextUID();
-        var intervalId = setInterval(function () {
-            callback.call(_this);
+    }
+    setInterval(callback, delay) {
+        let id = next_uid_1.nextUID();
+        let intervalId = setInterval(() => {
+            callback.call(this);
         }, delay);
-        var clearInterval_ = function () {
-            if (_this._disposables[id]) {
+        let clearInterval_ = () => {
+            if (this._disposables[id]) {
                 clearInterval(intervalId);
-                delete _this._disposables[id];
+                delete this._disposables[id];
             }
         };
-        var interval = (this._disposables[id] = {
+        let interval = (this._disposables[id] = {
             clear: clearInterval_,
             dispose: clearInterval_
         });
         return interval;
-    };
-    DisposableMixin.prototype.registerCallback = function (callback) {
-        var _this = this;
-        var id = next_uid_1.nextUID();
-        var disposable = this;
-        var cancelCallback = function () {
-            delete _this._disposables[id];
+    }
+    registerCallback(callback) {
+        let id = next_uid_1.nextUID();
+        let disposable = this;
+        let cancelCallback = () => {
+            delete this._disposables[id];
         };
-        var registeredCallback = function registeredCallback() {
+        let registeredCallback = function registeredCallback() {
             if (disposable._disposables[id]) {
                 delete disposable._disposables[id];
                 return callback.apply(disposable, arguments);
@@ -2300,16 +2289,15 @@ var DisposableMixin = /** @class */ (function () {
         registeredCallback.dispose = cancelCallback;
         this._disposables[id] = registeredCallback;
         return registeredCallback;
-    };
-    DisposableMixin.prototype.dispose = function () {
-        var disposables = this._disposables;
-        for (var id in disposables) {
+    }
+    dispose() {
+        let disposables = this._disposables;
+        for (let id in disposables) {
             disposables[id].dispose();
         }
         return this;
-    };
-    return DisposableMixin;
-}());
+    }
+}
 exports.DisposableMixin = DisposableMixin;
 
 
@@ -2332,69 +2320,60 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__14__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var gettext_1 = __webpack_require__(16);
+const gettext_1 = __webpack_require__(16);
 exports.formatters = {
-    or: function (value, arg) {
+    or(value, arg) {
         return value || arg;
     },
-    default: function (value, arg) {
+    default(value, arg) {
         return value === undefined ? arg : value;
     },
-    not: function (value) {
+    not(value) {
         return !value;
     },
-    notnot: function (value) {
+    notnot(value) {
         return !!value;
     },
-    eq: function (value, arg) {
+    eq(value, arg) {
         return value == arg;
     },
-    identical: function (value, arg) {
+    identical(value, arg) {
         return value === arg;
     },
-    lt: function (value, arg) {
+    lt(value, arg) {
         return value < arg;
     },
-    lte: function (value, arg) {
+    lte(value, arg) {
         return value <= arg;
     },
-    gt: function (value, arg) {
+    gt(value, arg) {
         return value > arg;
     },
-    gte: function (value, arg) {
+    gte(value, arg) {
         return value >= arg;
     },
-    has: function (obj, key) {
+    has(obj, key) {
         return !!obj && (typeof obj.has == 'function' ? obj.has(key) : obj.hasOwnProperty(key));
     },
-    get: function (obj, key) {
+    get(obj, key) {
         return obj && (typeof obj.get == 'function' ? obj.get(key) : obj[key]);
     },
-    key: function (obj, key) {
+    key(obj, key) {
         return obj && obj[key];
     },
-    join: function (arr, separator) {
-        if (separator === void 0) { separator = ', '; }
+    join(arr, separator = ', ') {
         return arr && arr.join(separator);
     },
-    dump: function (value) {
+    dump(value) {
         return value == null ? value : JSON.stringify(value);
     },
     t: gettext_1.getText.t,
     pt: gettext_1.getText.pt,
-    nt: function (count, key) {
-        var args = [];
-        for (var _i = 2; _i < arguments.length; _i++) {
-            args[_i - 2] = arguments[_i];
-        }
+    nt(count, key, ...args) {
         args.unshift(count);
         return gettext_1.getText('', key, true, args);
     },
-    npt: function (count, key, context) {
-        var args = [];
-        for (var _i = 3; _i < arguments.length; _i++) {
-            args[_i - 3] = arguments[_i];
-        }
+    npt(count, key, context, ...args) {
         args.unshift(count);
         return gettext_1.getText(context, key, true, args);
     }
@@ -2415,9 +2394,9 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__16__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var registerComponent_1 = __webpack_require__(18);
+const registerComponent_1 = __webpack_require__(18);
 function Component(config) {
-    return function (componentConstr) {
+    return (componentConstr) => {
         if (config) {
             if (config.elementIs !== undefined) {
                 componentConstr.elementIs = config.elementIs;
@@ -2454,25 +2433,25 @@ exports.Component = Component;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var kebab_case_1 = __webpack_require__(19);
-var mixin_1 = __webpack_require__(20);
-var pascalize_1 = __webpack_require__(21);
-var rionite_snake_case_attribute_name_1 = __webpack_require__(8);
-var cellx_1 = __webpack_require__(14);
-var BaseComponent_1 = __webpack_require__(23);
-var componentConstructorMap_1 = __webpack_require__(42);
-var ComponentParams_1 = __webpack_require__(29);
-var elementConstructorMap_1 = __webpack_require__(43);
-var ElementProtoMixin_1 = __webpack_require__(44);
-var Features_1 = __webpack_require__(46);
-var Template_1 = __webpack_require__(6);
-var push = Array.prototype.push;
+const kebab_case_1 = __webpack_require__(19);
+const mixin_1 = __webpack_require__(20);
+const pascalize_1 = __webpack_require__(21);
+const rionite_snake_case_attribute_name_1 = __webpack_require__(8);
+const cellx_1 = __webpack_require__(14);
+const BaseComponent_1 = __webpack_require__(23);
+const componentConstructorMap_1 = __webpack_require__(42);
+const ComponentParams_1 = __webpack_require__(29);
+const elementConstructorMap_1 = __webpack_require__(43);
+const ElementProtoMixin_1 = __webpack_require__(44);
+const Features_1 = __webpack_require__(46);
+const Template_1 = __webpack_require__(6);
+const push = Array.prototype.push;
 function inheritProperty(target, source, name, depth) {
-    var obj = target[name];
-    var parentObj = source[name];
+    let obj = target[name];
+    let parentObj = source[name];
     if (obj && parentObj && obj != parentObj) {
-        var o = (target[name] = { __proto__: parentObj });
-        for (var key in obj) {
+        let o = (target[name] = { __proto__: parentObj });
+        for (let key in obj) {
             o[key] = obj[key];
             if (depth) {
                 inheritProperty(o, parentObj, key, depth - 1);
@@ -2481,32 +2460,32 @@ function inheritProperty(target, source, name, depth) {
     }
 }
 function registerComponent(componentConstr) {
-    var elIs = componentConstr.hasOwnProperty('elementIs')
+    let elIs = componentConstr.hasOwnProperty('elementIs')
         ? componentConstr.elementIs
         : (componentConstr.elementIs = componentConstr.name);
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
-    var kebabCaseElIs = kebab_case_1.kebabCase(elIs, true);
+    let kebabCaseElIs = kebab_case_1.kebabCase(elIs, true);
     if (componentConstructorMap_1.componentConstructorMap.has(kebabCaseElIs)) {
-        throw new TypeError("Component \"" + kebabCaseElIs + "\" already registered");
+        throw new TypeError(`Component "${kebabCaseElIs}" already registered`);
     }
-    var componentProto = componentConstr.prototype;
-    var parentComponentConstr = Object.getPrototypeOf(componentProto)
+    let componentProto = componentConstr.prototype;
+    let parentComponentConstr = Object.getPrototypeOf(componentProto)
         .constructor;
     inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
-    var paramsConfig = componentConstr.params;
+    let paramsConfig = componentConstr.params;
     if (paramsConfig) {
-        var _loop_1 = function (name_1) {
-            var paramConfig = paramsConfig[name_1];
+        for (let name in paramsConfig) {
+            let paramConfig = paramsConfig[name];
             if (paramConfig === null) {
-                var parentParamConfig = parentComponentConstr.params && parentComponentConstr.params[name_1];
+                let parentParamConfig = parentComponentConstr.params && parentComponentConstr.params[name];
                 if (parentParamConfig != null) {
                     Object.defineProperty(componentProto, (typeof parentParamConfig == 'object' &&
                         (parentParamConfig.type !== undefined ||
                             parentParamConfig.default !== undefined) &&
                         parentParamConfig.property) ||
-                        name_1, {
+                        name, {
                         configurable: true,
                         enumerable: true,
                         writable: true,
@@ -2515,12 +2494,12 @@ function registerComponent(componentConstr) {
                 }
             }
             else {
-                var snakeCaseName_1 = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name_1, true);
-                var isObject = typeof paramConfig == 'object' &&
+                let snakeCaseName = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true);
+                let isObject = typeof paramConfig == 'object' &&
                     (paramConfig.type !== undefined || paramConfig.default !== undefined);
-                var propertyName_1 = (isObject && paramConfig.property) || name_1;
-                var required = void 0;
-                var readonly = void 0;
+                let propertyName = (isObject && paramConfig.property) || name;
+                let required;
+                let readonly;
                 if (isObject) {
                     required = paramConfig.required || false;
                     readonly = paramConfig.readonly || false;
@@ -2528,40 +2507,40 @@ function registerComponent(componentConstr) {
                 else {
                     required = readonly = false;
                 }
-                var $paramConfig_1 = ((componentConstr.hasOwnProperty(BaseComponent_1.KEY_PARAMS_CONFIG)
+                let $paramConfig = ((componentConstr.hasOwnProperty(BaseComponent_1.KEY_PARAMS_CONFIG)
                     ? componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG]
-                    : (componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG] = Object.create(null)))[name_1] = componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG][snakeCaseName_1] = {
-                    name: name_1,
-                    property: propertyName_1,
+                    : (componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG] = Object.create(null)))[name] = componentConstr[BaseComponent_1.KEY_PARAMS_CONFIG][snakeCaseName] = {
+                    name,
+                    property: propertyName,
                     type: undefined,
                     typeSerializer: undefined,
                     default: undefined,
-                    required: required,
-                    readonly: readonly,
-                    paramConfig: paramsConfig[name_1]
+                    required,
+                    readonly,
+                    paramConfig: paramsConfig[name]
                 });
-                var descriptor = void 0;
+                let descriptor;
                 if (readonly) {
                     descriptor = {
                         configurable: true,
                         enumerable: true,
-                        get: function () {
-                            return this[BaseComponent_1.KEY_PARAMS].get(name_1);
+                        get() {
+                            return this[BaseComponent_1.KEY_PARAMS].get(name);
                         },
-                        set: function (value) {
+                        set(value) {
                             if (this[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
-                                if (value !== this[BaseComponent_1.KEY_PARAMS].get(name_1)) {
-                                    throw new TypeError("Parameter \"" + name_1 + "\" is readonly");
+                                if (value !== this[BaseComponent_1.KEY_PARAMS].get(name)) {
+                                    throw new TypeError(`Parameter "${name}" is readonly`);
                                 }
                             }
                             else {
-                                this[BaseComponent_1.KEY_PARAMS].set(name_1, value);
+                                this[BaseComponent_1.KEY_PARAMS].set(name, value);
                             }
                         }
                     };
                 }
                 else {
-                    Object.defineProperty(componentProto, propertyName_1 + 'Cell', {
+                    Object.defineProperty(componentProto, propertyName + 'Cell', {
                         configurable: true,
                         enumerable: false,
                         writable: true,
@@ -2570,16 +2549,16 @@ function registerComponent(componentConstr) {
                     descriptor = {
                         configurable: true,
                         enumerable: true,
-                        get: function () {
-                            var valueCell = this[propertyName_1 + 'Cell'];
+                        get() {
+                            let valueCell = this[propertyName + 'Cell'];
                             if (valueCell) {
                                 return valueCell.get();
                             }
-                            var currentlyPulling = cellx_1.Cell.currentlyPulling;
-                            var value = this[BaseComponent_1.KEY_PARAMS].get(name_1);
+                            let currentlyPulling = cellx_1.Cell.currentlyPulling;
+                            let value = this[BaseComponent_1.KEY_PARAMS].get(name);
                             if (currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
                                 valueCell = new cellx_1.Cell(value, { context: this });
-                                Object.defineProperty(this, propertyName_1 + 'Cell', {
+                                Object.defineProperty(this, propertyName + 'Cell', {
                                     configurable: true,
                                     enumerable: false,
                                     writable: true,
@@ -2591,34 +2570,31 @@ function registerComponent(componentConstr) {
                             }
                             return value;
                         },
-                        set: function (value) {
+                        set(value) {
                             if (this[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
-                                var rawValue = $paramConfig_1.typeSerializer.write(value, $paramConfig_1.default);
+                                let rawValue = $paramConfig.typeSerializer.write(value, $paramConfig.default);
                                 if (rawValue === null) {
-                                    this.element.removeAttribute(snakeCaseName_1);
+                                    this.element.removeAttribute(snakeCaseName);
                                 }
                                 else {
-                                    this.element.setAttribute(snakeCaseName_1, rawValue);
+                                    this.element.setAttribute(snakeCaseName, rawValue);
                                 }
-                                var valueCell = this[propertyName_1 + 'Cell'];
+                                let valueCell = this[propertyName + 'Cell'];
                                 if (valueCell) {
                                     valueCell.set(value);
                                 }
                                 else {
-                                    this[BaseComponent_1.KEY_PARAMS].set(name_1, value);
+                                    this[BaseComponent_1.KEY_PARAMS].set(name, value);
                                 }
                             }
                             else {
-                                this[BaseComponent_1.KEY_PARAMS].set(name_1, value);
+                                this[BaseComponent_1.KEY_PARAMS].set(name, value);
                             }
                         }
                     };
                 }
-                Object.defineProperty(componentProto, propertyName_1, descriptor);
+                Object.defineProperty(componentProto, propertyName, descriptor);
             }
-        };
-        for (var name_1 in paramsConfig) {
-            _loop_1(name_1);
         }
     }
     inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
@@ -2628,7 +2604,7 @@ function registerComponent(componentConstr) {
     if (parentComponentConstr._elementBlockNames) {
         push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
     }
-    var template = componentConstr.template;
+    let template = componentConstr.template;
     if (template !== null) {
         if (template === parentComponentConstr.template) {
             componentConstr.template = template.extend('', {
@@ -2650,21 +2626,20 @@ function registerComponent(componentConstr) {
     inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
     inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
     if (template !== null) {
-        var events_1 = componentConstr.events;
-        var domEvents_1 = componentConstr.domEvents;
-        if (events_1 || domEvents_1) {
-            componentConstr.template.onBeforeNamedElementOpeningTagClosing = function (elNames) {
-                var attrs = '';
-                for (var _i = 0, elNames_1 = elNames; _i < elNames_1.length; _i++) {
-                    var name_2 = elNames_1[_i];
-                    if (events_1 && events_1[name_2]) {
-                        for (var type in events_1[name_2]) {
-                            attrs += " oncomponent-" + (type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type) + "=\":" + name_2 + "\"";
+        let events = componentConstr.events;
+        let domEvents = componentConstr.domEvents;
+        if (events || domEvents) {
+            componentConstr.template.onBeforeNamedElementOpeningTagClosing = elNames => {
+                let attrs = '';
+                for (let name of elNames) {
+                    if (events && events[name]) {
+                        for (let type in events[name]) {
+                            attrs += ` oncomponent-${type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type}=":${name}"`;
                         }
                     }
-                    if (domEvents_1 && domEvents_1[name_2]) {
-                        for (var type in domEvents_1[name_2]) {
-                            attrs += " on-" + type + "=\":" + name_2 + "\"";
+                    if (domEvents && domEvents[name]) {
+                        for (let type in domEvents[name]) {
+                            attrs += ` on-${type}=":${name}"`;
                         }
                     }
                 }
@@ -2672,19 +2647,19 @@ function registerComponent(componentConstr) {
             };
         }
     }
-    var elExtends = componentConstr.elementExtends;
-    var parentElConstr;
+    let elExtends = componentConstr.elementExtends;
+    let parentElConstr;
     if (elExtends) {
         parentElConstr =
-            elementConstructorMap_1.elementConstructorMap.get(elExtends) || window["HTML" + pascalize_1.pascalize(elExtends) + "Element"];
+            elementConstructorMap_1.elementConstructorMap.get(elExtends) || window[`HTML${pascalize_1.pascalize(elExtends)}Element`];
         if (!parentElConstr) {
-            throw new TypeError("Component \"" + elExtends + "\" is not registered");
+            throw new TypeError(`Component "${elExtends}" is not registered`);
         }
     }
     else {
         parentElConstr = HTMLElement;
     }
-    var elConstr = Features_1.reflectConstruct
+    let elConstr = Features_1.reflectConstruct
         ? function _(self) {
             return Reflect.construct(parentElConstr, [self], _);
         }
@@ -2695,19 +2670,19 @@ function registerComponent(componentConstr) {
     Object.defineProperty(elConstr, 'observedAttributes', {
         configurable: true,
         enumerable: true,
-        get: function () {
-            var paramsConfig = componentConstr.params;
+        get() {
+            let paramsConfig = componentConstr.params;
             if (!paramsConfig) {
                 return [];
             }
-            var attrs = [];
-            for (var name_3 in paramsConfig) {
-                attrs.push(rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name_3, true));
+            let attrs = [];
+            for (let name in paramsConfig) {
+                attrs.push(rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true));
             }
             return attrs;
         }
     });
-    var elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
+    let elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
     elProto.constructor = elConstr;
     mixin_1.mixin(elProto, ElementProtoMixin_1.ElementProtoMixin);
     window.customElements.define(kebabCaseElIs, elConstr, elExtends ? { extends: elExtends } : undefined);
@@ -2775,16 +2750,6 @@ exports.camelize = camelize;
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -2795,173 +2760,158 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var di_1 = __webpack_require__(1);
-var get_uid_1 = __webpack_require__(24);
-var kebab_case_1 = __webpack_require__(19);
-var logger_1 = __webpack_require__(2);
-var map_set_polyfill_1 = __webpack_require__(10);
-var move_content_1 = __webpack_require__(25);
-var symbol_polyfill_1 = __webpack_require__(26);
-var cellx_1 = __webpack_require__(14);
-var html_to_fragment_1 = __webpack_require__(27);
-var attachChildComponentElements_1 = __webpack_require__(28);
-var bindContent_1 = __webpack_require__(32);
-var componentBinding_1 = __webpack_require__(41);
-var componentConstructorMap_1 = __webpack_require__(42);
-var DisposableMixin_1 = __webpack_require__(12);
-var elementConstructorMap_1 = __webpack_require__(43);
-var ElementProtoMixin_1 = __webpack_require__(44);
-var handledEvents_1 = __webpack_require__(47);
-var handleDOMEvent_1 = __webpack_require__(48);
-var handleEvent_1 = __webpack_require__(49);
-var Features_1 = __webpack_require__(46);
-var map = Array.prototype.map;
+const di_1 = __webpack_require__(1);
+const get_uid_1 = __webpack_require__(24);
+const kebab_case_1 = __webpack_require__(19);
+const logger_1 = __webpack_require__(2);
+const map_set_polyfill_1 = __webpack_require__(10);
+const move_content_1 = __webpack_require__(25);
+const symbol_polyfill_1 = __webpack_require__(26);
+const cellx_1 = __webpack_require__(14);
+const html_to_fragment_1 = __webpack_require__(27);
+const attachChildComponentElements_1 = __webpack_require__(28);
+const bindContent_1 = __webpack_require__(32);
+const componentBinding_1 = __webpack_require__(41);
+const componentConstructorMap_1 = __webpack_require__(42);
+const DisposableMixin_1 = __webpack_require__(12);
+const elementConstructorMap_1 = __webpack_require__(43);
+const ElementProtoMixin_1 = __webpack_require__(44);
+const handledEvents_1 = __webpack_require__(47);
+const handleDOMEvent_1 = __webpack_require__(48);
+const handleEvent_1 = __webpack_require__(49);
+const Features_1 = __webpack_require__(46);
+const map = Array.prototype.map;
 exports.KEY_PARAMS_CONFIG = symbol_polyfill_1.Symbol('Rionite/BaseComponent[paramsConfig]');
 exports.KEY_PARAMS = symbol_polyfill_1.Symbol('Rionite/BaseComponent[params]');
 exports.KEY_IS_SLOT = symbol_polyfill_1.Symbol('Rionite/BaseComponent[isSlot]');
-var BaseComponent = /** @class */ (function (_super) {
-    __extends(BaseComponent, _super);
-    function BaseComponent(el) {
-        var _this = _super.call(this) || this;
-        _this._parentComponent = null;
-        _this._attached = false;
-        _this.initialized = false;
-        _this.isReady = false;
-        DisposableMixin_1.DisposableMixin.call(_this);
-        var constr = _this.constructor;
+class BaseComponent extends cellx_1.EventEmitter {
+    constructor(el) {
+        super();
+        this._parentComponent = null;
+        this._attached = false;
+        this.initialized = false;
+        this.isReady = false;
+        DisposableMixin_1.DisposableMixin.call(this);
+        let constr = this.constructor;
         if (!elementConstructorMap_1.elementConstructorMap.has(constr.elementIs)) {
             throw new TypeError('Component must be registered');
         }
         if (!el) {
             el = document.createElement(kebab_case_1.kebabCase(constr.elementIs, true));
         }
-        _this.element = el;
-        el.rioniteComponent = _this;
-        Object.defineProperty(el, '$component', { value: _this });
-        _this[exports.KEY_PARAMS] = new map_set_polyfill_1.Map();
-        _this.created();
-        return _this;
+        this.element = el;
+        el.rioniteComponent = this;
+        Object.defineProperty(el, '$component', { value: this });
+        this[exports.KEY_PARAMS] = new map_set_polyfill_1.Map();
+        this.created();
     }
-    Object.defineProperty(BaseComponent, "bindsInputContent", {
-        get: function () {
-            return this.template !== null;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(BaseComponent.prototype, "ownerComponent", {
-        get: function () {
-            if (this._ownerComponent) {
-                return this._ownerComponent;
+    static get bindsInputContent() {
+        return this.template !== null;
+    }
+    get ownerComponent() {
+        if (this._ownerComponent) {
+            return this._ownerComponent;
+        }
+        let component = this.parentComponent;
+        if (!component) {
+            return (this._ownerComponent = this);
+        }
+        for (let parentComponent; (parentComponent = component.parentComponent);) {
+            component = parentComponent;
+        }
+        return (this._ownerComponent = component);
+    }
+    set ownerComponent(ownerComponent) {
+        this._ownerComponent = ownerComponent;
+    }
+    get parentComponent() {
+        if (this._parentComponent !== undefined) {
+            return this._parentComponent;
+        }
+        for (let node; (node = (node || this.element).parentNode);) {
+            if (node.$component) {
+                return (this._parentComponent = node.$component);
             }
-            var component = this.parentComponent;
-            if (!component) {
-                return (this._ownerComponent = this);
-            }
-            for (var parentComponent = void 0; (parentComponent = component.parentComponent);) {
-                component = parentComponent;
-            }
-            return (this._ownerComponent = component);
-        },
-        set: function (ownerComponent) {
-            this._ownerComponent = ownerComponent;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    Object.defineProperty(BaseComponent.prototype, "parentComponent", {
-        get: function () {
-            if (this._parentComponent !== undefined) {
-                return this._parentComponent;
-            }
-            for (var node = void 0; (node = (node || this.element).parentNode);) {
-                if (node.$component) {
-                    return (this._parentComponent = node.$component);
-                }
-            }
-            return (this._parentComponent = null);
-        },
-        enumerable: true,
-        configurable: true
-    });
-    BaseComponent.prototype.handleEvent = function (evt) {
-        _super.prototype.handleEvent.call(this, evt);
+        }
+        return (this._parentComponent = null);
+    }
+    handleEvent(evt) {
+        super.handleEvent(evt);
         if (evt.bubbles !== false && !evt.propagationStopped) {
-            var parentComponent = this.parentComponent;
+            let parentComponent = this.parentComponent;
             if (parentComponent) {
                 parentComponent.handleEvent(evt);
                 return;
             }
         }
         handleEvent_1.handleEvent(evt);
-    };
-    BaseComponent.prototype.listenTo = function (target, type, listener, context, useCapture) {
+    }
+    listenTo(target, type, listener, context, useCapture) {
         return DisposableMixin_1.DisposableMixin.prototype.listenTo.call(this, typeof target == 'string' ? this.$(target) : target, type, listener, context, useCapture);
-    };
-    BaseComponent.prototype._listenTo = function (target, type, listener, context, useCapture) {
+    }
+    _listenTo(target, type, listener, context, useCapture) {
         if (target instanceof BaseComponent) {
             if (type.charAt(0) == '<') {
-                var index = type.indexOf('>', 2);
-                var targetType = type.slice(1, index);
+                let index = type.indexOf('>', 2);
+                let targetType = type.slice(1, index);
                 if (targetType != '*') {
-                    var targetConstr_1 = elementConstructorMap_1.elementConstructorMap.has(targetType) &&
+                    let targetConstr = elementConstructorMap_1.elementConstructorMap.has(targetType) &&
                         componentConstructorMap_1.componentConstructorMap.get(targetType);
-                    if (!targetConstr_1) {
-                        throw new TypeError("Component \"" + targetType + "\" is not defined");
+                    if (!targetConstr) {
+                        throw new TypeError(`Component "${targetType}" is not defined`);
                     }
-                    var inner_1 = listener;
+                    let inner = listener;
                     listener = function (evt) {
-                        if (evt.target instanceof targetConstr_1) {
-                            return inner_1.call(this, evt);
+                        if (evt.target instanceof targetConstr) {
+                            return inner.call(this, evt);
                         }
                     };
                 }
                 type = type.slice(index + 1);
             }
             else if (type.indexOf(':') == -1) {
-                var inner_2 = listener;
+                let inner = listener;
                 listener = function (evt) {
                     if (evt.target == target) {
-                        return inner_2.call(this, evt);
+                        return inner.call(this, evt);
                     }
                 };
             }
         }
         return DisposableMixin_1.DisposableMixin.prototype._listenTo.call(this, target, type, listener, context, useCapture);
-    };
-    BaseComponent.prototype._attach = function () {
-        var _this = this;
+    }
+    _attach() {
         this._attached = true;
         if (!this.initialized) {
-            var initializationResult = this.initialize();
+            let initializationResult = this.initialize();
             if (initializationResult) {
-                initializationResult.then(function () {
-                    _this.initialized = true;
-                    _this._attach();
+                initializationResult.then(() => {
+                    this.initialized = true;
+                    this._attach();
                 });
                 return;
             }
             this.initialized = true;
         }
-        var constr = this.constructor;
+        let constr = this.constructor;
         if (this.isReady) {
             this._unfreezeBindings();
         }
         else {
-            var el = this.element;
+            let el = this.element;
             el.className = constr._blockNamesString + el.className;
             if (constr.template === null) {
                 if (this.ownerComponent == this) {
-                    var contentBindingResult = [null, null, null];
+                    let contentBindingResult = [null, null, null];
                     bindContent_1.bindContent(el, -1, this, this, contentBindingResult);
-                    var childComponents = contentBindingResult[0];
-                    var backBindings = contentBindingResult[2];
+                    let childComponents = contentBindingResult[0];
+                    let backBindings = contentBindingResult[2];
                     this._bindings = contentBindingResult[1];
                     if (childComponents) {
                         attachChildComponentElements_1.attachChildComponentElements(childComponents);
                     }
                     if (backBindings) {
-                        for (var i = backBindings.length; i; i -= 3) {
+                        for (let i = backBindings.length; i; i -= 3) {
                             backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
                         }
                     }
@@ -2983,23 +2933,23 @@ var BaseComponent = /** @class */ (function (_super) {
                 else if (!this.$inputContent) {
                     this.$inputContent = document.createDocumentFragment();
                 }
-                var rawContent = constr._rawContent ||
+                let rawContent = constr._rawContent ||
                     (constr._rawContent = bindContent_1.prepareContent(html_to_fragment_1.htmlToFragment(constr.template.render())));
-                var content = rawContent.cloneNode(true);
+                let content = rawContent.cloneNode(true);
                 if (!Features_1.templateTag) {
-                    var templates = content.querySelectorAll('template');
-                    for (var i = 0, l = templates.length; i < l;) {
+                    let templates = content.querySelectorAll('template');
+                    for (let i = 0, l = templates.length; i < l;) {
                         i += templates[i].content.querySelectorAll('template').length + 1;
                     }
                 }
-                var contentBindingResult = [null, null, null];
+                let contentBindingResult = [null, null, null];
                 bindContent_1.bindComponentContent(this, content, this, this, contentBindingResult);
-                var childComponents = contentBindingResult[0];
-                var backBindings = contentBindingResult[2];
+                let childComponents = contentBindingResult[0];
+                let backBindings = contentBindingResult[2];
                 this._bindings = contentBindingResult[1];
                 if (childComponents) {
-                    for (var i = childComponents.length; i;) {
-                        var childComponent = childComponents[--i];
+                    for (let i = childComponents.length; i;) {
+                        let childComponent = childComponents[--i];
                         if (childComponent.element.firstChild &&
                             childComponent.constructor
                                 .bindsInputContent &&
@@ -3015,7 +2965,7 @@ var BaseComponent = /** @class */ (function (_super) {
                     attachChildComponentElements_1.attachChildComponentElements(childComponents);
                 }
                 if (backBindings) {
-                    for (var i = backBindings.length; i; i -= 3) {
+                    for (let i = backBindings.length; i; i -= 3) {
                         backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
                     }
                 }
@@ -3024,60 +2974,60 @@ var BaseComponent = /** @class */ (function (_super) {
             this.isReady = true;
         }
         this.elementAttached();
-    };
-    BaseComponent.prototype._detach = function () {
+    }
+    _detach() {
         this._attached = false;
         this.elementDetached();
         this.dispose();
-    };
-    BaseComponent.prototype.dispose = function () {
+    }
+    dispose() {
         this._freezeBindings();
         return DisposableMixin_1.DisposableMixin.prototype.dispose.call(this);
-    };
-    BaseComponent.prototype._freezeBindings = function () {
+    }
+    _freezeBindings() {
         if (this._bindings) {
             componentBinding_1.freezeBindings(this._bindings);
         }
-    };
-    BaseComponent.prototype._unfreezeBindings = function () {
+    }
+    _unfreezeBindings() {
         if (this._bindings) {
             componentBinding_1.unfreezeBindings(this._bindings);
         }
-    };
-    BaseComponent.prototype._destroyBindings = function () {
-        var bindings = this._bindings;
+    }
+    _destroyBindings() {
+        let bindings = this._bindings;
         if (bindings) {
-            for (var i = bindings.length; i;) {
+            for (let i = bindings.length; i;) {
                 bindings[--i].off();
             }
             this._bindings = null;
         }
-    };
+    }
     // Callbacks
-    BaseComponent.prototype.created = function () { };
-    BaseComponent.prototype.elementConnected = function () { };
-    BaseComponent.prototype.elementDisconnected = function () { };
-    BaseComponent.prototype.initialize = function () { };
-    BaseComponent.prototype.ready = function () { };
-    BaseComponent.prototype.elementAttached = function () { };
-    BaseComponent.prototype.elementDetached = function () { };
-    BaseComponent.prototype.elementMoved = function () { };
+    created() { }
+    elementConnected() { }
+    elementDisconnected() { }
+    initialize() { }
+    ready() { }
+    elementAttached() { }
+    elementDetached() { }
+    elementMoved() { }
     // Utils
-    BaseComponent.prototype.$ = function (name, container) {
-        var elList = this._getElementList(name, container);
+    $(name, container) {
+        let elList = this._getElementList(name, container);
         return (elList && elList.length
             ? elList[0].$component || elList[0]
             : null);
-    };
-    BaseComponent.prototype.$$ = function (name, container) {
-        var elList = this._getElementList(name, container);
+    }
+    $$(name, container) {
+        let elList = this._getElementList(name, container);
         return elList
-            ? map.call(elList, function (el) { return el.$component || el; })
+            ? map.call(elList, (el) => el.$component || el)
             : [];
-    };
-    BaseComponent.prototype._getElementList = function (name, container) {
-        var elListMap = this._elementListMap || (this._elementListMap = new map_set_polyfill_1.Map());
-        var containerEl;
+    }
+    _getElementList(name, container) {
+        let elListMap = this._elementListMap || (this._elementListMap = new map_set_polyfill_1.Map());
+        let containerEl;
         if (container) {
             if (typeof container == 'string') {
                 container = this.$(container);
@@ -3087,39 +3037,38 @@ var BaseComponent = /** @class */ (function (_super) {
         else {
             containerEl = this.element;
         }
-        var key = container ? get_uid_1.getUID(containerEl) + '/' + name : name;
-        var elList = elListMap.get(key);
+        let key = container ? get_uid_1.getUID(containerEl) + '/' + name : name;
+        let elList = elListMap.get(key);
         if (!elList) {
-            var elementBlockNames = this.constructor._elementBlockNames;
+            let elementBlockNames = this.constructor._elementBlockNames;
             elList = containerEl.getElementsByClassName(elementBlockNames[elementBlockNames.length - 1] + '__' + name);
             elListMap.set(key, elList);
         }
         return elList;
-    };
-    BaseComponent.elementExtends = null;
-    BaseComponent.params = null;
-    BaseComponent.i18n = null;
-    BaseComponent.template = null;
-    BaseComponent.events = null;
-    BaseComponent.domEvents = null;
-    __decorate([
-        di_1.Inject('logger'),
-        __metadata("design:type", logger_1.Logger)
-    ], BaseComponent.prototype, "logger", void 0);
-    return BaseComponent;
-}(cellx_1.EventEmitter));
+    }
+}
+BaseComponent.elementExtends = null;
+BaseComponent.params = null;
+BaseComponent.i18n = null;
+BaseComponent.template = null;
+BaseComponent.events = null;
+BaseComponent.domEvents = null;
+__decorate([
+    di_1.Inject('logger'),
+    __metadata("design:type", logger_1.Logger)
+], BaseComponent.prototype, "logger", void 0);
 exports.BaseComponent = BaseComponent;
-var disposableMixinProto = DisposableMixin_1.DisposableMixin.prototype;
-var baseComponentProto = BaseComponent.prototype;
-Object.getOwnPropertyNames(disposableMixinProto).forEach(function (name) {
+let disposableMixinProto = DisposableMixin_1.DisposableMixin.prototype;
+let baseComponentProto = BaseComponent.prototype;
+Object.getOwnPropertyNames(disposableMixinProto).forEach(name => {
     if (!(name in baseComponentProto)) {
         Object.defineProperty(baseComponentProto, name, Object.getOwnPropertyDescriptor(disposableMixinProto, name));
     }
 });
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
-    handledEvents_1.handledEvents.forEach(function (type) {
-        document.body.addEventListener(type, function (evt) {
+    handledEvents_1.handledEvents.forEach(type => {
+        document.body.addEventListener(type, evt => {
             if (evt.target != document.body) {
                 handleDOMEvent_1.handleDOMEvent(evt);
             }
@@ -3159,11 +3108,10 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__27__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var ComponentParams_1 = __webpack_require__(29);
+const ComponentParams_1 = __webpack_require__(29);
 // import { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 function attachChildComponentElements(childComponents) {
-    for (var _i = 0, childComponents_1 = childComponents; _i < childComponents_1.length; _i++) {
-        var childComponent = childComponents_1[_i];
+    for (let childComponent of childComponents) {
         // if (childComponent.element[KEY_ELEMENT_CONNECTED]) {
         childComponent._parentComponent = undefined;
         ComponentParams_1.ComponentParams.init(childComponent);
@@ -3182,25 +3130,25 @@ exports.attachChildComponentElements = attachChildComponentElements;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var rionite_snake_case_attribute_name_1 = __webpack_require__(8);
-var symbol_polyfill_1 = __webpack_require__(26);
-var BaseComponent_1 = __webpack_require__(23);
-var componentParamTypeSerializerMap_1 = __webpack_require__(30);
+const rionite_snake_case_attribute_name_1 = __webpack_require__(8);
+const symbol_polyfill_1 = __webpack_require__(26);
+const BaseComponent_1 = __webpack_require__(23);
+const componentParamTypeSerializerMap_1 = __webpack_require__(30);
 exports.KEY_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite/ComponentParams[componentParamsInited]');
 function initParam(component, $paramConfig, name) {
     if ($paramConfig === null) {
         return;
     }
-    var typeSerializer = $paramConfig.typeSerializer;
-    var defaultValue;
+    let typeSerializer = $paramConfig.typeSerializer;
+    let defaultValue;
     if (typeSerializer) {
         defaultValue = $paramConfig.default;
     }
     else {
-        var paramConfig = $paramConfig.paramConfig;
-        var type = typeof paramConfig;
+        let paramConfig = $paramConfig.paramConfig;
+        let type = typeof paramConfig;
         defaultValue = component[$paramConfig.property];
-        var isObject = type == 'object' &&
+        let isObject = type == 'object' &&
             (paramConfig.type !== undefined ||
                 paramConfig.default !== undefined);
         if (defaultValue === undefined) {
@@ -3223,12 +3171,12 @@ function initParam(component, $paramConfig, name) {
         $paramConfig.typeSerializer = typeSerializer;
         $paramConfig.default = defaultValue;
     }
-    var el = component.element;
-    var snakeCaseName = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true);
-    var rawValue = el.getAttribute(snakeCaseName);
+    let el = component.element;
+    let snakeCaseName = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true);
+    let rawValue = el.getAttribute(snakeCaseName);
     if (rawValue === null) {
         if ($paramConfig.required) {
-            throw new TypeError("Parameter \"" + name + "\" is required");
+            throw new TypeError(`Parameter "${name}" is required`);
         }
         if (defaultValue != null && defaultValue !== false) {
             el.setAttribute(snakeCaseName, typeSerializer.write(defaultValue));
@@ -3237,15 +3185,15 @@ function initParam(component, $paramConfig, name) {
     component[BaseComponent_1.KEY_PARAMS].set(name, typeSerializer.read(rawValue, defaultValue, el));
 }
 exports.ComponentParams = {
-    init: function (component) {
+    init(component) {
         if (component[exports.KEY_COMPONENT_PARAMS_INITED]) {
             return;
         }
-        var paramsConfig = component.constructor.params;
+        let paramsConfig = component.constructor.params;
         if (paramsConfig) {
-            var $paramsConfig = component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG];
-            for (var name_1 in paramsConfig) {
-                initParam(component, $paramsConfig[name_1], name_1);
+            let $paramsConfig = component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG];
+            for (let name in paramsConfig) {
+                initParam(component, $paramsConfig[name], name);
             }
         }
         component[exports.KEY_COMPONENT_PARAMS_INITED] = true;
@@ -3260,19 +3208,19 @@ exports.ComponentParams = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_html_1 = __webpack_require__(7);
-var is_regexp_1 = __webpack_require__(31);
-var map_set_polyfill_1 = __webpack_require__(10);
-var symbol_polyfill_1 = __webpack_require__(26);
+const escape_html_1 = __webpack_require__(7);
+const is_regexp_1 = __webpack_require__(31);
+const map_set_polyfill_1 = __webpack_require__(10);
+const symbol_polyfill_1 = __webpack_require__(26);
 exports.KEY_COMPONENT_PARAM_VALUE_MAP = symbol_polyfill_1.Symbol('Rionite/componentParamTypeSerializerMap[componentParamValueMap]');
 exports.componentParamTypeSerializerMap = new map_set_polyfill_1.Map([
     [
         Boolean,
         {
-            read: function (rawValue, defaultValue) {
+            read: (rawValue, defaultValue) => {
                 return rawValue !== null ? rawValue != 'no' : !!defaultValue;
             },
-            write: function (value, defaultValue) {
+            write: (value, defaultValue) => {
                 return value ? '' : defaultValue ? 'no' : null;
             }
         }
@@ -3280,14 +3228,14 @@ exports.componentParamTypeSerializerMap = new map_set_polyfill_1.Map([
     [
         Number,
         {
-            read: function (rawValue, defaultValue) {
+            read: (rawValue, defaultValue) => {
                 return rawValue !== null
                     ? +rawValue
                     : defaultValue !== undefined
                         ? defaultValue
                         : null;
             },
-            write: function (value) {
+            write: (value) => {
                 return value != null ? +value + '' : null;
             }
         }
@@ -3295,14 +3243,14 @@ exports.componentParamTypeSerializerMap = new map_set_polyfill_1.Map([
     [
         String,
         {
-            read: function (rawValue, defaultValue) {
+            read: (rawValue, defaultValue) => {
                 return rawValue !== null
                     ? rawValue
                     : defaultValue !== undefined
                         ? defaultValue
                         : null;
             },
-            write: function (value) {
+            write: (value) => {
                 return value != null ? value + '' : null;
             }
         }
@@ -3310,17 +3258,17 @@ exports.componentParamTypeSerializerMap = new map_set_polyfill_1.Map([
     [
         Object,
         {
-            read: function (rawValue, defaultValue, el) {
+            read: (rawValue, defaultValue, el) => {
                 if (!rawValue) {
                     return defaultValue || null;
                 }
-                var value = (el[exports.KEY_COMPONENT_PARAM_VALUE_MAP] || Object.create(null))[rawValue];
+                let value = (el[exports.KEY_COMPONENT_PARAM_VALUE_MAP] || Object.create(null))[rawValue];
                 if (!value) {
                     throw new TypeError('Value is not an object');
                 }
                 return value;
             },
-            write: function (value) {
+            write: (value) => {
                 return value != null ? '' : null;
             }
         }
@@ -3328,14 +3276,14 @@ exports.componentParamTypeSerializerMap = new map_set_polyfill_1.Map([
     [
         eval,
         {
-            read: function (rawValue, defaultValue) {
+            read: (rawValue, defaultValue) => {
                 return rawValue !== null
-                    ? Function("return " + escape_html_1.unescapeHTML(rawValue) + ";")()
+                    ? Function(`return ${escape_html_1.unescapeHTML(rawValue)};`)()
                     : defaultValue !== undefined
                         ? defaultValue
                         : null;
             },
-            write: function (value) {
+            write: (value) => {
                 return value != null
                     ? escape_html_1.escapeHTML(is_regexp_1.isRegExp(value) ? value.toString() : JSON.stringify(value))
                     : null;
@@ -3362,19 +3310,19 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__31__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var map_set_polyfill_1 = __webpack_require__(10);
-var next_uid_1 = __webpack_require__(13);
-var set_attribute_1 = __webpack_require__(33);
-var cellx_1 = __webpack_require__(14);
-var BaseComponent_1 = __webpack_require__(23);
-var compileContentNodeValue_1 = __webpack_require__(34);
-var ContentNodeValueParser_1 = __webpack_require__(36);
-var compileKeypath_1 = __webpack_require__(40);
+const map_set_polyfill_1 = __webpack_require__(10);
+const next_uid_1 = __webpack_require__(13);
+const set_attribute_1 = __webpack_require__(33);
+const cellx_1 = __webpack_require__(14);
+const BaseComponent_1 = __webpack_require__(23);
+const compileContentNodeValue_1 = __webpack_require__(34);
+const ContentNodeValueParser_1 = __webpack_require__(36);
+const compileKeypath_1 = __webpack_require__(40);
 exports.KEY_NODE_BINDING_SCHEMA = Symbol('Rionite/bindContent[nodeBindingSchema]');
 exports.KEY_NODE_BINDING_SCHEMAS = Symbol('Rionite/bindContent[nodeBindingSchemas]');
 exports.KEY_CHILD_COMPONENTS = Symbol('Rionite/bindContent[childComponents]');
 exports.KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
-var contentNodeValueASTCache = Object.create(null);
+const contentNodeValueASTCache = Object.create(null);
 function onAttributeBindingCellChange(evt) {
     set_attribute_1.setAttribute(evt.target.meta.element, evt.target.meta.attributeName, evt.data.value);
 }
@@ -3382,7 +3330,7 @@ function onTextNodeBindingCellChange(evt) {
     evt.target.meta.textNode.nodeValue = evt.data.value;
 }
 function prepareContent(node) {
-    for (var child = node.firstChild; child; child = child.nextSibling) {
+    for (let child = node.firstChild; child; child = child.nextSibling) {
         if (child.nodeType == Node.ELEMENT_NODE) {
             if (child instanceof HTMLTemplateElement) {
                 child.setAttribute('pid', next_uid_1.nextUID());
@@ -3402,7 +3350,7 @@ function prepareContent(node) {
 }
 exports.prepareContent = prepareContent;
 function bindComponentContent(component, node, ownerComponent, context, result) {
-    var schema = component.constructor.template[exports.KEY_NODE_BINDING_SCHEMA];
+    let schema = component.constructor.template[exports.KEY_NODE_BINDING_SCHEMA];
     if (schema === undefined) {
         component.constructor.template[exports.KEY_NODE_BINDING_SCHEMA] = bindContent(node, -1, ownerComponent, context, result);
     }
@@ -3413,9 +3361,9 @@ function bindComponentContent(component, node, ownerComponent, context, result) 
 }
 exports.bindComponentContent = bindComponentContent;
 function bindComponentContent2(component, node, ownerComponent, context, result) {
-    var pid = component.element.getAttribute('pid');
+    let pid = component.element.getAttribute('pid');
     if (pid) {
-        var schema = (component.ownerComponent.constructor.template[exports.KEY_NODE_BINDING_SCHEMAS] ||
+        let schema = (component.ownerComponent.constructor.template[exports.KEY_NODE_BINDING_SCHEMAS] ||
             (component.ownerComponent.constructor.template[exports.KEY_NODE_BINDING_SCHEMAS] = {}))[pid];
         if (schema === undefined) {
             component.ownerComponent.constructor.template[exports.KEY_NODE_BINDING_SCHEMAS][pid] = bindContent(node, -1, ownerComponent, context, result);
@@ -3431,34 +3379,34 @@ function bindComponentContent2(component, node, ownerComponent, context, result)
 }
 exports.bindComponentContent2 = bindComponentContent2;
 function bindContent(node, index, ownerComponent, context, result, schema, parentComponent) {
-    var children = node.childNodes;
-    for (var i = 0, l = children.length; i < l; i++) {
-        var child = children[i];
-        var childSchema = void 0;
+    let children = node.childNodes;
+    for (let i = 0, l = children.length; i < l; i++) {
+        let child = children[i];
+        let childSchema;
         switch (child.nodeType) {
             case Node.ELEMENT_NODE: {
-                var childComponent = child.$component;
-                var $paramsConfig = void 0;
-                var $specifiedParams = void 0;
+                let childComponent = child.$component;
+                let $paramsConfig;
+                let $specifiedParams;
                 if (childComponent) {
                     $paramsConfig = childComponent.constructor[BaseComponent_1.KEY_PARAMS_CONFIG];
                     $specifiedParams = new map_set_polyfill_1.Set();
                 }
-                var attrs = child.attributes;
-                for (var j = attrs.length; j;) {
-                    var attr = attrs[--j];
-                    var name_1 = attr.name;
-                    var targetName = void 0;
-                    if (name_1.charAt(0) == '_') {
-                        targetName = name_1.slice(1);
+                let attrs = child.attributes;
+                for (let j = attrs.length; j;) {
+                    let attr = attrs[--j];
+                    let name = attr.name;
+                    let targetName;
+                    if (name.charAt(0) == '_') {
+                        targetName = name.slice(1);
                     }
                     else {
-                        targetName = name_1;
-                        if (!name_1.lastIndexOf('oncomponent-', 0) || !name_1.lastIndexOf('on-', 0)) {
+                        targetName = name;
+                        if (!name.lastIndexOf('oncomponent-', 0) || !name.lastIndexOf('on-', 0)) {
                             child[exports.KEY_CONTEXT] = context;
                             if (!((schema ||
                                 (schema = {
-                                    index: index,
+                                    index,
                                     specifiedParams: null,
                                     childComponents: null,
                                     attributes: null,
@@ -3471,30 +3419,30 @@ function bindContent(node, index, ownerComponent, context, result, schema, paren
                             }
                         }
                     }
-                    var $paramConfig = $paramsConfig && $paramsConfig[targetName];
+                    let $paramConfig = $paramsConfig && $paramsConfig[targetName];
                     if ($paramConfig) {
                         $specifiedParams.add($paramConfig.name);
                     }
-                    var value = attr.value;
+                    let value = attr.value;
                     if (!value) {
                         continue;
                     }
-                    var valueAST = contentNodeValueASTCache[value];
+                    let valueAST = contentNodeValueASTCache[value];
                     if (!valueAST) {
                         if (valueAST === null) {
                             continue;
                         }
-                        var bracketIndex = value.indexOf('{');
+                        let bracketIndex = value.indexOf('{');
                         if (bracketIndex == -1) {
                             contentNodeValueASTCache[value] = null;
                             continue;
                         }
                         valueAST = contentNodeValueASTCache[value] = new ContentNodeValueParser_1.ContentNodeValueParser(value).parse(bracketIndex);
                     }
-                    var valueASTLength = valueAST.length;
+                    let valueASTLength = valueAST.length;
                     if (valueASTLength > 1 ||
                         valueAST[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.BINDING) {
-                        bindAttribute(child, name_1, targetName, value, valueAST, $paramConfig, context, result);
+                        bindAttribute(child, name, targetName, value, valueAST, $paramConfig, context, result);
                         if (!((childSchema ||
                             (childSchema = {
                                 index: i,
@@ -3505,8 +3453,8 @@ function bindContent(node, index, ownerComponent, context, result, schema, paren
                                 context: null,
                                 childSchemas: null
                             })).attributes || (childSchema.attributes = [])).length ||
-                            childSchema.attributes[childSchema.attributes.length - 1] != name_1) {
-                            childSchema.attributes.push(name_1);
+                            childSchema.attributes[childSchema.attributes.length - 1] != name) {
+                            childSchema.attributes.push(name);
                         }
                     }
                 }
@@ -3537,7 +3485,7 @@ function bindContent(node, index, ownerComponent, context, result, schema, paren
                     }
                     ((schema ||
                         (schema = {
-                            index: index,
+                            index,
                             specifiedParams: null,
                             childComponents: [],
                             attributes: null,
@@ -3554,7 +3502,7 @@ function bindContent(node, index, ownerComponent, context, result, schema, paren
                 break;
             }
             case Node.TEXT_NODE: {
-                var nextChild = child.nextSibling;
+                let nextChild = child.nextSibling;
                 if (nextChild && nextChild.nodeType == Node.TEXT_NODE) {
                     do {
                         child.nodeValue += nextChild.nodeValue;
@@ -3563,13 +3511,13 @@ function bindContent(node, index, ownerComponent, context, result, schema, paren
                         l--;
                     } while (nextChild && nextChild.nodeType == Node.TEXT_NODE);
                 }
-                var value = child.nodeValue;
-                var valueAST = contentNodeValueASTCache[value];
+                let value = child.nodeValue;
+                let valueAST = contentNodeValueASTCache[value];
                 if (!valueAST) {
                     if (valueAST === null) {
                         continue;
                     }
-                    var bracketIndex = value.indexOf('{');
+                    let bracketIndex = value.indexOf('{');
                     if (bracketIndex == -1) {
                         contentNodeValueASTCache[value] = null;
                         continue;
@@ -3581,7 +3529,7 @@ function bindContent(node, index, ownerComponent, context, result, schema, paren
                     bindTextNode(child, valueAST, context, result);
                     ((schema ||
                         (schema = {
-                            index: index,
+                            index,
                             specifiedParams: null,
                             childComponents: null,
                             attributes: null,
@@ -3596,7 +3544,7 @@ function bindContent(node, index, ownerComponent, context, result, schema, paren
         if (childSchema) {
             ((schema ||
                 (schema = {
-                    index: index,
+                    index,
                     specifiedParams: null,
                     childComponents: null,
                     attributes: null,
@@ -3610,12 +3558,11 @@ function bindContent(node, index, ownerComponent, context, result, schema, paren
 }
 exports.bindContent = bindContent;
 function bindContentBySchema(node, schema, ownerComponent, context, result, parentComponent) {
-    var children = node.childNodes;
+    let children = node.childNodes;
     if (schema.textChildren) {
-        for (var _i = 0, _a = schema.textChildren; _i < _a.length; _i++) {
-            var index = _a[_i];
-            var child = children[index];
-            var nextChild = child.nextSibling;
+        for (let index of schema.textChildren) {
+            let child = children[index];
+            let nextChild = child.nextSibling;
             if (nextChild && nextChild.nodeType == Node.TEXT_NODE) {
                 do {
                     child.nodeValue += nextChild.nodeValue;
@@ -3630,9 +3577,8 @@ function bindContentBySchema(node, schema, ownerComponent, context, result, pare
         node.$component.$specifiedParams = schema.specifiedParams;
     }
     if (schema.childComponents) {
-        for (var _b = 0, _c = schema.childComponents; _b < _c.length; _b++) {
-            var index = _c[_b];
-            var childComponent = children[index].$component;
+        for (let index of schema.childComponents) {
+            let childComponent = children[index].$component;
             childComponent._ownerComponent = ownerComponent;
             childComponent.$context = context;
             if (parentComponent) {
@@ -3645,40 +3591,37 @@ function bindContentBySchema(node, schema, ownerComponent, context, result, pare
         }
     }
     if (schema.attributes) {
-        var $paramsConfig = void 0;
+        let $paramsConfig;
         if (node.$component) {
             $paramsConfig = node.$component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG];
         }
-        for (var _d = 0, _e = schema.attributes; _d < _e.length; _d++) {
-            var name_2 = _e[_d];
-            var targetName = name_2.charAt(0) == '_' ? name_2.slice(1) : name_2;
-            var value = node.getAttribute(name_2);
-            bindAttribute(node, name_2, targetName, value, contentNodeValueASTCache[value], $paramsConfig && $paramsConfig[targetName], context, result);
+        for (let name of schema.attributes) {
+            let targetName = name.charAt(0) == '_' ? name.slice(1) : name;
+            let value = node.getAttribute(name);
+            bindAttribute(node, name, targetName, value, contentNodeValueASTCache[value], $paramsConfig && $paramsConfig[targetName], context, result);
         }
     }
     if (schema.context) {
-        for (var _f = 0, _g = schema.context; _f < _g.length; _f++) {
-            var index = _g[_f];
+        for (let index of schema.context) {
             children[index][exports.KEY_CONTEXT] = context;
         }
     }
     if (schema.childSchemas) {
-        for (var _h = 0, _j = schema.childSchemas; _h < _j.length; _h++) {
-            var childSchema = _j[_h];
-            var child = children[childSchema.index];
+        for (let childSchema of schema.childSchemas) {
+            let child = children[childSchema.index];
             bindContentBySchema(child, childSchema, ownerComponent, context, result, child.$component);
         }
     }
 }
 function bindAttribute(el, name, targetName, value, valueAST, $paramConfig, context, result) {
-    var prefix = valueAST.length == 1 ? valueAST[0].prefix : null;
+    let prefix = valueAST.length == 1 ? valueAST[0].prefix : null;
     if (prefix === '=') {
         set_attribute_1.setAttribute(el, targetName, compileContentNodeValue_1.compileContentNodeValue(valueAST, value, true).call(context));
         return;
     }
     if (prefix !== '->') {
-        var cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(valueAST, value, valueAST.length == 1), {
-            context: context,
+        let cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(valueAST, value, valueAST.length == 1), {
+            context,
             meta: {
                 element: el,
                 attributeName: targetName
@@ -3688,7 +3631,7 @@ function bindAttribute(el, name, targetName, value, valueAST, $paramConfig, cont
         set_attribute_1.setAttribute(el, targetName, cell.get());
         (result[1] || (result[1] = [])).push(cell);
     }
-    var paramConfig;
+    let paramConfig;
     if ($paramConfig) {
         paramConfig = $paramConfig.paramConfig;
     }
@@ -3696,22 +3639,22 @@ function bindAttribute(el, name, targetName, value, valueAST, $paramConfig, cont
         if (prefix == '->' && name.charAt(0) != '_') {
             el.removeAttribute(name);
         }
-        var keypath = valueAST[0].keypath;
-        var keys = keypath.split('.');
-        var handler = void 0;
+        let keypath = valueAST[0].keypath;
+        let keys = keypath.split('.');
+        let handler;
         if (keys.length == 1) {
-            var propertyName_1 = keys[0];
+            let propertyName = keys[0];
             handler = function (evt) {
-                this.ownerComponent[propertyName_1] = evt.data.value;
+                this.ownerComponent[propertyName] = evt.data.value;
             };
         }
         else {
-            var propertyName_2 = keys[keys.length - 1];
-            var getPropertyHolder_1 = compileKeypath_1.compileKeypath((keys = keys.slice(0, -1)), keys.join('.'));
+            let propertyName = keys[keys.length - 1];
+            let getPropertyHolder = compileKeypath_1.compileKeypath((keys = keys.slice(0, -1)), keys.join('.'));
             handler = function (evt) {
-                var propertyHolder = getPropertyHolder_1.call(this.ownerComponent);
+                let propertyHolder = getPropertyHolder.call(this.ownerComponent);
                 if (propertyHolder) {
-                    propertyHolder[propertyName_2] = evt.data.value;
+                    propertyHolder[propertyName] = evt.data.value;
                 }
             };
         }
@@ -3726,9 +3669,9 @@ function bindTextNode(textNode, valueAST, context, result) {
         textNode.nodeValue = compileContentNodeValue_1.compileContentNodeValue(valueAST, textNode.nodeValue, false).call(context);
     }
     else {
-        var cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(valueAST, textNode.nodeValue, false), {
-            context: context,
-            meta: { textNode: textNode },
+        let cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(valueAST, textNode.nodeValue, false), {
+            context,
+            meta: { textNode },
             onChange: onTextNodeBindingCellChange
         });
         textNode.nodeValue = cell.get();
@@ -3750,38 +3693,37 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__33__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escape_string_1 = __webpack_require__(11);
-var bindingToJSExpression_1 = __webpack_require__(35);
-var componentParamTypeSerializerMap_1 = __webpack_require__(30);
-var ContentNodeValueParser_1 = __webpack_require__(36);
-var formatters_1 = __webpack_require__(15);
-var cache = Object.create(null);
+const escape_string_1 = __webpack_require__(11);
+const bindingToJSExpression_1 = __webpack_require__(35);
+const componentParamTypeSerializerMap_1 = __webpack_require__(30);
+const ContentNodeValueParser_1 = __webpack_require__(36);
+const formatters_1 = __webpack_require__(15);
+const cache = Object.create(null);
 function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, useComponentParamValueMap) {
-    var cacheKey = contentNodeValueString + (useComponentParamValueMap ? ',' : '.');
+    let cacheKey = contentNodeValueString + (useComponentParamValueMap ? ',' : '.');
     if (cache[cacheKey]) {
         return cache[cacheKey];
     }
-    var inner;
+    let inner;
     if (contentNodeValueAST.length == 1) {
-        inner = Function('formatters', "var temp; return " + bindingToJSExpression_1.bindingToJSExpression(contentNodeValueAST[0]) + ";");
+        inner = Function('formatters', `var temp; return ${bindingToJSExpression_1.bindingToJSExpression(contentNodeValueAST[0])};`);
     }
     else {
-        var jsExpr = [];
-        for (var _i = 0, contentNodeValueAST_1 = contentNodeValueAST; _i < contentNodeValueAST_1.length; _i++) {
-            var node = contentNodeValueAST_1[_i];
+        let jsExpr = [];
+        for (let node of contentNodeValueAST) {
             jsExpr.push(node.nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.TEXT
-                ? "'" + escape_string_1.escapeString(node.value) + "'"
+                ? `'${escape_string_1.escapeString(node.value)}'`
                 : bindingToJSExpression_1.bindingToJSExpression(node));
         }
-        inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
+        inner = Function('formatters', `var temp; return [${jsExpr.join(', ')}].join('');`);
     }
     return (cache[cacheKey] = useComponentParamValueMap
         ? function (cell) {
-            var value = inner.call(this, formatters_1.formatters);
+            let value = inner.call(this, formatters_1.formatters);
             if (value) {
-                var valueType = typeof value;
+                let valueType = typeof value;
                 if (valueType == 'object' || valueType == 'function') {
-                    var meta = cell.meta;
+                    let meta = cell.meta;
                     (meta.element[componentParamTypeSerializerMap_1.KEY_COMPONENT_PARAM_VALUE_MAP] ||
                         (meta.element[componentParamTypeSerializerMap_1.KEY_COMPONENT_PARAM_VALUE_MAP] = Object.create(null)))[meta.attributeName] = value;
                     return meta.attributeName;
@@ -3790,7 +3732,7 @@ function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, us
             return value;
         }
         : function () {
-            var value = inner.call(this, formatters_1.formatters);
+            let value = inner.call(this, formatters_1.formatters);
             return value == null ? '' : value + '';
         });
 }
@@ -3805,25 +3747,25 @@ exports.compileContentNodeValue = compileContentNodeValue;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 function formattersReducer(jsExpr, formatter) {
-    var args = formatter.arguments;
-    return "(this." + formatter.name + " || formatters." + formatter.name + ").call(this['$/'], " + jsExpr + (args && args.value.length ? ', ' + args.value.join(', ') : '') + ")";
+    let args = formatter.arguments;
+    return `(this.${formatter.name} || formatters.${formatter.name}).call(this['$/'], ${jsExpr}${args && args.value.length ? ', ' + args.value.join(', ') : ''})`;
 }
 function bindingToJSExpression(binding) {
-    var formatters = binding.formatters;
+    let formatters = binding.formatters;
     if (binding.keypath) {
-        var keys = binding.keypath.split('.');
-        var keyCount = keys.length;
+        let keys = binding.keypath.split('.');
+        let keyCount = keys.length;
         if (keyCount == 1) {
             return formatters
-                ? formatters.reduce(formattersReducer, "this['" + keys[0] + "']")
-                : "this['" + keys[0] + "']";
+                ? formatters.reduce(formattersReducer, `this['${keys[0]}']`)
+                : `this['${keys[0]}']`;
         }
-        var index = keyCount - 2;
-        var jsExprArr = Array(index);
+        let index = keyCount - 2;
+        let jsExprArr = Array(index);
         while (index) {
-            jsExprArr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
+            jsExprArr[--index] = ` && (temp = temp['${keys[index + 1]}'])`;
         }
-        var jsExpr = "(temp = this['" + keys[0] + "'])" + jsExprArr.join('') + " && temp['" + keys[keyCount - 1] + "']";
+        let jsExpr = `(temp = this['${keys[0]}'])${jsExprArr.join('')} && temp['${keys[keyCount - 1]}']`;
         return formatters ? formatters.reduce(formattersReducer, jsExpr) : jsExpr;
     }
     return formatters ? formatters.reduce(formattersReducer, binding.value) : binding.value;
@@ -3838,9 +3780,9 @@ exports.bindingToJSExpression = bindingToJSExpression;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathPattern_1 = __webpack_require__(37);
-var keypathToJSExpression_1 = __webpack_require__(39);
-var namePattern_1 = __webpack_require__(38);
+const keypathPattern_1 = __webpack_require__(37);
+const keypathToJSExpression_1 = __webpack_require__(39);
+const namePattern_1 = __webpack_require__(38);
 var ContentNodeValueNodeType;
 (function (ContentNodeValueNodeType) {
     ContentNodeValueNodeType[ContentNodeValueNodeType["TEXT"] = 1] = "TEXT";
@@ -3849,25 +3791,25 @@ var ContentNodeValueNodeType;
     ContentNodeValueNodeType[ContentNodeValueNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
     ContentNodeValueNodeType[ContentNodeValueNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
 })(ContentNodeValueNodeType = exports.ContentNodeValueNodeType || (exports.ContentNodeValueNodeType = {}));
-var reWhitespace = /\s/;
-var reNameOrNothing = RegExp(namePattern_1.namePattern + '|', 'g');
-var reKeypathOrNothing = RegExp(keypathPattern_1.keypathPattern + '|', 'g');
-var reBooleanOrNothing = /false|true|/g;
-var reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
-var reVacuumOrNothing = /null|undefined|void 0|/g;
-var ContentNodeValueParser = /** @class */ (function () {
-    function ContentNodeValueParser(contentNodeValue) {
+const reWhitespace = /\s/;
+const reNameOrNothing = RegExp(namePattern_1.namePattern + '|', 'g');
+const reKeypathOrNothing = RegExp(keypathPattern_1.keypathPattern + '|', 'g');
+const reBooleanOrNothing = /false|true|/g;
+const reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+const reVacuumOrNothing = /null|undefined|void 0|/g;
+class ContentNodeValueParser {
+    constructor(contentNodeValue) {
         this.contentNodeValue = contentNodeValue;
     }
-    ContentNodeValueParser.prototype.parse = function (index) {
-        var contentNodeValue = this.contentNodeValue;
+    parse(index) {
+        let contentNodeValue = this.contentNodeValue;
         this.at = 0;
-        var result = (this.result = []);
+        let result = (this.result = []);
         do {
             this._pushText(contentNodeValue.slice(this.at, index));
             this.at = index;
             this.chr = contentNodeValue.charAt(index);
-            var binding = this._readBinding();
+            let binding = this._readBinding();
             if (binding) {
                 result.push(binding);
             }
@@ -3879,44 +3821,44 @@ var ContentNodeValueParser = /** @class */ (function () {
         } while (index != -1);
         this._pushText(contentNodeValue.slice(this.at));
         return result;
-    };
-    ContentNodeValueParser.prototype._pushText = function (value) {
+    }
+    _pushText(value) {
         if (value) {
-            var result = this.result;
-            var resultLen = result.length;
+            let result = this.result;
+            let resultLen = result.length;
             if (resultLen && result[resultLen - 1].nodeType == ContentNodeValueNodeType.TEXT) {
                 result[resultLen - 1].value += value;
             }
             else {
                 result.push({
                     nodeType: ContentNodeValueNodeType.TEXT,
-                    value: value
+                    value
                 });
             }
         }
-    };
-    ContentNodeValueParser.prototype._readBinding = function () {
-        var at = this.at;
+    }
+    _readBinding() {
+        let at = this.at;
         this._next('{');
         this._skipWhitespaces();
-        var prefix = this._readPrefix();
+        let prefix = this._readPrefix();
         this._skipWhitespaces();
-        var keypath = this._readKeypath();
-        var value;
+        let keypath = this._readKeypath();
+        let value;
         if (!prefix && !keypath) {
             value = this._readValue();
         }
         if (keypath || value) {
-            var formatters = void 0;
-            for (var formatter = void 0; this._skipWhitespaces() == '|' && (formatter = this._readFormatter());) {
+            let formatters;
+            for (let formatter; this._skipWhitespaces() == '|' && (formatter = this._readFormatter());) {
                 (formatters || (formatters = [])).push(formatter);
             }
             if (this.chr == '}') {
                 this._next();
                 return {
                     nodeType: ContentNodeValueNodeType.BINDING,
-                    prefix: prefix,
-                    keypath: keypath,
+                    prefix,
+                    keypath,
                     value: value || null,
                     formatters: formatters || null,
                     raw: this.contentNodeValue.slice(at, this.at)
@@ -3926,15 +3868,15 @@ var ContentNodeValueParser = /** @class */ (function () {
         this.at = at;
         this.chr = this.contentNodeValue.charAt(at);
         return null;
-    };
-    ContentNodeValueParser.prototype._readPrefix = function () {
-        var chr = this.chr;
+    }
+    _readPrefix() {
+        let chr = this.chr;
         if (chr == '=') {
             this._next();
             return '=';
         }
         if (chr == '<') {
-            var at = this.at;
+            let at = this.at;
             if (this.contentNodeValue.charAt(at + 1) == '-') {
                 if (this.contentNodeValue.charAt(at + 2) == '>') {
                     this.chr = this.contentNodeValue.charAt((this.at = at + 3));
@@ -3949,31 +3891,31 @@ var ContentNodeValueParser = /** @class */ (function () {
             return '->';
         }
         return null;
-    };
-    ContentNodeValueParser.prototype._readFormatter = function () {
-        var at = this.at;
+    }
+    _readFormatter() {
+        let at = this.at;
         this._next('|');
         this._skipWhitespaces();
-        var name = this._readName();
+        let name = this._readName();
         if (name) {
-            var args = this.chr == '(' ? this._readFormatterArguments() : null;
+            let args = this.chr == '(' ? this._readFormatterArguments() : null;
             return {
                 nodeType: ContentNodeValueNodeType.BINDING_FORMATTER,
-                name: name,
+                name,
                 arguments: args
             };
         }
         this.at = at;
         this.chr = this.contentNodeValue.charAt(at);
         return null;
-    };
-    ContentNodeValueParser.prototype._readFormatterArguments = function () {
-        var at = this.at;
+    }
+    _readFormatterArguments() {
+        let at = this.at;
         this._next('(');
-        var args = [];
+        let args = [];
         if (this._skipWhitespaces() != ')') {
             for (;;) {
-                var arg = this._readValue() || this._readKeypath(true);
+                let arg = this._readValue() || this._readKeypath(true);
                 if (arg) {
                     if (this._skipWhitespaces() == ',' || this.chr == ')') {
                         args.push(arg);
@@ -3995,8 +3937,8 @@ var ContentNodeValueParser = /** @class */ (function () {
             nodeType: ContentNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS,
             value: args
         };
-    };
-    ContentNodeValueParser.prototype._readValue = function () {
+    }
+    _readValue() {
         switch (this.chr) {
             case '{': {
                 return this._readObject();
@@ -4009,26 +3951,25 @@ var ContentNodeValueParser = /** @class */ (function () {
                 return this._readString();
             }
         }
-        var readers = ['_readBoolean', '_readNumber', '_readVacuum'];
-        for (var _i = 0, readers_1 = readers; _i < readers_1.length; _i++) {
-            var reader = readers_1[_i];
-            var value = this[reader]();
+        let readers = ['_readBoolean', '_readNumber', '_readVacuum'];
+        for (let reader of readers) {
+            let value = this[reader]();
             if (value) {
                 return value;
             }
         }
         return null;
-    };
-    ContentNodeValueParser.prototype._readObject = function () {
-        var at = this.at;
+    }
+    _readObject() {
+        let at = this.at;
         this._next('{');
-        var obj = '{';
+        let obj = '{';
         while (this._skipWhitespaces() != '}') {
-            var key = this.chr == "'" || this.chr == '"' ? this._readString() : this._readObjectKey();
+            let key = this.chr == "'" || this.chr == '"' ? this._readString() : this._readObjectKey();
             if (key && this._skipWhitespaces() == ':') {
                 this._next();
                 this._skipWhitespaces();
-                var valueOrKeypath = this._readValue() || this._readKeypath(true);
+                let valueOrKeypath = this._readValue() || this._readKeypath(true);
                 if (valueOrKeypath) {
                     if (this._skipWhitespaces() == ',') {
                         obj += key + ':' + valueOrKeypath + ',';
@@ -4047,21 +3988,21 @@ var ContentNodeValueParser = /** @class */ (function () {
         }
         this._next();
         return obj;
-    };
-    ContentNodeValueParser.prototype._readObjectKey = function () {
+    }
+    _readObjectKey() {
         return this._readName();
-    };
-    ContentNodeValueParser.prototype._readArray = function () {
-        var at = this.at;
+    }
+    _readArray() {
+        let at = this.at;
         this._next('[');
-        var arr = '[';
+        let arr = '[';
         while (this._skipWhitespaces() != ']') {
             if (this.chr == ',') {
                 arr += ',';
                 this._next();
             }
             else {
-                var valueOrKeypath = this._readValue() || this._readKeypath(true);
+                let valueOrKeypath = this._readValue() || this._readKeypath(true);
                 if (valueOrKeypath) {
                     arr += valueOrKeypath;
                 }
@@ -4074,38 +4015,38 @@ var ContentNodeValueParser = /** @class */ (function () {
         }
         this._next();
         return arr + ']';
-    };
-    ContentNodeValueParser.prototype._readBoolean = function () {
+    }
+    _readBoolean() {
         reBooleanOrNothing.lastIndex = this.at;
-        var bool = reBooleanOrNothing.exec(this.contentNodeValue)[0];
+        let bool = reBooleanOrNothing.exec(this.contentNodeValue)[0];
         if (bool) {
             this.chr = this.contentNodeValue.charAt((this.at = reBooleanOrNothing.lastIndex));
             return bool;
         }
         return null;
-    };
-    ContentNodeValueParser.prototype._readNumber = function () {
+    }
+    _readNumber() {
         reNumberOrNothing.lastIndex = this.at;
-        var num = reNumberOrNothing.exec(this.contentNodeValue)[0];
+        let num = reNumberOrNothing.exec(this.contentNodeValue)[0];
         if (num) {
             this.chr = this.contentNodeValue.charAt((this.at = reNumberOrNothing.lastIndex));
             return num;
         }
         return null;
-    };
-    ContentNodeValueParser.prototype._readString = function () {
-        var quoteChar = this.chr;
+    }
+    _readString() {
+        let quoteChar = this.chr;
         if (quoteChar != "'" && quoteChar != '"') {
             throw {
                 name: 'SyntaxError',
-                message: "Expected \"'\" instead of \"" + this.chr + "\"",
+                message: `Expected "'" instead of "${this.chr}"`,
                 at: this.at,
                 contentNodeValue: this.contentNodeValue
             };
         }
-        var at = this.at;
-        var str = '';
-        for (var next = void 0; (next = this._next());) {
+        let at = this.at;
+        let str = '';
+        for (let next; (next = this._next());) {
             if (next == quoteChar) {
                 this._next();
                 return quoteChar + str + quoteChar;
@@ -4123,54 +4064,53 @@ var ContentNodeValueParser = /** @class */ (function () {
         this.at = at;
         this.chr = this.contentNodeValue.charAt(at);
         return null;
-    };
-    ContentNodeValueParser.prototype._readVacuum = function () {
+    }
+    _readVacuum() {
         reVacuumOrNothing.lastIndex = this.at;
-        var vacuum = reVacuumOrNothing.exec(this.contentNodeValue)[0];
+        let vacuum = reVacuumOrNothing.exec(this.contentNodeValue)[0];
         if (vacuum) {
             this.chr = this.contentNodeValue.charAt((this.at = reVacuumOrNothing.lastIndex));
             return vacuum;
         }
         return null;
-    };
-    ContentNodeValueParser.prototype._readKeypath = function (toJSExpression) {
+    }
+    _readKeypath(toJSExpression) {
         reKeypathOrNothing.lastIndex = this.at;
-        var keypath = reKeypathOrNothing.exec(this.contentNodeValue)[0];
+        let keypath = reKeypathOrNothing.exec(this.contentNodeValue)[0];
         if (keypath) {
             this.chr = this.contentNodeValue.charAt((this.at = reKeypathOrNothing.lastIndex));
             return toJSExpression ? keypathToJSExpression_1.keypathToJSExpression(keypath) : keypath;
         }
         return null;
-    };
-    ContentNodeValueParser.prototype._readName = function () {
+    }
+    _readName() {
         reNameOrNothing.lastIndex = this.at;
-        var name = reNameOrNothing.exec(this.contentNodeValue)[0];
+        let name = reNameOrNothing.exec(this.contentNodeValue)[0];
         if (name) {
             this.chr = this.contentNodeValue.charAt((this.at = reNameOrNothing.lastIndex));
             return name;
         }
         return null;
-    };
-    ContentNodeValueParser.prototype._skipWhitespaces = function () {
-        var chr = this.chr;
+    }
+    _skipWhitespaces() {
+        let chr = this.chr;
         while (chr && reWhitespace.test(chr)) {
             chr = this._next();
         }
         return chr;
-    };
-    ContentNodeValueParser.prototype._next = function (current) {
+    }
+    _next(current) {
         if (current && current != this.chr) {
             throw {
                 name: 'SyntaxError',
-                message: "Expected \"" + current + "\" instead of \"" + this.chr + "\"",
+                message: `Expected "${current}" instead of "${this.chr}"`,
                 at: this.at,
                 contentNodeValue: this.contentNodeValue
             };
         }
         return (this.chr = this.contentNodeValue.charAt(++this.at));
-    };
-    return ContentNodeValueParser;
-}());
+    }
+}
 exports.ContentNodeValueParser = ContentNodeValueParser;
 
 
@@ -4181,8 +4121,8 @@ exports.ContentNodeValueParser = ContentNodeValueParser;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var namePattern_1 = __webpack_require__(38);
-exports.keypathPattern = "(?:" + namePattern_1.namePattern + "|\\d+)(?:\\.(?:" + namePattern_1.namePattern + "|\\d+))*";
+const namePattern_1 = __webpack_require__(38);
+exports.keypathPattern = `(?:${namePattern_1.namePattern}|\\d+)(?:\\.(?:${namePattern_1.namePattern}|\\d+))*`;
 
 
 /***/ }),
@@ -4202,23 +4142,22 @@ exports.namePattern = '[$_a-zA-Z][$\\w]*';
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var cache = Object.create(null);
-function keypathToJSExpression(keypath, cacheKey) {
-    if (cacheKey === void 0) { cacheKey = keypath; }
+const cache = Object.create(null);
+function keypathToJSExpression(keypath, cacheKey = keypath) {
     if (cache[cacheKey]) {
         return cache[cacheKey];
     }
-    var keys = typeof keypath == 'string' ? keypath.split('.') : keypath;
-    var keyCount = keys.length;
+    let keys = typeof keypath == 'string' ? keypath.split('.') : keypath;
+    let keyCount = keys.length;
     if (keyCount == 1) {
-        return (cache[cacheKey] = "this['" + keypath + "']");
+        return (cache[cacheKey] = `this['${keypath}']`);
     }
-    var index = keyCount - 2;
-    var jsExpr = Array(index);
+    let index = keyCount - 2;
+    let jsExpr = Array(index);
     while (index) {
-        jsExpr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
+        jsExpr[--index] = ` && (temp = temp['${keys[index + 1]}'])`;
     }
-    return (cache[cacheKey] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && temp['" + keys[keyCount - 1] + "']");
+    return (cache[cacheKey] = `(temp = this['${keys[0]}'])${jsExpr.join('')} && temp['${keys[keyCount - 1]}']`);
 }
 exports.keypathToJSExpression = keypathToJSExpression;
 
@@ -4230,12 +4169,11 @@ exports.keypathToJSExpression = keypathToJSExpression;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var keypathToJSExpression_1 = __webpack_require__(39);
-var cache = Object.create(null);
-function compileKeypath(keypath, cacheKey) {
-    if (cacheKey === void 0) { cacheKey = keypath; }
+const keypathToJSExpression_1 = __webpack_require__(39);
+const cache = Object.create(null);
+function compileKeypath(keypath, cacheKey = keypath) {
     return (cache[cacheKey] ||
-        (cache[cacheKey] = Function("var temp; return " + keypathToJSExpression_1.keypathToJSExpression(keypath, cacheKey) + ";")));
+        (cache[cacheKey] = Function(`var temp; return ${keypathToJSExpression_1.keypathToJSExpression(keypath, cacheKey)};`)));
 }
 exports.compileKeypath = compileKeypath;
 
@@ -4247,9 +4185,9 @@ exports.compileKeypath = compileKeypath;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var cellx_1 = __webpack_require__(14);
+const cellx_1 = __webpack_require__(14);
 function freezeBinding(binding) {
-    var changeEvent = binding._events.get('change');
+    let changeEvent = binding._events.get('change');
     binding._events.delete('change');
     binding._frozenState = {
         changeEventListener: changeEvent.listener,
@@ -4258,7 +4196,7 @@ function freezeBinding(binding) {
     };
 }
 function unfreezeBinding(binding) {
-    var frozenState = binding._frozenState;
+    let frozenState = binding._frozenState;
     binding._frozenState = null;
     binding.on('change', frozenState.changeEventListener, frozenState.changeEventContext);
     if (frozenState.value !== binding._value) {
@@ -4277,15 +4215,13 @@ function unfreezeBinding(binding) {
 }
 function freezeBindings(bindings) {
     cellx_1.Cell.forceRelease();
-    for (var _i = 0, bindings_1 = bindings; _i < bindings_1.length; _i++) {
-        var binding = bindings_1[_i];
+    for (let binding of bindings) {
         freezeBinding(binding);
     }
 }
 exports.freezeBindings = freezeBindings;
 function unfreezeBindings(bindings) {
-    for (var _i = 0, bindings_2 = bindings; _i < bindings_2.length; _i++) {
-        var binding = bindings_2[_i];
+    for (let binding of bindings) {
         unfreezeBinding(binding);
     }
     cellx_1.Cell.forceRelease();
@@ -4300,7 +4236,7 @@ exports.unfreezeBindings = unfreezeBindings;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var map_set_polyfill_1 = __webpack_require__(10);
+const map_set_polyfill_1 = __webpack_require__(10);
 exports.componentConstructorMap = new map_set_polyfill_1.Map();
 
 
@@ -4311,7 +4247,7 @@ exports.componentConstructorMap = new map_set_polyfill_1.Map();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var map_set_polyfill_1 = __webpack_require__(10);
+const map_set_polyfill_1 = __webpack_require__(10);
 exports.elementConstructorMap = new map_set_polyfill_1.Map([
     ['a', window.HTMLAnchorElement],
     ['blockquote', window.HTMLQuoteElement],
@@ -4364,15 +4300,14 @@ exports.elementConstructorMap = new map_set_polyfill_1.Map([
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var _a;
-var defer_1 = __webpack_require__(45);
-var di_1 = __webpack_require__(1);
-var symbol_polyfill_1 = __webpack_require__(26);
-var BaseComponent_1 = __webpack_require__(23);
-var ComponentParams_1 = __webpack_require__(29);
-var Features_1 = __webpack_require__(46);
+const defer_1 = __webpack_require__(45);
+const di_1 = __webpack_require__(1);
+const symbol_polyfill_1 = __webpack_require__(26);
+const BaseComponent_1 = __webpack_require__(23);
+const ComponentParams_1 = __webpack_require__(29);
+const Features_1 = __webpack_require__(46);
 exports.KEY_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite/ElementProtoMixin[elementConnected]');
-var connectionStatusCallbacksSuppressed = false;
+let connectionStatusCallbacksSuppressed = false;
 function suppressConnectionStatusCallbacks() {
     connectionStatusCallbacksSuppressed = true;
 }
@@ -4381,21 +4316,19 @@ function resumeConnectionStatusCallbacks() {
     connectionStatusCallbacksSuppressed = false;
 }
 exports.resumeConnectionStatusCallbacks = resumeConnectionStatusCallbacks;
-exports.ElementProtoMixin = (_a = {
-        rioniteComponent: null,
-        get $component() {
-            return (this.rioniteComponent ||
-                di_1.Container.get(this.constructor._rioniteComponentConstructor, [this]));
-        }
+exports.ElementProtoMixin = {
+    rioniteComponent: null,
+    get $component() {
+        return (this.rioniteComponent ||
+            di_1.Container.get(this.constructor._rioniteComponentConstructor, [this]));
     },
-    _a[exports.KEY_ELEMENT_CONNECTED] = false,
-    _a.connectedCallback = function () {
-        var _this = this;
+    [exports.KEY_ELEMENT_CONNECTED]: false,
+    connectedCallback() {
         this[exports.KEY_ELEMENT_CONNECTED] = true;
         if (connectionStatusCallbacksSuppressed) {
             return;
         }
-        var component = this.rioniteComponent;
+        let component = this.rioniteComponent;
         if (component) {
             ComponentParams_1.ComponentParams.init(component);
             component.elementConnected();
@@ -4411,47 +4344,47 @@ exports.ElementProtoMixin = (_a = {
             }
         }
         else {
-            defer_1.defer(function () {
-                if (_this[exports.KEY_ELEMENT_CONNECTED]) {
-                    var component_1 = _this.$component;
-                    component_1._parentComponent = undefined;
-                    if (!component_1.parentComponent && !component_1._attached) {
-                        ComponentParams_1.ComponentParams.init(component_1);
-                        component_1.elementConnected();
-                        component_1._attach();
+            defer_1.defer(() => {
+                if (this[exports.KEY_ELEMENT_CONNECTED]) {
+                    let component = this.$component;
+                    component._parentComponent = undefined;
+                    if (!component.parentComponent && !component._attached) {
+                        ComponentParams_1.ComponentParams.init(component);
+                        component.elementConnected();
+                        component._attach();
                     }
                 }
             });
         }
     },
-    _a.disconnectedCallback = function () {
+    disconnectedCallback() {
         this[exports.KEY_ELEMENT_CONNECTED] = false;
         if (connectionStatusCallbacksSuppressed) {
             return;
         }
-        var component = this.rioniteComponent;
+        let component = this.rioniteComponent;
         if (component && component._attached) {
             component._parentComponent = null;
             component.elementDisconnected();
-            defer_1.defer(function () {
+            defer_1.defer(() => {
                 if (component._parentComponent === null && component._attached) {
                     component._detach();
                 }
             });
         }
     },
-    _a.attributeChangedCallback = function (name, _prevRawValue, rawValue) {
-        var component = this.rioniteComponent;
+    attributeChangedCallback(name, _prevRawValue, rawValue) {
+        let component = this.rioniteComponent;
         if (component && component.isReady) {
-            var $paramConfig = component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG][name];
+            let $paramConfig = component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG][name];
             if ($paramConfig.readonly) {
                 if (Features_1.nativeCustomElements) {
-                    throw new TypeError("Cannot write to readonly parameter \"" + $paramConfig.name + "\"");
+                    throw new TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
                 }
             }
             else {
-                var valueCell = component[$paramConfig.property + 'Cell'];
-                var value = $paramConfig.typeSerializer.read(rawValue, $paramConfig.default, this);
+                let valueCell = component[$paramConfig.property + 'Cell'];
+                let value = $paramConfig.typeSerializer.read(rawValue, $paramConfig.default, this);
                 if (valueCell) {
                     valueCell.set(value);
                 }
@@ -4460,8 +4393,8 @@ exports.ElementProtoMixin = (_a = {
                 }
             }
         }
-    },
-    _a);
+    }
+};
 
 
 /***/ }),
@@ -4481,11 +4414,11 @@ exports.reflectConstruct = Reflect &&
     typeof Reflect == 'object' &&
     Reflect.construct &&
     Reflect.construct.toString().indexOf('[native code]') != -1;
-var templateTagContainer = document.createElement('div');
+const templateTagContainer = document.createElement('div');
 templateTagContainer.innerHTML = '<template>1</template>';
 exports.templateTag = !templateTagContainer.firstChild.firstChild;
-var nativeCustomElementsFeature = false;
-var TestNativeCustomElementsFeature = exports.reflectConstruct
+let nativeCustomElementsFeature = false;
+const TestNativeCustomElementsFeature = exports.reflectConstruct
     ? function TestNativeCustomElementsFeature(self) {
         return Reflect.construct(HTMLElement, [self], TestNativeCustomElementsFeature);
     }
@@ -4493,13 +4426,13 @@ var TestNativeCustomElementsFeature = exports.reflectConstruct
         return HTMLElement.call(this, self);
     };
 Object.defineProperty(TestNativeCustomElementsFeature, 'observedAttributes', {
-    get: function () {
+    get() {
         return ['test'];
     }
 });
 TestNativeCustomElementsFeature.prototype = Object.create(HTMLElement.prototype);
 TestNativeCustomElementsFeature.prototype.constructor = TestNativeCustomElementsFeature;
-TestNativeCustomElementsFeature.prototype.attributeChangedCallback = function () {
+TestNativeCustomElementsFeature.prototype.attributeChangedCallback = () => {
     nativeCustomElementsFeature = true;
 };
 window.customElements.define('test-native-custom-elements-feature', TestNativeCustomElementsFeature);
@@ -4534,24 +4467,24 @@ exports.handledEvents = [
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var bindContent_1 = __webpack_require__(32);
+const bindContent_1 = __webpack_require__(32);
 function handleDOMEvent(evt) {
-    var attrName = 'on-' + evt.type;
-    var el = evt.target;
-    var parentEl = el.parentElement;
-    var receivers;
+    let attrName = 'on-' + evt.type;
+    let el = evt.target;
+    let parentEl = el.parentElement;
+    let receivers;
     while (parentEl) {
         if (el.hasAttribute(attrName)) {
             (receivers || (receivers = [])).push(el);
         }
-        var component = parentEl.$component;
+        let component = parentEl.$component;
         if (component && receivers && receivers.length) {
-            for (var i = 0;;) {
-                var receiver = receivers[i];
-                var handlerName = receiver.getAttribute(attrName);
-                var handler = void 0;
+            for (let i = 0;;) {
+                let receiver = receivers[i];
+                let handlerName = receiver.getAttribute(attrName);
+                let handler;
                 if (handlerName.charAt(0) == ':') {
-                    var events = component.constructor.domEvents;
+                    let events = component.constructor.domEvents;
                     if (events) {
                         events = events[handlerName.slice(1)];
                         if (events) {
@@ -4593,45 +4526,44 @@ exports.handleDOMEvent = handleDOMEvent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var bindContent_1 = __webpack_require__(32);
-var stack = [];
+const bindContent_1 = __webpack_require__(32);
+const stack = [];
 function handleEvent(evt) {
-    var _a;
-    var target = evt.target;
-    var ownerComponent = target.ownerComponent;
+    let target = evt.target;
+    let ownerComponent = target.ownerComponent;
     if (target == ownerComponent) {
         return;
     }
-    var targetEl = target.element;
-    var el = targetEl;
-    var parentEl = el.parentElement;
+    let targetEl = target.element;
+    let el = targetEl;
+    let parentEl = el.parentElement;
     if (!parentEl) {
         return;
     }
     stack.length = 0;
-    var attrName = 'oncomponent-' + evt.type;
-    var ownerComponentEl = ownerComponent.element;
-    var receivers;
-    for (var component = void 0;;) {
+    let attrName = 'oncomponent-' + evt.type;
+    let ownerComponentEl = ownerComponent.element;
+    let receivers;
+    for (let component;;) {
         if (el.hasAttribute(attrName)) {
             (receivers || (receivers = [])).push(el);
         }
         if (parentEl == ownerComponentEl) {
             if (receivers) {
-                for (var i = 0, l = receivers.length; i < l; i++) {
-                    var receiver = receivers[i];
-                    var handlerName = receiver.getAttribute(attrName);
-                    var handler = void 0;
+                for (let i = 0, l = receivers.length; i < l; i++) {
+                    let receiver = receivers[i];
+                    let handlerName = receiver.getAttribute(attrName);
+                    let handler;
                     if (handlerName.charAt(0) == ':') {
-                        var events = ownerComponent.constructor.events;
+                        let events = ownerComponent.constructor.events;
                         if (receiver == targetEl) {
                             handler = events[handlerName.slice(1)][evt.type];
                         }
                         else {
-                            var elementBlockNames = target.constructor
+                            let elementBlockNames = target.constructor
                                 ._elementBlockNames;
-                            for (var j = 0, m = elementBlockNames.length; j < m; j++) {
-                                var typedHandler = events[handlerName.slice(1)]["<" + elementBlockNames[j] + ">" + evt.type];
+                            for (let j = 0, m = elementBlockNames.length; j < m; j++) {
+                                let typedHandler = events[handlerName.slice(1)][`<${elementBlockNames[j]}>` + evt.type];
                                 if (typedHandler &&
                                     typedHandler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
                                     return;
@@ -4657,7 +4589,7 @@ function handleEvent(evt) {
             if (!parentEl) {
                 break;
             }
-            _a = stack.pop(), ownerComponent = _a[0], receivers = _a[1];
+            [ownerComponent, receivers] = stack.pop();
             ownerComponentEl = ownerComponent.element;
         }
         else {
@@ -4686,11 +4618,11 @@ exports.handleEvent = handleEvent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var lower_case_first_word_1 = __webpack_require__(51);
-var map_set_polyfill_1 = __webpack_require__(10);
-var types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
-var prefix = 'param';
-var prefixLength = prefix.length;
+const lower_case_first_word_1 = __webpack_require__(51);
+const map_set_polyfill_1 = __webpack_require__(10);
+const types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
+const prefix = 'param';
+const prefixLength = prefix.length;
 function Param(target, propertyName, propertyDesc, name, config) {
     if (typeof propertyName != 'string') {
         if (target && typeof target != 'string') {
@@ -4700,9 +4632,7 @@ function Param(target, propertyName, propertyDesc, name, config) {
             name = target;
             config = propertyName;
         }
-        return function (target, propertyName, propertyDesc) {
-            return Param(target, propertyName, propertyDesc, name, config);
-        };
+        return (target, propertyName, propertyDesc) => Param(target, propertyName, propertyDesc, name, config);
     }
     if (!config) {
         config = {};
@@ -4712,10 +4642,10 @@ function Param(target, propertyName, propertyDesc, name, config) {
     }
     config.property = propertyName;
     if (!config.type) {
-        var type = Reflect.getMetadata('design:type', target, propertyName);
+        let type = Reflect.getMetadata('design:type', target, propertyName);
         config.type = types.has(type) ? type : Object;
     }
-    var constr = target.constructor;
+    let constr = target.constructor;
     ((constr.hasOwnProperty('params') && constr.params) || (constr.params = {}))[(name ||
         (propertyName.length <= prefixLength || propertyName.lastIndexOf(prefix, 0)
             ? propertyName
@@ -4736,16 +4666,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__51__;
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -4753,89 +4673,82 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var next_tick_1 = __webpack_require__(53);
-var cellx_1 = __webpack_require__(14);
-var attachChildComponentElements_1 = __webpack_require__(28);
-var BaseComponent_1 = __webpack_require__(23);
-var bindContent_1 = __webpack_require__(32);
-var Component_1 = __webpack_require__(17);
-var ElementProtoMixin_1 = __webpack_require__(44);
-var compileKeypath_1 = __webpack_require__(40);
-var Features_1 = __webpack_require__(46);
-var keypathPattern_1 = __webpack_require__(37);
-var removeNodes_1 = __webpack_require__(54);
-var RnRepeat_1 = __webpack_require__(55);
-var slice = Array.prototype.slice;
-var reKeypath = RegExp("^" + keypathPattern_1.keypathPattern + "$");
-var RnIfThen = /** @class */ (function (_super) {
-    __extends(RnIfThen, _super);
-    function RnIfThen() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this._elseMode = false;
-        _this._nodes = null;
-        _this._childComponents = null;
-        _this._active = false;
-        return _this;
+var RnIfThen_1;
+const next_tick_1 = __webpack_require__(53);
+const cellx_1 = __webpack_require__(14);
+const attachChildComponentElements_1 = __webpack_require__(28);
+const BaseComponent_1 = __webpack_require__(23);
+const bindContent_1 = __webpack_require__(32);
+const Component_1 = __webpack_require__(17);
+const ElementProtoMixin_1 = __webpack_require__(44);
+const compileKeypath_1 = __webpack_require__(40);
+const Features_1 = __webpack_require__(46);
+const keypathPattern_1 = __webpack_require__(37);
+const removeNodes_1 = __webpack_require__(54);
+const RnRepeat_1 = __webpack_require__(55);
+const slice = Array.prototype.slice;
+const reKeypath = RegExp(`^${keypathPattern_1.keypathPattern}$`);
+let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent {
+    constructor() {
+        super(...arguments);
+        this._elseMode = false;
+        this._nodes = null;
+        this._childComponents = null;
+        this._active = false;
     }
-    RnIfThen_1 = RnIfThen;
-    Object.defineProperty(RnIfThen, "bindsInputContent", {
-        get: function () {
-            return true;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    RnIfThen.prototype.elementConnected = function () {
+    static get bindsInputContent() {
+        return true;
+    }
+    elementConnected() {
         if (this._active) {
             return;
         }
         this._active = true;
         if (!this.initialized) {
-            var if_ = this.paramIf.trim();
+            let if_ = this.paramIf.trim();
             if (!reKeypath.test(if_)) {
-                throw new SyntaxError("Invalid value of attribute \"if\" (" + if_ + ")");
+                throw new SyntaxError(`Invalid value of attribute "if" (${if_})`);
             }
-            var getIfValue_1 = compileKeypath_1.compileKeypath(if_);
+            let getIfValue = compileKeypath_1.compileKeypath(if_);
             this._if = new cellx_1.Cell(function () {
-                return !!getIfValue_1.call(this);
+                return !!getIfValue.call(this);
             }, { context: this.$context });
             this.initialized = true;
         }
         this._if.on('change', this._onIfChange, this);
         this._render(false);
-    };
-    RnIfThen.prototype.elementDisconnected = function () {
-        var _this = this;
-        next_tick_1.nextTick(function () {
-            if (!_this.element[ElementProtoMixin_1.KEY_ELEMENT_CONNECTED]) {
-                _this._deactivate();
+    }
+    elementDisconnected() {
+        next_tick_1.nextTick(() => {
+            if (!this.element[ElementProtoMixin_1.KEY_ELEMENT_CONNECTED]) {
+                this._deactivate();
             }
         });
-    };
-    RnIfThen.prototype._onIfChange = function () {
+    }
+    _onIfChange() {
         if (this.element.parentNode) {
             this._render(true);
         }
-    };
-    RnIfThen.prototype._attach = function () {
+    }
+    _attach() {
         this._attached = true;
-    };
-    RnIfThen.prototype._detach = function () {
+    }
+    _detach() {
         this._attached = false;
-    };
-    RnIfThen.prototype._render = function (changed) {
+    }
+    _render(changed) {
         if (this._elseMode ? !this._if.get() : this._if.get()) {
-            var content = document.importNode(this.element.content, true);
+            let content = document.importNode(this.element.content, true);
             if (!Features_1.templateTag) {
-                var templates = content.querySelectorAll('template');
-                for (var i = 0, l = templates.length; i < l;) {
+                let templates = content.querySelectorAll('template');
+                for (let i = 0, l = templates.length; i < l;) {
                     i += templates[i].content.querySelectorAll('template').length + 1;
                 }
             }
-            var contentBindingResult = [null, null, null];
+            let contentBindingResult = [null, null, null];
             bindContent_1.bindComponentContent2(this, content, this.ownerComponent, this.$context, contentBindingResult);
-            var childComponents = contentBindingResult[0];
-            var backBindings = contentBindingResult[2];
+            let childComponents = contentBindingResult[0];
+            let backBindings = contentBindingResult[2];
             this._nodes = slice.call(content.childNodes);
             this._childComponents = childComponents;
             this._bindings = contentBindingResult[1];
@@ -4846,13 +4759,13 @@ var RnIfThen = /** @class */ (function (_super) {
                 attachChildComponentElements_1.attachChildComponentElements(childComponents);
             }
             if (backBindings) {
-                for (var i = backBindings.length; i; i -= 3) {
+                for (let i = backBindings.length; i; i -= 3) {
                     backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
                 }
             }
         }
         else {
-            var nodes = this._nodes;
+            let nodes = this._nodes;
             if (nodes) {
                 removeNodes_1.removeNodes(nodes);
                 this._destroyBindings();
@@ -4864,45 +4777,43 @@ var RnIfThen = /** @class */ (function (_super) {
             cellx_1.Cell.forceRelease();
             this.emit('change');
         }
-    };
-    RnIfThen.prototype._deactivate = function () {
+    }
+    _deactivate() {
         if (!this._active) {
             return;
         }
         this._active = false;
         this._if.off('change', this._onIfChange, this);
-        var nodes = this._nodes;
+        let nodes = this._nodes;
         if (nodes) {
             removeNodes_1.removeNodes(nodes);
             this._destroyBindings();
             this._nodes = null;
             this._deactivateChildComponents();
         }
-    };
-    RnIfThen.prototype._deactivateChildComponents = function () {
-        var childComponents = this._childComponents;
+    }
+    _deactivateChildComponents() {
+        let childComponents = this._childComponents;
         if (childComponents) {
-            for (var i = childComponents.length; i;) {
-                var childComponent = childComponents[--i];
+            for (let i = childComponents.length; i;) {
+                let childComponent = childComponents[--i];
                 if (childComponent instanceof RnIfThen_1 || childComponent instanceof RnRepeat_1.RnRepeat) {
                     childComponent._deactivate();
                 }
             }
         }
         this._childComponents = null;
-    };
-    var RnIfThen_1;
-    RnIfThen = RnIfThen_1 = __decorate([
-        Component_1.Component({
-            elementIs: 'RnIfThen',
-            elementExtends: 'template',
-            params: {
-                if: { property: 'paramIf', type: String, required: true, readonly: true }
-            }
-        })
-    ], RnIfThen);
-    return RnIfThen;
-}(BaseComponent_1.BaseComponent));
+    }
+};
+RnIfThen = RnIfThen_1 = __decorate([
+    Component_1.Component({
+        elementIs: 'RnIfThen',
+        elementExtends: 'template',
+        params: {
+            if: { property: 'paramIf', type: String, required: true, readonly: true }
+        }
+    })
+], RnIfThen);
 exports.RnIfThen = RnIfThen;
 
 
@@ -4920,16 +4831,16 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__53__;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 function removeNodes(nodes) {
-    var nodeCount = nodes.length;
+    let nodeCount = nodes.length;
     if (nodeCount == 1) {
-        var node = nodes[0];
+        let node = nodes[0];
         if (node.parentNode) {
             node.parentNode.removeChild(node);
         }
     }
     else {
-        for (var i = 0; i < nodeCount; i++) {
-            var node = nodes[i];
+        for (let i = 0; i < nodeCount; i++) {
+            let node = nodes[i];
             if (node.parentNode) {
                 node.parentNode.removeChild(node);
             }
@@ -4945,16 +4856,6 @@ exports.removeNodes = removeNodes;
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -4962,70 +4863,68 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var map_set_polyfill_1 = __webpack_require__(10);
-var next_tick_1 = __webpack_require__(53);
-var cellx_1 = __webpack_require__(14);
-var attachChildComponentElements_1 = __webpack_require__(28);
-var BaseComponent_1 = __webpack_require__(23);
-var bindContent_1 = __webpack_require__(32);
-var Component_1 = __webpack_require__(17);
-var ElementProtoMixin_1 = __webpack_require__(44);
-var compileKeypath_1 = __webpack_require__(40);
-var Features_1 = __webpack_require__(46);
-var keypathPattern_1 = __webpack_require__(37);
-var namePattern_1 = __webpack_require__(38);
-var removeNodes_1 = __webpack_require__(54);
-var RnIfThen_1 = __webpack_require__(52);
-var slice = Array.prototype.slice;
-var reForAttrValue = RegExp("^\\s*(" + namePattern_1.namePattern + ")\\s+(?:in|of)\\s+(" + keypathPattern_1.keypathPattern + ")\\s*$");
+const map_set_polyfill_1 = __webpack_require__(10);
+const next_tick_1 = __webpack_require__(53);
+const cellx_1 = __webpack_require__(14);
+const attachChildComponentElements_1 = __webpack_require__(28);
+const BaseComponent_1 = __webpack_require__(23);
+const bindContent_1 = __webpack_require__(32);
+const Component_1 = __webpack_require__(17);
+const ElementProtoMixin_1 = __webpack_require__(44);
+const compileKeypath_1 = __webpack_require__(40);
+const Features_1 = __webpack_require__(46);
+const keypathPattern_1 = __webpack_require__(37);
+const namePattern_1 = __webpack_require__(38);
+const removeNodes_1 = __webpack_require__(54);
+const RnIfThen_1 = __webpack_require__(52);
+const slice = Array.prototype.slice;
+const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern})\\s*$`);
 function getItem(list, index) {
     return Array.isArray(list) ? list[index] : list.get(index);
 }
 function insertBefore(nodes, beforeNode) {
-    var nodeCount = nodes.length;
+    let nodeCount = nodes.length;
     if (nodeCount == 1) {
         beforeNode.parentNode.insertBefore(nodes[0], beforeNode);
         return nodes[0];
     }
-    var parent = beforeNode.parentNode;
-    for (var i = 0; i < nodeCount; i++) {
+    let parent = beforeNode.parentNode;
+    for (let i = 0; i < nodeCount; i++) {
         parent.insertBefore(nodes[i], beforeNode);
     }
     return nodes[nodeCount - 1];
 }
 function offBindings(bindings) {
     if (bindings) {
-        for (var i = bindings.length; i;) {
+        for (let i = bindings.length; i;) {
             bindings[--i].off();
         }
     }
 }
 function deactivateChildComponents(childComponents) {
     if (childComponents) {
-        for (var i = childComponents.length; i;) {
-            var childComponent = childComponents[--i];
+        for (let i = childComponents.length; i;) {
+            let childComponent = childComponents[--i];
             if (childComponent instanceof RnIfThen_1.RnIfThen || childComponent instanceof RnRepeat) {
                 childComponent._deactivate();
             }
         }
     }
 }
-var RnRepeat = /** @class */ (function (_super) {
-    __extends(RnRepeat, _super);
-    function RnRepeat() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this._active = false;
-        return _this;
+let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
+    constructor() {
+        super(...arguments);
+        this._active = false;
     }
-    RnRepeat.prototype.elementConnected = function () {
+    elementConnected() {
         if (this._active) {
             return;
         }
         this._active = true;
         if (!this.initialized) {
-            var for_ = this.paramFor.match(reForAttrValue);
+            let for_ = this.paramFor.match(reForAttrValue);
             if (!for_) {
-                throw new SyntaxError("Invalid value of parameter \"for\" (" + this.paramFor + ")");
+                throw new SyntaxError(`Invalid value of parameter "for" (${this.paramFor})`);
             }
             this._itemName = for_[1];
             this._prevList = [];
@@ -5039,53 +4938,51 @@ var RnRepeat = /** @class */ (function (_super) {
         }
         this._list.on('change', this._onListChange, this);
         this._render(false);
-    };
-    RnRepeat.prototype.elementDisconnected = function () {
-        var _this = this;
-        next_tick_1.nextTick(function () {
-            if (!_this.element[ElementProtoMixin_1.KEY_ELEMENT_CONNECTED]) {
-                _this._deactivate();
+    }
+    elementDisconnected() {
+        next_tick_1.nextTick(() => {
+            if (!this.element[ElementProtoMixin_1.KEY_ELEMENT_CONNECTED]) {
+                this._deactivate();
             }
         });
-    };
-    RnRepeat.prototype._onListChange = function () {
+    }
+    _onListChange() {
         if (this.element.parentNode) {
             this._render(true);
         }
-    };
-    RnRepeat.prototype._attach = function () {
+    }
+    _attach() {
         this._attached = true;
-    };
-    RnRepeat.prototype._detach = function () {
+    }
+    _detach() {
         this._attached = false;
-    };
-    RnRepeat.prototype._render = function (fromChangeEvent) {
-        var _a;
-        var prevList = this._prevList;
-        var prevListLength = prevList.length;
-        var list = this._list.get();
-        var $itemMap = this._$itemMap;
-        var trackBy = this._trackBy;
-        var startIndex = 0;
-        var changed = false;
+    }
+    _render(fromChangeEvent) {
+        let prevList = this._prevList;
+        let prevListLength = prevList.length;
+        let list = this._list.get();
+        let $itemMap = this._$itemMap;
+        let trackBy = this._trackBy;
+        let startIndex = 0;
+        let changed = false;
         if (list) {
-            var el = this.element;
-            var lastNode = el;
-            var removedValues_1 = new map_set_polyfill_1.Set();
-            for (var i = 0, l = list.length; i < l;) {
-                var item = getItem(list, i);
-                var value = trackBy ? item[trackBy] : item;
-                var $item = $itemMap.get(value);
+            let el = this.element;
+            let lastNode = el;
+            let removedValues = new map_set_polyfill_1.Set();
+            for (let i = 0, l = list.length; i < l;) {
+                let item = getItem(list, i);
+                let value = trackBy ? item[trackBy] : item;
+                let $item = $itemMap.get(value);
                 if ($item) {
-                    if (removedValues_1.delete(value)) {
+                    if (removedValues.delete(value)) {
                         $item.item.set(item);
                         $item.index.set(i);
                         lastNode = insertBefore($item.nodes, lastNode == el ? lastNode : lastNode.nextSibling);
                         i++;
                     }
                     else {
-                        var foundIndex = void 0;
-                        for (var j = startIndex;; j++) {
+                        let foundIndex;
+                        for (let j = startIndex;; j++) {
                             if (foundIndex === undefined) {
                                 if (value === (trackBy ? prevList[j][trackBy] : prevList[j])) {
                                     if (j == startIndex) {
@@ -5098,8 +4995,8 @@ var RnRepeat = /** @class */ (function (_super) {
                                 }
                             }
                             else {
-                                var foundCount = j - foundIndex;
-                                var ii = i + foundCount;
+                                let foundCount = j - foundIndex;
+                                let ii = i + foundCount;
                                 if (ii < l) {
                                     if (j < prevListLength && trackBy
                                         ? getItem(list, ii)[trackBy] === prevList[j][trackBy]
@@ -5107,8 +5004,8 @@ var RnRepeat = /** @class */ (function (_super) {
                                         continue;
                                     }
                                     if (foundCount < foundIndex - startIndex) {
-                                        for (var k = foundIndex; k < j; k++) {
-                                            var k$Item = $itemMap.get(trackBy ? prevList[k][trackBy] : prevList[k]);
+                                        for (let k = foundIndex; k < j; k++) {
+                                            let k$Item = $itemMap.get(trackBy ? prevList[k][trackBy] : prevList[k]);
                                             k$Item.item.set(item);
                                             k$Item.index.set(i);
                                             lastNode = insertBefore(k$Item.nodes, lastNode == el ? lastNode : lastNode.nextSibling);
@@ -5120,12 +5017,12 @@ var RnRepeat = /** @class */ (function (_super) {
                                         break;
                                     }
                                 }
-                                for (var k = startIndex; k < foundIndex; k++) {
-                                    var value_1 = trackBy ? prevList[k][trackBy] : prevList[k];
-                                    removeNodes_1.removeNodes($itemMap.get(value_1).nodes);
-                                    removedValues_1.add(value_1);
+                                for (let k = startIndex; k < foundIndex; k++) {
+                                    let value = trackBy ? prevList[k][trackBy] : prevList[k];
+                                    removeNodes_1.removeNodes($itemMap.get(value).nodes);
+                                    removedValues.add(value);
                                 }
-                                var nodes = $itemMap.get(trackBy ? prevList[j - 1][trackBy] : prevList[j - 1]).nodes;
+                                let nodes = $itemMap.get(trackBy ? prevList[j - 1][trackBy] : prevList[j - 1]).nodes;
                                 lastNode = nodes[nodes.length - 1];
                                 changed = true;
                                 startIndex = j;
@@ -5136,46 +5033,45 @@ var RnRepeat = /** @class */ (function (_super) {
                     }
                 }
                 else {
-                    var itemCell = new cellx_1.Cell(item);
-                    var indexCell = new cellx_1.Cell(i);
-                    var content = this._rawItemContent.cloneNode(true);
+                    let itemCell = new cellx_1.Cell(item);
+                    let indexCell = new cellx_1.Cell(i);
+                    let content = this._rawItemContent.cloneNode(true);
                     if (!Features_1.templateTag) {
-                        var templates = content.querySelectorAll('template');
-                        for (var i_1 = 0, l_1 = templates.length; i_1 < l_1;) {
-                            i_1 += templates[i_1].content.querySelectorAll('template').length + 1;
+                        let templates = content.querySelectorAll('template');
+                        for (let i = 0, l = templates.length; i < l;) {
+                            i += templates[i].content.querySelectorAll('template').length + 1;
                         }
                     }
-                    var context = this.$context;
-                    var contentBindingResult = [null, null, null];
-                    bindContent_1.bindComponentContent2(this, content, this.ownerComponent, Object.create(context, (_a = {
-                            '$/': {
-                                configurable: false,
-                                enumerable: false,
-                                writable: false,
-                                value: context['$/'] || context
-                            }
+                    let context = this.$context;
+                    let contentBindingResult = [null, null, null];
+                    bindContent_1.bindComponentContent2(this, content, this.ownerComponent, Object.create(context, {
+                        '$/': {
+                            configurable: false,
+                            enumerable: false,
+                            writable: false,
+                            value: context['$/'] || context
                         },
-                        _a[this._itemName] = {
+                        [this._itemName]: {
                             configurable: true,
                             enumerable: true,
-                            get: (function (itemCell) { return function () { return itemCell.get(); }; })(itemCell)
+                            get: (itemCell => () => itemCell.get())(itemCell)
                         },
-                        _a.$index = {
+                        $index: {
                             configurable: true,
                             enumerable: true,
-                            get: (function (indexCell) { return function () { return indexCell.get(); }; })(indexCell)
-                        },
-                        _a)), contentBindingResult);
-                    var childComponents = contentBindingResult[0];
-                    var backBindings = contentBindingResult[2];
+                            get: (indexCell => () => indexCell.get())(indexCell)
+                        }
+                    }), contentBindingResult);
+                    let childComponents = contentBindingResult[0];
+                    let backBindings = contentBindingResult[2];
                     $itemMap.set(value, {
                         item: itemCell,
                         index: indexCell,
                         nodes: slice.call(content.childNodes),
                         bindings: contentBindingResult[1],
-                        childComponents: childComponents
+                        childComponents
                     });
-                    var newLastNode = content.lastChild;
+                    let newLastNode = content.lastChild;
                     ElementProtoMixin_1.suppressConnectionStatusCallbacks();
                     lastNode.parentNode.insertBefore(content, lastNode == el ? lastNode : lastNode.nextSibling);
                     ElementProtoMixin_1.resumeConnectionStatusCallbacks();
@@ -5184,20 +5080,20 @@ var RnRepeat = /** @class */ (function (_super) {
                         attachChildComponentElements_1.attachChildComponentElements(childComponents);
                     }
                     if (backBindings) {
-                        for (var i_2 = backBindings.length; i_2; i_2 -= 3) {
-                            backBindings[i_2 - 3].on('change:' + backBindings[i_2 - 2], backBindings[i_2 - 1]);
+                        for (let i = backBindings.length; i; i -= 3) {
+                            backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
                         }
                     }
                     changed = true;
                     i++;
                 }
             }
-            if (removedValues_1.size) {
-                (function ($itemMap) {
-                    removedValues_1.forEach(function (value) {
-                        var bindings = $itemMap.get(value).bindings;
+            if (removedValues.size) {
+                ($itemMap => {
+                    removedValues.forEach(value => {
+                        let bindings = $itemMap.get(value).bindings;
                         if (bindings) {
-                            for (var i = bindings.length; i;) {
+                            for (let i = bindings.length; i;) {
                                 bindings[--i].off();
                             }
                         }
@@ -5207,9 +5103,9 @@ var RnRepeat = /** @class */ (function (_super) {
             }
         }
         if (startIndex < prevListLength) {
-            for (var i = startIndex; i < prevListLength; i++) {
-                var value = trackBy ? prevList[i][trackBy] : prevList[i];
-                var $item = $itemMap.get(value);
+            for (let i = startIndex; i < prevListLength; i++) {
+                let value = trackBy ? prevList[i][trackBy] : prevList[i];
+                let $item = $itemMap.get(value);
                 removeNodes_1.removeNodes($item.nodes);
                 offBindings($item.bindings);
                 $itemMap.delete(value);
@@ -5224,37 +5120,36 @@ var RnRepeat = /** @class */ (function (_super) {
             cellx_1.Cell.forceRelease();
             this.emit('change');
         }
-    };
-    RnRepeat.prototype._deactivate = function () {
+    }
+    _deactivate() {
         if (!this._active) {
             return;
         }
         this._active = false;
         this._list.off('change', this._onListChange, this);
-        var prevList = this._prevList;
-        var $itemMap = this._$itemMap;
-        var trackBy = this._trackBy;
-        for (var i = 0, l = prevList.length; i < l; i++) {
-            var value = trackBy ? prevList[i][trackBy] : prevList[i];
-            var $item = $itemMap.get(value);
+        let prevList = this._prevList;
+        let $itemMap = this._$itemMap;
+        let trackBy = this._trackBy;
+        for (let i = 0, l = prevList.length; i < l; i++) {
+            let value = trackBy ? prevList[i][trackBy] : prevList[i];
+            let $item = $itemMap.get(value);
             removeNodes_1.removeNodes($item.nodes);
             offBindings($item.bindings);
             $itemMap.delete(value);
             deactivateChildComponents($item.childComponents);
         }
-    };
-    RnRepeat = __decorate([
-        Component_1.Component({
-            elementIs: 'RnRepeat',
-            elementExtends: 'template',
-            params: {
-                for: { property: 'paramFor', type: String, required: true, readonly: true },
-                trackBy: { property: 'paramTrackBy', type: String, readonly: true }
-            }
-        })
-    ], RnRepeat);
-    return RnRepeat;
-}(BaseComponent_1.BaseComponent));
+    }
+};
+RnRepeat = __decorate([
+    Component_1.Component({
+        elementIs: 'RnRepeat',
+        elementExtends: 'template',
+        params: {
+            for: { property: 'paramFor', type: String, required: true, readonly: true },
+            trackBy: { property: 'paramTrackBy', type: String, readonly: true }
+        }
+    })
+], RnRepeat);
 exports.RnRepeat = RnRepeat;
 
 
@@ -5264,16 +5159,6 @@ exports.RnRepeat = RnRepeat;
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -5281,23 +5166,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Component_1 = __webpack_require__(17);
-var RnIfThen_1 = __webpack_require__(52);
-var RnIfElse = /** @class */ (function (_super) {
-    __extends(RnIfElse, _super);
-    function RnIfElse() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
-        _this._elseMode = true;
-        return _this;
+const Component_1 = __webpack_require__(17);
+const RnIfThen_1 = __webpack_require__(52);
+let RnIfElse = class RnIfElse extends RnIfThen_1.RnIfThen {
+    constructor() {
+        super(...arguments);
+        this._elseMode = true;
     }
-    RnIfElse = __decorate([
-        Component_1.Component({
-            elementIs: 'RnIfElse',
-            elementExtends: 'template'
-        })
-    ], RnIfElse);
-    return RnIfElse;
-}(RnIfThen_1.RnIfThen));
+};
+RnIfElse = __decorate([
+    Component_1.Component({
+        elementIs: 'RnIfElse',
+        elementExtends: 'template'
+    })
+], RnIfElse);
 exports.RnIfElse = RnIfElse;
 
 
@@ -5307,16 +5189,6 @@ exports.RnIfElse = RnIfElse;
 
 "use strict";
 
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -5324,48 +5196,40 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var clear_node_1 = __webpack_require__(58);
-var get_uid_1 = __webpack_require__(24);
-var map_set_polyfill_1 = __webpack_require__(10);
-var move_content_1 = __webpack_require__(25);
-var symbol_polyfill_1 = __webpack_require__(26);
-var attachChildComponentElements_1 = __webpack_require__(28);
-var BaseComponent_1 = __webpack_require__(23);
-var bindContent_1 = __webpack_require__(32);
-var Component_1 = __webpack_require__(17);
-var ElementProtoMixin_1 = __webpack_require__(44);
-var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot[slotContentMap]');
-var RnSlot = /** @class */ (function (_super) {
-    __extends(RnSlot, _super);
-    function RnSlot() {
-        return _super !== null && _super.apply(this, arguments) || this;
+const clear_node_1 = __webpack_require__(58);
+const get_uid_1 = __webpack_require__(24);
+const map_set_polyfill_1 = __webpack_require__(10);
+const move_content_1 = __webpack_require__(25);
+const symbol_polyfill_1 = __webpack_require__(26);
+const attachChildComponentElements_1 = __webpack_require__(28);
+const BaseComponent_1 = __webpack_require__(23);
+const bindContent_1 = __webpack_require__(32);
+const Component_1 = __webpack_require__(17);
+const ElementProtoMixin_1 = __webpack_require__(44);
+const KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot[slotContentMap]');
+let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
+    static get bindsInputContent() {
+        return true;
     }
-    Object.defineProperty(RnSlot, "bindsInputContent", {
-        get: function () {
-            return true;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    RnSlot.prototype._attach = function () {
+    _attach() {
         this._attached = true;
         if (this.isReady) {
             this._unfreezeBindings();
         }
         else {
-            var ownerComponent = this.ownerComponent;
-            var el = this.element;
-            var contentOwnerComponent = ownerComponent.ownerComponent;
-            var ownerComponentContent = ownerComponent.$inputContent;
-            var cloneContent = this.paramCloneContent;
-            var content = void 0;
-            var bindings = void 0;
-            var backBindings = void 0;
-            var childComponents = void 0;
+            let ownerComponent = this.ownerComponent;
+            let el = this.element;
+            let contentOwnerComponent = ownerComponent.ownerComponent;
+            let ownerComponentContent = ownerComponent.$inputContent;
+            let cloneContent = this.paramCloneContent;
+            let content;
+            let bindings;
+            let backBindings;
+            let childComponents;
             if (!cloneContent || ownerComponentContent.firstChild) {
-                var slotName = this.paramName;
-                var forTag = void 0;
-                var for_ = void 0;
+                let slotName = this.paramName;
+                let forTag;
+                let for_;
                 if (!slotName) {
                     forTag = this.paramForTag;
                     if (forTag) {
@@ -5375,15 +5239,15 @@ var RnSlot = /** @class */ (function (_super) {
                         for_ = this.paramFor;
                     }
                 }
-                var key = get_uid_1.getUID(ownerComponent) +
+                let key = get_uid_1.getUID(ownerComponent) +
                     '/' +
                     (slotName ? '@' + slotName : forTag ? ':' + forTag : for_ || '');
                 if (slotName || forTag || for_) {
-                    var contentMap = void 0;
+                    let contentMap;
                     if (!cloneContent &&
                         (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
                         contentMap.has(key)) {
-                        var container = contentMap.get(key);
+                        let container = contentMap.get(key);
                         if (container.firstChild) {
                             content = move_content_1.moveContent(document.createDocumentFragment(), container);
                             contentMap.set(key, el);
@@ -5393,15 +5257,15 @@ var RnSlot = /** @class */ (function (_super) {
                     }
                     else if (ownerComponentContent.firstElementChild) {
                         if (for_ && for_.indexOf('__') == -1) {
-                            var elementBlockNames = ownerComponent.constructor
+                            let elementBlockNames = ownerComponent.constructor
                                 ._elementBlockNames;
                             for_ = elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
                         }
-                        var selectedElements = ownerComponentContent.querySelectorAll(slotName ? "[slot=" + slotName + "]" : forTag || '.' + for_);
-                        var selectedElementCount = selectedElements.length;
+                        let selectedElements = ownerComponentContent.querySelectorAll(slotName ? `[slot=${slotName}]` : forTag || '.' + for_);
+                        let selectedElementCount = selectedElements.length;
                         if (selectedElementCount) {
                             content = document.createDocumentFragment();
-                            for (var i = 0; i < selectedElementCount; i++) {
+                            for (let i = 0; i < selectedElementCount; i++) {
                                 content.appendChild(cloneContent
                                     ? selectedElements[i].cloneNode(true)
                                     : selectedElements[i]);
@@ -5415,9 +5279,9 @@ var RnSlot = /** @class */ (function (_super) {
                     }
                 }
                 else if (!cloneContent) {
-                    var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
+                    let contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
                     if (contentMap && contentMap.has(key)) {
-                        var container = contentMap.get(key);
+                        let container = contentMap.get(key);
                         content = move_content_1.moveContent(document.createDocumentFragment(), container);
                         contentMap.set(key, el);
                         childComponents = container.$component._childComponents;
@@ -5434,7 +5298,7 @@ var RnSlot = /** @class */ (function (_super) {
             }
             if (bindings === undefined) {
                 if (content || el.firstChild) {
-                    var contentBindingResult = [null, null, null];
+                    let contentBindingResult = [null, null, null];
                     if (content) {
                         bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
                             ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
@@ -5471,31 +5335,30 @@ var RnSlot = /** @class */ (function (_super) {
                 attachChildComponentElements_1.attachChildComponentElements(childComponents);
             }
             if (backBindings) {
-                for (var i = backBindings.length; i; i -= 3) {
+                for (let i = backBindings.length; i; i -= 3) {
                     backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
                 }
             }
             this.isReady = true;
         }
-    };
-    RnSlot.prototype._detach = function () {
+    }
+    _detach() {
         this._attached = false;
         this._freezeBindings();
-    };
-    RnSlot = __decorate([
-        Component_1.Component({
-            elementIs: 'RnSlot',
-            params: {
-                name: { property: 'paramName', type: String, readonly: true },
-                forTag: { property: 'paramForTag', type: String, readonly: true },
-                for: { property: 'paramFor', type: String, readonly: true },
-                cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
-                getContext: { property: 'paramGetContext', type: Object, readonly: true }
-            }
-        })
-    ], RnSlot);
-    return RnSlot;
-}(BaseComponent_1.BaseComponent));
+    }
+};
+RnSlot = __decorate([
+    Component_1.Component({
+        elementIs: 'RnSlot',
+        params: {
+            name: { property: 'paramName', type: String, readonly: true },
+            forTag: { property: 'paramForTag', type: String, readonly: true },
+            for: { property: 'paramFor', type: String, readonly: true },
+            cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
+            getContext: { property: 'paramGetContext', type: Object, readonly: true }
+        }
+    })
+], RnSlot);
 exports.RnSlot = RnSlot;
 RnSlot[BaseComponent_1.KEY_IS_SLOT] = true;
 
