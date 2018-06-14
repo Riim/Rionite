@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+
+<script src="../node_modules/lodash/lodash.js"></script>
+<script src="../node_modules/platform/platform.js"></script>
+<script src="../node_modules/benchmark/benchmark.js"></script>
+<script>
+
+var range = document.createRange();
+var selected = false;
+
+function htmlToFragment(html) {
+	if (!selected) {
+		range.selectNode(document.body);
+		selected = true;
+	}
+
+	return range.createContextualFragment(html);
+}
+
+function fragment() {
+	return htmlToFragment('<ul><li class="li1">1</li><li class="li2">2</li><li class="li3">3</li></ul>');
+}
+
+function create() {
+	let df = document.createDocumentFragment();
+	let ul = document.createElement('ul');
+	df.appendChild(ul);
+	let li1 = document.createElement('li');
+	li1.setAttribute('class', 'li1');
+	ul.appendChild(li1);
+	let li2 = document.createElement('li');
+	li2.setAttribute('class', 'li2');
+	ul.appendChild(li2);
+	let li3 = document.createElement('li');
+	li3.setAttribute('class', 'li3');
+	ul.appendChild(li3);
+	return df;
+}
+
+function clone() {
+	return el.cloneNode(true);
+}
+
+let el = create();
+
+function bindContent(content) {
+	for (let child = content.firstChild; child; child = child.nextSibling) {
+		switch (child.nodeType) {
+			case Node.ELEMENT_NODE: {
+				let attrs = child.attributes;
+
+				for (let i = attrs.length; i; ) {
+					let attr = attrs.item(--i);
+					let value = attr.value;
+
+					if (value) {
+						//
+					}
+				}
+
+				let childComponent = child.$component;
+
+				if (childComponent) {
+					//
+				}
+
+				if (child.firstChild && !childComponent) {
+					bindContent(child);
+				}
+
+				break;
+			}
+			case Node.TEXT_NODE: {
+				let content = child.textContent;
+
+				if (content) {
+					//
+				}
+
+				break;
+			}
+		}
+	}
+
+	return [null, null];
+}
+
+function cloneAndBind() {
+	let copy = el.cloneNode(true);
+	bindContent(copy);
+	return copy;
+}
+
+var suite = new Benchmark.Suite();
+
+suite
+	.add('fragment', function() {
+		fragment();
+	})
+	.add('create', function() {
+		create();
+	})
+	.add('clone', function() {
+		clone();
+	})
+	.add('cloneAndBind', function() {
+		cloneAndBind();
+	})
+	.on('cycle', function(evt) {
+		document.body.innerHTML += '<br>' + String(evt.target);
+	})
+	.run({ 'async': true });
+
+// fragment x 48,052 ops/sec ±6.16% (55 runs sampled)
+// create x 161,220 ops/sec ±3.72% (55 runs sampled)
+// clone x 264,068 ops/sec ±4.76% (48 runs sampled)
+// cloneAndBind x 64,243 ops/sec ±12.13% (40 runs sampled)
+
+</script>
+
+</body>
+</html>

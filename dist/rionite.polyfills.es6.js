@@ -1794,20 +1794,20 @@ class Template {
         this.nelm = typeof nelm == 'string' ? new nelm_parser_1.Parser(nelm).parse() : nelm;
         let blockName = (opts && opts.blockName) || this.nelm.name;
         if (parent) {
-            this._elementBlockNamesTemplate = [
+            this._elementNamesTemplate = [
                 blockName ? blockName + exports.ELEMENT_NAME_DELIMITER : ''
-            ].concat(parent._elementBlockNamesTemplate);
+            ].concat(parent._elementNamesTemplate);
         }
         else if (blockName) {
             if (Array.isArray(blockName)) {
                 this.setBlockName(blockName);
             }
             else {
-                this._elementBlockNamesTemplate = [blockName + exports.ELEMENT_NAME_DELIMITER, ''];
+                this._elementNamesTemplate = [blockName + exports.ELEMENT_NAME_DELIMITER, ''];
             }
         }
         else {
-            this._elementBlockNamesTemplate = ['', ''];
+            this._elementNamesTemplate = ['', ''];
         }
         this.onBeforeNamedElementOpeningTagClosing =
             (opts && opts.onBeforeNamedElementOpeningTagClosing) || (() => '');
@@ -1820,10 +1820,10 @@ class Template {
     }
     setBlockName(blockName) {
         if (Array.isArray(blockName)) {
-            (this._elementBlockNamesTemplate = blockName.map(blockName => blockName + exports.ELEMENT_NAME_DELIMITER)).push('');
+            (this._elementNamesTemplate = blockName.map(blockName => blockName + exports.ELEMENT_NAME_DELIMITER)).push('');
         }
         else {
-            this._elementBlockNamesTemplate[0] = blockName + exports.ELEMENT_NAME_DELIMITER;
+            this._elementNamesTemplate[0] = blockName + exports.ELEMENT_NAME_DELIMITER;
         }
         return this;
     }
@@ -2070,7 +2070,7 @@ class Template {
     _renderElementClasses(elNames) {
         let elClasses = '';
         for (let i = 0, l = elNames.length; i < l; i++) {
-            elClasses += this._elementBlockNamesTemplate.join(elNames[i] + ' ');
+            elClasses += this._elementNamesTemplate.join(elNames[i] + ' ');
         }
         return elClasses.slice(0, -1);
     }
@@ -3330,20 +3330,37 @@ function onTextNodeBindingCellChange(evt) {
     evt.target.meta.textNode.nodeValue = evt.data.value;
 }
 function prepareContent(node) {
-    for (let child = node.firstChild; child; child = child.nextSibling) {
-        if (child.nodeType == Node.ELEMENT_NODE) {
-            if (child instanceof HTMLTemplateElement) {
-                child.setAttribute('pid', next_uid_1.nextUID());
-                if (!child.firstChild) {
-                    prepareContent(child.content);
-                    continue;
+    for (let child = node.firstChild; child;) {
+        switch (child.nodeType) {
+            case Node.ELEMENT_NODE: {
+                if (child instanceof HTMLTemplateElement) {
+                    child.setAttribute('pid', next_uid_1.nextUID());
+                    if (!child.firstChild) {
+                        prepareContent(child.content);
+                        child = child.nextSibling;
+                        continue;
+                    }
                 }
+                else if (child.$component &&
+                    child.$component.constructor[BaseComponent_1.KEY_IS_SLOT]) {
+                    child.setAttribute('pid', next_uid_1.nextUID());
+                }
+                prepareContent(child);
+                child = child.nextSibling;
+                break;
             }
-            else if (child.$component &&
-                child.$component.constructor[BaseComponent_1.KEY_IS_SLOT]) {
-                child.setAttribute('pid', next_uid_1.nextUID());
+            case Node.TEXT_NODE: {
+                let nextChild = child.nextSibling;
+                if (nextChild && nextChild.nodeType == Node.TEXT_NODE) {
+                    do {
+                        child.nodeValue += nextChild.nodeValue;
+                        node.removeChild(nextChild);
+                        nextChild = child.nextSibling;
+                    } while (nextChild && nextChild.nodeType == Node.TEXT_NODE);
+                }
+                child = nextChild;
+                break;
             }
-            prepareContent(child);
         }
     }
     return node;
@@ -3559,20 +3576,6 @@ function bindContent(node, index, ownerComponent, context, result, schema, paren
 exports.bindContent = bindContent;
 function bindContentBySchema(node, schema, ownerComponent, context, result, parentComponent) {
     let children = node.childNodes;
-    if (schema.textChildren) {
-        for (let index of schema.textChildren) {
-            let child = children[index];
-            let nextChild = child.nextSibling;
-            if (nextChild && nextChild.nodeType == Node.TEXT_NODE) {
-                do {
-                    child.nodeValue += nextChild.nodeValue;
-                    node.removeChild(nextChild);
-                    nextChild = child.nextSibling;
-                } while (nextChild && nextChild.nodeType == Node.TEXT_NODE);
-            }
-            bindTextNode(child, contentNodeValueASTCache[child.nodeValue], context, result);
-        }
-    }
     if (schema.specifiedParams) {
         node.$component.$specifiedParams = schema.specifiedParams;
     }
@@ -3599,6 +3602,11 @@ function bindContentBySchema(node, schema, ownerComponent, context, result, pare
             let targetName = name.charAt(0) == '_' ? name.slice(1) : name;
             let value = node.getAttribute(name);
             bindAttribute(node, name, targetName, value, contentNodeValueASTCache[value], $paramsConfig && $paramsConfig[targetName], context, result);
+        }
+    }
+    if (schema.textChildren) {
+        for (let index of schema.textChildren) {
+            bindTextNode(children[index], contentNodeValueASTCache[children[index].nodeValue], context, result);
         }
     }
     if (schema.context) {

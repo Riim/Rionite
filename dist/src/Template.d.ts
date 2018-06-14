@@ -17,7 +17,7 @@ export declare class Template {
     };
     parent: Template | null;
     nelm: IBlock;
-    _elementBlockNamesTemplate: Array<string>;
+    _elementNamesTemplate: Array<string>;
     onBeforeNamedElementOpeningTagClosing: (elNames: Array<string>) => string;
     _tagNameMap: {
         [elName: string]: string;

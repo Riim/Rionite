@@ -54,23 +54,45 @@ function onTextNodeBindingCellChange(evt: IEvent<Cell<string, { textNode: Text }
 }
 
 export function prepareContent<T extends Node = DocumentFragment | Element>(node: T): T {
-	for (let child = node.firstChild; child; child = child.nextSibling) {
-		if (child.nodeType == Node.ELEMENT_NODE) {
-			if (child instanceof HTMLTemplateElement) {
-				child.setAttribute('pid', nextUID());
+	for (let child = node.firstChild; child; ) {
+		switch (child.nodeType) {
+			case Node.ELEMENT_NODE: {
+				if (child instanceof HTMLTemplateElement) {
+					child.setAttribute('pid', nextUID());
 
-				if (!child.firstChild) {
-					prepareContent(child.content);
-					continue;
+					if (!child.firstChild) {
+						prepareContent(child.content);
+						child = child.nextSibling;
+
+						continue;
+					}
+				} else if (
+					(child as IPossiblyComponentElement).$component &&
+					(child as IComponentElement).$component.constructor[KEY_IS_SLOT]
+				) {
+					(child as Element).setAttribute('pid', nextUID());
 				}
-			} else if (
-				(child as IPossiblyComponentElement).$component &&
-				(child as IComponentElement).$component.constructor[KEY_IS_SLOT]
-			) {
-				(child as Element).setAttribute('pid', nextUID());
-			}
 
-			prepareContent(child);
+				prepareContent(child);
+				child = child.nextSibling;
+
+				break;
+			}
+			case Node.TEXT_NODE: {
+				let nextChild = child.nextSibling;
+
+				if (nextChild && nextChild.nodeType == Node.TEXT_NODE) {
+					do {
+						child.nodeValue += nextChild.nodeValue!;
+						node.removeChild(nextChild);
+						nextChild = child.nextSibling;
+					} while (nextChild && nextChild.nodeType == Node.TEXT_NODE);
+				}
+
+				child = nextChild;
+
+				break;
+			}
 		}
 	}
 
@@ -436,28 +458,6 @@ function bindContentBySchema(
 ) {
 	let children = node.childNodes;
 
-	if (schema.textChildren) {
-		for (let index of schema.textChildren) {
-			let child = children[index];
-			let nextChild = child.nextSibling;
-
-			if (nextChild && nextChild.nodeType == Node.TEXT_NODE) {
-				do {
-					child.nodeValue += nextChild.nodeValue!;
-					node.removeChild(nextChild);
-					nextChild = child.nextSibling;
-				} while (nextChild && nextChild.nodeType == Node.TEXT_NODE);
-			}
-
-			bindTextNode(
-				child as Text,
-				contentNodeValueASTCache[child.nodeValue!]!,
-				context,
-				result
-			);
-		}
-	}
-
 	if (schema.specifiedParams) {
 		(node as IComponentElement).$component.$specifiedParams = schema.specifiedParams;
 	}
@@ -499,6 +499,17 @@ function bindContentBySchema(
 				value,
 				contentNodeValueASTCache[value]!,
 				$paramsConfig && $paramsConfig[targetName],
+				context,
+				result
+			);
+		}
+	}
+
+	if (schema.textChildren) {
+		for (let index of schema.textChildren) {
+			bindTextNode(
+				children[index] as Text,
+				contentNodeValueASTCache[children[index].nodeValue!]!,
 				context,
 				result
 			);
