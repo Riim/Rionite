@@ -31,6 +31,12 @@ export interface INodeBindingSchema {
 	childSchemas: Array<INodeBindingSchema> | null;
 }
 
+export type TResult = [
+	Array<BaseComponent> | null,
+	Array<IFreezableCell> | null,
+	Array<BaseComponent | string | TListener> | null
+];
+
 export const KEY_NODE_BINDING_SCHEMA = Symbol('Rionite/bindContent[nodeBindingSchema]');
 export const KEY_NODE_BINDING_SCHEMAS = Symbol('Rionite/bindContent[nodeBindingSchemas]');
 export const KEY_CHILD_COMPONENTS = Symbol('Rionite/bindContent[childComponents]');
@@ -104,16 +110,8 @@ export function bindComponentContent(
 	node: Element | DocumentFragment,
 	ownerComponent: BaseComponent,
 	context: object,
-	result: [
-		Array<BaseComponent> | null,
-		Array<IFreezableCell> | null,
-		Array<BaseComponent | string | TListener> | null
-	]
-): [
-	Array<BaseComponent> | null,
-	Array<IFreezableCell> | null,
-	Array<BaseComponent | string | TListener> | null
-] {
+	result: TResult
+): TResult {
 	let schema = (component.constructor as typeof BaseComponent).template![KEY_NODE_BINDING_SCHEMA];
 
 	if (schema === undefined) {
@@ -132,16 +130,8 @@ export function bindComponentContent2(
 	node: Element | DocumentFragment,
 	ownerComponent: BaseComponent,
 	context: object,
-	result: [
-		Array<BaseComponent> | null,
-		Array<IFreezableCell> | null,
-		Array<BaseComponent | string | TListener> | null
-	]
-): [
-	Array<BaseComponent> | null,
-	Array<IFreezableCell> | null,
-	Array<BaseComponent | string | TListener> | null
-] {
+	result: TResult
+): TResult {
 	let pid = component.element.getAttribute('pid');
 
 	if (pid) {
@@ -171,11 +161,7 @@ export function bindContent(
 	index: number,
 	ownerComponent: BaseComponent,
 	context: object,
-	result: [
-		Array<BaseComponent> | null,
-		Array<IFreezableCell> | null,
-		Array<BaseComponent | string | TListener> | null
-	],
+	result: TResult,
 	schema?: INodeBindingSchema | null,
 	parentComponent?: BaseComponent
 ) {
@@ -449,11 +435,7 @@ function bindContentBySchema(
 	schema: INodeBindingSchema,
 	ownerComponent: BaseComponent,
 	context: object,
-	result: [
-		Array<BaseComponent> | null,
-		Array<IFreezableCell> | null,
-		Array<BaseComponent | string | TListener> | null
-	],
+	result: TResult,
 	parentComponent?: BaseComponent
 ) {
 	let children = node.childNodes;
@@ -546,11 +528,7 @@ function bindAttribute(
 	valueAST: TContentNodeValue,
 	$paramConfig: I$ComponentParamConfig | undefined,
 	context: object,
-	result: [
-		Array<BaseComponent> | null,
-		Array<IFreezableCell> | null,
-		Array<BaseComponent | string | TListener> | null
-	]
+	result: TResult
 ) {
 	let prefix = valueAST.length == 1 ? (valueAST[0] as IContentNodeValueBinding).prefix : null;
 
@@ -626,11 +604,7 @@ function bindTextNode(
 	textNode: Text,
 	valueAST: TContentNodeValue,
 	context: object,
-	result: [
-		Array<BaseComponent> | null,
-		Array<IFreezableCell> | null,
-		Array<BaseComponent | string | TListener> | null
-	]
+	result: TResult
 ) {
 	if (valueAST.length == 1 && (valueAST[0] as IContentNodeValueBinding).prefix === '=') {
 		textNode.nodeValue = compileContentNodeValue(valueAST, textNode.nodeValue!, false).call(

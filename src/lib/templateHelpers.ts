@@ -5,7 +5,7 @@ import { Template } from '../Template';
 	Template.helpers[name] = el => {
 		let attrs = el.attributes;
 
-		// проверка на attrs для @*/name // ...
+		// проверка на attrs для `@div/name // ...`
 		if (attrs && name != 'repeat') {
 			let list = attrs.list;
 			let index = list.length - 1;
@@ -40,12 +40,34 @@ import { Template } from '../Template';
 		return [
 			{
 				nodeType: NodeType.ELEMENT,
-				isHelper: false,
 				tagName: 'template',
-				names: el.names && el.names[0] ? ['$' + el.names[0], ...el.names] : null,
+				isHelper: false,
+				names: el.names && el.names[0] ? ['_' + el.names[0], ...el.names] : null,
 				attributes: attrs,
 				content: el.content
 			}
 		];
 	};
 });
+
+Template.helpers.slot = el => {
+	return [
+		{
+			nodeType: NodeType.ELEMENT,
+			tagName: 'rn-slot2',
+			isHelper: false,
+			names: el.names && el.names[0] ? ['_' + el.names[0], ...el.names] : null,
+			attributes: el.attributes,
+			content: el.content && [
+				{
+					nodeType: NodeType.ELEMENT,
+					tagName: 'template',
+					isHelper: false,
+					names: null,
+					attributes: null,
+					content: el.content
+				}
+			]
+		}
+	];
+};

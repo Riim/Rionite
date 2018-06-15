@@ -10,6 +10,7 @@ export interface INodeBindingSchema {
     context: Array<number> | null;
     childSchemas: Array<INodeBindingSchema> | null;
 }
+export declare type TResult = [Array<BaseComponent> | null, Array<IFreezableCell> | null, Array<BaseComponent | string | TListener> | null];
 export declare const KEY_NODE_BINDING_SCHEMA: unique symbol;
 export declare const KEY_NODE_BINDING_SCHEMAS: unique symbol;
 export declare const KEY_CHILD_COMPONENTS: unique symbol;
@@ -19,6 +20,6 @@ export interface IAttributeBindingCellMeta {
     attributeName: string;
 }
 export declare function prepareContent<T extends Node = DocumentFragment | Element>(node: T): T;
-export declare function bindComponentContent(component: BaseComponent, node: Element | DocumentFragment, ownerComponent: BaseComponent, context: object, result: [Array<BaseComponent> | null, Array<IFreezableCell> | null, Array<BaseComponent | string | TListener> | null]): [Array<BaseComponent> | null, Array<IFreezableCell> | null, Array<BaseComponent | string | TListener> | null];
-export declare function bindComponentContent2(component: BaseComponent, node: Element | DocumentFragment, ownerComponent: BaseComponent, context: object, result: [Array<BaseComponent> | null, Array<IFreezableCell> | null, Array<BaseComponent | string | TListener> | null]): [Array<BaseComponent> | null, Array<IFreezableCell> | null, Array<BaseComponent | string | TListener> | null];
-export declare function bindContent(node: Element | DocumentFragment, index: number, ownerComponent: BaseComponent, context: object, result: [Array<BaseComponent> | null, Array<IFreezableCell> | null, Array<BaseComponent | string | TListener> | null], schema?: INodeBindingSchema | null, parentComponent?: BaseComponent): INodeBindingSchema | null;
+export declare function bindComponentContent(component: BaseComponent, node: Element | DocumentFragment, ownerComponent: BaseComponent, context: object, result: TResult): TResult;
+export declare function bindComponentContent2(component: BaseComponent, node: Element | DocumentFragment, ownerComponent: BaseComponent, context: object, result: TResult): TResult;
+export declare function bindContent(node: Element | DocumentFragment, index: number, ownerComponent: BaseComponent, context: object, result: TResult, schema?: INodeBindingSchema | null, parentComponent?: BaseComponent): INodeBindingSchema | null;

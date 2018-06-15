@@ -1,4 +1,3 @@
-import { clearNode } from '@riim/clear-node';
 import { getUID } from '@riim/get-uid';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
@@ -11,10 +10,10 @@ import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 
-const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot[slotContentMap]');
+const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot2[slotContentMap]');
 
 @Component({
-	elementIs: 'RnSlot',
+	elementIs: 'RnSlot2',
 
 	params: {
 		name: { property: 'paramName', type: String, readonly: true },
@@ -24,7 +23,7 @@ const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot[slotContentMap]');
 		getContext: { property: 'paramGetContext', type: Object, readonly: true }
 	}
 })
-export class RnSlot extends BaseComponent {
+export class RnSlot2 extends BaseComponent {
 	static get bindsInputContent() {
 		return true;
 	}
@@ -38,7 +37,7 @@ export class RnSlot extends BaseComponent {
 	paramGetContext: (
 		this: BaseComponent,
 		context: { [name: string]: any },
-		slot: RnSlot
+		slot: RnSlot2
 	) => { [name: string]: any };
 
 	_childComponents: Array<BaseComponent> | null;
@@ -95,7 +94,7 @@ export class RnSlot extends BaseComponent {
 						content = moveContent(document.createDocumentFragment(), container);
 						contentMap.set(key, el);
 
-						childComponents = (container.$component as RnSlot)._childComponents;
+						childComponents = (container.$component as RnSlot2)._childComponents;
 						bindings = container.$component._bindings;
 					}
 				} else if (ownerComponentContent.firstElementChild) {
@@ -142,7 +141,7 @@ export class RnSlot extends BaseComponent {
 					content = moveContent(document.createDocumentFragment(), container);
 					contentMap.set(key, el);
 
-					childComponents = (container.$component as RnSlot)._childComponents;
+					childComponents = (container.$component as RnSlot2)._childComponents;
 					bindings = container.$component._bindings;
 				} else if (ownerComponentContent.firstChild) {
 					content = ownerComponentContent;
@@ -155,7 +154,7 @@ export class RnSlot extends BaseComponent {
 		}
 
 		if (bindings === undefined) {
-			if (content || el.firstChild) {
+			if (content || el.firstElementChild) {
 				let contentBindingResult: [
 					Array<BaseComponent> | null,
 					Array<IFreezableCell> | null,
@@ -179,7 +178,10 @@ export class RnSlot extends BaseComponent {
 				} else {
 					bindComponentContent2(
 						this,
-						el,
+						(content = document.importNode(
+							(el.firstElementChild as HTMLTemplateElement).content,
+							true
+						)),
 						ownerComponent,
 						this.paramGetContext
 							? this.paramGetContext.call(ownerComponent, this.$context, this)
@@ -203,9 +205,6 @@ export class RnSlot extends BaseComponent {
 
 		if (content) {
 			suppressConnectionStatusCallbacks();
-			if (el.firstChild) {
-				clearNode(el);
-			}
 			el.appendChild(content);
 			resumeConnectionStatusCallbacks();
 		}
@@ -232,4 +231,4 @@ export class RnSlot extends BaseComponent {
 	}
 }
 
-RnSlot[KEY_IS_SLOT] = true;
+RnSlot2[KEY_IS_SLOT] = true;

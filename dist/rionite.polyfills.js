@@ -1665,6 +1665,8 @@ var RnRepeat_1 = __webpack_require__(55);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
 var RnSlot_1 = __webpack_require__(57);
 exports.RnSlot = RnSlot_1.RnSlot;
+var RnSlot2_1 = __webpack_require__(59);
+exports.RnSlot2 = RnSlot2_1.RnSlot2;
 di_1.Container.registerService('logger', logger_1.logger);
 
 
@@ -1726,7 +1728,7 @@ var Template_1 = __webpack_require__(6);
 ['if-then', 'if-else', 'repeat'].forEach(function (name) {
     Template_1.Template.helpers[name] = function (el) {
         var attrs = el.attributes;
-        // проверка на attrs для @*/name // ...
+        // проверка на attrs для `@div/name // ...`
         if (attrs && name != 'repeat') {
             var list = attrs.list;
             var index = list.length - 1;
@@ -1757,15 +1759,36 @@ var Template_1 = __webpack_require__(6);
         return [
             {
                 nodeType: nelm_parser_1.NodeType.ELEMENT,
-                isHelper: false,
                 tagName: 'template',
-                names: el.names && el.names[0] ? ['$' + el.names[0]].concat(el.names) : null,
+                isHelper: false,
+                names: el.names && el.names[0] ? ['_' + el.names[0]].concat(el.names) : null,
                 attributes: attrs,
                 content: el.content
             }
         ];
     };
 });
+Template_1.Template.helpers.slot = function (el) {
+    return [
+        {
+            nodeType: nelm_parser_1.NodeType.ELEMENT,
+            tagName: 'rn-slot2',
+            isHelper: false,
+            names: el.names && el.names[0] ? ['_' + el.names[0]].concat(el.names) : null,
+            attributes: el.attributes,
+            content: el.content && [
+                {
+                    nodeType: nelm_parser_1.NodeType.ELEMENT,
+                    tagName: 'template',
+                    isHelper: false,
+                    names: null,
+                    attributes: null,
+                    content: el.content
+                }
+            ]
+        }
+    ];
+};
 
 
 /***/ }),
@@ -5359,132 +5382,131 @@ var RnSlot = /** @class */ (function (_super) {
         this._attached = true;
         if (this.isReady) {
             this._unfreezeBindings();
+            return;
         }
-        else {
-            var ownerComponent = this.ownerComponent;
-            var el = this.element;
-            var contentOwnerComponent = ownerComponent.ownerComponent;
-            var ownerComponentContent = ownerComponent.$inputContent;
-            var cloneContent = this.paramCloneContent;
-            var content = void 0;
-            var bindings = void 0;
-            var backBindings = void 0;
-            var childComponents = void 0;
-            if (!cloneContent || ownerComponentContent.firstChild) {
-                var slotName = this.paramName;
-                var forTag = void 0;
-                var for_ = void 0;
-                if (!slotName) {
-                    forTag = this.paramForTag;
-                    if (forTag) {
-                        forTag = forTag.toUpperCase();
-                    }
-                    else {
-                        for_ = this.paramFor;
-                    }
+        var ownerComponent = this.ownerComponent;
+        var contentOwnerComponent = ownerComponent.ownerComponent;
+        var ownerComponentContent = ownerComponent.$inputContent;
+        var el = this.element;
+        var cloneContent = this.paramCloneContent;
+        var content;
+        var childComponents;
+        var bindings;
+        var backBindings;
+        if (!cloneContent || ownerComponentContent.firstChild) {
+            var slotName = this.paramName;
+            var forTag = void 0;
+            var for$ = void 0;
+            if (!slotName) {
+                forTag = this.paramForTag;
+                if (forTag) {
+                    forTag = forTag.toUpperCase();
                 }
-                var key = get_uid_1.getUID(ownerComponent) +
-                    '/' +
-                    (slotName ? '@' + slotName : forTag ? ':' + forTag : for_ || '');
-                if (slotName || forTag || for_) {
-                    var contentMap = void 0;
-                    if (!cloneContent &&
-                        (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
-                        contentMap.has(key)) {
-                        var container = contentMap.get(key);
-                        if (container.firstChild) {
-                            content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                            contentMap.set(key, el);
-                            childComponents = container.$component._childComponents;
-                            bindings = container.$component._bindings;
-                        }
-                    }
-                    else if (ownerComponentContent.firstElementChild) {
-                        if (for_ && for_.indexOf('__') == -1) {
-                            var elementBlockNames = ownerComponent.constructor
-                                ._elementBlockNames;
-                            for_ = elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
-                        }
-                        var selectedElements = ownerComponentContent.querySelectorAll(slotName ? "[slot=" + slotName + "]" : forTag || '.' + for_);
-                        var selectedElementCount = selectedElements.length;
-                        if (selectedElementCount) {
-                            content = document.createDocumentFragment();
-                            for (var i = 0; i < selectedElementCount; i++) {
-                                content.appendChild(cloneContent
-                                    ? selectedElements[i].cloneNode(true)
-                                    : selectedElements[i]);
-                            }
-                        }
-                        if (!cloneContent) {
-                            (contentMap ||
-                                contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
-                                (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                        }
-                    }
+                else {
+                    for$ = this.paramFor;
                 }
-                else if (!cloneContent) {
-                    var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
-                    if (contentMap && contentMap.has(key)) {
-                        var container = contentMap.get(key);
+            }
+            var key = get_uid_1.getUID(ownerComponent) +
+                '/' +
+                (slotName ? '@' + slotName : forTag ? ':' + forTag : for$ || '');
+            if (slotName || forTag || for$) {
+                var contentMap = void 0;
+                if (!cloneContent &&
+                    (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
+                    contentMap.has(key)) {
+                    var container = contentMap.get(key);
+                    if (container.firstChild) {
                         content = move_content_1.moveContent(document.createDocumentFragment(), container);
                         contentMap.set(key, el);
                         childComponents = container.$component._childComponents;
                         bindings = container.$component._bindings;
                     }
-                    else if (ownerComponentContent.firstChild) {
-                        content = ownerComponentContent;
-                        (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                    }
                 }
-                else {
-                    content = ownerComponentContent.cloneNode(true);
+                else if (ownerComponentContent.firstElementChild) {
+                    if (for$ && for$.indexOf('__') == -1) {
+                        var elementBlockNames = ownerComponent.constructor
+                            ._elementBlockNames;
+                        for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
+                    }
+                    var selectedElements = ownerComponentContent.querySelectorAll(slotName ? "[slot=" + slotName + "]" : forTag || '.' + for$);
+                    var selectedElementCount = selectedElements.length;
+                    if (selectedElementCount) {
+                        content = document.createDocumentFragment();
+                        for (var i = 0; i < selectedElementCount; i++) {
+                            content.appendChild(cloneContent
+                                ? selectedElements[i].cloneNode(true)
+                                : selectedElements[i]);
+                        }
+                    }
+                    if (!cloneContent) {
+                        (contentMap ||
+                            contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
+                            (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                    }
                 }
             }
-            if (bindings === undefined) {
-                if (content || el.firstChild) {
-                    var contentBindingResult = [null, null, null];
-                    if (content) {
-                        bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
-                            ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
-                            : ownerComponent.$context, contentBindingResult);
-                    }
-                    else {
-                        bindContent_1.bindComponentContent2(this, el, ownerComponent, this.paramGetContext
-                            ? this.paramGetContext.call(ownerComponent, this.$context, this)
-                            : this.$context, contentBindingResult);
-                    }
-                    childComponents = this._childComponents = contentBindingResult[0];
-                    this._bindings = contentBindingResult[1];
-                    backBindings = contentBindingResult[2];
-                }
-                else {
-                    this._childComponents = null;
-                    this._bindings = null;
-                }
+            else if (cloneContent) {
+                content = ownerComponentContent.cloneNode(true);
             }
             else {
-                this._childComponents = childComponents;
-                this._bindings = bindings;
-                this._unfreezeBindings();
-            }
-            if (content) {
-                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                if (el.firstChild) {
-                    clear_node_1.clearNode(el);
+                var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
+                if (contentMap && contentMap.has(key)) {
+                    var container = contentMap.get(key);
+                    content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                    contentMap.set(key, el);
+                    childComponents = container.$component._childComponents;
+                    bindings = container.$component._bindings;
                 }
-                el.appendChild(content);
-                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
-            }
-            if (childComponents) {
-                attachChildComponentElements_1.attachChildComponentElements(childComponents);
-            }
-            if (backBindings) {
-                for (var i = backBindings.length; i; i -= 3) {
-                    backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
+                else if (ownerComponentContent.firstChild) {
+                    content = ownerComponentContent;
+                    (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
                 }
             }
-            this.isReady = true;
         }
+        if (bindings === undefined) {
+            if (content || el.firstChild) {
+                var contentBindingResult = [null, null, null];
+                if (content) {
+                    bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
+                        ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
+                        : ownerComponent.$context, contentBindingResult);
+                }
+                else {
+                    bindContent_1.bindComponentContent2(this, el, ownerComponent, this.paramGetContext
+                        ? this.paramGetContext.call(ownerComponent, this.$context, this)
+                        : this.$context, contentBindingResult);
+                }
+                childComponents = this._childComponents = contentBindingResult[0];
+                this._bindings = contentBindingResult[1];
+                backBindings = contentBindingResult[2];
+            }
+            else {
+                this._childComponents = null;
+                this._bindings = null;
+            }
+        }
+        else {
+            this._childComponents = childComponents;
+            this._bindings = bindings;
+            this._unfreezeBindings();
+        }
+        if (content) {
+            ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+            if (el.firstChild) {
+                clear_node_1.clearNode(el);
+            }
+            el.appendChild(content);
+            ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+        }
+        if (childComponents) {
+            attachChildComponentElements_1.attachChildComponentElements(childComponents);
+        }
+        if (backBindings) {
+            for (var i = backBindings.length; i; i -= 3) {
+                backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
+            }
+        }
+        this.isReady = true;
     };
     RnSlot.prototype._detach = function () {
         this._attached = false;
@@ -5513,6 +5535,200 @@ RnSlot[BaseComponent_1.KEY_IS_SLOT] = true;
 /***/ (function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE__58__;
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var get_uid_1 = __webpack_require__(24);
+var map_set_polyfill_1 = __webpack_require__(10);
+var move_content_1 = __webpack_require__(25);
+var symbol_polyfill_1 = __webpack_require__(26);
+var attachChildComponentElements_1 = __webpack_require__(28);
+var BaseComponent_1 = __webpack_require__(23);
+var bindContent_1 = __webpack_require__(32);
+var Component_1 = __webpack_require__(17);
+var ElementProtoMixin_1 = __webpack_require__(44);
+var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot2[slotContentMap]');
+var RnSlot2 = /** @class */ (function (_super) {
+    __extends(RnSlot2, _super);
+    function RnSlot2() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    Object.defineProperty(RnSlot2, "bindsInputContent", {
+        get: function () {
+            return true;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    RnSlot2.prototype._attach = function () {
+        this._attached = true;
+        if (this.isReady) {
+            this._unfreezeBindings();
+            return;
+        }
+        var ownerComponent = this.ownerComponent;
+        var contentOwnerComponent = ownerComponent.ownerComponent;
+        var ownerComponentContent = ownerComponent.$inputContent;
+        var el = this.element;
+        var cloneContent = this.paramCloneContent;
+        var content;
+        var childComponents;
+        var bindings;
+        var backBindings;
+        if (!cloneContent || ownerComponentContent.firstChild) {
+            var slotName = this.paramName;
+            var forTag = void 0;
+            var for$ = void 0;
+            if (!slotName) {
+                forTag = this.paramForTag;
+                if (forTag) {
+                    forTag = forTag.toUpperCase();
+                }
+                else {
+                    for$ = this.paramFor;
+                }
+            }
+            var key = get_uid_1.getUID(ownerComponent) +
+                '/' +
+                (slotName ? '@' + slotName : forTag ? ':' + forTag : for$ || '');
+            if (slotName || forTag || for$) {
+                var contentMap = void 0;
+                if (!cloneContent &&
+                    (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
+                    contentMap.has(key)) {
+                    var container = contentMap.get(key);
+                    if (container.firstChild) {
+                        content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                        contentMap.set(key, el);
+                        childComponents = container.$component._childComponents;
+                        bindings = container.$component._bindings;
+                    }
+                }
+                else if (ownerComponentContent.firstElementChild) {
+                    if (for$ && for$.indexOf('__') == -1) {
+                        var elementBlockNames = ownerComponent.constructor
+                            ._elementBlockNames;
+                        for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
+                    }
+                    var selectedElements = ownerComponentContent.querySelectorAll(slotName ? "[slot=" + slotName + "]" : forTag || '.' + for$);
+                    var selectedElementCount = selectedElements.length;
+                    if (selectedElementCount) {
+                        content = document.createDocumentFragment();
+                        for (var i = 0; i < selectedElementCount; i++) {
+                            content.appendChild(cloneContent
+                                ? selectedElements[i].cloneNode(true)
+                                : selectedElements[i]);
+                        }
+                    }
+                    if (!cloneContent) {
+                        (contentMap ||
+                            contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
+                            (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                    }
+                }
+            }
+            else if (cloneContent) {
+                content = ownerComponentContent.cloneNode(true);
+            }
+            else {
+                var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
+                if (contentMap && contentMap.has(key)) {
+                    var container = contentMap.get(key);
+                    content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                    contentMap.set(key, el);
+                    childComponents = container.$component._childComponents;
+                    bindings = container.$component._bindings;
+                }
+                else if (ownerComponentContent.firstChild) {
+                    content = ownerComponentContent;
+                    (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                }
+            }
+        }
+        if (bindings === undefined) {
+            if (content || el.firstElementChild) {
+                var contentBindingResult = [null, null, null];
+                if (content) {
+                    bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
+                        ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
+                        : ownerComponent.$context, contentBindingResult);
+                }
+                else {
+                    bindContent_1.bindComponentContent2(this, (content = document.importNode(el.firstElementChild.content, true)), ownerComponent, this.paramGetContext
+                        ? this.paramGetContext.call(ownerComponent, this.$context, this)
+                        : this.$context, contentBindingResult);
+                }
+                childComponents = this._childComponents = contentBindingResult[0];
+                this._bindings = contentBindingResult[1];
+                backBindings = contentBindingResult[2];
+            }
+            else {
+                this._childComponents = null;
+                this._bindings = null;
+            }
+        }
+        else {
+            this._childComponents = childComponents;
+            this._bindings = bindings;
+            this._unfreezeBindings();
+        }
+        if (content) {
+            ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+            el.appendChild(content);
+            ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+        }
+        if (childComponents) {
+            attachChildComponentElements_1.attachChildComponentElements(childComponents);
+        }
+        if (backBindings) {
+            for (var i = backBindings.length; i; i -= 3) {
+                backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
+            }
+        }
+        this.isReady = true;
+    };
+    RnSlot2.prototype._detach = function () {
+        this._attached = false;
+        this._freezeBindings();
+    };
+    RnSlot2 = __decorate([
+        Component_1.Component({
+            elementIs: 'RnSlot2',
+            params: {
+                name: { property: 'paramName', type: String, readonly: true },
+                forTag: { property: 'paramForTag', type: String, readonly: true },
+                for: { property: 'paramFor', type: String, readonly: true },
+                cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
+                getContext: { property: 'paramGetContext', type: Object, readonly: true }
+            }
+        })
+    ], RnSlot2);
+    return RnSlot2;
+}(BaseComponent_1.BaseComponent));
+exports.RnSlot2 = RnSlot2;
+RnSlot2[BaseComponent_1.KEY_IS_SLOT] = true;
+
 
 /***/ })
 /******/ ]);

@@ -14,3 +14,4 @@ export { TIfCell as TRtIfThenIfCell, RnIfThen } from './components/RnIfThen';
 export { RnIfElse } from './components/RnIfElse';
 export { TList as TRtRepeatList, TListCell as TRtRepeatListCell, I$Item as IRtRepeatItem, T$ItemMap as TRtRepeatItemMap, RnRepeat } from './components/RnRepeat';
 export { RnSlot } from './components/RnSlot';
+export { RnSlot2 } from './components/RnSlot2';

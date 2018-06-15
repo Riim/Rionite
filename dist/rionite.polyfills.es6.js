@@ -1665,6 +1665,8 @@ var RnRepeat_1 = __webpack_require__(55);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
 var RnSlot_1 = __webpack_require__(57);
 exports.RnSlot = RnSlot_1.RnSlot;
+var RnSlot2_1 = __webpack_require__(59);
+exports.RnSlot2 = RnSlot2_1.RnSlot2;
 di_1.Container.registerService('logger', logger_1.logger);
 
 
@@ -1726,7 +1728,7 @@ const Template_1 = __webpack_require__(6);
 ['if-then', 'if-else', 'repeat'].forEach(name => {
     Template_1.Template.helpers[name] = el => {
         let attrs = el.attributes;
-        // проверка на attrs для @*/name // ...
+        // проверка на attrs для `@div/name // ...`
         if (attrs && name != 'repeat') {
             let list = attrs.list;
             let index = list.length - 1;
@@ -1757,15 +1759,36 @@ const Template_1 = __webpack_require__(6);
         return [
             {
                 nodeType: nelm_parser_1.NodeType.ELEMENT,
-                isHelper: false,
                 tagName: 'template',
-                names: el.names && el.names[0] ? ['$' + el.names[0], ...el.names] : null,
+                isHelper: false,
+                names: el.names && el.names[0] ? ['_' + el.names[0], ...el.names] : null,
                 attributes: attrs,
                 content: el.content
             }
         ];
     };
 });
+Template_1.Template.helpers.slot = el => {
+    return [
+        {
+            nodeType: nelm_parser_1.NodeType.ELEMENT,
+            tagName: 'rn-slot2',
+            isHelper: false,
+            names: el.names && el.names[0] ? ['_' + el.names[0], ...el.names] : null,
+            attributes: el.attributes,
+            content: el.content && [
+                {
+                    nodeType: nelm_parser_1.NodeType.ELEMENT,
+                    tagName: 'template',
+                    isHelper: false,
+                    names: null,
+                    attributes: null,
+                    content: el.content
+                }
+            ]
+        }
+    ];
+};
 
 
 /***/ }),
@@ -5223,132 +5246,131 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
         this._attached = true;
         if (this.isReady) {
             this._unfreezeBindings();
+            return;
         }
-        else {
-            let ownerComponent = this.ownerComponent;
-            let el = this.element;
-            let contentOwnerComponent = ownerComponent.ownerComponent;
-            let ownerComponentContent = ownerComponent.$inputContent;
-            let cloneContent = this.paramCloneContent;
-            let content;
-            let bindings;
-            let backBindings;
-            let childComponents;
-            if (!cloneContent || ownerComponentContent.firstChild) {
-                let slotName = this.paramName;
-                let forTag;
-                let for_;
-                if (!slotName) {
-                    forTag = this.paramForTag;
-                    if (forTag) {
-                        forTag = forTag.toUpperCase();
-                    }
-                    else {
-                        for_ = this.paramFor;
-                    }
+        let ownerComponent = this.ownerComponent;
+        let contentOwnerComponent = ownerComponent.ownerComponent;
+        let ownerComponentContent = ownerComponent.$inputContent;
+        let el = this.element;
+        let cloneContent = this.paramCloneContent;
+        let content;
+        let childComponents;
+        let bindings;
+        let backBindings;
+        if (!cloneContent || ownerComponentContent.firstChild) {
+            let slotName = this.paramName;
+            let forTag;
+            let for$;
+            if (!slotName) {
+                forTag = this.paramForTag;
+                if (forTag) {
+                    forTag = forTag.toUpperCase();
                 }
-                let key = get_uid_1.getUID(ownerComponent) +
-                    '/' +
-                    (slotName ? '@' + slotName : forTag ? ':' + forTag : for_ || '');
-                if (slotName || forTag || for_) {
-                    let contentMap;
-                    if (!cloneContent &&
-                        (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
-                        contentMap.has(key)) {
-                        let container = contentMap.get(key);
-                        if (container.firstChild) {
-                            content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                            contentMap.set(key, el);
-                            childComponents = container.$component._childComponents;
-                            bindings = container.$component._bindings;
-                        }
-                    }
-                    else if (ownerComponentContent.firstElementChild) {
-                        if (for_ && for_.indexOf('__') == -1) {
-                            let elementBlockNames = ownerComponent.constructor
-                                ._elementBlockNames;
-                            for_ = elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
-                        }
-                        let selectedElements = ownerComponentContent.querySelectorAll(slotName ? `[slot=${slotName}]` : forTag || '.' + for_);
-                        let selectedElementCount = selectedElements.length;
-                        if (selectedElementCount) {
-                            content = document.createDocumentFragment();
-                            for (let i = 0; i < selectedElementCount; i++) {
-                                content.appendChild(cloneContent
-                                    ? selectedElements[i].cloneNode(true)
-                                    : selectedElements[i]);
-                            }
-                        }
-                        if (!cloneContent) {
-                            (contentMap ||
-                                contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
-                                (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                        }
-                    }
+                else {
+                    for$ = this.paramFor;
                 }
-                else if (!cloneContent) {
-                    let contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
-                    if (contentMap && contentMap.has(key)) {
-                        let container = contentMap.get(key);
+            }
+            let key = get_uid_1.getUID(ownerComponent) +
+                '/' +
+                (slotName ? '@' + slotName : forTag ? ':' + forTag : for$ || '');
+            if (slotName || forTag || for$) {
+                let contentMap;
+                if (!cloneContent &&
+                    (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
+                    contentMap.has(key)) {
+                    let container = contentMap.get(key);
+                    if (container.firstChild) {
                         content = move_content_1.moveContent(document.createDocumentFragment(), container);
                         contentMap.set(key, el);
                         childComponents = container.$component._childComponents;
                         bindings = container.$component._bindings;
                     }
-                    else if (ownerComponentContent.firstChild) {
-                        content = ownerComponentContent;
-                        (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                    }
                 }
-                else {
-                    content = ownerComponentContent.cloneNode(true);
+                else if (ownerComponentContent.firstElementChild) {
+                    if (for$ && for$.indexOf('__') == -1) {
+                        let elementBlockNames = ownerComponent.constructor
+                            ._elementBlockNames;
+                        for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
+                    }
+                    let selectedElements = ownerComponentContent.querySelectorAll(slotName ? `[slot=${slotName}]` : forTag || '.' + for$);
+                    let selectedElementCount = selectedElements.length;
+                    if (selectedElementCount) {
+                        content = document.createDocumentFragment();
+                        for (let i = 0; i < selectedElementCount; i++) {
+                            content.appendChild(cloneContent
+                                ? selectedElements[i].cloneNode(true)
+                                : selectedElements[i]);
+                        }
+                    }
+                    if (!cloneContent) {
+                        (contentMap ||
+                            contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
+                            (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                    }
                 }
             }
-            if (bindings === undefined) {
-                if (content || el.firstChild) {
-                    let contentBindingResult = [null, null, null];
-                    if (content) {
-                        bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
-                            ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
-                            : ownerComponent.$context, contentBindingResult);
-                    }
-                    else {
-                        bindContent_1.bindComponentContent2(this, el, ownerComponent, this.paramGetContext
-                            ? this.paramGetContext.call(ownerComponent, this.$context, this)
-                            : this.$context, contentBindingResult);
-                    }
-                    childComponents = this._childComponents = contentBindingResult[0];
-                    this._bindings = contentBindingResult[1];
-                    backBindings = contentBindingResult[2];
-                }
-                else {
-                    this._childComponents = null;
-                    this._bindings = null;
-                }
+            else if (cloneContent) {
+                content = ownerComponentContent.cloneNode(true);
             }
             else {
-                this._childComponents = childComponents;
-                this._bindings = bindings;
-                this._unfreezeBindings();
-            }
-            if (content) {
-                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                if (el.firstChild) {
-                    clear_node_1.clearNode(el);
+                let contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
+                if (contentMap && contentMap.has(key)) {
+                    let container = contentMap.get(key);
+                    content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                    contentMap.set(key, el);
+                    childComponents = container.$component._childComponents;
+                    bindings = container.$component._bindings;
                 }
-                el.appendChild(content);
-                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
-            }
-            if (childComponents) {
-                attachChildComponentElements_1.attachChildComponentElements(childComponents);
-            }
-            if (backBindings) {
-                for (let i = backBindings.length; i; i -= 3) {
-                    backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
+                else if (ownerComponentContent.firstChild) {
+                    content = ownerComponentContent;
+                    (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
                 }
             }
-            this.isReady = true;
         }
+        if (bindings === undefined) {
+            if (content || el.firstChild) {
+                let contentBindingResult = [null, null, null];
+                if (content) {
+                    bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
+                        ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
+                        : ownerComponent.$context, contentBindingResult);
+                }
+                else {
+                    bindContent_1.bindComponentContent2(this, el, ownerComponent, this.paramGetContext
+                        ? this.paramGetContext.call(ownerComponent, this.$context, this)
+                        : this.$context, contentBindingResult);
+                }
+                childComponents = this._childComponents = contentBindingResult[0];
+                this._bindings = contentBindingResult[1];
+                backBindings = contentBindingResult[2];
+            }
+            else {
+                this._childComponents = null;
+                this._bindings = null;
+            }
+        }
+        else {
+            this._childComponents = childComponents;
+            this._bindings = bindings;
+            this._unfreezeBindings();
+        }
+        if (content) {
+            ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+            if (el.firstChild) {
+                clear_node_1.clearNode(el);
+            }
+            el.appendChild(content);
+            ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+        }
+        if (childComponents) {
+            attachChildComponentElements_1.attachChildComponentElements(childComponents);
+        }
+        if (backBindings) {
+            for (let i = backBindings.length; i; i -= 3) {
+                backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
+            }
+        }
+        this.isReady = true;
     }
     _detach() {
         this._attached = false;
@@ -5376,6 +5398,181 @@ RnSlot[BaseComponent_1.KEY_IS_SLOT] = true;
 /***/ (function(module, exports) {
 
 module.exports = __WEBPACK_EXTERNAL_MODULE__58__;
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const get_uid_1 = __webpack_require__(24);
+const map_set_polyfill_1 = __webpack_require__(10);
+const move_content_1 = __webpack_require__(25);
+const symbol_polyfill_1 = __webpack_require__(26);
+const attachChildComponentElements_1 = __webpack_require__(28);
+const BaseComponent_1 = __webpack_require__(23);
+const bindContent_1 = __webpack_require__(32);
+const Component_1 = __webpack_require__(17);
+const ElementProtoMixin_1 = __webpack_require__(44);
+const KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot2[slotContentMap]');
+let RnSlot2 = class RnSlot2 extends BaseComponent_1.BaseComponent {
+    static get bindsInputContent() {
+        return true;
+    }
+    _attach() {
+        this._attached = true;
+        if (this.isReady) {
+            this._unfreezeBindings();
+            return;
+        }
+        let ownerComponent = this.ownerComponent;
+        let contentOwnerComponent = ownerComponent.ownerComponent;
+        let ownerComponentContent = ownerComponent.$inputContent;
+        let el = this.element;
+        let cloneContent = this.paramCloneContent;
+        let content;
+        let childComponents;
+        let bindings;
+        let backBindings;
+        if (!cloneContent || ownerComponentContent.firstChild) {
+            let slotName = this.paramName;
+            let forTag;
+            let for$;
+            if (!slotName) {
+                forTag = this.paramForTag;
+                if (forTag) {
+                    forTag = forTag.toUpperCase();
+                }
+                else {
+                    for$ = this.paramFor;
+                }
+            }
+            let key = get_uid_1.getUID(ownerComponent) +
+                '/' +
+                (slotName ? '@' + slotName : forTag ? ':' + forTag : for$ || '');
+            if (slotName || forTag || for$) {
+                let contentMap;
+                if (!cloneContent &&
+                    (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
+                    contentMap.has(key)) {
+                    let container = contentMap.get(key);
+                    if (container.firstChild) {
+                        content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                        contentMap.set(key, el);
+                        childComponents = container.$component._childComponents;
+                        bindings = container.$component._bindings;
+                    }
+                }
+                else if (ownerComponentContent.firstElementChild) {
+                    if (for$ && for$.indexOf('__') == -1) {
+                        let elementBlockNames = ownerComponent.constructor
+                            ._elementBlockNames;
+                        for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
+                    }
+                    let selectedElements = ownerComponentContent.querySelectorAll(slotName ? `[slot=${slotName}]` : forTag || '.' + for$);
+                    let selectedElementCount = selectedElements.length;
+                    if (selectedElementCount) {
+                        content = document.createDocumentFragment();
+                        for (let i = 0; i < selectedElementCount; i++) {
+                            content.appendChild(cloneContent
+                                ? selectedElements[i].cloneNode(true)
+                                : selectedElements[i]);
+                        }
+                    }
+                    if (!cloneContent) {
+                        (contentMap ||
+                            contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
+                            (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                    }
+                }
+            }
+            else if (cloneContent) {
+                content = ownerComponentContent.cloneNode(true);
+            }
+            else {
+                let contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
+                if (contentMap && contentMap.has(key)) {
+                    let container = contentMap.get(key);
+                    content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                    contentMap.set(key, el);
+                    childComponents = container.$component._childComponents;
+                    bindings = container.$component._bindings;
+                }
+                else if (ownerComponentContent.firstChild) {
+                    content = ownerComponentContent;
+                    (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
+                }
+            }
+        }
+        if (bindings === undefined) {
+            if (content || el.firstElementChild) {
+                let contentBindingResult = [null, null, null];
+                if (content) {
+                    bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
+                        ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
+                        : ownerComponent.$context, contentBindingResult);
+                }
+                else {
+                    bindContent_1.bindComponentContent2(this, (content = document.importNode(el.firstElementChild.content, true)), ownerComponent, this.paramGetContext
+                        ? this.paramGetContext.call(ownerComponent, this.$context, this)
+                        : this.$context, contentBindingResult);
+                }
+                childComponents = this._childComponents = contentBindingResult[0];
+                this._bindings = contentBindingResult[1];
+                backBindings = contentBindingResult[2];
+            }
+            else {
+                this._childComponents = null;
+                this._bindings = null;
+            }
+        }
+        else {
+            this._childComponents = childComponents;
+            this._bindings = bindings;
+            this._unfreezeBindings();
+        }
+        if (content) {
+            ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+            el.appendChild(content);
+            ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+        }
+        if (childComponents) {
+            attachChildComponentElements_1.attachChildComponentElements(childComponents);
+        }
+        if (backBindings) {
+            for (let i = backBindings.length; i; i -= 3) {
+                backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
+            }
+        }
+        this.isReady = true;
+    }
+    _detach() {
+        this._attached = false;
+        this._freezeBindings();
+    }
+};
+RnSlot2 = __decorate([
+    Component_1.Component({
+        elementIs: 'RnSlot2',
+        params: {
+            name: { property: 'paramName', type: String, readonly: true },
+            forTag: { property: 'paramForTag', type: String, readonly: true },
+            for: { property: 'paramFor', type: String, readonly: true },
+            cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
+            getContext: { property: 'paramGetContext', type: Object, readonly: true }
+        }
+    })
+], RnSlot2);
+exports.RnSlot2 = RnSlot2;
+RnSlot2[BaseComponent_1.KEY_IS_SLOT] = true;
+
 
 /***/ })
 /******/ ]);
