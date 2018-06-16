@@ -1,4 +1,3 @@
-import { clearNode } from '@riim/clear-node';
 import { getUID } from '@riim/get-uid';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
@@ -155,7 +154,7 @@ export class RnSlot extends BaseComponent {
 		}
 
 		if (bindings === undefined) {
-			if (content || el.firstChild) {
+			if (content || el.firstElementChild) {
 				let contentBindingResult: [
 					Array<BaseComponent> | null,
 					Array<IFreezableCell> | null,
@@ -179,7 +178,10 @@ export class RnSlot extends BaseComponent {
 				} else {
 					bindComponentContent2(
 						this,
-						el,
+						(content = document.importNode(
+							(el.firstElementChild as HTMLTemplateElement).content,
+							true
+						)),
 						ownerComponent,
 						this.paramGetContext
 							? this.paramGetContext.call(ownerComponent, this.$context, this)
@@ -203,9 +205,6 @@ export class RnSlot extends BaseComponent {
 
 		if (content) {
 			suppressConnectionStatusCallbacks();
-			if (el.firstChild) {
-				clearNode(el);
-			}
 			el.appendChild(content);
 			resumeConnectionStatusCallbacks();
 		}

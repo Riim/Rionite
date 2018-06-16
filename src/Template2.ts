@@ -19,9 +19,9 @@ export interface IElement {
 	innerSource: Array<string>;
 }
 
-export type TRenderer = (this: IElementRendererMap) => DocumentFragment;
+export type TRenderer = (this: Template) => DocumentFragment;
 
-export type TElementRenderer = (this: IElementRendererMap, $super?: IElementRendererMap) => string;
+export type TElementRenderer = (this: Template, $super?: IElementRendererMap) => string;
 
 export interface IElementRendererMap {
 	[elName: string]: TElementRenderer;
@@ -53,8 +53,7 @@ export class Template {
 
 	_elementNamesTemplate: Array<string>;
 
-	onNamedElement: (el: Element) => void;
-	onBinding: () => void;
+	_onNamedElement: (el: Element) => void;
 
 	_tagNameMap: { [elName: string]: string };
 	_attributeListMap: { [elName: string]: Object };
@@ -68,16 +67,33 @@ export class Template {
 	_elementRendererMap: IElementRendererMap;
 
 	constructor(
-		nelm: string | IBlock,
+		nelm: IBlock | string,
 		opts?: {
 			parent?: Template;
 			blockName?: string | Array<string>;
-			onNamedElement?: () => void;
-			onBinding?: () => void;
+			onNamedElement?: (el: Element) => void;
 		}
 	) {
+		if (typeof nelm == 'string') {
+			nelm = new Parser(nelm).parse();
+		}
+
 		let parent = (this.parent = (opts && opts.parent) || null);
-		this.nelm = typeof nelm == 'string' ? new Parser(nelm).parse() : nelm;
+
+		if (!parent) {
+			nelm.content = [
+				{
+					nodeType: NodeType.ELEMENT,
+					tagName: 'section',
+					isHelper: true,
+					names: ['root'],
+					attributes: null,
+					content: nelm.content
+				} as INelmElement
+			];
+		}
+
+		this.nelm = nelm;
 
 		let blockName = (opts && opts.blockName) || this.nelm.name;
 
@@ -95,8 +111,7 @@ export class Template {
 			this._elementNamesTemplate = ['', ''];
 		}
 
-		this.onNamedElement = (opts && opts.onNamedElement) || (() => {});
-		this.onBinding = (opts && opts.onBinding) || (() => {});
+		this._onNamedElement = (opts && opts.onNamedElement) || (() => {});
 
 		this._tagNameMap = { __proto__: parent && parent._tagNameMap } as any;
 		this._attributeListMap = { __proto__: parent && parent._attributeListMap } as any;
@@ -120,13 +135,7 @@ export class Template {
 	}
 
 	render(): DocumentFragment {
-		return (this._renderer || this._compileRenderers()).call({
-			__proto__: this._elementRendererMap,
-			'@': this,
-			'@renderElementClasses': this._renderElementClasses,
-			'@onNamedElement': this.onNamedElement,
-			'@onBinding': this.onBinding
-		});
+		return (this._renderer || this._compileRenderers()).call(this);
 	}
 
 	_compileRenderers(): TRenderer {
@@ -229,7 +238,7 @@ export class Template {
 				let tagName = el.tagName;
 				let isHelper = el.isHelper;
 				let elNames = el.names;
-				let elName = elNames && elNames[0];
+				let elName = elNames && (isHelper ? '@' + elNames[0] : elNames[0]);
 				let elAttrs = el.attributes;
 				let content = el.content;
 				let elVarName = isHelper ? parentElVarName : parentElVarName + '$' + nodeIndex;
@@ -308,7 +317,7 @@ export class Template {
 
 								if (attrList['class'] !== undefined) {
 									attrList[attrList['class']] =
-										`\ne.className = this['@renderElementClasses'].call(this['@'], ['${elNames.join(
+										`\ne.className = this._renderElementClasses(['${elNames.join(
 											"','"
 										)}']) + ' ` +
 										attrList[attrList['class']].slice(
@@ -317,13 +326,13 @@ export class Template {
 									renderedAttrs = join.call(attrList, '');
 								} else {
 									renderedAttrs =
-										`\ne.className = this['@renderElementClasses'].call(this['@'], ['${elNames.join(
+										`\ne.className = this._renderElementClasses(['${elNames.join(
 											"','"
 										)}']);` + join.call(attrList, '');
 								}
 							}
 						} else if (!isHelper) {
-							renderedAttrs = `\ne.className = this['@renderElementClasses'].call(this['@'], ['${elNames.join(
+							renderedAttrs = `\ne.className = this._renderElementClasses(['${elNames.join(
 								"','"
 							)}']);`;
 						}
@@ -332,17 +341,17 @@ export class Template {
 							name: elName,
 							superCall: false,
 							source: isHelper
-								? [`this['${elName}/content'](n);`]
+								? [`this._elementRendererMap['${elName}/content'].call(this, n);`]
 								: [
 										`var e = n.appendChild(${
 											content && content.length
-												? `this['${elName}/content'](${createElement(
+												? `this._elementRendererMap['${elName}/content'].call(this, ${createElement(
 														tagName || 'div',
 														isSVG
 												  )})`
 												: createElement(tagName || 'div', isSVG)
 										});` + renderedAttrs,
-										"this['@onNamedElement'].call(this['@'], e);",
+										'this._onNamedElement(e);',
 										'return e;'
 								  ],
 							innerSource: []
@@ -359,7 +368,7 @@ export class Template {
 								if (attr.name == 'class') {
 									hasClassAttr = true;
 
-									let value = `this['@renderElementClasses'].call(this['@'], ['${elNames
+									let value = `this._renderElementClasses(['${elNames
 										.join("','")
 										.slice(3)}']) + '${
 										attr.value ? ' ' + escapeString(attr.value) : ''
@@ -386,7 +395,7 @@ export class Template {
 								)});` +
 									(hasClassAttr
 										? attrs
-										: `\n${elVarName}.className = this['@renderElementClasses'].call(this['@'], ['${elNames
+										: `\n${elVarName}.className = this._renderElementClasses(['${elNames
 												.join("','")
 												.slice(3)}']);` + attrs)
 							);
@@ -396,14 +405,14 @@ export class Template {
 									tagName || 'div',
 									isSVG
 								)});`,
-								`${elVarName}.className = this['@renderElementClasses'].call(this['@'], ['${elNames
+								`${elVarName}.className = this._renderElementClasses(['${elNames
 									.join("','")
 									.slice(3)}']);`
 							);
 						}
 
 						this._currentElement.innerSource.push(
-							`this['@onNamedElement'].call(this['@'], ${elVarName});`
+							`this._onNamedElement(${elVarName});`
 						);
 					}
 				} else if (!isHelper) {
@@ -460,7 +469,9 @@ export class Template {
 				if (elName) {
 					els.pop();
 					this._currentElement = els[els.length - 1];
-					this._currentElement.innerSource.push(`this['${elName}'](${parentElVarName});`);
+					this._currentElement.innerSource.push(
+						`this._elementRendererMap['${elName}'].call(this, ${parentElVarName});`
+					);
 				}
 
 				break;

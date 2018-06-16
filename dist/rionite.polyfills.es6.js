@@ -1529,14 +1529,14 @@ PERFORMANCE OF THIS SOFTWARE.
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"), require("@riim/clear-node"));
+		module.exports = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"));
 	else if(typeof define === 'function' && define.amd)
-		define(["@riim/di", "@riim/logger", "nelm-parser", "@riim/escape-html", "@riim/rionite-snake-case-attribute-name", "@riim/map-set-polyfill", "escape-string", "@riim/next-uid", "cellx", "@riim/gettext", "@riim/kebab-case", "@riim/mixin", "@riim/get-uid", "@riim/move-content", "@riim/symbol-polyfill", "html-to-fragment", "@riim/is-regexp", "@riim/set-attribute", "@riim/defer", "@riim/lower-case-first-word", "@riim/next-tick", "@riim/clear-node"], factory);
+		define(["@riim/di", "@riim/logger", "nelm-parser", "@riim/escape-html", "@riim/rionite-snake-case-attribute-name", "@riim/map-set-polyfill", "escape-string", "@riim/next-uid", "cellx", "@riim/gettext", "@riim/kebab-case", "@riim/mixin", "@riim/get-uid", "@riim/move-content", "@riim/symbol-polyfill", "html-to-fragment", "@riim/is-regexp", "@riim/set-attribute", "@riim/defer", "@riim/lower-case-first-word", "@riim/next-tick"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"), require("@riim/clear-node"));
+		exports["rionite"] = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"));
 	else
-		root["rionite"] = factory(root["@riim/di"], root["@riim/logger"], root["nelm-parser"], root["@riim/escape-html"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["escape-string"], root["@riim/next-uid"], root["cellx"], root["@riim/gettext"], root["@riim/kebab-case"], root["@riim/mixin"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/symbol-polyfill"], root["html-to-fragment"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/next-tick"], root["@riim/clear-node"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__1__, __WEBPACK_EXTERNAL_MODULE__2__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__10__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__13__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__19__, __WEBPACK_EXTERNAL_MODULE__20__, __WEBPACK_EXTERNAL_MODULE__24__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__26__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__33__, __WEBPACK_EXTERNAL_MODULE__45__, __WEBPACK_EXTERNAL_MODULE__51__, __WEBPACK_EXTERNAL_MODULE__53__, __WEBPACK_EXTERNAL_MODULE__58__) {
+		root["rionite"] = factory(root["@riim/di"], root["@riim/logger"], root["nelm-parser"], root["@riim/escape-html"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["escape-string"], root["@riim/next-uid"], root["cellx"], root["@riim/gettext"], root["@riim/kebab-case"], root["@riim/mixin"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/symbol-polyfill"], root["html-to-fragment"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/next-tick"]);
+})(window, function(__WEBPACK_EXTERNAL_MODULE__1__, __WEBPACK_EXTERNAL_MODULE__2__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__10__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__13__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__19__, __WEBPACK_EXTERNAL_MODULE__20__, __WEBPACK_EXTERNAL_MODULE__24__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__26__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__33__, __WEBPACK_EXTERNAL_MODULE__45__, __WEBPACK_EXTERNAL_MODULE__51__, __WEBPACK_EXTERNAL_MODULE__53__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1665,8 +1665,6 @@ var RnRepeat_1 = __webpack_require__(55);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
 var RnSlot_1 = __webpack_require__(57);
 exports.RnSlot = RnSlot_1.RnSlot;
-var RnSlot2_1 = __webpack_require__(59);
-exports.RnSlot2 = RnSlot2_1.RnSlot2;
 di_1.Container.registerService('logger', logger_1.logger);
 
 
@@ -1761,7 +1759,7 @@ const Template_1 = __webpack_require__(6);
                 nodeType: nelm_parser_1.NodeType.ELEMENT,
                 tagName: 'template',
                 isHelper: false,
-                names: el.names && el.names[0] ? ['_' + el.names[0], ...el.names] : null,
+                names: el.names,
                 attributes: attrs,
                 content: el.content
             }
@@ -1772,9 +1770,9 @@ Template_1.Template.helpers.slot = el => {
     return [
         {
             nodeType: nelm_parser_1.NodeType.ELEMENT,
-            tagName: 'rn-slot2',
+            tagName: 'rn-slot',
             isHelper: false,
-            names: el.names && el.names[0] ? ['_' + el.names[0], ...el.names] : null,
+            names: el.names,
             attributes: el.attributes,
             content: el.content && [
                 {
@@ -1813,8 +1811,23 @@ const join = Array.prototype.join;
 exports.ELEMENT_NAME_DELIMITER = '__';
 class Template {
     constructor(nelm, opts) {
+        if (typeof nelm == 'string') {
+            nelm = new nelm_parser_1.Parser(nelm).parse();
+        }
         let parent = (this.parent = (opts && opts.parent) || null);
-        this.nelm = typeof nelm == 'string' ? new nelm_parser_1.Parser(nelm).parse() : nelm;
+        if (!parent) {
+            nelm.content = [
+                {
+                    nodeType: nelm_parser_1.NodeType.ELEMENT,
+                    tagName: 'section',
+                    isHelper: true,
+                    names: ['root'],
+                    attributes: null,
+                    content: nelm.content
+                }
+            ];
+        }
+        this.nelm = nelm;
         let blockName = (opts && opts.blockName) || this.nelm.name;
         if (parent) {
             this._elementNamesTemplate = [
@@ -1851,12 +1864,7 @@ class Template {
         return this;
     }
     render() {
-        return (this._renderer || this._compileRenderers()).call({
-            __proto__: this._elementRendererMap,
-            '@': this,
-            '@renderElementClasses': this._renderElementClasses,
-            '@onBeforeNamedElementOpeningTagClosing': this.onBeforeNamedElementOpeningTagClosing
-        });
+        return (this._renderer || this._compileRenderers()).call(this);
     }
     _compileRenderers() {
         let parent = this.parent;
@@ -1914,7 +1922,7 @@ class Template {
                 let tagName = el.tagName;
                 let isHelper = el.isHelper;
                 let elNames = el.names;
-                let elName = elNames && elNames[0];
+                let elName = elNames && (isHelper ? '@' + elNames[0] : elNames[0]);
                 let elAttrs = el.attributes;
                 let content = el.content;
                 if (elNames) {
@@ -1973,29 +1981,29 @@ class Template {
                                 };
                                 if (attrList['class'] !== undefined) {
                                     attrList[attrList['class']] =
-                                        ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join("','")}']) + ' ` +
+                                        ` class="' + this._renderElementClasses(['${elNames.join("','")}']) + ' ` +
                                             attrList[attrList['class']].slice(' class="'.length);
                                     renderedAttrs = join.call(attrList, '');
                                 }
                                 else {
                                     renderedAttrs =
-                                        ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join("','")}']) + '"` + join.call(attrList, '');
+                                        ` class="' + this._renderElementClasses(['${elNames.join("','")}']) + '"` + join.call(attrList, '');
                                 }
                             }
                         }
                         else if (!isHelper) {
-                            renderedAttrs = ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join("','")}']) + '"`;
+                            renderedAttrs = ` class="' + this._renderElementClasses(['${elNames.join("','")}']) + '"`;
                         }
                         let currentEl = {
                             name: elName,
                             superCall: false,
                             source: isHelper
-                                ? [`this['${elName}/content']()`]
+                                ? [`this._elementRendererMap['${elName}/content'].call(this)`]
                                 : [
                                     `'<${tagName ||
-                                        'div'}${renderedAttrs}' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames.join("','")}']) + '>'`,
+                                        'div'}${renderedAttrs}' + this.onBeforeNamedElementOpeningTagClosing(['${elNames.join("','")}']) + '>'`,
                                     content && content.length
-                                        ? `this['${elName}/content']() + '</${tagName ||
+                                        ? `this._elementRendererMap['${elName}/content'].call(this) + '</${tagName ||
                                             'div'}>'`
                                         : !content && tagName && self_closing_tags_1.map.has(tagName)
                                             ? "''"
@@ -2014,7 +2022,7 @@ class Template {
                                 let value = attr.value;
                                 if (attr.name == 'class') {
                                     hasClassAttr = true;
-                                    attrs += ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
+                                    attrs += ` class="' + this._renderElementClasses(['${elNames
                                         .slice(1)
                                         .join("','")}']) + '${value ? ' ' + escape_string_1.escapeString(escape_html_1.escapeHTML(value)) : ''}"`;
                                 }
@@ -2024,17 +2032,17 @@ class Template {
                             }
                             this._currentElement.innerSource.push(`'<${tagName || 'div'}${hasClassAttr
                                 ? attrs
-                                : ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
+                                : ` class="' + this._renderElementClasses(['${elNames
                                     .slice(1)
-                                    .join("','")}']) + '"` + attrs}' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames
+                                    .join("','")}']) + '"` + attrs}' + this.onBeforeNamedElementOpeningTagClosing(['${elNames
                                 .slice(1)
                                 .join("','")}']) + '>'`);
                         }
                         else {
                             this._currentElement.innerSource.push(`'<${tagName ||
-                                'div'} class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
+                                'div'} class="' + this._renderElementClasses(['${elNames
                                 .slice(1)
-                                .join("','")}']) + '"' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames
+                                .join("','")}']) + '"' + this.onBeforeNamedElementOpeningTagClosing(['${elNames
                                 .slice(1)
                                 .join("','")}']) + '>'`);
                         }
@@ -2071,7 +2079,7 @@ class Template {
                 if (elName) {
                     els.pop();
                     this._currentElement = els[els.length - 1];
-                    this._currentElement.innerSource.push(`this['${elName}']()`);
+                    this._currentElement.innerSource.push(`this._elementRendererMap['${elName}'].call(this)`);
                 }
                 else if (!isHelper && (content || !tagName || !self_closing_tags_1.map.has(tagName))) {
                     this._currentElement.innerSource.push(`'</${tagName || 'div'}>'`);
@@ -5227,7 +5235,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const clear_node_1 = __webpack_require__(58);
 const get_uid_1 = __webpack_require__(24);
 const map_set_polyfill_1 = __webpack_require__(10);
 const move_content_1 = __webpack_require__(25);
@@ -5239,190 +5246,6 @@ const Component_1 = __webpack_require__(17);
 const ElementProtoMixin_1 = __webpack_require__(44);
 const KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot[slotContentMap]');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
-    static get bindsInputContent() {
-        return true;
-    }
-    _attach() {
-        this._attached = true;
-        if (this.isReady) {
-            this._unfreezeBindings();
-            return;
-        }
-        let ownerComponent = this.ownerComponent;
-        let contentOwnerComponent = ownerComponent.ownerComponent;
-        let ownerComponentContent = ownerComponent.$inputContent;
-        let el = this.element;
-        let cloneContent = this.paramCloneContent;
-        let content;
-        let childComponents;
-        let bindings;
-        let backBindings;
-        if (!cloneContent || ownerComponentContent.firstChild) {
-            let slotName = this.paramName;
-            let forTag;
-            let for$;
-            if (!slotName) {
-                forTag = this.paramForTag;
-                if (forTag) {
-                    forTag = forTag.toUpperCase();
-                }
-                else {
-                    for$ = this.paramFor;
-                }
-            }
-            let key = get_uid_1.getUID(ownerComponent) +
-                '/' +
-                (slotName ? '@' + slotName : forTag ? ':' + forTag : for$ || '');
-            if (slotName || forTag || for$) {
-                let contentMap;
-                if (!cloneContent &&
-                    (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
-                    contentMap.has(key)) {
-                    let container = contentMap.get(key);
-                    if (container.firstChild) {
-                        content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                        contentMap.set(key, el);
-                        childComponents = container.$component._childComponents;
-                        bindings = container.$component._bindings;
-                    }
-                }
-                else if (ownerComponentContent.firstElementChild) {
-                    if (for$ && for$.indexOf('__') == -1) {
-                        let elementBlockNames = ownerComponent.constructor
-                            ._elementBlockNames;
-                        for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
-                    }
-                    let selectedElements = ownerComponentContent.querySelectorAll(slotName ? `[slot=${slotName}]` : forTag || '.' + for$);
-                    let selectedElementCount = selectedElements.length;
-                    if (selectedElementCount) {
-                        content = document.createDocumentFragment();
-                        for (let i = 0; i < selectedElementCount; i++) {
-                            content.appendChild(cloneContent
-                                ? selectedElements[i].cloneNode(true)
-                                : selectedElements[i]);
-                        }
-                    }
-                    if (!cloneContent) {
-                        (contentMap ||
-                            contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
-                            (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                    }
-                }
-            }
-            else if (cloneContent) {
-                content = ownerComponentContent.cloneNode(true);
-            }
-            else {
-                let contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
-                if (contentMap && contentMap.has(key)) {
-                    let container = contentMap.get(key);
-                    content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                    contentMap.set(key, el);
-                    childComponents = container.$component._childComponents;
-                    bindings = container.$component._bindings;
-                }
-                else if (ownerComponentContent.firstChild) {
-                    content = ownerComponentContent;
-                    (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                }
-            }
-        }
-        if (bindings === undefined) {
-            if (content || el.firstChild) {
-                let contentBindingResult = [null, null, null];
-                if (content) {
-                    bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
-                        ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
-                        : ownerComponent.$context, contentBindingResult);
-                }
-                else {
-                    bindContent_1.bindComponentContent2(this, el, ownerComponent, this.paramGetContext
-                        ? this.paramGetContext.call(ownerComponent, this.$context, this)
-                        : this.$context, contentBindingResult);
-                }
-                childComponents = this._childComponents = contentBindingResult[0];
-                this._bindings = contentBindingResult[1];
-                backBindings = contentBindingResult[2];
-            }
-            else {
-                this._childComponents = null;
-                this._bindings = null;
-            }
-        }
-        else {
-            this._childComponents = childComponents;
-            this._bindings = bindings;
-            this._unfreezeBindings();
-        }
-        if (content) {
-            ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-            if (el.firstChild) {
-                clear_node_1.clearNode(el);
-            }
-            el.appendChild(content);
-            ElementProtoMixin_1.resumeConnectionStatusCallbacks();
-        }
-        if (childComponents) {
-            attachChildComponentElements_1.attachChildComponentElements(childComponents);
-        }
-        if (backBindings) {
-            for (let i = backBindings.length; i; i -= 3) {
-                backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
-            }
-        }
-        this.isReady = true;
-    }
-    _detach() {
-        this._attached = false;
-        this._freezeBindings();
-    }
-};
-RnSlot = __decorate([
-    Component_1.Component({
-        elementIs: 'RnSlot',
-        params: {
-            name: { property: 'paramName', type: String, readonly: true },
-            forTag: { property: 'paramForTag', type: String, readonly: true },
-            for: { property: 'paramFor', type: String, readonly: true },
-            cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
-            getContext: { property: 'paramGetContext', type: Object, readonly: true }
-        }
-    })
-], RnSlot);
-exports.RnSlot = RnSlot;
-RnSlot[BaseComponent_1.KEY_IS_SLOT] = true;
-
-
-/***/ }),
-/* 58 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__58__;
-
-/***/ }),
-/* 59 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(24);
-const map_set_polyfill_1 = __webpack_require__(10);
-const move_content_1 = __webpack_require__(25);
-const symbol_polyfill_1 = __webpack_require__(26);
-const attachChildComponentElements_1 = __webpack_require__(28);
-const BaseComponent_1 = __webpack_require__(23);
-const bindContent_1 = __webpack_require__(32);
-const Component_1 = __webpack_require__(17);
-const ElementProtoMixin_1 = __webpack_require__(44);
-const KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot2[slotContentMap]');
-let RnSlot2 = class RnSlot2 extends BaseComponent_1.BaseComponent {
     static get bindsInputContent() {
         return true;
     }
@@ -5558,9 +5381,9 @@ let RnSlot2 = class RnSlot2 extends BaseComponent_1.BaseComponent {
         this._freezeBindings();
     }
 };
-RnSlot2 = __decorate([
+RnSlot = __decorate([
     Component_1.Component({
-        elementIs: 'RnSlot2',
+        elementIs: 'RnSlot',
         params: {
             name: { property: 'paramName', type: String, readonly: true },
             forTag: { property: 'paramForTag', type: String, readonly: true },
@@ -5569,9 +5392,9 @@ RnSlot2 = __decorate([
             getContext: { property: 'paramGetContext', type: Object, readonly: true }
         }
     })
-], RnSlot2);
-exports.RnSlot2 = RnSlot2;
-RnSlot2[BaseComponent_1.KEY_IS_SLOT] = true;
+], RnSlot);
+exports.RnSlot = RnSlot;
+RnSlot[BaseComponent_1.KEY_IS_SLOT] = true;
 
 
 /***/ })

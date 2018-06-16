@@ -1529,14 +1529,14 @@ PERFORMANCE OF THIS SOFTWARE.
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"), require("@riim/clear-node"));
+		module.exports = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"));
 	else if(typeof define === 'function' && define.amd)
-		define(["@riim/di", "@riim/logger", "nelm-parser", "@riim/escape-html", "@riim/rionite-snake-case-attribute-name", "@riim/map-set-polyfill", "escape-string", "@riim/next-uid", "cellx", "@riim/gettext", "@riim/kebab-case", "@riim/mixin", "@riim/get-uid", "@riim/move-content", "@riim/symbol-polyfill", "html-to-fragment", "@riim/is-regexp", "@riim/set-attribute", "@riim/defer", "@riim/lower-case-first-word", "@riim/next-tick", "@riim/clear-node"], factory);
+		define(["@riim/di", "@riim/logger", "nelm-parser", "@riim/escape-html", "@riim/rionite-snake-case-attribute-name", "@riim/map-set-polyfill", "escape-string", "@riim/next-uid", "cellx", "@riim/gettext", "@riim/kebab-case", "@riim/mixin", "@riim/get-uid", "@riim/move-content", "@riim/symbol-polyfill", "html-to-fragment", "@riim/is-regexp", "@riim/set-attribute", "@riim/defer", "@riim/lower-case-first-word", "@riim/next-tick"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"), require("@riim/clear-node"));
+		exports["rionite"] = factory(require("@riim/di"), require("@riim/logger"), require("nelm-parser"), require("@riim/escape-html"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("escape-string"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/kebab-case"), require("@riim/mixin"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/symbol-polyfill"), require("html-to-fragment"), require("@riim/is-regexp"), require("@riim/set-attribute"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/next-tick"));
 	else
-		root["rionite"] = factory(root["@riim/di"], root["@riim/logger"], root["nelm-parser"], root["@riim/escape-html"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["escape-string"], root["@riim/next-uid"], root["cellx"], root["@riim/gettext"], root["@riim/kebab-case"], root["@riim/mixin"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/symbol-polyfill"], root["html-to-fragment"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/next-tick"], root["@riim/clear-node"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__1__, __WEBPACK_EXTERNAL_MODULE__2__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__10__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__13__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__19__, __WEBPACK_EXTERNAL_MODULE__20__, __WEBPACK_EXTERNAL_MODULE__24__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__26__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__33__, __WEBPACK_EXTERNAL_MODULE__45__, __WEBPACK_EXTERNAL_MODULE__51__, __WEBPACK_EXTERNAL_MODULE__53__, __WEBPACK_EXTERNAL_MODULE__58__) {
+		root["rionite"] = factory(root["@riim/di"], root["@riim/logger"], root["nelm-parser"], root["@riim/escape-html"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["escape-string"], root["@riim/next-uid"], root["cellx"], root["@riim/gettext"], root["@riim/kebab-case"], root["@riim/mixin"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/symbol-polyfill"], root["html-to-fragment"], root["@riim/is-regexp"], root["@riim/set-attribute"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/next-tick"]);
+})(window, function(__WEBPACK_EXTERNAL_MODULE__1__, __WEBPACK_EXTERNAL_MODULE__2__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__10__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__13__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__19__, __WEBPACK_EXTERNAL_MODULE__20__, __WEBPACK_EXTERNAL_MODULE__24__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__26__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__33__, __WEBPACK_EXTERNAL_MODULE__45__, __WEBPACK_EXTERNAL_MODULE__51__, __WEBPACK_EXTERNAL_MODULE__53__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1665,8 +1665,6 @@ var RnRepeat_1 = __webpack_require__(55);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
 var RnSlot_1 = __webpack_require__(57);
 exports.RnSlot = RnSlot_1.RnSlot;
-var RnSlot2_1 = __webpack_require__(59);
-exports.RnSlot2 = RnSlot2_1.RnSlot2;
 di_1.Container.registerService('logger', logger_1.logger);
 
 
@@ -1761,7 +1759,7 @@ var Template_1 = __webpack_require__(6);
                 nodeType: nelm_parser_1.NodeType.ELEMENT,
                 tagName: 'template',
                 isHelper: false,
-                names: el.names && el.names[0] ? ['_' + el.names[0]].concat(el.names) : null,
+                names: el.names,
                 attributes: attrs,
                 content: el.content
             }
@@ -1772,9 +1770,9 @@ Template_1.Template.helpers.slot = function (el) {
     return [
         {
             nodeType: nelm_parser_1.NodeType.ELEMENT,
-            tagName: 'rn-slot2',
+            tagName: 'rn-slot',
             isHelper: false,
-            names: el.names && el.names[0] ? ['_' + el.names[0]].concat(el.names) : null,
+            names: el.names,
             attributes: el.attributes,
             content: el.content && [
                 {
@@ -1813,8 +1811,23 @@ var join = Array.prototype.join;
 exports.ELEMENT_NAME_DELIMITER = '__';
 var Template = /** @class */ (function () {
     function Template(nelm, opts) {
+        if (typeof nelm == 'string') {
+            nelm = new nelm_parser_1.Parser(nelm).parse();
+        }
         var parent = (this.parent = (opts && opts.parent) || null);
-        this.nelm = typeof nelm == 'string' ? new nelm_parser_1.Parser(nelm).parse() : nelm;
+        if (!parent) {
+            nelm.content = [
+                {
+                    nodeType: nelm_parser_1.NodeType.ELEMENT,
+                    tagName: 'section',
+                    isHelper: true,
+                    names: ['root'],
+                    attributes: null,
+                    content: nelm.content
+                }
+            ];
+        }
+        this.nelm = nelm;
         var blockName = (opts && opts.blockName) || this.nelm.name;
         if (parent) {
             this._elementNamesTemplate = [
@@ -1851,12 +1864,7 @@ var Template = /** @class */ (function () {
         return this;
     };
     Template.prototype.render = function () {
-        return (this._renderer || this._compileRenderers()).call({
-            __proto__: this._elementRendererMap,
-            '@': this,
-            '@renderElementClasses': this._renderElementClasses,
-            '@onBeforeNamedElementOpeningTagClosing': this.onBeforeNamedElementOpeningTagClosing
-        });
+        return (this._renderer || this._compileRenderers()).call(this);
     };
     Template.prototype._compileRenderers = function () {
         var parent = this.parent;
@@ -1914,7 +1922,7 @@ var Template = /** @class */ (function () {
                 var tagName = el.tagName;
                 var isHelper = el.isHelper;
                 var elNames = el.names;
-                var elName = elNames && elNames[0];
+                var elName = elNames && (isHelper ? '@' + elNames[0] : elNames[0]);
                 var elAttrs = el.attributes;
                 var content = el.content;
                 if (elNames) {
@@ -1974,29 +1982,29 @@ var Template = /** @class */ (function () {
                                 };
                                 if (attrList['class'] !== undefined) {
                                     attrList[attrList['class']] =
-                                        " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames.join("','") + "']) + ' " +
+                                        " class=\"' + this._renderElementClasses(['" + elNames.join("','") + "']) + ' " +
                                             attrList[attrList['class']].slice(' class="'.length);
                                     renderedAttrs = join.call(attrList, '');
                                 }
                                 else {
                                     renderedAttrs =
-                                        " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames.join("','") + "']) + '\"" + join.call(attrList, '');
+                                        " class=\"' + this._renderElementClasses(['" + elNames.join("','") + "']) + '\"" + join.call(attrList, '');
                                 }
                             }
                         }
                         else if (!isHelper) {
-                            renderedAttrs = " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames.join("','") + "']) + '\"";
+                            renderedAttrs = " class=\"' + this._renderElementClasses(['" + elNames.join("','") + "']) + '\"";
                         }
                         var currentEl = {
                             name: elName,
                             superCall: false,
                             source: isHelper
-                                ? ["this['" + elName + "/content']()"]
+                                ? ["this._elementRendererMap['" + elName + "/content'].call(this)"]
                                 : [
                                     "'<" + (tagName ||
-                                        'div') + renderedAttrs + "' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['" + elNames.join("','") + "']) + '>'",
+                                        'div') + renderedAttrs + "' + this.onBeforeNamedElementOpeningTagClosing(['" + elNames.join("','") + "']) + '>'",
                                     content && content.length
-                                        ? "this['" + elName + "/content']() + '</" + (tagName ||
+                                        ? "this._elementRendererMap['" + elName + "/content'].call(this) + '</" + (tagName ||
                                             'div') + ">'"
                                         : !content && tagName && self_closing_tags_1.map.has(tagName)
                                             ? "''"
@@ -2016,7 +2024,7 @@ var Template = /** @class */ (function () {
                                 var value = attr.value;
                                 if (attr.name == 'class') {
                                     hasClassAttr = true;
-                                    attrs += " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
+                                    attrs += " class=\"' + this._renderElementClasses(['" + elNames
                                         .slice(1)
                                         .join("','") + "']) + '" + (value ? ' ' + escape_string_1.escapeString(escape_html_1.escapeHTML(value)) : '') + "\"";
                                 }
@@ -2026,17 +2034,17 @@ var Template = /** @class */ (function () {
                             }
                             this._currentElement.innerSource.push("'<" + (tagName || 'div') + (hasClassAttr
                                 ? attrs
-                                : " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
+                                : " class=\"' + this._renderElementClasses(['" + elNames
                                     .slice(1)
-                                    .join("','") + "']) + '\"" + attrs) + "' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['" + elNames
+                                    .join("','") + "']) + '\"" + attrs) + "' + this.onBeforeNamedElementOpeningTagClosing(['" + elNames
                                 .slice(1)
                                 .join("','") + "']) + '>'");
                         }
                         else {
                             this._currentElement.innerSource.push("'<" + (tagName ||
-                                'div') + " class=\"' + this['@renderElementClasses'].call(this['@'], ['" + elNames
+                                'div') + " class=\"' + this._renderElementClasses(['" + elNames
                                 .slice(1)
-                                .join("','") + "']) + '\"' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['" + elNames
+                                .join("','") + "']) + '\"' + this.onBeforeNamedElementOpeningTagClosing(['" + elNames
                                 .slice(1)
                                 .join("','") + "']) + '>'");
                         }
@@ -2076,7 +2084,7 @@ var Template = /** @class */ (function () {
                 if (elName) {
                     els.pop();
                     this._currentElement = els[els.length - 1];
-                    this._currentElement.innerSource.push("this['" + elName + "']()");
+                    this._currentElement.innerSource.push("this._elementRendererMap['" + elName + "'].call(this)");
                 }
                 else if (!isHelper && (content || !tagName || !self_closing_tags_1.map.has(tagName))) {
                     this._currentElement.innerSource.push("'</" + (tagName || 'div') + ">'");
@@ -5355,7 +5363,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var clear_node_1 = __webpack_require__(58);
 var get_uid_1 = __webpack_require__(24);
 var map_set_polyfill_1 = __webpack_require__(10);
 var move_content_1 = __webpack_require__(25);
@@ -5379,209 +5386,6 @@ var RnSlot = /** @class */ (function (_super) {
         configurable: true
     });
     RnSlot.prototype._attach = function () {
-        this._attached = true;
-        if (this.isReady) {
-            this._unfreezeBindings();
-            return;
-        }
-        var ownerComponent = this.ownerComponent;
-        var contentOwnerComponent = ownerComponent.ownerComponent;
-        var ownerComponentContent = ownerComponent.$inputContent;
-        var el = this.element;
-        var cloneContent = this.paramCloneContent;
-        var content;
-        var childComponents;
-        var bindings;
-        var backBindings;
-        if (!cloneContent || ownerComponentContent.firstChild) {
-            var slotName = this.paramName;
-            var forTag = void 0;
-            var for$ = void 0;
-            if (!slotName) {
-                forTag = this.paramForTag;
-                if (forTag) {
-                    forTag = forTag.toUpperCase();
-                }
-                else {
-                    for$ = this.paramFor;
-                }
-            }
-            var key = get_uid_1.getUID(ownerComponent) +
-                '/' +
-                (slotName ? '@' + slotName : forTag ? ':' + forTag : for$ || '');
-            if (slotName || forTag || for$) {
-                var contentMap = void 0;
-                if (!cloneContent &&
-                    (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
-                    contentMap.has(key)) {
-                    var container = contentMap.get(key);
-                    if (container.firstChild) {
-                        content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                        contentMap.set(key, el);
-                        childComponents = container.$component._childComponents;
-                        bindings = container.$component._bindings;
-                    }
-                }
-                else if (ownerComponentContent.firstElementChild) {
-                    if (for$ && for$.indexOf('__') == -1) {
-                        var elementBlockNames = ownerComponent.constructor
-                            ._elementBlockNames;
-                        for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
-                    }
-                    var selectedElements = ownerComponentContent.querySelectorAll(slotName ? "[slot=" + slotName + "]" : forTag || '.' + for$);
-                    var selectedElementCount = selectedElements.length;
-                    if (selectedElementCount) {
-                        content = document.createDocumentFragment();
-                        for (var i = 0; i < selectedElementCount; i++) {
-                            content.appendChild(cloneContent
-                                ? selectedElements[i].cloneNode(true)
-                                : selectedElements[i]);
-                        }
-                    }
-                    if (!cloneContent) {
-                        (contentMap ||
-                            contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
-                            (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                    }
-                }
-            }
-            else if (cloneContent) {
-                content = ownerComponentContent.cloneNode(true);
-            }
-            else {
-                var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
-                if (contentMap && contentMap.has(key)) {
-                    var container = contentMap.get(key);
-                    content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                    contentMap.set(key, el);
-                    childComponents = container.$component._childComponents;
-                    bindings = container.$component._bindings;
-                }
-                else if (ownerComponentContent.firstChild) {
-                    content = ownerComponentContent;
-                    (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
-                }
-            }
-        }
-        if (bindings === undefined) {
-            if (content || el.firstChild) {
-                var contentBindingResult = [null, null, null];
-                if (content) {
-                    bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
-                        ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
-                        : ownerComponent.$context, contentBindingResult);
-                }
-                else {
-                    bindContent_1.bindComponentContent2(this, el, ownerComponent, this.paramGetContext
-                        ? this.paramGetContext.call(ownerComponent, this.$context, this)
-                        : this.$context, contentBindingResult);
-                }
-                childComponents = this._childComponents = contentBindingResult[0];
-                this._bindings = contentBindingResult[1];
-                backBindings = contentBindingResult[2];
-            }
-            else {
-                this._childComponents = null;
-                this._bindings = null;
-            }
-        }
-        else {
-            this._childComponents = childComponents;
-            this._bindings = bindings;
-            this._unfreezeBindings();
-        }
-        if (content) {
-            ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-            if (el.firstChild) {
-                clear_node_1.clearNode(el);
-            }
-            el.appendChild(content);
-            ElementProtoMixin_1.resumeConnectionStatusCallbacks();
-        }
-        if (childComponents) {
-            attachChildComponentElements_1.attachChildComponentElements(childComponents);
-        }
-        if (backBindings) {
-            for (var i = backBindings.length; i; i -= 3) {
-                backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
-            }
-        }
-        this.isReady = true;
-    };
-    RnSlot.prototype._detach = function () {
-        this._attached = false;
-        this._freezeBindings();
-    };
-    RnSlot = __decorate([
-        Component_1.Component({
-            elementIs: 'RnSlot',
-            params: {
-                name: { property: 'paramName', type: String, readonly: true },
-                forTag: { property: 'paramForTag', type: String, readonly: true },
-                for: { property: 'paramFor', type: String, readonly: true },
-                cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
-                getContext: { property: 'paramGetContext', type: Object, readonly: true }
-            }
-        })
-    ], RnSlot);
-    return RnSlot;
-}(BaseComponent_1.BaseComponent));
-exports.RnSlot = RnSlot;
-RnSlot[BaseComponent_1.KEY_IS_SLOT] = true;
-
-
-/***/ }),
-/* 58 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__58__;
-
-/***/ }),
-/* 59 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var get_uid_1 = __webpack_require__(24);
-var map_set_polyfill_1 = __webpack_require__(10);
-var move_content_1 = __webpack_require__(25);
-var symbol_polyfill_1 = __webpack_require__(26);
-var attachChildComponentElements_1 = __webpack_require__(28);
-var BaseComponent_1 = __webpack_require__(23);
-var bindContent_1 = __webpack_require__(32);
-var Component_1 = __webpack_require__(17);
-var ElementProtoMixin_1 = __webpack_require__(44);
-var KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot2[slotContentMap]');
-var RnSlot2 = /** @class */ (function (_super) {
-    __extends(RnSlot2, _super);
-    function RnSlot2() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Object.defineProperty(RnSlot2, "bindsInputContent", {
-        get: function () {
-            return true;
-        },
-        enumerable: true,
-        configurable: true
-    });
-    RnSlot2.prototype._attach = function () {
         this._attached = true;
         if (this.isReady) {
             this._unfreezeBindings();
@@ -5708,13 +5512,13 @@ var RnSlot2 = /** @class */ (function (_super) {
         }
         this.isReady = true;
     };
-    RnSlot2.prototype._detach = function () {
+    RnSlot.prototype._detach = function () {
         this._attached = false;
         this._freezeBindings();
     };
-    RnSlot2 = __decorate([
+    RnSlot = __decorate([
         Component_1.Component({
-            elementIs: 'RnSlot2',
+            elementIs: 'RnSlot',
             params: {
                 name: { property: 'paramName', type: String, readonly: true },
                 forTag: { property: 'paramForTag', type: String, readonly: true },
@@ -5723,11 +5527,11 @@ var RnSlot2 = /** @class */ (function (_super) {
                 getContext: { property: 'paramGetContext', type: Object, readonly: true }
             }
         })
-    ], RnSlot2);
-    return RnSlot2;
+    ], RnSlot);
+    return RnSlot;
 }(BaseComponent_1.BaseComponent));
-exports.RnSlot2 = RnSlot2;
-RnSlot2[BaseComponent_1.KEY_IS_SLOT] = true;
+exports.RnSlot = RnSlot;
+RnSlot[BaseComponent_1.KEY_IS_SLOT] = true;
 
 
 /***/ })

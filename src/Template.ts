@@ -22,9 +22,9 @@ export interface IElement {
 	innerSource: Array<string>;
 }
 
-export type TRenderer = (this: IElementRendererMap) => string;
+export type TRenderer = (this: Template) => string;
 
-export type TElementRenderer = (this: IElementRendererMap, $super?: IElementRendererMap) => string;
+export type TElementRenderer = (this: Template, $super?: IElementRendererMap) => string;
 
 export interface IElementRendererMap {
 	[elName: string]: TElementRenderer;
@@ -57,15 +57,33 @@ export class Template {
 	_elementRendererMap: IElementRendererMap;
 
 	constructor(
-		nelm: string | IBlock,
+		nelm: IBlock | string,
 		opts?: {
 			parent?: Template;
 			blockName?: string | Array<string>;
 			onBeforeNamedElementOpeningTagClosing?: (elNames: Array<string>) => string;
 		}
 	) {
+		if (typeof nelm == 'string') {
+			nelm = new Parser(nelm).parse();
+		}
+
 		let parent = (this.parent = (opts && opts.parent) || null);
-		this.nelm = typeof nelm == 'string' ? new Parser(nelm).parse() : nelm;
+
+		if (!parent) {
+			nelm.content = [
+				{
+					nodeType: NodeType.ELEMENT,
+					tagName: 'section',
+					isHelper: true,
+					names: ['root'],
+					attributes: null,
+					content: nelm.content
+				} as INelmElement
+			];
+		}
+
+		this.nelm = nelm;
 
 		let blockName = (opts && opts.blockName) || this.nelm.name;
 
@@ -109,12 +127,7 @@ export class Template {
 	}
 
 	render(): string {
-		return (this._renderer || this._compileRenderers()).call({
-			__proto__: this._elementRendererMap,
-			'@': this,
-			'@renderElementClasses': this._renderElementClasses,
-			'@onBeforeNamedElementOpeningTagClosing': this.onBeforeNamedElementOpeningTagClosing
-		});
+		return (this._renderer || this._compileRenderers()).call(this);
 	}
 
 	_compileRenderers(): TRenderer {
@@ -193,7 +206,7 @@ export class Template {
 				let tagName = el.tagName;
 				let isHelper = el.isHelper;
 				let elNames = el.names;
-				let elName = elNames && elNames[0];
+				let elName = elNames && (isHelper ? '@' + elNames[0] : elNames[0]);
 				let elAttrs = el.attributes;
 				let content = el.content;
 
@@ -272,20 +285,20 @@ export class Template {
 
 								if (attrList['class'] !== undefined) {
 									attrList[attrList['class']] =
-										` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join(
+										` class="' + this._renderElementClasses(['${elNames.join(
 											"','"
 										)}']) + ' ` +
 										attrList[attrList['class']].slice(' class="'.length);
 									renderedAttrs = join.call(attrList, '');
 								} else {
 									renderedAttrs =
-										` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join(
+										` class="' + this._renderElementClasses(['${elNames.join(
 											"','"
 										)}']) + '"` + join.call(attrList, '');
 								}
 							}
 						} else if (!isHelper) {
-							renderedAttrs = ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames.join(
+							renderedAttrs = ` class="' + this._renderElementClasses(['${elNames.join(
 								"','"
 							)}']) + '"`;
 						}
@@ -294,14 +307,14 @@ export class Template {
 							name: elName,
 							superCall: false,
 							source: isHelper
-								? [`this['${elName}/content']()`]
+								? [`this._elementRendererMap['${elName}/content'].call(this)`]
 								: [
 										`'<${tagName ||
-											'div'}${renderedAttrs}' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames.join(
+											'div'}${renderedAttrs}' + this.onBeforeNamedElementOpeningTagClosing(['${elNames.join(
 											"','"
 										)}']) + '>'`,
 										content && content.length
-											? `this['${elName}/content']() + '</${tagName ||
+											? `this._elementRendererMap['${elName}/content'].call(this) + '</${tagName ||
 													'div'}>'`
 											: !content && tagName && selfClosingTagMap.has(tagName)
 												? "''"
@@ -322,7 +335,7 @@ export class Template {
 
 								if (attr.name == 'class') {
 									hasClassAttr = true;
-									attrs += ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
+									attrs += ` class="' + this._renderElementClasses(['${elNames
 										.slice(1)
 										.join("','")}']) + '${
 										value ? ' ' + escapeString(escapeHTML(value)) : ''
@@ -338,21 +351,21 @@ export class Template {
 								`'<${tagName || 'div'}${
 									hasClassAttr
 										? attrs
-										: ` class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
+										: ` class="' + this._renderElementClasses(['${elNames
 												.slice(1)
 												.join("','")}']) + '"` + attrs
-								}' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames
+								}' + this.onBeforeNamedElementOpeningTagClosing(['${elNames
 									.slice(1)
 									.join("','")}']) + '>'`
 							);
 						} else {
 							this._currentElement.innerSource.push(
 								`'<${tagName ||
-									'div'} class="' + this['@renderElementClasses'].call(this['@'], ['${elNames
+									'div'} class="' + this._renderElementClasses(['${elNames
 									.slice(1)
 									.join(
 										"','"
-									)}']) + '"' + this['@onBeforeNamedElementOpeningTagClosing'].call(null, ['${elNames
+									)}']) + '"' + this.onBeforeNamedElementOpeningTagClosing(['${elNames
 									.slice(1)
 									.join("','")}']) + '>'`
 							);
@@ -408,7 +421,9 @@ export class Template {
 				if (elName) {
 					els.pop();
 					this._currentElement = els[els.length - 1];
-					this._currentElement.innerSource.push(`this['${elName}']()`);
+					this._currentElement.innerSource.push(
+						`this._elementRendererMap['${elName}'].call(this)`
+					);
 				} else if (!isHelper && (content || !tagName || !selfClosingTagMap.has(tagName))) {
 					this._currentElement.innerSource.push(`'</${tagName || 'div'}>'`);
 				}

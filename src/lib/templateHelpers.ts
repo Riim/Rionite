@@ -42,7 +42,7 @@ import { Template } from '../Template';
 				nodeType: NodeType.ELEMENT,
 				tagName: 'template',
 				isHelper: false,
-				names: el.names && el.names[0] ? ['_' + el.names[0], ...el.names] : null,
+				names: el.names,
 				attributes: attrs,
 				content: el.content
 			}
@@ -54,9 +54,9 @@ Template.helpers.slot = el => {
 	return [
 		{
 			nodeType: NodeType.ELEMENT,
-			tagName: 'rn-slot2',
+			tagName: 'rn-slot',
 			isHelper: false,
-			names: el.names && el.names[0] ? ['_' + el.names[0], ...el.names] : null,
+			names: el.names,
 			attributes: el.attributes,
 			content: el.content && [
 				{

@@ -5,8 +5,8 @@ export interface IElement {
     source: Array<string> | null;
     innerSource: Array<string>;
 }
-export declare type TRenderer = (this: IElementRendererMap) => string;
-export declare type TElementRenderer = (this: IElementRendererMap, $super?: IElementRendererMap) => string;
+export declare type TRenderer = (this: Template) => string;
+export declare type TElementRenderer = (this: Template, $super?: IElementRendererMap) => string;
 export interface IElementRendererMap {
     [elName: string]: TElementRenderer;
 }
@@ -35,7 +35,7 @@ export declare class Template {
     };
     _renderer: TRenderer;
     _elementRendererMap: IElementRendererMap;
-    constructor(nelm: string | IBlock, opts?: {
+    constructor(nelm: IBlock | string, opts?: {
         parent?: Template;
         blockName?: string | Array<string>;
         onBeforeNamedElementOpeningTagClosing?: (elNames: Array<string>) => string;

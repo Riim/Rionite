@@ -43,6 +43,5 @@ export {
 	RnRepeat
 } from './components/RnRepeat';
 export { RnSlot } from './components/RnSlot';
-export { RnSlot2 } from './components/RnSlot2';
 
 Container.registerService('logger', logger);
