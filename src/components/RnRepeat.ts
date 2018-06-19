@@ -1,6 +1,7 @@
 import { Map, Set } from '@riim/map-set-polyfill';
 import { nextTick } from '@riim/next-tick';
 import { Cell, ObservableList, TListener } from 'cellx';
+import { moveContent } from '../../node_modules/@riim/move-content';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
 import { bindComponentContent2 } from '../bindContent';
@@ -12,6 +13,7 @@ import { templateTag as templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
 import { namePattern } from '../lib/namePattern';
 import { removeNodes } from '../lib/removeNodes';
+import { Template } from '../Template';
 import { RnIfThen } from './RnIfThen';
 
 const slice = Array.prototype.slice;
@@ -281,7 +283,9 @@ export class RnRepeat extends BaseComponent {
 					] = [null, null, null];
 
 					bindComponentContent2(
-						this,
+						(this.ownerComponent.constructor as typeof BaseComponent)
+							.template as Template,
+						this.element.getAttribute('pid'),
 						content,
 						this.ownerComponent,
 						Object.create(context, {
@@ -317,6 +321,23 @@ export class RnRepeat extends BaseComponent {
 						bindings: contentBindingResult[1],
 						childComponents
 					});
+
+					if (childComponents) {
+						for (let i = childComponents.length; i; ) {
+							let childComponent = childComponents[--i];
+
+							if (
+								childComponent.element.firstChild &&
+								(childComponent.constructor as typeof BaseComponent)
+									.bindsInputContent
+							) {
+								childComponent.$inputContent = moveContent(
+									document.createDocumentFragment(),
+									childComponent.element
+								);
+							}
+						}
+					}
 
 					let newLastNode = content.lastChild!;
 					suppressConnectionStatusCallbacks();

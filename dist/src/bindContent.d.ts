@@ -1,6 +1,7 @@
 import { TListener } from 'cellx';
 import { BaseComponent } from './BaseComponent';
 import { IFreezableCell } from './componentBinding';
+import { Template } from './Template';
 export interface INodeBindingSchema {
     index: number;
     specifiedParams: Set<string> | null;
@@ -21,5 +22,5 @@ export interface IAttributeBindingCellMeta {
 }
 export declare function prepareContent<T extends Node = DocumentFragment | Element>(node: T): T;
 export declare function bindComponentContent(component: BaseComponent, node: Element | DocumentFragment, ownerComponent: BaseComponent, context: object, result: TResult): TResult;
-export declare function bindComponentContent2(component: BaseComponent, node: Element | DocumentFragment, ownerComponent: BaseComponent, context: object, result: TResult): TResult;
+export declare function bindComponentContent2(ownerComponentTemplate: Template, pid: string | null, node: Element | DocumentFragment, ownerComponent: BaseComponent, context: object, result: TResult): TResult;
 export declare function bindContent(node: Element | DocumentFragment, index: number, ownerComponent: BaseComponent, context: object, result: TResult, schema?: INodeBindingSchema | null, parentComponent?: BaseComponent): INodeBindingSchema | null;

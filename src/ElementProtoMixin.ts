@@ -25,12 +25,11 @@ export function resumeConnectionStatusCallbacks() {
 }
 
 export const ElementProtoMixin = {
-	rioniteComponent: null,
+	$component: null,
 
-	get $component(): BaseComponent {
+	get rioniteComponent(): BaseComponent {
 		return (
-			this.rioniteComponent ||
-			Container.get(this.constructor._rioniteComponentConstructor, [this])
+			this.$component || Container.get(this.constructor._rioniteComponentConstructor, [this])
 		);
 	},
 
@@ -43,7 +42,7 @@ export const ElementProtoMixin = {
 			return;
 		}
 
-		let component = this.rioniteComponent;
+		let component = this.$component;
 
 		if (component) {
 			ComponentParams.init(component);
@@ -62,7 +61,7 @@ export const ElementProtoMixin = {
 		} else {
 			defer(() => {
 				if (this[KEY_ELEMENT_CONNECTED]) {
-					let component = this.$component;
+					let component = this.rioniteComponent;
 
 					component._parentComponent = undefined;
 
@@ -84,7 +83,7 @@ export const ElementProtoMixin = {
 			return;
 		}
 
-		let component = this.rioniteComponent;
+		let component = this.$component;
 
 		if (component && component._attached) {
 			component._parentComponent = null;
@@ -105,7 +104,7 @@ export const ElementProtoMixin = {
 		_prevRawValue: string | null,
 		rawValue: string | null
 	) {
-		let component = this.rioniteComponent;
+		let component = this.$component;
 
 		if (component && component.isReady) {
 			let $paramConfig: I$ComponentParamConfig =

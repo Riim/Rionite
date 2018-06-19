@@ -59,13 +59,13 @@ export interface I$ComponentParamConfig {
 
 export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent>
 	extends HTMLElement {
-	rioniteComponent?: T | null;
-	$component?: T;
+	$component?: T | null;
+	rioniteComponent?: T;
 }
 
 export interface IComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
-	rioniteComponent: T | null;
-	$component: T;
+	$component: T | null;
+	rioniteComponent: T;
 }
 
 export interface IComponentElementClassNameMap {
@@ -87,8 +87,6 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 
 export const KEY_PARAMS_CONFIG = Symbol('Rionite/BaseComponent[paramsConfig]');
 export const KEY_PARAMS = Symbol('Rionite/BaseComponent[params]');
-
-export const KEY_IS_SLOT = Symbol('Rionite/BaseComponent[isSlot]');
 
 export class BaseComponent extends EventEmitter implements DisposableMixin {
 	static elementIs: string;
@@ -146,8 +144,8 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 		}
 
 		for (let node: any; (node = (node || this.element).parentNode); ) {
-			if (node.$component) {
-				return (this._parentComponent = node.$component);
+			if (node.$component !== undefined) {
+				return (this._parentComponent = node.$component || node.rioniteComponent);
 			}
 		}
 
@@ -156,7 +154,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 	element: IComponentElement;
 
-	$inputContent: DocumentFragment | undefined;
+	$inputContent: DocumentFragment | null = null;
 	$context: { [name: string]: any } | undefined;
 	$specifiedParams: Set<string> | undefined;
 
@@ -184,9 +182,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 		}
 
 		this.element = el as IComponentElement;
-
-		(el as IComponentElement).rioniteComponent = this;
-		Object.defineProperty(el, '$component', { value: this });
+		(el as IComponentElement).$component = this;
 
 		this[KEY_PARAMS] = new Map();
 
@@ -364,8 +360,6 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 						el
 					);
 					resumeConnectionStatusCallbacks();
-				} else if (!this.$inputContent) {
-					this.$inputContent = document.createDocumentFragment();
 				}
 
 				let rawContent =
@@ -400,9 +394,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 						if (
 							childComponent.element.firstChild &&
-							(childComponent.constructor as typeof BaseComponent)
-								.bindsInputContent &&
-							!childComponent.constructor[KEY_IS_SLOT]
+							(childComponent.constructor as typeof BaseComponent).bindsInputContent
 						) {
 							childComponent.$inputContent = moveContent(
 								document.createDocumentFragment(),

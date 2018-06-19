@@ -1659,11 +1659,11 @@ var registerComponent_1 = __webpack_require__(18);
 exports.registerComponent = registerComponent_1.registerComponent;
 var RnIfThen_1 = __webpack_require__(52);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
-var RnIfElse_1 = __webpack_require__(56);
+var RnIfElse_1 = __webpack_require__(57);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
-var RnRepeat_1 = __webpack_require__(55);
+var RnRepeat_1 = __webpack_require__(56);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
-var RnSlot_1 = __webpack_require__(57);
+var RnSlot_1 = __webpack_require__(58);
 exports.RnSlot = RnSlot_1.RnSlot;
 di_1.Container.registerService('logger', logger_1.logger);
 
@@ -2849,12 +2849,12 @@ var Features_1 = __webpack_require__(46);
 var map = Array.prototype.map;
 exports.KEY_PARAMS_CONFIG = symbol_polyfill_1.Symbol('Rionite/BaseComponent[paramsConfig]');
 exports.KEY_PARAMS = symbol_polyfill_1.Symbol('Rionite/BaseComponent[params]');
-exports.KEY_IS_SLOT = symbol_polyfill_1.Symbol('Rionite/BaseComponent[isSlot]');
 var BaseComponent = /** @class */ (function (_super) {
     __extends(BaseComponent, _super);
     function BaseComponent(el) {
         var _this = _super.call(this) || this;
         _this._parentComponent = null;
+        _this.$inputContent = null;
         _this._attached = false;
         _this.initialized = false;
         _this.isReady = false;
@@ -2867,8 +2867,7 @@ var BaseComponent = /** @class */ (function (_super) {
             el = document.createElement(kebab_case_1.kebabCase(constr.elementIs, true));
         }
         _this.element = el;
-        el.rioniteComponent = _this;
-        Object.defineProperty(el, '$component', { value: _this });
+        el.$component = _this;
         _this[exports.KEY_PARAMS] = new map_set_polyfill_1.Map();
         _this.created();
         return _this;
@@ -2906,8 +2905,8 @@ var BaseComponent = /** @class */ (function (_super) {
                 return this._parentComponent;
             }
             for (var node = void 0; (node = (node || this.element).parentNode);) {
-                if (node.$component) {
-                    return (this._parentComponent = node.$component);
+                if (node.$component !== undefined) {
+                    return (this._parentComponent = node.$component || node.rioniteComponent);
                 }
             }
             return (this._parentComponent = null);
@@ -3011,9 +3010,6 @@ var BaseComponent = /** @class */ (function (_super) {
                         (this.$inputContent = document.createDocumentFragment()), el);
                     ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                 }
-                else if (!this.$inputContent) {
-                    this.$inputContent = document.createDocumentFragment();
-                }
                 var rawContent = constr._rawContent ||
                     (constr._rawContent = bindContent_1.prepareContent(html_to_fragment_1.htmlToFragment(constr.template.render())));
                 var content = rawContent.cloneNode(true);
@@ -3032,9 +3028,7 @@ var BaseComponent = /** @class */ (function (_super) {
                     for (var i = childComponents.length; i;) {
                         var childComponent = childComponents[--i];
                         if (childComponent.element.firstChild &&
-                            childComponent.constructor
-                                .bindsInputContent &&
-                            !childComponent.constructor[exports.KEY_IS_SLOT]) {
+                            childComponent.constructor.bindsInputContent) {
                             childComponent.$inputContent = move_content_1.moveContent(document.createDocumentFragment(), childComponent.element);
                         }
                     }
@@ -3424,10 +3418,6 @@ function prepareContent(node) {
                         continue;
                     }
                 }
-                else if (child.$component &&
-                    child.$component.constructor[BaseComponent_1.KEY_IS_SLOT]) {
-                    child.setAttribute('pid', next_uid_1.nextUID());
-                }
                 prepareContent(child);
                 child = child.nextSibling;
                 break;
@@ -3460,13 +3450,12 @@ function bindComponentContent(component, node, ownerComponent, context, result) 
     return result;
 }
 exports.bindComponentContent = bindComponentContent;
-function bindComponentContent2(component, node, ownerComponent, context, result) {
-    var pid = component.element.getAttribute('pid');
+function bindComponentContent2(ownerComponentTemplate, pid, node, ownerComponent, context, result) {
     if (pid) {
-        var schema = (component.ownerComponent.constructor.template[exports.KEY_NODE_BINDING_SCHEMAS] ||
-            (component.ownerComponent.constructor.template[exports.KEY_NODE_BINDING_SCHEMAS] = {}))[pid];
+        var schema = (ownerComponentTemplate[exports.KEY_NODE_BINDING_SCHEMAS] ||
+            (ownerComponentTemplate[exports.KEY_NODE_BINDING_SCHEMAS] = {}))[pid];
         if (schema === undefined) {
-            component.ownerComponent.constructor.template[exports.KEY_NODE_BINDING_SCHEMAS][pid] = bindContent(node, -1, ownerComponent, context, result);
+            ownerComponentTemplate[exports.KEY_NODE_BINDING_SCHEMAS][pid] = bindContent(node, -1, ownerComponent, context, result);
         }
         else if (schema) {
             bindContentBySchema(node, schema, ownerComponent, context, result);
@@ -3485,7 +3474,7 @@ function bindContent(node, index, ownerComponent, context, result, schema, paren
         var childSchema = void 0;
         switch (child.nodeType) {
             case Node.ELEMENT_NODE: {
-                var childComponent = child.$component;
+                var childComponent = child.rioniteComponent;
                 var $paramsConfig = void 0;
                 var $specifiedParams = void 0;
                 if (childComponent) {
@@ -3665,7 +3654,7 @@ function bindContentBySchema(node, schema, ownerComponent, context, result, pare
     if (schema.childComponents) {
         for (var _i = 0, _a = schema.childComponents; _i < _a.length; _i++) {
             var index = _a[_i];
-            var childComponent = children[index].$component;
+            var childComponent = children[index].rioniteComponent;
             childComponent._ownerComponent = ownerComponent;
             childComponent.$context = context;
             if (parentComponent) {
@@ -4421,10 +4410,9 @@ function resumeConnectionStatusCallbacks() {
 }
 exports.resumeConnectionStatusCallbacks = resumeConnectionStatusCallbacks;
 exports.ElementProtoMixin = (_a = {
-        rioniteComponent: null,
-        get $component() {
-            return (this.rioniteComponent ||
-                di_1.Container.get(this.constructor._rioniteComponentConstructor, [this]));
+        $component: null,
+        get rioniteComponent() {
+            return (this.$component || di_1.Container.get(this.constructor._rioniteComponentConstructor, [this]));
         }
     },
     _a[exports.KEY_ELEMENT_CONNECTED] = false,
@@ -4434,7 +4422,7 @@ exports.ElementProtoMixin = (_a = {
         if (connectionStatusCallbacksSuppressed) {
             return;
         }
-        var component = this.rioniteComponent;
+        var component = this.$component;
         if (component) {
             ComponentParams_1.ComponentParams.init(component);
             component.elementConnected();
@@ -4452,7 +4440,7 @@ exports.ElementProtoMixin = (_a = {
         else {
             defer_1.defer(function () {
                 if (_this[exports.KEY_ELEMENT_CONNECTED]) {
-                    var component_1 = _this.$component;
+                    var component_1 = _this.rioniteComponent;
                     component_1._parentComponent = undefined;
                     if (!component_1.parentComponent && !component_1._attached) {
                         ComponentParams_1.ComponentParams.init(component_1);
@@ -4468,7 +4456,7 @@ exports.ElementProtoMixin = (_a = {
         if (connectionStatusCallbacksSuppressed) {
             return;
         }
-        var component = this.rioniteComponent;
+        var component = this.$component;
         if (component && component._attached) {
             component._parentComponent = null;
             component.elementDisconnected();
@@ -4480,7 +4468,7 @@ exports.ElementProtoMixin = (_a = {
         }
     },
     _a.attributeChangedCallback = function (name, _prevRawValue, rawValue) {
-        var component = this.rioniteComponent;
+        var component = this.$component;
         if (component && component.isReady) {
             var $paramConfig = component.constructor[BaseComponent_1.KEY_PARAMS_CONFIG][name];
             if ($paramConfig.readonly) {
@@ -4794,6 +4782,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var next_tick_1 = __webpack_require__(53);
 var cellx_1 = __webpack_require__(14);
+var move_content_1 = __webpack_require__(54);
 var attachChildComponentElements_1 = __webpack_require__(28);
 var BaseComponent_1 = __webpack_require__(23);
 var bindContent_1 = __webpack_require__(32);
@@ -4802,8 +4791,8 @@ var ElementProtoMixin_1 = __webpack_require__(44);
 var compileKeypath_1 = __webpack_require__(40);
 var Features_1 = __webpack_require__(46);
 var keypathPattern_1 = __webpack_require__(37);
-var removeNodes_1 = __webpack_require__(54);
-var RnRepeat_1 = __webpack_require__(55);
+var removeNodes_1 = __webpack_require__(55);
+var RnRepeat_1 = __webpack_require__(56);
 var slice = Array.prototype.slice;
 var reKeypath = RegExp("^" + keypathPattern_1.keypathPattern + "$");
 var RnIfThen = /** @class */ (function (_super) {
@@ -4872,12 +4861,21 @@ var RnIfThen = /** @class */ (function (_super) {
                 }
             }
             var contentBindingResult = [null, null, null];
-            bindContent_1.bindComponentContent2(this, content, this.ownerComponent, this.$context, contentBindingResult);
+            bindContent_1.bindComponentContent2(this.ownerComponent.constructor.template, this.element.getAttribute('pid'), content, this.ownerComponent, this.$context, contentBindingResult);
             var childComponents = contentBindingResult[0];
             var backBindings = contentBindingResult[2];
             this._nodes = slice.call(content.childNodes);
             this._childComponents = childComponents;
             this._bindings = contentBindingResult[1];
+            if (childComponents) {
+                for (var i = childComponents.length; i;) {
+                    var childComponent = childComponents[--i];
+                    if (childComponent.element.firstChild &&
+                        childComponent.constructor.bindsInputContent) {
+                        childComponent.$inputContent = move_content_1.moveContent(document.createDocumentFragment(), childComponent.element);
+                    }
+                }
+            }
             ElementProtoMixin_1.suppressConnectionStatusCallbacks();
             this.element.parentNode.insertBefore(content, this.element);
             ElementProtoMixin_1.resumeConnectionStatusCallbacks();
@@ -4958,6 +4956,22 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__53__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+function moveContent(target, source) {
+    for (var child = void 0; (child = source.firstChild);) {
+        target.appendChild(child);
+    }
+    return target;
+}
+exports.moveContent = moveContent;
+
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 function removeNodes(nodes) {
     var nodeCount = nodes.length;
     if (nodeCount == 1) {
@@ -4979,7 +4993,7 @@ exports.removeNodes = removeNodes;
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5004,6 +5018,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var map_set_polyfill_1 = __webpack_require__(10);
 var next_tick_1 = __webpack_require__(53);
 var cellx_1 = __webpack_require__(14);
+var move_content_1 = __webpack_require__(54);
 var attachChildComponentElements_1 = __webpack_require__(28);
 var BaseComponent_1 = __webpack_require__(23);
 var bindContent_1 = __webpack_require__(32);
@@ -5013,7 +5028,7 @@ var compileKeypath_1 = __webpack_require__(40);
 var Features_1 = __webpack_require__(46);
 var keypathPattern_1 = __webpack_require__(37);
 var namePattern_1 = __webpack_require__(38);
-var removeNodes_1 = __webpack_require__(54);
+var removeNodes_1 = __webpack_require__(55);
 var RnIfThen_1 = __webpack_require__(52);
 var slice = Array.prototype.slice;
 var reForAttrValue = RegExp("^\\s*(" + namePattern_1.namePattern + ")\\s+(?:in|of)\\s+(" + keypathPattern_1.keypathPattern + ")\\s*$");
@@ -5186,7 +5201,8 @@ var RnRepeat = /** @class */ (function (_super) {
                     }
                     var context = this.$context;
                     var contentBindingResult = [null, null, null];
-                    bindContent_1.bindComponentContent2(this, content, this.ownerComponent, Object.create(context, (_a = {
+                    bindContent_1.bindComponentContent2(this.ownerComponent.constructor
+                        .template, this.element.getAttribute('pid'), content, this.ownerComponent, Object.create(context, (_a = {
                             '$/': {
                                 configurable: false,
                                 enumerable: false,
@@ -5214,6 +5230,16 @@ var RnRepeat = /** @class */ (function (_super) {
                         bindings: contentBindingResult[1],
                         childComponents: childComponents
                     });
+                    if (childComponents) {
+                        for (var i_2 = childComponents.length; i_2;) {
+                            var childComponent = childComponents[--i_2];
+                            if (childComponent.element.firstChild &&
+                                childComponent.constructor
+                                    .bindsInputContent) {
+                                childComponent.$inputContent = move_content_1.moveContent(document.createDocumentFragment(), childComponent.element);
+                            }
+                        }
+                    }
                     var newLastNode = content.lastChild;
                     ElementProtoMixin_1.suppressConnectionStatusCallbacks();
                     lastNode.parentNode.insertBefore(content, lastNode == el ? lastNode : lastNode.nextSibling);
@@ -5223,8 +5249,8 @@ var RnRepeat = /** @class */ (function (_super) {
                         attachChildComponentElements_1.attachChildComponentElements(childComponents);
                     }
                     if (backBindings) {
-                        for (var i_2 = backBindings.length; i_2; i_2 -= 3) {
-                            backBindings[i_2 - 3].on('change:' + backBindings[i_2 - 2], backBindings[i_2 - 1]);
+                        for (var i_3 = backBindings.length; i_3; i_3 -= 3) {
+                            backBindings[i_3 - 3].on('change:' + backBindings[i_3 - 2], backBindings[i_3 - 1]);
                         }
                     }
                     changed = true;
@@ -5298,7 +5324,7 @@ exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5341,7 +5367,7 @@ exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
-/* 57 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5393,14 +5419,14 @@ var RnSlot = /** @class */ (function (_super) {
         }
         var ownerComponent = this.ownerComponent;
         var contentOwnerComponent = ownerComponent.ownerComponent;
-        var ownerComponentContent = ownerComponent.$inputContent;
+        var ownerComponentInputContent = ownerComponent.$inputContent;
         var el = this.element;
         var cloneContent = this.paramCloneContent;
         var content;
         var childComponents;
         var bindings;
         var backBindings;
-        if (!cloneContent || ownerComponentContent.firstChild) {
+        if (ownerComponentInputContent || !cloneContent) {
             var slotName = this.paramName;
             var forTag = void 0;
             var for$ = void 0;
@@ -5415,7 +5441,7 @@ var RnSlot = /** @class */ (function (_super) {
             }
             var key = get_uid_1.getUID(ownerComponent) +
                 '/' +
-                (slotName ? '@' + slotName : forTag ? ':' + forTag : for$ || '');
+                (slotName ? 's:' + slotName : forTag ? 't:' + forTag : for$ || '');
             if (slotName || forTag || for$) {
                 var contentMap = void 0;
                 if (!cloneContent &&
@@ -5429,13 +5455,13 @@ var RnSlot = /** @class */ (function (_super) {
                         bindings = container.$component._bindings;
                     }
                 }
-                else if (ownerComponentContent.firstElementChild) {
+                else if (ownerComponentInputContent) {
                     if (for$ && for$.indexOf('__') == -1) {
                         var elementBlockNames = ownerComponent.constructor
                             ._elementBlockNames;
                         for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
                     }
-                    var selectedElements = ownerComponentContent.querySelectorAll(slotName ? "[slot=" + slotName + "]" : forTag || '.' + for$);
+                    var selectedElements = ownerComponentInputContent.querySelectorAll(slotName ? "[slot=" + slotName + "]" : forTag || '.' + for$);
                     var selectedElementCount = selectedElements.length;
                     if (selectedElementCount) {
                         content = document.createDocumentFragment();
@@ -5453,7 +5479,7 @@ var RnSlot = /** @class */ (function (_super) {
                 }
             }
             else if (cloneContent) {
-                content = ownerComponentContent.cloneNode(true);
+                content = ownerComponentInputContent.cloneNode(true);
             }
             else {
                 var contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
@@ -5464,14 +5490,14 @@ var RnSlot = /** @class */ (function (_super) {
                     childComponents = container.$component._childComponents;
                     bindings = container.$component._bindings;
                 }
-                else if (ownerComponentContent.firstChild) {
-                    content = ownerComponentContent;
+                else if (ownerComponentInputContent) {
+                    content = ownerComponentInputContent;
                     (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new map_set_polyfill_1.Map())).set(key, el);
                 }
             }
         }
         if (bindings === undefined) {
-            if (content || el.firstElementChild) {
+            if (content || this.$inputContent) {
                 var contentBindingResult = [null, null, null];
                 if (content) {
                     bindContent_1.bindContent(content, -1, contentOwnerComponent, this.paramGetContext
@@ -5479,13 +5505,24 @@ var RnSlot = /** @class */ (function (_super) {
                         : ownerComponent.$context, contentBindingResult);
                 }
                 else {
-                    bindContent_1.bindComponentContent2(this, (content = document.importNode(el.firstElementChild.content, true)), ownerComponent, this.paramGetContext
+                    var template = this.$inputContent.firstElementChild;
+                    bindContent_1.bindComponentContent2(this.ownerComponent.constructor
+                        .template, template.getAttribute('pid'), (content = document.importNode(template.content, true)), ownerComponent, this.paramGetContext
                         ? this.paramGetContext.call(ownerComponent, this.$context, this)
                         : this.$context, contentBindingResult);
                 }
                 childComponents = this._childComponents = contentBindingResult[0];
                 this._bindings = contentBindingResult[1];
                 backBindings = contentBindingResult[2];
+                if (childComponents) {
+                    for (var i = childComponents.length; i;) {
+                        var childComponent = childComponents[--i];
+                        if (childComponent.element.firstChild &&
+                            childComponent.constructor.bindsInputContent) {
+                            childComponent.$inputContent = move_content_1.moveContent(document.createDocumentFragment(), childComponent.element);
+                        }
+                    }
+                }
             }
             else {
                 this._childComponents = null;
@@ -5531,7 +5568,6 @@ var RnSlot = /** @class */ (function (_super) {
     return RnSlot;
 }(BaseComponent_1.BaseComponent));
 exports.RnSlot = RnSlot;
-RnSlot[BaseComponent_1.KEY_IS_SLOT] = true;
 
 
 /***/ })

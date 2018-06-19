@@ -26,7 +26,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 	let ownerComponentEl = ownerComponent.element;
 	let receivers: Array<Element> | undefined;
 
-	for (let component: BaseComponent | undefined; ; ) {
+	for (let component: BaseComponent | null | undefined; ; ) {
 		if (el.hasAttribute(attrName)) {
 			(receivers || (receivers = [])).push(el);
 		}

@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.32.97",
+  "version": "0.32.98",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/src/index.d.ts",
@@ -19,9 +19,9 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "@types/jest": "^23.1.0",
+    "@types/jest": "^23.1.1",
     "ajv": "^6.5.1",
-    "awesome-typescript-loader": "^5.0.0",
+    "awesome-typescript-loader": "^5.1.1",
     "benchmark": "^2.1.4",
     "chalk": "^2.4.1",
     "document-register-element": "^1.9.1",
@@ -38,7 +38,7 @@
     "tslint-loader": "^3.6.0",
     "typescript": "^2.9.2",
     "webpack": "^4.12.0",
-    "webpack-cli": "^3.0.7"
+    "webpack-cli": "^3.0.8"
   },
   "dependencies": {
     "@riim/clear-node": "^1.0.0",

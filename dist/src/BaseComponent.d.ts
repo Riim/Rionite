@@ -23,12 +23,12 @@ export interface I$ComponentParamConfig {
     paramConfig: IComponentParamConfig | Function;
 }
 export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
-    rioniteComponent?: T | null;
-    $component?: T;
+    $component?: T | null;
+    rioniteComponent?: T;
 }
 export interface IComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
-    rioniteComponent: T | null;
-    $component: T;
+    $component: T | null;
+    rioniteComponent: T;
 }
 export interface IComponentElementClassNameMap {
     [elName: string]: string;
@@ -43,7 +43,6 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 }
 export declare const KEY_PARAMS_CONFIG: symbol;
 export declare const KEY_PARAMS: symbol;
-export declare const KEY_IS_SLOT: symbol;
 export declare class BaseComponent extends EventEmitter implements DisposableMixin {
     static elementIs: string;
     static elementExtends: string | null;
@@ -67,7 +66,7 @@ export declare class BaseComponent extends EventEmitter implements DisposableMix
     _parentComponent: BaseComponent | null | undefined;
     readonly parentComponent: BaseComponent | null;
     element: IComponentElement;
-    $inputContent: DocumentFragment | undefined;
+    $inputContent: DocumentFragment | null;
     $context: {
         [name: string]: any;
     } | undefined;

@@ -4,11 +4,12 @@ import { moveContent } from '@riim/move-content';
 import { Symbol } from '@riim/symbol-polyfill';
 import { TListener } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
-import { BaseComponent, IComponentElement, KEY_IS_SLOT } from '../BaseComponent';
+import { BaseComponent, IComponentElement } from '../BaseComponent';
 import { bindComponentContent2, bindContent } from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
+import { Template } from '../Template';
 
 const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot[slotContentMap]');
 
@@ -52,7 +53,7 @@ export class RnSlot extends BaseComponent {
 
 		let ownerComponent = this.ownerComponent;
 		let contentOwnerComponent = ownerComponent.ownerComponent;
-		let ownerComponentContent = ownerComponent.$inputContent!;
+		let ownerComponentInputContent = ownerComponent.$inputContent;
 		let el = this.element;
 		let cloneContent = this.paramCloneContent;
 		let content: DocumentFragment | undefined;
@@ -60,7 +61,7 @@ export class RnSlot extends BaseComponent {
 		let bindings: Array<IFreezableCell> | null | undefined;
 		let backBindings: Array<BaseComponent | string | TListener> | null | undefined;
 
-		if (!cloneContent || ownerComponentContent.firstChild) {
+		if (ownerComponentInputContent || !cloneContent) {
 			let slotName: string | null = this.paramName;
 			let forTag: string | null | undefined;
 			let for$: string | null | undefined;
@@ -78,7 +79,7 @@ export class RnSlot extends BaseComponent {
 			let key =
 				getUID(ownerComponent) +
 				'/' +
-				(slotName ? '@' + slotName : forTag ? ':' + forTag : for$ || '');
+				(slotName ? 's:' + slotName : forTag ? 't:' + forTag : for$ || '');
 
 			if (slotName || forTag || for$) {
 				let contentMap: Map<string, IComponentElement> | undefined;
@@ -95,16 +96,16 @@ export class RnSlot extends BaseComponent {
 						contentMap.set(key, el);
 
 						childComponents = (container.$component as RnSlot)._childComponents;
-						bindings = container.$component._bindings;
+						bindings = container.$component!._bindings;
 					}
-				} else if (ownerComponentContent.firstElementChild) {
+				} else if (ownerComponentInputContent) {
 					if (for$ && for$.indexOf('__') == -1) {
 						let elementBlockNames = (ownerComponent.constructor as typeof BaseComponent)
 							._elementBlockNames;
 						for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
 					}
 
-					let selectedElements = ownerComponentContent.querySelectorAll(
+					let selectedElements = ownerComponentInputContent.querySelectorAll(
 						slotName ? `[slot=${slotName}]` : forTag || '.' + for$
 					);
 					let selectedElementCount = selectedElements.length;
@@ -130,7 +131,7 @@ export class RnSlot extends BaseComponent {
 					}
 				}
 			} else if (cloneContent) {
-				content = ownerComponentContent.cloneNode(true) as DocumentFragment;
+				content = ownerComponentInputContent!.cloneNode(true) as DocumentFragment;
 			} else {
 				let contentMap: Map<string, IComponentElement> | undefined =
 					contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
@@ -142,9 +143,9 @@ export class RnSlot extends BaseComponent {
 					contentMap.set(key, el);
 
 					childComponents = (container.$component as RnSlot)._childComponents;
-					bindings = container.$component._bindings;
-				} else if (ownerComponentContent.firstChild) {
-					content = ownerComponentContent;
+					bindings = container.$component!._bindings;
+				} else if (ownerComponentInputContent) {
+					content = ownerComponentInputContent;
 					(contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())).set(
 						key,
 						el
@@ -154,7 +155,7 @@ export class RnSlot extends BaseComponent {
 		}
 
 		if (bindings === undefined) {
-			if (content || el.firstElementChild) {
+			if (content || this.$inputContent) {
 				let contentBindingResult: [
 					Array<BaseComponent> | null,
 					Array<IFreezableCell> | null,
@@ -176,12 +177,13 @@ export class RnSlot extends BaseComponent {
 						contentBindingResult
 					);
 				} else {
+					let template = this.$inputContent!.firstElementChild as HTMLTemplateElement;
+
 					bindComponentContent2(
-						this,
-						(content = document.importNode(
-							(el.firstElementChild as HTMLTemplateElement).content,
-							true
-						)),
+						(this.ownerComponent.constructor as typeof BaseComponent)
+							.template as Template,
+						template.getAttribute('pid'),
+						(content = document.importNode(template.content, true)),
 						ownerComponent,
 						this.paramGetContext
 							? this.paramGetContext.call(ownerComponent, this.$context, this)
@@ -193,6 +195,22 @@ export class RnSlot extends BaseComponent {
 				childComponents = this._childComponents = contentBindingResult[0];
 				this._bindings = contentBindingResult[1];
 				backBindings = contentBindingResult[2];
+
+				if (childComponents) {
+					for (let i = childComponents.length; i; ) {
+						let childComponent = childComponents[--i];
+
+						if (
+							childComponent.element.firstChild &&
+							(childComponent.constructor as typeof BaseComponent).bindsInputContent
+						) {
+							childComponent.$inputContent = moveContent(
+								document.createDocumentFragment(),
+								childComponent.element
+							);
+						}
+					}
+				}
 			} else {
 				this._childComponents = null;
 				this._bindings = null;
@@ -230,5 +248,3 @@ export class RnSlot extends BaseComponent {
 		this._freezeBindings();
 	}
 }
-
-RnSlot[KEY_IS_SLOT] = true;

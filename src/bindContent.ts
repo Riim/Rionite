@@ -8,7 +8,6 @@ import {
 	IComponentElement,
 	IComponentParamConfig,
 	IPossiblyComponentElement,
-	KEY_IS_SLOT,
 	KEY_PARAMS_CONFIG
 	} from './BaseComponent';
 import { compileContentNodeValue } from './compileContentNodeValue';
@@ -20,6 +19,7 @@ import {
 	TContentNodeValue
 	} from './ContentNodeValueParser';
 import { compileKeypath } from './lib/compileKeypath';
+import { Template } from './Template';
 
 export interface INodeBindingSchema {
 	index: number;
@@ -69,19 +69,12 @@ export function prepareContent<T extends Node = DocumentFragment | Element>(node
 					if (!child.firstChild) {
 						prepareContent(child.content);
 						child = child.nextSibling;
-
 						continue;
 					}
-				} else if (
-					(child as IPossiblyComponentElement).$component &&
-					(child as IComponentElement).$component.constructor[KEY_IS_SLOT]
-				) {
-					(child as Element).setAttribute('pid', nextUID());
 				}
 
 				prepareContent(child);
 				child = child.nextSibling;
-
 				break;
 			}
 			case Node.TEXT_NODE: {
@@ -96,7 +89,6 @@ export function prepareContent<T extends Node = DocumentFragment | Element>(node
 				}
 
 				child = nextChild;
-
 				break;
 			}
 		}
@@ -126,26 +118,25 @@ export function bindComponentContent(
 }
 
 export function bindComponentContent2(
-	component: BaseComponent,
+	ownerComponentTemplate: Template,
+	pid: string | null,
 	node: Element | DocumentFragment,
 	ownerComponent: BaseComponent,
 	context: object,
 	result: TResult
 ): TResult {
-	let pid = component.element.getAttribute('pid');
-
 	if (pid) {
-		let schema = ((component.ownerComponent.constructor as typeof BaseComponent).template![
-			KEY_NODE_BINDING_SCHEMAS
-		] ||
-			((component.ownerComponent.constructor as typeof BaseComponent).template![
-				KEY_NODE_BINDING_SCHEMAS
-			] = {}))[pid];
+		let schema = (ownerComponentTemplate[KEY_NODE_BINDING_SCHEMAS] ||
+			(ownerComponentTemplate[KEY_NODE_BINDING_SCHEMAS] = {}))[pid];
 
 		if (schema === undefined) {
-			(component.ownerComponent.constructor as typeof BaseComponent).template![
-				KEY_NODE_BINDING_SCHEMAS
-			][pid] = bindContent(node, -1, ownerComponent, context, result);
+			ownerComponentTemplate[KEY_NODE_BINDING_SCHEMAS][pid] = bindContent(
+				node,
+				-1,
+				ownerComponent,
+				context,
+				result
+			);
 		} else if (schema) {
 			bindContentBySchema(node, schema, ownerComponent, context, result);
 		}
@@ -173,7 +164,7 @@ export function bindContent(
 
 		switch (child.nodeType) {
 			case Node.ELEMENT_NODE: {
-				let childComponent = (child as IPossiblyComponentElement).$component;
+				let childComponent = (child as IPossiblyComponentElement).rioniteComponent;
 				let $paramsConfig: { [name: string]: I$ComponentParamConfig } | undefined;
 				let $specifiedParams: Set<string> | undefined;
 
@@ -441,12 +432,12 @@ function bindContentBySchema(
 	let children = node.childNodes;
 
 	if (schema.specifiedParams) {
-		(node as IComponentElement).$component.$specifiedParams = schema.specifiedParams;
+		(node as IComponentElement).$component!.$specifiedParams = schema.specifiedParams;
 	}
 
 	if (schema.childComponents) {
 		for (let index of schema.childComponents) {
-			let childComponent = (children[index] as IComponentElement).$component;
+			let childComponent = (children[index] as IComponentElement).rioniteComponent;
 			childComponent._ownerComponent = ownerComponent;
 			childComponent.$context = context;
 
@@ -465,9 +456,7 @@ function bindContentBySchema(
 		let $paramsConfig: { [name: string]: I$ComponentParamConfig } | undefined;
 
 		if ((node as IPossiblyComponentElement).$component) {
-			$paramsConfig = (node as IPossiblyComponentElement).$component!.constructor[
-				KEY_PARAMS_CONFIG
-			];
+			$paramsConfig = (node as IComponentElement).$component!.constructor[KEY_PARAMS_CONFIG];
 		}
 
 		for (let name of schema.attributes) {
@@ -514,7 +503,7 @@ function bindContentBySchema(
 				ownerComponent,
 				context,
 				result,
-				child.$component
+				child.$component!
 			);
 		}
 	}
@@ -590,7 +579,7 @@ function bindAttribute(
 		}
 
 		(result[2] || (result[2] = [])).push(
-			(el as IComponentElement).$component,
+			(el as IComponentElement).$component!,
 			(typeof paramConfig == 'object' &&
 				(paramConfig.type !== undefined || paramConfig.default !== undefined) &&
 				paramConfig.property) ||

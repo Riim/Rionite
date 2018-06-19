@@ -1,5 +1,6 @@
 import { nextTick } from '@riim/next-tick';
 import { Cell, TListener } from 'cellx';
+import { moveContent } from '../../node_modules/@riim/move-content';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
 import { bindComponentContent2 } from '../bindContent';
@@ -10,6 +11,7 @@ import { compileKeypath } from '../lib/compileKeypath';
 import { templateTag as templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
 import { removeNodes } from '../lib/removeNodes';
+import { Template } from '../Template';
 import { RnRepeat } from './RnRepeat';
 
 const slice = Array.prototype.slice;
@@ -113,7 +115,8 @@ export class RnIfThen extends BaseComponent {
 			] = [null, null, null];
 
 			bindComponentContent2(
-				this,
+				(this.ownerComponent.constructor as typeof BaseComponent).template as Template,
+				this.element.getAttribute('pid'),
 				content,
 				this.ownerComponent,
 				this.$context!,
@@ -126,6 +129,22 @@ export class RnIfThen extends BaseComponent {
 			this._nodes = slice.call(content.childNodes);
 			this._childComponents = childComponents;
 			this._bindings = contentBindingResult[1];
+
+			if (childComponents) {
+				for (let i = childComponents.length; i; ) {
+					let childComponent = childComponents[--i];
+
+					if (
+						childComponent.element.firstChild &&
+						(childComponent.constructor as typeof BaseComponent).bindsInputContent
+					) {
+						childComponent.$inputContent = moveContent(
+							document.createDocumentFragment(),
+							childComponent.element
+						);
+					}
+				}
+			}
 
 			suppressConnectionStatusCallbacks();
 			this.element.parentNode!.insertBefore(content, this.element);
