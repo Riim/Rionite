@@ -635,6 +635,7 @@ PERFORMANCE OF THIS SOFTWARE.
     targets = IE8 && [],
   
     attachShadow = HTMLElementPrototype.attachShadow,
+    cloneNode = HTMLElementPrototype.cloneNode,
     dispatchEvent = HTMLElementPrototype.dispatchEvent,
     getAttribute = HTMLElementPrototype.getAttribute,
     hasAttribute = HTMLElementPrototype.hasAttribute,
@@ -643,6 +644,7 @@ PERFORMANCE OF THIS SOFTWARE.
   
     // replaced later on
     createElement = document.createElement,
+    importNode = document.importNode,
     patchedCreateElement = createElement,
   
     // shared observer for all attributes
@@ -974,37 +976,29 @@ PERFORMANCE OF THIS SOFTWARE.
         document[ADD_EVENT_LISTENER](DOM_CONTENT_LOADED, onReadyStateChange);
         document[ADD_EVENT_LISTENER]('readystatechange', onReadyStateChange);
   
-        [HTMLElementPrototype, DocumentFragment.prototype].forEach(function(proto) {
-          var origCloneNode = proto.cloneNode;
+        document.importNode = function (node, deep) {
+          switch (node.nodeType) {
+            case 1:
+              return setupAll(document, importNode, [node, !!deep]);
+            case 11:
+              for (var
+                fragment = document.createDocumentFragment(),
+                childNodes = node.childNodes,
+                length = childNodes.length,
+                i = 0; i < length; i++
+              )
+                fragment.appendChild(document.importNode(childNodes[i], !!deep));
+              return fragment;
+            default:
+              return cloneNode.call(node, !!deep);
+          }
+        };
   
+        [HTMLElementPrototype, DocumentFragment.prototype].forEach(function (proto) {
           proto.cloneNode = function (deep) {
-            var
-              node = origCloneNode.call(this, !!deep),
-              i
-            ;
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              i = getTypeIndex(node);
-              if (-1 < i) patch(node, protos[i]);
-            }
-            if (deep && query.length) loopAndSetup(node.querySelectorAll(query));
-            return node;
+            return setupAll(this, cloneNode, [!!deep]);
           };
         });
-  
-        var origImportNode = document.importNode;
-  
-        document.importNode = function (node, deep) {
-          var
-            importedNode = origImportNode.call(this, node, !!deep),
-            i
-          ;
-          if (importedNode.nodeType === Node.ELEMENT_NODE) {
-            i = getTypeIndex(importedNode);
-            if (-1 < i) patch(importedNode, protos[i]);
-          }
-          if (deep && query.length) loopAndSetup(importedNode.querySelectorAll(query));
-          return importedNode;
-        };
       }
   
       if (justSetup) return (justSetup = false);
@@ -1196,6 +1190,20 @@ PERFORMANCE OF THIS SOFTWARE.
     onSubtreeModified.call(self, {target: self});
   }
   
+  function setupAll(context, callback, args) {
+    var
+      node = callback.apply(context, args),
+      i
+    ;
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      i = getTypeIndex(node);
+      if (-1 < i) patch(node, protos[i]);
+    }
+    if (args[args.length - 1] && query.length)
+      loopAndSetup(node.querySelectorAll(query));
+    return node;
+  }
+  
   function setupNode(node, proto) {
     setPrototype(node, proto);
     if (observer) {
@@ -1330,8 +1338,10 @@ PERFORMANCE OF THIS SOFTWARE.
     });
     safeProperty(proto, ATTRIBUTE_CHANGED_CALLBACK, {
       value: function (name) {
-        if (-1 < indexOf.call(attributes, name))
-          CProto[ATTRIBUTE_CHANGED_CALLBACK].apply(this, arguments);
+        if (-1 < indexOf.call(attributes, name)) {
+          if (CProto[ATTRIBUTE_CHANGED_CALLBACK])
+            CProto[ATTRIBUTE_CHANGED_CALLBACK].apply(this, arguments);
+        }
       }
     });
     if (CProto[CONNECTED_CALLBACK]) {

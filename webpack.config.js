@@ -50,7 +50,6 @@ module.exports = (env = {}) => {
 		externals: [
 			'@riim/clear-node',
 			'@riim/defer',
-			'@riim/di',
 			'@riim/escape-html',
 			'@riim/get-uid',
 			'@riim/gettext',

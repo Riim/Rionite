@@ -36,11 +36,17 @@ function createElement(tagName: string, isSVG: boolean): string {
 }
 
 function setAttribute(name: string, value: string, isSVG: boolean): string {
-	return isSVG && name == 'xmlns'
-		? `setAttributeNS('http://www.w3.org/2000/xmlns/', '${escapeString(name)}', '${escapeString(
+	if (isSVG) {
+		if (name == 'xmlns') {
+			return `setAttributeNS('http://www.w3.org/2000/xmlns/', '${name}', '${escapeString(
 				value
-		  )}')`
-		: `setAttribute('${escapeString(name)}', '${escapeString(value)}')`;
+			)}')`;
+		}
+	} else if (name == 'class') {
+		return `className = '${escapeString(value)}'`;
+	}
+
+	return `setAttribute('${escapeString(name)}', '${escapeString(value)}')`;
 }
 
 export class Template {
@@ -65,6 +71,9 @@ export class Template {
 
 	_renderer: TRenderer;
 	_elementRendererMap: IElementRendererMap;
+
+	_childTemplates: Array<Template> | null;
+	_childTemplateIndex: number;
 
 	constructor(
 		nelm: IBlock | string,
@@ -135,7 +144,7 @@ export class Template {
 	}
 
 	render(): DocumentFragment {
-		return (this._renderer || this._compileRenderers()).call(this);
+		return this._renderer ? this._renderer() : this._compileRenderers().call(this);
 	}
 
 	_compileRenderers(): TRenderer {
@@ -157,6 +166,9 @@ export class Template {
 
 		this._elementRendererMap = { __proto__: parent && parent._elementRendererMap } as any;
 
+		this._childTemplates = parent ? parent._childTemplates : null;
+		this._childTemplateIndex = parent ? parent._childTemplateIndex : 0;
+
 		let content = this.nelm.content;
 		let contentLength = content.length;
 
@@ -175,13 +187,13 @@ export class Template {
 			Object.keys(elMap).forEach(function(this: IElementRendererMap, name: string) {
 				let el = elMap[name];
 
-				console.log(`[el(${el.name})]`, el.source!.join('\n'));
+				// console.log(`[el(${el.name})]`, el.source!.join('\n'));
 				this[name] = Function('n', el.source!.join('\n')) as any;
 
-				console.log(
-					`[el(${el.name})/content]`,
-					el.innerSource.length ? el.innerSource.join('\n') + '\nreturn n;' : 'return n;'
-				);
+				// console.log(
+				// 	`[el(${el.name})/content]`,
+				// 	el.innerSource.length ? el.innerSource.join('\n') + '\nreturn n;' : 'return n;'
+				// );
 				if (el.superCall) {
 					let inner = Function(
 						'n',
@@ -204,12 +216,12 @@ export class Template {
 			}, this._elementRendererMap);
 
 			if (!parent) {
-				console.log(
-					'[root]',
-					`var n = document.createDocumentFragment();\n${this._currentElement.innerSource.join(
-						'\n'
-					) || ''}\nreturn n;`
-				);
+				// console.log(
+				// 	'[root]',
+				// 	`var n = document.createDocumentFragment();\n${this._currentElement.innerSource.join(
+				// 		'\n'
+				// 	) || ''}\nreturn n;`
+				// );
 				return (this._renderer = Function(
 					`var n = document.createDocumentFragment();\n${this._currentElement.innerSource.join(
 						'\n'
@@ -298,10 +310,9 @@ export class Template {
 								let value = attr.value;
 								let index = attrList[name];
 
-								attrList[index === undefined ? attrCount : index] =
-									!isSVG && name == 'class'
-										? `\ne.className = '${escapeString(value)}';`
-										: `\ne.${setAttribute(name, value, isSVG)};`;
+								attrList[
+									index === undefined ? attrCount : index
+								] = `\ne.${setAttribute(name, value, isSVG)};`;
 
 								if (index === undefined) {
 									attrList[name] = attrCount;
@@ -315,26 +326,39 @@ export class Template {
 									length: attrCount
 								};
 
-								if (attrList['class'] !== undefined) {
-									attrList[attrList['class']] =
-										`\ne.className = this._renderElementClasses(['${elNames.join(
-											"','"
-										)}']) + ' ` +
-										attrList[attrList['class']].slice(
-											"\ne.className = '".length
-										);
+								if (attrList.class !== undefined) {
+									attrList[attrList.class] = isSVG
+										? `\ne.setAttribute('class', this._renderElementClasses(['${elNames.join(
+												"','"
+										  )}']) + ' ` +
+										  attrList[attrList.class].slice(
+												"\ne.setAttribute('class', '".length
+										  )
+										: `\ne.className = this._renderElementClasses(['${elNames.join(
+												"','"
+										  )}']) + ' ` +
+										  attrList[attrList.class].slice(
+												"\ne.className = '".length
+										  );
 									renderedAttrs = join.call(attrList, '');
 								} else {
-									renderedAttrs =
-										`\ne.className = this._renderElementClasses(['${elNames.join(
-											"','"
-										)}']);` + join.call(attrList, '');
+									renderedAttrs = isSVG
+										? `\ne.setAttribute('class', this._renderElementClasses(['${elNames.join(
+												"','"
+										  )}']));` + join.call(attrList, '')
+										: `\ne.className = this._renderElementClasses(['${elNames.join(
+												"','"
+										  )}']);` + join.call(attrList, '');
 								}
 							}
 						} else if (!isHelper) {
-							renderedAttrs = `\ne.className = this._renderElementClasses(['${elNames.join(
-								"','"
-							)}']);`;
+							renderedAttrs = isSVG
+								? `\ne.setAttribute('class', this._renderElementClasses(['${elNames.join(
+										"','"
+								  )}']));`
+								: `\ne.className = this._renderElementClasses(['${elNames.join(
+										"','"
+								  )}']);`;
 						}
 
 						let currentEl = {
@@ -343,14 +367,20 @@ export class Template {
 							source: isHelper
 								? [`this._elementRendererMap['${elName}/content'].call(this, n);`]
 								: [
-										`var e = n.appendChild(${
-											content && content.length
-												? `this._elementRendererMap['${elName}/content'].call(this, ${createElement(
-														tagName || 'div',
-														isSVG
-												  )})`
-												: createElement(tagName || 'div', isSVG)
-										});` + renderedAttrs,
+										'var e = n.appendChild(' +
+											(!isSVG && tagName === 'template'
+												? createElement(tagName, false) +
+												  `);\ne.rioniteTemplate = this._childTemplates[${
+														this._childTemplateIndex
+												  }];`
+												: (content && content.length
+														? `this._elementRendererMap['${elName}/content'].call(this, ${createElement(
+																tagName || 'div',
+																isSVG
+														  )})`
+														: createElement(tagName || 'div', isSVG)) +
+												  ');') +
+											renderedAttrs,
 										'this._onNamedElement(e);',
 										'return e;'
 								  ],
@@ -374,11 +404,11 @@ export class Template {
 										attr.value ? ' ' + escapeString(attr.value) : ''
 									}'`;
 
-									attrs += isSVG
-										? `\n${elVarName}.setAttribute('${escapeString(
-												attr.name
-										  )}', ${value});`
-										: `\n${elVarName}.className = ${value};`;
+									attrs +=
+										`\n${elVarName}.` +
+										(isSVG
+											? `setAttribute('class', ${value});`
+											: `className = ${value};`);
 								} else {
 									attrs += `\n${elVarName}.${setAttribute(
 										attr.name,
@@ -393,21 +423,36 @@ export class Template {
 									tagName || 'div',
 									isSVG
 								)});` +
+									(!isSVG && tagName === 'template'
+										? `\n${elVarName}.rioniteTemplate = this._childTemplates[${
+												this._childTemplateIndex
+										  }];`
+										: '') +
 									(hasClassAttr
 										? attrs
-										: `\n${elVarName}.className = this._renderElementClasses(['${elNames
+										: `\n${elVarName}.${
+												isSVG ? "setAttribute('class', " : 'className = '
+										  }this._renderElementClasses(['${elNames
 												.join("','")
-												.slice(3)}']);` + attrs)
+												.slice(3)}'])` +
+										  (isSVG ? ');' : ';') +
+										  attrs)
 							);
 						} else {
 							this._currentElement.innerSource.push(
 								`var ${elVarName} = ${parentElVarName}.appendChild(${createElement(
 									tagName || 'div',
 									isSVG
-								)});`,
-								`${elVarName}.className = this._renderElementClasses(['${elNames
-									.join("','")
-									.slice(3)}']);`
+								)});` +
+									(!isSVG && tagName === 'template'
+										? `\n${elVarName}.rioniteTemplate = this._childTemplates[${
+												this._childTemplateIndex
+										  }];`
+										: ''),
+								`${elVarName}.${
+									isSVG ? "setAttribute('class', " : 'className = '
+								}this._renderElementClasses(['${elNames.join("','").slice(3)}'])` +
+									(isSVG ? ');' : ';')
 							);
 						}
 
@@ -421,6 +466,11 @@ export class Template {
 							tagName || 'div',
 							isSVG
 						)});` +
+							(!isSVG && tagName === 'template'
+								? `\n${elVarName}.rioniteTemplate = this._childTemplates[${
+										this._childTemplateIndex
+								  }];`
+								: '') +
 							(elAttrs
 								? elAttrs.list
 										.map(
@@ -448,9 +498,43 @@ export class Template {
 					}
 
 					content = helper(el);
+				} else if (!isSVG && tagName === 'template') {
+					(this._childTemplates || (this._childTemplates = []))[
+						this._childTemplateIndex++
+					] = this.extend({
+						nodeType: NodeType.BLOCK,
+						name: null,
+						content: [
+							{
+								nodeType: NodeType.ELEMENT,
+								tagName: 'section',
+								isHelper: true,
+								names: ['root'],
+								attributes: null,
+								content:
+									elNames && elNames[0]
+										? [
+												{
+													nodeType: NodeType.ELEMENT,
+													tagName: 'section',
+													isHelper: true,
+													names: elNames,
+													attributes: null,
+													content: [
+														{
+															nodeType: NodeType.SUPER_CALL,
+															elementName: null
+														} as ISuperCall
+													]
+												} as INelmElement
+										  ]
+										: content || []
+							} as INelmElement
+						]
+					});
 				}
 
-				if (content) {
+				if (content /* && (isHelper || isSVG || tagName !== 'template')*/) {
 					for (let i = 0, l = content.length; i < l; i++) {
 						let node = content[i];
 
@@ -460,7 +544,7 @@ export class Template {
 							i,
 							isSVG ||
 								(node.nodeType == NodeType.ELEMENT &&
-									(node as INelmElement).tagName == 'svg'),
+									(node as INelmElement).tagName === 'svg'),
 							elName || superElName
 						);
 					}
@@ -487,9 +571,16 @@ export class Template {
 			}
 			case NodeType.SUPER_CALL: {
 				this._currentElement.superCall = true;
+
+				let name = `${(node as ISuperCall).elementName || superElName}/content`;
+
 				this._currentElement.innerSource.push(
-					`$super['${(node as ISuperCall).elementName ||
-						superElName}/content'].call(this, ${parentElVarName});`
+					// name.charAt(0) == '@'
+					// 	? `($super['${name}'] || $super['${name.slice(1)}']).call(this, ${parentElVarName});`
+					// 	: `($super[@'${name}'] || $super['${name}']).call(this, ${parentElVarName});`
+					`($super['${name}']${
+						name.charAt(0) == '@' ? ` || $super['${name.slice(1)}']` : ''
+					}).call(this, ${parentElVarName});`
 				);
 
 				break;

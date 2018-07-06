@@ -1,15 +1,24 @@
 import { NodeType } from 'nelm-parser';
 import { Template } from '../src/Template2';
 
-let origRender = Template.prototype.render;
+declare module '../src/Template2' {
+	/* tslint:disable-next-line */
+	interface Template {
+		renderToString(): string;
+	}
+}
 
-Template.prototype.render = function() {
+function fragmentToString(df: DocumentFragment): string {
 	let el = document.createElement('div');
-	el.appendChild(origRender.call(this));
+	el.appendChild(df.cloneNode(true));
 	return el.innerHTML;
-} as any;
+}
 
-describe.skip('Template2', () => {
+Template.prototype.renderToString = function(): string {
+	return fragmentToString(this.render());
+};
+
+describe('Template2', () => {
 	test('simple template', () => {
 		expect(
 			new Template(`
@@ -17,7 +26,7 @@ describe.skip('Template2', () => {
 				b {
 					'text'
 				}
-			`).render()
+			`).renderToString()
 		).toBe('<b>text</b>');
 	});
 
@@ -28,7 +37,7 @@ describe.skip('Template2', () => {
 				b/el1 {
 					'text'
 				}
-			`).render()
+			`).renderToString()
 		).toBe('<b class="block1__el1">text</b>');
 	});
 
@@ -37,7 +46,7 @@ describe.skip('Template2', () => {
 			new Template(`
 				#block1
 				b/name1, name2
-			`).render()
+			`).renderToString()
 		).toBe('<b class="block1__name1 block1__name2"></b>');
 	});
 
@@ -46,7 +55,7 @@ describe.skip('Template2', () => {
 			new Template(`
 				#block1
 				b/, name1, name2
-			`).render()
+			`).renderToString()
 		).toBe('<b class="block1__name1 block1__name2"></b>');
 	});
 
@@ -69,7 +78,7 @@ describe.skip('Template2', () => {
 						}
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe('<i class="block1-x__el1 block1__el1">text</i><br>');
 	});
 
@@ -92,7 +101,7 @@ describe.skip('Template2', () => {
 						}
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe('<b class="block1-x__el1 block1__el1">other text</b><br>');
 	});
 
@@ -112,7 +121,7 @@ describe.skip('Template2', () => {
 						}
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe('<b class="block1-x__el1 block1__el1">text</b>');
 	});
 
@@ -134,7 +143,7 @@ describe.skip('Template2', () => {
 						}
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe('<b class="block1-x-x__el1 block1-x__el1 block1__el1">text</b>');
 	});
 
@@ -152,7 +161,7 @@ describe.skip('Template2', () => {
 						/el1 (super!)
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe('<b class="block1-x__el1 block1__el1" attr1="value1" attr2="value2"></b>');
 	});
 
@@ -170,7 +179,7 @@ describe.skip('Template2', () => {
 						/el1 (super!, attr1=value0, attr3=value3)
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe(
 			'<b class="block1-x__el1 block1__el1" attr1="value0" attr2="value2" attr3="value3"></b>'
 		);
@@ -190,7 +199,7 @@ describe.skip('Template2', () => {
 						/el1 (super!)
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe('<b class="block1-x__el1 block1__el1 _mod1"></b>');
 	});
 
@@ -210,7 +219,7 @@ describe.skip('Template2', () => {
 						/el1 (super!)
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe(
 			'<b class="block1-x-x__el1 block1-x__el1 block1__el1" attr1="value1" attr2="value2"></b>'
 		);
@@ -232,7 +241,7 @@ describe.skip('Template2', () => {
 						/el2 (super.el1!, class=_mod1)
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe(
 			'<b attr3="value3" attr4="value4" class="block1-x__el1 block1__el1 _mod2"></b><b class="block1-x__el2 block1__el2 _mod1" attr1="value1" attr2="value2"></b>'
 		);
@@ -258,7 +267,7 @@ describe.skip('Template2', () => {
 						}
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe('<u class="block1-x__el1 block1__el1"><b>text</b></u>');
 	});
 
@@ -279,7 +288,7 @@ describe.skip('Template2', () => {
 						}
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe(
 			'<b class="block1-x__el1 block1__el1"></b><i class="block1-x__el2 block1__el2"></i>'
 		);
@@ -307,7 +316,7 @@ describe.skip('Template2', () => {
 						}
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe('<u class="block1-x-x__el1 block1-x__el1 block1__el1"><b>text</b></u>');
 	});
 
@@ -331,7 +340,7 @@ describe.skip('Template2', () => {
 						}
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe(
 			'<u class="block1-x__el1 block1__el1"><b class="block1-x__el2 block1__el2">text</b></u>'
 		);
@@ -351,7 +360,7 @@ describe.skip('Template2', () => {
 					attr2=1
 					// comment
 				)
-			`).render()
+			`).renderToString()
 		).toBe(
 			'<b></b><b attr1="1"></b><b attr1=""></b><b attr1="" attr2=""></b><b attr1="" attr2="1"></b>'
 		);
@@ -372,7 +381,7 @@ describe.skip('Template2', () => {
 				b {
 					@test
 				}
-			`).render()
+			`).renderToString()
 		).toBe('<b>123</b>');
 	});
 
@@ -393,7 +402,7 @@ describe.skip('Template2', () => {
 						i
 					}
 				}
-			`).render()
+			`).renderToString()
 		).toBe('<b>[<i></i>]</b>');
 	});
 
@@ -424,7 +433,7 @@ describe.skip('Template2', () => {
 						@/test (super!, attr2=value2)
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe('<b class="block1-x__test block1__test" attr1="value1" attr2="value2"></b>');
 	});
 
@@ -470,7 +479,7 @@ describe.skip('Template2', () => {
 						}
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe(
 			'<b class="block1-x__test block1__test" attr1="value1" attr2="value2"><u><s><u>text</u></s></u></b>'
 		);
@@ -479,9 +488,7 @@ describe.skip('Template2', () => {
 	test('helper content super', () => {
 		let t1 = new Template(`
 			#block1
-			@section/inner {
-				b
-			}
+			b
 		`);
 
 		expect(
@@ -489,14 +496,14 @@ describe.skip('Template2', () => {
 				.extend(
 					`
 						#block1-x
-						@/inner {
+						@/root {
 							u {
 								super!
 							}
 						}
 					`
 				)
-				.render()
+				.renderToString()
 		).toBe('<u><b></b></u>');
 	});
 
@@ -504,11 +511,87 @@ describe.skip('Template2', () => {
 		expect(
 			new Template(`
 				'_\\t_\\x20_\\u0020_'
-			`).render()
+			`).renderToString()
 		).toBe('_\t_\x20_\u0020_');
 	});
 
 	test('empty', () => {
-		expect(new Template('').render()).toBe('');
+		expect(new Template('').renderToString()).toBe('');
+	});
+
+	test('rioniteTemplate', () => {
+		let r1 = new Template(`
+			#block1
+			template {
+				'text'
+			}
+		`).render();
+
+		expect(fragmentToString(r1)).toBe('<template></template>');
+		expect(((r1.firstChild as any).rioniteTemplate as Template).renderToString()).toBe('text');
+	});
+
+	test('rioniteTemplate (2)', () => {
+		let r1 = new Template(`
+			#block1
+			template {
+				template {
+					'text'
+				}
+			}
+		`).render();
+		let r2 = ((r1.firstChild as any).rioniteTemplate as Template).render();
+
+		expect(fragmentToString(r1)).toBe('<template></template>');
+		expect(fragmentToString(r2)).toBe('<template></template>');
+		expect(((r2.firstChild as any).rioniteTemplate as Template).renderToString()).toBe('text');
+	});
+
+	test('rioniteTemplate super', () => {
+		let t1 = new Template(`
+			#block1
+			template {
+				template {
+					'text'
+				}
+			}
+		`);
+		let r1 = t1.extend('#block1-x').render();
+		let r2 = ((r1.firstChild as any).rioniteTemplate as Template).render();
+
+		expect(fragmentToString(r1)).toBe('<template></template>');
+		expect(fragmentToString(r2)).toBe('<template></template>');
+		expect(((r2.firstChild as any).rioniteTemplate as Template).renderToString()).toBe('text');
+	});
+
+	test('rioniteTemplate super (2)', () => {
+		let t1 = new Template(`
+			#block1
+			template/template1 {
+				'text'
+			}
+		`);
+		let r1 = t1.render();
+		let r2 = t1
+			.extend(
+				`
+					#block1-x
+					/template1 {
+						b {
+							super!
+						}
+					}
+				`
+			)
+			.render();
+
+		expect(fragmentToString(r1)).toBe('<template class="block1__template1"></template>');
+		expect(((r1.firstChild as any).rioniteTemplate as Template).renderToString()).toBe('text');
+		expect(fragmentToString(r2)).toBe(
+			'<template class="block1-x__template1 block1__template1"></template>'
+		);
+		expect(((r2.firstChild as any).rioniteTemplate as Template).renderToString()).toBe(
+			'<b>text</b>'
+		);
 	});
 });

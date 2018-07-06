@@ -1,8 +1,7 @@
-import { Container } from '@riim/di';
-import { logger } from '@riim/logger';
 import './lib/polyfills';
 import './lib/templateHelpers';
 
+export { Container, Inject } from './DI';
 export { NodeType as NelmNodeType, IBlock as INelmBlock, Parser as NelmParser } from 'nelm-parser';
 export {
 	IDisposable,
@@ -43,5 +42,3 @@ export {
 	RnRepeat
 } from './components/RnRepeat';
 export { RnSlot } from './components/RnSlot';
-
-Container.registerService('logger', logger);

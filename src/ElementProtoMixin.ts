@@ -1,5 +1,4 @@
 import { defer } from '@riim/defer';
-import { Container } from '@riim/di';
 import { Symbol } from '@riim/symbol-polyfill';
 import { Cell } from 'cellx';
 import {
@@ -10,7 +9,8 @@ import {
 	KEY_PARAMS_CONFIG
 	} from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
-import { nativeCustomElements as nativeCustomElementsFeature } from './lib/Features';
+import { Container } from './DI';
+import { nativeCustomElementsFeature } from './lib/Features';
 
 export const KEY_ELEMENT_CONNECTED = Symbol('Rionite/ElementProtoMixin[elementConnected]');
 

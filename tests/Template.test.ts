@@ -471,9 +471,7 @@ describe('Template', () => {
 	test('helper content super', () => {
 		let t1 = new Template(`
 			#block1
-			@section/inner {
-				b
-			}
+			b
 		`);
 
 		expect(
@@ -481,7 +479,7 @@ describe('Template', () => {
 				.extend(
 					`
 						#block1-x
-						@/inner {
+						@/root {
 							u {
 								super!
 							}

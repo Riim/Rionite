@@ -1,4 +1,3 @@
-import { Inject } from '@riim/di';
 import { getUID } from '@riim/get-uid';
 import { kebabCase } from '@riim/kebab-case';
 import { Logger } from '@riim/logger';
@@ -18,6 +17,7 @@ import {
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructorMap } from './componentConstructorMap';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
+import { Inject } from './DI';
 import {
 	DisposableMixin,
 	IDisposableListening,
@@ -29,7 +29,7 @@ import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } fr
 import { handledEvents } from './handledEvents';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
-import { templateTag as templateTagFeature } from './lib/Features';
+import { templateTagFeature } from './lib/Features';
 import { Template } from './Template';
 
 const map = Array.prototype.map;
@@ -109,7 +109,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 	static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null = null;
 	static domEvents: IComponentEvents<BaseComponent, Event> | null = null;
 
-	@Inject('logger') logger: Logger;
+	@Inject logger: Logger;
 
 	_disposables: typeof DisposableMixin.prototype._disposables;
 
@@ -185,8 +185,6 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 		(el as IComponentElement).$component = this;
 
 		this[KEY_PARAMS] = new Map();
-
-		this.created();
 	}
 
 	handleEvent(evt: IEvent<BaseComponent>) {
@@ -467,7 +465,6 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 	// Callbacks
 
-	created() {}
 	elementConnected() {}
 	elementDisconnected() {}
 	initialize(): Promise<any> | void {}

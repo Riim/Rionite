@@ -1,12 +1,20 @@
 import { getText } from '@riim/gettext';
 
 export const formatters: { [name: string]: Function } = {
+	default(value: any, arg: any): any {
+		return value === undefined ? arg : value;
+	},
+
+	placeholder(value: any, arg: any): any {
+		return value === null ? arg : value;
+	},
+
 	or(value: any, arg: any): any {
 		return value || arg;
 	},
 
-	default(value: any, arg: any): any {
-		return value === undefined ? arg : value;
+	cond(condition: any, value1: any, value2: any): any {
+		return condition ? value1 : value2;
 	},
 
 	not(value: any): boolean {

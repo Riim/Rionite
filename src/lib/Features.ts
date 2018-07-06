@@ -1,5 +1,4 @@
-export const reflectConstruct =
-	Reflect &&
+export const reflectConstructFeature =
 	typeof Reflect == 'object' &&
 	Reflect.construct &&
 	Reflect.construct.toString().indexOf('[native code]') != -1;
@@ -7,11 +6,11 @@ export const reflectConstruct =
 const templateTagContainer = document.createElement('div');
 templateTagContainer.innerHTML = '<template>1</template>';
 
-export const templateTag = !templateTagContainer.firstChild!.firstChild;
+export const templateTagFeature = !templateTagContainer.firstChild!.firstChild;
 
-let nativeCustomElementsFeature = false;
+let nativeCustomElementsFeature_ = false;
 
-const TestNativeCustomElementsFeature = reflectConstruct
+const TestNativeCustomElementsFeature = reflectConstructFeature
 	? function TestNativeCustomElementsFeature(self: HTMLElement | undefined): HTMLElement {
 			return Reflect.construct(HTMLElement, [self], TestNativeCustomElementsFeature);
 	  }
@@ -29,7 +28,7 @@ TestNativeCustomElementsFeature.prototype = Object.create(HTMLElement.prototype)
 TestNativeCustomElementsFeature.prototype.constructor = TestNativeCustomElementsFeature;
 
 TestNativeCustomElementsFeature.prototype.attributeChangedCallback = () => {
-	nativeCustomElementsFeature = true;
+	nativeCustomElementsFeature_ = true;
 };
 
 window.customElements.define(
@@ -39,4 +38,4 @@ window.customElements.define(
 
 document.createElement('test-native-custom-elements-feature').setAttribute('test', '');
 
-export const nativeCustomElements = nativeCustomElementsFeature;
+export const nativeCustomElementsFeature = nativeCustomElementsFeature_;

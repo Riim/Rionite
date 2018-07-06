@@ -1,5 +1,6 @@
 import './lib/polyfills';
 import './lib/templateHelpers';
+export { Container, Inject } from './DI';
 export { NodeType as NelmNodeType, IBlock as INelmBlock, Parser as NelmParser } from 'nelm-parser';
 export { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, DisposableMixin } from './DisposableMixin';
 export { formatters } from './lib/formatters';

@@ -92,7 +92,6 @@ export declare class BaseComponent extends EventEmitter implements DisposableMix
     _freezeBindings(): void;
     _unfreezeBindings(): void;
     _destroyBindings(): void;
-    created(): void;
     elementConnected(): void;
     elementDisconnected(): void;
     initialize(): Promise<any> | void;

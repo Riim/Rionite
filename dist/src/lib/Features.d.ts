@@ -1,3 +1,3 @@
-export declare const reflectConstruct: boolean;
-export declare const templateTag: boolean;
-export declare const nativeCustomElements: boolean;
+export declare const reflectConstructFeature: boolean;
+export declare const templateTagFeature: boolean;
+export declare const nativeCustomElementsFeature: boolean;

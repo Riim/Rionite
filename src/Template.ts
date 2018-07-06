@@ -312,16 +312,21 @@ export class Template {
 										`'<${tagName ||
 											'div'}${renderedAttrs}' + this.onBeforeNamedElementOpeningTagClosing(['${elNames.join(
 											"','"
-										)}']) + '>'`,
-										content && content.length
-											? `this._elementRendererMap['${elName}/content'].call(this) + '</${tagName ||
-													'div'}>'`
-											: !content && tagName && selfClosingTagMap.has(tagName)
-												? "''"
-												: `'</${tagName || 'div'}>'`
+										)}']) + '>'`
 								  ],
 							innerSource: []
 						};
+
+						if (!isHelper) {
+							if (content && content.length) {
+								currentEl.source.push(
+									`this._elementRendererMap['${elName}/content'].call(this) + '</${tagName ||
+										'div'}>'`
+								);
+							} else if (content || !tagName || !selfClosingTagMap.has(tagName)) {
+								currentEl.source.push(`'</${tagName || 'div'}>'`);
+							}
+						}
 
 						els.push((this._currentElement = currentEl));
 						this._elementMap[elName] = currentEl;

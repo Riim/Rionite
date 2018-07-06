@@ -15,7 +15,7 @@ import { componentConstructorMap } from './componentConstructorMap';
 import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
-import { reflectConstruct } from './lib/Features';
+import { reflectConstructFeature } from './lib/Features';
 import { Template } from './Template';
 
 const push = Array.prototype.push;
@@ -300,7 +300,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		parentElConstr = HTMLElement;
 	}
 
-	let elConstr = reflectConstruct
+	let elConstr = reflectConstructFeature
 		? function _(self: HTMLElement | undefined): IComponentElement {
 				return Reflect.construct(parentElConstr, [self], _);
 		  }
