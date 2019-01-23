@@ -69,17 +69,12 @@ export const formatters: { [name: string]: Function } = {
 		return value == null ? value : JSON.stringify(value);
 	},
 
-	t: getText.t,
-	pt: getText.pt,
-
-	nt(count: number, key: string, ...args: Array<any>): string {
-		args.unshift(count);
-		return getText('', key, true, args);
+	t(msgid: string, ...args: Array<any>) {
+		return getText('', msgid, args);
 	},
 
-	npt(count: number, key: string, context: string, ...args: Array<any>): string {
-		args.unshift(count);
-		return getText(context, key, true, args);
+	pt(msgid: string, msgctxt: string, ...args: Array<any>) {
+		return getText(msgctxt, msgid, args);
 	}
 };
 

@@ -953,15 +953,11 @@ exports.formatters = {
     dump(value) {
         return value == null ? value : JSON.stringify(value);
     },
-    t: gettext_1.getText.t,
-    pt: gettext_1.getText.pt,
-    nt(count, key, ...args) {
-        args.unshift(count);
-        return gettext_1.getText('', key, true, args);
+    t(msgid, ...args) {
+        return gettext_1.getText('', msgid, args);
     },
-    npt(count, key, context, ...args) {
-        args.unshift(count);
-        return gettext_1.getText(context, key, true, args);
+    pt(msgid, msgctxt, ...args) {
+        return gettext_1.getText(msgctxt, msgid, args);
     }
 };
 exports.formatters.seq = exports.formatters.identical;

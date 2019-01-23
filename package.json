@@ -1,12 +1,12 @@
 {
   "name": "rionite",
-  "version": "0.32.99",
+  "version": "0.32.100",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/src/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && node_modules/.bin/webpack && node_modules/.bin/webpack --env.es6 && node_modules/.bin/gulp",
-    "test": "node_modules/.bin/jest"
+    "build": "rm -rf dist && webpack && webpack --env.es6 && gulp",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -45,7 +45,7 @@
     "@riim/defer": "^1.1.0",
     "@riim/escape-html": "^1.1.1",
     "@riim/get-uid": "^1.0.0",
-    "@riim/gettext": "^1.1.1",
+    "@riim/gettext": "^2.0.0",
     "@riim/is-regexp": "^1.0.0",
     "@riim/kebab-case": "^1.0.0",
     "@riim/logger": "^1.0.2",

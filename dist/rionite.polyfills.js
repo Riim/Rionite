@@ -2508,23 +2508,19 @@ exports.formatters = {
     dump: function (value) {
         return value == null ? value : JSON.stringify(value);
     },
-    t: gettext_1.getText.t,
-    pt: gettext_1.getText.pt,
-    nt: function (count, key) {
+    t: function (msgid) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        return gettext_1.getText('', msgid, args);
+    },
+    pt: function (msgid, msgctxt) {
         var args = [];
         for (var _i = 2; _i < arguments.length; _i++) {
             args[_i - 2] = arguments[_i];
         }
-        args.unshift(count);
-        return gettext_1.getText('', key, true, args);
-    },
-    npt: function (count, key, context) {
-        var args = [];
-        for (var _i = 3; _i < arguments.length; _i++) {
-            args[_i - 3] = arguments[_i];
-        }
-        args.unshift(count);
-        return gettext_1.getText(context, key, true, args);
+        return gettext_1.getText(msgctxt, msgid, args);
     }
 };
 exports.formatters.seq = exports.formatters.identical;
