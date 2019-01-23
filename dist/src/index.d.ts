@@ -10,6 +10,7 @@ export { IComponentParamConfig, I$ComponentParamConfig, IPossiblyComponentElemen
 export { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export { Template } from './Template';
+export { ContentNodeValueNodeType, ContentNodeValueParser } from './ContentNodeValueParser';
 export { registerComponent } from './registerComponent';
 export { TIfCell as TRtIfThenIfCell, RnIfThen } from './components/RnIfThen';
 export { RnIfElse } from './components/RnIfElse';

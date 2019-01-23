@@ -127,6 +127,9 @@ var ComponentParams_1 = __webpack_require__(30);
 exports.ComponentParams = ComponentParams_1.ComponentParams;
 var Template_1 = __webpack_require__(4);
 exports.Template = Template_1.Template;
+var ContentNodeValueParser_1 = __webpack_require__(37);
+exports.ContentNodeValueNodeType = ContentNodeValueParser_1.ContentNodeValueNodeType;
+exports.ContentNodeValueParser = ContentNodeValueParser_1.ContentNodeValueParser;
 var registerComponent_1 = __webpack_require__(19);
 exports.registerComponent = registerComponent_1.registerComponent;
 var RnIfThen_1 = __webpack_require__(52);
@@ -2632,7 +2635,7 @@ class ContentNodeValueParser {
                 str += next + this._next();
             }
             else {
-                if (next == '\r' || next == '\n') {
+                if (next == '\n' || next == '\r') {
                     break;
                 }
                 str += next;

@@ -394,7 +394,7 @@ export class ContentNodeValueParser {
 			if (next == '\\') {
 				str += next + this._next();
 			} else {
-				if (next == '\r' || next == '\n') {
+				if (next == '\n' || next == '\r') {
 					break;
 				}
 
