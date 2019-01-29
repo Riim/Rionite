@@ -20,6 +20,7 @@
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
     "@types/jest": "^23.3.13",
+    "@types/node": "^10.12.19",
     "ajv": "^6.7.0",
     "awesome-typescript-loader": "^5.2.1",
     "benchmark": "^2.1.4",
