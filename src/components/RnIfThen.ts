@@ -16,8 +16,6 @@ import { RnRepeat } from './RnRepeat';
 
 const slice = Array.prototype.slice;
 
-export type TIfCell = Cell<boolean>;
-
 const reKeypath = RegExp(`^${keypathPattern}$`);
 
 @Component({
@@ -37,7 +35,7 @@ export class RnIfThen extends BaseComponent {
 
 	_elseMode = false;
 
-	_if: TIfCell;
+	_if: Cell<boolean | undefined>;
 
 	_nodes: Array<Node> | null = null;
 	_childComponents: Array<BaseComponent> | null = null;
@@ -96,7 +94,7 @@ export class RnIfThen extends BaseComponent {
 	}
 
 	_render(changed: boolean) {
-		if (this._elseMode ? !this._if.get() : this._if.get()) {
+		if (this._elseMode ? this._if.get() === false : this._if.get()) {
 			let content = document.importNode(
 				((this.element as any) as HTMLTemplateElement).content,
 				true

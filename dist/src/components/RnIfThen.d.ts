@@ -1,11 +1,10 @@
 import { Cell } from 'cellx';
 import { BaseComponent } from '../BaseComponent';
-export declare type TIfCell = Cell<boolean>;
 export declare class RnIfThen extends BaseComponent {
     static readonly bindsInputContent: boolean;
     paramIf: string;
     _elseMode: boolean;
-    _if: TIfCell;
+    _if: Cell<boolean | undefined>;
     _nodes: Array<Node> | null;
     _childComponents: Array<BaseComponent> | null;
     _active: boolean;

@@ -1,7 +1,6 @@
 import { Cell, ObservableList } from 'cellx';
 import { BaseComponent } from '../BaseComponent';
 export declare type TList = Array<any> | ObservableList<any>;
-export declare type TListCell = Cell<TList>;
 export interface I$Item {
     item: Cell<any>;
     index: Cell<number>;
@@ -15,7 +14,7 @@ export declare class RnRepeat extends BaseComponent {
     paramTrackBy: string;
     _itemName: string;
     _prevList: Array<any>;
-    _list: TListCell;
+    _list: Cell<TList | undefined>;
     _$itemMap: T$ItemMap;
     _trackBy: string | null;
     _rawItemContent: DocumentFragment;

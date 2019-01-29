@@ -19,7 +19,7 @@ import { RnIfThen } from './RnIfThen';
 const slice = Array.prototype.slice;
 
 export type TList = Array<any> | ObservableList<any>;
-export type TListCell = Cell<TList>;
+
 export interface I$Item {
 	item: Cell<any>;
 	index: Cell<number>;
@@ -27,6 +27,7 @@ export interface I$Item {
 	bindings: Array<Cell> | null;
 	childComponents: Array<BaseComponent> | null;
 }
+
 export type T$ItemMap = Map<any, I$Item>;
 
 const reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+(?:in|of)\\s+(${keypathPattern})\\s*$`);
@@ -88,7 +89,7 @@ export class RnRepeat extends BaseComponent {
 	_itemName: string;
 
 	_prevList: Array<any>;
-	_list: TListCell;
+	_list: Cell<TList | undefined>;
 
 	_$itemMap: T$ItemMap;
 
@@ -399,7 +400,7 @@ export class RnRepeat extends BaseComponent {
 			return;
 		}
 
-		this._prevList = Array.isArray(list) ? list.slice() : list.toArray();
+		this._prevList = Array.isArray(list) ? list.slice() : list!.toArray();
 
 		if (fromChangeEvent) {
 			Cell.forceRelease();

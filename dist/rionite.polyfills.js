@@ -4909,7 +4909,7 @@ var RnIfThen = /** @class */ (function (_super) {
         this._attached = false;
     };
     RnIfThen.prototype._render = function (changed) {
-        if (this._elseMode ? !this._if.get() : this._if.get()) {
+        if (this._elseMode ? this._if.get() === false : this._if.get()) {
             var content = document.importNode(this.element.content, true);
             if (!Features_1.templateTagFeature) {
                 var templates = content.querySelectorAll('template');
