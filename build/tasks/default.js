@@ -1,6 +1,6 @@
 const gulp = require('gulp');
-const runSequence = require('run-sequence');
 
-gulp.task('default', done => {
-	runSequence('polyfills', 'minify', done);
-});
+require('./polyfills');
+require('./minify');
+
+gulp.task('default', gulp.series('polyfills', 'minify'));

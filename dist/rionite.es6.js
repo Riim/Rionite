@@ -1603,7 +1603,8 @@ class BaseComponent extends cellx_1.EventEmitter {
             : [];
     }
     _getElementList(name, container) {
-        let elListMap = this._elementListMap || (this._elementListMap = new map_set_polyfill_1.Map());
+        let elListMap = this._elementListMap ||
+            (this._elementListMap = new map_set_polyfill_1.Map());
         let containerEl;
         if (container) {
             if (typeof container == 'string') {

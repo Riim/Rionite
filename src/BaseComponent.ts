@@ -109,7 +109,8 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 	static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null = null;
 	static domEvents: IComponentEvents<BaseComponent, Event> | null = null;
 
-	@Inject logger: Logger;
+	@Inject
+	logger: Logger;
 
 	_disposables: typeof DisposableMixin.prototype._disposables;
 
@@ -160,7 +161,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 	_bindings: Array<IFreezableCell> | null;
 
-	_elementListMap: Map<string, NodeListOf<Element>> | undefined;
+	_elementListMap: Map<string, HTMLCollectionOf<Element>> | undefined;
 
 	_attached = false;
 
@@ -490,6 +491,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 		container?: Element | BaseComponent | string
 	): Array<R> {
 		let elList = this._getElementList(name, container);
+
 		return elList
 			? map.call(elList, (el: IPossiblyComponentElement) => el.$component || el)
 			: [];
@@ -498,9 +500,10 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 	_getElementList(
 		name: string,
 		container?: Element | BaseComponent | string
-	): NodeListOf<Element> | undefined {
+	): HTMLCollectionOf<Element> | undefined {
 		let elListMap =
-			this._elementListMap || (this._elementListMap = new Map<string, NodeListOf<Element>>());
+			this._elementListMap ||
+			(this._elementListMap = new Map<string, HTMLCollectionOf<Element>>());
 		let containerEl: Element;
 
 		if (container) {

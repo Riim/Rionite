@@ -60,7 +60,7 @@ function onTextNodeBindingCellChange(evt: IEvent<Cell<string, { textNode: Text }
 }
 
 export function prepareContent<T extends Node = DocumentFragment | Element>(node: T): T {
-	for (let child = node.firstChild; child; ) {
+	for (let child: Node | null = node.firstChild; child; ) {
 		switch (child.nodeType) {
 			case Node.ELEMENT_NODE: {
 				if (child instanceof HTMLTemplateElement) {

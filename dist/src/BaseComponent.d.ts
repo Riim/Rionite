@@ -72,7 +72,7 @@ export declare class BaseComponent extends EventEmitter implements DisposableMix
     } | undefined;
     $specifiedParams: Set<string> | undefined;
     _bindings: Array<IFreezableCell> | null;
-    _elementListMap: Map<string, NodeListOf<Element>> | undefined;
+    _elementListMap: Map<string, HTMLCollectionOf<Element>> | undefined;
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;
@@ -101,5 +101,5 @@ export declare class BaseComponent extends EventEmitter implements DisposableMix
     elementMoved(): void;
     $<R = BaseComponent | Element>(name: string, container?: Element | BaseComponent | string): R | null;
     $$<R = BaseComponent | Element>(name: string, container?: Element | BaseComponent | string): Array<R>;
-    _getElementList(name: string, container?: Element | BaseComponent | string): NodeListOf<Element> | undefined;
+    _getElementList(name: string, container?: Element | BaseComponent | string): HTMLCollectionOf<Element> | undefined;
 }
