@@ -25,10 +25,10 @@ export function bindingToJSExpression(binding: IContentNodeValueBinding): string
 		let jsExprArr = Array(index);
 
 		while (index) {
-			jsExprArr[--index] = ` && (temp = temp['${keys[index + 1]}'])`;
+			jsExprArr[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
 		}
 
-		let jsExpr = `(temp = this['${keys[0]}'])${jsExprArr.join('')} && temp['${
+		let jsExpr = `(tmp = this['${keys[0]}'])${jsExprArr.join('')} && tmp['${
 			keys[keyCount - 1]
 		}']`;
 

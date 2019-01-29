@@ -24,7 +24,7 @@ export function compileContentNodeValue(
 	if (contentNodeValueAST.length == 1) {
 		inner = Function(
 			'formatters',
-			`var temp; return ${bindingToJSExpression(
+			`var tmp; return ${bindingToJSExpression(
 				contentNodeValueAST[0] as IContentNodeValueBinding
 			)};`
 		) as any;
@@ -39,7 +39,7 @@ export function compileContentNodeValue(
 			);
 		}
 
-		inner = Function('formatters', `var temp; return [${jsExpr.join(', ')}].join('');`) as any;
+		inner = Function('formatters', `var tmp; return [${jsExpr.join(', ')}].join('');`) as any;
 	}
 
 	return (cache[cacheKey] = useComponentParamValueMap

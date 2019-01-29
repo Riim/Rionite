@@ -22,7 +22,7 @@ export function Param(
 export function Param(
 	target?: Object | string | IComponentParamConfig | Function,
 	propertyName?: string | IComponentParamConfig | Function,
-	propertyDesc?: PropertyDescriptor,
+	_propertyDesc?: PropertyDescriptor,
 	name?: string,
 	config?: IComponentParamConfig | Function
 ): any {

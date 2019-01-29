@@ -13,8 +13,6 @@ export function compileKeypath(
 ): (this: object) => any {
 	return (
 		cache[cacheKey] ||
-		(cache[cacheKey] = Function(
-			`var temp; return ${keypathToJSExpression(keypath, cacheKey)};`
-		))
+		(cache[cacheKey] = Function(`var tmp; return ${keypathToJSExpression(keypath, cacheKey)};`))
 	);
 }

@@ -21,10 +21,10 @@ export function keypathToJSExpression(
 	let jsExpr = Array(index);
 
 	while (index) {
-		jsExpr[--index] = ` && (temp = temp['${keys[index + 1]}'])`;
+		jsExpr[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
 	}
 
-	return (cache[cacheKey] = `(temp = this['${keys[0]}'])${jsExpr.join('')} && temp['${
+	return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${jsExpr.join('')} && tmp['${
 		keys[keyCount - 1]
 	}']`);
 }

@@ -79,7 +79,7 @@ export class RnSlot extends BaseComponent {
 			let key =
 				getUID(ownerComponent) +
 				'/' +
-				(slotName ? 's:' + slotName : forTag ? 't:' + forTag : for$ || '');
+				(slotName ? 'slot:' + slotName : forTag ? 'tag:' + forTag : for$ || '');
 
 			if (slotName || forTag || for$) {
 				let contentMap: Map<string, IComponentElement> | undefined;
@@ -106,7 +106,7 @@ export class RnSlot extends BaseComponent {
 					}
 
 					let selectedElements = ownerComponentInputContent.querySelectorAll(
-						slotName ? `[slot=${slotName}]` : forTag || '.' + for$
+						for$ ? '.' + for$ : forTag || `[slot=${slotName}]`
 					);
 					let selectedElementCount = selectedElements.length;
 
