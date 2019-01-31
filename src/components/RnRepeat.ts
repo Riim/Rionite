@@ -1,4 +1,4 @@
-import { Map, Set } from '@riim/map-set-polyfill';
+import { Map } from '@riim/map-set-polyfill';
 import { nextTick } from '@riim/next-tick';
 import { Cell, ObservableList, TListener } from 'cellx';
 import { moveContent } from '../../node_modules/@riim/move-content';
@@ -28,7 +28,7 @@ export interface I$Item {
 	childComponents: Array<BaseComponent> | null;
 }
 
-export type T$ItemMap = Map<any, I$Item>;
+export type T$ItemMap = Map<any, Array<I$Item>>;
 
 const reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+(?:in|of)\\s+(${keypathPattern})\\s*$`);
 
@@ -170,17 +170,37 @@ export class RnRepeat extends BaseComponent {
 		let changed = false;
 
 		if (list) {
+			let new$ItemMap: T$ItemMap = new Map();
+			let removedValues = new Map<any, number>();
 			let el = this.element;
 			let lastNode: Node = el;
-			let removedValues = new Set<any>();
 
 			for (let i = 0, l = list.length; i < l; ) {
 				let item = getItem(list, i);
 				let value = trackBy ? item[trackBy] : item;
-				let $item = $itemMap.get(value);
+				let $items = $itemMap.get(value);
 
-				if ($item) {
-					if (removedValues.delete(value)) {
+				if ($items) {
+					if (removedValues.has(value)) {
+						let $item = $items.shift()!;
+
+						if (new$ItemMap.has(value)) {
+							new$ItemMap.get(value)!.push($item);
+						} else {
+							new$ItemMap.set(value, [$item]);
+						}
+						if (!$items.length) {
+							$itemMap.delete(value);
+						}
+
+						let removedCount = removedValues.get(value)!;
+
+						if (removedCount == 1) {
+							removedValues.delete(value);
+						} else {
+							removedValues.set(value, removedCount - 1);
+						}
+
 						$item.item.set(item);
 						$item.index.set(i);
 
@@ -196,10 +216,23 @@ export class RnRepeat extends BaseComponent {
 						for (let j = startIndex; ; j++) {
 							if (foundIndex === undefined) {
 								if (value === (trackBy ? prevList[j][trackBy] : prevList[j])) {
+									let $item = $items.shift()!;
+
+									if (new$ItemMap.has(value)) {
+										new$ItemMap.get(value)!.push($item);
+									} else {
+										new$ItemMap.set(value, [$item]);
+									}
+									if (!$items.length) {
+										$itemMap.delete(value);
+									}
+
 									if (j == startIndex) {
 										lastNode = $item.nodes[$item.nodes.length - 1];
+
 										startIndex++;
 										i++;
+
 										break;
 									}
 
@@ -210,25 +243,41 @@ export class RnRepeat extends BaseComponent {
 								let ii = i + foundCount;
 
 								if (ii < l) {
+									let iiValue;
+
 									if (
-										j < prevListLength && trackBy
-											? getItem(list, ii)[trackBy] === prevList[j][trackBy]
-											: getItem(list, ii) === prevList[j]
+										j < prevListLength &&
+										(trackBy
+											? (iiValue = getItem(list, ii)[trackBy]) ===
+											  prevList[j][trackBy]
+											: (iiValue = getItem(list, ii)) === prevList[j])
 									) {
+										let ii$Items = $itemMap.get(iiValue)!;
+
+										if (new$ItemMap.has(iiValue)) {
+											new$ItemMap.get(iiValue)!.push(ii$Items.shift()!);
+										} else {
+											new$ItemMap.set(iiValue, [ii$Items.shift()!]);
+										}
+										if (!ii$Items.length) {
+											$itemMap.delete(iiValue);
+										}
+
 										continue;
 									}
 
 									if (foundCount < foundIndex - startIndex) {
 										for (let k = foundIndex; k < j; k++) {
-											let k$Item = $itemMap.get(
-												trackBy ? prevList[k][trackBy] : prevList[k]
-											)!;
+											let kValue = trackBy
+												? prevList[k][trackBy]
+												: prevList[k];
+											let k$Item = new$ItemMap.get(kValue)!;
 
-											k$Item.item.set(item);
-											k$Item.index.set(i);
+											k$Item[0].item.set(item);
+											k$Item[0].index.set(i);
 
 											lastNode = insertBefore(
-												k$Item.nodes,
+												k$Item[0].nodes,
 												lastNode == el ? lastNode : lastNode.nextSibling!
 											);
 										}
@@ -236,29 +285,34 @@ export class RnRepeat extends BaseComponent {
 										prevList.splice(foundIndex, foundCount);
 										prevListLength -= foundCount;
 
-										changed = true;
-
 										i = ii;
+
+										changed = true;
 
 										break;
 									}
 								}
 
 								for (let k = startIndex; k < foundIndex; k++) {
-									let value = trackBy ? prevList[k][trackBy] : prevList[k];
-									removeNodes($itemMap.get(value)!.nodes);
-									removedValues.add(value);
+									let kValue = trackBy ? prevList[k][trackBy] : prevList[k];
+									let index = removedValues.get(kValue) || 0;
+
+									removeNodes($itemMap.get(kValue)![index].nodes);
+									removedValues.set(kValue, index + 1);
 								}
 
-								let nodes = $itemMap.get(
-									trackBy ? prevList[j - 1][trackBy] : prevList[j - 1]
-								)!.nodes;
+								let lastFoundValue = trackBy
+									? prevList[j - 1][trackBy]
+									: prevList[j - 1];
+								let nodes = new$ItemMap.get(lastFoundValue)![
+									removedValues.get(lastFoundValue) || 0
+								].nodes;
 								lastNode = nodes[nodes.length - 1];
-
-								changed = true;
 
 								startIndex = j;
 								i = ii;
+
+								changed = true;
 
 								break;
 							}
@@ -314,14 +368,19 @@ export class RnRepeat extends BaseComponent {
 
 					let childComponents = contentBindingResult[0];
 					let backBindings = contentBindingResult[2];
-
-					$itemMap.set(value, {
+					let new$Item = {
 						item: itemCell,
 						index: indexCell,
 						nodes: slice.call(content.childNodes),
 						bindings: contentBindingResult[1],
 						childComponents
-					});
+					};
+
+					if (new$ItemMap.has(value)) {
+						new$ItemMap.get(value)!.push(new$Item);
+					} else {
+						new$ItemMap.set(value, [new$Item]);
+					}
 
 					if (childComponents) {
 						for (let i = childComponents.length; i; ) {
@@ -370,31 +429,29 @@ export class RnRepeat extends BaseComponent {
 
 			if (removedValues.size) {
 				($itemMap => {
-					removedValues.forEach(value => {
-						let bindings = $itemMap.get(value)!.bindings;
-
-						if (bindings) {
-							for (let i = bindings.length; i; ) {
-								bindings[--i].off();
-							}
+					removedValues.forEach((_removedCount, value) => {
+						for (let $item of $itemMap.get(value)!) {
+							offBindings($item.bindings);
+							deactivateChildComponents($item.childComponents);
 						}
-
-						$itemMap.delete(value);
 					});
 				})($itemMap);
 			}
+
+			this._$itemMap = new$ItemMap;
+		} else {
+			this._$itemMap = new Map();
 		}
 
 		if (startIndex < prevListLength) {
 			for (let i = startIndex; i < prevListLength; i++) {
 				let value = trackBy ? prevList[i][trackBy] : prevList[i];
-				let $item = $itemMap.get(value)!;
 
-				removeNodes($item.nodes);
-				offBindings($item.bindings);
-				$itemMap.delete(value);
-
-				deactivateChildComponents($item.childComponents);
+				for (let $item of $itemMap.get(value)!) {
+					removeNodes($item.nodes);
+					offBindings($item.bindings);
+					deactivateChildComponents($item.childComponents);
+				}
 			}
 		} else if (!changed) {
 			return;
@@ -423,13 +480,14 @@ export class RnRepeat extends BaseComponent {
 
 		for (let i = 0, l = prevList.length; i < l; i++) {
 			let value = trackBy ? prevList[i][trackBy] : prevList[i];
-			let $item = $itemMap.get(value)!;
 
-			removeNodes($item.nodes);
-			offBindings($item.bindings);
-			$itemMap.delete(value);
-
-			deactivateChildComponents($item.childComponents);
+			for (let $item of $itemMap.get(value)!) {
+				removeNodes($item.nodes);
+				offBindings($item.bindings);
+				deactivateChildComponents($item.childComponents);
+			}
 		}
+
+		$itemMap.clear();
 	}
 }

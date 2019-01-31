@@ -4001,7 +4001,7 @@ function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, us
     }
     var inner;
     if (contentNodeValueAST.length == 1) {
-        inner = Function('formatters', "var temp; return " + bindingToJSExpression_1.bindingToJSExpression(contentNodeValueAST[0]) + ";");
+        inner = Function('formatters', "var tmp; return " + bindingToJSExpression_1.bindingToJSExpression(contentNodeValueAST[0]) + ";");
     }
     else {
         var jsExpr = [];
@@ -4011,7 +4011,7 @@ function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, us
                 ? "'" + escape_string_1.escapeString(node.value) + "'"
                 : bindingToJSExpression_1.bindingToJSExpression(node));
         }
-        inner = Function('formatters', "var temp; return [" + jsExpr.join(', ') + "].join('');");
+        inner = Function('formatters', "var tmp; return [" + jsExpr.join(', ') + "].join('');");
     }
     return (cache[cacheKey] = useComponentParamValueMap
         ? function (cell) {
@@ -4059,9 +4059,9 @@ function bindingToJSExpression(binding) {
         var index = keyCount - 2;
         var jsExprArr = Array(index);
         while (index) {
-            jsExprArr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
+            jsExprArr[--index] = " && (tmp = tmp['" + keys[index + 1] + "'])";
         }
-        var jsExpr = "(temp = this['" + keys[0] + "'])" + jsExprArr.join('') + " && temp['" + keys[keyCount - 1] + "']";
+        var jsExpr = "(tmp = this['" + keys[0] + "'])" + jsExprArr.join('') + " && tmp['" + keys[keyCount - 1] + "']";
         return formatters ? formatters.reduce(formattersReducer, jsExpr) : jsExpr;
     }
     return formatters ? formatters.reduce(formattersReducer, binding.value) : binding.value;
@@ -4454,9 +4454,9 @@ function keypathToJSExpression(keypath, cacheKey) {
     var index = keyCount - 2;
     var jsExpr = Array(index);
     while (index) {
-        jsExpr[--index] = " && (temp = temp['" + keys[index + 1] + "'])";
+        jsExpr[--index] = " && (tmp = tmp['" + keys[index + 1] + "'])";
     }
-    return (cache[cacheKey] = "(temp = this['" + keys[0] + "'])" + jsExpr.join('') + " && temp['" + keys[keyCount - 1] + "']");
+    return (cache[cacheKey] = "(tmp = this['" + keys[0] + "'])" + jsExpr.join('') + " && tmp['" + keys[keyCount - 1] + "']");
 }
 exports.keypathToJSExpression = keypathToJSExpression;
 
@@ -4473,7 +4473,7 @@ var cache = Object.create(null);
 function compileKeypath(keypath, cacheKey) {
     if (cacheKey === void 0) { cacheKey = keypath; }
     return (cache[cacheKey] ||
-        (cache[cacheKey] = Function("var temp; return " + keypathToJSExpression_1.keypathToJSExpression(keypath, cacheKey) + ";")));
+        (cache[cacheKey] = Function("var tmp; return " + keypathToJSExpression_1.keypathToJSExpression(keypath, cacheKey) + ";")));
 }
 exports.compileKeypath = compileKeypath;
 
@@ -4891,7 +4891,7 @@ var map_set_polyfill_1 = __webpack_require__(8);
 var types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
 var prefix = 'param';
 var prefixLength = prefix.length;
-function Param(target, propertyName, propertyDesc, name, config) {
+function Param(target, propertyName, _propertyDesc, name, config) {
     if (typeof propertyName != 'string') {
         if (target && typeof target != 'string') {
             config = target;
@@ -5302,15 +5302,33 @@ var RnRepeat = /** @class */ (function (_super) {
         var startIndex = 0;
         var changed = false;
         if (list) {
+            var new$ItemMap = new map_set_polyfill_1.Map();
+            var removedValues_1 = new map_set_polyfill_1.Map();
             var el = this.element;
             var lastNode = el;
-            var removedValues_1 = new map_set_polyfill_1.Set();
             for (var i = 0, l = list.length; i < l;) {
                 var item = getItem(list, i);
                 var value = trackBy ? item[trackBy] : item;
-                var $item = $itemMap.get(value);
-                if ($item) {
-                    if (removedValues_1.delete(value)) {
+                var $items = $itemMap.get(value);
+                if ($items) {
+                    if (removedValues_1.has(value)) {
+                        var $item = $items.shift();
+                        if (new$ItemMap.has(value)) {
+                            new$ItemMap.get(value).push($item);
+                        }
+                        else {
+                            new$ItemMap.set(value, [$item]);
+                        }
+                        if (!$items.length) {
+                            $itemMap.delete(value);
+                        }
+                        var removedCount = removedValues_1.get(value);
+                        if (removedCount == 1) {
+                            removedValues_1.delete(value);
+                        }
+                        else {
+                            removedValues_1.set(value, removedCount - 1);
+                        }
                         $item.item.set(item);
                         $item.index.set(i);
                         lastNode = insertBefore($item.nodes, lastNode == el ? lastNode : lastNode.nextSibling);
@@ -5321,6 +5339,16 @@ var RnRepeat = /** @class */ (function (_super) {
                         for (var j = startIndex;; j++) {
                             if (foundIndex === undefined) {
                                 if (value === (trackBy ? prevList[j][trackBy] : prevList[j])) {
+                                    var $item = $items.shift();
+                                    if (new$ItemMap.has(value)) {
+                                        new$ItemMap.get(value).push($item);
+                                    }
+                                    else {
+                                        new$ItemMap.set(value, [$item]);
+                                    }
+                                    if (!$items.length) {
+                                        $itemMap.delete(value);
+                                    }
                                     if (j == startIndex) {
                                         lastNode = $item.nodes[$item.nodes.length - 1];
                                         startIndex++;
@@ -5334,35 +5362,55 @@ var RnRepeat = /** @class */ (function (_super) {
                                 var foundCount = j - foundIndex;
                                 var ii = i + foundCount;
                                 if (ii < l) {
-                                    if (j < prevListLength && trackBy
-                                        ? getItem(list, ii)[trackBy] === prevList[j][trackBy]
-                                        : getItem(list, ii) === prevList[j]) {
+                                    var iiValue = void 0;
+                                    if (j < prevListLength &&
+                                        (trackBy
+                                            ? (iiValue = getItem(list, ii)[trackBy]) ===
+                                                prevList[j][trackBy]
+                                            : (iiValue = getItem(list, ii)) === prevList[j])) {
+                                        var ii$Items = $itemMap.get(iiValue);
+                                        if (new$ItemMap.has(iiValue)) {
+                                            new$ItemMap.get(iiValue).push(ii$Items.shift());
+                                        }
+                                        else {
+                                            new$ItemMap.set(iiValue, [ii$Items.shift()]);
+                                        }
+                                        if (!ii$Items.length) {
+                                            $itemMap.delete(iiValue);
+                                        }
                                         continue;
                                     }
                                     if (foundCount < foundIndex - startIndex) {
                                         for (var k = foundIndex; k < j; k++) {
-                                            var k$Item = $itemMap.get(trackBy ? prevList[k][trackBy] : prevList[k]);
-                                            k$Item.item.set(item);
-                                            k$Item.index.set(i);
-                                            lastNode = insertBefore(k$Item.nodes, lastNode == el ? lastNode : lastNode.nextSibling);
+                                            var kValue = trackBy
+                                                ? prevList[k][trackBy]
+                                                : prevList[k];
+                                            var k$Item = new$ItemMap.get(kValue);
+                                            k$Item[0].item.set(item);
+                                            k$Item[0].index.set(i);
+                                            lastNode = insertBefore(k$Item[0].nodes, lastNode == el ? lastNode : lastNode.nextSibling);
                                         }
                                         prevList.splice(foundIndex, foundCount);
                                         prevListLength -= foundCount;
-                                        changed = true;
                                         i = ii;
+                                        changed = true;
                                         break;
                                     }
                                 }
                                 for (var k = startIndex; k < foundIndex; k++) {
-                                    var value_1 = trackBy ? prevList[k][trackBy] : prevList[k];
-                                    removeNodes_1.removeNodes($itemMap.get(value_1).nodes);
-                                    removedValues_1.add(value_1);
+                                    var kValue = trackBy ? prevList[k][trackBy] : prevList[k];
+                                    var index = removedValues_1.get(kValue) || 0;
+                                    removeNodes_1.removeNodes($itemMap.get(kValue)[index].nodes);
+                                    removedValues_1.set(kValue, index + 1);
                                 }
-                                var nodes = $itemMap.get(trackBy ? prevList[j - 1][trackBy] : prevList[j - 1]).nodes;
+                                var lastFoundValue = trackBy
+                                    ? prevList[j - 1][trackBy]
+                                    : prevList[j - 1];
+                                var nodes = new$ItemMap.get(lastFoundValue)[removedValues_1.get(lastFoundValue) || 0].nodes;
                                 lastNode = nodes[nodes.length - 1];
-                                changed = true;
                                 startIndex = j;
                                 i = ii;
+                                changed = true;
                                 break;
                             }
                         }
@@ -5402,13 +5450,19 @@ var RnRepeat = /** @class */ (function (_super) {
                         _a)), contentBindingResult);
                     var childComponents = contentBindingResult[0];
                     var backBindings = contentBindingResult[2];
-                    $itemMap.set(value, {
+                    var new$Item = {
                         item: itemCell,
                         index: indexCell,
                         nodes: slice.call(content.childNodes),
                         bindings: contentBindingResult[1],
                         childComponents: childComponents
-                    });
+                    };
+                    if (new$ItemMap.has(value)) {
+                        new$ItemMap.get(value).push(new$Item);
+                    }
+                    else {
+                        new$ItemMap.set(value, [new$Item]);
+                    }
                     if (childComponents) {
                         for (var i_2 = childComponents.length; i_2;) {
                             var childComponent = childComponents[--i_2];
@@ -5438,26 +5492,29 @@ var RnRepeat = /** @class */ (function (_super) {
             }
             if (removedValues_1.size) {
                 (function ($itemMap) {
-                    removedValues_1.forEach(function (value) {
-                        var bindings = $itemMap.get(value).bindings;
-                        if (bindings) {
-                            for (var i = bindings.length; i;) {
-                                bindings[--i].off();
-                            }
+                    removedValues_1.forEach(function (_removedCount, value) {
+                        for (var _i = 0, _a = $itemMap.get(value); _i < _a.length; _i++) {
+                            var $item = _a[_i];
+                            offBindings($item.bindings);
+                            deactivateChildComponents($item.childComponents);
                         }
-                        $itemMap.delete(value);
                     });
                 })($itemMap);
             }
+            this._$itemMap = new$ItemMap;
+        }
+        else {
+            this._$itemMap = new map_set_polyfill_1.Map();
         }
         if (startIndex < prevListLength) {
             for (var i = startIndex; i < prevListLength; i++) {
                 var value = trackBy ? prevList[i][trackBy] : prevList[i];
-                var $item = $itemMap.get(value);
-                removeNodes_1.removeNodes($item.nodes);
-                offBindings($item.bindings);
-                $itemMap.delete(value);
-                deactivateChildComponents($item.childComponents);
+                for (var _i = 0, _b = $itemMap.get(value); _i < _b.length; _i++) {
+                    var $item = _b[_i];
+                    removeNodes_1.removeNodes($item.nodes);
+                    offBindings($item.bindings);
+                    deactivateChildComponents($item.childComponents);
+                }
             }
         }
         else if (!changed) {
@@ -5480,12 +5537,14 @@ var RnRepeat = /** @class */ (function (_super) {
         var trackBy = this._trackBy;
         for (var i = 0, l = prevList.length; i < l; i++) {
             var value = trackBy ? prevList[i][trackBy] : prevList[i];
-            var $item = $itemMap.get(value);
-            removeNodes_1.removeNodes($item.nodes);
-            offBindings($item.bindings);
-            $itemMap.delete(value);
-            deactivateChildComponents($item.childComponents);
+            for (var _i = 0, _a = $itemMap.get(value); _i < _a.length; _i++) {
+                var $item = _a[_i];
+                removeNodes_1.removeNodes($item.nodes);
+                offBindings($item.bindings);
+                deactivateChildComponents($item.childComponents);
+            }
         }
+        $itemMap.clear();
     };
     RnRepeat = __decorate([
         Component_1.Component({
@@ -5626,7 +5685,7 @@ var RnSlot = /** @class */ (function (_super) {
             }
             var key = get_uid_1.getUID(ownerComponent) +
                 '/' +
-                (slotName ? 's:' + slotName : forTag ? 't:' + forTag : for$ || '');
+                (slotName ? 'slot:' + slotName : forTag ? 'tag:' + forTag : for$ || '');
             if (slotName || forTag || for$) {
                 var contentMap = void 0;
                 if (!cloneContent &&
@@ -5646,7 +5705,7 @@ var RnSlot = /** @class */ (function (_super) {
                             ._elementBlockNames;
                         for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
                     }
-                    var selectedElements = ownerComponentInputContent.querySelectorAll(slotName ? "[slot=" + slotName + "]" : forTag || '.' + for$);
+                    var selectedElements = ownerComponentInputContent.querySelectorAll(for$ ? '.' + for$ : forTag || "[slot=" + slotName + "]");
                     var selectedElementCount = selectedElements.length;
                     if (selectedElementCount) {
                         content = document.createDocumentFragment();

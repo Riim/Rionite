@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.32.104",
+  "version": "0.32.107",
   "description": "",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/src/index.d.ts",
@@ -20,7 +20,7 @@
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
     "@types/jest": "^23.3.13",
-    "@types/node": "^10.12.19",
+    "@types/node": "^10.12.20",
     "ajv": "^6.7.0",
     "awesome-typescript-loader": "^5.2.1",
     "benchmark": "^2.1.4",
@@ -63,7 +63,7 @@
     "@riim/symbol-polyfill": "^1.0.5",
     "cellx": "^1.7.95",
     "escape-string": "^1.0.2",
-    "html-to-fragment": "^1.0.1",
+    "html-to-fragment": "^1.0.2",
     "nelm-parser": "^1.1.17"
   },
   "jest": {

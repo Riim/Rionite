@@ -8,7 +8,7 @@ export interface I$Item {
     bindings: Array<Cell> | null;
     childComponents: Array<BaseComponent> | null;
 }
-export declare type T$ItemMap = Map<any, I$Item>;
+export declare type T$ItemMap = Map<any, Array<I$Item>>;
 export declare class RnRepeat extends BaseComponent {
     paramFor: string;
     paramTrackBy: string;

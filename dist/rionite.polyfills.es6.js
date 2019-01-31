@@ -3938,7 +3938,7 @@ function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, us
     }
     let inner;
     if (contentNodeValueAST.length == 1) {
-        inner = Function('formatters', `var temp; return ${bindingToJSExpression_1.bindingToJSExpression(contentNodeValueAST[0])};`);
+        inner = Function('formatters', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(contentNodeValueAST[0])};`);
     }
     else {
         let jsExpr = [];
@@ -3947,7 +3947,7 @@ function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, us
                 ? `'${escape_string_1.escapeString(node.value)}'`
                 : bindingToJSExpression_1.bindingToJSExpression(node));
         }
-        inner = Function('formatters', `var temp; return [${jsExpr.join(', ')}].join('');`);
+        inner = Function('formatters', `var tmp; return [${jsExpr.join(', ')}].join('');`);
     }
     return (cache[cacheKey] = useComponentParamValueMap
         ? function (cell) {
@@ -3995,9 +3995,9 @@ function bindingToJSExpression(binding) {
         let index = keyCount - 2;
         let jsExprArr = Array(index);
         while (index) {
-            jsExprArr[--index] = ` && (temp = temp['${keys[index + 1]}'])`;
+            jsExprArr[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
         }
-        let jsExpr = `(temp = this['${keys[0]}'])${jsExprArr.join('')} && temp['${keys[keyCount - 1]}']`;
+        let jsExpr = `(tmp = this['${keys[0]}'])${jsExprArr.join('')} && tmp['${keys[keyCount - 1]}']`;
         return formatters ? formatters.reduce(formattersReducer, jsExpr) : jsExpr;
     }
     return formatters ? formatters.reduce(formattersReducer, binding.value) : binding.value;
@@ -4387,9 +4387,9 @@ function keypathToJSExpression(keypath, cacheKey = keypath) {
     let index = keyCount - 2;
     let jsExpr = Array(index);
     while (index) {
-        jsExpr[--index] = ` && (temp = temp['${keys[index + 1]}'])`;
+        jsExpr[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
     }
-    return (cache[cacheKey] = `(temp = this['${keys[0]}'])${jsExpr.join('')} && temp['${keys[keyCount - 1]}']`);
+    return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${jsExpr.join('')} && tmp['${keys[keyCount - 1]}']`);
 }
 exports.keypathToJSExpression = keypathToJSExpression;
 
@@ -4405,7 +4405,7 @@ const keypathToJSExpression_1 = __webpack_require__(40);
 const cache = Object.create(null);
 function compileKeypath(keypath, cacheKey = keypath) {
     return (cache[cacheKey] ||
-        (cache[cacheKey] = Function(`var temp; return ${keypathToJSExpression_1.keypathToJSExpression(keypath, cacheKey)};`)));
+        (cache[cacheKey] = Function(`var tmp; return ${keypathToJSExpression_1.keypathToJSExpression(keypath, cacheKey)};`)));
 }
 exports.compileKeypath = compileKeypath;
 
@@ -4817,7 +4817,7 @@ const map_set_polyfill_1 = __webpack_require__(8);
 const types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
 const prefix = 'param';
 const prefixLength = prefix.length;
-function Param(target, propertyName, propertyDesc, name, config) {
+function Param(target, propertyName, _propertyDesc, name, config) {
     if (typeof propertyName != 'string') {
         if (target && typeof target != 'string') {
             config = target;
@@ -5187,15 +5187,33 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
         let startIndex = 0;
         let changed = false;
         if (list) {
+            let new$ItemMap = new map_set_polyfill_1.Map();
+            let removedValues = new map_set_polyfill_1.Map();
             let el = this.element;
             let lastNode = el;
-            let removedValues = new map_set_polyfill_1.Set();
             for (let i = 0, l = list.length; i < l;) {
                 let item = getItem(list, i);
                 let value = trackBy ? item[trackBy] : item;
-                let $item = $itemMap.get(value);
-                if ($item) {
-                    if (removedValues.delete(value)) {
+                let $items = $itemMap.get(value);
+                if ($items) {
+                    if (removedValues.has(value)) {
+                        let $item = $items.shift();
+                        if (new$ItemMap.has(value)) {
+                            new$ItemMap.get(value).push($item);
+                        }
+                        else {
+                            new$ItemMap.set(value, [$item]);
+                        }
+                        if (!$items.length) {
+                            $itemMap.delete(value);
+                        }
+                        let removedCount = removedValues.get(value);
+                        if (removedCount == 1) {
+                            removedValues.delete(value);
+                        }
+                        else {
+                            removedValues.set(value, removedCount - 1);
+                        }
                         $item.item.set(item);
                         $item.index.set(i);
                         lastNode = insertBefore($item.nodes, lastNode == el ? lastNode : lastNode.nextSibling);
@@ -5206,6 +5224,16 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                         for (let j = startIndex;; j++) {
                             if (foundIndex === undefined) {
                                 if (value === (trackBy ? prevList[j][trackBy] : prevList[j])) {
+                                    let $item = $items.shift();
+                                    if (new$ItemMap.has(value)) {
+                                        new$ItemMap.get(value).push($item);
+                                    }
+                                    else {
+                                        new$ItemMap.set(value, [$item]);
+                                    }
+                                    if (!$items.length) {
+                                        $itemMap.delete(value);
+                                    }
                                     if (j == startIndex) {
                                         lastNode = $item.nodes[$item.nodes.length - 1];
                                         startIndex++;
@@ -5219,35 +5247,55 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                                 let foundCount = j - foundIndex;
                                 let ii = i + foundCount;
                                 if (ii < l) {
-                                    if (j < prevListLength && trackBy
-                                        ? getItem(list, ii)[trackBy] === prevList[j][trackBy]
-                                        : getItem(list, ii) === prevList[j]) {
+                                    let iiValue;
+                                    if (j < prevListLength &&
+                                        (trackBy
+                                            ? (iiValue = getItem(list, ii)[trackBy]) ===
+                                                prevList[j][trackBy]
+                                            : (iiValue = getItem(list, ii)) === prevList[j])) {
+                                        let ii$Items = $itemMap.get(iiValue);
+                                        if (new$ItemMap.has(iiValue)) {
+                                            new$ItemMap.get(iiValue).push(ii$Items.shift());
+                                        }
+                                        else {
+                                            new$ItemMap.set(iiValue, [ii$Items.shift()]);
+                                        }
+                                        if (!ii$Items.length) {
+                                            $itemMap.delete(iiValue);
+                                        }
                                         continue;
                                     }
                                     if (foundCount < foundIndex - startIndex) {
                                         for (let k = foundIndex; k < j; k++) {
-                                            let k$Item = $itemMap.get(trackBy ? prevList[k][trackBy] : prevList[k]);
-                                            k$Item.item.set(item);
-                                            k$Item.index.set(i);
-                                            lastNode = insertBefore(k$Item.nodes, lastNode == el ? lastNode : lastNode.nextSibling);
+                                            let kValue = trackBy
+                                                ? prevList[k][trackBy]
+                                                : prevList[k];
+                                            let k$Item = new$ItemMap.get(kValue);
+                                            k$Item[0].item.set(item);
+                                            k$Item[0].index.set(i);
+                                            lastNode = insertBefore(k$Item[0].nodes, lastNode == el ? lastNode : lastNode.nextSibling);
                                         }
                                         prevList.splice(foundIndex, foundCount);
                                         prevListLength -= foundCount;
-                                        changed = true;
                                         i = ii;
+                                        changed = true;
                                         break;
                                     }
                                 }
                                 for (let k = startIndex; k < foundIndex; k++) {
-                                    let value = trackBy ? prevList[k][trackBy] : prevList[k];
-                                    removeNodes_1.removeNodes($itemMap.get(value).nodes);
-                                    removedValues.add(value);
+                                    let kValue = trackBy ? prevList[k][trackBy] : prevList[k];
+                                    let index = removedValues.get(kValue) || 0;
+                                    removeNodes_1.removeNodes($itemMap.get(kValue)[index].nodes);
+                                    removedValues.set(kValue, index + 1);
                                 }
-                                let nodes = $itemMap.get(trackBy ? prevList[j - 1][trackBy] : prevList[j - 1]).nodes;
+                                let lastFoundValue = trackBy
+                                    ? prevList[j - 1][trackBy]
+                                    : prevList[j - 1];
+                                let nodes = new$ItemMap.get(lastFoundValue)[removedValues.get(lastFoundValue) || 0].nodes;
                                 lastNode = nodes[nodes.length - 1];
-                                changed = true;
                                 startIndex = j;
                                 i = ii;
+                                changed = true;
                                 break;
                             }
                         }
@@ -5286,13 +5334,19 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                     }), contentBindingResult);
                     let childComponents = contentBindingResult[0];
                     let backBindings = contentBindingResult[2];
-                    $itemMap.set(value, {
+                    let new$Item = {
                         item: itemCell,
                         index: indexCell,
                         nodes: slice.call(content.childNodes),
                         bindings: contentBindingResult[1],
                         childComponents
-                    });
+                    };
+                    if (new$ItemMap.has(value)) {
+                        new$ItemMap.get(value).push(new$Item);
+                    }
+                    else {
+                        new$ItemMap.set(value, [new$Item]);
+                    }
                     if (childComponents) {
                         for (let i = childComponents.length; i;) {
                             let childComponent = childComponents[--i];
@@ -5322,26 +5376,27 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
             }
             if (removedValues.size) {
                 ($itemMap => {
-                    removedValues.forEach(value => {
-                        let bindings = $itemMap.get(value).bindings;
-                        if (bindings) {
-                            for (let i = bindings.length; i;) {
-                                bindings[--i].off();
-                            }
+                    removedValues.forEach((_removedCount, value) => {
+                        for (let $item of $itemMap.get(value)) {
+                            offBindings($item.bindings);
+                            deactivateChildComponents($item.childComponents);
                         }
-                        $itemMap.delete(value);
                     });
                 })($itemMap);
             }
+            this._$itemMap = new$ItemMap;
+        }
+        else {
+            this._$itemMap = new map_set_polyfill_1.Map();
         }
         if (startIndex < prevListLength) {
             for (let i = startIndex; i < prevListLength; i++) {
                 let value = trackBy ? prevList[i][trackBy] : prevList[i];
-                let $item = $itemMap.get(value);
-                removeNodes_1.removeNodes($item.nodes);
-                offBindings($item.bindings);
-                $itemMap.delete(value);
-                deactivateChildComponents($item.childComponents);
+                for (let $item of $itemMap.get(value)) {
+                    removeNodes_1.removeNodes($item.nodes);
+                    offBindings($item.bindings);
+                    deactivateChildComponents($item.childComponents);
+                }
             }
         }
         else if (!changed) {
@@ -5364,12 +5419,13 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
         let trackBy = this._trackBy;
         for (let i = 0, l = prevList.length; i < l; i++) {
             let value = trackBy ? prevList[i][trackBy] : prevList[i];
-            let $item = $itemMap.get(value);
-            removeNodes_1.removeNodes($item.nodes);
-            offBindings($item.bindings);
-            $itemMap.delete(value);
-            deactivateChildComponents($item.childComponents);
+            for (let $item of $itemMap.get(value)) {
+                removeNodes_1.removeNodes($item.nodes);
+                offBindings($item.bindings);
+                deactivateChildComponents($item.childComponents);
+            }
         }
+        $itemMap.clear();
     }
 };
 RnRepeat = __decorate([
@@ -5472,7 +5528,7 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
             }
             let key = get_uid_1.getUID(ownerComponent) +
                 '/' +
-                (slotName ? 's:' + slotName : forTag ? 't:' + forTag : for$ || '');
+                (slotName ? 'slot:' + slotName : forTag ? 'tag:' + forTag : for$ || '');
             if (slotName || forTag || for$) {
                 let contentMap;
                 if (!cloneContent &&
@@ -5492,7 +5548,7 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
                             ._elementBlockNames;
                         for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
                     }
-                    let selectedElements = ownerComponentInputContent.querySelectorAll(slotName ? `[slot=${slotName}]` : forTag || '.' + for$);
+                    let selectedElements = ownerComponentInputContent.querySelectorAll(for$ ? '.' + for$ : forTag || `[slot=${slotName}]`);
                     let selectedElementCount = selectedElements.length;
                     if (selectedElementCount) {
                         content = document.createDocumentFragment();
