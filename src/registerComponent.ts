@@ -1,5 +1,4 @@
 import { kebabCase } from '@riim/kebab-case';
-import { mixin } from '@riim/mixin';
 import { pascalize } from '@riim/pascalize';
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
 import { Cell, EventEmitter } from 'cellx';
@@ -7,16 +6,15 @@ import {
 	BaseComponent,
 	I$ComponentParamConfig,
 	IComponentElement,
-	IComponentParamConfig,
-	KEY_PARAMS,
-	KEY_PARAMS_CONFIG
+	IComponentParamConfig
 	} from './BaseComponent';
 import { componentConstructorMap } from './componentConstructorMap';
 import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
+import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
 import { reflectConstructFeature } from './lib/Features';
-import { Template } from './Template';
+import { Template } from './Template2';
 
 const push = Array.prototype.push;
 
@@ -77,8 +75,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 					Object.defineProperty(
 						componentProto,
 						(typeof parentParamConfig == 'object' &&
-							(parentParamConfig.type !== undefined ||
-								parentParamConfig.default !== undefined) &&
+							(parentParamConfig.type || parentParamConfig.default !== undefined) &&
 							parentParamConfig.property) ||
 							name,
 						{
@@ -94,7 +91,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 				let isObject =
 					typeof paramConfig == 'object' &&
-					(paramConfig.type !== undefined || paramConfig.default !== undefined);
+					(!!paramConfig.type || paramConfig.default !== undefined);
 
 				let propertyName = (isObject && paramConfig.property) || name;
 
@@ -251,42 +248,10 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		}
 	}
 
-	componentConstr._rawContent = undefined;
-
 	inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
 	inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
 
-	if (template !== null) {
-		let events = componentConstr.events;
-		let domEvents = componentConstr.domEvents;
-
-		if (events || domEvents) {
-			(componentConstr.template as Template).onBeforeNamedElementOpeningTagClosing = elNames => {
-				let attrs = '';
-
-				for (let name of elNames) {
-					if (events && events[name]) {
-						for (let type in events[name]) {
-							attrs += ` oncomponent-${
-								type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type
-							}=":${name}"`;
-						}
-					}
-
-					if (domEvents && domEvents[name]) {
-						for (let type in domEvents[name]) {
-							attrs += ` on-${type}=":${name}"`;
-						}
-					}
-				}
-
-				return attrs;
-			};
-		}
-	}
-
 	let elExtends = componentConstr.elementExtends;
-
 	let parentElConstr: Function;
 
 	if (elExtends) {
@@ -334,7 +299,26 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 	let elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
 
 	elProto.constructor = elConstr;
-	mixin(elProto, ElementProtoMixin);
+
+	let names: Array<string | symbol> = Object.getOwnPropertyNames(ElementProtoMixin);
+
+	for (let i = 0, l = names.length; i < l; i++) {
+		Object.defineProperty(
+			elProto,
+			names[i],
+			Object.getOwnPropertyDescriptor(ElementProtoMixin, names[i])!
+		);
+	}
+
+	names = Object.getOwnPropertySymbols(ElementProtoMixin);
+
+	for (let i = 0, l = names.length; i < l; i++) {
+		Object.defineProperty(
+			elProto,
+			names[i],
+			Object.getOwnPropertyDescriptor(ElementProtoMixin, names[i])!
+		);
+	}
 
 	window.customElements.define(
 		kebabCaseElIs,

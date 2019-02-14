@@ -2,7 +2,6 @@ import './lib/polyfills';
 import './lib/templateHelpers';
 
 export { Container, Inject } from './DI';
-export { NodeType as NelmNodeType, IBlock as INelmBlock, Parser as NelmParser } from 'nelm-parser';
 export {
 	IDisposable,
 	IDisposableListening,
@@ -16,6 +15,7 @@ export {
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
+export { KEY_PARAMS_CONFIG, KEY_PARAMS } from './Constants';
 export {
 	IComponentParamConfig,
 	I$ComponentParamConfig,
@@ -24,14 +24,11 @@ export {
 	IComponentElementClassNameMap,
 	TEventHandler,
 	IComponentEvents,
-	KEY_PARAMS_CONFIG,
-	KEY_PARAMS,
 	BaseComponent
 } from './BaseComponent';
 export { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
-export { Template } from './Template';
-export { ContentNodeValueNodeType, ContentNodeValueParser } from './ContentNodeValueParser';
+export { NodeType as TemplateNodeType, IBlock as ITemplateBlock, Template } from './Template2';
 export { registerComponent } from './registerComponent';
 export { RnIfThen } from './components/RnIfThen';
 export { RnIfElse } from './components/RnIfElse';

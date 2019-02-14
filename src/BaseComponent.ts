@@ -3,20 +3,13 @@ import { kebabCase } from '@riim/kebab-case';
 import { Logger } from '@riim/logger';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
-import { Symbol } from '@riim/symbol-polyfill';
 import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
-import { htmlToFragment } from 'html-to-fragment';
-import { IBlock } from 'nelm-parser';
 import { attachChildComponentElements } from './attachChildComponentElements';
-import {
-	bindComponentContent,
-	bindContent,
-	KEY_CHILD_COMPONENTS,
-	prepareContent
-	} from './bindContent';
+import { bindContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructorMap } from './componentConstructorMap';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
+import { KEY_CHILD_COMPONENTS, KEY_PARAMS } from './Constants';
 import { Inject } from './DI';
 import {
 	DisposableMixin,
@@ -29,8 +22,8 @@ import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } fr
 import { handledEvents } from './handledEvents';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
-import { templateTagFeature } from './lib/Features';
-import { Template } from './Template';
+import { normalizeTextNodes } from './lib/normalizeTextNodes';
+import { IBlock, Template } from './Template2';
 
 const map = Array.prototype.map;
 
@@ -61,11 +54,13 @@ export interface IPossiblyComponentElement<T extends BaseComponent = BaseCompone
 	extends HTMLElement {
 	$component?: T | null;
 	rioniteComponent?: T;
+	contentTemplate?: Template;
 }
 
 export interface IComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
 	$component: T | null;
 	rioniteComponent: T;
+	contentTemplate?: Template;
 }
 
 export interface IComponentElementClassNameMap {
@@ -85,9 +80,6 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	};
 }
 
-export const KEY_PARAMS_CONFIG = Symbol('Rionite/BaseComponent[paramsConfig]');
-export const KEY_PARAMS = Symbol('Rionite/BaseComponent[params]');
-
 export class BaseComponent extends EventEmitter implements DisposableMixin {
 	static elementIs: string;
 	static elementExtends: string | null = null;
@@ -99,8 +91,6 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 	static _elementBlockNames: Array<string>;
 
 	static template: string | IBlock | Template | null = null;
-
-	static _rawContent: DocumentFragment | undefined;
 
 	static get bindsInputContent() {
 		return this.template !== null;
@@ -324,7 +314,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 						Array<BaseComponent | string | TEventEmitterListener> | null
 					] = [null, null, null];
 
-					bindContent(el, -1, this, this, contentBindingResult);
+					bindContent(el, this, this, contentBindingResult);
 
 					let childComponents = contentBindingResult[0];
 					let backBindings = contentBindingResult[2];
@@ -356,31 +346,19 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 					moveContent(
 						this.$inputContent ||
 							(this.$inputContent = document.createDocumentFragment()),
-						el
+						normalizeTextNodes(el)
 					);
 					resumeConnectionStatusCallbacks();
 				}
 
-				let rawContent =
-					constr._rawContent ||
-					(constr._rawContent = prepareContent(
-						htmlToFragment((constr.template as Template).render())
-					));
-				let content = rawContent.cloneNode(true) as DocumentFragment;
-				if (!templateTagFeature) {
-					let templates = content.querySelectorAll('template');
-
-					for (let i = 0, l = templates.length; i < l; ) {
-						i += templates[i].content.querySelectorAll('template').length + 1;
-					}
-				}
+				let content = (constr.template as Template).render(this);
 				let contentBindingResult: [
 					Array<BaseComponent> | null,
 					Array<IFreezableCell> | null,
 					Array<BaseComponent | string | TEventEmitterListener> | null
 				] = [null, null, null];
 
-				bindComponentContent(this, content, this, this, contentBindingResult);
+				bindContent(content, this, this, contentBindingResult);
 
 				let childComponents = contentBindingResult[0];
 				let backBindings = contentBindingResult[2];

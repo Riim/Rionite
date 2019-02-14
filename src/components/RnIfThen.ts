@@ -3,15 +3,14 @@ import { Cell, TListener } from 'cellx';
 import { moveContent } from '../../node_modules/@riim/move-content';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
-import { bindComponentContent2 } from '../bindContent';
+import { bindContent } from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
-import { templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
 import { removeNodes } from '../lib/removeNodes';
-import { Template } from '../Template';
+import { Template } from '../Template2';
 import { RnRepeat } from './RnRepeat';
 
 const slice = Array.prototype.slice;
@@ -67,9 +66,10 @@ export class RnIfThen extends BaseComponent {
 			this.initialized = true;
 		}
 
-		this._if.on('change', this._onIfChange, this);
-
-		this._render(false);
+		if ((this.element as any).contentTemplate) {
+			this._if.on('change', this._onIfChange, this);
+			this._render(false);
+		}
 	}
 
 	elementDisconnected() {
@@ -95,31 +95,14 @@ export class RnIfThen extends BaseComponent {
 
 	_render(changed: boolean) {
 		if (this._elseMode ? this._if.get() === false : this._if.get()) {
-			let content = document.importNode(
-				((this.element as any) as HTMLTemplateElement).content,
-				true
-			);
-			if (!templateTagFeature) {
-				let templates = content.querySelectorAll('template');
-
-				for (let i = 0, l = templates.length; i < l; ) {
-					i += templates[i].content.querySelectorAll('template').length + 1;
-				}
-			}
+			let content = ((this.element as any).contentTemplate as Template).render();
 			let contentBindingResult: [
 				Array<BaseComponent> | null,
 				Array<IFreezableCell> | null,
 				Array<BaseComponent | string | TListener> | null
 			] = [null, null, null];
 
-			bindComponentContent2(
-				(this.ownerComponent.constructor as typeof BaseComponent).template as Template,
-				this.element.getAttribute('pid'),
-				content,
-				this.ownerComponent,
-				this.$context!,
-				contentBindingResult
-			);
+			bindContent(content, this.ownerComponent, this.$context!, contentBindingResult);
 
 			let childComponents = contentBindingResult[0];
 			let backBindings = contentBindingResult[2];

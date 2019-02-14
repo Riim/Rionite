@@ -5,11 +5,12 @@ import { Symbol } from '@riim/symbol-polyfill';
 import { TListener } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent, IComponentElement } from '../BaseComponent';
-import { bindComponentContent2, bindContent } from '../bindContent';
+import { bindContent } from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
-import { Template } from '../Template';
+import { cloneNode } from '../lib/cloneNode';
+import { Template } from '../Template2';
 
 const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot[slotContentMap]');
 
@@ -115,9 +116,7 @@ export class RnSlot extends BaseComponent {
 
 						for (let i = 0; i < selectedElementCount; i++) {
 							content.appendChild(
-								cloneContent
-									? selectedElements[i].cloneNode(true)
-									: selectedElements[i]
+								cloneContent ? cloneNode(selectedElements[i]) : selectedElements[i]
 							);
 						}
 					}
@@ -131,7 +130,7 @@ export class RnSlot extends BaseComponent {
 					}
 				}
 			} else if (cloneContent) {
-				content = ownerComponentInputContent!.cloneNode(true) as DocumentFragment;
+				content = cloneNode(ownerComponentInputContent!);
 			} else {
 				let contentMap: Map<string, IComponentElement> | undefined =
 					contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
@@ -155,7 +154,7 @@ export class RnSlot extends BaseComponent {
 		}
 
 		if (bindings === undefined) {
-			if (content || this.$inputContent) {
+			if (content || (this.element as any).contentTemplate) {
 				let contentBindingResult: [
 					Array<BaseComponent> | null,
 					Array<IFreezableCell> | null,
@@ -165,7 +164,6 @@ export class RnSlot extends BaseComponent {
 				if (content) {
 					bindContent(
 						content,
-						-1,
 						contentOwnerComponent,
 						this.paramGetContext
 							? this.paramGetContext.call(
@@ -177,13 +175,10 @@ export class RnSlot extends BaseComponent {
 						contentBindingResult
 					);
 				} else {
-					let template = this.$inputContent!.firstElementChild as HTMLTemplateElement;
+					content = ((this.element as any).contentTemplate as Template).render();
 
-					bindComponentContent2(
-						(this.ownerComponent.constructor as typeof BaseComponent)
-							.template as Template,
-						template.getAttribute('pid'),
-						(content = document.importNode(template.content, true)),
+					bindContent(
+						content,
 						ownerComponent,
 						this.paramGetContext
 							? this.paramGetContext.call(ownerComponent, this.$context, this)

@@ -1,17 +1,13 @@
 import { defer } from '@riim/defer';
 import { Symbol } from '@riim/symbol-polyfill';
 import { Cell } from 'cellx';
-import {
-	BaseComponent,
-	I$ComponentParamConfig,
-	IComponentElement,
-	KEY_PARAMS,
-	KEY_PARAMS_CONFIG
-	} from './BaseComponent';
+import { BaseComponent, I$ComponentParamConfig, IComponentElement } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
+import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';
 import { Container } from './DI';
 import { nativeCustomElementsFeature } from './lib/Features';
 
+// export const KEY_IS_COMPONENT_ELEMENT = Symbol('Rionite/ElementProtoMixin[isComponentElement]');
 export const KEY_ELEMENT_CONNECTED = Symbol('Rionite/ElementProtoMixin[elementConnected]');
 
 let connectionStatusCallbacksSuppressed = false;
@@ -25,6 +21,8 @@ export function resumeConnectionStatusCallbacks() {
 }
 
 export const ElementProtoMixin = {
+	// [KEY_IS_COMPONENT_ELEMENT]: true,
+
 	$component: null,
 
 	get rioniteComponent(): BaseComponent {

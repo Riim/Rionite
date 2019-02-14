@@ -1,10 +1,9 @@
 import { Logger } from '@riim/logger';
 import { EventEmitter, IEvent } from 'cellx';
-import { IBlock } from 'nelm-parser';
 import { IFreezableCell } from './componentBinding';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
 import { DisposableMixin, IDisposableListening, TListener, TListeningTarget } from './DisposableMixin';
-import { Template } from './Template';
+import { IBlock, Template } from './Template2';
 export interface IComponentParamConfig {
     property?: string;
     type?: Function;
@@ -25,10 +24,12 @@ export interface I$ComponentParamConfig {
 export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
     $component?: T | null;
     rioniteComponent?: T;
+    contentTemplate?: Template;
 }
 export interface IComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
     $component: T | null;
     rioniteComponent: T;
+    contentTemplate?: Template;
 }
 export interface IComponentElementClassNameMap {
     [elName: string]: string;
@@ -41,8 +42,6 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
         [eventName: string]: TEventHandler<T, U>;
     };
 }
-export declare const KEY_PARAMS_CONFIG: symbol;
-export declare const KEY_PARAMS: symbol;
 export declare class BaseComponent extends EventEmitter implements DisposableMixin {
     static elementIs: string;
     static elementExtends: string | null;
@@ -55,7 +54,6 @@ export declare class BaseComponent extends EventEmitter implements DisposableMix
     static _blockNamesString: string;
     static _elementBlockNames: Array<string>;
     static template: string | IBlock | Template | null;
-    static _rawContent: DocumentFragment | undefined;
     static readonly bindsInputContent: boolean;
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
     static domEvents: IComponentEvents<BaseComponent, Event> | null;

@@ -3,11 +3,6 @@ export const reflectConstructFeature =
 	Reflect.construct &&
 	Reflect.construct.toString().indexOf('[native code]') != -1;
 
-const templateTagContainer = document.createElement('div');
-templateTagContainer.innerHTML = '<template>1</template>';
-
-export const templateTagFeature = !templateTagContainer.firstChild!.firstChild;
-
 let nativeCustomElementsFeature_ = false;
 
 const TestNativeCustomElementsFeature = reflectConstructFeature

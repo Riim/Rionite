@@ -17,7 +17,6 @@ export declare class RnRepeat extends BaseComponent {
     _list: Cell<TList | undefined>;
     _$itemMap: T$ItemMap;
     _trackBy: string | null;
-    _rawItemContent: DocumentFragment;
     _active: boolean;
     elementConnected(): void;
     elementDisconnected(): void;

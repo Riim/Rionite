@@ -1,4 +1,6 @@
 import { kebabCase } from '@riim/kebab-case';
+import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
+import { BaseComponent } from './BaseComponent';
 
 export enum NodeType {
 	BLOCK = 1,
@@ -23,6 +25,7 @@ export interface IElementCall extends INode {
 export interface ISuperCall extends INode {
 	nodeType: NodeType.SUPER_CALL;
 	elementName: string;
+	element: IElement;
 }
 
 export interface IDebuggerCall extends INode {
@@ -154,7 +157,7 @@ export class Template {
 		}
 	}
 
-	initialize() {
+	initialize(component?: BaseComponent) {
 		if (this.initialized) {
 			return;
 		}
@@ -162,7 +165,7 @@ export class Template {
 		this.initialized = true;
 
 		if (this.parent) {
-			this.parent.parse();
+			this.parent.parse(component);
 		}
 
 		let parent = this.parent;
@@ -205,8 +208,8 @@ export class Template {
 			  );
 	}
 
-	parse(): IBlock {
-		this.initialize();
+	parse(component?: BaseComponent): IBlock {
+		this.initialize(component);
 
 		if (this.block) {
 			return this.block;
@@ -223,7 +226,12 @@ export class Template {
 			elements: this._elements
 		});
 
-		this._readContent(this.parent ? null : block.elements['@root'].content, null, false);
+		this._readContent(
+			this.parent ? null : block.elements['@root'].content,
+			null,
+			false,
+			component && (component.constructor as typeof BaseComponent)
+		);
 
 		return block;
 	}
@@ -231,7 +239,8 @@ export class Template {
 	_readContent(
 		content: TContent | null,
 		superElName: string | null,
-		brackets: boolean
+		brackets: boolean,
+		componentConstr?: typeof BaseComponent
 	): TContent | null {
 		if (brackets) {
 			this._next('{');
@@ -274,33 +283,15 @@ export class Template {
 							return content;
 						}
 
-						let pos = this._pos;
 						let superCall = this._readSuperCall(superElName);
 
 						if (superCall) {
-							if (!this.parent) {
-								this._throwError(
-									'SuperCall is impossible if no parent is defined',
-									pos
-								);
-							}
-
-							let parentEl = this.parent!._elements[superCall.elementName];
-
-							if (!parentEl) {
-								this._throwError(
-									`Element "${superCall.elementName}" is not defined`,
-									pos
-								);
-							}
-
 							(content || (content = [])).push(superCall);
-
 							break;
 						}
 					}
 
-					content = this._readElement(content, superElName);
+					content = this._readElement(content, superElName, componentConstr);
 
 					break;
 				}
@@ -310,7 +301,11 @@ export class Template {
 		}
 	}
 
-	_readElement(targetContent: TContent | null, superElName: string | null): TContent | null {
+	_readElement(
+		targetContent: TContent | null,
+		superElName: string | null,
+		componentConstr?: typeof BaseComponent
+	): TContent | null {
 		let pos = this._pos;
 		let isHelper = this._chr == '@';
 
@@ -374,14 +369,77 @@ export class Template {
 		let attrs: IElementAttributes | null | undefined;
 
 		if (this._chr == '(') {
-			attrs = this._readAttributes(elName || superElName);
+			attrs = this._readAttributes(elName || superElName, isHelper);
 			this._skipWhitespaces();
+		}
+
+		if (elNames && componentConstr) {
+			let events = componentConstr.events;
+			let domEvents = componentConstr.domEvents;
+
+			if (events || domEvents) {
+				for (let name of elNames) {
+					if (!name) {
+						continue;
+					}
+
+					if (events && events[name]) {
+						let attrList = (
+							attrs ||
+							(attrs = {
+								isAttributeValue: null,
+								list: { __proto__: null, 'length=': 0 } as any
+							})
+						).list;
+
+						for (let type in events[name]) {
+							let attrName =
+								'oncomponent-' +
+								(type.charAt(0) == '<'
+									? type.slice(type.indexOf('>', 2) + 1)
+									: type);
+
+							attrList[
+								attrList[attrName] === undefined
+									? (attrList[attrName] = attrList['length=']++)
+									: attrList[attrName]
+							] = {
+								name: attrName,
+								value: ':' + name
+							};
+						}
+					}
+
+					if (domEvents && domEvents[name]) {
+						let attrList = (
+							attrs ||
+							(attrs = {
+								isAttributeValue: null,
+								list: { __proto__: null, 'length=': 0 } as any
+							})
+						).list;
+
+						for (let type in domEvents[name]) {
+							let attrName = 'on-' + type;
+
+							attrList[
+								attrList[attrName] === undefined
+									? (attrList[attrName] = attrList['length=']++)
+									: attrList[attrName]
+							] = {
+								name: attrName,
+								value: ':' + name
+							};
+						}
+					}
+				}
+			}
 		}
 
 		let content: TContent | null | undefined;
 
 		if (this._chr == '{') {
-			content = this._readContent(null, elName || superElName, true);
+			content = this._readContent(null, elName || superElName, true, componentConstr);
 		}
 
 		let el: IElement;
@@ -404,68 +462,68 @@ export class Template {
 				contentTemplateIndex: null
 			};
 
-			if (elName) {
-				this._elements[elName] = el;
-				(targetContent || (targetContent = [])).push({
-					nodeType: NodeType.ELEMENT_CALL,
-					name: elName
-				} as IElementCall);
-			} else {
-				(targetContent || (targetContent = [])).push(el);
-			}
-
 			content = helper(el);
 
 			if (content && content.length) {
-				let targetContent: Array<INode> = (el.content = []);
+				el.content = content;
 
-				for (let node of content) {
+				for (let i = 0, l = content.length; i < l; i++) {
+					let node = content[i];
+
 					if (node.nodeType == NodeType.ELEMENT) {
-						el =
+						if (
 							(node as IElement).content &&
 							((node as IElement).tagName == 'template' ||
 								(node as IElement).tagName == 'rn-slot')
-								? {
-										nodeType: NodeType.ELEMENT,
-										isHelper: false,
-										tagName: (node as IElement).tagName,
-										is: (node as IElement).is,
-										names: (node as IElement).names,
-										attributes: (node as IElement).attributes,
-										content: (node as IElement).content,
-										contentTemplateIndex:
-											(
-												this._embeddedTemplates ||
-												(this._embeddedTemplates = [])
-											).push(
-												new Template(
-													{
-														nodeType: NodeType.BLOCK,
-														content: (node as IElement).content!,
-														elements: this._elements
-													},
-													{
-														_isEmbedded: true,
-														parent: this
-													}
-												)
-											) - 1
-								  }
-								: (node as IElement);
+						) {
+							let el: IElement = {
+								nodeType: NodeType.ELEMENT,
+								isHelper: false,
+								tagName: (node as IElement).tagName,
+								is: (node as IElement).is,
+								names: (node as IElement).names,
+								attributes: (node as IElement).attributes,
+								content: (node as IElement).content,
+								contentTemplateIndex:
+									(
+										this._embeddedTemplates || (this._embeddedTemplates = [])
+									).push(
+										new Template(
+											{
+												nodeType: NodeType.BLOCK,
+												content: (node as IElement).content!,
+												elements: this._elements
+											},
+											{
+												_isEmbedded: true,
+												parent: this
+											}
+										)
+									) - 1
+							};
 
-						let nodeName = el.names && el.names![0];
+							let elName = el.names && el.names![0];
 
-						if (nodeName) {
-							this._elements[nodeName] = el;
-							targetContent.push({
-								nodeType: NodeType.ELEMENT_CALL,
-								name: nodeName
-							} as IElementCall);
+							if (elName) {
+								this._elements[elName] = el;
+								content[i] = {
+									nodeType: NodeType.ELEMENT_CALL,
+									name: elName
+								} as IElementCall;
+							} else {
+								content[i] = el;
+							}
 						} else {
-							targetContent.push(el);
+							let elName = (node as IElement).names && (node as IElement).names![0];
+
+							if (elName) {
+								this._elements[elName] = node as IElement;
+								content[i] = {
+									nodeType: NodeType.ELEMENT_CALL,
+									name: elName
+								} as IElementCall;
+							}
 						}
-					} else {
-						targetContent.push(node);
 					}
 				}
 			} else {
@@ -497,23 +555,25 @@ export class Template {
 						  ) - 1
 						: null
 			};
+		}
 
-			if (elName) {
-				this._elements[elName] = el;
-
-				(targetContent || (targetContent = [])).push({
-					nodeType: NodeType.ELEMENT_CALL,
-					name: elName
-				} as IElementCall);
-			} else {
-				(targetContent || (targetContent = [])).push(el);
-			}
+		if (elName) {
+			this._elements[elName] = el;
+			(targetContent || (targetContent = [])).push({
+				nodeType: NodeType.ELEMENT_CALL,
+				name: elName
+			} as IElementCall);
+		} else {
+			(targetContent || (targetContent = [])).push(el);
 		}
 
 		return targetContent;
 	}
 
-	_readAttributes(superElName: string | null): IElementAttributes | null {
+	_readAttributes(
+		superElName: string | null,
+		isElementHelper: boolean
+	): IElementAttributes | null {
 		this._next('(');
 
 		if (this._skipWhitespacesAndComments() == ')') {
@@ -527,22 +587,12 @@ export class Template {
 		let list: IElementAttributeList | undefined;
 
 		loop: for (let f = true; ; ) {
-			let pos = this._pos;
-
 			if (f && this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
-				if (!this.parent) {
-					this._throwError('SuperCall is impossible if no parent is defined', pos);
-				}
+				let superElAttrs = superCall.element.attributes;
 
-				let parentEl = this.parent!._elements[superCall.elementName];
-
-				if (!parentEl) {
-					this._throwError(`Element "${superCall.elementName}" is not defined`, pos);
-				}
-
-				if (parentEl.attributes) {
-					isAttrValue = parentEl.attributes.isAttributeValue;
-					list = { __proto__: parentEl.attributes.list } as any;
+				if (superElAttrs) {
+					isAttrValue = superElAttrs.isAttributeValue;
+					list = { __proto__: superElAttrs.list } as any;
 				}
 
 				this._skipWhitespacesAndComments();
@@ -551,6 +601,7 @@ export class Template {
 
 				if (!name) {
 					this._throwError('Expected attribute name');
+					throw 1;
 				}
 
 				if (this._skipWhitespacesAndComments() == '=') {
@@ -562,12 +613,12 @@ export class Template {
 						if (name == 'is') {
 							isAttrValue = this._readString();
 						} else {
-							(list || (list = { 'length=': 0 }))[
-								list[name!] === undefined
-									? (list[name!] = list['length=']++)
-									: list[name!]
+							(list || (list = { __proto__: null, 'length=': 0 } as any))[
+								list![name] === undefined
+									? (list![name] = list!['length=']++)
+									: list![name]
 							] = {
-								name: name!,
+								name,
 								value: this._readString()
 							};
 						}
@@ -587,12 +638,12 @@ export class Template {
 								if (name == 'is') {
 									isAttrValue = value.trim();
 								} else {
-									(list || (list = { 'length=': 0 }))[
-										list[name!] === undefined
-											? (list[name!] = list['length=']++)
-											: list[name!]
+									(list || (list = { __proto__: null, 'length=': 0 } as any))[
+										list![name] === undefined
+											? (list![name] = list!['length=']++)
+											: list![name]
 									] = {
-										name: name!,
+										name,
 										value: value.trim()
 									};
 								}
@@ -611,10 +662,10 @@ export class Template {
 				} else if (name == 'is') {
 					isAttrValue = '';
 				} else {
-					(list || (list = { 'length=': 0 }))[
-						list[name!] === undefined ? (list[name!] = list['length=']++) : list[name!]
+					(list || (list = { __proto__: null, 'length=': 0 } as any))[
+						list![name] === undefined ? (list![name] = list!['length=']++) : list![name]
 					] = {
-						name: name!,
+						name,
 						value: ''
 					};
 				}
@@ -650,19 +701,33 @@ export class Template {
 			  };
 	}
 
-	_readSuperCall(elName: string | null): ISuperCall | null {
+	_readSuperCall(defaultElName: string | null): ISuperCall | null {
 		reSuperCallOrNothing.lastIndex = this._pos;
 		let match = reSuperCallOrNothing.exec(this.template)!;
 
 		if (match[0]) {
+			if (!this.parent) {
+				this._throwError('SuperCall is impossible if no parent is defined');
+			}
+
+			let elName =
+				match[1] ||
+				defaultElName ||
+				(this._throwError('SuperCall.elementName is required') as any);
+			let el =
+				(elName.charAt(0) == '@' && this.parent!._elements[elName.slice(1)]) ||
+				this.parent!._elements[elName];
+
+			if (!el) {
+				this._throwError(`Element "${elName}" is not defined`);
+			}
+
 			this._chr = this.template.charAt((this._pos = reSuperCallOrNothing.lastIndex));
 
 			return {
 				nodeType: NodeType.SUPER_CALL,
-				elementName:
-					match[1] ||
-					elName ||
-					(this._throwError('SuperCall.elementName is required') as any)
+				elementName: elName,
+				element: el
 			};
 		}
 
@@ -684,9 +749,9 @@ export class Template {
 	_readString(): string {
 		let quoteChar = this._chr;
 
-		if (process.env.DEBUG && quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
-			this._throwError('Expected string');
-		}
+		// if (process.env.DEBUG && quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
+		// 	this._throwError('Expected string');
+		// }
 
 		let str = '';
 
@@ -851,24 +916,20 @@ export class Template {
 		return this;
 	}
 
-	render(): DocumentFragment {
-		let block = this.parse();
+	render(component?: BaseComponent): DocumentFragment {
+		let block = this.parse(component);
 
 		return renderContent(
 			document.createDocumentFragment(),
 			this,
-			this._elements,
 			block.content || block.elements['@root'].content
 		);
 	}
 }
 
-declare function innerHTML(el: HTMLElement, html: string): HTMLElement;
-
 function renderContent<T extends Node = Element>(
 	targetNode: T,
 	template: Template,
-	elements: { [name: string]: IElement },
 	content: TContent | null,
 	isSVG?: boolean
 ): T {
@@ -876,20 +937,14 @@ function renderContent<T extends Node = Element>(
 		for (let node of content) {
 			switch (node.nodeType) {
 				case NodeType.ELEMENT_CALL: {
-					node = elements[(node as IElementCall).name];
+					node = template._elements[(node as IElementCall).name];
 					break;
 				}
 				case NodeType.SUPER_CALL: {
-					let parentElements = (template._isEmbedded
-						? template.parent!.parent!
-						: template.parent!
-					)._elements;
-
 					renderContent(
 						targetNode,
 						template,
-						parentElements,
-						parentElements[(node as ISuperCall).elementName].content,
+						(node as ISuperCall).element.content,
 						isSVG
 					);
 
@@ -900,13 +955,7 @@ function renderContent<T extends Node = Element>(
 			switch (node.nodeType) {
 				case NodeType.ELEMENT: {
 					if ((node as IElement).isHelper) {
-						renderContent(
-							targetNode,
-							template,
-							elements,
-							(node as IElement).content,
-							isSVG
-						);
+						renderContent(targetNode, template, (node as IElement).content, isSVG);
 					} else {
 						if ((node as IElement).tagName == 'svg') {
 							isSVG = true;
@@ -920,7 +969,7 @@ function renderContent<T extends Node = Element>(
 								(node as IElement).tagName
 							);
 						} else if ((node as IElement).is) {
-							el = innerHTML(
+							el = (window as any).innerHTML(
 								document.createElement('div'),
 								`<${(node as IElement).tagName} is="${(node as IElement).is}">`
 							).firstChild as Element;
@@ -929,10 +978,20 @@ function renderContent<T extends Node = Element>(
 						}
 
 						if ((node as IElement).names) {
-							el.className = renderElementClasses(
-								template._elementNamesTemplate,
-								(node as IElement).names!
-							);
+							if (isSVG) {
+								el.setAttribute(
+									'class',
+									renderElementClasses(
+										template._elementNamesTemplate,
+										(node as IElement).names!
+									)
+								);
+							} else {
+								el.className = renderElementClasses(
+									template._elementNamesTemplate,
+									(node as IElement).names!
+								);
+							}
 						}
 
 						let attrList =
@@ -956,15 +1015,22 @@ function renderContent<T extends Node = Element>(
 											attrName,
 											attr.value
 										);
-
-										continue;
+									} else if (attrName == 'class') {
+										el.setAttribute(
+											attrName,
+											(el.getAttribute('class') || '') + attr.value
+										);
+									} else {
+										el.setAttribute(attrName, attr.value);
 									}
 								} else if (attrName == 'class') {
 									el.className += attr.value;
-									continue;
+								} else {
+									el.setAttribute(
+										snakeCaseAttributeName(attrName, true),
+										attr.value
+									);
 								}
-
-								el.setAttribute(attrName, attr.value);
 							}
 						}
 
@@ -973,13 +1039,7 @@ function renderContent<T extends Node = Element>(
 								(node as IElement).contentTemplateIndex!
 							];
 						} else {
-							renderContent(
-								el,
-								template,
-								elements,
-								(node as IElement).content,
-								isSVG
-							);
+							renderContent(el, template, (node as IElement).content, isSVG);
 						}
 
 						targetNode.appendChild(el);

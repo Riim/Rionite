@@ -4,16 +4,15 @@ import { Cell, ObservableList, TListener } from 'cellx';
 import { moveContent } from '../../node_modules/@riim/move-content';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
-import { bindComponentContent2 } from '../bindContent';
+import { bindContent } from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
-import { templateTagFeature } from '../lib/Features';
 import { keypathPattern } from '../lib/keypathPattern';
 import { namePattern } from '../lib/namePattern';
 import { removeNodes } from '../lib/removeNodes';
-import { Template } from '../Template';
+import { Template } from '../Template2';
 import { RnIfThen } from './RnIfThen';
 
 const slice = Array.prototype.slice;
@@ -95,8 +94,6 @@ export class RnRepeat extends BaseComponent {
 
 	_trackBy: string | null;
 
-	_rawItemContent: DocumentFragment;
-
 	_active = false;
 
 	elementConnected() {
@@ -124,17 +121,13 @@ export class RnRepeat extends BaseComponent {
 
 			this._trackBy = this.paramTrackBy;
 
-			this._rawItemContent = document.importNode(
-				((this.element as any) as HTMLTemplateElement).content,
-				true
-			);
-
 			this.initialized = true;
 		}
 
-		this._list.on('change', this._onListChange, this);
-
-		this._render(false);
+		if ((this.element as any).contentTemplate) {
+			this._list.on('change', this._onListChange, this);
+			this._render(false);
+		}
 	}
 
 	elementDisconnected() {
@@ -322,14 +315,7 @@ export class RnRepeat extends BaseComponent {
 					let itemCell = new Cell(item);
 					let indexCell = new Cell(i);
 
-					let content = this._rawItemContent.cloneNode(true) as DocumentFragment;
-					if (!templateTagFeature) {
-						let templates = content.querySelectorAll('template');
-
-						for (let i = 0, l = templates.length; i < l; ) {
-							i += templates[i].content.querySelectorAll('template').length + 1;
-						}
-					}
+					let content = ((this.element as any).contentTemplate as Template).render();
 					let context = this.$context!;
 					let contentBindingResult: [
 						Array<BaseComponent> | null,
@@ -337,10 +323,7 @@ export class RnRepeat extends BaseComponent {
 						Array<BaseComponent | string | TListener> | null
 					] = [null, null, null];
 
-					bindComponentContent2(
-						(this.ownerComponent.constructor as typeof BaseComponent)
-							.template as Template,
-						this.element.getAttribute('pid'),
+					bindContent(
 						content,
 						this.ownerComponent,
 						Object.create(context, {

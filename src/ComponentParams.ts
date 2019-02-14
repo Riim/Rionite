@@ -1,13 +1,8 @@
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
 import { Symbol } from '@riim/symbol-polyfill';
-import {
-	BaseComponent,
-	I$ComponentParamConfig,
-	IComponentParamConfig,
-	KEY_PARAMS,
-	KEY_PARAMS_CONFIG
-	} from './BaseComponent';
+import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './BaseComponent';
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
+import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';
 
 export const KEY_COMPONENT_PARAMS_INITED = Symbol('Rionite/ComponentParams[componentParamsInited]');
 
@@ -33,7 +28,7 @@ function initParam(
 
 		let isObject =
 			type == 'object' &&
-			((paramConfig as IComponentParamConfig).type !== undefined ||
+			(!!(paramConfig as IComponentParamConfig).type ||
 				(paramConfig as IComponentParamConfig).default !== undefined);
 
 		if (defaultValue === undefined) {
