@@ -1,12 +1,10 @@
 {
-  "name": "rionite",
-  "version": "0.33.0",
-  "description": "",
-  "main": "dist/rionite.polyfills.js",
-  "typings": "dist/src/index.d.ts",
+  "name": "@riim/rionite-packages",
+  "version": "1.0.0",
+  "description": "Реактивная обёртка над [custom-elements](https://www.w3.org/TR/custom-elements/).",
+  "main": "index.js",
   "scripts": {
-    "build": "rm -rf dist && webpack && webpack --env.es6 && gulp",
-    "test": "jest"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -19,63 +17,7 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "@types/jest": "^24.0.4",
-    "@types/node": "^11.9.3",
-    "ajv": "^6.9.1",
-    "awesome-typescript-loader": "^5.2.1",
-    "benchmark": "^2.1.4",
-    "chalk": "^2.4.2",
-    "document-register-element": "^1.13.1",
-    "gulp": "^4.0.0",
-    "gulp-concat": "^2.6.1",
-    "gulp-rename": "^1.4.0",
-    "gulp-uglify": "^3.0.1",
-    "jest": "^24.1.0",
-    "pump": "^3.0.0",
-    "require-dir": "^1.2.0",
-    "run-sequence": "^2.2.1",
-    "ts-jest": "^23.10.5",
-    "tslint": "^5.12.1",
-    "tslint-loader": "^3.6.0",
-    "typescript": "^3.3.3",
-    "webpack": "^4.29.3",
-    "webpack-cli": "^3.2.3"
-  },
-  "dependencies": {
-    "@riim/clear-node": "^1.0.0",
-    "@riim/defer": "^1.1.0",
-    "@riim/escape-html": "^1.1.5",
-    "@riim/get-uid": "^1.0.0",
-    "@riim/gettext": "^2.0.0",
-    "@riim/is-regexp": "^1.0.0",
-    "@riim/kebab-case": "^1.0.0",
-    "@riim/logger": "^1.0.2",
-    "@riim/lower-case-first-word": "^1.0.1",
-    "@riim/map-set-polyfill": "^1.0.2",
-    "@riim/mixin": "^1.0.0",
-    "@riim/move-content": "^1.0.0",
-    "@riim/next-tick": "^1.0.2",
-    "@riim/next-uid": "^1.0.0",
-    "@riim/pascalize": "^1.0.1",
-    "@riim/rionite-snake-case-attribute-name": "^1.0.1",
-    "@riim/self-closing-tags": "^1.0.2",
-    "@riim/set-attribute": "^1.0.0",
-    "@riim/symbol-polyfill": "^1.0.5",
-    "cellx": "^1.7.95",
-    "escape-string": "^1.0.2",
-    "html-to-fragment": "^1.0.2",
-    "nelm-parser": "^1.1.17"
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.ts$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(js|ts)$",
-    "moduleFileExtensions": [
-      "ts",
-      "js",
-      "json",
-      "node"
-    ]
+    "lerna": "^3.11.1",
+    "typescript": "^3.3.3"
   }
 }
