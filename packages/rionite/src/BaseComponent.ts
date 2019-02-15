@@ -18,7 +18,7 @@ import { handledEvents } from './handledEvents';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
 import { normalizeTextNodes } from './lib/normalizeTextNodes';
-import { IBlock, Template } from './Template2';
+import { IBlock, Template } from './Template';
 
 const map = Array.prototype.map;
 

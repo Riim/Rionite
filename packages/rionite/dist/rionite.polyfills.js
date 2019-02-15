@@ -1775,9 +1775,9 @@ var ElementProtoMixin_1 = __webpack_require__(24);
 exports.KEY_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_ELEMENT_CONNECTED;
 var ComponentParams_1 = __webpack_require__(18);
 exports.ComponentParams = ComponentParams_1.ComponentParams;
-var Template2_1 = __webpack_require__(3);
-exports.TemplateNodeType = Template2_1.NodeType;
-exports.Template = Template2_1.Template;
+var Template_1 = __webpack_require__(3);
+exports.TemplateNodeType = Template_1.NodeType;
+exports.Template = Template_1.Template;
 var registerComponent_1 = __webpack_require__(13);
 exports.registerComponent = registerComponent_1.registerComponent;
 var RnIfThen_1 = __webpack_require__(49);
@@ -1831,9 +1831,9 @@ if (!('nextElementSibling' in DocumentFragment.prototype)) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var Template2_1 = __webpack_require__(3);
+var Template_1 = __webpack_require__(3);
 ['if-then', 'if-else', 'repeat'].forEach(function (name) {
-    Template2_1.Template.helpers[name] = function (el) {
+    Template_1.Template.helpers[name] = function (el) {
         var attrs = el.attributes;
         // проверка на attrs для `@/name // ...`
         if (name != 'repeat' && attrs) {
@@ -1862,7 +1862,7 @@ var Template2_1 = __webpack_require__(3);
         }
         return [
             {
-                nodeType: Template2_1.NodeType.ELEMENT,
+                nodeType: Template_1.NodeType.ELEMENT,
                 isHelper: false,
                 tagName: 'template',
                 is: 'rn-' + name,
@@ -1874,10 +1874,10 @@ var Template2_1 = __webpack_require__(3);
         ];
     };
 });
-Template2_1.Template.helpers.slot = function (el) {
+Template_1.Template.helpers.slot = function (el) {
     return [
         {
-            nodeType: Template2_1.NodeType.ELEMENT,
+            nodeType: Template_1.NodeType.ELEMENT,
             isHelper: false,
             tagName: 'rn-slot',
             is: null,
@@ -2896,7 +2896,7 @@ var Constants_1 = __webpack_require__(22);
 var elementConstructorMap_1 = __webpack_require__(23);
 var ElementProtoMixin_1 = __webpack_require__(24);
 var Features_1 = __webpack_require__(9);
-var Template2_1 = __webpack_require__(3);
+var Template_1 = __webpack_require__(3);
 var push = Array.prototype.push;
 function inheritProperty(target, source, name, depth) {
     var obj = target[name];
@@ -3065,7 +3065,7 @@ function registerComponent(componentConstr) {
                 blockName: elIs
             });
         }
-        else if (template instanceof Template2_1.Template) {
+        else if (template instanceof Template_1.Template) {
             template.setBlockName(componentConstr._elementBlockNames);
         }
         else {
@@ -3073,7 +3073,7 @@ function registerComponent(componentConstr) {
                 ? parentComponentConstr.template.extend(template, {
                     blockName: elIs
                 })
-                : new Template2_1.Template(template, { blockName: componentConstr._elementBlockNames });
+                : new Template_1.Template(template, { blockName: componentConstr._elementBlockNames });
         }
     }
     inheritProperty(componentConstr, parentComponentConstr, 'events', 1);

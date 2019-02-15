@@ -2,7 +2,7 @@ import { Logger } from '@riim/logger';
 import { EventEmitter, IEvent } from 'cellx';
 import { IFreezableCell } from './componentBinding';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
-import { IBlock, Template } from './Template2';
+import { IBlock, Template } from './Template';
 export interface IDisposable {
     dispose(): any;
     [key: string]: any;

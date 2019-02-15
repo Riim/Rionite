@@ -10,7 +10,7 @@ import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnect
 import { compileKeypath } from '../lib/compileKeypath';
 import { keypathPattern } from '../lib/keypathPattern';
 import { removeNodes } from '../lib/removeNodes';
-import { Template } from '../Template2';
+import { Template } from '../Template';
 import { RnRepeat } from './RnRepeat';
 
 const slice = Array.prototype.slice;

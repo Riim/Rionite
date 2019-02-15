@@ -1,6 +1,6 @@
 import { IEvent } from 'cellx';
 import { BaseComponent, IComponentEvents } from '../BaseComponent';
-import { IBlock, Template } from '../Template2';
+import { IBlock, Template } from '../Template';
 export declare function Component<T extends BaseComponent>(config?: {
     elementIs?: string;
     elementExtends?: string | null;

@@ -1,117 +1,907 @@
-import { escapeHTML } from '@riim/escape-html';
+import { kebabCase } from '@riim/kebab-case';
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
-import { map as selfClosingTagMap } from '@riim/self-closing-tags';
-import { escapeString } from 'escape-string';
-import {
-	IBlock,
-	IElement as INelmElement,
-	INode,
-	ISuperCall,
-	ITextNode,
-	NodeType,
-	Parser,
-	TContent
-	} from 'nelm-parser';
+import { BaseComponent } from './BaseComponent';
 
-const join = Array.prototype.join;
-
-export interface IElement {
-	name: string | null;
-	superCall: boolean;
-	source: Array<string> | null;
-	innerSource: Array<string>;
+export enum NodeType {
+	BLOCK = 1,
+	ELEMENT_CALL,
+	SUPER_CALL,
+	DEBUGGER_CALL,
+	ELEMENT,
+	TEXT
 }
 
-export type TRenderer = (this: Template) => string;
+export interface INode {
+	nodeType: NodeType;
+}
 
-export type TElementRenderer = (this: Template, $super?: IElementRendererMap) => string;
+export type TContent = Array<INode>;
 
-export interface IElementRendererMap {
-	[elName: string]: TElementRenderer;
+export interface IElementCall extends INode {
+	nodeType: NodeType.ELEMENT_CALL;
+	name: string;
+}
+
+export interface ISuperCall extends INode {
+	nodeType: NodeType.SUPER_CALL;
+	elementName: string;
+	element: IElement;
+}
+
+export interface IDebuggerCall extends INode {
+	nodeType: NodeType.DEBUGGER_CALL;
+}
+
+export interface IElementAttribute {
+	name: string;
+	value: string;
+}
+
+export interface IElementAttributeList {
+	[attrIndex: number]: IElementAttribute;
+	'length=': number;
+}
+
+export interface IElementAttributes {
+	isAttributeValue: string | null;
+	list: IElementAttributeList | null;
+}
+
+export interface IElement extends INode {
+	nodeType: NodeType.ELEMENT;
+	isHelper: boolean;
+	tagName: string;
+	is: string | null;
+	names: Array<string | null> | null;
+	attributes: IElementAttributes | null;
+	content: TContent | null;
+	contentTemplateIndex: number | null;
+}
+
+export interface ITextNode extends INode {
+	nodeType: NodeType.TEXT;
+	value: string;
+}
+
+export interface IBlock extends INode {
+	nodeType: NodeType.BLOCK;
+	content: TContent | null;
+	elements: { [name: string]: IElement };
+}
+
+const escapee: { [char: string]: string } = {
+	__proto__: null,
+
+	'/': '/',
+	'\\': '\\',
+	b: '\b',
+	f: '\f',
+	n: '\n',
+	r: '\r',
+	t: '\t'
+} as any;
+
+const reWhitespace = /\s/;
+
+const reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
+const reElementNameOrNothing = /[a-zA-Z][\-\w]*|/g;
+const reAttributeNameOrNothing = /[^\s'">/=,)]+|/g;
+const reSuperCallOrNothing = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
+
+function normalizeMultilineText(text: string): string {
+	return text
+		.trim()
+		.replace(/[ \t]*(?:\n|\r\n?)/g, '\n')
+		.replace(/\n[ \t]+/g, '\n');
 }
 
 export const ELEMENT_NAME_DELIMITER = '__';
 
 export class Template {
-	static helpers: { [name: string]: (el: INelmElement) => TContent | null } = {
+	static helpers: { [name: string]: (el: IElement) => TContent | null } = {
 		section: el => el.content
 	};
 
+	_isEmbedded: boolean;
+
 	parent: Template | null;
-	nelm: IBlock;
+	template: string;
 
 	_elementNamesTemplate: Array<string>;
 
-	onBeforeNamedElementOpeningTagClosing: (elNames: Array<string>) => string;
+	initialized = false;
 
-	_tagNameMap: { [elName: string]: string };
+	_elements: { [name: string]: IElement };
 
-	_attributeListMap: { [elName: string]: Object };
-	_attributeCountMap: { [elName: string]: number };
+	_pos: number;
+	_chr: string;
 
-	_currentElement: IElement;
-	_elements: Array<IElement>;
-	_elementMap: { [elName: string]: IElement };
-
-	_renderer: TRenderer;
-	_elementRendererMap: IElementRendererMap;
+	block: IBlock | null;
+	_embeddedTemplates: Array<Template> | null;
 
 	constructor(
-		nelm: IBlock | string,
-		opts?: {
+		template: string | IBlock,
+		options?: {
+			_isEmbedded?: boolean;
 			parent?: Template;
 			blockName?: string | Array<string>;
-			onBeforeNamedElementOpeningTagClosing?: (elNames: Array<string>) => string;
 		}
 	) {
-		if (typeof nelm == 'string') {
-			nelm = new Parser(nelm).parse();
+		let isEmbedded = (this._isEmbedded = !!(options && options._isEmbedded));
+		let parent = (this.parent = (options && options.parent) || null);
+
+		if (typeof template == 'string') {
+			this.template = template;
+			this.block = null;
+		} else {
+			this.block = template;
+			this._elements = template.elements;
 		}
 
-		let parent = (this.parent = (opts && opts.parent) || null);
+		if (isEmbedded) {
+			this._elementNamesTemplate = parent!._elementNamesTemplate;
+		} else {
+			let blockName = options && options.blockName;
 
-		if (!parent) {
-			nelm.content = [
-				{
-					nodeType: NodeType.ELEMENT,
-					tagName: 'section',
-					isHelper: true,
-					names: ['root'],
-					attributes: null,
-					content: nelm.content
-				} as INelmElement
-			];
-		}
-
-		this.nelm = nelm;
-
-		let blockName = (opts && opts.blockName) || this.nelm.name;
-
-		if (parent) {
-			this._elementNamesTemplate = [
-				blockName ? (blockName as string) + ELEMENT_NAME_DELIMITER : ''
-			].concat(parent._elementNamesTemplate);
-		} else if (blockName) {
 			if (Array.isArray(blockName)) {
 				this.setBlockName(blockName);
-			} else {
+			} else if (parent) {
+				this._elementNamesTemplate = blockName
+					? [blockName + ELEMENT_NAME_DELIMITER].concat(parent._elementNamesTemplate)
+					: parent._elementNamesTemplate.slice();
+			} else if (blockName) {
 				this._elementNamesTemplate = [blockName + ELEMENT_NAME_DELIMITER, ''];
+			} else {
+				this._elementNamesTemplate = ['', ''];
 			}
-		} else {
-			this._elementNamesTemplate = ['', ''];
 		}
-
-		this.onBeforeNamedElementOpeningTagClosing =
-			(opts && opts.onBeforeNamedElementOpeningTagClosing) || (() => '');
-
-		this._tagNameMap = { __proto__: parent && parent._tagNameMap } as any;
-
-		this._attributeListMap = { __proto__: parent && parent._attributeListMap } as any;
-		this._attributeCountMap = { __proto__: parent && parent._attributeCountMap } as any;
 	}
 
-	extend(nelm: string | IBlock, opts?: { blockName?: string }): Template {
-		return new Template(nelm, { __proto__: opts || null, parent: this } as any);
+	initialize(component?: BaseComponent) {
+		if (this.initialized) {
+			return;
+		}
+
+		this.initialized = true;
+
+		if (this.parent) {
+			this.parent.parse(component);
+		}
+
+		let parent = this.parent;
+
+		if (!this._isEmbedded) {
+			this._elements = parent
+				? ({ __proto__: parent._elements } as any)
+				: ({
+						__proto__: null,
+						'@root': {
+							nodeType: NodeType.ELEMENT,
+							isHelper: true,
+							tagName: 'section',
+							is: null,
+							names: ['root'],
+							attributes: null,
+							content: [],
+							contentTemplateIndex: null
+						}
+				  } as any);
+		}
+
+		this._embeddedTemplates = this._isEmbedded
+			? parent!._embeddedTemplates
+			: parent &&
+			  parent._embeddedTemplates &&
+			  parent._embeddedTemplates.map(
+					template =>
+						new Template(
+							{
+								nodeType: NodeType.BLOCK,
+								content: template.block!.content,
+								elements: this._elements
+							},
+							{
+								_isEmbedded: true,
+								parent: this
+							}
+						)
+			  );
+	}
+
+	parse(component?: BaseComponent): IBlock {
+		this.initialize(component);
+
+		if (this.block) {
+			return this.block;
+		}
+
+		this._pos = 0;
+		this._chr = this.template.charAt(0);
+
+		this._skipWhitespacesAndComments();
+
+		let block: IBlock = (this.block = {
+			nodeType: NodeType.BLOCK,
+			content: null,
+			elements: this._elements
+		});
+
+		this._readContent(
+			this.parent ? null : block.elements['@root'].content,
+			null,
+			false,
+			component && (component.constructor as typeof BaseComponent)
+		);
+
+		return block;
+	}
+
+	_readContent(
+		content: TContent | null,
+		superElName: string | null,
+		brackets: boolean,
+		componentConstr?: typeof BaseComponent
+	): TContent | null {
+		if (brackets) {
+			this._next('{');
+			this._skipWhitespacesAndComments();
+		}
+
+		for (;;) {
+			switch (this._chr) {
+				case "'":
+				case '"':
+				case '`': {
+					(content || (content = [])).push({
+						nodeType: NodeType.TEXT,
+						value: this._readString()
+					} as ITextNode);
+
+					break;
+				}
+				case '': {
+					if (brackets) {
+						this._throwError(
+							'Unexpected end of template. Expected "}" to close block.'
+						);
+					}
+
+					return content;
+				}
+				default: {
+					let chr = this._chr;
+
+					if (chr == 'd' && this.template.substr(this._pos, 9) == 'debugger!') {
+						this._chr = this.template.charAt((this._pos += 9));
+						(content || (content = [])).push({ nodeType: NodeType.DEBUGGER_CALL });
+						break;
+					}
+
+					if (brackets) {
+						if (chr == '}') {
+							this._next();
+							return content;
+						}
+
+						let superCall = this._readSuperCall(superElName);
+
+						if (superCall) {
+							(content || (content = [])).push(superCall);
+							break;
+						}
+					}
+
+					content = this._readElement(content, superElName, componentConstr);
+
+					break;
+				}
+			}
+
+			this._skipWhitespacesAndComments();
+		}
+	}
+
+	_readElement(
+		targetContent: TContent | null,
+		superElName: string | null,
+		componentConstr?: typeof BaseComponent
+	): TContent | null {
+		let pos = this._pos;
+		let isHelper = this._chr == '@';
+
+		if (isHelper) {
+			this._next();
+		}
+
+		let tagName = this._readName(reTagNameOrNothing);
+		let elNames: Array<string | null> | undefined;
+		let elName: string | null | undefined;
+
+		if (this._chr == '/') {
+			this._next();
+
+			let pos = this._pos;
+
+			this._skipWhitespaces();
+
+			if ((this._chr as any) == ',') {
+				this._next();
+				this._skipWhitespaces();
+				elNames = [null];
+			}
+
+			for (let name; (name = this._readName(reElementNameOrNothing)); ) {
+				(elNames || (elNames = [])).push(name);
+
+				if (this._skipWhitespaces() != ',') {
+					break;
+				}
+
+				this._next();
+				this._skipWhitespaces();
+			}
+
+			if (!elNames || (!elNames[0] && elNames.length == 1)) {
+				this._throwError('Expected element name', pos);
+			}
+
+			elName = isHelper ? elNames![0] && '@' + elNames![0] : elNames![0];
+		} else {
+			this._skipWhitespacesAndComments();
+		}
+
+		if (tagName) {
+			tagName = kebabCase(tagName, true);
+		} else {
+			if (!elName) {
+				this._throwError('Expected element', pos);
+			}
+
+			if (
+				!this.parent ||
+				!(tagName = (this.parent._elements[elName!] || { __proto__: null }).tagName)
+			) {
+				this._throwError('Element.tagName is required', isHelper ? pos + 1 : pos);
+				throw 1;
+			}
+		}
+
+		let attrs: IElementAttributes | null | undefined;
+
+		if (this._chr == '(') {
+			attrs = this._readAttributes(elName || superElName, isHelper);
+			this._skipWhitespaces();
+		}
+
+		if (elNames && componentConstr) {
+			let events = componentConstr.events;
+			let domEvents = componentConstr.domEvents;
+
+			if (events || domEvents) {
+				for (let name of elNames) {
+					if (!name) {
+						continue;
+					}
+
+					if (events && events[name]) {
+						let attrList = (
+							attrs ||
+							(attrs = {
+								isAttributeValue: null,
+								list: { __proto__: null, 'length=': 0 } as any
+							})
+						).list;
+
+						for (let type in events[name]) {
+							let attrName =
+								'oncomponent-' +
+								(type.charAt(0) == '<'
+									? type.slice(type.indexOf('>', 2) + 1)
+									: type);
+
+							attrList[
+								attrList[attrName] === undefined
+									? (attrList[attrName] = attrList['length=']++)
+									: attrList[attrName]
+							] = {
+								name: attrName,
+								value: ':' + name
+							};
+						}
+					}
+
+					if (domEvents && domEvents[name]) {
+						let attrList = (
+							attrs ||
+							(attrs = {
+								isAttributeValue: null,
+								list: { __proto__: null, 'length=': 0 } as any
+							})
+						).list;
+
+						for (let type in domEvents[name]) {
+							let attrName = 'on-' + type;
+
+							attrList[
+								attrList[attrName] === undefined
+									? (attrList[attrName] = attrList['length=']++)
+									: attrList[attrName]
+							] = {
+								name: attrName,
+								value: ':' + name
+							};
+						}
+					}
+				}
+			}
+		}
+
+		let content: TContent | null | undefined;
+
+		if (this._chr == '{') {
+			content = this._readContent(null, elName || superElName, true, componentConstr);
+		}
+
+		let el: IElement;
+
+		if (isHelper) {
+			let helper = Template.helpers[tagName];
+
+			if (!helper) {
+				this._throwError(`Helper "${tagName}" is not defined`, pos);
+			}
+
+			el = {
+				nodeType: NodeType.ELEMENT,
+				isHelper: true,
+				tagName,
+				is: (attrs && attrs.isAttributeValue) || null,
+				names: elNames || null,
+				attributes: attrs || null,
+				content: content || null,
+				contentTemplateIndex: null
+			};
+
+			content = helper(el);
+
+			if (content && content.length) {
+				el.content = content;
+
+				for (let i = 0, l = content.length; i < l; i++) {
+					let node = content[i];
+
+					if (node.nodeType == NodeType.ELEMENT) {
+						if (
+							(node as IElement).content &&
+							((node as IElement).tagName == 'template' ||
+								(node as IElement).tagName == 'rn-slot')
+						) {
+							let el: IElement = {
+								nodeType: NodeType.ELEMENT,
+								isHelper: false,
+								tagName: (node as IElement).tagName,
+								is: (node as IElement).is,
+								names: (node as IElement).names,
+								attributes: (node as IElement).attributes,
+								content: (node as IElement).content,
+								contentTemplateIndex:
+									(
+										this._embeddedTemplates || (this._embeddedTemplates = [])
+									).push(
+										new Template(
+											{
+												nodeType: NodeType.BLOCK,
+												content: (node as IElement).content!,
+												elements: this._elements
+											},
+											{
+												_isEmbedded: true,
+												parent: this
+											}
+										)
+									) - 1
+							};
+
+							let elName = el.names && el.names![0];
+
+							if (elName) {
+								this._elements[elName] = el;
+								content[i] = {
+									nodeType: NodeType.ELEMENT_CALL,
+									name: elName
+								} as IElementCall;
+							} else {
+								content[i] = el;
+							}
+						} else {
+							let elName = (node as IElement).names && (node as IElement).names![0];
+
+							if (elName) {
+								this._elements[elName] = node as IElement;
+								content[i] = {
+									nodeType: NodeType.ELEMENT_CALL,
+									name: elName
+								} as IElementCall;
+							}
+						}
+					}
+				}
+			} else {
+				el.content = null;
+			}
+		} else {
+			el = {
+				nodeType: NodeType.ELEMENT,
+				isHelper: false,
+				tagName,
+				is: (attrs && attrs.isAttributeValue) || null,
+				names: elNames || null,
+				attributes: attrs || null,
+				content: content || null,
+				contentTemplateIndex:
+					content && (tagName == 'template' || tagName == 'rn-slot')
+						? (this._embeddedTemplates || (this._embeddedTemplates = [])).push(
+								new Template(
+									{
+										nodeType: NodeType.BLOCK,
+										content,
+										elements: this._elements
+									},
+									{
+										_isEmbedded: true,
+										parent: this
+									}
+								)
+						  ) - 1
+						: null
+			};
+		}
+
+		if (elName) {
+			this._elements[elName] = el;
+			(targetContent || (targetContent = [])).push({
+				nodeType: NodeType.ELEMENT_CALL,
+				name: elName
+			} as IElementCall);
+		} else {
+			(targetContent || (targetContent = [])).push(el);
+		}
+
+		return targetContent;
+	}
+
+	_readAttributes(
+		superElName: string | null,
+		isElementHelper: boolean
+	): IElementAttributes | null {
+		this._next('(');
+
+		if (this._skipWhitespacesAndComments() == ')') {
+			this._next();
+			return null;
+		}
+
+		let superCall: ISuperCall | null | undefined;
+
+		let isAttrValue: string | null | undefined;
+		let list: IElementAttributeList | undefined;
+
+		loop: for (let f = true; ; ) {
+			if (f && this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
+				let superElAttrs = superCall.element.attributes;
+
+				if (superElAttrs) {
+					isAttrValue = superElAttrs.isAttributeValue;
+					list = { __proto__: superElAttrs.list } as any;
+				}
+
+				this._skipWhitespacesAndComments();
+			} else {
+				let name = this._readName(reAttributeNameOrNothing);
+
+				if (!name) {
+					this._throwError('Expected attribute name');
+					throw 1;
+				}
+
+				if (this._skipWhitespacesAndComments() == '=') {
+					this._next();
+
+					let chr = this._skipWhitespaces();
+
+					if (chr == "'" || chr == '"' || chr == '`') {
+						if (name == 'is') {
+							isAttrValue = this._readString();
+						} else {
+							(list || (list = { __proto__: null, 'length=': 0 } as any))[
+								list![name] === undefined
+									? (list![name] = list!['length=']++)
+									: list![name]
+							] = {
+								name,
+								value: this._readString()
+							};
+						}
+
+						this._skipWhitespacesAndComments();
+					} else {
+						let value = '';
+
+						for (;;) {
+							if (!chr) {
+								this._throwError(
+									'Unexpected end of template. Expected "," or ")" to finalize attribute value.'
+								);
+							}
+
+							if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
+								if (name == 'is') {
+									isAttrValue = value.trim();
+								} else {
+									(list || (list = { __proto__: null, 'length=': 0 } as any))[
+										list![name] === undefined
+											? (list![name] = list!['length=']++)
+											: list![name]
+									] = {
+										name,
+										value: value.trim()
+									};
+								}
+
+								if (chr == '\n' || chr == '\r') {
+									this._skipWhitespacesAndComments();
+								}
+
+								break;
+							}
+
+							value += chr;
+							chr = this._next();
+						}
+					}
+				} else if (name == 'is') {
+					isAttrValue = '';
+				} else {
+					(list || (list = { __proto__: null, 'length=': 0 } as any))[
+						list![name] === undefined ? (list![name] = list!['length=']++) : list![name]
+					] = {
+						name,
+						value: ''
+					};
+				}
+			}
+
+			switch (this._chr) {
+				case ')': {
+					this._next();
+					break loop;
+				}
+				case ',': {
+					this._next();
+					this._skipWhitespacesAndComments();
+					break;
+				}
+				default: {
+					this._throwError(
+						'Unexpected end of template. Expected "," or ")" to finalize attribute value.'
+					);
+				}
+			}
+
+			if (f) {
+				f = false;
+			}
+		}
+
+		return isAttrValue == null && !list
+			? null
+			: {
+					isAttributeValue: isAttrValue || null,
+					list: list || null
+			  };
+	}
+
+	_readSuperCall(defaultElName: string | null): ISuperCall | null {
+		reSuperCallOrNothing.lastIndex = this._pos;
+		let match = reSuperCallOrNothing.exec(this.template)!;
+
+		if (match[0]) {
+			if (!this.parent) {
+				this._throwError('SuperCall is impossible if no parent is defined');
+			}
+
+			let elName =
+				match[1] ||
+				defaultElName ||
+				(this._throwError('SuperCall.elementName is required') as any);
+			let el =
+				(elName.charAt(0) == '@' && this.parent!._elements[elName.slice(1)]) ||
+				this.parent!._elements[elName];
+
+			if (!el) {
+				this._throwError(`Element "${elName}" is not defined`);
+			}
+
+			this._chr = this.template.charAt((this._pos = reSuperCallOrNothing.lastIndex));
+
+			return {
+				nodeType: NodeType.SUPER_CALL,
+				elementName: elName,
+				element: el
+			};
+		}
+
+		return null;
+	}
+
+	_readName(reNameOrNothing: RegExp): string | null {
+		reNameOrNothing.lastIndex = this._pos;
+		let name = reNameOrNothing.exec(this.template)![0];
+
+		if (name) {
+			this._chr = this.template.charAt((this._pos = reNameOrNothing.lastIndex));
+			return name;
+		}
+
+		return null;
+	}
+
+	_readString(): string {
+		let quoteChar = this._chr;
+
+		// if (process.env.DEBUG && quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
+		// 	this._throwError('Expected string');
+		// }
+
+		let str = '';
+
+		for (let chr = this._next(); chr; ) {
+			if (chr == quoteChar) {
+				this._next();
+				return quoteChar == '`' ? normalizeMultilineText(str) : str;
+			}
+
+			if (chr == '\\') {
+				chr = this._next();
+
+				if (chr == 'x' || chr == 'u') {
+					let pos = this._pos + 1;
+
+					let hexadecimal = chr == 'x';
+					let code = parseInt(this.template.slice(pos, pos + (hexadecimal ? 2 : 4)), 16);
+
+					if (!isFinite(code)) {
+						this._throwError(
+							`Invalid ${hexadecimal ? 'hexadecimal' : 'unicode'} escape sequence`,
+							pos
+						);
+					}
+
+					str += String.fromCharCode(code);
+					chr = this._chr = this.template.charAt(
+						(this._pos = pos + (hexadecimal ? 2 : 4))
+					);
+				} else if (chr in escapee) {
+					str += escapee[chr];
+					chr = this._next();
+				} else {
+					this._throwError('Invalid escape sequence', this._pos - 1);
+				}
+			} else {
+				if (quoteChar != '`' && (chr == '\n' || chr == '\r')) {
+					this._throwError('Unexpected line break in string literal');
+				}
+
+				str += chr;
+				chr = this._next();
+			}
+		}
+
+		throw 1;
+	}
+
+	_skipWhitespaces(): string {
+		let chr = this._chr;
+
+		while (chr && reWhitespace.test(chr)) {
+			chr = this._next();
+		}
+
+		return chr;
+	}
+
+	_skipWhitespacesAndComments(): string {
+		let chr = this._chr;
+
+		loop1: for (;;) {
+			if (chr == '/') {
+				switch (this.template.charAt(this._pos + 1)) {
+					case '/': {
+						this._next();
+						while ((chr = this._next()) && chr != '\n' && chr != '\r') {}
+						break;
+					}
+					case '*': {
+						let pos = this._pos;
+
+						this._next();
+
+						loop2: for (;;) {
+							switch (this._next()) {
+								case '*': {
+									if (this._next() == '/') {
+										chr = this._next();
+										break loop2;
+									}
+
+									break;
+								}
+								case '': {
+									this._throwError(
+										'Expected "*/" to close multiline comment',
+										pos
+									);
+								}
+							}
+						}
+
+						break;
+					}
+					default: {
+						break loop1;
+					}
+				}
+			} else if (chr && reWhitespace.test(chr)) {
+				chr = this._next();
+			} else {
+				break;
+			}
+		}
+
+		return chr;
+	}
+
+	_next(current?: string): string {
+		if (current && current != this._chr) {
+			this._throwError(`Expected "${current}" instead of "${this._chr}"`);
+		}
+
+		return (this._chr = this.template.charAt(++this._pos));
+	}
+
+	_throwError(msg: string, pos = this._pos) {
+		let n = pos < 40 ? 40 - pos : 0;
+
+		throw new SyntaxError(
+			msg +
+				'\n' +
+				this.template
+					.slice(pos < 40 ? 0 : pos - 40, pos + 20)
+					.replace(/\t/g, ' ')
+					.replace(/\n|\r\n?/g, match => {
+						if (match.length == 2) {
+							n++;
+						}
+
+						return '↵';
+					}) +
+				'\n' +
+				'----------------------------------------'.slice(n) +
+				'↑'
+		);
+	}
+
+	extend(
+		template: string | IBlock,
+		options?: {
+			blockName?: string;
+			_isEmbedded?: boolean;
+		}
+	): Template {
+		return new Template(template, {
+			__proto__: options,
+			parent: this
+		} as any);
 	}
 
 	setBlockName(blockName: string | Array<string>): Template {
@@ -126,341 +916,157 @@ export class Template {
 		return this;
 	}
 
-	render(): string {
-		return (this._renderer || this._compileRenderers()).call(this);
+	render(component?: BaseComponent): DocumentFragment {
+		let block = this.parse(component);
+
+		return renderContent(
+			document.createDocumentFragment(),
+			this,
+			block.content || block.elements['@root'].content
+		);
 	}
+}
 
-	_compileRenderers(): TRenderer {
-		let parent = this.parent;
-
-		this._elements = [
-			(this._currentElement = {
-				name: null,
-				superCall: false,
-				source: null,
-				innerSource: []
-			})
-		];
-		let elMap = (this._elementMap = {} as { [elName: string]: IElement });
-
-		if (parent) {
-			this._renderer = parent._renderer || parent._compileRenderers();
-		}
-
-		this._elementRendererMap = { __proto__: parent && parent._elementRendererMap } as any;
-
-		let content = this.nelm.content;
-		let contentLength = content.length;
-
-		if (contentLength) {
-			for (let i = 0; i < contentLength; i++) {
-				let node = content[i];
-				this._compileNode(
-					node,
-					node.nodeType == NodeType.ELEMENT
-						? (node as INelmElement).tagName == 'svg'
-						: false
-				);
-			}
-
-			Object.keys(elMap).forEach(function(this: IElementRendererMap, name: string) {
-				let el = elMap[name];
-
-				this[name] = Function(`return ${el.source!.join(' + ')};`) as any;
-
-				if (el.superCall) {
-					let inner = Function(
-						'$super',
-						`return ${el.innerSource.join(' + ')};`
-					) as TElementRenderer;
-					let parentElRendererMap = parent && parent._elementRendererMap;
-
-					this[name + '/content'] = function() {
-						return inner.call(this, parentElRendererMap);
-					};
-				} else {
-					this[name + '/content'] = Function(
-						`return ${el.innerSource.join(' + ') || "''"};`
-					) as any;
+function renderContent<T extends Node = Element>(
+	targetNode: T,
+	template: Template,
+	content: TContent | null,
+	isSVG?: boolean
+): T {
+	if (content) {
+		for (let node of content) {
+			switch (node.nodeType) {
+				case NodeType.ELEMENT_CALL: {
+					node = template._elements[(node as IElementCall).name];
+					break;
 				}
-			}, this._elementRendererMap);
+				case NodeType.SUPER_CALL: {
+					renderContent(
+						targetNode,
+						template,
+						(node as ISuperCall).element.content,
+						isSVG
+					);
 
-			if (!parent) {
-				return (this._renderer = Function(
-					`return ${this._currentElement.innerSource.join(' + ') || "''"};`
-				) as any);
+					continue;
+				}
 			}
-		} else if (!parent) {
-			return (this._renderer = () => '');
-		}
 
-		return this._renderer;
-	}
-
-	_compileNode(node: INode, isSVG: boolean, parentElName?: string) {
-		switch (node.nodeType) {
-			case NodeType.ELEMENT: {
-				let parent = this.parent;
-				let els = this._elements;
-				let el = node as INelmElement;
-				let tagName = el.tagName;
-				let isHelper = el.isHelper;
-				let elNames = el.names;
-				let elName = elNames && (isHelper ? '@' + elNames[0] : elNames[0]);
-				let elAttrs = el.attributes;
-				let content = el.content;
-
-				if (elNames) {
-					if (elName) {
-						if (tagName) {
-							this._tagNameMap[elName] = tagName;
-						} else {
-							// Не надо добавлять ` || 'div'`,
-							// тк. ниже tagName используется как имя хелпера.
-							tagName = parent && parent._tagNameMap[elName];
+			switch (node.nodeType) {
+				case NodeType.ELEMENT: {
+					if ((node as IElement).isHelper) {
+						renderContent(targetNode, template, (node as IElement).content, isSVG);
+					} else {
+						if ((node as IElement).tagName == 'svg') {
+							isSVG = true;
 						}
 
-						let renderedAttrs!: string;
+						let el: Element;
 
-						if (elAttrs && (elAttrs.list.length || elAttrs.superCall)) {
-							let attrListMap =
-								this._attributeListMap ||
-								(this._attributeListMap = {
-									__proto__: (parent && parent._attributeListMap) || null
-								} as any);
-							let attrCountMap =
-								this._attributeCountMap ||
-								(this._attributeCountMap = {
-									__proto__: (parent && parent._attributeCountMap) || null
-								} as any);
+						if (isSVG) {
+							el = document.createElementNS(
+								'http://www.w3.org/2000/svg',
+								(node as IElement).tagName
+							);
+						} else if ((node as IElement).is) {
+							el = (window as any).innerHTML(
+								document.createElement('div'),
+								`<${(node as IElement).tagName} is="${(node as IElement).is}">`
+							).firstChild as Element;
+						} else {
+							el = document.createElement((node as IElement).tagName);
+						}
 
-							let elAttrsSuperCall = elAttrs.superCall;
-							let attrList: { [key: string]: any };
-							let attrCount: number;
+						if ((node as IElement).names) {
+							if (isSVG) {
+								el.setAttribute(
+									'class',
+									renderElementClasses(
+										template._elementNamesTemplate,
+										(node as IElement).names!
+									)
+								);
+							} else {
+								el.className = renderElementClasses(
+									template._elementNamesTemplate,
+									(node as IElement).names!
+								);
+							}
+						}
 
-							if (elAttrsSuperCall) {
-								if (!parent) {
-									throw new TypeError(
-										'Parent template is required when using super'
+						let attrList =
+							(node as IElement).attributes && (node as IElement).attributes!.list;
+
+						if (attrList) {
+							for (let i = 0, l = attrList['length=']; i < l; i++) {
+								let attr = attrList[i];
+								let attrName = attr.name;
+
+								if (isSVG) {
+									if (
+										attrName == 'xlink:href' ||
+										attrName == 'href' ||
+										attrName == 'xmlns'
+									) {
+										el.setAttributeNS(
+											attrName == 'xmlns'
+												? 'http://www.w3.org/2000/xmlns/'
+												: 'http://www.w3.org/1999/xlink',
+											attrName,
+											attr.value
+										);
+									} else if (attrName == 'class') {
+										el.setAttribute(
+											attrName,
+											(el.getAttribute('class') || '') + attr.value
+										);
+									} else {
+										el.setAttribute(attrName, attr.value);
+									}
+								} else if (attrName == 'class') {
+									el.className += attr.value;
+								} else {
+									el.setAttribute(
+										snakeCaseAttributeName(attrName, true),
+										attr.value
 									);
 								}
-
-								attrList = attrListMap[elName] = {
-									__proto__:
-										parent._attributeListMap[
-											elAttrsSuperCall.elementName || elName
-										] || null
-								};
-								attrCount = attrCountMap[elName] =
-									parent._attributeCountMap[
-										elAttrsSuperCall.elementName || elName
-									] || 0;
-							} else {
-								attrList = attrListMap[elName] = { __proto__: null };
-								attrCount = attrCountMap[elName] = 0;
-							}
-
-							for (let attr of elAttrs.list) {
-								let name = isSVG
-									? attr.name
-									: snakeCaseAttributeName(attr.name, true);
-								let value = attr.value;
-								let index = attrList[name];
-
-								attrList[
-									index === undefined ? attrCount : index
-								] = ` ${name}="${value && escapeString(escapeHTML(value))}"`;
-
-								if (index === undefined) {
-									attrList[name] = attrCount;
-									attrCountMap[elName] = ++attrCount;
-								}
-							}
-
-							if (!isHelper) {
-								attrList = {
-									__proto__: attrList,
-									length: attrCount
-								};
-
-								if (attrList['class'] !== undefined) {
-									attrList[attrList['class']] =
-										` class="' + this._renderElementClasses(['${elNames.join(
-											"','"
-										)}']) + ' ` +
-										attrList[attrList['class']].slice(' class="'.length);
-									renderedAttrs = join.call(attrList, '');
-								} else {
-									renderedAttrs =
-										` class="' + this._renderElementClasses(['${elNames.join(
-											"','"
-										)}']) + '"` + join.call(attrList, '');
-								}
-							}
-						} else if (!isHelper) {
-							renderedAttrs = ` class="' + this._renderElementClasses(['${elNames.join(
-								"','"
-							)}']) + '"`;
-						}
-
-						let currentEl = {
-							name: elName,
-							superCall: false,
-							source: isHelper
-								? [`this._elementRendererMap['${elName}/content'].call(this)`]
-								: [
-										`'<${tagName ||
-											'div'}${renderedAttrs}' + this.onBeforeNamedElementOpeningTagClosing(['${elNames.join(
-											"','"
-										)}']) + '>'`
-								  ],
-							innerSource: []
-						};
-
-						if (!isHelper) {
-							if (content && content.length) {
-								currentEl.source.push(
-									`this._elementRendererMap['${elName}/content'].call(this) + '</${tagName ||
-										'div'}>'`
-								);
-							} else if (content || !tagName || !selfClosingTagMap.has(tagName)) {
-								currentEl.source.push(`'</${tagName || 'div'}>'`);
 							}
 						}
 
-						els.push((this._currentElement = currentEl));
-						this._elementMap[elName] = currentEl;
-					} else if (!isHelper) {
-						if (elAttrs && elAttrs.list.length) {
-							let hasClassAttr = false;
-							let attrs = '';
-
-							for (let attr of elAttrs.list) {
-								let value = attr.value;
-
-								if (attr.name == 'class') {
-									hasClassAttr = true;
-									attrs += ` class="' + this._renderElementClasses(['${elNames
-										.slice(1)
-										.join("','")}']) + '${
-										value ? ' ' + escapeString(escapeHTML(value)) : ''
-									}"`;
-								} else {
-									attrs += ` ${
-										isSVG ? attr.name : snakeCaseAttributeName(attr.name, true)
-									}="${value && escapeString(escapeHTML(value))}"`;
-								}
-							}
-
-							this._currentElement.innerSource.push(
-								`'<${tagName || 'div'}${
-									hasClassAttr
-										? attrs
-										: ` class="' + this._renderElementClasses(['${elNames
-												.slice(1)
-												.join("','")}']) + '"` + attrs
-								}' + this.onBeforeNamedElementOpeningTagClosing(['${elNames
-									.slice(1)
-									.join("','")}']) + '>'`
-							);
+						if ((node as IElement).contentTemplateIndex !== null) {
+							(el as any).contentTemplate = template._embeddedTemplates![
+								(node as IElement).contentTemplateIndex!
+							];
 						} else {
-							this._currentElement.innerSource.push(
-								`'<${tagName ||
-									'div'} class="' + this._renderElementClasses(['${elNames
-									.slice(1)
-									.join(
-										"','"
-									)}']) + '"' + this.onBeforeNamedElementOpeningTagClosing(['${elNames
-									.slice(1)
-									.join("','")}']) + '>'`
-							);
+							renderContent(el, template, (node as IElement).content, isSVG);
 						}
-					}
-				} else if (!isHelper) {
-					this._currentElement.innerSource.push(
-						`'<${tagName || 'div'}${
-							elAttrs
-								? elAttrs.list
-										.map(
-											attr =>
-												` ${
-													isSVG
-														? attr.name
-														: snakeCaseAttributeName(attr.name, true)
-												}="${attr.value &&
-													escapeString(escapeHTML(attr.value))}"`
-										)
-										.join('')
-								: ''
-						}>'`
-					);
-				}
 
-				if (isHelper) {
-					if (!tagName) {
-						throw new TypeError('"tagName" is required');
+						targetNode.appendChild(el);
 					}
 
-					let helper = Template.helpers[tagName];
-
-					if (!helper) {
-						throw new TypeError(`Helper "${tagName}" is not defined`);
-					}
-
-					content = helper(el);
+					break;
 				}
-
-				if (content) {
-					for (let node of content) {
-						this._compileNode(
-							node,
-							isSVG ||
-								(node.nodeType == NodeType.ELEMENT
-									? (node as INelmElement).tagName == 'svg'
-									: false),
-							elName || parentElName
-						);
-					}
+				case NodeType.TEXT: {
+					targetNode.appendChild(document.createTextNode((node as ITextNode).value));
+					break;
 				}
-
-				if (elName) {
-					els.pop();
-					this._currentElement = els[els.length - 1];
-					this._currentElement.innerSource.push(
-						`this._elementRendererMap['${elName}'].call(this)`
-					);
-				} else if (!isHelper && (content || !tagName || !selfClosingTagMap.has(tagName))) {
-					this._currentElement.innerSource.push(`'</${tagName || 'div'}>'`);
-				}
-
-				break;
-			}
-			case NodeType.TEXT: {
-				this._currentElement.innerSource.push(
-					`'${(node as ITextNode).value && escapeString((node as ITextNode).value)}'`
-				);
-
-				break;
-			}
-			case NodeType.SUPER_CALL: {
-				this._currentElement.superCall = true;
-				this._currentElement.innerSource.push(
-					`$super['${(node as ISuperCall).elementName ||
-						parentElName}/content'].call(this)`
-				);
-
-				break;
 			}
 		}
 	}
 
-	_renderElementClasses(elNames: Array<string>): string {
-		let elClasses = '';
+	return targetNode;
+}
 
-		for (let i = 0, l = elNames.length; i < l; i++) {
-			elClasses += this._elementNamesTemplate.join(elNames[i] + ' ');
-		}
+function renderElementClasses(
+	elementNamesTemplate: Array<string>,
+	elNames: Array<string | null>
+): string {
+	let elClasses = '';
 
-		return elClasses.slice(0, -1);
+	for (let i = elNames[0] ? 0 : 1, l = elNames.length; i < l; i++) {
+		elClasses += elementNamesTemplate.join(elNames[i] + ' ');
 	}
+
+	return elClasses;
 }

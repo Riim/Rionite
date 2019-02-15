@@ -10,7 +10,7 @@ import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { cloneNode } from '../lib/cloneNode';
-import { Template } from '../Template2';
+import { Template } from '../Template';
 
 const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot[slotContentMap]');
 

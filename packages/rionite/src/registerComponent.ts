@@ -14,7 +14,7 @@ import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
 import { reflectConstructFeature } from './lib/Features';
-import { Template } from './Template2';
+import { Template } from './Template';
 
 const push = Array.prototype.push;
 

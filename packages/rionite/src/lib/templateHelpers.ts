@@ -1,4 +1,4 @@
-import { NodeType, Template } from '../Template2';
+import { NodeType, Template } from '../Template';
 
 ['if-then', 'if-else', 'repeat'].forEach(name => {
 	Template.helpers[name] = el => {

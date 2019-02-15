@@ -25,7 +25,7 @@ export {
 } from './BaseComponent';
 export { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
-export { NodeType as TemplateNodeType, IBlock as ITemplateBlock, Template } from './Template2';
+export { NodeType as TemplateNodeType, IBlock as ITemplateBlock, Template } from './Template';
 export { registerComponent } from './registerComponent';
 export { RnIfThen } from './components/RnIfThen';
 export { RnIfElse } from './components/RnIfElse';
