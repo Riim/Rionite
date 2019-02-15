@@ -1,4 +1,5 @@
 import { EventEmitter, IEvent } from 'cellx';
+import { BaseComponent } from './BaseComponent';
 export interface IDisposable {
     dispose(): any;
     [key: string]: any;
@@ -18,17 +19,18 @@ export interface IDisposableCallback extends IDisposable {
 }
 export declare type TListeningTarget = EventEmitter | EventTarget | Array<EventEmitter | EventTarget> | NodeList | HTMLCollection;
 export declare type TListener = (evt: IEvent | Event) => any;
-export declare class DisposableMixin implements IDisposable {
+export declare class DisposableComponent extends BaseComponent implements IDisposable {
     _disposables: {
         [id: string]: IDisposable;
     };
-    listenTo(target: TListeningTarget | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
-    listenTo(target: TListeningTarget | Array<TListeningTarget>, listeners: {
+    listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
+    listenTo(target: TListeningTarget | string | Array<TListeningTarget>, listeners: {
         [type: string]: TListener | Array<TListener>;
     }, context?: any, useCapture?: boolean): IDisposableListening;
     _listenTo(target: EventEmitter | EventTarget, type: string, listener: TListener, context: any, useCapture: boolean): IDisposableListening;
     setTimeout(callback: Function, delay: number): IDisposableTimeout;
     setInterval(callback: Function, delay: number): IDisposableInterval;
     registerCallback(callback: Function): IDisposableCallback;
-    dispose(): DisposableMixin;
+    _detach(): void;
+    dispose(): DisposableComponent;
 }

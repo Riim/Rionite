@@ -1,5 +1,8 @@
 import { nextUID } from '@riim/next-uid';
 import { EventEmitter, IEvent } from 'cellx';
+import { BaseComponent } from './BaseComponent';
+import { componentConstructorMap } from './componentConstructorMap';
+import { elementConstructorMap } from './elementConstructorMap';
 
 export interface IDisposable {
 	dispose(): any;
@@ -32,29 +35,33 @@ export type TListeningTarget =
 
 export type TListener = (evt: IEvent | Event) => any;
 
-export class DisposableMixin implements IDisposable {
+export class DisposableComponent extends BaseComponent implements IDisposable {
 	_disposables: { [id: string]: IDisposable } = {};
 
 	listenTo(
-		target: TListeningTarget | Array<TListeningTarget>,
+		target: TListeningTarget | string | Array<TListeningTarget>,
 		type: string | Array<string>,
 		listener: TListener | Array<TListener>,
 		context?: any,
 		useCapture?: boolean
 	): IDisposableListening;
 	listenTo(
-		target: TListeningTarget | Array<TListeningTarget>,
+		target: TListeningTarget | string | Array<TListeningTarget>,
 		listeners: { [type: string]: TListener | Array<TListener> },
 		context?: any,
 		useCapture?: boolean
 	): IDisposableListening;
 	listenTo(
-		target: TListeningTarget | Array<TListeningTarget>,
+		target: TListeningTarget | string | Array<TListeningTarget>,
 		type: string | Array<string> | { [type: string]: TListener | Array<TListener> },
 		listener?: TListener | Array<TListener> | any,
 		context?: any,
 		useCapture?: boolean
 	): IDisposableListening {
+		if (typeof target == 'string') {
+			target = this.$<TListeningTarget>(target)!;
+		}
+
 		let listenings: Array<IDisposableListening>;
 
 		if (typeof type == 'object') {
@@ -88,7 +95,7 @@ export class DisposableMixin implements IDisposable {
 				}
 			} else {
 				return this._listenTo(
-					target,
+					target as EventEmitter | EventTarget,
 					type,
 					listener,
 					context !== undefined ? context : this,
@@ -122,6 +129,41 @@ export class DisposableMixin implements IDisposable {
 		context: any,
 		useCapture: boolean
 	): IDisposableListening {
+		if (target instanceof BaseComponent) {
+			if (type.charAt(0) == '<') {
+				let index = type.indexOf('>', 2);
+				let targetType = type.slice(1, index);
+
+				if (targetType != '*') {
+					let targetConstr =
+						elementConstructorMap.has(targetType) &&
+						componentConstructorMap.get(targetType);
+
+					if (!targetConstr) {
+						throw new TypeError(`Component "${targetType}" is not defined`);
+					}
+
+					let inner = listener;
+
+					listener = function(evt) {
+						if (evt.target instanceof (targetConstr as any)) {
+							return inner.call(this, evt);
+						}
+					};
+				}
+
+				type = type.slice(index + 1);
+			} else if (type.indexOf(':') == -1) {
+				let inner = listener;
+
+				listener = function(evt) {
+					if (evt.target == target) {
+						return inner.call(this, evt);
+					}
+				};
+			}
+		}
+
 		if (target instanceof EventEmitter) {
 			target.on(type, listener, context);
 		} else if (target.addEventListener) {
@@ -223,7 +265,14 @@ export class DisposableMixin implements IDisposable {
 		return registeredCallback;
 	}
 
-	dispose(): DisposableMixin {
+	_detach() {
+		super._detach();
+		this.dispose();
+	}
+
+	dispose(): DisposableComponent {
+		this._freezeBindings();
+
 		let disposables = this._disposables;
 
 		for (let id in disposables) {

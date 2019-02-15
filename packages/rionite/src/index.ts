@@ -2,16 +2,6 @@ import './lib/polyfills';
 import './lib/templateHelpers';
 
 export { Container, Inject } from './DI';
-export {
-	IDisposable,
-	IDisposableListening,
-	IDisposableTimeout,
-	IDisposableInterval,
-	IDisposableCallback,
-	TListeningTarget,
-	TListener,
-	DisposableMixin
-} from './DisposableMixin';
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
@@ -26,6 +16,16 @@ export {
 	IComponentEvents,
 	BaseComponent
 } from './BaseComponent';
+export {
+	IDisposable,
+	IDisposableListening,
+	IDisposableTimeout,
+	IDisposableInterval,
+	IDisposableCallback,
+	TListeningTarget,
+	TListener,
+	DisposableComponent
+} from './DisposableComponent';
 export { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export { NodeType as TemplateNodeType, IBlock as ITemplateBlock, Template } from './Template2';

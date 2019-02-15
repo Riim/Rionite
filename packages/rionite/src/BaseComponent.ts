@@ -7,16 +7,9 @@ import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx'
 import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
-import { componentConstructorMap } from './componentConstructorMap';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS } from './Constants';
 import { Inject } from './DI';
-import {
-	DisposableMixin,
-	IDisposableListening,
-	TListener,
-	TListeningTarget
-	} from './DisposableMixin';
 import { elementConstructorMap } from './elementConstructorMap';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { handledEvents } from './handledEvents';
@@ -80,7 +73,7 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	};
 }
 
-export class BaseComponent extends EventEmitter implements DisposableMixin {
+export class BaseComponent extends EventEmitter {
 	static elementIs: string;
 	static elementExtends: string | null = null;
 
@@ -101,8 +94,6 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 	@Inject
 	logger: Logger;
-
-	_disposables: typeof DisposableMixin.prototype._disposables;
 
 	_ownerComponent: BaseComponent | undefined;
 
@@ -160,7 +151,6 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 	constructor(el?: HTMLElement) {
 		super();
-		DisposableMixin.call(this);
 
 		let constr = this.constructor as typeof BaseComponent;
 
@@ -192,92 +182,6 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 		handleEvent(evt);
 	}
-
-	listenTo(
-		target: TListeningTarget | string | Array<TListeningTarget>,
-		type: string | Array<string>,
-		listener: TListener | Array<TListener>,
-		context?: any,
-		useCapture?: boolean
-	): IDisposableListening;
-	listenTo(
-		target: TListeningTarget | string | Array<TListeningTarget>,
-		listeners: { [type: string]: TListener | Array<TListener> },
-		context?: any,
-		useCapture?: boolean
-	): IDisposableListening;
-	listenTo(
-		target: TListeningTarget | string | Array<TListeningTarget>,
-		type: string | Array<string> | { [type: string]: TListener | Array<TListener> },
-		listener?: TListener | Array<TListener> | any,
-		context?: any,
-		useCapture?: boolean
-	): IDisposableListening {
-		return DisposableMixin.prototype.listenTo.call(
-			this,
-			typeof target == 'string' ? this.$<any>(target) : target,
-			type,
-			listener,
-			context,
-			useCapture
-		);
-	}
-
-	_listenTo(
-		target: EventEmitter | EventTarget,
-		type: string,
-		listener: TListener,
-		context: any,
-		useCapture: boolean
-	): IDisposableListening {
-		if (target instanceof BaseComponent) {
-			if (type.charAt(0) == '<') {
-				let index = type.indexOf('>', 2);
-				let targetType = type.slice(1, index);
-
-				if (targetType != '*') {
-					let targetConstr =
-						elementConstructorMap.has(targetType) &&
-						componentConstructorMap.get(targetType);
-
-					if (!targetConstr) {
-						throw new TypeError(`Component "${targetType}" is not defined`);
-					}
-
-					let inner = listener;
-
-					listener = function(evt) {
-						if (evt.target instanceof (targetConstr as any)) {
-							return inner.call(this, evt);
-						}
-					};
-				}
-
-				type = type.slice(index + 1);
-			} else if (type.indexOf(':') == -1) {
-				let inner = listener;
-
-				listener = function(evt) {
-					if (evt.target == target) {
-						return inner.call(this, evt);
-					}
-				};
-			}
-		}
-
-		return DisposableMixin.prototype._listenTo.call(
-			this,
-			target,
-			type,
-			listener,
-			context,
-			useCapture
-		);
-	}
-
-	setTimeout: typeof DisposableMixin.prototype.setTimeout;
-	setInterval: typeof DisposableMixin.prototype.setInterval;
-	registerCallback: typeof DisposableMixin.prototype.registerCallback;
 
 	_attach() {
 		this._attached = true;
@@ -408,14 +312,7 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 
 	_detach() {
 		this._attached = false;
-
 		this.elementDetached();
-		this.dispose();
-	}
-
-	dispose(): BaseComponent {
-		this._freezeBindings();
-		return DisposableMixin.prototype.dispose.call(this);
 	}
 
 	_freezeBindings() {
@@ -509,19 +406,6 @@ export class BaseComponent extends EventEmitter implements DisposableMixin {
 		return elList;
 	}
 }
-
-let disposableMixinProto = DisposableMixin.prototype;
-let baseComponentProto = BaseComponent.prototype;
-
-Object.getOwnPropertyNames(disposableMixinProto).forEach(name => {
-	if (!(name in baseComponentProto)) {
-		Object.defineProperty(
-			baseComponentProto,
-			name,
-			Object.getOwnPropertyDescriptor(disposableMixinProto, name)!
-		);
-	}
-});
 
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);

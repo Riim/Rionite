@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("@riim/symbol-polyfill"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/get-uid"), require("@riim/logger"), require("@riim/move-content"), require("@riim/set-attribute"), require("escape-string"), require("@riim/next-tick"));
+		module.exports = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("@riim/symbol-polyfill"), require("@riim/gettext"), require("cellx"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/get-uid"), require("@riim/logger"), require("@riim/move-content"), require("@riim/set-attribute"), require("escape-string"), require("@riim/next-uid"), require("@riim/next-tick"));
 	else if(typeof define === 'function' && define.amd)
-		define(["@riim/kebab-case", "@riim/rionite-snake-case-attribute-name", "@riim/map-set-polyfill", "@riim/symbol-polyfill", "@riim/next-uid", "cellx", "@riim/gettext", "@riim/escape-html", "@riim/is-regexp", "@riim/defer", "@riim/lower-case-first-word", "@riim/get-uid", "@riim/logger", "@riim/move-content", "@riim/set-attribute", "escape-string", "@riim/next-tick"], factory);
+		define(["@riim/kebab-case", "@riim/rionite-snake-case-attribute-name", "@riim/map-set-polyfill", "@riim/symbol-polyfill", "@riim/gettext", "cellx", "@riim/escape-html", "@riim/is-regexp", "@riim/defer", "@riim/lower-case-first-word", "@riim/get-uid", "@riim/logger", "@riim/move-content", "@riim/set-attribute", "escape-string", "@riim/next-uid", "@riim/next-tick"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("@riim/symbol-polyfill"), require("@riim/next-uid"), require("cellx"), require("@riim/gettext"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/get-uid"), require("@riim/logger"), require("@riim/move-content"), require("@riim/set-attribute"), require("escape-string"), require("@riim/next-tick"));
+		exports["rionite"] = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("@riim/symbol-polyfill"), require("@riim/gettext"), require("cellx"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/get-uid"), require("@riim/logger"), require("@riim/move-content"), require("@riim/set-attribute"), require("escape-string"), require("@riim/next-uid"), require("@riim/next-tick"));
 	else
-		root["rionite"] = factory(root["@riim/kebab-case"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["@riim/symbol-polyfill"], root["@riim/next-uid"], root["cellx"], root["@riim/gettext"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/get-uid"], root["@riim/logger"], root["@riim/move-content"], root["@riim/set-attribute"], root["escape-string"], root["@riim/next-tick"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__12__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__22__, __WEBPACK_EXTERNAL_MODULE__23__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__29__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__32__, __WEBPACK_EXTERNAL_MODULE__33__, __WEBPACK_EXTERNAL_MODULE__36__, __WEBPACK_EXTERNAL_MODULE__38__, __WEBPACK_EXTERNAL_MODULE__51__) {
+		root["rionite"] = factory(root["@riim/kebab-case"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["@riim/symbol-polyfill"], root["@riim/gettext"], root["cellx"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/get-uid"], root["@riim/logger"], root["@riim/move-content"], root["@riim/set-attribute"], root["escape-string"], root["@riim/next-uid"], root["@riim/next-tick"]);
+})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__20__, __WEBPACK_EXTERNAL_MODULE__21__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__29__, __WEBPACK_EXTERNAL_MODULE__30__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__34__, __WEBPACK_EXTERNAL_MODULE__36__, __WEBPACK_EXTERNAL_MODULE__49__, __WEBPACK_EXTERNAL_MODULE__51__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -106,27 +106,27 @@ __webpack_require__(2);
 var DI_1 = __webpack_require__(6);
 exports.Container = DI_1.Container;
 exports.Inject = DI_1.Inject;
-var DisposableMixin_1 = __webpack_require__(10);
-exports.DisposableMixin = DisposableMixin_1.DisposableMixin;
-var formatters_1 = __webpack_require__(13);
+var formatters_1 = __webpack_require__(10);
 exports.formatters = formatters_1.formatters;
-var Component_1 = __webpack_require__(15);
+var Component_1 = __webpack_require__(12);
 exports.Component = Component_1.Component;
-var Param_1 = __webpack_require__(28);
+var Param_1 = __webpack_require__(26);
 exports.Param = Param_1.Param;
-var Constants_1 = __webpack_require__(24);
+var Constants_1 = __webpack_require__(22);
 exports.KEY_PARAMS_CONFIG = Constants_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAMS = Constants_1.KEY_PARAMS;
-var BaseComponent_1 = __webpack_require__(30);
+var BaseComponent_1 = __webpack_require__(28);
 exports.BaseComponent = BaseComponent_1.BaseComponent;
-var ElementProtoMixin_1 = __webpack_require__(26);
+var DisposableComponent_1 = __webpack_require__(48);
+exports.DisposableComponent = DisposableComponent_1.DisposableComponent;
+var ElementProtoMixin_1 = __webpack_require__(24);
 exports.KEY_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_ELEMENT_CONNECTED;
-var ComponentParams_1 = __webpack_require__(20);
+var ComponentParams_1 = __webpack_require__(18);
 exports.ComponentParams = ComponentParams_1.ComponentParams;
 var Template2_1 = __webpack_require__(3);
 exports.TemplateNodeType = Template2_1.NodeType;
 exports.Template = Template2_1.Template;
-var registerComponent_1 = __webpack_require__(16);
+var registerComponent_1 = __webpack_require__(13);
 exports.registerComponent = registerComponent_1.registerComponent;
 var RnIfThen_1 = __webpack_require__(50);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
@@ -1100,173 +1100,7 @@ exports.nativeCustomElementsFeature = nativeCustomElementsFeature_;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_uid_1 = __webpack_require__(11);
-const cellx_1 = __webpack_require__(12);
-class DisposableMixin {
-    constructor() {
-        this._disposables = {};
-    }
-    listenTo(target, type, listener, context, useCapture) {
-        let listenings;
-        if (typeof type == 'object') {
-            listenings = [];
-            if (Array.isArray(type)) {
-                for (let i = 0, l = type.length; i < l; i++) {
-                    listenings.push(this.listenTo(target, type[i], listener, context, useCapture));
-                }
-            }
-            else {
-                for (let name in type) {
-                    listenings.push(this.listenTo(target, name, type[name], listener, context));
-                }
-            }
-        }
-        else {
-            if (Array.isArray(target) ||
-                target instanceof NodeList ||
-                target instanceof HTMLCollection) {
-                listenings = [];
-                for (let i = 0, l = target.length; i < l; i++) {
-                    listenings.push(this.listenTo(target[i], type, listener, context, useCapture));
-                }
-            }
-            else if (Array.isArray(listener)) {
-                listenings = [];
-                for (let i = 0, l = listener.length; i < l; i++) {
-                    listenings.push(this.listenTo(target, type, listener[i], context, useCapture));
-                }
-            }
-            else {
-                return this._listenTo(target, type, listener, context !== undefined ? context : this, useCapture || false);
-            }
-        }
-        let id = next_uid_1.nextUID();
-        let stopListening = () => {
-            for (let i = listenings.length; i;) {
-                listenings[--i].stop();
-            }
-            delete this._disposables[id];
-        };
-        let listening = (this._disposables[id] = {
-            stop: stopListening,
-            dispose: stopListening
-        });
-        return listening;
-    }
-    _listenTo(target, type, listener, context, useCapture) {
-        if (target instanceof cellx_1.EventEmitter) {
-            target.on(type, listener, context);
-        }
-        else if (target.addEventListener) {
-            if (target !== context) {
-                listener = listener.bind(context);
-            }
-            target.addEventListener(type, listener, useCapture);
-        }
-        else {
-            throw new TypeError('Unable to add a listener');
-        }
-        let id = next_uid_1.nextUID();
-        let stopListening = () => {
-            if (this._disposables[id]) {
-                if (target instanceof cellx_1.EventEmitter) {
-                    target.off(type, listener, context);
-                }
-                else {
-                    target.removeEventListener(type, listener, useCapture);
-                }
-                delete this._disposables[id];
-            }
-        };
-        let listening = (this._disposables[id] = {
-            stop: stopListening,
-            dispose: stopListening
-        });
-        return listening;
-    }
-    setTimeout(callback, delay) {
-        let id = next_uid_1.nextUID();
-        let timeoutId = setTimeout(() => {
-            delete this._disposables[id];
-            callback.call(this);
-        }, delay);
-        let clearTimeout_ = () => {
-            if (this._disposables[id]) {
-                clearTimeout(timeoutId);
-                delete this._disposables[id];
-            }
-        };
-        let timeout = (this._disposables[id] = {
-            clear: clearTimeout_,
-            dispose: clearTimeout_
-        });
-        return timeout;
-    }
-    setInterval(callback, delay) {
-        let id = next_uid_1.nextUID();
-        let intervalId = setInterval(() => {
-            callback.call(this);
-        }, delay);
-        let clearInterval_ = () => {
-            if (this._disposables[id]) {
-                clearInterval(intervalId);
-                delete this._disposables[id];
-            }
-        };
-        let interval = (this._disposables[id] = {
-            clear: clearInterval_,
-            dispose: clearInterval_
-        });
-        return interval;
-    }
-    registerCallback(callback) {
-        let id = next_uid_1.nextUID();
-        let disposable = this;
-        let cancelCallback = () => {
-            delete this._disposables[id];
-        };
-        let registeredCallback = function registeredCallback() {
-            if (disposable._disposables[id]) {
-                delete disposable._disposables[id];
-                return callback.apply(disposable, arguments);
-            }
-        };
-        registeredCallback.cancel = cancelCallback;
-        registeredCallback.dispose = cancelCallback;
-        this._disposables[id] = registeredCallback;
-        return registeredCallback;
-    }
-    dispose() {
-        let disposables = this._disposables;
-        for (let id in disposables) {
-            disposables[id].dispose();
-        }
-        return this;
-    }
-}
-exports.DisposableMixin = DisposableMixin;
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__11__;
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__12__;
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const gettext_1 = __webpack_require__(14);
+const gettext_1 = __webpack_require__(11);
 exports.formatters = {
     default(value, arg) {
         return value === undefined ? arg : value;
@@ -1330,19 +1164,19 @@ exports.formatters.seq = exports.formatters.identical;
 
 
 /***/ }),
-/* 14 */
+/* 11 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__14__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__11__;
 
 /***/ }),
-/* 15 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const registerComponent_1 = __webpack_require__(16);
+const registerComponent_1 = __webpack_require__(13);
 function Component(config) {
     return (componentConstr) => {
         if (config) {
@@ -1375,21 +1209,21 @@ exports.Component = Component;
 
 
 /***/ }),
-/* 16 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const kebab_case_1 = __webpack_require__(4);
-const pascalize_1 = __webpack_require__(17);
+const pascalize_1 = __webpack_require__(14);
 const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
-const cellx_1 = __webpack_require__(12);
-const componentConstructorMap_1 = __webpack_require__(19);
-const ComponentParams_1 = __webpack_require__(20);
-const Constants_1 = __webpack_require__(24);
-const elementConstructorMap_1 = __webpack_require__(25);
-const ElementProtoMixin_1 = __webpack_require__(26);
+const cellx_1 = __webpack_require__(16);
+const componentConstructorMap_1 = __webpack_require__(17);
+const ComponentParams_1 = __webpack_require__(18);
+const Constants_1 = __webpack_require__(22);
+const elementConstructorMap_1 = __webpack_require__(23);
+const ElementProtoMixin_1 = __webpack_require__(24);
 const Features_1 = __webpack_require__(9);
 const Template2_1 = __webpack_require__(3);
 const push = Array.prototype.push;
@@ -1624,13 +1458,13 @@ exports.registerComponent = registerComponent;
 
 
 /***/ }),
-/* 17 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(18);
+var camelize_1 = __webpack_require__(15);
 var cache = Object.create(null);
 function pascalize(str, useCache) {
     str = String(str);
@@ -1644,7 +1478,7 @@ exports.pascalize = pascalize;
 
 
 /***/ }),
-/* 18 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1663,7 +1497,13 @@ exports.camelize = camelize;
 
 
 /***/ }),
-/* 19 */
+/* 16 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__16__;
+
+/***/ }),
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1674,7 +1514,7 @@ exports.componentConstructorMap = new map_set_polyfill_1.Map();
 
 
 /***/ }),
-/* 20 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1682,8 +1522,8 @@ exports.componentConstructorMap = new map_set_polyfill_1.Map();
 Object.defineProperty(exports, "__esModule", { value: true });
 const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const symbol_polyfill_1 = __webpack_require__(8);
-const componentParamTypeSerializerMap_1 = __webpack_require__(21);
-const Constants_1 = __webpack_require__(24);
+const componentParamTypeSerializerMap_1 = __webpack_require__(19);
+const Constants_1 = __webpack_require__(22);
 exports.KEY_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite/ComponentParams[componentParamsInited]');
 function initParam(component, $paramConfig, name) {
     if ($paramConfig === null) {
@@ -1752,14 +1592,14 @@ exports.ComponentParams = {
 
 
 /***/ }),
-/* 21 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const escape_html_1 = __webpack_require__(22);
-const is_regexp_1 = __webpack_require__(23);
+const escape_html_1 = __webpack_require__(20);
+const is_regexp_1 = __webpack_require__(21);
 const map_set_polyfill_1 = __webpack_require__(7);
 const symbol_polyfill_1 = __webpack_require__(8);
 exports.KEY_COMPONENT_PARAM_VALUE_MAP = symbol_polyfill_1.Symbol('Rionite/componentParamTypeSerializerMap[componentParamValueMap]');
@@ -1848,19 +1688,19 @@ exports.componentParamTypeSerializerMap.set('object', exports.componentParamType
 
 
 /***/ }),
+/* 20 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__20__;
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__21__;
+
+/***/ }),
 /* 22 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__22__;
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__23__;
-
-/***/ }),
-/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1873,7 +1713,7 @@ exports.KEY_CHILD_COMPONENTS = symbol_polyfill_1.Symbol('Rionite/BaseComponent[c
 
 
 /***/ }),
-/* 25 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1926,16 +1766,16 @@ exports.elementConstructorMap = new map_set_polyfill_1.Map([
 
 
 /***/ }),
-/* 26 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const defer_1 = __webpack_require__(27);
+const defer_1 = __webpack_require__(25);
 const symbol_polyfill_1 = __webpack_require__(8);
-const ComponentParams_1 = __webpack_require__(20);
-const Constants_1 = __webpack_require__(24);
+const ComponentParams_1 = __webpack_require__(18);
+const Constants_1 = __webpack_require__(22);
 const DI_1 = __webpack_require__(6);
 const Features_1 = __webpack_require__(9);
 // export const KEY_IS_COMPONENT_ELEMENT = Symbol('Rionite/ElementProtoMixin[isComponentElement]');
@@ -2031,19 +1871,19 @@ exports.ElementProtoMixin = {
 
 
 /***/ }),
-/* 27 */
+/* 25 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__27__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__25__;
 
 /***/ }),
-/* 28 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const lower_case_first_word_1 = __webpack_require__(29);
+const lower_case_first_word_1 = __webpack_require__(27);
 const map_set_polyfill_1 = __webpack_require__(7);
 const types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
 const prefix = 'param';
@@ -2080,13 +1920,13 @@ exports.Param = Param;
 
 
 /***/ }),
-/* 29 */
+/* 27 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__29__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__27__;
 
 /***/ }),
-/* 30 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2101,25 +1941,23 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(31);
+const get_uid_1 = __webpack_require__(29);
 const kebab_case_1 = __webpack_require__(4);
-const logger_1 = __webpack_require__(32);
+const logger_1 = __webpack_require__(30);
 const map_set_polyfill_1 = __webpack_require__(7);
-const move_content_1 = __webpack_require__(33);
-const cellx_1 = __webpack_require__(12);
-const attachChildComponentElements_1 = __webpack_require__(34);
-const bindContent_1 = __webpack_require__(35);
-const componentBinding_1 = __webpack_require__(45);
-const componentConstructorMap_1 = __webpack_require__(19);
-const Constants_1 = __webpack_require__(24);
+const move_content_1 = __webpack_require__(31);
+const cellx_1 = __webpack_require__(16);
+const attachChildComponentElements_1 = __webpack_require__(32);
+const bindContent_1 = __webpack_require__(33);
+const componentBinding_1 = __webpack_require__(43);
+const Constants_1 = __webpack_require__(22);
 const DI_1 = __webpack_require__(6);
-const DisposableMixin_1 = __webpack_require__(10);
-const elementConstructorMap_1 = __webpack_require__(25);
-const ElementProtoMixin_1 = __webpack_require__(26);
-const handledEvents_1 = __webpack_require__(46);
-const handleDOMEvent_1 = __webpack_require__(47);
-const handleEvent_1 = __webpack_require__(48);
-const normalizeTextNodes_1 = __webpack_require__(49);
+const elementConstructorMap_1 = __webpack_require__(23);
+const ElementProtoMixin_1 = __webpack_require__(24);
+const handledEvents_1 = __webpack_require__(44);
+const handleDOMEvent_1 = __webpack_require__(45);
+const handleEvent_1 = __webpack_require__(46);
+const normalizeTextNodes_1 = __webpack_require__(47);
 const map = Array.prototype.map;
 class BaseComponent extends cellx_1.EventEmitter {
     constructor(el) {
@@ -2129,7 +1967,6 @@ class BaseComponent extends cellx_1.EventEmitter {
         this._attached = false;
         this.initialized = false;
         this.isReady = false;
-        DisposableMixin_1.DisposableMixin.call(this);
         let constr = this.constructor;
         if (!elementConstructorMap_1.elementConstructorMap.has(constr.elementIs)) {
             throw new TypeError('Component must be registered');
@@ -2181,40 +2018,6 @@ class BaseComponent extends cellx_1.EventEmitter {
             }
         }
         handleEvent_1.handleEvent(evt);
-    }
-    listenTo(target, type, listener, context, useCapture) {
-        return DisposableMixin_1.DisposableMixin.prototype.listenTo.call(this, typeof target == 'string' ? this.$(target) : target, type, listener, context, useCapture);
-    }
-    _listenTo(target, type, listener, context, useCapture) {
-        if (target instanceof BaseComponent) {
-            if (type.charAt(0) == '<') {
-                let index = type.indexOf('>', 2);
-                let targetType = type.slice(1, index);
-                if (targetType != '*') {
-                    let targetConstr = elementConstructorMap_1.elementConstructorMap.has(targetType) &&
-                        componentConstructorMap_1.componentConstructorMap.get(targetType);
-                    if (!targetConstr) {
-                        throw new TypeError(`Component "${targetType}" is not defined`);
-                    }
-                    let inner = listener;
-                    listener = function (evt) {
-                        if (evt.target instanceof targetConstr) {
-                            return inner.call(this, evt);
-                        }
-                    };
-                }
-                type = type.slice(index + 1);
-            }
-            else if (type.indexOf(':') == -1) {
-                let inner = listener;
-                listener = function (evt) {
-                    if (evt.target == target) {
-                        return inner.call(this, evt);
-                    }
-                };
-            }
-        }
-        return DisposableMixin_1.DisposableMixin.prototype._listenTo.call(this, target, type, listener, context, useCapture);
     }
     _attach() {
         this._attached = true;
@@ -2301,11 +2104,6 @@ class BaseComponent extends cellx_1.EventEmitter {
     _detach() {
         this._attached = false;
         this.elementDetached();
-        this.dispose();
-    }
-    dispose() {
-        this._freezeBindings();
-        return DisposableMixin_1.DisposableMixin.prototype.dispose.call(this);
     }
     _freezeBindings() {
         if (this._bindings) {
@@ -2381,13 +2179,6 @@ __decorate([
     __metadata("design:type", logger_1.Logger)
 ], BaseComponent.prototype, "logger", void 0);
 exports.BaseComponent = BaseComponent;
-let disposableMixinProto = DisposableMixin_1.DisposableMixin.prototype;
-let baseComponentProto = BaseComponent.prototype;
-Object.getOwnPropertyNames(disposableMixinProto).forEach(name => {
-    if (!(name in baseComponentProto)) {
-        Object.defineProperty(baseComponentProto, name, Object.getOwnPropertyDescriptor(disposableMixinProto, name));
-    }
-});
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
     handledEvents_1.handledEvents.forEach(type => {
@@ -2401,6 +2192,18 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 
 /***/ }),
+/* 29 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__29__;
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__30__;
+
+/***/ }),
 /* 31 */
 /***/ (function(module, exports) {
 
@@ -2408,24 +2211,12 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__31__;
 
 /***/ }),
 /* 32 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__32__;
-
-/***/ }),
-/* 33 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__33__;
-
-/***/ }),
-/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const ComponentParams_1 = __webpack_require__(20);
+const ComponentParams_1 = __webpack_require__(18);
 // import { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 function attachChildComponentElements(childComponents) {
     for (let childComponent of childComponents) {
@@ -2441,19 +2232,19 @@ exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
-/* 35 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const map_set_polyfill_1 = __webpack_require__(7);
-const set_attribute_1 = __webpack_require__(36);
-const cellx_1 = __webpack_require__(12);
-const compileContentNodeValue_1 = __webpack_require__(37);
-const Constants_1 = __webpack_require__(24);
-const ContentNodeValueParser_1 = __webpack_require__(40);
-const compileKeypath_1 = __webpack_require__(44);
+const set_attribute_1 = __webpack_require__(34);
+const cellx_1 = __webpack_require__(16);
+const compileContentNodeValue_1 = __webpack_require__(35);
+const Constants_1 = __webpack_require__(22);
+const ContentNodeValueParser_1 = __webpack_require__(38);
+const compileKeypath_1 = __webpack_require__(42);
 exports.KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 const contentNodeValueASTCache = {
     __proto__: null
@@ -2628,23 +2419,23 @@ exports.bindContent = bindContent;
 
 
 /***/ }),
-/* 36 */
+/* 34 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__36__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__34__;
 
 /***/ }),
-/* 37 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const escape_string_1 = __webpack_require__(38);
-const bindingToJSExpression_1 = __webpack_require__(39);
-const componentParamTypeSerializerMap_1 = __webpack_require__(21);
-const ContentNodeValueParser_1 = __webpack_require__(40);
-const formatters_1 = __webpack_require__(13);
+const escape_string_1 = __webpack_require__(36);
+const bindingToJSExpression_1 = __webpack_require__(37);
+const componentParamTypeSerializerMap_1 = __webpack_require__(19);
+const ContentNodeValueParser_1 = __webpack_require__(38);
+const formatters_1 = __webpack_require__(10);
 const cache = Object.create(null);
 function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, useComponentParamValueMap) {
     let cacheKey = contentNodeValueString + (useComponentParamValueMap ? ',' : '.');
@@ -2687,13 +2478,13 @@ exports.compileContentNodeValue = compileContentNodeValue;
 
 
 /***/ }),
-/* 38 */
+/* 36 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__38__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__36__;
 
 /***/ }),
-/* 39 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2727,15 +2518,15 @@ exports.bindingToJSExpression = bindingToJSExpression;
 
 
 /***/ }),
-/* 40 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const keypathPattern_1 = __webpack_require__(41);
-const keypathToJSExpression_1 = __webpack_require__(43);
-const namePattern_1 = __webpack_require__(42);
+const keypathPattern_1 = __webpack_require__(39);
+const keypathToJSExpression_1 = __webpack_require__(41);
+const namePattern_1 = __webpack_require__(40);
 var ContentNodeValueNodeType;
 (function (ContentNodeValueNodeType) {
     ContentNodeValueNodeType[ContentNodeValueNodeType["TEXT"] = 1] = "TEXT";
@@ -3068,18 +2859,18 @@ exports.ContentNodeValueParser = ContentNodeValueParser;
 
 
 /***/ }),
-/* 41 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const namePattern_1 = __webpack_require__(42);
+const namePattern_1 = __webpack_require__(40);
 exports.keypathPattern = `(?:${namePattern_1.namePattern}|\\d+)(?:\\.(?:${namePattern_1.namePattern}|\\d+))*`;
 
 
 /***/ }),
-/* 42 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3089,7 +2880,7 @@ exports.namePattern = '[$_a-zA-Z][$\\w]*';
 
 
 /***/ }),
-/* 43 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3116,13 +2907,13 @@ exports.keypathToJSExpression = keypathToJSExpression;
 
 
 /***/ }),
-/* 44 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const keypathToJSExpression_1 = __webpack_require__(43);
+const keypathToJSExpression_1 = __webpack_require__(41);
 const cache = Object.create(null);
 function compileKeypath(keypath, cacheKey = keypath) {
     return (cache[cacheKey] ||
@@ -3132,13 +2923,13 @@ exports.compileKeypath = compileKeypath;
 
 
 /***/ }),
-/* 45 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const cellx_1 = __webpack_require__(12);
+const cellx_1 = __webpack_require__(16);
 function freezeBinding(binding) {
     let changeEvent = binding._events.get('change');
     binding._events.delete('change');
@@ -3183,7 +2974,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 46 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3203,13 +2994,13 @@ exports.handledEvents = [
 
 
 /***/ }),
-/* 47 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const bindContent_1 = __webpack_require__(35);
+const bindContent_1 = __webpack_require__(33);
 function handleDOMEvent(evt) {
     let attrName = 'on-' + evt.type;
     let el = evt.target;
@@ -3262,13 +3053,13 @@ exports.handleDOMEvent = handleDOMEvent;
 
 
 /***/ }),
-/* 48 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const bindContent_1 = __webpack_require__(35);
+const bindContent_1 = __webpack_require__(33);
 const stack = [];
 function handleEvent(evt) {
     let target = evt.target;
@@ -3354,7 +3145,7 @@ exports.handleEvent = handleEvent;
 
 
 /***/ }),
-/* 49 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3388,6 +3179,206 @@ exports.normalizeTextNodes = normalizeTextNodes;
 
 
 /***/ }),
+/* 48 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const next_uid_1 = __webpack_require__(49);
+const cellx_1 = __webpack_require__(16);
+const BaseComponent_1 = __webpack_require__(28);
+const componentConstructorMap_1 = __webpack_require__(17);
+const elementConstructorMap_1 = __webpack_require__(23);
+class DisposableComponent extends BaseComponent_1.BaseComponent {
+    constructor() {
+        super(...arguments);
+        this._disposables = {};
+    }
+    listenTo(target, type, listener, context, useCapture) {
+        if (typeof target == 'string') {
+            target = this.$(target);
+        }
+        let listenings;
+        if (typeof type == 'object') {
+            listenings = [];
+            if (Array.isArray(type)) {
+                for (let i = 0, l = type.length; i < l; i++) {
+                    listenings.push(this.listenTo(target, type[i], listener, context, useCapture));
+                }
+            }
+            else {
+                for (let name in type) {
+                    listenings.push(this.listenTo(target, name, type[name], listener, context));
+                }
+            }
+        }
+        else {
+            if (Array.isArray(target) ||
+                target instanceof NodeList ||
+                target instanceof HTMLCollection) {
+                listenings = [];
+                for (let i = 0, l = target.length; i < l; i++) {
+                    listenings.push(this.listenTo(target[i], type, listener, context, useCapture));
+                }
+            }
+            else if (Array.isArray(listener)) {
+                listenings = [];
+                for (let i = 0, l = listener.length; i < l; i++) {
+                    listenings.push(this.listenTo(target, type, listener[i], context, useCapture));
+                }
+            }
+            else {
+                return this._listenTo(target, type, listener, context !== undefined ? context : this, useCapture || false);
+            }
+        }
+        let id = next_uid_1.nextUID();
+        let stopListening = () => {
+            for (let i = listenings.length; i;) {
+                listenings[--i].stop();
+            }
+            delete this._disposables[id];
+        };
+        let listening = (this._disposables[id] = {
+            stop: stopListening,
+            dispose: stopListening
+        });
+        return listening;
+    }
+    _listenTo(target, type, listener, context, useCapture) {
+        if (target instanceof BaseComponent_1.BaseComponent) {
+            if (type.charAt(0) == '<') {
+                let index = type.indexOf('>', 2);
+                let targetType = type.slice(1, index);
+                if (targetType != '*') {
+                    let targetConstr = elementConstructorMap_1.elementConstructorMap.has(targetType) &&
+                        componentConstructorMap_1.componentConstructorMap.get(targetType);
+                    if (!targetConstr) {
+                        throw new TypeError(`Component "${targetType}" is not defined`);
+                    }
+                    let inner = listener;
+                    listener = function (evt) {
+                        if (evt.target instanceof targetConstr) {
+                            return inner.call(this, evt);
+                        }
+                    };
+                }
+                type = type.slice(index + 1);
+            }
+            else if (type.indexOf(':') == -1) {
+                let inner = listener;
+                listener = function (evt) {
+                    if (evt.target == target) {
+                        return inner.call(this, evt);
+                    }
+                };
+            }
+        }
+        if (target instanceof cellx_1.EventEmitter) {
+            target.on(type, listener, context);
+        }
+        else if (target.addEventListener) {
+            if (target !== context) {
+                listener = listener.bind(context);
+            }
+            target.addEventListener(type, listener, useCapture);
+        }
+        else {
+            throw new TypeError('Unable to add a listener');
+        }
+        let id = next_uid_1.nextUID();
+        let stopListening = () => {
+            if (this._disposables[id]) {
+                if (target instanceof cellx_1.EventEmitter) {
+                    target.off(type, listener, context);
+                }
+                else {
+                    target.removeEventListener(type, listener, useCapture);
+                }
+                delete this._disposables[id];
+            }
+        };
+        let listening = (this._disposables[id] = {
+            stop: stopListening,
+            dispose: stopListening
+        });
+        return listening;
+    }
+    setTimeout(callback, delay) {
+        let id = next_uid_1.nextUID();
+        let timeoutId = setTimeout(() => {
+            delete this._disposables[id];
+            callback.call(this);
+        }, delay);
+        let clearTimeout_ = () => {
+            if (this._disposables[id]) {
+                clearTimeout(timeoutId);
+                delete this._disposables[id];
+            }
+        };
+        let timeout = (this._disposables[id] = {
+            clear: clearTimeout_,
+            dispose: clearTimeout_
+        });
+        return timeout;
+    }
+    setInterval(callback, delay) {
+        let id = next_uid_1.nextUID();
+        let intervalId = setInterval(() => {
+            callback.call(this);
+        }, delay);
+        let clearInterval_ = () => {
+            if (this._disposables[id]) {
+                clearInterval(intervalId);
+                delete this._disposables[id];
+            }
+        };
+        let interval = (this._disposables[id] = {
+            clear: clearInterval_,
+            dispose: clearInterval_
+        });
+        return interval;
+    }
+    registerCallback(callback) {
+        let id = next_uid_1.nextUID();
+        let disposable = this;
+        let cancelCallback = () => {
+            delete this._disposables[id];
+        };
+        let registeredCallback = function registeredCallback() {
+            if (disposable._disposables[id]) {
+                delete disposable._disposables[id];
+                return callback.apply(disposable, arguments);
+            }
+        };
+        registeredCallback.cancel = cancelCallback;
+        registeredCallback.dispose = cancelCallback;
+        this._disposables[id] = registeredCallback;
+        return registeredCallback;
+    }
+    _detach() {
+        super._detach();
+        this.dispose();
+    }
+    dispose() {
+        this._freezeBindings();
+        let disposables = this._disposables;
+        for (let id in disposables) {
+            disposables[id].dispose();
+        }
+        return this;
+    }
+}
+exports.DisposableComponent = DisposableComponent;
+
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__49__;
+
+/***/ }),
 /* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3402,15 +3393,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 var RnIfThen_1;
 const next_tick_1 = __webpack_require__(51);
-const cellx_1 = __webpack_require__(12);
+const cellx_1 = __webpack_require__(16);
 const move_content_1 = __webpack_require__(52);
-const attachChildComponentElements_1 = __webpack_require__(34);
-const BaseComponent_1 = __webpack_require__(30);
-const bindContent_1 = __webpack_require__(35);
-const Component_1 = __webpack_require__(15);
-const ElementProtoMixin_1 = __webpack_require__(26);
-const compileKeypath_1 = __webpack_require__(44);
-const keypathPattern_1 = __webpack_require__(41);
+const attachChildComponentElements_1 = __webpack_require__(32);
+const BaseComponent_1 = __webpack_require__(28);
+const bindContent_1 = __webpack_require__(33);
+const Component_1 = __webpack_require__(12);
+const ElementProtoMixin_1 = __webpack_require__(24);
+const compileKeypath_1 = __webpack_require__(42);
+const keypathPattern_1 = __webpack_require__(39);
 const removeNodes_1 = __webpack_require__(53);
 const RnRepeat_1 = __webpack_require__(54);
 const slice = Array.prototype.slice;
@@ -3613,16 +3604,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 const map_set_polyfill_1 = __webpack_require__(7);
 const next_tick_1 = __webpack_require__(51);
-const cellx_1 = __webpack_require__(12);
+const cellx_1 = __webpack_require__(16);
 const move_content_1 = __webpack_require__(52);
-const attachChildComponentElements_1 = __webpack_require__(34);
-const BaseComponent_1 = __webpack_require__(30);
-const bindContent_1 = __webpack_require__(35);
-const Component_1 = __webpack_require__(15);
-const ElementProtoMixin_1 = __webpack_require__(26);
-const compileKeypath_1 = __webpack_require__(44);
-const keypathPattern_1 = __webpack_require__(41);
-const namePattern_1 = __webpack_require__(42);
+const attachChildComponentElements_1 = __webpack_require__(32);
+const BaseComponent_1 = __webpack_require__(28);
+const bindContent_1 = __webpack_require__(33);
+const Component_1 = __webpack_require__(12);
+const ElementProtoMixin_1 = __webpack_require__(24);
+const compileKeypath_1 = __webpack_require__(42);
+const keypathPattern_1 = __webpack_require__(39);
+const namePattern_1 = __webpack_require__(40);
 const removeNodes_1 = __webpack_require__(53);
 const RnIfThen_1 = __webpack_require__(50);
 const slice = Array.prototype.slice;
@@ -3975,7 +3966,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Component_1 = __webpack_require__(15);
+const Component_1 = __webpack_require__(12);
 const RnIfThen_1 = __webpack_require__(50);
 let RnIfElse = class RnIfElse extends RnIfThen_1.RnIfThen {
     constructor() {
@@ -4005,15 +3996,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(31);
+const get_uid_1 = __webpack_require__(29);
 const map_set_polyfill_1 = __webpack_require__(7);
-const move_content_1 = __webpack_require__(33);
+const move_content_1 = __webpack_require__(31);
 const symbol_polyfill_1 = __webpack_require__(8);
-const attachChildComponentElements_1 = __webpack_require__(34);
-const BaseComponent_1 = __webpack_require__(30);
-const bindContent_1 = __webpack_require__(35);
-const Component_1 = __webpack_require__(15);
-const ElementProtoMixin_1 = __webpack_require__(26);
+const attachChildComponentElements_1 = __webpack_require__(32);
+const BaseComponent_1 = __webpack_require__(28);
+const bindContent_1 = __webpack_require__(33);
+const Component_1 = __webpack_require__(12);
+const ElementProtoMixin_1 = __webpack_require__(24);
 const cloneNode_1 = __webpack_require__(57);
 const KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot[slotContentMap]');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
