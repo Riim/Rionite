@@ -1,7 +1,6 @@
 import './lib/polyfills';
 import './lib/templateHelpers';
 
-export { Container, Inject } from './DI';
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';

@@ -51,7 +51,6 @@ module.exports = (env = {}) => {
 			'@riim/gettext',
 			'@riim/is-regexp',
 			'@riim/kebab-case',
-			'@riim/logger',
 			'@riim/lower-case-first-word',
 			'@riim/map-set-polyfill',
 			'@riim/move-content',

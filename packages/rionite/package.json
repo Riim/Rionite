@@ -38,7 +38,6 @@
     "@riim/gettext": "^2.0.0",
     "@riim/is-regexp": "^1.0.0",
     "@riim/kebab-case": "^1.0.0",
-    "@riim/logger": "^1.0.2",
     "@riim/lower-case-first-word": "^1.0.1",
     "@riim/map-set-polyfill": "^1.0.2",
     "@riim/move-content": "^1.0.0",

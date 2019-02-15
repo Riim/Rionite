@@ -1,6 +1,5 @@
 import { getUID } from '@riim/get-uid';
 import { kebabCase } from '@riim/kebab-case';
-import { Logger } from '@riim/logger';
 import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
 import { nextUID } from '@riim/next-uid';
@@ -11,7 +10,6 @@ import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBin
 import { componentConstructorMap } from './componentConstructorMap';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS } from './Constants';
-import { Inject } from './DI';
 import { elementConstructorMap } from './elementConstructorMap';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { handledEvents } from './handledEvents';
@@ -124,9 +122,6 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null = null;
 	static domEvents: IComponentEvents<BaseComponent, Event> | null = null;
-
-	@Inject
-	logger: Logger;
 
 	_disposables: { [id: string]: IDisposable } = {};
 

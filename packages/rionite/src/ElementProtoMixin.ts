@@ -4,8 +4,6 @@ import { Cell } from 'cellx';
 import { BaseComponent, I$ComponentParamConfig, IComponentElement } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
 import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';
-import { Container } from './DI';
-import { nativeCustomElementsFeature } from './lib/Features';
 
 // export const KEY_IS_COMPONENT_ELEMENT = Symbol('Rionite/ElementProtoMixin[isComponentElement]');
 export const KEY_ELEMENT_CONNECTED = Symbol('Rionite/ElementProtoMixin[elementConnected]');
@@ -26,9 +24,7 @@ export const ElementProtoMixin = {
 	$component: null,
 
 	get rioniteComponent(): BaseComponent {
-		return (
-			this.$component || Container.get(this.constructor._rioniteComponentConstructor, [this])
-		);
+		return this.$component || new this.constructor._rioniteComponentConstructor(this);
 	},
 
 	[KEY_ELEMENT_CONNECTED]: false,
@@ -109,20 +105,16 @@ export const ElementProtoMixin = {
 				component.constructor[KEY_PARAMS_CONFIG][name];
 
 			if ($paramConfig.readonly) {
-				if (nativeCustomElementsFeature) {
-					throw new TypeError(
-						`Cannot write to readonly parameter "${$paramConfig.name}"`
-					);
-				}
-			} else {
-				let valueCell: Cell | undefined = component[$paramConfig.property + 'Cell'];
-				let value = $paramConfig.typeSerializer!.read(rawValue, $paramConfig.default, this);
+				throw new TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
+			}
 
-				if (valueCell) {
-					valueCell.set(value);
-				} else {
-					component[KEY_PARAMS].set($paramConfig.name, value);
-				}
+			let valueCell: Cell | undefined = component[$paramConfig.property + 'Cell'];
+			let value = $paramConfig.typeSerializer!.read(rawValue, $paramConfig.default, this);
+
+			if (valueCell) {
+				valueCell.set(value);
+			} else {
+				component[KEY_PARAMS].set($paramConfig.name, value);
 			}
 		}
 	}

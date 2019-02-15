@@ -1,4 +1,3 @@
-import { Logger } from '@riim/logger';
 import { EventEmitter, IEvent } from 'cellx';
 import { IFreezableCell } from './componentBinding';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
@@ -75,7 +74,6 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     static readonly bindsInputContent: boolean;
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
     static domEvents: IComponentEvents<BaseComponent, Event> | null;
-    logger: Logger;
     _disposables: {
         [id: string]: IDisposable;
     };
