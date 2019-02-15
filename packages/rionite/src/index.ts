@@ -7,6 +7,13 @@ export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
 export { KEY_PARAMS_CONFIG, KEY_PARAMS } from './Constants';
 export {
+	IDisposable,
+	IDisposableListening,
+	IDisposableTimeout,
+	IDisposableInterval,
+	IDisposableCallback,
+	TListeningTarget,
+	TListener,
 	IComponentParamConfig,
 	I$ComponentParamConfig,
 	IPossiblyComponentElement,
@@ -16,16 +23,6 @@ export {
 	IComponentEvents,
 	BaseComponent
 } from './BaseComponent';
-export {
-	IDisposable,
-	IDisposableListening,
-	IDisposableTimeout,
-	IDisposableInterval,
-	IDisposableCallback,
-	TListeningTarget,
-	TListener,
-	DisposableComponent
-} from './DisposableComponent';
 export { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export { NodeType as TemplateNodeType, IBlock as ITemplateBlock, Template } from './Template2';

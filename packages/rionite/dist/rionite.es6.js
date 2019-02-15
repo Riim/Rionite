@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("@riim/symbol-polyfill"), require("@riim/gettext"), require("cellx"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/get-uid"), require("@riim/logger"), require("@riim/move-content"), require("@riim/set-attribute"), require("escape-string"), require("@riim/next-uid"), require("@riim/next-tick"));
+		module.exports = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("@riim/symbol-polyfill"), require("@riim/gettext"), require("cellx"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/get-uid"), require("@riim/logger"), require("@riim/move-content"), require("@riim/next-uid"), require("@riim/set-attribute"), require("escape-string"), require("@riim/next-tick"));
 	else if(typeof define === 'function' && define.amd)
-		define(["@riim/kebab-case", "@riim/rionite-snake-case-attribute-name", "@riim/map-set-polyfill", "@riim/symbol-polyfill", "@riim/gettext", "cellx", "@riim/escape-html", "@riim/is-regexp", "@riim/defer", "@riim/lower-case-first-word", "@riim/get-uid", "@riim/logger", "@riim/move-content", "@riim/set-attribute", "escape-string", "@riim/next-uid", "@riim/next-tick"], factory);
+		define(["@riim/kebab-case", "@riim/rionite-snake-case-attribute-name", "@riim/map-set-polyfill", "@riim/symbol-polyfill", "@riim/gettext", "cellx", "@riim/escape-html", "@riim/is-regexp", "@riim/defer", "@riim/lower-case-first-word", "@riim/get-uid", "@riim/logger", "@riim/move-content", "@riim/next-uid", "@riim/set-attribute", "escape-string", "@riim/next-tick"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("@riim/symbol-polyfill"), require("@riim/gettext"), require("cellx"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/get-uid"), require("@riim/logger"), require("@riim/move-content"), require("@riim/set-attribute"), require("escape-string"), require("@riim/next-uid"), require("@riim/next-tick"));
+		exports["rionite"] = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/map-set-polyfill"), require("@riim/symbol-polyfill"), require("@riim/gettext"), require("cellx"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/get-uid"), require("@riim/logger"), require("@riim/move-content"), require("@riim/next-uid"), require("@riim/set-attribute"), require("escape-string"), require("@riim/next-tick"));
 	else
-		root["rionite"] = factory(root["@riim/kebab-case"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["@riim/symbol-polyfill"], root["@riim/gettext"], root["cellx"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/get-uid"], root["@riim/logger"], root["@riim/move-content"], root["@riim/set-attribute"], root["escape-string"], root["@riim/next-uid"], root["@riim/next-tick"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__20__, __WEBPACK_EXTERNAL_MODULE__21__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__29__, __WEBPACK_EXTERNAL_MODULE__30__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__34__, __WEBPACK_EXTERNAL_MODULE__36__, __WEBPACK_EXTERNAL_MODULE__49__, __WEBPACK_EXTERNAL_MODULE__51__) {
+		root["rionite"] = factory(root["@riim/kebab-case"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/map-set-polyfill"], root["@riim/symbol-polyfill"], root["@riim/gettext"], root["cellx"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/get-uid"], root["@riim/logger"], root["@riim/move-content"], root["@riim/next-uid"], root["@riim/set-attribute"], root["escape-string"], root["@riim/next-tick"]);
+})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__20__, __WEBPACK_EXTERNAL_MODULE__21__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__29__, __WEBPACK_EXTERNAL_MODULE__30__, __WEBPACK_EXTERNAL_MODULE__31__, __WEBPACK_EXTERNAL_MODULE__32__, __WEBPACK_EXTERNAL_MODULE__35__, __WEBPACK_EXTERNAL_MODULE__37__, __WEBPACK_EXTERNAL_MODULE__50__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -117,8 +117,6 @@ exports.KEY_PARAMS_CONFIG = Constants_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAMS = Constants_1.KEY_PARAMS;
 var BaseComponent_1 = __webpack_require__(28);
 exports.BaseComponent = BaseComponent_1.BaseComponent;
-var DisposableComponent_1 = __webpack_require__(48);
-exports.DisposableComponent = DisposableComponent_1.DisposableComponent;
 var ElementProtoMixin_1 = __webpack_require__(24);
 exports.KEY_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_ELEMENT_CONNECTED;
 var ComponentParams_1 = __webpack_require__(18);
@@ -128,13 +126,13 @@ exports.TemplateNodeType = Template2_1.NodeType;
 exports.Template = Template2_1.Template;
 var registerComponent_1 = __webpack_require__(13);
 exports.registerComponent = registerComponent_1.registerComponent;
-var RnIfThen_1 = __webpack_require__(50);
+var RnIfThen_1 = __webpack_require__(49);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
-var RnIfElse_1 = __webpack_require__(55);
+var RnIfElse_1 = __webpack_require__(54);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
-var RnRepeat_1 = __webpack_require__(54);
+var RnRepeat_1 = __webpack_require__(53);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
-var RnSlot_1 = __webpack_require__(56);
+var RnSlot_1 = __webpack_require__(55);
 exports.RnSlot = RnSlot_1.RnSlot;
 
 
@@ -1946,22 +1944,25 @@ const kebab_case_1 = __webpack_require__(4);
 const logger_1 = __webpack_require__(30);
 const map_set_polyfill_1 = __webpack_require__(7);
 const move_content_1 = __webpack_require__(31);
+const next_uid_1 = __webpack_require__(32);
 const cellx_1 = __webpack_require__(16);
-const attachChildComponentElements_1 = __webpack_require__(32);
-const bindContent_1 = __webpack_require__(33);
-const componentBinding_1 = __webpack_require__(43);
+const attachChildComponentElements_1 = __webpack_require__(33);
+const bindContent_1 = __webpack_require__(34);
+const componentBinding_1 = __webpack_require__(44);
+const componentConstructorMap_1 = __webpack_require__(17);
 const Constants_1 = __webpack_require__(22);
 const DI_1 = __webpack_require__(6);
 const elementConstructorMap_1 = __webpack_require__(23);
 const ElementProtoMixin_1 = __webpack_require__(24);
-const handledEvents_1 = __webpack_require__(44);
-const handleDOMEvent_1 = __webpack_require__(45);
-const handleEvent_1 = __webpack_require__(46);
-const normalizeTextNodes_1 = __webpack_require__(47);
+const handledEvents_1 = __webpack_require__(45);
+const handleDOMEvent_1 = __webpack_require__(46);
+const handleEvent_1 = __webpack_require__(47);
+const normalizeTextNodes_1 = __webpack_require__(48);
 const map = Array.prototype.map;
 class BaseComponent extends cellx_1.EventEmitter {
     constructor(el) {
         super();
+        this._disposables = {};
         this._parentComponent = null;
         this.$inputContent = null;
         this._attached = false;
@@ -2018,6 +2019,167 @@ class BaseComponent extends cellx_1.EventEmitter {
             }
         }
         handleEvent_1.handleEvent(evt);
+    }
+    listenTo(target, type, listener, context, useCapture) {
+        if (typeof target == 'string') {
+            target = this.$(target);
+        }
+        let listenings;
+        if (typeof type == 'object') {
+            listenings = [];
+            if (Array.isArray(type)) {
+                for (let i = 0, l = type.length; i < l; i++) {
+                    listenings.push(this.listenTo(target, type[i], listener, context, useCapture));
+                }
+            }
+            else {
+                for (let name in type) {
+                    listenings.push(this.listenTo(target, name, type[name], listener, context));
+                }
+            }
+        }
+        else {
+            if (Array.isArray(target) ||
+                target instanceof NodeList ||
+                target instanceof HTMLCollection) {
+                listenings = [];
+                for (let i = 0, l = target.length; i < l; i++) {
+                    listenings.push(this.listenTo(target[i], type, listener, context, useCapture));
+                }
+            }
+            else if (Array.isArray(listener)) {
+                listenings = [];
+                for (let i = 0, l = listener.length; i < l; i++) {
+                    listenings.push(this.listenTo(target, type, listener[i], context, useCapture));
+                }
+            }
+            else {
+                return this._listenTo(target, type, listener, context !== undefined ? context : this, useCapture || false);
+            }
+        }
+        let id = next_uid_1.nextUID();
+        let stopListening = () => {
+            for (let i = listenings.length; i;) {
+                listenings[--i].stop();
+            }
+            delete this._disposables[id];
+        };
+        let listening = (this._disposables[id] = {
+            stop: stopListening,
+            dispose: stopListening
+        });
+        return listening;
+    }
+    _listenTo(target, type, listener, context, useCapture) {
+        if (target instanceof BaseComponent) {
+            if (type.charAt(0) == '<') {
+                let index = type.indexOf('>', 2);
+                let targetType = type.slice(1, index);
+                if (targetType != '*') {
+                    let targetConstr = elementConstructorMap_1.elementConstructorMap.has(targetType) &&
+                        componentConstructorMap_1.componentConstructorMap.get(targetType);
+                    if (!targetConstr) {
+                        throw new TypeError(`Component "${targetType}" is not defined`);
+                    }
+                    let inner = listener;
+                    listener = function (evt) {
+                        if (evt.target instanceof targetConstr) {
+                            return inner.call(this, evt);
+                        }
+                    };
+                }
+                type = type.slice(index + 1);
+            }
+            else if (type.indexOf(':') == -1) {
+                let inner = listener;
+                listener = function (evt) {
+                    if (evt.target == target) {
+                        return inner.call(this, evt);
+                    }
+                };
+            }
+        }
+        if (target instanceof cellx_1.EventEmitter) {
+            target.on(type, listener, context);
+        }
+        else if (target.addEventListener) {
+            if (target !== context) {
+                listener = listener.bind(context);
+            }
+            target.addEventListener(type, listener, useCapture);
+        }
+        else {
+            throw new TypeError('Unable to add a listener');
+        }
+        let id = next_uid_1.nextUID();
+        let stopListening = () => {
+            if (this._disposables[id]) {
+                if (target instanceof cellx_1.EventEmitter) {
+                    target.off(type, listener, context);
+                }
+                else {
+                    target.removeEventListener(type, listener, useCapture);
+                }
+                delete this._disposables[id];
+            }
+        };
+        let listening = (this._disposables[id] = {
+            stop: stopListening,
+            dispose: stopListening
+        });
+        return listening;
+    }
+    setTimeout(callback, delay) {
+        let id = next_uid_1.nextUID();
+        let timeoutId = setTimeout(() => {
+            delete this._disposables[id];
+            callback.call(this);
+        }, delay);
+        let clearTimeout_ = () => {
+            if (this._disposables[id]) {
+                clearTimeout(timeoutId);
+                delete this._disposables[id];
+            }
+        };
+        let timeout = (this._disposables[id] = {
+            clear: clearTimeout_,
+            dispose: clearTimeout_
+        });
+        return timeout;
+    }
+    setInterval(callback, delay) {
+        let id = next_uid_1.nextUID();
+        let intervalId = setInterval(() => {
+            callback.call(this);
+        }, delay);
+        let clearInterval_ = () => {
+            if (this._disposables[id]) {
+                clearInterval(intervalId);
+                delete this._disposables[id];
+            }
+        };
+        let interval = (this._disposables[id] = {
+            clear: clearInterval_,
+            dispose: clearInterval_
+        });
+        return interval;
+    }
+    registerCallback(callback) {
+        let id = next_uid_1.nextUID();
+        let disposable = this;
+        let cancelCallback = () => {
+            delete this._disposables[id];
+        };
+        let registeredCallback = function registeredCallback() {
+            if (disposable._disposables[id]) {
+                delete disposable._disposables[id];
+                return callback.apply(disposable, arguments);
+            }
+        };
+        registeredCallback.cancel = cancelCallback;
+        registeredCallback.dispose = cancelCallback;
+        this._disposables[id] = registeredCallback;
+        return registeredCallback;
     }
     _attach() {
         this._attached = true;
@@ -2104,6 +2266,15 @@ class BaseComponent extends cellx_1.EventEmitter {
     _detach() {
         this._attached = false;
         this.elementDetached();
+        this.dispose();
+    }
+    dispose() {
+        this._freezeBindings();
+        let disposables = this._disposables;
+        for (let id in disposables) {
+            disposables[id].dispose();
+        }
+        return this;
     }
     _freezeBindings() {
         if (this._bindings) {
@@ -2211,6 +2382,12 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__31__;
 
 /***/ }),
 /* 32 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__32__;
+
+/***/ }),
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2232,19 +2409,19 @@ exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const map_set_polyfill_1 = __webpack_require__(7);
-const set_attribute_1 = __webpack_require__(34);
+const set_attribute_1 = __webpack_require__(35);
 const cellx_1 = __webpack_require__(16);
-const compileContentNodeValue_1 = __webpack_require__(35);
+const compileContentNodeValue_1 = __webpack_require__(36);
 const Constants_1 = __webpack_require__(22);
-const ContentNodeValueParser_1 = __webpack_require__(38);
-const compileKeypath_1 = __webpack_require__(42);
+const ContentNodeValueParser_1 = __webpack_require__(39);
+const compileKeypath_1 = __webpack_require__(43);
 exports.KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 const contentNodeValueASTCache = {
     __proto__: null
@@ -2419,22 +2596,22 @@ exports.bindContent = bindContent;
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__34__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__35__;
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const escape_string_1 = __webpack_require__(36);
-const bindingToJSExpression_1 = __webpack_require__(37);
+const escape_string_1 = __webpack_require__(37);
+const bindingToJSExpression_1 = __webpack_require__(38);
 const componentParamTypeSerializerMap_1 = __webpack_require__(19);
-const ContentNodeValueParser_1 = __webpack_require__(38);
+const ContentNodeValueParser_1 = __webpack_require__(39);
 const formatters_1 = __webpack_require__(10);
 const cache = Object.create(null);
 function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, useComponentParamValueMap) {
@@ -2478,13 +2655,13 @@ exports.compileContentNodeValue = compileContentNodeValue;
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__36__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__37__;
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2518,15 +2695,15 @@ exports.bindingToJSExpression = bindingToJSExpression;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const keypathPattern_1 = __webpack_require__(39);
-const keypathToJSExpression_1 = __webpack_require__(41);
-const namePattern_1 = __webpack_require__(40);
+const keypathPattern_1 = __webpack_require__(40);
+const keypathToJSExpression_1 = __webpack_require__(42);
+const namePattern_1 = __webpack_require__(41);
 var ContentNodeValueNodeType;
 (function (ContentNodeValueNodeType) {
     ContentNodeValueNodeType[ContentNodeValueNodeType["TEXT"] = 1] = "TEXT";
@@ -2859,18 +3036,18 @@ exports.ContentNodeValueParser = ContentNodeValueParser;
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const namePattern_1 = __webpack_require__(40);
+const namePattern_1 = __webpack_require__(41);
 exports.keypathPattern = `(?:${namePattern_1.namePattern}|\\d+)(?:\\.(?:${namePattern_1.namePattern}|\\d+))*`;
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2880,7 +3057,7 @@ exports.namePattern = '[$_a-zA-Z][$\\w]*';
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2907,13 +3084,13 @@ exports.keypathToJSExpression = keypathToJSExpression;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const keypathToJSExpression_1 = __webpack_require__(41);
+const keypathToJSExpression_1 = __webpack_require__(42);
 const cache = Object.create(null);
 function compileKeypath(keypath, cacheKey = keypath) {
     return (cache[cacheKey] ||
@@ -2923,7 +3100,7 @@ exports.compileKeypath = compileKeypath;
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2974,7 +3151,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2994,13 +3171,13 @@ exports.handledEvents = [
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const bindContent_1 = __webpack_require__(33);
+const bindContent_1 = __webpack_require__(34);
 function handleDOMEvent(evt) {
     let attrName = 'on-' + evt.type;
     let el = evt.target;
@@ -3053,13 +3230,13 @@ exports.handleDOMEvent = handleDOMEvent;
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const bindContent_1 = __webpack_require__(33);
+const bindContent_1 = __webpack_require__(34);
 const stack = [];
 function handleEvent(evt) {
     let target = evt.target;
@@ -3145,7 +3322,7 @@ exports.handleEvent = handleEvent;
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3179,207 +3356,7 @@ exports.normalizeTextNodes = normalizeTextNodes;
 
 
 /***/ }),
-/* 48 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const next_uid_1 = __webpack_require__(49);
-const cellx_1 = __webpack_require__(16);
-const BaseComponent_1 = __webpack_require__(28);
-const componentConstructorMap_1 = __webpack_require__(17);
-const elementConstructorMap_1 = __webpack_require__(23);
-class DisposableComponent extends BaseComponent_1.BaseComponent {
-    constructor() {
-        super(...arguments);
-        this._disposables = {};
-    }
-    listenTo(target, type, listener, context, useCapture) {
-        if (typeof target == 'string') {
-            target = this.$(target);
-        }
-        let listenings;
-        if (typeof type == 'object') {
-            listenings = [];
-            if (Array.isArray(type)) {
-                for (let i = 0, l = type.length; i < l; i++) {
-                    listenings.push(this.listenTo(target, type[i], listener, context, useCapture));
-                }
-            }
-            else {
-                for (let name in type) {
-                    listenings.push(this.listenTo(target, name, type[name], listener, context));
-                }
-            }
-        }
-        else {
-            if (Array.isArray(target) ||
-                target instanceof NodeList ||
-                target instanceof HTMLCollection) {
-                listenings = [];
-                for (let i = 0, l = target.length; i < l; i++) {
-                    listenings.push(this.listenTo(target[i], type, listener, context, useCapture));
-                }
-            }
-            else if (Array.isArray(listener)) {
-                listenings = [];
-                for (let i = 0, l = listener.length; i < l; i++) {
-                    listenings.push(this.listenTo(target, type, listener[i], context, useCapture));
-                }
-            }
-            else {
-                return this._listenTo(target, type, listener, context !== undefined ? context : this, useCapture || false);
-            }
-        }
-        let id = next_uid_1.nextUID();
-        let stopListening = () => {
-            for (let i = listenings.length; i;) {
-                listenings[--i].stop();
-            }
-            delete this._disposables[id];
-        };
-        let listening = (this._disposables[id] = {
-            stop: stopListening,
-            dispose: stopListening
-        });
-        return listening;
-    }
-    _listenTo(target, type, listener, context, useCapture) {
-        if (target instanceof BaseComponent_1.BaseComponent) {
-            if (type.charAt(0) == '<') {
-                let index = type.indexOf('>', 2);
-                let targetType = type.slice(1, index);
-                if (targetType != '*') {
-                    let targetConstr = elementConstructorMap_1.elementConstructorMap.has(targetType) &&
-                        componentConstructorMap_1.componentConstructorMap.get(targetType);
-                    if (!targetConstr) {
-                        throw new TypeError(`Component "${targetType}" is not defined`);
-                    }
-                    let inner = listener;
-                    listener = function (evt) {
-                        if (evt.target instanceof targetConstr) {
-                            return inner.call(this, evt);
-                        }
-                    };
-                }
-                type = type.slice(index + 1);
-            }
-            else if (type.indexOf(':') == -1) {
-                let inner = listener;
-                listener = function (evt) {
-                    if (evt.target == target) {
-                        return inner.call(this, evt);
-                    }
-                };
-            }
-        }
-        if (target instanceof cellx_1.EventEmitter) {
-            target.on(type, listener, context);
-        }
-        else if (target.addEventListener) {
-            if (target !== context) {
-                listener = listener.bind(context);
-            }
-            target.addEventListener(type, listener, useCapture);
-        }
-        else {
-            throw new TypeError('Unable to add a listener');
-        }
-        let id = next_uid_1.nextUID();
-        let stopListening = () => {
-            if (this._disposables[id]) {
-                if (target instanceof cellx_1.EventEmitter) {
-                    target.off(type, listener, context);
-                }
-                else {
-                    target.removeEventListener(type, listener, useCapture);
-                }
-                delete this._disposables[id];
-            }
-        };
-        let listening = (this._disposables[id] = {
-            stop: stopListening,
-            dispose: stopListening
-        });
-        return listening;
-    }
-    setTimeout(callback, delay) {
-        let id = next_uid_1.nextUID();
-        let timeoutId = setTimeout(() => {
-            delete this._disposables[id];
-            callback.call(this);
-        }, delay);
-        let clearTimeout_ = () => {
-            if (this._disposables[id]) {
-                clearTimeout(timeoutId);
-                delete this._disposables[id];
-            }
-        };
-        let timeout = (this._disposables[id] = {
-            clear: clearTimeout_,
-            dispose: clearTimeout_
-        });
-        return timeout;
-    }
-    setInterval(callback, delay) {
-        let id = next_uid_1.nextUID();
-        let intervalId = setInterval(() => {
-            callback.call(this);
-        }, delay);
-        let clearInterval_ = () => {
-            if (this._disposables[id]) {
-                clearInterval(intervalId);
-                delete this._disposables[id];
-            }
-        };
-        let interval = (this._disposables[id] = {
-            clear: clearInterval_,
-            dispose: clearInterval_
-        });
-        return interval;
-    }
-    registerCallback(callback) {
-        let id = next_uid_1.nextUID();
-        let disposable = this;
-        let cancelCallback = () => {
-            delete this._disposables[id];
-        };
-        let registeredCallback = function registeredCallback() {
-            if (disposable._disposables[id]) {
-                delete disposable._disposables[id];
-                return callback.apply(disposable, arguments);
-            }
-        };
-        registeredCallback.cancel = cancelCallback;
-        registeredCallback.dispose = cancelCallback;
-        this._disposables[id] = registeredCallback;
-        return registeredCallback;
-    }
-    _detach() {
-        super._detach();
-        this.dispose();
-    }
-    dispose() {
-        this._freezeBindings();
-        let disposables = this._disposables;
-        for (let id in disposables) {
-            disposables[id].dispose();
-        }
-        return this;
-    }
-}
-exports.DisposableComponent = DisposableComponent;
-
-
-/***/ }),
 /* 49 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__49__;
-
-/***/ }),
-/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3392,18 +3369,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var RnIfThen_1;
-const next_tick_1 = __webpack_require__(51);
+const next_tick_1 = __webpack_require__(50);
 const cellx_1 = __webpack_require__(16);
-const move_content_1 = __webpack_require__(52);
-const attachChildComponentElements_1 = __webpack_require__(32);
+const move_content_1 = __webpack_require__(51);
+const attachChildComponentElements_1 = __webpack_require__(33);
 const BaseComponent_1 = __webpack_require__(28);
-const bindContent_1 = __webpack_require__(33);
+const bindContent_1 = __webpack_require__(34);
 const Component_1 = __webpack_require__(12);
 const ElementProtoMixin_1 = __webpack_require__(24);
-const compileKeypath_1 = __webpack_require__(42);
-const keypathPattern_1 = __webpack_require__(39);
-const removeNodes_1 = __webpack_require__(53);
-const RnRepeat_1 = __webpack_require__(54);
+const compileKeypath_1 = __webpack_require__(43);
+const keypathPattern_1 = __webpack_require__(40);
+const removeNodes_1 = __webpack_require__(52);
+const RnRepeat_1 = __webpack_require__(53);
 const slice = Array.prototype.slice;
 const reKeypath = RegExp(`^${keypathPattern_1.keypathPattern}$`);
 let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent {
@@ -3541,13 +3518,13 @@ exports.RnIfThen = RnIfThen;
 
 
 /***/ }),
-/* 51 */
+/* 50 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__51__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__50__;
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3563,7 +3540,7 @@ exports.moveContent = moveContent;
 
 
 /***/ }),
-/* 53 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3590,7 +3567,7 @@ exports.removeNodes = removeNodes;
 
 
 /***/ }),
-/* 54 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3603,19 +3580,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const map_set_polyfill_1 = __webpack_require__(7);
-const next_tick_1 = __webpack_require__(51);
+const next_tick_1 = __webpack_require__(50);
 const cellx_1 = __webpack_require__(16);
-const move_content_1 = __webpack_require__(52);
-const attachChildComponentElements_1 = __webpack_require__(32);
+const move_content_1 = __webpack_require__(51);
+const attachChildComponentElements_1 = __webpack_require__(33);
 const BaseComponent_1 = __webpack_require__(28);
-const bindContent_1 = __webpack_require__(33);
+const bindContent_1 = __webpack_require__(34);
 const Component_1 = __webpack_require__(12);
 const ElementProtoMixin_1 = __webpack_require__(24);
-const compileKeypath_1 = __webpack_require__(42);
-const keypathPattern_1 = __webpack_require__(39);
-const namePattern_1 = __webpack_require__(40);
-const removeNodes_1 = __webpack_require__(53);
-const RnIfThen_1 = __webpack_require__(50);
+const compileKeypath_1 = __webpack_require__(43);
+const keypathPattern_1 = __webpack_require__(40);
+const namePattern_1 = __webpack_require__(41);
+const removeNodes_1 = __webpack_require__(52);
+const RnIfThen_1 = __webpack_require__(49);
 const slice = Array.prototype.slice;
 const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern})\\s*$`);
 function getItem(list, index) {
@@ -3954,7 +3931,7 @@ exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
-/* 55 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3967,7 +3944,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Component_1 = __webpack_require__(12);
-const RnIfThen_1 = __webpack_require__(50);
+const RnIfThen_1 = __webpack_require__(49);
 let RnIfElse = class RnIfElse extends RnIfThen_1.RnIfThen {
     constructor() {
         super(...arguments);
@@ -3984,7 +3961,7 @@ exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
-/* 56 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4000,12 +3977,12 @@ const get_uid_1 = __webpack_require__(29);
 const map_set_polyfill_1 = __webpack_require__(7);
 const move_content_1 = __webpack_require__(31);
 const symbol_polyfill_1 = __webpack_require__(8);
-const attachChildComponentElements_1 = __webpack_require__(32);
+const attachChildComponentElements_1 = __webpack_require__(33);
 const BaseComponent_1 = __webpack_require__(28);
-const bindContent_1 = __webpack_require__(33);
+const bindContent_1 = __webpack_require__(34);
 const Component_1 = __webpack_require__(12);
 const ElementProtoMixin_1 = __webpack_require__(24);
-const cloneNode_1 = __webpack_require__(57);
+const cloneNode_1 = __webpack_require__(56);
 const KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot[slotContentMap]');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
     static get bindsInputContent() {
@@ -4167,7 +4144,7 @@ exports.RnSlot = RnSlot;
 
 
 /***/ }),
-/* 57 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
