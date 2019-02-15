@@ -7,7 +7,7 @@
 		exports["rionite"] = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("@riim/gettext"), require("cellx"), require("@riim/map-set-polyfill"), require("@riim/symbol-polyfill"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/next-uid"), require("@riim/set-attribute"), require("escape-string"), require("@riim/next-tick"));
 	else
 		root["rionite"] = factory(root["@riim/kebab-case"], root["@riim/rionite-snake-case-attribute-name"], root["@riim/gettext"], root["cellx"], root["@riim/map-set-polyfill"], root["@riim/symbol-polyfill"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/next-uid"], root["@riim/set-attribute"], root["escape-string"], root["@riim/next-tick"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__12__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__18__, __WEBPACK_EXTERNAL_MODULE__19__, __WEBPACK_EXTERNAL_MODULE__23__, __WEBPACK_EXTERNAL_MODULE__25__, __WEBPACK_EXTERNAL_MODULE__27__, __WEBPACK_EXTERNAL_MODULE__28__, __WEBPACK_EXTERNAL_MODULE__29__, __WEBPACK_EXTERNAL_MODULE__32__, __WEBPACK_EXTERNAL_MODULE__34__, __WEBPACK_EXTERNAL_MODULE__47__) {
+})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__7__, __WEBPACK_EXTERNAL_MODULE__12__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__18__, __WEBPACK_EXTERNAL_MODULE__19__, __WEBPACK_EXTERNAL_MODULE__23__, __WEBPACK_EXTERNAL_MODULE__26__, __WEBPACK_EXTERNAL_MODULE__28__, __WEBPACK_EXTERNAL_MODULE__29__, __WEBPACK_EXTERNAL_MODULE__30__, __WEBPACK_EXTERNAL_MODULE__33__, __WEBPACK_EXTERNAL_MODULE__35__, __WEBPACK_EXTERNAL_MODULE__48__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -107,12 +107,12 @@ var formatters_1 = __webpack_require__(6);
 exports.formatters = formatters_1.formatters;
 var Component_1 = __webpack_require__(8);
 exports.Component = Component_1.Component;
-var Param_1 = __webpack_require__(24);
+var Param_1 = __webpack_require__(25);
 exports.Param = Param_1.Param;
 var Constants_1 = __webpack_require__(20);
 exports.KEY_PARAMS_CONFIG = Constants_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAMS = Constants_1.KEY_PARAMS;
-var BaseComponent_1 = __webpack_require__(26);
+var BaseComponent_1 = __webpack_require__(27);
 exports.BaseComponent = BaseComponent_1.BaseComponent;
 var ElementProtoMixin_1 = __webpack_require__(22);
 exports.KEY_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_ELEMENT_CONNECTED;
@@ -123,13 +123,13 @@ exports.TemplateNodeType = Template_1.NodeType;
 exports.Template = Template_1.Template;
 var registerComponent_1 = __webpack_require__(9);
 exports.registerComponent = registerComponent_1.registerComponent;
-var RnIfThen_1 = __webpack_require__(46);
+var RnIfThen_1 = __webpack_require__(47);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
-var RnIfElse_1 = __webpack_require__(51);
+var RnIfElse_1 = __webpack_require__(52);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
-var RnRepeat_1 = __webpack_require__(50);
+var RnRepeat_1 = __webpack_require__(51);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
-var RnSlot_1 = __webpack_require__(52);
+var RnSlot_1 = __webpack_require__(53);
 exports.RnSlot = RnSlot_1.RnSlot;
 
 
@@ -1687,6 +1687,7 @@ const defer_1 = __webpack_require__(23);
 const symbol_polyfill_1 = __webpack_require__(16);
 const ComponentParams_1 = __webpack_require__(15);
 const Constants_1 = __webpack_require__(20);
+const observedAttributesFeature_1 = __webpack_require__(24);
 // export const KEY_IS_COMPONENT_ELEMENT = Symbol('Rionite/ElementProtoMixin[isComponentElement]');
 exports.KEY_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite/ElementProtoMixin[elementConnected]');
 let connectionStatusCallbacksSuppressed = false;
@@ -1760,15 +1761,19 @@ exports.ElementProtoMixin = {
         if (component && component.isReady) {
             let $paramConfig = component.constructor[Constants_1.KEY_PARAMS_CONFIG][name];
             if ($paramConfig.readonly) {
-                throw new TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
-            }
-            let valueCell = component[$paramConfig.property + 'Cell'];
-            let value = $paramConfig.typeSerializer.read(rawValue, $paramConfig.default, this);
-            if (valueCell) {
-                valueCell.set(value);
+                if (observedAttributesFeature_1.observedAttributesFeature) {
+                    throw new TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
+                }
             }
             else {
-                component[Constants_1.KEY_PARAMS].set($paramConfig.name, value);
+                let valueCell = component[$paramConfig.property + 'Cell'];
+                let value = $paramConfig.typeSerializer.read(rawValue, $paramConfig.default, this);
+                if (valueCell) {
+                    valueCell.set(value);
+                }
+                else {
+                    component[Constants_1.KEY_PARAMS].set($paramConfig.name, value);
+                }
             }
         }
     }
@@ -1788,7 +1793,27 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__23__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const lower_case_first_word_1 = __webpack_require__(25);
+let observedAttributesFeature_ = false;
+window.customElements.define('test-observed-attributes-feature', class extends HTMLElement {
+    static get observedAttributes() {
+        return ['test'];
+    }
+    attributeChangedCallback() {
+        observedAttributesFeature_ = true;
+    }
+});
+document.createElement('test-observed-attributes-feature').setAttribute('test', '');
+exports.observedAttributesFeature = observedAttributesFeature_;
+
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const lower_case_first_word_1 = __webpack_require__(26);
 const map_set_polyfill_1 = __webpack_require__(14);
 const types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
 const prefix = 'param';
@@ -1825,35 +1850,35 @@ exports.Param = Param;
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__25__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__26__;
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(27);
+const get_uid_1 = __webpack_require__(28);
 const kebab_case_1 = __webpack_require__(4);
 const map_set_polyfill_1 = __webpack_require__(14);
-const move_content_1 = __webpack_require__(28);
-const next_uid_1 = __webpack_require__(29);
+const move_content_1 = __webpack_require__(29);
+const next_uid_1 = __webpack_require__(30);
 const cellx_1 = __webpack_require__(12);
-const attachChildComponentElements_1 = __webpack_require__(30);
-const bindContent_1 = __webpack_require__(31);
-const componentBinding_1 = __webpack_require__(41);
+const attachChildComponentElements_1 = __webpack_require__(31);
+const bindContent_1 = __webpack_require__(32);
+const componentBinding_1 = __webpack_require__(42);
 const componentConstructorMap_1 = __webpack_require__(13);
 const Constants_1 = __webpack_require__(20);
 const elementConstructorMap_1 = __webpack_require__(21);
 const ElementProtoMixin_1 = __webpack_require__(22);
-const handledEvents_1 = __webpack_require__(42);
-const handleDOMEvent_1 = __webpack_require__(43);
-const handleEvent_1 = __webpack_require__(44);
-const normalizeTextNodes_1 = __webpack_require__(45);
+const handledEvents_1 = __webpack_require__(43);
+const handleDOMEvent_1 = __webpack_require__(44);
+const handleEvent_1 = __webpack_require__(45);
+const normalizeTextNodes_1 = __webpack_require__(46);
 const map = Array.prototype.map;
 class BaseComponent extends cellx_1.EventEmitter {
     constructor(el) {
@@ -2255,12 +2280,6 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 
 /***/ }),
-/* 27 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__27__;
-
-/***/ }),
 /* 28 */
 /***/ (function(module, exports) {
 
@@ -2274,6 +2293,12 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__29__;
 
 /***/ }),
 /* 30 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__30__;
+
+/***/ }),
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2295,19 +2320,19 @@ exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const map_set_polyfill_1 = __webpack_require__(14);
-const set_attribute_1 = __webpack_require__(32);
+const set_attribute_1 = __webpack_require__(33);
 const cellx_1 = __webpack_require__(12);
-const compileContentNodeValue_1 = __webpack_require__(33);
+const compileContentNodeValue_1 = __webpack_require__(34);
 const Constants_1 = __webpack_require__(20);
-const ContentNodeValueParser_1 = __webpack_require__(36);
-const compileKeypath_1 = __webpack_require__(40);
+const ContentNodeValueParser_1 = __webpack_require__(37);
+const compileKeypath_1 = __webpack_require__(41);
 exports.KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 const contentNodeValueASTCache = {
     __proto__: null
@@ -2482,22 +2507,22 @@ exports.bindContent = bindContent;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__32__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__33__;
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const escape_string_1 = __webpack_require__(34);
-const bindingToJSExpression_1 = __webpack_require__(35);
+const escape_string_1 = __webpack_require__(35);
+const bindingToJSExpression_1 = __webpack_require__(36);
 const componentParamTypeSerializerMap_1 = __webpack_require__(17);
-const ContentNodeValueParser_1 = __webpack_require__(36);
+const ContentNodeValueParser_1 = __webpack_require__(37);
 const formatters_1 = __webpack_require__(6);
 const cache = Object.create(null);
 function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, useComponentParamValueMap) {
@@ -2541,13 +2566,13 @@ exports.compileContentNodeValue = compileContentNodeValue;
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__34__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__35__;
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2581,15 +2606,15 @@ exports.bindingToJSExpression = bindingToJSExpression;
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const keypathPattern_1 = __webpack_require__(37);
-const keypathToJSExpression_1 = __webpack_require__(39);
-const namePattern_1 = __webpack_require__(38);
+const keypathPattern_1 = __webpack_require__(38);
+const keypathToJSExpression_1 = __webpack_require__(40);
+const namePattern_1 = __webpack_require__(39);
 var ContentNodeValueNodeType;
 (function (ContentNodeValueNodeType) {
     ContentNodeValueNodeType[ContentNodeValueNodeType["TEXT"] = 1] = "TEXT";
@@ -2922,18 +2947,18 @@ exports.ContentNodeValueParser = ContentNodeValueParser;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const namePattern_1 = __webpack_require__(38);
+const namePattern_1 = __webpack_require__(39);
 exports.keypathPattern = `(?:${namePattern_1.namePattern}|\\d+)(?:\\.(?:${namePattern_1.namePattern}|\\d+))*`;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2943,7 +2968,7 @@ exports.namePattern = '[$_a-zA-Z][$\\w]*';
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2970,13 +2995,13 @@ exports.keypathToJSExpression = keypathToJSExpression;
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const keypathToJSExpression_1 = __webpack_require__(39);
+const keypathToJSExpression_1 = __webpack_require__(40);
 const cache = Object.create(null);
 function compileKeypath(keypath, cacheKey = keypath) {
     return (cache[cacheKey] ||
@@ -2986,7 +3011,7 @@ exports.compileKeypath = compileKeypath;
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3037,7 +3062,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3057,13 +3082,13 @@ exports.handledEvents = [
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const bindContent_1 = __webpack_require__(31);
+const bindContent_1 = __webpack_require__(32);
 function handleDOMEvent(evt) {
     let attrName = 'on-' + evt.type;
     let el = evt.target;
@@ -3116,13 +3141,13 @@ exports.handleDOMEvent = handleDOMEvent;
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const bindContent_1 = __webpack_require__(31);
+const bindContent_1 = __webpack_require__(32);
 const stack = [];
 function handleEvent(evt) {
     let target = evt.target;
@@ -3208,7 +3233,7 @@ exports.handleEvent = handleEvent;
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3242,7 +3267,7 @@ exports.normalizeTextNodes = normalizeTextNodes;
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3255,18 +3280,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var RnIfThen_1;
-const next_tick_1 = __webpack_require__(47);
+const next_tick_1 = __webpack_require__(48);
 const cellx_1 = __webpack_require__(12);
-const move_content_1 = __webpack_require__(48);
-const attachChildComponentElements_1 = __webpack_require__(30);
-const BaseComponent_1 = __webpack_require__(26);
-const bindContent_1 = __webpack_require__(31);
+const move_content_1 = __webpack_require__(49);
+const attachChildComponentElements_1 = __webpack_require__(31);
+const BaseComponent_1 = __webpack_require__(27);
+const bindContent_1 = __webpack_require__(32);
 const Component_1 = __webpack_require__(8);
 const ElementProtoMixin_1 = __webpack_require__(22);
-const compileKeypath_1 = __webpack_require__(40);
-const keypathPattern_1 = __webpack_require__(37);
-const removeNodes_1 = __webpack_require__(49);
-const RnRepeat_1 = __webpack_require__(50);
+const compileKeypath_1 = __webpack_require__(41);
+const keypathPattern_1 = __webpack_require__(38);
+const removeNodes_1 = __webpack_require__(50);
+const RnRepeat_1 = __webpack_require__(51);
 const slice = Array.prototype.slice;
 const reKeypath = RegExp(`^${keypathPattern_1.keypathPattern}$`);
 let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent {
@@ -3404,13 +3429,13 @@ exports.RnIfThen = RnIfThen;
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__47__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__48__;
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3426,7 +3451,7 @@ exports.moveContent = moveContent;
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3453,7 +3478,7 @@ exports.removeNodes = removeNodes;
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3466,19 +3491,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const map_set_polyfill_1 = __webpack_require__(14);
-const next_tick_1 = __webpack_require__(47);
+const next_tick_1 = __webpack_require__(48);
 const cellx_1 = __webpack_require__(12);
-const move_content_1 = __webpack_require__(48);
-const attachChildComponentElements_1 = __webpack_require__(30);
-const BaseComponent_1 = __webpack_require__(26);
-const bindContent_1 = __webpack_require__(31);
+const move_content_1 = __webpack_require__(49);
+const attachChildComponentElements_1 = __webpack_require__(31);
+const BaseComponent_1 = __webpack_require__(27);
+const bindContent_1 = __webpack_require__(32);
 const Component_1 = __webpack_require__(8);
 const ElementProtoMixin_1 = __webpack_require__(22);
-const compileKeypath_1 = __webpack_require__(40);
-const keypathPattern_1 = __webpack_require__(37);
-const namePattern_1 = __webpack_require__(38);
-const removeNodes_1 = __webpack_require__(49);
-const RnIfThen_1 = __webpack_require__(46);
+const compileKeypath_1 = __webpack_require__(41);
+const keypathPattern_1 = __webpack_require__(38);
+const namePattern_1 = __webpack_require__(39);
+const removeNodes_1 = __webpack_require__(50);
+const RnIfThen_1 = __webpack_require__(47);
 const slice = Array.prototype.slice;
 const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern})\\s*$`);
 function getItem(list, index) {
@@ -3817,7 +3842,7 @@ exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3830,7 +3855,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Component_1 = __webpack_require__(8);
-const RnIfThen_1 = __webpack_require__(46);
+const RnIfThen_1 = __webpack_require__(47);
 let RnIfElse = class RnIfElse extends RnIfThen_1.RnIfThen {
     constructor() {
         super(...arguments);
@@ -3847,7 +3872,7 @@ exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3859,16 +3884,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(27);
+const get_uid_1 = __webpack_require__(28);
 const map_set_polyfill_1 = __webpack_require__(14);
-const move_content_1 = __webpack_require__(28);
+const move_content_1 = __webpack_require__(29);
 const symbol_polyfill_1 = __webpack_require__(16);
-const attachChildComponentElements_1 = __webpack_require__(30);
-const BaseComponent_1 = __webpack_require__(26);
-const bindContent_1 = __webpack_require__(31);
+const attachChildComponentElements_1 = __webpack_require__(31);
+const BaseComponent_1 = __webpack_require__(27);
+const bindContent_1 = __webpack_require__(32);
 const Component_1 = __webpack_require__(8);
 const ElementProtoMixin_1 = __webpack_require__(22);
-const cloneNode_1 = __webpack_require__(53);
+const cloneNode_1 = __webpack_require__(54);
 const KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot[slotContentMap]');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
     static get bindsInputContent() {
@@ -4030,7 +4055,7 @@ exports.RnSlot = RnSlot;
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
