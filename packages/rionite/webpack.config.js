@@ -17,7 +17,7 @@ module.exports = (env = {}) => {
 
 		output: {
 			path: path.join(__dirname, 'dist'),
-			filename: env.es6 ? '[name].es6.js' : '[name].js',
+			filename: '[name].js',
 			library: '[name]',
 			libraryTarget: 'umd'
 		},
@@ -33,10 +33,7 @@ module.exports = (env = {}) => {
 				{
 					test: /\.ts$/,
 					exclude: /(?:node_modules|bower_components)/,
-					loader: 'awesome-typescript-loader',
-					options: {
-						configFileName: env.es6 ? 'tsconfig.es6.json' : 'tsconfig.json'
-					}
+					loader: 'awesome-typescript-loader'
 				}
 			]
 		},
@@ -48,7 +45,6 @@ module.exports = (env = {}) => {
 		context: __dirname,
 
 		externals: [
-			'@riim/clear-node',
 			'@riim/defer',
 			'@riim/escape-html',
 			'@riim/get-uid',
@@ -58,7 +54,6 @@ module.exports = (env = {}) => {
 			'@riim/logger',
 			'@riim/lower-case-first-word',
 			'@riim/map-set-polyfill',
-			'@riim/mixin',
 			'@riim/move-content',
 			'@riim/next-tick',
 			'@riim/next-uid',
@@ -66,9 +61,7 @@ module.exports = (env = {}) => {
 			'@riim/set-attribute',
 			'@riim/symbol-polyfill',
 			'cellx',
-			'escape-string',
-			'html-to-fragment',
-			'nelm-parser'
+			'escape-string'
 		],
 
 		plugins,

@@ -2,18 +2,12 @@ import { kebabCase } from '@riim/kebab-case';
 import { pascalize } from '@riim/pascalize';
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
 import { Cell, EventEmitter } from 'cellx';
-import {
-	BaseComponent,
-	I$ComponentParamConfig,
-	IComponentElement,
-	IComponentParamConfig
-	} from './BaseComponent';
+import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './BaseComponent';
 import { componentConstructorMap } from './componentConstructorMap';
 import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';
 import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
-import { reflectConstructFeature } from './lib/Features';
 import { Template } from './Template';
 
 const push = Array.prototype.push;
@@ -252,7 +246,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 	inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
 
 	let elExtends = componentConstr.elementExtends;
-	let parentElConstr: Function;
+	let parentElConstr: typeof HTMLElement;
 
 	if (elExtends) {
 		parentElConstr =
@@ -265,13 +259,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		parentElConstr = HTMLElement;
 	}
 
-	let elConstr = reflectConstructFeature
-		? function _(self: HTMLElement | undefined): IComponentElement {
-				return Reflect.construct(parentElConstr, [self], _);
-		  }
-		: function(self: HTMLElement | undefined): IComponentElement {
-				return parentElConstr.call(this, self);
-		  };
+	let elConstr = class extends parentElConstr {};
 
 	(elConstr as any)._rioniteComponentConstructor = componentConstr;
 
@@ -296,7 +284,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		}
 	});
 
-	let elProto = (elConstr.prototype = Object.create(parentElConstr.prototype));
+	let elProto = elConstr.prototype;
 
 	elProto.constructor = elConstr;
 
