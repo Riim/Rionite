@@ -1,16 +1,21 @@
 import { getText } from '@riim/gettext';
+import { ObservableList, ObservableMap } from 'cellx';
 
 export const formatters: { [name: string]: Function } = {
-	default(value: any, arg: any): any {
-		return value === undefined ? arg : value;
+	default(value: any, defaultValue: any): any {
+		return value === undefined ? defaultValue : value;
 	},
 
-	placeholder(value: any, arg: any): any {
-		return value === null ? arg : value;
+	defaultFor(defaultValue: any, value: any): any {
+		return value === undefined ? defaultValue : value;
 	},
 
-	or(value: any, arg: any): any {
-		return value || arg;
+	placeholder(value: any, placeholderValue: any): any {
+		return value === null ? placeholderValue : value;
+	},
+
+	or(value: any, orValue: any): any {
+		return value || orValue;
 	},
 
 	cond(condition: any, value1: any, value2: any): any {
@@ -25,55 +30,69 @@ export const formatters: { [name: string]: Function } = {
 		return !!value;
 	},
 
-	eq(value: any, arg: any): boolean {
-		return value == arg;
+	eq(value1: any, value2: any): boolean {
+		return value1 == value2;
 	},
 
-	identical(value: any, arg: any): boolean {
-		return value === arg;
+	identical(value1: any, value2: any): boolean {
+		return value1 === value2;
 	},
 
-	lt(value: number, arg: number): boolean {
-		return value < arg;
+	lt(value1: number, value2: number): boolean {
+		return value1 < value2;
 	},
 
-	lte(value: number, arg: number): boolean {
-		return value <= arg;
+	lte(value1: number, value2: number): boolean {
+		return value1 <= value2;
 	},
 
-	gt(value: number, arg: number): boolean {
-		return value > arg;
+	gt(value1: number, value2: number): boolean {
+		return value1 > value2;
 	},
 
-	gte(value: number, arg: number): boolean {
-		return value >= arg;
+	gte(value1: number, value2: number): boolean {
+		return value1 >= value2;
 	},
 
-	has(obj: { [name: string]: any }, key: string): boolean {
-		return !!obj && (typeof obj.has == 'function' ? obj.has(key) : obj.hasOwnProperty(key));
+	has(target: ObservableMap | null | undefined, key: any): boolean {
+		return !!target && target.has(key);
 	},
 
-	get(obj: { [name: string]: any }, key: string): any {
-		return obj && (typeof obj.get == 'function' ? obj.get(key) : obj[key]);
+	hasOwn(target: object | null | undefined, propertyName: string | number): boolean {
+		return !!target && target.hasOwnProperty(propertyName);
 	},
 
-	key(obj: { [name: string]: any }, key: string): any {
-		return obj && obj[key];
+	get(target: ObservableMap | ObservableList | null | undefined, key: any): any {
+		return target && target.get(key);
 	},
 
-	join(arr: Array<any> | null | undefined, separator = ', '): string | null | undefined {
-		return arr && arr.join(separator);
+	key(target: object | null | undefined, key: any): any {
+		return target && target[key];
+	},
+
+	contains(target: Array<any> | ObservableList | null | undefined, value: any): boolean {
+		return (
+			!!target &&
+			(Array.isArray(target) ? target.indexOf(value) != -1 : target.contains(value))
+		);
+	},
+
+	join(
+		target: Array<any> | ObservableList | null | undefined,
+		separator = ', '
+	): string | null | undefined {
+		return target && target.join(separator);
 	},
 
 	dump(value: any): string | null | undefined {
 		return value == null ? value : JSON.stringify(value);
 	},
 
-	t(msgid: string, ...args: Array<any>) {
+	t(msgid: string, ...args: Array<any>): string {
 		return getText('', msgid, args);
 	},
 
-	pt(msgid: string, msgctxt: string, ...args: Array<any>) {
+	pt(msgid: string, msgctxt: string, ...args: Array<any>): string {
 		return getText(msgctxt, msgid, args);
 	}
 };

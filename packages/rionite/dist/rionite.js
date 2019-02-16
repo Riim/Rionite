@@ -1007,14 +1007,17 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__5__;
 Object.defineProperty(exports, "__esModule", { value: true });
 const gettext_1 = __webpack_require__(7);
 exports.formatters = {
-    default(value, arg) {
-        return value === undefined ? arg : value;
+    default(value, defaultValue) {
+        return value === undefined ? defaultValue : value;
     },
-    placeholder(value, arg) {
-        return value === null ? arg : value;
+    defaultFor(defaultValue, value) {
+        return value === undefined ? defaultValue : value;
     },
-    or(value, arg) {
-        return value || arg;
+    placeholder(value, placeholderValue) {
+        return value === null ? placeholderValue : value;
+    },
+    or(value, orValue) {
+        return value || orValue;
     },
     cond(condition, value1, value2) {
         return condition ? value1 : value2;
@@ -1025,35 +1028,42 @@ exports.formatters = {
     notnot(value) {
         return !!value;
     },
-    eq(value, arg) {
-        return value == arg;
+    eq(value1, value2) {
+        return value1 == value2;
     },
-    identical(value, arg) {
-        return value === arg;
+    identical(value1, value2) {
+        return value1 === value2;
     },
-    lt(value, arg) {
-        return value < arg;
+    lt(value1, value2) {
+        return value1 < value2;
     },
-    lte(value, arg) {
-        return value <= arg;
+    lte(value1, value2) {
+        return value1 <= value2;
     },
-    gt(value, arg) {
-        return value > arg;
+    gt(value1, value2) {
+        return value1 > value2;
     },
-    gte(value, arg) {
-        return value >= arg;
+    gte(value1, value2) {
+        return value1 >= value2;
     },
-    has(obj, key) {
-        return !!obj && (typeof obj.has == 'function' ? obj.has(key) : obj.hasOwnProperty(key));
+    has(target, key) {
+        return !!target && target.has(key);
     },
-    get(obj, key) {
-        return obj && (typeof obj.get == 'function' ? obj.get(key) : obj[key]);
+    hasOwn(target, propertyName) {
+        return !!target && target.hasOwnProperty(propertyName);
     },
-    key(obj, key) {
-        return obj && obj[key];
+    get(target, key) {
+        return target && target.get(key);
     },
-    join(arr, separator = ', ') {
-        return arr && arr.join(separator);
+    key(target, key) {
+        return target && target[key];
+    },
+    contains(target, value) {
+        return (!!target &&
+            (Array.isArray(target) ? target.indexOf(value) != -1 : target.contains(value)));
+    },
+    join(target, separator = ', ') {
+        return target && target.join(separator);
     },
     dump(value) {
         return value == null ? value : JSON.stringify(value);
