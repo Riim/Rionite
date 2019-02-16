@@ -3623,7 +3623,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                         }
                         $item.item.set(item);
                         $item.index.set(i);
-                        lastNode = insertBefore($item.nodes, lastNode == el ? lastNode : lastNode.nextSibling);
+                        lastNode = insertBefore($item.nodes, lastNode == el && this.paramBeforeTemplate ? el : lastNode.nextSibling);
                         i++;
                     }
                     else {
@@ -3680,7 +3680,9 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                                             let k$Item = new$ItemMap.get(kValue);
                                             k$Item[0].item.set(item);
                                             k$Item[0].index.set(i);
-                                            lastNode = insertBefore(k$Item[0].nodes, lastNode == el ? lastNode : lastNode.nextSibling);
+                                            lastNode = insertBefore(k$Item[0].nodes, lastNode == el && this.paramBeforeTemplate
+                                                ? el
+                                                : lastNode.nextSibling);
                                         }
                                         prevList.splice(foundIndex, foundCount);
                                         prevListLength -= foundCount;
@@ -3759,7 +3761,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                     }
                     let newLastNode = content.lastChild;
                     ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                    lastNode.parentNode.insertBefore(content, lastNode == el ? lastNode : lastNode.nextSibling);
+                    lastNode.parentNode.insertBefore(content, lastNode == el && this.paramBeforeTemplate ? el : lastNode.nextSibling);
                     ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                     lastNode = newLastNode;
                     if (childComponents) {
@@ -3834,7 +3836,8 @@ RnRepeat = __decorate([
         elementExtends: 'template',
         params: {
             for: { property: 'paramFor', type: String, required: true, readonly: true },
-            trackBy: { property: 'paramTrackBy', type: String, readonly: true }
+            trackBy: { property: 'paramTrackBy', type: String, readonly: true },
+            beforeTemplate: { property: 'paramBeforeTemplate', type: Boolean, readonly: true }
         }
     })
 ], RnRepeat);

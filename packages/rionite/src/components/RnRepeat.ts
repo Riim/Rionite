@@ -78,12 +78,15 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 
 	params: {
 		for: { property: 'paramFor', type: String, required: true, readonly: true },
-		trackBy: { property: 'paramTrackBy', type: String, readonly: true }
+		trackBy: { property: 'paramTrackBy', type: String, readonly: true },
+		beforeTemplate: { property: 'paramBeforeTemplate', type: Boolean, readonly: true }
 	}
 })
 export class RnRepeat extends BaseComponent {
 	paramFor: string;
 	paramTrackBy: string;
+
+	paramBeforeTemplate: boolean;
 
 	_itemName: string;
 
@@ -199,7 +202,7 @@ export class RnRepeat extends BaseComponent {
 
 						lastNode = insertBefore(
 							$item.nodes,
-							lastNode == el ? lastNode : lastNode.nextSibling!
+							lastNode == el && this.paramBeforeTemplate ? el : lastNode.nextSibling!
 						);
 
 						i++;
@@ -271,7 +274,9 @@ export class RnRepeat extends BaseComponent {
 
 											lastNode = insertBefore(
 												k$Item[0].nodes,
-												lastNode == el ? lastNode : lastNode.nextSibling!
+												lastNode == el && this.paramBeforeTemplate
+													? el
+													: lastNode.nextSibling!
 											);
 										}
 
@@ -386,7 +391,7 @@ export class RnRepeat extends BaseComponent {
 					suppressConnectionStatusCallbacks();
 					lastNode.parentNode!.insertBefore(
 						content,
-						lastNode == el ? lastNode : lastNode.nextSibling
+						lastNode == el && this.paramBeforeTemplate ? el : lastNode.nextSibling
 					);
 					resumeConnectionStatusCallbacks();
 					lastNode = newLastNode;

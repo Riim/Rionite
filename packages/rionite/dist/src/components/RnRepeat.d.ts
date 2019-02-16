@@ -12,6 +12,7 @@ export declare type T$ItemMap = Map<any, Array<I$Item>>;
 export declare class RnRepeat extends BaseComponent {
     paramFor: string;
     paramTrackBy: string;
+    paramBeforeTemplate: boolean;
     _itemName: string;
     _prevList: Array<any>;
     _list: Cell<TList | undefined>;
