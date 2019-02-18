@@ -1025,7 +1025,7 @@ exports.formatters = {
     not(value) {
         return !value;
     },
-    notnot(value) {
+    bool(value) {
         return !!value;
     },
     eq(value1, value2) {

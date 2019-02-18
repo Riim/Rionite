@@ -26,7 +26,7 @@ export const formatters: { [name: string]: Function } = {
 		return !value;
 	},
 
-	notnot(value: any): boolean {
+	bool(value: any): boolean {
 		return !!value;
 	},
 
