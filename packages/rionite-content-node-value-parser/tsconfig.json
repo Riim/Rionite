@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"declaration": true,
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"lib": ["dom", "es2017"],
+		"module": "commonjs",
+		"newLine": "lf",
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"outDir": "dist",
+		"preserveConstEnums": true,
+		"strictNullChecks": true,
+		"suppressImplicitAnyIndexErrors": true,
+		"target": "es6"
+	},
+	"files": [
+		"src/index.ts"
+	]
+}
