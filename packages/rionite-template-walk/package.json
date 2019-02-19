@@ -1,0 +1,27 @@
+{
+  "name": "@riim/rionite-template-walk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Riim/Rionite.git"
+  },
+  "author": "Dmitry Vibe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Riim/Rionite/issues"
+  },
+  "homepage": "https://github.com/Riim/Rionite#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@riim/rionite-template-parser": "^0.36.1"
+  }
+}
