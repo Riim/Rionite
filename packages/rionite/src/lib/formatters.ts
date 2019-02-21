@@ -58,7 +58,7 @@ export const formatters: { [name: string]: Function } = {
 		return !!target && target.has(key);
 	},
 
-	hasOwn(target: object | null | undefined, propertyName: string | number): boolean {
+	hasOwn(target: Object | null | undefined, propertyName: string | number): boolean {
 		return !!target && target.hasOwnProperty(propertyName);
 	},
 
