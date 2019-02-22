@@ -957,13 +957,10 @@ function renderContent<T extends Node = Element>(
 					if ((node as IElement).isHelper) {
 						renderContent(targetNode, template, (node as IElement).content, isSVG);
 					} else {
-						if ((node as IElement).tagName == 'svg') {
-							isSVG = true;
-						}
-
+						let isSVG_ = (node as IElement).tagName == 'svg' || isSVG;
 						let el: Element;
 
-						if (isSVG) {
+						if (isSVG_) {
 							el = document.createElementNS(
 								'http://www.w3.org/2000/svg',
 								(node as IElement).tagName
@@ -978,7 +975,7 @@ function renderContent<T extends Node = Element>(
 						}
 
 						if ((node as IElement).names) {
-							if (isSVG) {
+							if (isSVG_) {
 								el.setAttribute(
 									'class',
 									renderElementClasses(
@@ -1002,7 +999,7 @@ function renderContent<T extends Node = Element>(
 								let attr = attrList[i];
 								let attrName = attr.name;
 
-								if (isSVG) {
+								if (isSVG_) {
 									if (
 										attrName == 'xlink:href' ||
 										attrName == 'href' ||
@@ -1039,7 +1036,7 @@ function renderContent<T extends Node = Element>(
 								(node as IElement).contentTemplateIndex!
 							];
 						} else {
-							renderContent(el, template, (node as IElement).content, isSVG);
+							renderContent(el, template, (node as IElement).content, isSVG_);
 						}
 
 						targetNode.appendChild(el);

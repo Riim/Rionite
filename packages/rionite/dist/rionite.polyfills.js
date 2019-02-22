@@ -2563,11 +2563,9 @@ function renderContent(targetNode, template, content, isSVG) {
                         renderContent(targetNode, template, node.content, isSVG);
                     }
                     else {
-                        if (node.tagName == 'svg') {
-                            isSVG = true;
-                        }
+                        let isSVG_ = node.tagName == 'svg' || isSVG;
                         let el;
-                        if (isSVG) {
+                        if (isSVG_) {
                             el = document.createElementNS('http://www.w3.org/2000/svg', node.tagName);
                         }
                         else if (node.is) {
@@ -2577,7 +2575,7 @@ function renderContent(targetNode, template, content, isSVG) {
                             el = document.createElement(node.tagName);
                         }
                         if (node.names) {
-                            if (isSVG) {
+                            if (isSVG_) {
                                 el.setAttribute('class', renderElementClasses(template._elementNamesTemplate, node.names));
                             }
                             else {
@@ -2589,7 +2587,7 @@ function renderContent(targetNode, template, content, isSVG) {
                             for (let i = 0, l = attrList['length=']; i < l; i++) {
                                 let attr = attrList[i];
                                 let attrName = attr.name;
-                                if (isSVG) {
+                                if (isSVG_) {
                                     if (attrName == 'xlink:href' ||
                                         attrName == 'href' ||
                                         attrName == 'xmlns') {
@@ -2616,7 +2614,7 @@ function renderContent(targetNode, template, content, isSVG) {
                             el.contentTemplate = template._embeddedTemplates[node.contentTemplateIndex];
                         }
                         else {
-                            renderContent(el, template, node.content, isSVG);
+                            renderContent(el, template, node.content, isSVG_);
                         }
                         targetNode.appendChild(el);
                     }
