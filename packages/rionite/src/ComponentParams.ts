@@ -43,6 +43,10 @@ function initParam(
 
 		if (defaultValue !== undefined && type !== eval) {
 			type = typeof defaultValue;
+
+			if (type == 'function') {
+				type = 'object';
+			}
 		}
 
 		typeSerializer = componentParamTypeSerializerMap.get(type);

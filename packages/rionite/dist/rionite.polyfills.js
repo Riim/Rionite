@@ -3119,6 +3119,9 @@ function initParam(component, $paramConfig, name) {
         type = isObject ? paramConfig.type : paramConfig;
         if (defaultValue !== undefined && type !== eval) {
             type = typeof defaultValue;
+            if (type == 'function') {
+                type = 'object';
+            }
         }
         typeSerializer = componentParamTypeSerializerMap_1.componentParamTypeSerializerMap.get(type);
         if (!typeSerializer) {
