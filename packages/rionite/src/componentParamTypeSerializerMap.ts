@@ -33,8 +33,8 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 				return rawValue !== null
 					? +rawValue
 					: defaultValue !== undefined
-						? defaultValue
-						: null;
+					? defaultValue
+					: null;
 			},
 
 			write: (value: any): string | null => {
@@ -50,8 +50,8 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 				return rawValue !== null
 					? rawValue
 					: defaultValue !== undefined
-						? defaultValue
-						: null;
+					? defaultValue
+					: null;
 			},
 
 			write: (value: any): string | null => {
@@ -72,7 +72,7 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 					return defaultValue || null;
 				}
 
-				let value = (el[KEY_COMPONENT_PARAM_VALUE_MAP] || Object.create(null))[rawValue];
+				let value = (el[KEY_COMPONENT_PARAM_VALUE_MAP] || { __proto__: null })[rawValue];
 
 				if (!value) {
 					throw new TypeError('Value is not an object');
@@ -94,8 +94,8 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 				return rawValue !== null
 					? Function(`return ${unescapeHTML(rawValue)};`)()
 					: defaultValue !== undefined
-						? defaultValue
-						: null;
+					? defaultValue
+					: null;
 			},
 
 			write: (value: any): string | null => {

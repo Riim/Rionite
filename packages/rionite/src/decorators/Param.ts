@@ -54,9 +54,9 @@ export function Param(
 	let constr = target!.constructor as typeof BaseComponent;
 
 	((constr.hasOwnProperty('params') && constr.params) || (constr.params = {}))[
-		(name ||
+		name ||
 			(propertyName.length <= prefixLength || propertyName.lastIndexOf(prefix, 0)
 				? propertyName
-				: lowerCaseFirstWord(propertyName.slice(5)))) as string
+				: lowerCaseFirstWord(propertyName.slice(5)))
 	] = config;
 }

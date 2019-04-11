@@ -65,8 +65,8 @@ export interface IBlock extends INode {
 	content: TContent;
 }
 
-const escapee: { [char: string]: string } = {
-	__proto__: null,
+const escapee: Record<string, string> = {
+	__proto__: null as any,
 
 	'/': '/',
 	'\\': '\\',
@@ -75,16 +75,16 @@ const escapee: { [char: string]: string } = {
 	n: '\n',
 	r: '\r',
 	t: '\t'
-} as any;
+};
 
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
 
-const reWhitespacesOrNothing = /\s+|/g;
-const reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
-const reElementNameOrNothing = /[a-zA-Z][\-\w]*|/g;
-const reAttributeNameOrNothing = /[^\s'">/=,)]+|/g;
-const reSuperCallOrNothing = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
+const reWhitespaces = /\s+|/g;
+const reTagName = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
+const reElementName = /[a-zA-Z][\-\w]*|/g;
+const reAttributeName = /[^\s'">/=,)]+|/g;
+const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
 
 function normalizeMultilineText(text: string): string {
 	return text
@@ -213,7 +213,7 @@ export class TemplateParser {
 			this._next();
 		}
 
-		let tagName = this._readName(reTagNameOrNothing);
+		let tagName = this._readName(reTagName);
 		let elNames: Array<string | null> | undefined;
 
 		if (this._chr == '/') {
@@ -229,7 +229,7 @@ export class TemplateParser {
 				elNames = [null];
 			}
 
-			for (let name; (name = this._readName(reElementNameOrNothing)); ) {
+			for (let name; (name = this._readName(reElementName)); ) {
 				(elNames || (elNames = [])).push(name);
 
 				if (this._skipWhitespaces() != ',') {
@@ -297,7 +297,7 @@ export class TemplateParser {
 			} else {
 				let pos = this._pos;
 				let line = this._line;
-				let name = this._readName(reAttributeNameOrNothing);
+				let name = this._readName(reAttributeName);
 
 				if (!name) {
 					this._throwError('Expected attribute name');
@@ -391,11 +391,11 @@ export class TemplateParser {
 	_readSuperCall(): ISuperCall | null {
 		let pos = this._pos;
 
-		reSuperCallOrNothing.lastIndex = pos;
-		let match = reSuperCallOrNothing.exec(this.template)!;
+		reSuperCall.lastIndex = pos;
+		let match = reSuperCall.exec(this.template)!;
 
 		if (match[0]) {
-			this._chr = this.template.charAt((this._pos = reSuperCallOrNothing.lastIndex));
+			this._chr = this.template.charAt((this._pos = reSuperCall.lastIndex));
 
 			return {
 				nodeType: NodeType.SUPER_CALL,
@@ -408,12 +408,12 @@ export class TemplateParser {
 		return null;
 	}
 
-	_readName(reNameOrNothing: RegExp): string | null {
-		reNameOrNothing.lastIndex = this._pos;
-		let name = reNameOrNothing.exec(this.template)![0];
+	_readName(reName: RegExp): string | null {
+		reName.lastIndex = this._pos;
+		let name = reName.exec(this.template)![0];
 
 		if (name) {
-			this._chr = this.template.charAt((this._pos = reNameOrNothing.lastIndex));
+			this._chr = this.template.charAt((this._pos = reName.lastIndex));
 			return name;
 		}
 
@@ -543,15 +543,13 @@ export class TemplateParser {
 	}
 
 	_skipWhitespaces(): string {
-		reWhitespacesOrNothing.lastIndex = this._pos;
-		let whitespaces = reWhitespacesOrNothing.exec(this.template)![0];
+		reWhitespaces.lastIndex = this._pos;
+		let whitespaces = reWhitespaces.exec(this.template)![0];
 
 		if (whitespaces) {
 			this._line += whitespaces.split(reLineBreak).length - 1;
 
-			return (this._chr = this.template.charAt(
-				(this._pos = reWhitespacesOrNothing.lastIndex)
-			));
+			return (this._chr = this.template.charAt((this._pos = reWhitespaces.lastIndex)));
 		}
 
 		return this._chr;

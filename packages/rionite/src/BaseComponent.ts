@@ -12,7 +12,6 @@ import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS } from './Constants';
 import { elementConstructorMap } from './elementConstructorMap';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
-import { handledEvents } from './handledEvents';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
 import { normalizeTextNodes } from './lib/normalizeTextNodes';
@@ -94,7 +93,7 @@ export interface IComponentElementClassNameMap {
 export type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (
 	this: T,
 	evt: U,
-	context: { [name: string]: any },
+	context: Record<string, any>,
 	receiver: Element
 ) => any;
 
@@ -108,8 +107,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	static elementIs: string;
 	static elementExtends: string | null = null;
 
-	static params: { [name: string]: any } | null = null;
-	static i18n: { [key: string]: any } | null = null;
+	static params: Record<string, any> | null = null;
+	static i18n: Record<string, any> | null = null;
 
 	static _blockNamesString: string;
 	static _elementBlockNames: Array<string>;
@@ -123,7 +122,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null = null;
 	static domEvents: IComponentEvents<BaseComponent, Event> | null = null;
 
-	_disposables: { [id: string]: IDisposable } = {};
+	_disposables: Record<string, IDisposable> = {};
 
 	_ownerComponent: BaseComponent | undefined;
 
@@ -167,7 +166,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	element: IComponentElement;
 
 	$inputContent: DocumentFragment | null = null;
-	$context: { [name: string]: any } | undefined;
+	$context: Record<string, any> | undefined;
 	$specifiedParams: Set<string> | undefined;
 
 	_bindings: Array<IFreezableCell> | null;
@@ -222,13 +221,13 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | string | Array<TListeningTarget>,
-		listeners: { [type: string]: TListener | Array<TListener> },
+		listeners: Record<string, TListener | Array<TListener>>,
 		context?: any,
 		useCapture?: boolean
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | string | Array<TListeningTarget>,
-		type: string | Array<string> | { [type: string]: TListener | Array<TListener> },
+		type: string | Array<string> | Record<string, TListener | Array<TListener>>,
 		listener?: TListener | Array<TListener> | any,
 		context?: any,
 		useCapture?: boolean
@@ -676,6 +675,18 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return elList;
 	}
 }
+
+const handledEvents = [
+	'change',
+	'click',
+	'dblclick',
+	'focusin',
+	'focusout',
+	'input',
+	'mousedown',
+	'mouseup',
+	'submit'
+];
 
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);

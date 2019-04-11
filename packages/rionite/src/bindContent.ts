@@ -18,7 +18,7 @@ import {
 	} from './ContentNodeValueParser';
 import { compileKeypath } from './lib/compileKeypath';
 
-export type TResult = [
+export type TContentBindingResult = [
 	Array<BaseComponent> | null,
 	Array<IFreezableCell> | null,
 	Array<BaseComponent | string | TListener> | null
@@ -26,9 +26,7 @@ export type TResult = [
 
 export const KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 
-const contentNodeValueASTCache: { [nodeValue: string]: TContentNodeValue | null } = {
-	__proto__: null
-};
+const contentNodeValueASTCache: Record<string, TContentNodeValue | null> = Object.create(null);
 
 export interface IAttributeBindingCellMeta {
 	element: Element;
@@ -47,14 +45,14 @@ export function bindContent(
 	node: Element | DocumentFragment,
 	ownerComponent: BaseComponent,
 	context: object,
-	result: TResult,
+	result: TContentBindingResult,
 	parentComponent?: BaseComponent
-): TResult {
+): TContentBindingResult {
 	for (let child: Node | null = node.firstChild; child; child = child.nextSibling) {
 		switch (child.nodeType) {
 			case Node.ELEMENT_NODE: {
 				let childComponent = (child as IPossiblyComponentElement).rioniteComponent;
-				let $paramsConfig: { [name: string]: I$ComponentParamConfig } | undefined;
+				let $paramsConfig: Record<string, I$ComponentParamConfig> | undefined;
 				let $specifiedParams: Set<string> | undefined;
 
 				if (childComponent) {

@@ -30,7 +30,7 @@ export class RnSlot extends BaseComponent {
 		return true;
 	}
 
-	$context: { [name: string]: any };
+	$context: Record<string, any>;
 
 	paramName: string;
 	paramForTag: string;
@@ -38,9 +38,9 @@ export class RnSlot extends BaseComponent {
 	paramCloneContent: boolean;
 	paramGetContext: (
 		this: BaseComponent,
-		context: { [name: string]: any },
+		context: Record<string, any>,
 		slot: RnSlot
-	) => { [name: string]: any };
+	) => Record<string, any>;
 
 	_childComponents: Array<BaseComponent> | null;
 

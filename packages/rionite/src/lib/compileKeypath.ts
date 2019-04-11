@@ -1,6 +1,6 @@
 import { keypathToJSExpression } from './keypathToJSExpression';
 
-const cache = Object.create(null);
+const cache: Record<string, (this: object) => any> = Object.create(null);
 
 export function compileKeypath(keypath: string, cacheKey?: string): (this: object) => any;
 export function compileKeypath(
@@ -13,6 +13,8 @@ export function compileKeypath(
 ): (this: object) => any {
 	return (
 		cache[cacheKey] ||
-		(cache[cacheKey] = Function(`var tmp; return ${keypathToJSExpression(keypath, cacheKey)};`))
+		(cache[cacheKey] = Function(
+			`var tmp; return ${keypathToJSExpression(keypath, cacheKey)};`
+		) as any)
 	);
 }

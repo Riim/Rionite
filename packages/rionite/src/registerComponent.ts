@@ -13,16 +13,16 @@ import { Template } from './Template';
 const push = Array.prototype.push;
 
 function inheritProperty(
-	target: { [name: string]: any },
-	source: { [name: string]: any },
+	target: Record<string, any>,
+	source: Record<string, any>,
 	name: string,
 	depth: number
 ) {
-	let obj = target[name] as { [name: string]: any } | null | undefined;
-	let parentObj = source[name] as { [name: string]: any } | null | undefined;
+	let obj = target[name] as Record<string, any> | null | undefined;
+	let parentObj = source[name] as Record<string, any> | null | undefined;
 
 	if (obj && parentObj && obj != parentObj) {
-		let o: { [name: string]: any } = (target[name] = { __proto__: parentObj });
+		let o: Record<string, any> = (target[name] = { __proto__: parentObj });
 
 		for (let key in obj) {
 			o[key] = obj[key];
@@ -103,7 +103,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 					KEY_PARAMS_CONFIG
 				)
 					? componentConstr[KEY_PARAMS_CONFIG]
-					: (componentConstr[KEY_PARAMS_CONFIG] = Object.create(null)))[
+					: (componentConstr[KEY_PARAMS_CONFIG] = { __proto__: null }))[
 					name
 				] = componentConstr[KEY_PARAMS_CONFIG][snakeCaseName] = {
 					name,

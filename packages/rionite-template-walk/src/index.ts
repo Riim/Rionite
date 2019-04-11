@@ -9,7 +9,7 @@ import {
 
 export function walk(
 	node: IBlock | IElement | TContent,
-	callbacks: { [nodeType: number]: (node: INode) => void }
+	callbacks: Record<number, (node: INode) => void>
 ) {
 	if (Array.isArray(node)) {
 		walkContent(node, callbacks);
@@ -24,10 +24,7 @@ export function walk(
 	}
 }
 
-export function walkContent(
-	content: TContent,
-	callbacks: { [nodeType: number]: (node: INode) => void }
-) {
+export function walkContent(content: TContent, callbacks: Record<number, (node: INode) => void>) {
 	for (let node of content) {
 		if (callbacks[node.nodeType]) {
 			callbacks[node.nodeType](node);
@@ -47,7 +44,7 @@ export function walkContent(
 
 export function walkAttributes(
 	attrs: IElementAttributes,
-	callbacks: { [nodeType: number]: (node: INode) => void }
+	callbacks: Record<number, (node: INode) => void>
 ) {
 	if (attrs.superCall && callbacks[NodeType.SUPER_CALL]) {
 		callbacks[NodeType.ELEMENT_ATTRIBUTE](attrs.superCall);

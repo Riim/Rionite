@@ -1,7 +1,7 @@
 const namePattern = '[$_a-zA-Z][$\\w]*';
 const keypathPattern = `(?:${namePattern}|\\d+)(?:\\.(?:${namePattern}|\\d+))*`;
 
-const cache = Object.create(null);
+const cache: Record<string, string> = Object.create(null);
 
 export function keypathToJSExpression(keypath: string, cacheKey?: string): string;
 export function keypathToJSExpression(keypath: string | Array<string>, cacheKey: string): string;
@@ -21,13 +21,13 @@ export function keypathToJSExpression(
 	}
 
 	let index = keyCount - 2;
-	let jsExpr = Array(index);
+	let fragments = Array(index);
 
 	while (index) {
-		jsExpr[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
+		fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
 	}
 
-	return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${jsExpr.join('')} && tmp['${
+	return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${
 		keys[keyCount - 1]
 	}']`);
 }
@@ -73,16 +73,18 @@ export type TContentNodeValue = Array<IContentNodeValueText | IContentNodeValueB
 
 const reWhitespace = /\s/;
 
-const reNameOrNothing = RegExp(namePattern + '|', 'g');
-const reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
-const reBooleanOrNothing = /false|true|/g;
-const reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
-const reVacuumOrNothing = /null|undefined|void 0|/g;
+const reName = RegExp(namePattern + '|', 'g');
+const reKeypath = RegExp(keypathPattern + '|', 'g');
+const reBoolean = /false|true|/g;
+const reNumber = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+const reVacuum = /null|undefined|void 0|/g;
 
 export class ContentNodeValueParser {
 	contentNodeValue: string;
-	at: number;
-	chr: string;
+
+	_pos: number;
+	_chr: string;
+
 	result: TContentNodeValue;
 
 	constructor(contentNodeValue: string) {
@@ -92,29 +94,29 @@ export class ContentNodeValueParser {
 	parse(index: number): TContentNodeValue {
 		let contentNodeValue = this.contentNodeValue;
 
-		this.at = 0;
+		this._pos = 0;
 
 		let result: TContentNodeValue = (this.result = []);
 
 		do {
-			this._pushText(contentNodeValue.slice(this.at, index));
+			this._pushText(contentNodeValue.slice(this._pos, index));
 
-			this.at = index;
-			this.chr = contentNodeValue.charAt(index);
+			this._pos = index;
+			this._chr = contentNodeValue.charAt(index);
 
 			let binding = this._readBinding();
 
 			if (binding) {
 				result.push(binding);
 			} else {
-				this._pushText(this.chr);
+				this._pushText(this._chr);
 				this._next('{');
 			}
 
-			index = contentNodeValue.indexOf('{', this.at);
+			index = contentNodeValue.indexOf('{', this._pos);
 		} while (index != -1);
 
-		this._pushText(contentNodeValue.slice(this.at));
+		this._pushText(contentNodeValue.slice(this._pos));
 
 		return result;
 	}
@@ -136,7 +138,7 @@ export class ContentNodeValueParser {
 	}
 
 	_readBinding(): IContentNodeValueBinding | null {
-		let at = this.at;
+		let pos = this._pos;
 
 		this._next('{');
 		this._skipWhitespaces();
@@ -163,7 +165,7 @@ export class ContentNodeValueParser {
 				(formatters || (formatters = [])).push(formatter);
 			}
 
-			if (this.chr == '}') {
+			if (this._chr == '}') {
 				this._next();
 
 				return {
@@ -172,19 +174,19 @@ export class ContentNodeValueParser {
 					keypath,
 					value: value || null,
 					formatters: formatters || null,
-					raw: this.contentNodeValue.slice(at, this.at)
+					raw: this.contentNodeValue.slice(pos, this._pos)
 				};
 			}
 		}
 
-		this.at = at;
-		this.chr = this.contentNodeValue.charAt(at);
+		this._pos = pos;
+		this._chr = this.contentNodeValue.charAt(pos);
 
 		return null;
 	}
 
 	_readPrefix(): string | null {
-		let chr = this.chr;
+		let chr = this._chr;
 
 		if (chr == '=') {
 			this._next();
@@ -192,19 +194,19 @@ export class ContentNodeValueParser {
 		}
 
 		if (chr == '<') {
-			let at = this.at;
+			let pos = this._pos;
 
-			if (this.contentNodeValue.charAt(at + 1) == '-') {
-				if (this.contentNodeValue.charAt(at + 2) == '>') {
-					this.chr = this.contentNodeValue.charAt((this.at = at + 3));
+			if (this.contentNodeValue.charAt(pos + 1) == '-') {
+				if (this.contentNodeValue.charAt(pos + 2) == '>') {
+					this._chr = this.contentNodeValue.charAt((this._pos = pos + 3));
 					return '<->';
 				}
 
-				this.chr = this.contentNodeValue.charAt((this.at = at + 2));
+				this._chr = this.contentNodeValue.charAt((this._pos = pos + 2));
 				return '<-';
 			}
-		} else if (chr == '-' && this.contentNodeValue.charAt(this.at + 1) == '>') {
-			this.chr = this.contentNodeValue.charAt((this.at += 2));
+		} else if (chr == '-' && this.contentNodeValue.charAt(this._pos + 1) == '>') {
+			this._chr = this.contentNodeValue.charAt((this._pos += 2));
 			return '->';
 		}
 
@@ -212,7 +214,7 @@ export class ContentNodeValueParser {
 	}
 
 	_readFormatter(): IContentNodeValueBindingFormatter | null {
-		let at = this.at;
+		let pos = this._pos;
 
 		this._next('|');
 		this._skipWhitespaces();
@@ -220,7 +222,7 @@ export class ContentNodeValueParser {
 		let name = this._readName();
 
 		if (name) {
-			let args = this.chr == '(' ? this._readFormatterArguments() : null;
+			let args = this._chr == '(' ? this._readFormatterArguments() : null;
 
 			return {
 				nodeType: ContentNodeValueNodeType.BINDING_FORMATTER,
@@ -229,14 +231,14 @@ export class ContentNodeValueParser {
 			};
 		}
 
-		this.at = at;
-		this.chr = this.contentNodeValue.charAt(at);
+		this._pos = pos;
+		this._chr = this.contentNodeValue.charAt(pos);
 
 		return null;
 	}
 
 	_readFormatterArguments(): IContentNodeValueBindingFormatterArguments | null {
-		let at = this.at;
+		let pos = this._pos;
 
 		this._next('(');
 
@@ -247,10 +249,10 @@ export class ContentNodeValueParser {
 				let arg = this._readValue() || this._readKeypath(true);
 
 				if (arg) {
-					if (this._skipWhitespaces() == ',' || this.chr == ')') {
+					if (this._skipWhitespaces() == ',' || this._chr == ')') {
 						args.push(arg);
 
-						if (this.chr == ',') {
+						if (this._chr == ',') {
 							this._next();
 							this._skipWhitespaces();
 							continue;
@@ -260,8 +262,8 @@ export class ContentNodeValueParser {
 					}
 				}
 
-				this.at = at;
-				this.chr = this.contentNodeValue.charAt(at);
+				this._pos = pos;
+				this._chr = this.contentNodeValue.charAt(pos);
 
 				return null;
 			}
@@ -276,7 +278,7 @@ export class ContentNodeValueParser {
 	}
 
 	_readValue(): string | null {
-		switch (this.chr) {
+		switch (this._chr) {
 			case '{': {
 				return this._readObject();
 			}
@@ -303,7 +305,7 @@ export class ContentNodeValueParser {
 	}
 
 	_readObject(): string | null {
-		let at = this.at;
+		let pos = this._pos;
 
 		this._next('{');
 
@@ -311,7 +313,7 @@ export class ContentNodeValueParser {
 
 		while (this._skipWhitespaces() != '}') {
 			let key =
-				this.chr == "'" || this.chr == '"' ? this._readString() : this._readObjectKey();
+				this._chr == "'" || this._chr == '"' ? this._readString() : this._readObjectKey();
 
 			if (key && this._skipWhitespaces() == ':') {
 				this._next();
@@ -324,15 +326,15 @@ export class ContentNodeValueParser {
 						obj += key + ':' + valueOrKeypath + ',';
 						this._next();
 						continue;
-					} else if (this.chr == '}') {
+					} else if (this._chr == '}') {
 						obj += key + ':' + valueOrKeypath + '}';
 						break;
 					}
 				}
 			}
 
-			this.at = at;
-			this.chr = this.contentNodeValue.charAt(at);
+			this._pos = pos;
+			this._chr = this.contentNodeValue.charAt(pos);
 
 			return null;
 		}
@@ -347,14 +349,14 @@ export class ContentNodeValueParser {
 	}
 
 	_readArray(): string | null {
-		let at = this.at;
+		let pos = this._pos;
 
 		this._next('[');
 
 		let arr = '[';
 
 		while (this._skipWhitespaces() != ']') {
-			if (this.chr == ',') {
+			if (this._chr == ',') {
 				arr += ',';
 				this._next();
 			} else {
@@ -363,8 +365,8 @@ export class ContentNodeValueParser {
 				if (valueOrKeypath) {
 					arr += valueOrKeypath;
 				} else {
-					this.at = at;
-					this.chr = this.contentNodeValue.charAt(at);
+					this._pos = pos;
+					this._chr = this.contentNodeValue.charAt(pos);
 
 					return null;
 				}
@@ -377,11 +379,11 @@ export class ContentNodeValueParser {
 	}
 
 	_readBoolean(): string | null {
-		reBooleanOrNothing.lastIndex = this.at;
-		let bool = reBooleanOrNothing.exec(this.contentNodeValue)![0];
+		reBoolean.lastIndex = this._pos;
+		let bool = reBoolean.exec(this.contentNodeValue)![0];
 
 		if (bool) {
-			this.chr = this.contentNodeValue.charAt((this.at = reBooleanOrNothing.lastIndex));
+			this._chr = this.contentNodeValue.charAt((this._pos = reBoolean.lastIndex));
 			return bool;
 		}
 
@@ -389,11 +391,11 @@ export class ContentNodeValueParser {
 	}
 
 	_readNumber(): string | null {
-		reNumberOrNothing.lastIndex = this.at;
-		let num = reNumberOrNothing.exec(this.contentNodeValue)![0];
+		reNumber.lastIndex = this._pos;
+		let num = reNumber.exec(this.contentNodeValue)![0];
 
 		if (num) {
-			this.chr = this.contentNodeValue.charAt((this.at = reNumberOrNothing.lastIndex));
+			this._chr = this.contentNodeValue.charAt((this._pos = reNumber.lastIndex));
 			return num;
 		}
 
@@ -401,18 +403,18 @@ export class ContentNodeValueParser {
 	}
 
 	_readString(): string | null {
-		let quoteChar = this.chr;
+		let quoteChar = this._chr;
 
 		if (quoteChar != "'" && quoteChar != '"') {
 			throw {
 				name: 'SyntaxError',
-				message: `Expected "'" instead of "${this.chr}"`,
-				at: this.at,
+				message: `Expected "'" instead of "${this._chr}"`,
+				pos: this._pos,
 				contentNodeValue: this.contentNodeValue
 			};
 		}
 
-		let at = this.at;
+		let pos = this._pos;
 		let str = '';
 
 		for (let next; (next = this._next()); ) {
@@ -432,18 +434,18 @@ export class ContentNodeValueParser {
 			}
 		}
 
-		this.at = at;
-		this.chr = this.contentNodeValue.charAt(at);
+		this._pos = pos;
+		this._chr = this.contentNodeValue.charAt(pos);
 
 		return null;
 	}
 
 	_readVacuum(): string | null {
-		reVacuumOrNothing.lastIndex = this.at;
-		let vacuum = reVacuumOrNothing.exec(this.contentNodeValue)![0];
+		reVacuum.lastIndex = this._pos;
+		let vacuum = reVacuum.exec(this.contentNodeValue)![0];
 
 		if (vacuum) {
-			this.chr = this.contentNodeValue.charAt((this.at = reVacuumOrNothing.lastIndex));
+			this._chr = this.contentNodeValue.charAt((this._pos = reVacuum.lastIndex));
 			return vacuum;
 		}
 
@@ -451,11 +453,11 @@ export class ContentNodeValueParser {
 	}
 
 	_readKeypath(toJSExpression?: boolean): string | null {
-		reKeypathOrNothing.lastIndex = this.at;
-		let keypath = reKeypathOrNothing.exec(this.contentNodeValue)![0];
+		reKeypath.lastIndex = this._pos;
+		let keypath = reKeypath.exec(this.contentNodeValue)![0];
 
 		if (keypath) {
-			this.chr = this.contentNodeValue.charAt((this.at = reKeypathOrNothing.lastIndex));
+			this._chr = this.contentNodeValue.charAt((this._pos = reKeypath.lastIndex));
 			return toJSExpression ? keypathToJSExpression(keypath) : keypath;
 		}
 
@@ -463,11 +465,11 @@ export class ContentNodeValueParser {
 	}
 
 	_readName(): string | null {
-		reNameOrNothing.lastIndex = this.at;
-		let name = reNameOrNothing.exec(this.contentNodeValue)![0];
+		reName.lastIndex = this._pos;
+		let name = reName.exec(this.contentNodeValue)![0];
 
 		if (name) {
-			this.chr = this.contentNodeValue.charAt((this.at = reNameOrNothing.lastIndex));
+			this._chr = this.contentNodeValue.charAt((this._pos = reName.lastIndex));
 			return name;
 		}
 
@@ -475,7 +477,7 @@ export class ContentNodeValueParser {
 	}
 
 	_skipWhitespaces(): string {
-		let chr = this.chr;
+		let chr = this._chr;
 
 		while (chr && reWhitespace.test(chr)) {
 			chr = this._next();
@@ -485,15 +487,15 @@ export class ContentNodeValueParser {
 	}
 
 	_next(current?: string): string {
-		if (current && current != this.chr) {
+		if (current && current != this._chr) {
 			throw {
 				name: 'SyntaxError',
-				message: `Expected "${current}" instead of "${this.chr}"`,
-				at: this.at,
+				message: `Expected "${current}" instead of "${this._chr}"`,
+				pos: this._pos,
 				contentNodeValue: this.contentNodeValue
 			};
 		}
 
-		return (this.chr = this.contentNodeValue.charAt(++this.at));
+		return (this._chr = this.contentNodeValue.charAt(++this._pos));
 	}
 }

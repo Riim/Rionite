@@ -66,11 +66,11 @@ export interface ITextNode extends INode {
 export interface IBlock extends INode {
 	nodeType: NodeType.BLOCK;
 	content: TContent | null;
-	elements: { [name: string]: IElement };
+	elements: Record<string, IElement>;
 }
 
-const escapee: { [char: string]: string } = {
-	__proto__: null,
+const escapee: Record<string, string> = {
+	__proto__: null as any,
 
 	'/': '/',
 	'\\': '\\',
@@ -79,14 +79,14 @@ const escapee: { [char: string]: string } = {
 	n: '\n',
 	r: '\r',
 	t: '\t'
-} as any;
+};
 
 const reWhitespace = /\s/;
 
-const reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
-const reElementNameOrNothing = /[a-zA-Z][\-\w]*|/g;
-const reAttributeNameOrNothing = /[^\s'">/=,)]+|/g;
-const reSuperCallOrNothing = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
+const reTagName = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
+const reElementName = /[a-zA-Z][\-\w]*|/g;
+const reAttributeName = /[^\s'">/=,)]+|/g;
+const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
 
 function normalizeMultilineText(text: string): string {
 	return text
@@ -98,7 +98,7 @@ function normalizeMultilineText(text: string): string {
 export const ELEMENT_NAME_DELIMITER = '__';
 
 export class Template {
-	static helpers: { [name: string]: (el: IElement) => TContent | null } = {
+	static helpers: Record<string, (el: IElement) => TContent | null> = {
 		section: el => el.content
 	};
 
@@ -111,7 +111,7 @@ export class Template {
 
 	initialized = false;
 
-	_elements: { [name: string]: IElement };
+	_elements: Record<string, IElement>;
 
 	_pos: number;
 	_chr: string;
@@ -172,9 +172,9 @@ export class Template {
 
 		if (!this._isEmbedded) {
 			this._elements = parent
-				? ({ __proto__: parent._elements } as any)
-				: ({
-						__proto__: null,
+				? { __proto__: parent._elements as any }
+				: {
+						__proto__: null as any,
 						'@root': {
 							nodeType: NodeType.ELEMENT,
 							isHelper: true,
@@ -185,7 +185,7 @@ export class Template {
 							content: [],
 							contentTemplateIndex: null
 						}
-				  } as any);
+				  };
 		}
 
 		this._embeddedTemplates = this._isEmbedded
@@ -313,7 +313,7 @@ export class Template {
 			this._next();
 		}
 
-		let tagName = this._readName(reTagNameOrNothing);
+		let tagName = this._readName(reTagName);
 		let elNames: Array<string | null> | undefined;
 		let elName: string | null | undefined;
 
@@ -330,7 +330,7 @@ export class Template {
 				elNames = [null];
 			}
 
-			for (let name; (name = this._readName(reElementNameOrNothing)); ) {
+			for (let name; (name = this._readName(reElementName)); ) {
 				(elNames || (elNames = [])).push(name);
 
 				if (this._skipWhitespaces() != ',') {
@@ -597,7 +597,7 @@ export class Template {
 
 				this._skipWhitespacesAndComments();
 			} else {
-				let name = this._readName(reAttributeNameOrNothing);
+				let name = this._readName(reAttributeName);
 
 				if (!name) {
 					this._throwError('Expected attribute name');
@@ -702,8 +702,8 @@ export class Template {
 	}
 
 	_readSuperCall(defaultElName: string | null): ISuperCall | null {
-		reSuperCallOrNothing.lastIndex = this._pos;
-		let match = reSuperCallOrNothing.exec(this.template)!;
+		reSuperCall.lastIndex = this._pos;
+		let match = reSuperCall.exec(this.template)!;
 
 		if (match[0]) {
 			if (!this.parent) {
@@ -722,7 +722,7 @@ export class Template {
 				this._throwError(`Element "${elName}" is not defined`);
 			}
 
-			this._chr = this.template.charAt((this._pos = reSuperCallOrNothing.lastIndex));
+			this._chr = this.template.charAt((this._pos = reSuperCall.lastIndex));
 
 			return {
 				nodeType: NodeType.SUPER_CALL,
@@ -734,12 +734,12 @@ export class Template {
 		return null;
 	}
 
-	_readName(reNameOrNothing: RegExp): string | null {
-		reNameOrNothing.lastIndex = this._pos;
-		let name = reNameOrNothing.exec(this.template)![0];
+	_readName(reName: RegExp): string | null {
+		reName.lastIndex = this._pos;
+		let name = reName.exec(this.template)![0];
 
 		if (name) {
-			this._chr = this.template.charAt((this._pos = reNameOrNothing.lastIndex));
+			this._chr = this.template.charAt((this._pos = reName.lastIndex));
 			return name;
 		}
 
@@ -922,7 +922,8 @@ export class Template {
 		return renderContent(
 			document.createDocumentFragment(),
 			this,
-			block.content || block.elements['@root'].content
+			block.content || block.elements['@root'].content,
+			false
 		);
 	}
 }
@@ -931,7 +932,7 @@ function renderContent<T extends Node = Element>(
 	targetNode: T,
 	template: Template,
 	content: TContent | null,
-	isSVG?: boolean
+	isSVG: boolean
 ): T {
 	if (content) {
 		for (let node of content) {

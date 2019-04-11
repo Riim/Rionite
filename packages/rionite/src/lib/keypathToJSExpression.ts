@@ -1,4 +1,4 @@
-const cache = Object.create(null);
+const cache: Record<string, string> = Object.create(null);
 
 export function keypathToJSExpression(keypath: string, cacheKey?: string): string;
 export function keypathToJSExpression(keypath: string | Array<string>, cacheKey: string): string;
@@ -18,13 +18,13 @@ export function keypathToJSExpression(
 	}
 
 	let index = keyCount - 2;
-	let jsExpr = Array(index);
+	let fragments = Array(index);
 
 	while (index) {
-		jsExpr[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
+		fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
 	}
 
-	return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${jsExpr.join('')} && tmp['${
+	return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${
 		keys[keyCount - 1]
 	}']`);
 }

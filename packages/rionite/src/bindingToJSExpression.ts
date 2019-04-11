@@ -22,13 +22,13 @@ export function bindingToJSExpression(binding: IContentNodeValueBinding): string
 		}
 
 		let index = keyCount - 2;
-		let jsExprArr = Array(index);
+		let fragments = Array(index);
 
 		while (index) {
-			jsExprArr[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
+			fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
 		}
 
-		let jsExpr = `(tmp = this['${keys[0]}'])${jsExprArr.join('')} && tmp['${
+		let jsExpr = `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${
 			keys[keyCount - 1]
 		}']`;
 

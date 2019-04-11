@@ -1,7 +1,7 @@
 import { getText } from '@riim/gettext';
 import { ObservableList, ObservableMap } from 'cellx';
 
-export const formatters: { [name: string]: Function } = {
+export const formatters: Record<string, Function> = {
 	default(value: any, defaultValue: any): any {
 		return value === undefined ? defaultValue : value;
 	},

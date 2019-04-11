@@ -6,7 +6,7 @@ import { KEY_COMPONENT_PARAM_VALUE_MAP } from './componentParamTypeSerializerMap
 import { ContentNodeValueNodeType, IContentNodeValueBinding, TContentNodeValue } from './ContentNodeValueParser';
 import { formatters } from './lib/formatters';
 
-const cache = Object.create(null);
+const cache: Record<string, TCellPull<any>> = Object.create(null);
 
 export function compileContentNodeValue(
 	contentNodeValueAST: TContentNodeValue,
@@ -19,7 +19,7 @@ export function compileContentNodeValue(
 		return cache[cacheKey];
 	}
 
-	let inner: (formatters: { [name: string]: Function }) => any;
+	let inner: (formatters: Record<string, Function>) => any;
 
 	if (contentNodeValueAST.length == 1) {
 		inner = Function(
@@ -29,17 +29,20 @@ export function compileContentNodeValue(
 			)};`
 		) as any;
 	} else {
-		let jsExpr: Array<string> = [];
+		let fragments: Array<string> = [];
 
 		for (let node of contentNodeValueAST) {
-			jsExpr.push(
+			fragments.push(
 				node.nodeType == ContentNodeValueNodeType.TEXT
 					? `'${escapeString(node.value)}'`
 					: bindingToJSExpression(node)
 			);
 		}
 
-		inner = Function('formatters', `var tmp; return [${jsExpr.join(', ')}].join('');`) as any;
+		inner = Function(
+			'formatters',
+			`var tmp; return [${fragments.join(', ')}].join('');`
+		) as any;
 	}
 
 	return (cache[cacheKey] = useComponentParamValueMap
@@ -53,7 +56,7 @@ export function compileContentNodeValue(
 						let meta = cell.meta!;
 
 						(meta.element[KEY_COMPONENT_PARAM_VALUE_MAP] ||
-							(meta.element[KEY_COMPONENT_PARAM_VALUE_MAP] = Object.create(null)))[
+							(meta.element[KEY_COMPONENT_PARAM_VALUE_MAP] = { __proto__: null }))[
 							meta.attributeName
 						] = value;
 
