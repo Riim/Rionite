@@ -1,6 +1,6 @@
 {
   "name": "@riim/rionite-content-node-value-parser",
-  "version": "0.36.3",
+  "version": "0.36.6",
   "description": "",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
