@@ -1,6 +1,25 @@
 import { kebabCase } from '@riim/kebab-case';
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
-import { BaseComponent } from './BaseComponent';
+import { Cell, IEvent, TListener } from 'cellx';
+import {
+	BaseComponent,
+	I$ComponentParamConfig,
+	IComponentParamConfig,
+	IPossiblyComponentElement
+	} from './BaseComponent';
+import {
+	contentNodeValueASTCache,
+	IAttributeBindingCellMeta,
+	KEY_CONTEXT,
+	onAttributeBindingCellChange,
+	onTextNodeBindingCellChange,
+	TContentBindingResult
+	} from './bindContent';
+import { compileContentNodeValue } from './compileContentNodeValue';
+import { IFreezableCell } from './componentBinding';
+import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
+import { ContentNodeValueNodeType, ContentNodeValueParser, IContentNodeValueBinding } from './ContentNodeValueParser';
+import { compileKeypath } from './lib/compileKeypath';
 
 export enum NodeType {
 	BLOCK = 1,
@@ -157,7 +176,7 @@ export class Template {
 		}
 	}
 
-	initialize(component?: BaseComponent) {
+	initialize(component?: BaseComponent | null) {
 		if (this.initialized) {
 			return;
 		}
@@ -208,7 +227,7 @@ export class Template {
 			  );
 	}
 
-	parse(component?: BaseComponent): IBlock {
+	parse(component?: BaseComponent | null): IBlock {
 		this.initialize(component);
 
 		if (this.block) {
@@ -240,7 +259,7 @@ export class Template {
 		content: TContent | null,
 		superElName: string | null,
 		brackets: boolean,
-		componentConstr?: typeof BaseComponent
+		componentConstr?: typeof BaseComponent | null
 	): TContent | null {
 		if (brackets) {
 			this._next('{');
@@ -304,7 +323,7 @@ export class Template {
 	_readElement(
 		targetContent: TContent | null,
 		superElName: string | null,
-		componentConstr?: typeof BaseComponent
+		componentConstr?: typeof BaseComponent | null
 	): TContent | null {
 		let pos = this._pos;
 		let isHelper = this._chr == '@';
@@ -916,23 +935,37 @@ export class Template {
 		return this;
 	}
 
-	render(component?: BaseComponent): DocumentFragment {
+	render(
+		component?: BaseComponent | null,
+		ownerComponent?: BaseComponent,
+		context?: object,
+		result?: TContentBindingResult,
+		parentComponent?: BaseComponent
+	): DocumentFragment {
 		let block = this.parse(component);
 
 		return renderContent(
 			document.createDocumentFragment(),
-			this,
 			block.content || block.elements['@root'].content,
-			false
+			this,
+			false,
+			ownerComponent,
+			context,
+			result,
+			parentComponent
 		);
 	}
 }
 
 function renderContent<T extends Node = Element>(
 	targetNode: T,
-	template: Template,
 	content: TContent | null,
-	isSVG: boolean
+	template: Template,
+	isSVG: boolean,
+	ownerComponent?: BaseComponent,
+	context?: object,
+	result?: TContentBindingResult,
+	parentComponent?: BaseComponent
 ): T {
 	if (content) {
 		for (let node of content) {
@@ -944,9 +977,13 @@ function renderContent<T extends Node = Element>(
 				case NodeType.SUPER_CALL: {
 					renderContent(
 						targetNode,
-						template,
 						(node as ISuperCall).element.content,
-						isSVG
+						template,
+						isSVG,
+						ownerComponent,
+						context,
+						result,
+						parentComponent
 					);
 
 					continue;
@@ -956,23 +993,40 @@ function renderContent<T extends Node = Element>(
 			switch (node.nodeType) {
 				case NodeType.ELEMENT: {
 					if ((node as IElement).isHelper) {
-						renderContent(targetNode, template, (node as IElement).content, isSVG);
+						renderContent(
+							targetNode,
+							(node as IElement).content,
+							template,
+							isSVG,
+							ownerComponent,
+							context,
+							result,
+							parentComponent
+						);
 					} else {
-						let isSVG_ = (node as IElement).tagName == 'svg' || isSVG;
+						let tagName = (node as IElement).tagName;
+						let isSVG_ = isSVG || tagName == 'svg';
 						let el: Element;
 
 						if (isSVG_) {
-							el = document.createElementNS(
-								'http://www.w3.org/2000/svg',
-								(node as IElement).tagName
-							);
+							el = document.createElementNS('http://www.w3.org/2000/svg', tagName);
 						} else if ((node as IElement).is) {
 							el = (window as any).innerHTML(
 								document.createElement('div'),
-								`<${(node as IElement).tagName} is="${(node as IElement).is}">`
+								`<${tagName} is="${(node as IElement).is}">`
 							).firstChild as Element;
 						} else {
-							el = document.createElement((node as IElement).tagName);
+							el = document.createElement(tagName);
+						}
+
+						let nodeComponent =
+							result && (el as IPossiblyComponentElement).rioniteComponent;
+						let $paramsConfig: Record<string, I$ComponentParamConfig> | undefined;
+						let $specifiedParams: Set<string> | undefined;
+
+						if (nodeComponent) {
+							$paramsConfig = nodeComponent.constructor[KEY_PARAMS_CONFIG];
+							$specifiedParams = new Set();
 						}
 
 						if ((node as IElement).names) {
@@ -999,36 +1053,212 @@ function renderContent<T extends Node = Element>(
 							for (let i = 0, l = attrList['length=']; i < l; i++) {
 								let attr = attrList[i];
 								let attrName = attr.name;
+								let attrValue: any = attr.value;
 
-								if (isSVG_) {
-									if (
-										attrName == 'xlink:href' ||
-										attrName == 'href' ||
-										attrName == 'xmlns'
-									) {
-										el.setAttributeNS(
-											attrName == 'xmlns'
-												? 'http://www.w3.org/2000/xmlns/'
-												: 'http://www.w3.org/1999/xlink',
-											attrName,
-											attr.value
-										);
-									} else if (attrName == 'class') {
-										el.setAttribute(
-											attrName,
-											(el.getAttribute('class') || '') + attr.value
-										);
+								if (result) {
+									let targetName: string;
+
+									if (attrName.charAt(0) == '_') {
+										targetName = attrName.slice(1);
 									} else {
-										el.setAttribute(attrName, attr.value);
+										targetName = attrName;
+
+										if (
+											!attrName.lastIndexOf('oncomponent-', 0) ||
+											!attrName.lastIndexOf('on-', 0)
+										) {
+											el[KEY_CONTEXT] = context;
+										}
 									}
-								} else if (attrName == 'class') {
-									el.className += attr.value;
-								} else {
-									el.setAttribute(
-										snakeCaseAttributeName(attrName, true),
-										attr.value
-									);
+
+									let $paramConfig = $paramsConfig && $paramsConfig[targetName];
+
+									if ($paramConfig) {
+										$specifiedParams!.add($paramConfig.name);
+									}
+
+									if (attrValue) {
+										let attrValueAST = contentNodeValueASTCache[attrValue];
+
+										if (attrValueAST === undefined) {
+											let bracketIndex = attrValue.indexOf('{');
+
+											if (bracketIndex == -1) {
+												attrValueAST = contentNodeValueASTCache[
+													attrValue
+												] = null;
+											} else {
+												attrValueAST = new ContentNodeValueParser(
+													attrValue
+												).parse(bracketIndex);
+
+												if (
+													attrValueAST.length == 1 &&
+													attrValueAST[0].nodeType ==
+														ContentNodeValueNodeType.TEXT
+												) {
+													attrValueAST = contentNodeValueASTCache[
+														attrValue
+													] = null;
+												} else {
+													contentNodeValueASTCache[
+														attrValue
+													] = attrValueAST;
+												}
+											}
+										}
+
+										if (attrValueAST) {
+											let bindingPrefix =
+												attrValueAST.length == 1
+													? (attrValueAST[0] as IContentNodeValueBinding)
+															.prefix
+													: null;
+
+											if (bindingPrefix === '=') {
+												attrValue = compileContentNodeValue(
+													attrValueAST,
+													attrValue,
+													true
+												).call(context);
+											} else {
+												if (bindingPrefix !== '->') {
+													let cell = new Cell<
+														any,
+														IAttributeBindingCellMeta
+													>(
+														compileContentNodeValue(
+															attrValueAST,
+															attrValue,
+															attrValueAST.length == 1
+														),
+														{
+															context,
+															meta: {
+																element: el,
+																attributeName: targetName
+															},
+															onChange: onAttributeBindingCellChange
+														}
+													);
+
+													attrValue = cell.get();
+
+													(result[1] || (result[1] = [])).push(
+														cell as IFreezableCell
+													);
+												}
+
+												let paramConfig:
+													| IComponentParamConfig
+													| Function
+													| undefined;
+
+												if ($paramConfig) {
+													paramConfig = $paramConfig.paramConfig;
+												}
+
+												if (
+													paramConfig !== undefined &&
+													(bindingPrefix === '->' ||
+														bindingPrefix === '<->')
+												) {
+													let keypath = (attrValueAST[0] as IContentNodeValueBinding)
+														.keypath!;
+													let keys = keypath.split('.');
+													let handler: TListener;
+
+													if (keys.length == 1) {
+														handler = (propertyName =>
+															function(evt: IEvent) {
+																this.ownerComponent[propertyName] =
+																	evt.data.value;
+															})(keys[0]);
+													} else {
+														handler = ((propertyName, keys) => {
+															let getPropertyHolder = compileKeypath(
+																keys,
+																keys.join('.')
+															);
+
+															return function(evt: IEvent) {
+																let propertyHolder = getPropertyHolder.call(
+																	this.ownerComponent
+																);
+
+																if (propertyHolder) {
+																	propertyHolder[propertyName] =
+																		evt.data.value;
+																}
+															};
+														})(
+															keys[keys.length - 1],
+															keys.slice(0, -1)
+														);
+													}
+
+													(result[2] || (result[2] = [])).push(
+														nodeComponent!,
+														(typeof paramConfig == 'object' &&
+															(paramConfig.type ||
+																paramConfig.default !==
+																	undefined) &&
+															paramConfig.property) ||
+															$paramConfig!.name,
+														handler
+													);
+												}
+											}
+										}
+									}
 								}
+
+								if (attrValue !== false && attrValue != null) {
+									if (isSVG_) {
+										if (
+											attrName == 'xlink:href' ||
+											attrName == 'href' ||
+											attrName == 'xmlns'
+										) {
+											el.setAttributeNS(
+												attrName == 'xmlns'
+													? 'http://www.w3.org/2000/xmlns/'
+													: 'http://www.w3.org/1999/xlink',
+												attrName,
+												attrValue
+											);
+										} else if (attrName == 'class') {
+											el.setAttribute(
+												attrName,
+												(el.getAttribute('class') || '') + attrValue
+											);
+										} else {
+											el.setAttribute(attrName, attrValue);
+										}
+									} else if (attrName == 'class') {
+										el.className += attrValue;
+									} else {
+										el.setAttribute(
+											snakeCaseAttributeName(attrName, true),
+											attrValue
+										);
+									}
+								}
+							}
+						}
+
+						if (nodeComponent) {
+							nodeComponent._ownerComponent = ownerComponent;
+							nodeComponent.$context = context;
+							nodeComponent.$specifiedParams = $specifiedParams;
+
+							if (parentComponent) {
+								(
+									parentComponent[KEY_CHILD_COMPONENTS] ||
+									(parentComponent[KEY_CHILD_COMPONENTS] = [])
+								).push(nodeComponent);
+							} else {
+								(result![0] || (result![0] = [])).push(nodeComponent);
 							}
 						}
 
@@ -1036,8 +1266,24 @@ function renderContent<T extends Node = Element>(
 							(el as any).contentTemplate = template._embeddedTemplates![
 								(node as IElement).contentTemplateIndex!
 							];
+						} else if (
+							result &&
+							(!nodeComponent ||
+								!(nodeComponent.constructor as typeof BaseComponent)
+									.bindsInputContent)
+						) {
+							renderContent(
+								el,
+								(node as IElement).content,
+								template,
+								isSVG_,
+								ownerComponent,
+								context,
+								result,
+								nodeComponent
+							);
 						} else {
-							renderContent(el, template, (node as IElement).content, isSVG_);
+							renderContent(el, (node as IElement).content, template, isSVG_);
 						}
 
 						targetNode.appendChild(el);
@@ -1046,7 +1292,70 @@ function renderContent<T extends Node = Element>(
 					break;
 				}
 				case NodeType.TEXT: {
-					targetNode.appendChild(document.createTextNode((node as ITextNode).value));
+					let nodeValue = (node as ITextNode).value;
+
+					if (result) {
+						let nodeValueAST = contentNodeValueASTCache[nodeValue];
+
+						if (nodeValueAST === undefined) {
+							let bracketIndex = nodeValue.indexOf('{');
+
+							if (bracketIndex == -1) {
+								nodeValueAST = contentNodeValueASTCache[nodeValue] = null;
+							} else {
+								nodeValueAST = new ContentNodeValueParser(nodeValue).parse(
+									bracketIndex
+								);
+
+								if (
+									nodeValueAST.length == 1 &&
+									nodeValueAST[0].nodeType == ContentNodeValueNodeType.TEXT
+								) {
+									nodeValueAST = contentNodeValueASTCache[nodeValue] = null;
+								} else {
+									contentNodeValueASTCache[nodeValue] = nodeValueAST;
+								}
+							}
+						}
+
+						if (nodeValueAST) {
+							if (
+								nodeValueAST.length == 1 &&
+								(nodeValueAST[0] as IContentNodeValueBinding).prefix === '='
+							) {
+								targetNode.appendChild(
+									document.createTextNode(
+										compileContentNodeValue(
+											nodeValueAST,
+											nodeValue,
+											false
+										).call(context)
+									)
+								);
+							} else {
+								let meta = { textNode: null as any };
+								let cell = new Cell<string, { textNode: Text }>(
+									compileContentNodeValue(nodeValueAST, nodeValue, false),
+									{
+										context,
+										meta,
+										onChange: onTextNodeBindingCellChange
+									}
+								);
+
+								meta.textNode = targetNode.appendChild(
+									document.createTextNode(cell.get())
+								);
+
+								(result[1] || (result[1] = [])).push(cell as IFreezableCell);
+							}
+
+							break;
+						}
+					}
+
+					targetNode.appendChild(document.createTextNode(nodeValue));
+
 					break;
 				}
 			}

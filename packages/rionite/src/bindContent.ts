@@ -26,18 +26,20 @@ export type TContentBindingResult = [
 
 export const KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 
-const contentNodeValueASTCache: Record<string, TContentNodeValue | null> = Object.create(null);
+export const contentNodeValueASTCache: Record<string, TContentNodeValue | null> = Object.create(
+	null
+);
 
 export interface IAttributeBindingCellMeta {
 	element: Element;
 	attributeName: string;
 }
 
-function onAttributeBindingCellChange(evt: IEvent<Cell<any, IAttributeBindingCellMeta>>) {
+export function onAttributeBindingCellChange(evt: IEvent<Cell<any, IAttributeBindingCellMeta>>) {
 	setAttribute(evt.target.meta!.element, evt.target.meta!.attributeName, evt.data.value);
 }
 
-function onTextNodeBindingCellChange(evt: IEvent<Cell<string, { textNode: Text }>>) {
+export function onTextNodeBindingCellChange(evt: IEvent<Cell<string, { textNode: Text }>>) {
 	evt.target.meta!.textNode.nodeValue = evt.data.value;
 }
 
@@ -64,138 +66,142 @@ export function bindContent(
 
 				for (let i = attrs.length; i; ) {
 					let attr = attrs[--i];
-					let name = attr.name;
-					let targetName: string;
+					let attrName = attr.name;
+					let targetAttrName: string;
 
-					if (name.charAt(0) == '_') {
-						targetName = name.slice(1);
+					if (attrName.charAt(0) == '_') {
+						targetAttrName = attrName.slice(1);
 					} else {
-						targetName = name;
+						targetAttrName = attrName;
 
-						if (!name.lastIndexOf('oncomponent-', 0) || !name.lastIndexOf('on-', 0)) {
+						if (
+							!attrName.lastIndexOf('oncomponent-', 0) ||
+							!attrName.lastIndexOf('on-', 0)
+						) {
 							child[KEY_CONTEXT] = context;
 						}
 					}
 
-					let $paramConfig = $paramsConfig && $paramsConfig[targetName];
+					let $paramConfig = $paramsConfig && $paramsConfig[targetAttrName];
 
 					if ($paramConfig) {
 						$specifiedParams!.add($paramConfig.name);
 					}
 
-					let value = attr.value;
+					let attrValue = attr.value;
 
-					if (!value) {
+					if (!attrValue) {
 						continue;
 					}
 
-					let valueAST = contentNodeValueASTCache[value];
+					let attrValueAST = contentNodeValueASTCache[attrValue];
 
-					if (!valueAST) {
-						if (valueAST === null) {
+					if (!attrValueAST) {
+						if (attrValueAST === null) {
 							continue;
 						}
 
-						let bracketIndex = value.indexOf('{');
+						let bracketIndex = attrValue.indexOf('{');
 
 						if (bracketIndex == -1) {
-							contentNodeValueASTCache[value] = null;
+							contentNodeValueASTCache[attrValue] = null;
 							continue;
 						}
 
-						valueAST = contentNodeValueASTCache[value] = new ContentNodeValueParser(
-							value
-						).parse(bracketIndex);
+						attrValueAST = new ContentNodeValueParser(attrValue).parse(bracketIndex);
+
+						if (
+							attrValueAST.length == 1 &&
+							attrValueAST[0].nodeType == ContentNodeValueNodeType.TEXT
+						) {
+							contentNodeValueASTCache[attrValue] = null;
+							continue;
+						}
+
+						contentNodeValueASTCache[attrValue] = attrValueAST;
 					}
 
-					let valueASTLength = valueAST.length;
+					let bindingPrefix =
+						attrValueAST.length == 1
+							? (attrValueAST[0] as IContentNodeValueBinding).prefix
+							: null;
 
-					if (
-						valueASTLength > 1 ||
-						valueAST[0].nodeType == ContentNodeValueNodeType.BINDING
-					) {
-						let prefix =
-							valueAST.length == 1
-								? (valueAST[0] as IContentNodeValueBinding).prefix
-								: null;
-
-						if (prefix === '=') {
-							setAttribute(
-								child as Element,
-								targetName,
-								compileContentNodeValue(valueAST, value, true).call(context)
-							);
-						} else {
-							if (prefix !== '->') {
-								let cell = new Cell<any, IAttributeBindingCellMeta>(
-									compileContentNodeValue(valueAST, value, valueAST.length == 1),
-									{
-										context,
-										meta: {
-											element: child as Element,
-											attributeName: targetName
-										},
-										onChange: onAttributeBindingCellChange
-									}
-								);
-
-								setAttribute(child as Element, targetName, cell.get());
-
-								(result[1] || (result[1] = [])).push(cell as IFreezableCell);
-							}
-
-							let paramConfig: IComponentParamConfig | Function | undefined;
-
-							if ($paramConfig) {
-								paramConfig = $paramConfig.paramConfig;
-							}
-
-							if (
-								paramConfig !== undefined &&
-								(prefix === '->' || prefix === '<->')
-							) {
-								if (prefix == '->' && name.charAt(0) != '_') {
-									(child as Element).removeAttribute(name);
+					if (bindingPrefix === '=') {
+						setAttribute(
+							child as Element,
+							targetAttrName,
+							compileContentNodeValue(attrValueAST, attrValue, true).call(context)
+						);
+					} else {
+						if (bindingPrefix !== '->') {
+							let cell = new Cell<any, IAttributeBindingCellMeta>(
+								compileContentNodeValue(
+									attrValueAST,
+									attrValue,
+									attrValueAST.length == 1
+								),
+								{
+									context,
+									meta: {
+										element: child as Element,
+										attributeName: targetAttrName
+									},
+									onChange: onAttributeBindingCellChange
 								}
+							);
 
-								let keypath = (valueAST[0] as IContentNodeValueBinding).keypath!;
-								let keys = keypath.split('.');
-								let handler: TListener;
+							setAttribute(child as Element, targetAttrName, cell.get());
 
-								if (keys.length == 1) {
-									handler = (propertyName => {
-										return function(evt: IEvent) {
-											this.ownerComponent[propertyName] = evt.data.value;
-										};
+							(result[1] || (result[1] = [])).push(cell as IFreezableCell);
+						}
+
+						let paramConfig: IComponentParamConfig | Function | undefined;
+
+						if ($paramConfig) {
+							paramConfig = $paramConfig.paramConfig;
+						}
+
+						if (
+							paramConfig !== undefined &&
+							(bindingPrefix === '->' || bindingPrefix === '<->')
+						) {
+							if (bindingPrefix == '->' && attrName.charAt(0) != '_') {
+								(child as Element).removeAttribute(attrName);
+							}
+
+							let keypath = (attrValueAST[0] as IContentNodeValueBinding).keypath!;
+							let keys = keypath.split('.');
+							let handler: TListener;
+
+							if (keys.length == 1) {
+								handler = (propertyName =>
+									function(evt: IEvent) {
+										this.ownerComponent[propertyName] = evt.data.value;
 									})(keys[0]);
-								} else {
-									handler = ((propertyName, keys) => {
-										let getPropertyHolder = compileKeypath(
-											keys,
-											keys.join('.')
+							} else {
+								handler = ((propertyName, keys) => {
+									let getPropertyHolder = compileKeypath(keys, keys.join('.'));
+
+									return function(evt: IEvent) {
+										let propertyHolder = getPropertyHolder.call(
+											this.ownerComponent
 										);
 
-										return function(evt: IEvent) {
-											let propertyHolder = getPropertyHolder.call(
-												this.ownerComponent
-											);
-
-											if (propertyHolder) {
-												propertyHolder[propertyName] = evt.data.value;
-											}
-										};
-									})(keys[keys.length - 1], keys.slice(0, -1));
-								}
-
-								(result[2] || (result[2] = [])).push(
-									childComponent!,
-									(typeof paramConfig == 'object' &&
-										(paramConfig.type || paramConfig.default !== undefined) &&
-										paramConfig.property) ||
-										$paramConfig!.name,
-									handler
-								);
+										if (propertyHolder) {
+											propertyHolder[propertyName] = evt.data.value;
+										}
+									};
+								})(keys[keys.length - 1], keys.slice(0, -1));
 							}
+
+							(result[2] || (result[2] = [])).push(
+								childComponent!,
+								(typeof paramConfig == 'object' &&
+									(paramConfig.type || paramConfig.default !== undefined) &&
+									paramConfig.property) ||
+									$paramConfig!.name,
+								handler
+							);
 						}
 					}
 				}
@@ -226,51 +232,56 @@ export function bindContent(
 				break;
 			}
 			case Node.TEXT_NODE: {
-				let value = child.nodeValue!;
-				let valueAST = contentNodeValueASTCache[value];
+				let childValue = child.nodeValue!;
+				let childValueAST = contentNodeValueASTCache[childValue];
 
-				if (!valueAST) {
-					if (valueAST === null) {
+				if (!childValueAST) {
+					if (childValueAST === null) {
 						continue;
 					}
 
-					let bracketIndex = value.indexOf('{');
+					let bracketIndex = childValue.indexOf('{');
 
 					if (bracketIndex == -1) {
-						contentNodeValueASTCache[value] = null;
+						contentNodeValueASTCache[childValue] = null;
 						continue;
 					}
 
-					valueAST = contentNodeValueASTCache[value] = new ContentNodeValueParser(
-						value
-					).parse(bracketIndex);
+					childValueAST = new ContentNodeValueParser(childValue).parse(bracketIndex);
+
+					if (
+						childValueAST.length == 1 &&
+						childValueAST[0].nodeType == ContentNodeValueNodeType.TEXT
+					) {
+						contentNodeValueASTCache[childValue] = null;
+						continue;
+					}
+
+					contentNodeValueASTCache[childValue] = childValueAST;
 				}
 
 				if (
-					valueAST.length > 1 ||
-					valueAST[0].nodeType == ContentNodeValueNodeType.BINDING
+					childValueAST.length == 1 &&
+					(childValueAST[0] as IContentNodeValueBinding).prefix === '='
 				) {
-					if (
-						valueAST.length == 1 &&
-						(valueAST[0] as IContentNodeValueBinding).prefix === '='
-					) {
-						child.nodeValue = compileContentNodeValue(valueAST, value, false).call(
-							context
-						);
-					} else {
-						let cell = new Cell<string, { textNode: Text }>(
-							compileContentNodeValue(valueAST, value, false),
-							{
-								context,
-								meta: { textNode: child as Text },
-								onChange: onTextNodeBindingCellChange
-							}
-						);
+					child.nodeValue = compileContentNodeValue(
+						childValueAST,
+						childValue,
+						false
+					).call(context);
+				} else {
+					let cell = new Cell<string, { textNode: Text }>(
+						compileContentNodeValue(childValueAST, childValue, false),
+						{
+							context,
+							meta: { textNode: child as Text },
+							onChange: onTextNodeBindingCellChange
+						}
+					);
 
-						child.nodeValue = cell.get();
+					child.nodeValue = cell.get();
 
-						(result[1] || (result[1] = [])).push(cell as IFreezableCell);
-					}
+					(result[1] || (result[1] = [])).push(cell as IFreezableCell);
 				}
 
 				break;

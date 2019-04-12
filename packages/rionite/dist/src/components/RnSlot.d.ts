@@ -1,18 +1,12 @@
 import { BaseComponent } from '../BaseComponent';
 export declare class RnSlot extends BaseComponent {
     static readonly bindsInputContent: boolean;
-    $context: {
-        [name: string]: any;
-    };
+    $context: Record<string, any>;
     paramName: string;
     paramForTag: string;
     paramFor: string;
     paramCloneContent: boolean;
-    paramGetContext: (this: BaseComponent, context: {
-        [name: string]: any;
-    }, slot: RnSlot) => {
-        [name: string]: any;
-    };
+    paramGetContext: (this: BaseComponent, context: Record<string, any>, slot: RnSlot) => Record<string, any>;
     _childComponents: Array<BaseComponent> | null;
     _attach(): void;
     _detach(): void;

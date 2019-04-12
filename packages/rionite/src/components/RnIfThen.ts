@@ -3,7 +3,6 @@ import { Cell, TListener } from 'cellx';
 import { moveContent } from '../../node_modules/@riim/move-content';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
-import { bindContent } from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
@@ -66,7 +65,7 @@ export class RnIfThen extends BaseComponent {
 			this.initialized = true;
 		}
 
-		if ((this.element as any).contentTemplate) {
+		if (this.element.contentTemplate) {
 			this._if.on('change', this._onIfChange, this);
 			this._render(false);
 		}
@@ -95,15 +94,17 @@ export class RnIfThen extends BaseComponent {
 
 	_render(changed: boolean) {
 		if (this._elseMode ? this._if.get() === false : this._if.get()) {
-			let content = ((this.element as any).contentTemplate as Template).render();
 			let contentBindingResult: [
 				Array<BaseComponent> | null,
 				Array<IFreezableCell> | null,
 				Array<BaseComponent | string | TListener> | null
 			] = [null, null, null];
-
-			bindContent(content, this.ownerComponent, this.$context!, contentBindingResult);
-
+			let content = (this.element.contentTemplate as Template).render(
+				null,
+				this.ownerComponent,
+				this.$context!,
+				contentBindingResult
+			);
 			let childComponents = contentBindingResult[0];
 			let backBindings = contentBindingResult[2];
 

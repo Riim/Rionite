@@ -154,7 +154,7 @@ export class RnSlot extends BaseComponent {
 		}
 
 		if (bindings === undefined) {
-			if (content || (this.element as any).contentTemplate) {
+			if (content || this.element.contentTemplate) {
 				let contentBindingResult: [
 					Array<BaseComponent> | null,
 					Array<IFreezableCell> | null,
@@ -175,10 +175,8 @@ export class RnSlot extends BaseComponent {
 						contentBindingResult
 					);
 				} else {
-					content = ((this.element as any).contentTemplate as Template).render();
-
-					bindContent(
-						content,
+					content = (this.element.contentTemplate as Template).render(
+						null,
 						ownerComponent,
 						this.paramGetContext
 							? this.paramGetContext.call(ownerComponent, this.$context, this)

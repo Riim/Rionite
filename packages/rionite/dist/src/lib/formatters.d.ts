@@ -1,3 +1,1 @@
-export declare const formatters: {
-    [name: string]: Function;
-};
+export declare const formatters: Record<string, Function>;

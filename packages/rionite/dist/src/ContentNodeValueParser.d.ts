@@ -32,8 +32,8 @@ export interface IContentNodeValueBinding extends IContentNodeValueNode {
 export declare type TContentNodeValue = Array<IContentNodeValueText | IContentNodeValueBinding>;
 export declare class ContentNodeValueParser {
     contentNodeValue: string;
-    at: number;
-    chr: string;
+    _pos: number;
+    _chr: string;
     result: TContentNodeValue;
     constructor(contentNodeValue: string);
     parse(index: number): TContentNodeValue;

@@ -511,15 +511,17 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					resumeConnectionStatusCallbacks();
 				}
 
-				let content = (constr.template as Template).render(this);
 				let contentBindingResult: [
 					Array<BaseComponent> | null,
 					Array<IFreezableCell> | null,
 					Array<BaseComponent | string | TEventEmitterListener> | null
 				] = [null, null, null];
-
-				bindContent(content, this, this, contentBindingResult);
-
+				let content = (constr.template as Template).render(
+					this,
+					this,
+					this,
+					contentBindingResult
+				);
 				let childComponents = contentBindingResult[0];
 				let backBindings = contentBindingResult[2];
 

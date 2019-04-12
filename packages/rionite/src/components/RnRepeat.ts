@@ -4,7 +4,6 @@ import { Cell, ObservableList, TListener } from 'cellx';
 import { moveContent } from '../../node_modules/@riim/move-content';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
-import { bindContent } from '../bindContent';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
@@ -127,7 +126,7 @@ export class RnRepeat extends BaseComponent {
 			this.initialized = true;
 		}
 
-		if ((this.element as any).contentTemplate) {
+		if (this.element.contentTemplate) {
 			this._list.on('change', this._onListChange, this);
 			this._render(false);
 		}
@@ -320,16 +319,14 @@ export class RnRepeat extends BaseComponent {
 					let itemCell = new Cell(item);
 					let indexCell = new Cell(i);
 
-					let content = ((this.element as any).contentTemplate as Template).render();
 					let context = this.$context!;
 					let contentBindingResult: [
 						Array<BaseComponent> | null,
 						Array<IFreezableCell> | null,
 						Array<BaseComponent | string | TListener> | null
 					] = [null, null, null];
-
-					bindContent(
-						content,
+					let content = (this.element.contentTemplate as Template).render(
+						null,
 						this.ownerComponent,
 						Object.create(context, {
 							'$/': {
@@ -353,7 +350,6 @@ export class RnRepeat extends BaseComponent {
 						}),
 						contentBindingResult
 					);
-
 					let childComponents = contentBindingResult[0];
 					let backBindings = contentBindingResult[2];
 					let new$Item = {

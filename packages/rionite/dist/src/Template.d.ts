@@ -1,4 +1,5 @@
 import { BaseComponent } from './BaseComponent';
+import { TContentBindingResult } from './bindContent';
 export declare enum NodeType {
     BLOCK = 1,
     ELEMENT_CALL = 2,
@@ -52,23 +53,17 @@ export interface ITextNode extends INode {
 export interface IBlock extends INode {
     nodeType: NodeType.BLOCK;
     content: TContent | null;
-    elements: {
-        [name: string]: IElement;
-    };
+    elements: Record<string, IElement>;
 }
 export declare const ELEMENT_NAME_DELIMITER = "__";
 export declare class Template {
-    static helpers: {
-        [name: string]: (el: IElement) => TContent | null;
-    };
+    static helpers: Record<string, (el: IElement) => TContent | null>;
     _isEmbedded: boolean;
     parent: Template | null;
     template: string;
     _elementNamesTemplate: Array<string>;
     initialized: boolean;
-    _elements: {
-        [name: string]: IElement;
-    };
+    _elements: Record<string, IElement>;
     _pos: number;
     _chr: string;
     block: IBlock | null;
@@ -78,13 +73,13 @@ export declare class Template {
         parent?: Template;
         blockName?: string | Array<string>;
     });
-    initialize(component?: BaseComponent): void;
-    parse(component?: BaseComponent): IBlock;
-    _readContent(content: TContent | null, superElName: string | null, brackets: boolean, componentConstr?: typeof BaseComponent): TContent | null;
-    _readElement(targetContent: TContent | null, superElName: string | null, componentConstr?: typeof BaseComponent): TContent | null;
+    initialize(component?: BaseComponent | null): void;
+    parse(component?: BaseComponent | null): IBlock;
+    _readContent(content: TContent | null, superElName: string | null, brackets: boolean, componentConstr?: typeof BaseComponent | null): TContent | null;
+    _readElement(targetContent: TContent | null, superElName: string | null, componentConstr?: typeof BaseComponent | null): TContent | null;
     _readAttributes(superElName: string | null, isElementHelper: boolean): IElementAttributes | null;
     _readSuperCall(defaultElName: string | null): ISuperCall | null;
-    _readName(reNameOrNothing: RegExp): string | null;
+    _readName(reName: RegExp): string | null;
     _readString(): string;
     _skipWhitespaces(): string;
     _skipWhitespacesAndComments(): string;
@@ -95,5 +90,5 @@ export declare class Template {
         _isEmbedded?: boolean;
     }): Template;
     setBlockName(blockName: string | Array<string>): Template;
-    render(component?: BaseComponent): DocumentFragment;
+    render(component?: BaseComponent | null, ownerComponent?: BaseComponent, context?: object, result?: TContentBindingResult, parentComponent?: BaseComponent): DocumentFragment;
 }
