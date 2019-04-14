@@ -103,7 +103,7 @@ export class RnIfThen extends BaseComponent {
 	}
 
 	_render(changed: boolean) {
-		if (this._elseMode ? this._if.get() === false : this._if.get()) {
+		if (this._elseMode ? !this._if.get() && this._if.get() !== undefined : this._if.get()) {
 			let contentBindingResult: [
 				Array<BaseComponent> | null,
 				Array<IFreezableCell> | null,

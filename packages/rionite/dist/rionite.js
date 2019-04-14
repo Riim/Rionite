@@ -3515,7 +3515,7 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
         this._attached = false;
     }
     _render(changed) {
-        if (this._elseMode ? this._if.get() === false : this._if.get()) {
+        if (this._elseMode ? !this._if.get() && this._if.get() !== undefined : this._if.get()) {
             let contentBindingResult = [null, null, null];
             let content = this.element.contentTemplate.render(null, this.ownerComponent, this.$context, contentBindingResult);
             let childComponents = contentBindingResult[0];
