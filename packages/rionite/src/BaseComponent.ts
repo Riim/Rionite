@@ -464,7 +464,9 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		} else {
 			let el = this.element;
 
-			el.className = constr._blockNamesString + el.className;
+			if (el.className.lastIndexOf(constr._blockNamesString, 0)) {
+				el.className = constr._blockNamesString + el.className;
+			}
 
 			if (constr.template === null) {
 				if (this.ownerComponent == this) {

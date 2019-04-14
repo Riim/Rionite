@@ -1047,21 +1047,20 @@ function renderContent<T extends Node = Element>(
 						let nodeComponent =
 							result && (el as IPossiblyComponentElement).rioniteComponent;
 
+						let className: string | null | undefined;
+
+						if (nodeComponent) {
+							className = (nodeComponent.constructor as typeof BaseComponent)
+								._blockNamesString;
+						}
+
 						if ((node as IElement).names) {
-							if (isSVG_) {
-								el.setAttribute(
-									'class',
-									renderElementClasses(
-										template._elementNamesTemplate,
-										(node as IElement).names!
-									)
-								);
-							} else {
-								el.className = renderElementClasses(
+							className =
+								(className || '') +
+								renderElementClasses(
 									template._elementNamesTemplate,
 									(node as IElement).names!
 								);
-							}
 						}
 
 						let attrList =
@@ -1078,6 +1077,11 @@ function renderContent<T extends Node = Element>(
 								let attr = attrList[i];
 								let attrName = attr.name;
 								let attrValue: any = attr.value;
+
+								if (attrName == 'class') {
+									attrValue = (className || '') + attrValue;
+									className = null;
+								}
 
 								if (result) {
 									if (
@@ -1198,6 +1202,10 @@ function renderContent<T extends Node = Element>(
 								}
 
 								if (attrValue !== false && attrValue != null) {
+									if (attrValue === true) {
+										attrValue = '';
+									}
+
 									if (isSVG_) {
 										if (
 											attrName == 'xlink:href' ||
@@ -1211,16 +1219,11 @@ function renderContent<T extends Node = Element>(
 												attrName,
 												attrValue
 											);
-										} else if (attrName == 'class') {
-											el.setAttribute(
-												attrName,
-												(el.getAttribute('class') || '') + attrValue
-											);
 										} else {
 											el.setAttribute(attrName, attrValue);
 										}
 									} else if (attrName == 'class') {
-										el.className += attrValue;
+										el.className = attrValue;
 									} else {
 										el.setAttribute(
 											snakeCaseAttributeName(attrName, true),
@@ -1228,6 +1231,14 @@ function renderContent<T extends Node = Element>(
 										);
 									}
 								}
+							}
+						}
+
+						if (className) {
+							if (isSVG_) {
+								el.setAttribute('class', className);
+							} else {
+								el.className = className;
 							}
 						}
 

@@ -943,13 +943,15 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                             el = document.createElement(tagName);
                         }
                         let nodeComponent = result && el.rioniteComponent;
+                        let className;
+                        if (nodeComponent) {
+                            className = nodeComponent.constructor
+                                ._blockNamesString;
+                        }
                         if (node.names) {
-                            if (isSVG_) {
-                                el.setAttribute('class', renderElementClasses(template._elementNamesTemplate, node.names));
-                            }
-                            else {
-                                el.className = renderElementClasses(template._elementNamesTemplate, node.names);
-                            }
+                            className =
+                                (className || '') +
+                                    renderElementClasses(template._elementNamesTemplate, node.names);
                         }
                         let attrList = node.attributes && node.attributes.list;
                         if (attrList) {
@@ -961,6 +963,10 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                                 let attr = attrList[i];
                                 let attrName = attr.name;
                                 let attrValue = attr.value;
+                                if (attrName == 'class') {
+                                    attrValue = (className || '') + attrValue;
+                                    className = null;
+                                }
                                 if (result) {
                                     if (!attrName.lastIndexOf('oncomponent-', 0) ||
                                         !attrName.lastIndexOf('on-', 0)) {
@@ -1031,6 +1037,9 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                                     }
                                 }
                                 if (attrValue !== false && attrValue != null) {
+                                    if (attrValue === true) {
+                                        attrValue = '';
+                                    }
                                     if (isSVG_) {
                                         if (attrName == 'xlink:href' ||
                                             attrName == 'href' ||
@@ -1039,20 +1048,25 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                                                 ? 'http://www.w3.org/2000/xmlns/'
                                                 : 'http://www.w3.org/1999/xlink', attrName, attrValue);
                                         }
-                                        else if (attrName == 'class') {
-                                            el.setAttribute(attrName, (el.getAttribute('class') || '') + attrValue);
-                                        }
                                         else {
                                             el.setAttribute(attrName, attrValue);
                                         }
                                     }
                                     else if (attrName == 'class') {
-                                        el.className += attrValue;
+                                        el.className = attrValue;
                                     }
                                     else {
                                         el.setAttribute(rionite_snake_case_attribute_name_1.snakeCaseAttributeName(attrName, true), attrValue);
                                     }
                                 }
+                            }
+                        }
+                        if (className) {
+                            if (isSVG_) {
+                                el.setAttribute('class', className);
+                            }
+                            else {
+                                el.className = className;
                             }
                         }
                         if (nodeComponent) {
@@ -2968,7 +2982,9 @@ class BaseComponent extends cellx_1.EventEmitter {
         }
         else {
             let el = this.element;
-            el.className = constr._blockNamesString + el.className;
+            if (el.className.lastIndexOf(constr._blockNamesString, 0)) {
+                el.className = constr._blockNamesString + el.className;
+            }
             if (constr.template === null) {
                 if (this.ownerComponent == this) {
                     let contentBindingResult = [null, null, null];

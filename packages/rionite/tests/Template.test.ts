@@ -333,7 +333,7 @@ describe('Template#render', () => {
 					{ blockName: 'block1-x' }
 				)
 				.renderToString()
-		).toBe('<b class="block1-x__el1 block1__el1 " attr1="value1" attr2="value2"></b>');
+		).toBe('<b attr1="value1" attr2="value2" class="block1-x__el1 block1__el1 "></b>');
 	});
 
 	test('доопределение атрибутов элемента', () => {
@@ -354,7 +354,7 @@ describe('Template#render', () => {
 				)
 				.renderToString()
 		).toBe(
-			'<b class="block1-x__el1 block1__el1 " attr1="value0" attr2="value2" attr3="value3"></b>'
+			'<b attr1="value0" attr2="value2" attr3="value3" class="block1-x__el1 block1__el1 "></b>'
 		);
 	});
 
@@ -398,7 +398,7 @@ describe('Template#render', () => {
 				)
 				.renderToString()
 		).toBe(
-			'<b class="block1-x-x__el1 block1-x__el1 block1__el1 " attr1="value1" attr2="value2"></b>'
+			'<b attr1="value1" attr2="value2" class="block1-x-x__el1 block1-x__el1 block1__el1 "></b>'
 		);
 	});
 
@@ -422,7 +422,7 @@ describe('Template#render', () => {
 				)
 				.renderToString()
 		).toBe(
-			'<b class="block1-x__el1 block1__el1 _mod2" attr3="value3" attr4="value4"></b><b class="block1-x__el2 block1__el2 _mod1" attr1="value1" attr2="value2"></b>'
+			'<b attr3="value3" attr4="value4" class="block1-x__el1 block1__el1 _mod2"></b><b class="block1-x__el2 block1__el2 _mod1" attr1="value1" attr2="value2"></b>'
 		);
 	});
 
@@ -668,7 +668,7 @@ describe('Template#render', () => {
 					{ blockName: 'block1-x' }
 				)
 				.renderToString()
-		).toBe('<b class="block1-x__test block1__test " attr1="value1" attr2="value2"></b>');
+		).toBe('<b attr1="value1" attr2="value2" class="block1-x__test block1__test "></b>');
 	});
 
 	test('доопределение атрибутов и содержимого helper-а', () => {
@@ -721,7 +721,7 @@ describe('Template#render', () => {
 				)
 				.renderToString()
 		).toBe(
-			'<b class="block1-x__test block1__test " attr1="value1" attr2="value2"><u><s><u>text</u></s></u></b>'
+			'<b attr1="value1" attr2="value2" class="block1-x__test block1__test "><u><s><u>text</u></s></u></b>'
 		);
 	});
 
@@ -1080,10 +1080,10 @@ describe('Template#render', () => {
 		);
 
 		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
-			'<div class="block1__el1 " attr1="value1"></div>'
+			'<div attr1="value1" class="block1__el1 "></div>'
 		);
 		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
-			'<div class="block1-x__el1 block1__el1 " attr1="value2"></div>'
+			'<div attr1="value2" class="block1-x__el1 block1__el1 "></div>'
 		);
 	});
 
