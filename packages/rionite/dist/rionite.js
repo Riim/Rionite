@@ -3515,7 +3515,9 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
         this._attached = false;
     }
     _render(changed) {
-        if (this._elseMode ? !this._if.get() && this._if.get() !== undefined : this._if.get()) {
+        if (this._elseMode
+            ? !this._if.get() && (this._if.get() !== undefined || this.paramWithUndefined)
+            : this._if.get()) {
             let contentBindingResult = [null, null, null];
             let content = this.element.contentTemplate.render(null, this.ownerComponent, this.$context, contentBindingResult);
             let childComponents = contentBindingResult[0];
@@ -3590,7 +3592,8 @@ RnIfThen = RnIfThen_1 = __decorate([
         elementIs: 'RnIfThen',
         elementExtends: 'template',
         params: {
-            if: { property: 'paramIf', type: String, required: true, readonly: true }
+            if: { property: 'paramIf', type: String, required: true, readonly: true },
+            withUndefined: { property: 'paramWithUndefined', type: Boolean, readonly: true }
         }
     })
 ], RnIfThen);

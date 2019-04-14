@@ -3,6 +3,7 @@ import { BaseComponent } from '../BaseComponent';
 export declare class RnIfThen extends BaseComponent {
     static readonly bindsInputContent: boolean;
     paramIf: string;
+    paramWithUndefined: boolean;
     _elseMode: boolean;
     _if: Cell<boolean | undefined>;
     _nodes: Array<Node> | null;
