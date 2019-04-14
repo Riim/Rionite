@@ -1,4 +1,4 @@
-import { Cell, TCellPull } from 'cellx/dist/Cell';
+import { Cell, TCellPull } from 'cellx';
 import { escapeString } from 'escape-string';
 import { IAttributeBindingCellMeta } from './bindContent';
 import { bindingToJSExpression } from './bindingToJSExpression';

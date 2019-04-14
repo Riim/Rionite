@@ -4,9 +4,11 @@ import { Cell, ObservableList, TListener } from 'cellx';
 import { moveContent } from '../../node_modules/@riim/move-content';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
+import { compileBinding } from '../compileBinding';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
+import { getTemplateNodeValueAST } from '../getTemplateNodeValueAST';
 import { compileKeypath } from '../lib/compileKeypath';
 import { keypathPattern } from '../lib/keypathPattern';
 import { namePattern } from '../lib/namePattern';
@@ -28,7 +30,9 @@ export interface I$Item {
 
 export type T$ItemMap = Map<any, Array<I$Item>>;
 
-const reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+(?:in|of)\\s+(${keypathPattern})\\s*$`);
+const reForAttrValue = RegExp(
+	`^\\s*(${namePattern})\\s+(?:in|of)\\s+(${keypathPattern}(?:\\s*(.*\\S))?)\\s*$`
+);
 
 function getItem(list: TList, index: number): any {
 	return Array.isArray(list) ? list[index] : list.get(index);
@@ -109,15 +113,27 @@ export class RnRepeat extends BaseComponent {
 			let for_ = this.paramFor.match(reForAttrValue);
 
 			if (!for_) {
-				throw new SyntaxError(`Invalid value of parameter "for" (${this.paramFor})`);
+				throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
+			}
+
+			let getList: (this: object) => any;
+
+			if (for_[3]) {
+				let inListAST = getTemplateNodeValueAST(`{${for_[2]}}`);
+
+				if (!inListAST || inListAST.length != 1) {
+					throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
+				}
+
+				getList = compileBinding(inListAST, for_[2]);
+			} else {
+				getList = compileKeypath(for_[2]);
 			}
 
 			this._itemName = for_[1];
 
 			this._prevList = [];
-			this._list = new Cell<any>(compileKeypath(for_[2]), {
-				context: this.$context
-			});
+			this._list = new Cell<any>(getList, { context: this.$context });
 
 			this._$itemMap = new Map();
 

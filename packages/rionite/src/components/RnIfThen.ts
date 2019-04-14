@@ -3,9 +3,11 @@ import { Cell, TListener } from 'cellx';
 import { moveContent } from '../../node_modules/@riim/move-content';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
+import { compileBinding } from '../compileBinding';
 import { IFreezableCell } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
+import { getTemplateNodeValueAST } from '../getTemplateNodeValueAST';
 import { compileKeypath } from '../lib/compileKeypath';
 import { keypathPattern } from '../lib/keypathPattern';
 import { removeNodes } from '../lib/removeNodes';
@@ -49,12 +51,20 @@ export class RnIfThen extends BaseComponent {
 
 		if (!this.initialized) {
 			let if_ = this.paramIf.trim();
+			let getIfValue: (this: object) => any;
 
-			if (!reKeypath.test(if_)) {
-				throw new SyntaxError(`Invalid value of attribute "if" (${if_})`);
+			if (reKeypath.test(if_)) {
+				getIfValue = compileKeypath(if_);
+			} else {
+				let ifAST = getTemplateNodeValueAST(`{${if_}}`);
+
+				if (!ifAST || ifAST.length != 1) {
+					throw new SyntaxError(`Invalid value in parameter "if" (${if_})`);
+				}
+
+				getIfValue = compileBinding(ifAST, if_);
 			}
 
-			let getIfValue = compileKeypath(if_);
 			this._if = new Cell<boolean>(
 				function() {
 					return !!getIfValue.call(this);

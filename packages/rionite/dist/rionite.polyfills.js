@@ -1779,11 +1779,11 @@ var registerComponent_1 = __webpack_require__(28);
 exports.registerComponent = registerComponent_1.registerComponent;
 var RnIfThen_1 = __webpack_require__(47);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
-var RnIfElse_1 = __webpack_require__(52);
+var RnIfElse_1 = __webpack_require__(53);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
-var RnRepeat_1 = __webpack_require__(51);
+var RnRepeat_1 = __webpack_require__(52);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
-var RnSlot_1 = __webpack_require__(53);
+var RnSlot_1 = __webpack_require__(54);
 exports.RnSlot = RnSlot_1.RnSlot;
 
 
@@ -5085,12 +5085,14 @@ const cellx_1 = __webpack_require__(6);
 const move_content_1 = __webpack_require__(49);
 const attachChildComponentElements_1 = __webpack_require__(42);
 const BaseComponent_1 = __webpack_require__(38);
+const compileBinding_1 = __webpack_require__(50);
 const Component_1 = __webpack_require__(27);
 const ElementProtoMixin_1 = __webpack_require__(33);
+const getTemplateNodeValueAST_1 = __webpack_require__(24);
 const compileKeypath_1 = __webpack_require__(25);
 const keypathPattern_1 = __webpack_require__(20);
-const removeNodes_1 = __webpack_require__(50);
-const RnRepeat_1 = __webpack_require__(51);
+const removeNodes_1 = __webpack_require__(51);
+const RnRepeat_1 = __webpack_require__(52);
 const slice = Array.prototype.slice;
 const reKeypath = RegExp(`^${keypathPattern_1.keypathPattern}$`);
 let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent {
@@ -5111,10 +5113,17 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
         this._active = true;
         if (!this.initialized) {
             let if_ = this.paramIf.trim();
-            if (!reKeypath.test(if_)) {
-                throw new SyntaxError(`Invalid value of attribute "if" (${if_})`);
+            let getIfValue;
+            if (reKeypath.test(if_)) {
+                getIfValue = compileKeypath_1.compileKeypath(if_);
             }
-            let getIfValue = compileKeypath_1.compileKeypath(if_);
+            else {
+                let ifAST = getTemplateNodeValueAST_1.getTemplateNodeValueAST(`{${if_}}`);
+                if (!ifAST || ifAST.length != 1) {
+                    throw new SyntaxError(`Invalid value in parameter "if" (${if_})`);
+                }
+                getIfValue = compileBinding_1.compileBinding(ifAST, if_);
+            }
             this._if = new cellx_1.Cell(function () {
                 return !!getIfValue.call(this);
             }, { context: this.$context });
@@ -5255,6 +5264,28 @@ exports.moveContent = moveContent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const bindingToJSExpression_1 = __webpack_require__(12);
+const formatters_1 = __webpack_require__(17);
+const cache = Object.create(null);
+function compileBinding(binding, cacheKey) {
+    if (cache[cacheKey]) {
+        return cache[cacheKey];
+    }
+    let inner = Function('formatters', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(binding[0])};`);
+    return (cache[cacheKey] = function () {
+        return inner.call(this, formatters_1.formatters);
+    });
+}
+exports.compileBinding = compileBinding;
+
+
+/***/ }),
+/* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 function removeNodes(nodes) {
     let nodeCount = nodes.length;
     if (nodeCount == 1) {
@@ -5276,7 +5307,7 @@ exports.removeNodes = removeNodes;
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5294,15 +5325,17 @@ const cellx_1 = __webpack_require__(6);
 const move_content_1 = __webpack_require__(49);
 const attachChildComponentElements_1 = __webpack_require__(42);
 const BaseComponent_1 = __webpack_require__(38);
+const compileBinding_1 = __webpack_require__(50);
 const Component_1 = __webpack_require__(27);
 const ElementProtoMixin_1 = __webpack_require__(33);
+const getTemplateNodeValueAST_1 = __webpack_require__(24);
 const compileKeypath_1 = __webpack_require__(25);
 const keypathPattern_1 = __webpack_require__(20);
 const namePattern_1 = __webpack_require__(21);
-const removeNodes_1 = __webpack_require__(50);
+const removeNodes_1 = __webpack_require__(51);
 const RnIfThen_1 = __webpack_require__(47);
 const slice = Array.prototype.slice;
-const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern})\\s*$`);
+const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern}(?:\\s*(.*\\S))?)\\s*$`);
 function getItem(list, index) {
     return Array.isArray(list) ? list[index] : list.get(index);
 }
@@ -5348,13 +5381,22 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
         if (!this.initialized) {
             let for_ = this.paramFor.match(reForAttrValue);
             if (!for_) {
-                throw new SyntaxError(`Invalid value of parameter "for" (${this.paramFor})`);
+                throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
+            }
+            let getList;
+            if (for_[3]) {
+                let inListAST = getTemplateNodeValueAST_1.getTemplateNodeValueAST(`{${for_[2]}}`);
+                if (!inListAST || inListAST.length != 1) {
+                    throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
+                }
+                getList = compileBinding_1.compileBinding(inListAST, for_[2]);
+            }
+            else {
+                getList = compileKeypath_1.compileKeypath(for_[2]);
             }
             this._itemName = for_[1];
             this._prevList = [];
-            this._list = new cellx_1.Cell(compileKeypath_1.compileKeypath(for_[2]), {
-                context: this.$context
-            });
+            this._list = new cellx_1.Cell(getList, { context: this.$context });
             this._$itemMap = new map_set_polyfill_1.Map();
             this._trackBy = this.paramTrackBy;
             this.initialized = true;
@@ -5641,7 +5683,7 @@ exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5671,7 +5713,7 @@ exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5692,7 +5734,7 @@ const BaseComponent_1 = __webpack_require__(38);
 const bindContent_1 = __webpack_require__(7);
 const Component_1 = __webpack_require__(27);
 const ElementProtoMixin_1 = __webpack_require__(33);
-const cloneNode_1 = __webpack_require__(54);
+const cloneNode_1 = __webpack_require__(55);
 const KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot[slotContentMap]');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
     static get bindsInputContent() {
@@ -5853,7 +5895,7 @@ exports.RnSlot = RnSlot;
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
