@@ -1,6 +1,6 @@
-import { IContentNodeValueBinding, IContentNodeValueBindingFormatter } from './ContentNodeValueParser';
+import { ITemplateNodeValueBinding, ITemplateNodeValueBindingFormatter } from './TemplateNodeValueParser';
 
-function formattersReducer(jsExpr: string, formatter: IContentNodeValueBindingFormatter): string {
+function formattersReducer(jsExpr: string, formatter: ITemplateNodeValueBindingFormatter): string {
 	let args = formatter.arguments;
 
 	return `(this.${formatter.name} || formatters.${formatter.name}).call(this['$/'], ${jsExpr}${
@@ -8,7 +8,7 @@ function formattersReducer(jsExpr: string, formatter: IContentNodeValueBindingFo
 	})`;
 }
 
-export function bindingToJSExpression(binding: IContentNodeValueBinding): string {
+export function bindingToJSExpression(binding: ITemplateNodeValueBinding): string {
 	let formatters = binding.formatters;
 
 	if (binding.keypath) {

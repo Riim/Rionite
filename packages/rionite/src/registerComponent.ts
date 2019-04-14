@@ -290,21 +290,21 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 	let names: Array<string | symbol> = Object.getOwnPropertyNames(ElementProtoMixin);
 
-	for (let i = 0, l = names.length; i < l; i++) {
+	for (let name of names) {
 		Object.defineProperty(
 			elProto,
-			names[i],
-			Object.getOwnPropertyDescriptor(ElementProtoMixin, names[i])!
+			name,
+			Object.getOwnPropertyDescriptor(ElementProtoMixin, name)!
 		);
 	}
 
 	names = Object.getOwnPropertySymbols(ElementProtoMixin);
 
-	for (let i = 0, l = names.length; i < l; i++) {
+	for (let name of names) {
 		Object.defineProperty(
 			elProto,
-			names[i],
-			Object.getOwnPropertyDescriptor(ElementProtoMixin, names[i])!
+			name,
+			Object.getOwnPropertyDescriptor(ElementProtoMixin, name)!
 		);
 	}
 

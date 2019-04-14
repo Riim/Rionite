@@ -8,18 +8,19 @@ import {
 	IPossiblyComponentElement
 	} from './BaseComponent';
 import {
-	contentNodeValueASTCache,
 	IAttributeBindingCellMeta,
 	KEY_CONTEXT,
 	onAttributeBindingCellChange,
 	onTextNodeBindingCellChange,
 	TContentBindingResult
 	} from './bindContent';
-import { compileContentNodeValue } from './compileContentNodeValue';
+import { compileTemplateNodeValue } from './compileTemplateNodeValue';
 import { IFreezableCell } from './componentBinding';
+import { componentConstructorMap } from './componentConstructorMap';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
-import { ContentNodeValueNodeType, ContentNodeValueParser, IContentNodeValueBinding } from './ContentNodeValueParser';
+import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
 import { compileKeypath } from './lib/compileKeypath';
+import { ITemplateNodeValueBinding } from './TemplateNodeValueParser';
 
 export enum NodeType {
 	BLOCK = 1,
@@ -73,6 +74,7 @@ export interface IElement extends INode {
 	is: string | null;
 	names: Array<string | null> | null;
 	attributes: IElementAttributes | null;
+	$specifiedParams: Set<string> | null;
 	content: TContent | null;
 	contentTemplateIndex: number | null;
 }
@@ -201,6 +203,7 @@ export class Template {
 							is: null,
 							names: ['root'],
 							attributes: null,
+							$specifiedParams: null,
 							content: [],
 							contentTemplateIndex: null
 						}
@@ -385,10 +388,24 @@ export class Template {
 			}
 		}
 
+		let elComponentConstr = componentConstructorMap.get(tagName);
+
 		let attrs: IElementAttributes | null | undefined;
+		let $specifiedParams: Set<string> | undefined;
+
+		if (elComponentConstr) {
+			$specifiedParams = new Set();
+		}
 
 		if (this._chr == '(') {
-			attrs = this._readAttributes(elName || superElName, isHelper);
+			attrs = this._readAttributes(
+				elName || superElName,
+				elComponentConstr &&
+					elComponentConstr.params &&
+					elComponentConstr[KEY_PARAMS_CONFIG],
+				$specifiedParams
+			);
+
 			this._skipWhitespaces();
 		}
 
@@ -477,6 +494,7 @@ export class Template {
 				is: (attrs && attrs.isAttributeValue) || null,
 				names: elNames || null,
 				attributes: attrs || null,
+				$specifiedParams: $specifiedParams || null,
 				content: content || null,
 				contentTemplateIndex: null
 			};
@@ -502,6 +520,7 @@ export class Template {
 								is: (node as IElement).is,
 								names: (node as IElement).names,
 								attributes: (node as IElement).attributes,
+								$specifiedParams: $specifiedParams || null,
 								content: (node as IElement).content,
 								contentTemplateIndex:
 									(
@@ -556,6 +575,7 @@ export class Template {
 				is: (attrs && attrs.isAttributeValue) || null,
 				names: elNames || null,
 				attributes: attrs || null,
+				$specifiedParams: $specifiedParams || null,
 				content: content || null,
 				contentTemplateIndex:
 					content && (tagName == 'template' || tagName == 'rn-slot')
@@ -591,7 +611,8 @@ export class Template {
 
 	_readAttributes(
 		superElName: string | null,
-		isElementHelper: boolean
+		$paramsConfig?: Record<string, I$ComponentParamConfig> | null,
+		$specifiedParams?: Set<string>
 	): IElementAttributes | null {
 		this._next('(');
 
@@ -687,6 +708,10 @@ export class Template {
 						name,
 						value: ''
 					};
+				}
+
+				if ($paramsConfig && $paramsConfig[name]) {
+					$specifiedParams!.add($paramsConfig[name].name);
 				}
 			}
 
@@ -1021,13 +1046,6 @@ function renderContent<T extends Node = Element>(
 
 						let nodeComponent =
 							result && (el as IPossiblyComponentElement).rioniteComponent;
-						let $paramsConfig: Record<string, I$ComponentParamConfig> | undefined;
-						let $specifiedParams: Set<string> | undefined;
-
-						if (nodeComponent) {
-							$paramsConfig = nodeComponent.constructor[KEY_PARAMS_CONFIG];
-							$specifiedParams = new Set();
-						}
 
 						if ((node as IElement).names) {
 							if (isSVG_) {
@@ -1050,73 +1068,37 @@ function renderContent<T extends Node = Element>(
 							(node as IElement).attributes && (node as IElement).attributes!.list;
 
 						if (attrList) {
+							let $paramsConfig: Record<string, I$ComponentParamConfig> | undefined;
+
+							if (nodeComponent) {
+								$paramsConfig = nodeComponent.constructor[KEY_PARAMS_CONFIG];
+							}
+
 							for (let i = 0, l = attrList['length=']; i < l; i++) {
 								let attr = attrList[i];
 								let attrName = attr.name;
 								let attrValue: any = attr.value;
 
 								if (result) {
-									let targetName: string;
-
-									if (attrName.charAt(0) == '_') {
-										targetName = attrName.slice(1);
-									} else {
-										targetName = attrName;
-
-										if (
-											!attrName.lastIndexOf('oncomponent-', 0) ||
-											!attrName.lastIndexOf('on-', 0)
-										) {
-											el[KEY_CONTEXT] = context;
-										}
-									}
-
-									let $paramConfig = $paramsConfig && $paramsConfig[targetName];
-
-									if ($paramConfig) {
-										$specifiedParams!.add($paramConfig.name);
+									if (
+										!attrName.lastIndexOf('oncomponent-', 0) ||
+										!attrName.lastIndexOf('on-', 0)
+									) {
+										el[KEY_CONTEXT] = context;
 									}
 
 									if (attrValue) {
-										let attrValueAST = contentNodeValueASTCache[attrValue];
-
-										if (attrValueAST === undefined) {
-											let bracketIndex = attrValue.indexOf('{');
-
-											if (bracketIndex == -1) {
-												attrValueAST = contentNodeValueASTCache[
-													attrValue
-												] = null;
-											} else {
-												attrValueAST = new ContentNodeValueParser(
-													attrValue
-												).parse(bracketIndex);
-
-												if (
-													attrValueAST.length == 1 &&
-													attrValueAST[0].nodeType ==
-														ContentNodeValueNodeType.TEXT
-												) {
-													attrValueAST = contentNodeValueASTCache[
-														attrValue
-													] = null;
-												} else {
-													contentNodeValueASTCache[
-														attrValue
-													] = attrValueAST;
-												}
-											}
-										}
+										let attrValueAST = getTemplateNodeValueAST(attrValue);
 
 										if (attrValueAST) {
 											let bindingPrefix =
 												attrValueAST.length == 1
-													? (attrValueAST[0] as IContentNodeValueBinding)
+													? (attrValueAST[0] as ITemplateNodeValueBinding)
 															.prefix
 													: null;
 
 											if (bindingPrefix === '=') {
-												attrValue = compileContentNodeValue(
+												attrValue = compileTemplateNodeValue(
 													attrValueAST,
 													attrValue,
 													true
@@ -1127,7 +1109,7 @@ function renderContent<T extends Node = Element>(
 														any,
 														IAttributeBindingCellMeta
 													>(
-														compileContentNodeValue(
+														compileTemplateNodeValue(
 															attrValueAST,
 															attrValue,
 															attrValueAST.length == 1
@@ -1136,7 +1118,7 @@ function renderContent<T extends Node = Element>(
 															context,
 															meta: {
 																element: el,
-																attributeName: targetName
+																attributeName: attrName
 															},
 															onChange: onAttributeBindingCellChange
 														}
@@ -1149,6 +1131,8 @@ function renderContent<T extends Node = Element>(
 													);
 												}
 
+												let $paramConfig =
+													$paramsConfig && $paramsConfig[attrName];
 												let paramConfig:
 													| IComponentParamConfig
 													| Function
@@ -1163,7 +1147,7 @@ function renderContent<T extends Node = Element>(
 													(bindingPrefix === '->' ||
 														bindingPrefix === '<->')
 												) {
-													let keypath = (attrValueAST[0] as IContentNodeValueBinding)
+													let keypath = (attrValueAST[0] as ITemplateNodeValueBinding)
 														.keypath!;
 													let keys = keypath.split('.');
 													let handler: TListener;
@@ -1250,7 +1234,7 @@ function renderContent<T extends Node = Element>(
 						if (nodeComponent) {
 							nodeComponent._ownerComponent = ownerComponent;
 							nodeComponent.$context = context;
-							nodeComponent.$specifiedParams = $specifiedParams;
+							nodeComponent.$specifiedParams = (node as IElement).$specifiedParams!;
 
 							if (parentComponent) {
 								(
@@ -1295,37 +1279,16 @@ function renderContent<T extends Node = Element>(
 					let nodeValue = (node as ITextNode).value;
 
 					if (result) {
-						let nodeValueAST = contentNodeValueASTCache[nodeValue];
-
-						if (nodeValueAST === undefined) {
-							let bracketIndex = nodeValue.indexOf('{');
-
-							if (bracketIndex == -1) {
-								nodeValueAST = contentNodeValueASTCache[nodeValue] = null;
-							} else {
-								nodeValueAST = new ContentNodeValueParser(nodeValue).parse(
-									bracketIndex
-								);
-
-								if (
-									nodeValueAST.length == 1 &&
-									nodeValueAST[0].nodeType == ContentNodeValueNodeType.TEXT
-								) {
-									nodeValueAST = contentNodeValueASTCache[nodeValue] = null;
-								} else {
-									contentNodeValueASTCache[nodeValue] = nodeValueAST;
-								}
-							}
-						}
+						let nodeValueAST = getTemplateNodeValueAST(nodeValue);
 
 						if (nodeValueAST) {
 							if (
 								nodeValueAST.length == 1 &&
-								(nodeValueAST[0] as IContentNodeValueBinding).prefix === '='
+								(nodeValueAST[0] as ITemplateNodeValueBinding).prefix === '='
 							) {
 								targetNode.appendChild(
 									document.createTextNode(
-										compileContentNodeValue(
+										compileTemplateNodeValue(
 											nodeValueAST,
 											nodeValue,
 											false
@@ -1335,7 +1298,7 @@ function renderContent<T extends Node = Element>(
 							} else {
 								let meta = { textNode: null as any };
 								let cell = new Cell<string, { textNode: Text }>(
-									compileContentNodeValue(nodeValueAST, nodeValue, false),
+									compileTemplateNodeValue(nodeValueAST, nodeValue, false),
 									{
 										context,
 										meta,

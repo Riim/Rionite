@@ -7,6 +7,7 @@
     "forin": false,
     "function-constructor": false,
     "indent": false,
+    "interface-name": false,
     "label-position": false,
     "max-classes-per-file": false,
     "max-line-length": false,

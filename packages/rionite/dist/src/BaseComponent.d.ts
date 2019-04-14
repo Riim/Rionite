@@ -76,7 +76,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     element: IComponentElement;
     $inputContent: DocumentFragment | null;
     $context: Record<string, any> | undefined;
-    $specifiedParams: Set<string> | undefined;
+    $specifiedParams: ReadonlySet<string> | undefined;
     _bindings: Array<IFreezableCell> | null;
     _elementListMap: Map<string, HTMLCollectionOf<Element>> | undefined;
     _attached: boolean;

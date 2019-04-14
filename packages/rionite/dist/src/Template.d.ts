@@ -1,4 +1,4 @@
-import { BaseComponent } from './BaseComponent';
+import { BaseComponent, I$ComponentParamConfig } from './BaseComponent';
 import { TContentBindingResult } from './bindContent';
 export declare enum NodeType {
     BLOCK = 1,
@@ -43,6 +43,7 @@ export interface IElement extends INode {
     is: string | null;
     names: Array<string | null> | null;
     attributes: IElementAttributes | null;
+    $specifiedParams: Set<string> | null;
     content: TContent | null;
     contentTemplateIndex: number | null;
 }
@@ -77,7 +78,7 @@ export declare class Template {
     parse(component?: BaseComponent | null): IBlock;
     _readContent(content: TContent | null, superElName: string | null, brackets: boolean, componentConstr?: typeof BaseComponent | null): TContent | null;
     _readElement(targetContent: TContent | null, superElName: string | null, componentConstr?: typeof BaseComponent | null): TContent | null;
-    _readAttributes(superElName: string | null, isElementHelper: boolean): IElementAttributes | null;
+    _readAttributes(superElName: string | null, $paramsConfig?: Record<string, I$ComponentParamConfig> | null, $specifiedParams?: Set<string>): IElementAttributes | null;
     _readSuperCall(defaultElName: string | null): ISuperCall | null;
     _readName(reName: RegExp): string | null;
     _readString(): string;

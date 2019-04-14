@@ -3,17 +3,17 @@ import { escapeString } from 'escape-string';
 import { IAttributeBindingCellMeta } from './bindContent';
 import { bindingToJSExpression } from './bindingToJSExpression';
 import { KEY_COMPONENT_PARAM_VALUE_MAP } from './componentParamTypeSerializerMap';
-import { ContentNodeValueNodeType, IContentNodeValueBinding, TContentNodeValue } from './ContentNodeValueParser';
 import { formatters } from './lib/formatters';
+import { ITemplateNodeValueBinding, TemplateNodeValueNodeType, TTemplateNodeValue } from './TemplateNodeValueParser';
 
 const cache: Record<string, TCellPull<any>> = Object.create(null);
 
-export function compileContentNodeValue(
-	contentNodeValueAST: TContentNodeValue,
-	contentNodeValueString: string,
+export function compileTemplateNodeValue(
+	templateNodeValueAST: TTemplateNodeValue,
+	templateNodeValueString: string,
 	useComponentParamValueMap: boolean
 ): TCellPull<any> {
-	let cacheKey = contentNodeValueString + (useComponentParamValueMap ? ',' : '.');
+	let cacheKey = templateNodeValueString + (useComponentParamValueMap ? ',' : '.');
 
 	if (cache[cacheKey]) {
 		return cache[cacheKey];
@@ -21,19 +21,19 @@ export function compileContentNodeValue(
 
 	let inner: (formatters: Record<string, Function>) => any;
 
-	if (contentNodeValueAST.length == 1) {
+	if (templateNodeValueAST.length == 1) {
 		inner = Function(
 			'formatters',
 			`var tmp; return ${bindingToJSExpression(
-				contentNodeValueAST[0] as IContentNodeValueBinding
+				templateNodeValueAST[0] as ITemplateNodeValueBinding
 			)};`
 		) as any;
 	} else {
 		let fragments: Array<string> = [];
 
-		for (let node of contentNodeValueAST) {
+		for (let node of templateNodeValueAST) {
 			fragments.push(
-				node.nodeType == ContentNodeValueNodeType.TEXT
+				node.nodeType == TemplateNodeValueNodeType.TEXT
 					? `'${escapeString(node.value)}'`
 					: bindingToJSExpression(node)
 			);

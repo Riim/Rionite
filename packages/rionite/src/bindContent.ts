@@ -7,16 +7,12 @@ import {
 	IComponentParamConfig,
 	IPossiblyComponentElement
 	} from './BaseComponent';
-import { compileContentNodeValue } from './compileContentNodeValue';
+import { compileTemplateNodeValue } from './compileTemplateNodeValue';
 import { IFreezableCell } from './componentBinding';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
-import {
-	ContentNodeValueNodeType,
-	ContentNodeValueParser,
-	IContentNodeValueBinding,
-	TContentNodeValue
-	} from './ContentNodeValueParser';
+import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
 import { compileKeypath } from './lib/compileKeypath';
+import { ITemplateNodeValueBinding, TTemplateNodeValue } from './TemplateNodeValueParser';
 
 export type TContentBindingResult = [
 	Array<BaseComponent> | null,
@@ -26,7 +22,7 @@ export type TContentBindingResult = [
 
 export const KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
 
-export const contentNodeValueASTCache: Record<string, TContentNodeValue | null> = Object.create(
+export const templateNodeValueASTCache: Record<string, TTemplateNodeValue | null> = Object.create(
 	null
 );
 
@@ -94,48 +90,27 @@ export function bindContent(
 						continue;
 					}
 
-					let attrValueAST = contentNodeValueASTCache[attrValue];
+					let attrValueAST = getTemplateNodeValueAST(attrValue);
 
 					if (!attrValueAST) {
-						if (attrValueAST === null) {
-							continue;
-						}
-
-						let bracketIndex = attrValue.indexOf('{');
-
-						if (bracketIndex == -1) {
-							contentNodeValueASTCache[attrValue] = null;
-							continue;
-						}
-
-						attrValueAST = new ContentNodeValueParser(attrValue).parse(bracketIndex);
-
-						if (
-							attrValueAST.length == 1 &&
-							attrValueAST[0].nodeType == ContentNodeValueNodeType.TEXT
-						) {
-							contentNodeValueASTCache[attrValue] = null;
-							continue;
-						}
-
-						contentNodeValueASTCache[attrValue] = attrValueAST;
+						continue;
 					}
 
 					let bindingPrefix =
 						attrValueAST.length == 1
-							? (attrValueAST[0] as IContentNodeValueBinding).prefix
+							? (attrValueAST[0] as ITemplateNodeValueBinding).prefix
 							: null;
 
 					if (bindingPrefix === '=') {
 						setAttribute(
 							child as Element,
 							targetAttrName,
-							compileContentNodeValue(attrValueAST, attrValue, true).call(context)
+							compileTemplateNodeValue(attrValueAST, attrValue, true).call(context)
 						);
 					} else {
 						if (bindingPrefix !== '->') {
 							let cell = new Cell<any, IAttributeBindingCellMeta>(
-								compileContentNodeValue(
+								compileTemplateNodeValue(
 									attrValueAST,
 									attrValue,
 									attrValueAST.length == 1
@@ -169,7 +144,7 @@ export function bindContent(
 								(child as Element).removeAttribute(attrName);
 							}
 
-							let keypath = (attrValueAST[0] as IContentNodeValueBinding).keypath!;
+							let keypath = (attrValueAST[0] as ITemplateNodeValueBinding).keypath!;
 							let keys = keypath.split('.');
 							let handler: TListener;
 
@@ -233,45 +208,24 @@ export function bindContent(
 			}
 			case Node.TEXT_NODE: {
 				let childValue = child.nodeValue!;
-				let childValueAST = contentNodeValueASTCache[childValue];
+				let childValueAST = getTemplateNodeValueAST(childValue);
 
 				if (!childValueAST) {
-					if (childValueAST === null) {
-						continue;
-					}
-
-					let bracketIndex = childValue.indexOf('{');
-
-					if (bracketIndex == -1) {
-						contentNodeValueASTCache[childValue] = null;
-						continue;
-					}
-
-					childValueAST = new ContentNodeValueParser(childValue).parse(bracketIndex);
-
-					if (
-						childValueAST.length == 1 &&
-						childValueAST[0].nodeType == ContentNodeValueNodeType.TEXT
-					) {
-						contentNodeValueASTCache[childValue] = null;
-						continue;
-					}
-
-					contentNodeValueASTCache[childValue] = childValueAST;
+					break;
 				}
 
 				if (
 					childValueAST.length == 1 &&
-					(childValueAST[0] as IContentNodeValueBinding).prefix === '='
+					(childValueAST[0] as ITemplateNodeValueBinding).prefix === '='
 				) {
-					child.nodeValue = compileContentNodeValue(
+					child.nodeValue = compileTemplateNodeValue(
 						childValueAST,
 						childValue,
 						false
 					).call(context);
 				} else {
 					let cell = new Cell<string, { textNode: Text }>(
-						compileContentNodeValue(childValueAST, childValue, false),
+						compileTemplateNodeValue(childValueAST, childValue, false),
 						{
 							context,
 							meta: { textNode: child as Text },

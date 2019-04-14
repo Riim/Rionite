@@ -1,5 +1,5 @@
 {
-  "name": "@riim/rionite-content-node-value-parser",
+  "name": "@riim/rionite-template-node-value-parser",
   "version": "0.36.6",
   "description": "",
   "main": "dist/index.js",

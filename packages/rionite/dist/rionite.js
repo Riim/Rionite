@@ -7,7 +7,7 @@
 		exports["rionite"] = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("cellx"), require("@riim/map-set-polyfill"), require("@riim/set-attribute"), require("escape-string"), require("@riim/escape-html"), require("@riim/is-regexp"), require("@riim/symbol-polyfill"), require("@riim/gettext"), require("@riim/defer"), require("@riim/lower-case-first-word"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/next-uid"), require("@riim/next-tick"));
 	else
 		root["rionite"] = factory(root["@riim/kebab-case"], root["@riim/rionite-snake-case-attribute-name"], root["cellx"], root["@riim/map-set-polyfill"], root["@riim/set-attribute"], root["escape-string"], root["@riim/escape-html"], root["@riim/is-regexp"], root["@riim/symbol-polyfill"], root["@riim/gettext"], root["@riim/defer"], root["@riim/lower-case-first-word"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/next-uid"], root["@riim/next-tick"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__6__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__9__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__15__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__22__, __WEBPACK_EXTERNAL_MODULE__33__, __WEBPACK_EXTERNAL_MODULE__36__, __WEBPACK_EXTERNAL_MODULE__38__, __WEBPACK_EXTERNAL_MODULE__39__, __WEBPACK_EXTERNAL_MODULE__40__, __WEBPACK_EXTERNAL_MODULE__47__) {
+})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__6__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__9__, __WEBPACK_EXTERNAL_MODULE__11__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__15__, __WEBPACK_EXTERNAL_MODULE__16__, __WEBPACK_EXTERNAL_MODULE__18__, __WEBPACK_EXTERNAL_MODULE__34__, __WEBPACK_EXTERNAL_MODULE__37__, __WEBPACK_EXTERNAL_MODULE__39__, __WEBPACK_EXTERNAL_MODULE__40__, __WEBPACK_EXTERNAL_MODULE__41__, __WEBPACK_EXTERNAL_MODULE__48__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -103,33 +103,33 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(1);
 __webpack_require__(2);
-var formatters_1 = __webpack_require__(21);
+var formatters_1 = __webpack_require__(17);
 exports.formatters = formatters_1.formatters;
-var Component_1 = __webpack_require__(25);
+var Component_1 = __webpack_require__(27);
 exports.Component = Component_1.Component;
-var Param_1 = __webpack_require__(35);
+var Param_1 = __webpack_require__(36);
 exports.Param = Param_1.Param;
 var Constants_1 = __webpack_require__(23);
 exports.KEY_PARAMS_CONFIG = Constants_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAMS = Constants_1.KEY_PARAMS;
-var BaseComponent_1 = __webpack_require__(37);
+var BaseComponent_1 = __webpack_require__(38);
 exports.BaseComponent = BaseComponent_1.BaseComponent;
-var ElementProtoMixin_1 = __webpack_require__(32);
+var ElementProtoMixin_1 = __webpack_require__(33);
 exports.KEY_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_ELEMENT_CONNECTED;
-var ComponentParams_1 = __webpack_require__(30);
+var ComponentParams_1 = __webpack_require__(31);
 exports.ComponentParams = ComponentParams_1.ComponentParams;
 var Template_1 = __webpack_require__(3);
 exports.TemplateNodeType = Template_1.NodeType;
 exports.Template = Template_1.Template;
-var registerComponent_1 = __webpack_require__(26);
+var registerComponent_1 = __webpack_require__(28);
 exports.registerComponent = registerComponent_1.registerComponent;
-var RnIfThen_1 = __webpack_require__(46);
+var RnIfThen_1 = __webpack_require__(47);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
-var RnIfElse_1 = __webpack_require__(51);
+var RnIfElse_1 = __webpack_require__(52);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
-var RnRepeat_1 = __webpack_require__(50);
+var RnRepeat_1 = __webpack_require__(51);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
-var RnSlot_1 = __webpack_require__(52);
+var RnSlot_1 = __webpack_require__(53);
 exports.RnSlot = RnSlot_1.RnSlot;
 
 
@@ -244,10 +244,11 @@ const kebab_case_1 = __webpack_require__(4);
 const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const cellx_1 = __webpack_require__(6);
 const bindContent_1 = __webpack_require__(7);
-const compileContentNodeValue_1 = __webpack_require__(10);
+const compileTemplateNodeValue_1 = __webpack_require__(10);
+const componentConstructorMap_1 = __webpack_require__(26);
 const Constants_1 = __webpack_require__(23);
-const ContentNodeValueParser_1 = __webpack_require__(17);
-const compileKeypath_1 = __webpack_require__(24);
+const getTemplateNodeValueAST_1 = __webpack_require__(24);
+const compileKeypath_1 = __webpack_require__(25);
 var NodeType;
 (function (NodeType) {
     NodeType[NodeType["BLOCK"] = 1] = "BLOCK";
@@ -334,6 +335,7 @@ class Template {
                         is: null,
                         names: ['root'],
                         attributes: null,
+                        $specifiedParams: null,
                         content: [],
                         contentTemplateIndex: null
                     }
@@ -462,9 +464,16 @@ class Template {
                 throw 1;
             }
         }
+        let elComponentConstr = componentConstructorMap_1.componentConstructorMap.get(tagName);
         let attrs;
+        let $specifiedParams;
+        if (elComponentConstr) {
+            $specifiedParams = new Set();
+        }
         if (this._chr == '(') {
-            attrs = this._readAttributes(elName || superElName, isHelper);
+            attrs = this._readAttributes(elName || superElName, elComponentConstr &&
+                elComponentConstr.params &&
+                elComponentConstr[Constants_1.KEY_PARAMS_CONFIG], $specifiedParams);
             this._skipWhitespaces();
         }
         if (elNames && componentConstr) {
@@ -530,6 +539,7 @@ class Template {
                 is: (attrs && attrs.isAttributeValue) || null,
                 names: elNames || null,
                 attributes: attrs || null,
+                $specifiedParams: $specifiedParams || null,
                 content: content || null,
                 contentTemplateIndex: null
             };
@@ -549,6 +559,7 @@ class Template {
                                 is: node.is,
                                 names: node.names,
                                 attributes: node.attributes,
+                                $specifiedParams: $specifiedParams || null,
                                 content: node.content,
                                 contentTemplateIndex: (this._embeddedTemplates || (this._embeddedTemplates = [])).push(new Template({
                                     nodeType: NodeType.BLOCK,
@@ -596,6 +607,7 @@ class Template {
                 is: (attrs && attrs.isAttributeValue) || null,
                 names: elNames || null,
                 attributes: attrs || null,
+                $specifiedParams: $specifiedParams || null,
                 content: content || null,
                 contentTemplateIndex: content && (tagName == 'template' || tagName == 'rn-slot')
                     ? (this._embeddedTemplates || (this._embeddedTemplates = [])).push(new Template({
@@ -621,7 +633,7 @@ class Template {
         }
         return targetContent;
     }
-    _readAttributes(superElName, isElementHelper) {
+    _readAttributes(superElName, $paramsConfig, $specifiedParams) {
         this._next('(');
         if (this._skipWhitespacesAndComments() == ')') {
             this._next();
@@ -698,6 +710,9 @@ class Template {
                         name,
                         value: ''
                     };
+                }
+                if ($paramsConfig && $paramsConfig[name]) {
+                    $specifiedParams.add($paramsConfig[name].name);
                 }
             }
             switch (this._chr) {
@@ -928,12 +943,6 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                             el = document.createElement(tagName);
                         }
                         let nodeComponent = result && el.rioniteComponent;
-                        let $paramsConfig;
-                        let $specifiedParams;
-                        if (nodeComponent) {
-                            $paramsConfig = nodeComponent.constructor[Constants_1.KEY_PARAMS_CONFIG];
-                            $specifiedParams = new Set();
-                        }
                         if (node.names) {
                             if (isSVG_) {
                                 el.setAttribute('class', renderElementClasses(template._elementNamesTemplate, node.names));
@@ -944,66 +953,43 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                         }
                         let attrList = node.attributes && node.attributes.list;
                         if (attrList) {
+                            let $paramsConfig;
+                            if (nodeComponent) {
+                                $paramsConfig = nodeComponent.constructor[Constants_1.KEY_PARAMS_CONFIG];
+                            }
                             for (let i = 0, l = attrList['length=']; i < l; i++) {
                                 let attr = attrList[i];
                                 let attrName = attr.name;
                                 let attrValue = attr.value;
                                 if (result) {
-                                    let targetName;
-                                    if (attrName.charAt(0) == '_') {
-                                        targetName = attrName.slice(1);
-                                    }
-                                    else {
-                                        targetName = attrName;
-                                        if (!attrName.lastIndexOf('oncomponent-', 0) ||
-                                            !attrName.lastIndexOf('on-', 0)) {
-                                            el[bindContent_1.KEY_CONTEXT] = context;
-                                        }
-                                    }
-                                    let $paramConfig = $paramsConfig && $paramsConfig[targetName];
-                                    if ($paramConfig) {
-                                        $specifiedParams.add($paramConfig.name);
+                                    if (!attrName.lastIndexOf('oncomponent-', 0) ||
+                                        !attrName.lastIndexOf('on-', 0)) {
+                                        el[bindContent_1.KEY_CONTEXT] = context;
                                     }
                                     if (attrValue) {
-                                        let attrValueAST = bindContent_1.contentNodeValueASTCache[attrValue];
-                                        if (attrValueAST === undefined) {
-                                            let bracketIndex = attrValue.indexOf('{');
-                                            if (bracketIndex == -1) {
-                                                attrValueAST = bindContent_1.contentNodeValueASTCache[attrValue] = null;
-                                            }
-                                            else {
-                                                attrValueAST = new ContentNodeValueParser_1.ContentNodeValueParser(attrValue).parse(bracketIndex);
-                                                if (attrValueAST.length == 1 &&
-                                                    attrValueAST[0].nodeType ==
-                                                        ContentNodeValueParser_1.ContentNodeValueNodeType.TEXT) {
-                                                    attrValueAST = bindContent_1.contentNodeValueASTCache[attrValue] = null;
-                                                }
-                                                else {
-                                                    bindContent_1.contentNodeValueASTCache[attrValue] = attrValueAST;
-                                                }
-                                            }
-                                        }
+                                        let attrValueAST = getTemplateNodeValueAST_1.getTemplateNodeValueAST(attrValue);
                                         if (attrValueAST) {
                                             let bindingPrefix = attrValueAST.length == 1
                                                 ? attrValueAST[0]
                                                     .prefix
                                                 : null;
                                             if (bindingPrefix === '=') {
-                                                attrValue = compileContentNodeValue_1.compileContentNodeValue(attrValueAST, attrValue, true).call(context);
+                                                attrValue = compileTemplateNodeValue_1.compileTemplateNodeValue(attrValueAST, attrValue, true).call(context);
                                             }
                                             else {
                                                 if (bindingPrefix !== '->') {
-                                                    let cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(attrValueAST, attrValue, attrValueAST.length == 1), {
+                                                    let cell = new cellx_1.Cell(compileTemplateNodeValue_1.compileTemplateNodeValue(attrValueAST, attrValue, attrValueAST.length == 1), {
                                                         context,
                                                         meta: {
                                                             element: el,
-                                                            attributeName: targetName
+                                                            attributeName: attrName
                                                         },
                                                         onChange: bindContent_1.onAttributeBindingCellChange
                                                     });
                                                     attrValue = cell.get();
                                                     (result[1] || (result[1] = [])).push(cell);
                                                 }
+                                                let $paramConfig = $paramsConfig && $paramsConfig[attrName];
                                                 let paramConfig;
                                                 if ($paramConfig) {
                                                     paramConfig = $paramConfig.paramConfig;
@@ -1072,7 +1058,7 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                         if (nodeComponent) {
                             nodeComponent._ownerComponent = ownerComponent;
                             nodeComponent.$context = context;
-                            nodeComponent.$specifiedParams = $specifiedParams;
+                            nodeComponent.$specifiedParams = node.$specifiedParams;
                             if (parentComponent) {
                                 (parentComponent[Constants_1.KEY_CHILD_COMPONENTS] ||
                                     (parentComponent[Constants_1.KEY_CHILD_COMPONENTS] = [])).push(nodeComponent);
@@ -1100,31 +1086,15 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                 case NodeType.TEXT: {
                     let nodeValue = node.value;
                     if (result) {
-                        let nodeValueAST = bindContent_1.contentNodeValueASTCache[nodeValue];
-                        if (nodeValueAST === undefined) {
-                            let bracketIndex = nodeValue.indexOf('{');
-                            if (bracketIndex == -1) {
-                                nodeValueAST = bindContent_1.contentNodeValueASTCache[nodeValue] = null;
-                            }
-                            else {
-                                nodeValueAST = new ContentNodeValueParser_1.ContentNodeValueParser(nodeValue).parse(bracketIndex);
-                                if (nodeValueAST.length == 1 &&
-                                    nodeValueAST[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.TEXT) {
-                                    nodeValueAST = bindContent_1.contentNodeValueASTCache[nodeValue] = null;
-                                }
-                                else {
-                                    bindContent_1.contentNodeValueASTCache[nodeValue] = nodeValueAST;
-                                }
-                            }
-                        }
+                        let nodeValueAST = getTemplateNodeValueAST_1.getTemplateNodeValueAST(nodeValue);
                         if (nodeValueAST) {
                             if (nodeValueAST.length == 1 &&
                                 nodeValueAST[0].prefix === '=') {
-                                targetNode.appendChild(document.createTextNode(compileContentNodeValue_1.compileContentNodeValue(nodeValueAST, nodeValue, false).call(context)));
+                                targetNode.appendChild(document.createTextNode(compileTemplateNodeValue_1.compileTemplateNodeValue(nodeValueAST, nodeValue, false).call(context)));
                             }
                             else {
                                 let meta = { textNode: null };
-                                let cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(nodeValueAST, nodeValue, false), {
+                                let cell = new cellx_1.Cell(compileTemplateNodeValue_1.compileTemplateNodeValue(nodeValueAST, nodeValue, false), {
                                     context,
                                     meta,
                                     onChange: bindContent_1.onTextNodeBindingCellChange
@@ -1180,12 +1150,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const map_set_polyfill_1 = __webpack_require__(8);
 const set_attribute_1 = __webpack_require__(9);
 const cellx_1 = __webpack_require__(6);
-const compileContentNodeValue_1 = __webpack_require__(10);
+const compileTemplateNodeValue_1 = __webpack_require__(10);
 const Constants_1 = __webpack_require__(23);
-const ContentNodeValueParser_1 = __webpack_require__(17);
-const compileKeypath_1 = __webpack_require__(24);
+const getTemplateNodeValueAST_1 = __webpack_require__(24);
+const compileKeypath_1 = __webpack_require__(25);
 exports.KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
-exports.contentNodeValueASTCache = Object.create(null);
+exports.templateNodeValueASTCache = Object.create(null);
 function onAttributeBindingCellChange(evt) {
     set_attribute_1.setAttribute(evt.target.meta.element, evt.target.meta.attributeName, evt.data.value);
 }
@@ -1228,33 +1198,19 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                     if (!attrValue) {
                         continue;
                     }
-                    let attrValueAST = exports.contentNodeValueASTCache[attrValue];
+                    let attrValueAST = getTemplateNodeValueAST_1.getTemplateNodeValueAST(attrValue);
                     if (!attrValueAST) {
-                        if (attrValueAST === null) {
-                            continue;
-                        }
-                        let bracketIndex = attrValue.indexOf('{');
-                        if (bracketIndex == -1) {
-                            exports.contentNodeValueASTCache[attrValue] = null;
-                            continue;
-                        }
-                        attrValueAST = new ContentNodeValueParser_1.ContentNodeValueParser(attrValue).parse(bracketIndex);
-                        if (attrValueAST.length == 1 &&
-                            attrValueAST[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.TEXT) {
-                            exports.contentNodeValueASTCache[attrValue] = null;
-                            continue;
-                        }
-                        exports.contentNodeValueASTCache[attrValue] = attrValueAST;
+                        continue;
                     }
                     let bindingPrefix = attrValueAST.length == 1
                         ? attrValueAST[0].prefix
                         : null;
                     if (bindingPrefix === '=') {
-                        set_attribute_1.setAttribute(child, targetAttrName, compileContentNodeValue_1.compileContentNodeValue(attrValueAST, attrValue, true).call(context));
+                        set_attribute_1.setAttribute(child, targetAttrName, compileTemplateNodeValue_1.compileTemplateNodeValue(attrValueAST, attrValue, true).call(context));
                     }
                     else {
                         if (bindingPrefix !== '->') {
-                            let cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(attrValueAST, attrValue, attrValueAST.length == 1), {
+                            let cell = new cellx_1.Cell(compileTemplateNodeValue_1.compileTemplateNodeValue(attrValueAST, attrValue, attrValueAST.length == 1), {
                                 context,
                                 meta: {
                                     element: child,
@@ -1321,30 +1277,16 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
             }
             case Node.TEXT_NODE: {
                 let childValue = child.nodeValue;
-                let childValueAST = exports.contentNodeValueASTCache[childValue];
+                let childValueAST = getTemplateNodeValueAST_1.getTemplateNodeValueAST(childValue);
                 if (!childValueAST) {
-                    if (childValueAST === null) {
-                        continue;
-                    }
-                    let bracketIndex = childValue.indexOf('{');
-                    if (bracketIndex == -1) {
-                        exports.contentNodeValueASTCache[childValue] = null;
-                        continue;
-                    }
-                    childValueAST = new ContentNodeValueParser_1.ContentNodeValueParser(childValue).parse(bracketIndex);
-                    if (childValueAST.length == 1 &&
-                        childValueAST[0].nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.TEXT) {
-                        exports.contentNodeValueASTCache[childValue] = null;
-                        continue;
-                    }
-                    exports.contentNodeValueASTCache[childValue] = childValueAST;
+                    break;
                 }
                 if (childValueAST.length == 1 &&
                     childValueAST[0].prefix === '=') {
-                    child.nodeValue = compileContentNodeValue_1.compileContentNodeValue(childValueAST, childValue, false).call(context);
+                    child.nodeValue = compileTemplateNodeValue_1.compileTemplateNodeValue(childValueAST, childValue, false).call(context);
                 }
                 else {
-                    let cell = new cellx_1.Cell(compileContentNodeValue_1.compileContentNodeValue(childValueAST, childValue, false), {
+                    let cell = new cellx_1.Cell(compileTemplateNodeValue_1.compileTemplateNodeValue(childValueAST, childValue, false), {
                         context,
                         meta: { textNode: child },
                         onChange: onTextNodeBindingCellChange
@@ -1383,22 +1325,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const escape_string_1 = __webpack_require__(11);
 const bindingToJSExpression_1 = __webpack_require__(12);
 const componentParamTypeSerializerMap_1 = __webpack_require__(13);
-const ContentNodeValueParser_1 = __webpack_require__(17);
-const formatters_1 = __webpack_require__(21);
+const formatters_1 = __webpack_require__(17);
+const TemplateNodeValueParser_1 = __webpack_require__(19);
 const cache = Object.create(null);
-function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, useComponentParamValueMap) {
-    let cacheKey = contentNodeValueString + (useComponentParamValueMap ? ',' : '.');
+function compileTemplateNodeValue(templateNodeValueAST, templateNodeValueString, useComponentParamValueMap) {
+    let cacheKey = templateNodeValueString + (useComponentParamValueMap ? ',' : '.');
     if (cache[cacheKey]) {
         return cache[cacheKey];
     }
     let inner;
-    if (contentNodeValueAST.length == 1) {
-        inner = Function('formatters', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(contentNodeValueAST[0])};`);
+    if (templateNodeValueAST.length == 1) {
+        inner = Function('formatters', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(templateNodeValueAST[0])};`);
     }
     else {
         let fragments = [];
-        for (let node of contentNodeValueAST) {
-            fragments.push(node.nodeType == ContentNodeValueParser_1.ContentNodeValueNodeType.TEXT
+        for (let node of templateNodeValueAST) {
+            fragments.push(node.nodeType == TemplateNodeValueParser_1.TemplateNodeValueNodeType.TEXT
                 ? `'${escape_string_1.escapeString(node.value)}'`
                 : bindingToJSExpression_1.bindingToJSExpression(node));
         }
@@ -1423,7 +1365,7 @@ function compileContentNodeValue(contentNodeValueAST, contentNodeValueString, us
             return value == null ? '' : value + '';
         });
 }
-exports.compileContentNodeValue = compileContentNodeValue;
+exports.compileTemplateNodeValue = compileTemplateNodeValue;
 
 
 /***/ }),
@@ -1587,396 +1529,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__16__;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const keypathPattern_1 = __webpack_require__(18);
-const keypathToJSExpression_1 = __webpack_require__(20);
-const namePattern_1 = __webpack_require__(19);
-var ContentNodeValueNodeType;
-(function (ContentNodeValueNodeType) {
-    ContentNodeValueNodeType[ContentNodeValueNodeType["TEXT"] = 1] = "TEXT";
-    ContentNodeValueNodeType[ContentNodeValueNodeType["BINDING"] = 2] = "BINDING";
-    ContentNodeValueNodeType[ContentNodeValueNodeType["BINDING_KEYPATH"] = 3] = "BINDING_KEYPATH";
-    ContentNodeValueNodeType[ContentNodeValueNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
-    ContentNodeValueNodeType[ContentNodeValueNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
-})(ContentNodeValueNodeType = exports.ContentNodeValueNodeType || (exports.ContentNodeValueNodeType = {}));
-const reWhitespace = /\s/;
-const reName = RegExp(namePattern_1.namePattern + '|', 'g');
-const reKeypath = RegExp(keypathPattern_1.keypathPattern + '|', 'g');
-const reBoolean = /false|true|/g;
-const reNumber = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
-const reVacuum = /null|undefined|void 0|/g;
-class ContentNodeValueParser {
-    constructor(contentNodeValue) {
-        this.contentNodeValue = contentNodeValue;
-    }
-    parse(index) {
-        let contentNodeValue = this.contentNodeValue;
-        this._pos = 0;
-        let result = (this.result = []);
-        do {
-            this._pushText(contentNodeValue.slice(this._pos, index));
-            this._pos = index;
-            this._chr = contentNodeValue.charAt(index);
-            let binding = this._readBinding();
-            if (binding) {
-                result.push(binding);
-            }
-            else {
-                this._pushText(this._chr);
-                this._next('{');
-            }
-            index = contentNodeValue.indexOf('{', this._pos);
-        } while (index != -1);
-        this._pushText(contentNodeValue.slice(this._pos));
-        return result;
-    }
-    _pushText(value) {
-        if (value) {
-            let result = this.result;
-            let resultLen = result.length;
-            if (resultLen && result[resultLen - 1].nodeType == ContentNodeValueNodeType.TEXT) {
-                result[resultLen - 1].value += value;
-            }
-            else {
-                result.push({
-                    nodeType: ContentNodeValueNodeType.TEXT,
-                    value
-                });
-            }
-        }
-    }
-    _readBinding() {
-        let pos = this._pos;
-        this._next('{');
-        this._skipWhitespaces();
-        let prefix = this._readPrefix();
-        this._skipWhitespaces();
-        let keypath = this._readKeypath();
-        let value;
-        if (!prefix && !keypath) {
-            value = this._readValue();
-        }
-        if (keypath || value) {
-            let formatters;
-            for (let formatter; this._skipWhitespaces() == '|' && (formatter = this._readFormatter());) {
-                (formatters || (formatters = [])).push(formatter);
-            }
-            if (this._chr == '}') {
-                this._next();
-                return {
-                    nodeType: ContentNodeValueNodeType.BINDING,
-                    prefix,
-                    keypath,
-                    value: value || null,
-                    formatters: formatters || null,
-                    raw: this.contentNodeValue.slice(pos, this._pos)
-                };
-            }
-        }
-        this._pos = pos;
-        this._chr = this.contentNodeValue.charAt(pos);
-        return null;
-    }
-    _readPrefix() {
-        let chr = this._chr;
-        if (chr == '=') {
-            this._next();
-            return '=';
-        }
-        if (chr == '<') {
-            let pos = this._pos;
-            if (this.contentNodeValue.charAt(pos + 1) == '-') {
-                if (this.contentNodeValue.charAt(pos + 2) == '>') {
-                    this._chr = this.contentNodeValue.charAt((this._pos = pos + 3));
-                    return '<->';
-                }
-                this._chr = this.contentNodeValue.charAt((this._pos = pos + 2));
-                return '<-';
-            }
-        }
-        else if (chr == '-' && this.contentNodeValue.charAt(this._pos + 1) == '>') {
-            this._chr = this.contentNodeValue.charAt((this._pos += 2));
-            return '->';
-        }
-        return null;
-    }
-    _readFormatter() {
-        let pos = this._pos;
-        this._next('|');
-        this._skipWhitespaces();
-        let name = this._readName();
-        if (name) {
-            let args = this._chr == '(' ? this._readFormatterArguments() : null;
-            return {
-                nodeType: ContentNodeValueNodeType.BINDING_FORMATTER,
-                name,
-                arguments: args
-            };
-        }
-        this._pos = pos;
-        this._chr = this.contentNodeValue.charAt(pos);
-        return null;
-    }
-    _readFormatterArguments() {
-        let pos = this._pos;
-        this._next('(');
-        let args = [];
-        if (this._skipWhitespaces() != ')') {
-            for (;;) {
-                let arg = this._readValue() || this._readKeypath(true);
-                if (arg) {
-                    if (this._skipWhitespaces() == ',' || this._chr == ')') {
-                        args.push(arg);
-                        if (this._chr == ',') {
-                            this._next();
-                            this._skipWhitespaces();
-                            continue;
-                        }
-                        break;
-                    }
-                }
-                this._pos = pos;
-                this._chr = this.contentNodeValue.charAt(pos);
-                return null;
-            }
-        }
-        this._next();
-        return {
-            nodeType: ContentNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS,
-            value: args
-        };
-    }
-    _readValue() {
-        switch (this._chr) {
-            case '{': {
-                return this._readObject();
-            }
-            case '[': {
-                return this._readArray();
-            }
-            case "'":
-            case '"': {
-                return this._readString();
-            }
-        }
-        let readers = ['_readBoolean', '_readNumber', '_readVacuum'];
-        for (let reader of readers) {
-            let value = this[reader]();
-            if (value) {
-                return value;
-            }
-        }
-        return null;
-    }
-    _readObject() {
-        let pos = this._pos;
-        this._next('{');
-        let obj = '{';
-        while (this._skipWhitespaces() != '}') {
-            let key = this._chr == "'" || this._chr == '"' ? this._readString() : this._readObjectKey();
-            if (key && this._skipWhitespaces() == ':') {
-                this._next();
-                this._skipWhitespaces();
-                let valueOrKeypath = this._readValue() || this._readKeypath(true);
-                if (valueOrKeypath) {
-                    if (this._skipWhitespaces() == ',') {
-                        obj += key + ':' + valueOrKeypath + ',';
-                        this._next();
-                        continue;
-                    }
-                    else if (this._chr == '}') {
-                        obj += key + ':' + valueOrKeypath + '}';
-                        break;
-                    }
-                }
-            }
-            this._pos = pos;
-            this._chr = this.contentNodeValue.charAt(pos);
-            return null;
-        }
-        this._next();
-        return obj;
-    }
-    _readObjectKey() {
-        return this._readName();
-    }
-    _readArray() {
-        let pos = this._pos;
-        this._next('[');
-        let arr = '[';
-        while (this._skipWhitespaces() != ']') {
-            if (this._chr == ',') {
-                arr += ',';
-                this._next();
-            }
-            else {
-                let valueOrKeypath = this._readValue() || this._readKeypath(true);
-                if (valueOrKeypath) {
-                    arr += valueOrKeypath;
-                }
-                else {
-                    this._pos = pos;
-                    this._chr = this.contentNodeValue.charAt(pos);
-                    return null;
-                }
-            }
-        }
-        this._next();
-        return arr + ']';
-    }
-    _readBoolean() {
-        reBoolean.lastIndex = this._pos;
-        let bool = reBoolean.exec(this.contentNodeValue)[0];
-        if (bool) {
-            this._chr = this.contentNodeValue.charAt((this._pos = reBoolean.lastIndex));
-            return bool;
-        }
-        return null;
-    }
-    _readNumber() {
-        reNumber.lastIndex = this._pos;
-        let num = reNumber.exec(this.contentNodeValue)[0];
-        if (num) {
-            this._chr = this.contentNodeValue.charAt((this._pos = reNumber.lastIndex));
-            return num;
-        }
-        return null;
-    }
-    _readString() {
-        let quoteChar = this._chr;
-        if (quoteChar != "'" && quoteChar != '"') {
-            throw {
-                name: 'SyntaxError',
-                message: `Expected "'" instead of "${this._chr}"`,
-                pos: this._pos,
-                contentNodeValue: this.contentNodeValue
-            };
-        }
-        let pos = this._pos;
-        let str = '';
-        for (let next; (next = this._next());) {
-            if (next == quoteChar) {
-                this._next();
-                return quoteChar + str + quoteChar;
-            }
-            if (next == '\\') {
-                str += next + this._next();
-            }
-            else {
-                if (next == '\n' || next == '\r') {
-                    break;
-                }
-                str += next;
-            }
-        }
-        this._pos = pos;
-        this._chr = this.contentNodeValue.charAt(pos);
-        return null;
-    }
-    _readVacuum() {
-        reVacuum.lastIndex = this._pos;
-        let vacuum = reVacuum.exec(this.contentNodeValue)[0];
-        if (vacuum) {
-            this._chr = this.contentNodeValue.charAt((this._pos = reVacuum.lastIndex));
-            return vacuum;
-        }
-        return null;
-    }
-    _readKeypath(toJSExpression) {
-        reKeypath.lastIndex = this._pos;
-        let keypath = reKeypath.exec(this.contentNodeValue)[0];
-        if (keypath) {
-            this._chr = this.contentNodeValue.charAt((this._pos = reKeypath.lastIndex));
-            return toJSExpression ? keypathToJSExpression_1.keypathToJSExpression(keypath) : keypath;
-        }
-        return null;
-    }
-    _readName() {
-        reName.lastIndex = this._pos;
-        let name = reName.exec(this.contentNodeValue)[0];
-        if (name) {
-            this._chr = this.contentNodeValue.charAt((this._pos = reName.lastIndex));
-            return name;
-        }
-        return null;
-    }
-    _skipWhitespaces() {
-        let chr = this._chr;
-        while (chr && reWhitespace.test(chr)) {
-            chr = this._next();
-        }
-        return chr;
-    }
-    _next(current) {
-        if (current && current != this._chr) {
-            throw {
-                name: 'SyntaxError',
-                message: `Expected "${current}" instead of "${this._chr}"`,
-                pos: this._pos,
-                contentNodeValue: this.contentNodeValue
-            };
-        }
-        return (this._chr = this.contentNodeValue.charAt(++this._pos));
-    }
-}
-exports.ContentNodeValueParser = ContentNodeValueParser;
-
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const namePattern_1 = __webpack_require__(19);
-exports.keypathPattern = `(?:${namePattern_1.namePattern}|\\d+)(?:\\.(?:${namePattern_1.namePattern}|\\d+))*`;
-
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.namePattern = '[$_a-zA-Z][$\\w]*';
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const cache = Object.create(null);
-function keypathToJSExpression(keypath, cacheKey = keypath) {
-    if (cache[cacheKey]) {
-        return cache[cacheKey];
-    }
-    let keys = typeof keypath == 'string' ? keypath.split('.') : keypath;
-    let keyCount = keys.length;
-    if (keyCount == 1) {
-        return (cache[cacheKey] = `this['${keypath}']`);
-    }
-    let index = keyCount - 2;
-    let fragments = Array(index);
-    while (index) {
-        fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
-    }
-    return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`);
-}
-exports.keypathToJSExpression = keypathToJSExpression;
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const gettext_1 = __webpack_require__(22);
+const gettext_1 = __webpack_require__(18);
 exports.formatters = {
     default(value, defaultValue) {
         return value === undefined ? defaultValue : value;
@@ -2050,10 +1603,399 @@ exports.formatters.seq = exports.formatters.identical;
 
 
 /***/ }),
-/* 22 */
+/* 18 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__22__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__18__;
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const keypathPattern_1 = __webpack_require__(20);
+const keypathToJSExpression_1 = __webpack_require__(22);
+const namePattern_1 = __webpack_require__(21);
+var TemplateNodeValueNodeType;
+(function (TemplateNodeValueNodeType) {
+    TemplateNodeValueNodeType[TemplateNodeValueNodeType["TEXT"] = 1] = "TEXT";
+    TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING"] = 2] = "BINDING";
+    TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING_KEYPATH"] = 3] = "BINDING_KEYPATH";
+    TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
+    TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
+})(TemplateNodeValueNodeType = exports.TemplateNodeValueNodeType || (exports.TemplateNodeValueNodeType = {}));
+const reWhitespace = /\s/;
+const reName = RegExp(namePattern_1.namePattern + '|', 'g');
+const reKeypath = RegExp(keypathPattern_1.keypathPattern + '|', 'g');
+const reBoolean = /false|true|/g;
+const reNumber = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+const reVacuum = /null|undefined|void 0|/g;
+class TemplateNodeValueParser {
+    constructor(templateNodeValue) {
+        this.templateNodeValue = templateNodeValue;
+    }
+    parse(index) {
+        let templateNodeValue = this.templateNodeValue;
+        this._pos = 0;
+        let result = (this.result = []);
+        do {
+            this._pushText(templateNodeValue.slice(this._pos, index));
+            this._pos = index;
+            this._chr = templateNodeValue.charAt(index);
+            let binding = this._readBinding();
+            if (binding) {
+                result.push(binding);
+            }
+            else {
+                this._pushText(this._chr);
+                this._next('{');
+            }
+            index = templateNodeValue.indexOf('{', this._pos);
+        } while (index != -1);
+        this._pushText(templateNodeValue.slice(this._pos));
+        return result;
+    }
+    _pushText(value) {
+        if (value) {
+            let result = this.result;
+            let resultLen = result.length;
+            if (resultLen && result[resultLen - 1].nodeType == TemplateNodeValueNodeType.TEXT) {
+                result[resultLen - 1].value += value;
+            }
+            else {
+                result.push({
+                    nodeType: TemplateNodeValueNodeType.TEXT,
+                    value
+                });
+            }
+        }
+    }
+    _readBinding() {
+        let pos = this._pos;
+        this._next('{');
+        this._skipWhitespaces();
+        let prefix = this._readPrefix();
+        this._skipWhitespaces();
+        let keypath = this._readKeypath();
+        let value;
+        if (!prefix && !keypath) {
+            value = this._readValue();
+        }
+        if (keypath || value) {
+            let formatters;
+            for (let formatter; this._skipWhitespaces() == '|' && (formatter = this._readFormatter());) {
+                (formatters || (formatters = [])).push(formatter);
+            }
+            if (this._chr == '}') {
+                this._next();
+                return {
+                    nodeType: TemplateNodeValueNodeType.BINDING,
+                    prefix,
+                    keypath,
+                    value: value || null,
+                    formatters: formatters || null,
+                    raw: this.templateNodeValue.slice(pos, this._pos)
+                };
+            }
+        }
+        this._pos = pos;
+        this._chr = this.templateNodeValue.charAt(pos);
+        return null;
+    }
+    _readPrefix() {
+        let chr = this._chr;
+        if (chr == '=') {
+            this._next();
+            return '=';
+        }
+        if (chr == '<') {
+            let pos = this._pos;
+            if (this.templateNodeValue.charAt(pos + 1) == '-') {
+                if (this.templateNodeValue.charAt(pos + 2) == '>') {
+                    this._chr = this.templateNodeValue.charAt((this._pos = pos + 3));
+                    return '<->';
+                }
+                this._chr = this.templateNodeValue.charAt((this._pos = pos + 2));
+                return '<-';
+            }
+        }
+        else if (chr == '-' && this.templateNodeValue.charAt(this._pos + 1) == '>') {
+            this._chr = this.templateNodeValue.charAt((this._pos += 2));
+            return '->';
+        }
+        return null;
+    }
+    _readFormatter() {
+        let pos = this._pos;
+        this._next('|');
+        this._skipWhitespaces();
+        let name = this._readName();
+        if (name) {
+            let args = this._chr == '(' ? this._readFormatterArguments() : null;
+            return {
+                nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER,
+                name,
+                arguments: args
+            };
+        }
+        this._pos = pos;
+        this._chr = this.templateNodeValue.charAt(pos);
+        return null;
+    }
+    _readFormatterArguments() {
+        let pos = this._pos;
+        this._next('(');
+        let args = [];
+        if (this._skipWhitespaces() != ')') {
+            for (;;) {
+                let arg = this._readValue() || this._readKeypath(true);
+                if (arg) {
+                    if (this._skipWhitespaces() == ',' || this._chr == ')') {
+                        args.push(arg);
+                        if (this._chr == ',') {
+                            this._next();
+                            this._skipWhitespaces();
+                            continue;
+                        }
+                        break;
+                    }
+                }
+                this._pos = pos;
+                this._chr = this.templateNodeValue.charAt(pos);
+                return null;
+            }
+        }
+        this._next();
+        return {
+            nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS,
+            value: args
+        };
+    }
+    _readValue() {
+        switch (this._chr) {
+            case '{': {
+                return this._readObject();
+            }
+            case '[': {
+                return this._readArray();
+            }
+            case "'":
+            case '"': {
+                return this._readString();
+            }
+        }
+        let readers = ['_readBoolean', '_readNumber', '_readVacuum'];
+        for (let reader of readers) {
+            let value = this[reader]();
+            if (value) {
+                return value;
+            }
+        }
+        return null;
+    }
+    _readObject() {
+        let pos = this._pos;
+        this._next('{');
+        let obj = '{';
+        while (this._skipWhitespaces() != '}') {
+            let key = this._chr == "'" || this._chr == '"' ? this._readString() : this._readObjectKey();
+            if (key && this._skipWhitespaces() == ':') {
+                this._next();
+                this._skipWhitespaces();
+                let valueOrKeypath = this._readValue() || this._readKeypath(true);
+                if (valueOrKeypath) {
+                    if (this._skipWhitespaces() == ',') {
+                        obj += key + ':' + valueOrKeypath + ',';
+                        this._next();
+                        continue;
+                    }
+                    else if (this._chr == '}') {
+                        obj += key + ':' + valueOrKeypath + '}';
+                        break;
+                    }
+                }
+            }
+            this._pos = pos;
+            this._chr = this.templateNodeValue.charAt(pos);
+            return null;
+        }
+        this._next();
+        return obj;
+    }
+    _readObjectKey() {
+        return this._readName();
+    }
+    _readArray() {
+        let pos = this._pos;
+        this._next('[');
+        let arr = '[';
+        while (this._skipWhitespaces() != ']') {
+            if (this._chr == ',') {
+                arr += ',';
+                this._next();
+            }
+            else {
+                let valueOrKeypath = this._readValue() || this._readKeypath(true);
+                if (valueOrKeypath) {
+                    arr += valueOrKeypath;
+                }
+                else {
+                    this._pos = pos;
+                    this._chr = this.templateNodeValue.charAt(pos);
+                    return null;
+                }
+            }
+        }
+        this._next();
+        return arr + ']';
+    }
+    _readBoolean() {
+        reBoolean.lastIndex = this._pos;
+        let bool = reBoolean.exec(this.templateNodeValue)[0];
+        if (bool) {
+            this._chr = this.templateNodeValue.charAt((this._pos = reBoolean.lastIndex));
+            return bool;
+        }
+        return null;
+    }
+    _readNumber() {
+        reNumber.lastIndex = this._pos;
+        let num = reNumber.exec(this.templateNodeValue)[0];
+        if (num) {
+            this._chr = this.templateNodeValue.charAt((this._pos = reNumber.lastIndex));
+            return num;
+        }
+        return null;
+    }
+    _readString() {
+        let quoteChar = this._chr;
+        if (quoteChar != "'" && quoteChar != '"') {
+            throw {
+                name: 'SyntaxError',
+                message: `Expected "'" instead of "${this._chr}"`,
+                pos: this._pos,
+                templateNodeValue: this.templateNodeValue
+            };
+        }
+        let pos = this._pos;
+        let str = '';
+        for (let next; (next = this._next());) {
+            if (next == quoteChar) {
+                this._next();
+                return quoteChar + str + quoteChar;
+            }
+            if (next == '\\') {
+                str += next + this._next();
+            }
+            else {
+                if (next == '\n' || next == '\r') {
+                    break;
+                }
+                str += next;
+            }
+        }
+        this._pos = pos;
+        this._chr = this.templateNodeValue.charAt(pos);
+        return null;
+    }
+    _readVacuum() {
+        reVacuum.lastIndex = this._pos;
+        let vacuum = reVacuum.exec(this.templateNodeValue)[0];
+        if (vacuum) {
+            this._chr = this.templateNodeValue.charAt((this._pos = reVacuum.lastIndex));
+            return vacuum;
+        }
+        return null;
+    }
+    _readKeypath(toJSExpression) {
+        reKeypath.lastIndex = this._pos;
+        let keypath = reKeypath.exec(this.templateNodeValue)[0];
+        if (keypath) {
+            this._chr = this.templateNodeValue.charAt((this._pos = reKeypath.lastIndex));
+            return toJSExpression ? keypathToJSExpression_1.keypathToJSExpression(keypath) : keypath;
+        }
+        return null;
+    }
+    _readName() {
+        reName.lastIndex = this._pos;
+        let name = reName.exec(this.templateNodeValue)[0];
+        if (name) {
+            this._chr = this.templateNodeValue.charAt((this._pos = reName.lastIndex));
+            return name;
+        }
+        return null;
+    }
+    _skipWhitespaces() {
+        let chr = this._chr;
+        while (chr && reWhitespace.test(chr)) {
+            chr = this._next();
+        }
+        return chr;
+    }
+    _next(current) {
+        if (current && current != this._chr) {
+            throw {
+                name: 'SyntaxError',
+                message: `Expected "${current}" instead of "${this._chr}"`,
+                pos: this._pos,
+                templateNodeValue: this.templateNodeValue
+            };
+        }
+        return (this._chr = this.templateNodeValue.charAt(++this._pos));
+    }
+}
+exports.TemplateNodeValueParser = TemplateNodeValueParser;
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const namePattern_1 = __webpack_require__(21);
+exports.keypathPattern = `(?:${namePattern_1.namePattern}|\\d+)(?:\\.(?:${namePattern_1.namePattern}|\\d+))*`;
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.namePattern = '[$_a-zA-Z][$\\w]*';
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const cache = Object.create(null);
+function keypathToJSExpression(keypath, cacheKey = keypath) {
+    if (cache[cacheKey]) {
+        return cache[cacheKey];
+    }
+    let keys = typeof keypath == 'string' ? keypath.split('.') : keypath;
+    let keyCount = keys.length;
+    if (keyCount == 1) {
+        return (cache[cacheKey] = `this['${keypath}']`);
+    }
+    let index = keyCount - 2;
+    let fragments = Array(index);
+    while (index) {
+        fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
+    }
+    return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`);
+}
+exports.keypathToJSExpression = keypathToJSExpression;
+
 
 /***/ }),
 /* 23 */
@@ -2075,13 +2017,29 @@ exports.KEY_CHILD_COMPONENTS = symbol_polyfill_1.Symbol('Rionite/BaseComponent[c
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const keypathToJSExpression_1 = __webpack_require__(20);
-const cache = Object.create(null);
-function compileKeypath(keypath, cacheKey = keypath) {
-    return (cache[cacheKey] ||
-        (cache[cacheKey] = Function(`var tmp; return ${keypathToJSExpression_1.keypathToJSExpression(keypath, cacheKey)};`)));
+const bindContent_1 = __webpack_require__(7);
+const TemplateNodeValueParser_1 = __webpack_require__(19);
+function getTemplateNodeValueAST(templateNodeValue) {
+    let templateNodeValueAST = bindContent_1.templateNodeValueASTCache[templateNodeValue];
+    if (templateNodeValueAST === undefined) {
+        let bracketIndex = templateNodeValue.indexOf('{');
+        if (bracketIndex == -1) {
+            templateNodeValueAST = bindContent_1.templateNodeValueASTCache[templateNodeValue] = null;
+        }
+        else {
+            templateNodeValueAST = new TemplateNodeValueParser_1.TemplateNodeValueParser(templateNodeValue).parse(bracketIndex);
+            if (templateNodeValueAST.length == 1 &&
+                templateNodeValueAST[0].nodeType == TemplateNodeValueParser_1.TemplateNodeValueNodeType.TEXT) {
+                templateNodeValueAST = bindContent_1.templateNodeValueASTCache[templateNodeValue] = null;
+            }
+            else {
+                bindContent_1.templateNodeValueASTCache[templateNodeValue] = templateNodeValueAST;
+            }
+        }
+    }
+    return templateNodeValueAST;
 }
-exports.compileKeypath = compileKeypath;
+exports.getTemplateNodeValueAST = getTemplateNodeValueAST;
 
 
 /***/ }),
@@ -2091,7 +2049,34 @@ exports.compileKeypath = compileKeypath;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const registerComponent_1 = __webpack_require__(26);
+const keypathToJSExpression_1 = __webpack_require__(22);
+const cache = Object.create(null);
+function compileKeypath(keypath, cacheKey = keypath) {
+    return (cache[cacheKey] ||
+        (cache[cacheKey] = Function(`var tmp; return ${keypathToJSExpression_1.keypathToJSExpression(keypath, cacheKey)};`)));
+}
+exports.compileKeypath = compileKeypath;
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const map_set_polyfill_1 = __webpack_require__(8);
+exports.componentConstructorMap = new map_set_polyfill_1.Map();
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const registerComponent_1 = __webpack_require__(28);
 function Component(config) {
     return (componentConstr) => {
         if (config) {
@@ -2124,21 +2109,21 @@ exports.Component = Component;
 
 
 /***/ }),
-/* 26 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const kebab_case_1 = __webpack_require__(4);
-const pascalize_1 = __webpack_require__(27);
+const pascalize_1 = __webpack_require__(29);
 const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const cellx_1 = __webpack_require__(6);
-const componentConstructorMap_1 = __webpack_require__(29);
-const ComponentParams_1 = __webpack_require__(30);
+const componentConstructorMap_1 = __webpack_require__(26);
+const ComponentParams_1 = __webpack_require__(31);
 const Constants_1 = __webpack_require__(23);
-const elementConstructorMap_1 = __webpack_require__(31);
-const ElementProtoMixin_1 = __webpack_require__(32);
+const elementConstructorMap_1 = __webpack_require__(32);
+const ElementProtoMixin_1 = __webpack_require__(33);
 const Template_1 = __webpack_require__(3);
 const push = Array.prototype.push;
 function inheritProperty(target, source, name, depth) {
@@ -2351,12 +2336,12 @@ function registerComponent(componentConstr) {
     let elProto = elConstr.prototype;
     elProto.constructor = elConstr;
     let names = Object.getOwnPropertyNames(ElementProtoMixin_1.ElementProtoMixin);
-    for (let i = 0, l = names.length; i < l; i++) {
-        Object.defineProperty(elProto, names[i], Object.getOwnPropertyDescriptor(ElementProtoMixin_1.ElementProtoMixin, names[i]));
+    for (let name of names) {
+        Object.defineProperty(elProto, name, Object.getOwnPropertyDescriptor(ElementProtoMixin_1.ElementProtoMixin, name));
     }
     names = Object.getOwnPropertySymbols(ElementProtoMixin_1.ElementProtoMixin);
-    for (let i = 0, l = names.length; i < l; i++) {
-        Object.defineProperty(elProto, names[i], Object.getOwnPropertyDescriptor(ElementProtoMixin_1.ElementProtoMixin, names[i]));
+    for (let name of names) {
+        Object.defineProperty(elProto, name, Object.getOwnPropertyDescriptor(ElementProtoMixin_1.ElementProtoMixin, name));
     }
     window.customElements.define(kebabCaseElIs, elConstr, elExtends ? { extends: elExtends } : undefined);
     componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
@@ -2367,13 +2352,13 @@ exports.registerComponent = registerComponent;
 
 
 /***/ }),
-/* 27 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(28);
+var camelize_1 = __webpack_require__(30);
 var cache = Object.create(null);
 function pascalize(str, useCache) {
     str = String(str);
@@ -2387,7 +2372,7 @@ exports.pascalize = pascalize;
 
 
 /***/ }),
-/* 28 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2406,18 +2391,7 @@ exports.camelize = camelize;
 
 
 /***/ }),
-/* 29 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const map_set_polyfill_1 = __webpack_require__(8);
-exports.componentConstructorMap = new map_set_polyfill_1.Map();
-
-
-/***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2498,7 +2472,7 @@ exports.ComponentParams = {
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2551,17 +2525,17 @@ exports.elementConstructorMap = new map_set_polyfill_1.Map([
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const defer_1 = __webpack_require__(33);
+const defer_1 = __webpack_require__(34);
 const symbol_polyfill_1 = __webpack_require__(16);
-const ComponentParams_1 = __webpack_require__(30);
+const ComponentParams_1 = __webpack_require__(31);
 const Constants_1 = __webpack_require__(23);
-const observedAttributesFeature_1 = __webpack_require__(34);
+const observedAttributesFeature_1 = __webpack_require__(35);
 // export const KEY_IS_COMPONENT_ELEMENT = Symbol('Rionite/ElementProtoMixin[isComponentElement]');
 exports.KEY_ELEMENT_CONNECTED = symbol_polyfill_1.Symbol('Rionite/ElementProtoMixin[elementConnected]');
 let connectionStatusCallbacksSuppressed = false;
@@ -2655,13 +2629,13 @@ exports.ElementProtoMixin = {
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__33__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__34__;
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2681,13 +2655,13 @@ exports.observedAttributesFeature = observedAttributesFeature_;
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const lower_case_first_word_1 = __webpack_require__(36);
+const lower_case_first_word_1 = __webpack_require__(37);
 const map_set_polyfill_1 = __webpack_require__(8);
 const types = new map_set_polyfill_1.Set([Boolean, Number, String, Object]);
 const prefix = 'param';
@@ -2724,34 +2698,34 @@ exports.Param = Param;
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__36__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__37__;
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(38);
+const get_uid_1 = __webpack_require__(39);
 const kebab_case_1 = __webpack_require__(4);
 const map_set_polyfill_1 = __webpack_require__(8);
-const move_content_1 = __webpack_require__(39);
-const next_uid_1 = __webpack_require__(40);
+const move_content_1 = __webpack_require__(40);
+const next_uid_1 = __webpack_require__(41);
 const cellx_1 = __webpack_require__(6);
-const attachChildComponentElements_1 = __webpack_require__(41);
+const attachChildComponentElements_1 = __webpack_require__(42);
 const bindContent_1 = __webpack_require__(7);
-const componentBinding_1 = __webpack_require__(42);
-const componentConstructorMap_1 = __webpack_require__(29);
+const componentBinding_1 = __webpack_require__(43);
+const componentConstructorMap_1 = __webpack_require__(26);
 const Constants_1 = __webpack_require__(23);
-const elementConstructorMap_1 = __webpack_require__(31);
-const ElementProtoMixin_1 = __webpack_require__(32);
-const handleDOMEvent_1 = __webpack_require__(43);
-const handleEvent_1 = __webpack_require__(44);
-const normalizeTextNodes_1 = __webpack_require__(45);
+const elementConstructorMap_1 = __webpack_require__(32);
+const ElementProtoMixin_1 = __webpack_require__(33);
+const handleDOMEvent_1 = __webpack_require__(44);
+const handleEvent_1 = __webpack_require__(45);
+const normalizeTextNodes_1 = __webpack_require__(46);
 const map = Array.prototype.map;
 class BaseComponent extends cellx_1.EventEmitter {
     constructor(el) {
@@ -3163,12 +3137,6 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 
 /***/ }),
-/* 38 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__38__;
-
-/***/ }),
 /* 39 */
 /***/ (function(module, exports) {
 
@@ -3182,12 +3150,18 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__40__;
 
 /***/ }),
 /* 41 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__41__;
+
+/***/ }),
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const ComponentParams_1 = __webpack_require__(30);
+const ComponentParams_1 = __webpack_require__(31);
 // import { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 function attachChildComponentElements(childComponents) {
     for (let childComponent of childComponents) {
@@ -3203,7 +3177,7 @@ exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3254,7 +3228,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3313,7 +3287,7 @@ exports.handleDOMEvent = handleDOMEvent;
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3405,7 +3379,7 @@ exports.handleEvent = handleEvent;
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3439,7 +3413,7 @@ exports.normalizeTextNodes = normalizeTextNodes;
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3452,17 +3426,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var RnIfThen_1;
-const next_tick_1 = __webpack_require__(47);
+const next_tick_1 = __webpack_require__(48);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(48);
-const attachChildComponentElements_1 = __webpack_require__(41);
-const BaseComponent_1 = __webpack_require__(37);
-const Component_1 = __webpack_require__(25);
-const ElementProtoMixin_1 = __webpack_require__(32);
-const compileKeypath_1 = __webpack_require__(24);
-const keypathPattern_1 = __webpack_require__(18);
-const removeNodes_1 = __webpack_require__(49);
-const RnRepeat_1 = __webpack_require__(50);
+const move_content_1 = __webpack_require__(49);
+const attachChildComponentElements_1 = __webpack_require__(42);
+const BaseComponent_1 = __webpack_require__(38);
+const Component_1 = __webpack_require__(27);
+const ElementProtoMixin_1 = __webpack_require__(33);
+const compileKeypath_1 = __webpack_require__(25);
+const keypathPattern_1 = __webpack_require__(20);
+const removeNodes_1 = __webpack_require__(50);
+const RnRepeat_1 = __webpack_require__(51);
 const slice = Array.prototype.slice;
 const reKeypath = RegExp(`^${keypathPattern_1.keypathPattern}$`);
 let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent {
@@ -3599,13 +3573,13 @@ exports.RnIfThen = RnIfThen;
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__47__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__48__;
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3621,7 +3595,7 @@ exports.moveContent = moveContent;
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3648,7 +3622,7 @@ exports.removeNodes = removeNodes;
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3661,18 +3635,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const map_set_polyfill_1 = __webpack_require__(8);
-const next_tick_1 = __webpack_require__(47);
+const next_tick_1 = __webpack_require__(48);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(48);
-const attachChildComponentElements_1 = __webpack_require__(41);
-const BaseComponent_1 = __webpack_require__(37);
-const Component_1 = __webpack_require__(25);
-const ElementProtoMixin_1 = __webpack_require__(32);
-const compileKeypath_1 = __webpack_require__(24);
-const keypathPattern_1 = __webpack_require__(18);
-const namePattern_1 = __webpack_require__(19);
-const removeNodes_1 = __webpack_require__(49);
-const RnIfThen_1 = __webpack_require__(46);
+const move_content_1 = __webpack_require__(49);
+const attachChildComponentElements_1 = __webpack_require__(42);
+const BaseComponent_1 = __webpack_require__(38);
+const Component_1 = __webpack_require__(27);
+const ElementProtoMixin_1 = __webpack_require__(33);
+const compileKeypath_1 = __webpack_require__(25);
+const keypathPattern_1 = __webpack_require__(20);
+const namePattern_1 = __webpack_require__(21);
+const removeNodes_1 = __webpack_require__(50);
+const RnIfThen_1 = __webpack_require__(47);
 const slice = Array.prototype.slice;
 const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern})\\s*$`);
 function getItem(list, index) {
@@ -4013,7 +3987,7 @@ exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4025,8 +3999,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Component_1 = __webpack_require__(25);
-const RnIfThen_1 = __webpack_require__(46);
+const Component_1 = __webpack_require__(27);
+const RnIfThen_1 = __webpack_require__(47);
 let RnIfElse = class RnIfElse extends RnIfThen_1.RnIfThen {
     constructor() {
         super(...arguments);
@@ -4043,7 +4017,7 @@ exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4055,16 +4029,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(38);
+const get_uid_1 = __webpack_require__(39);
 const map_set_polyfill_1 = __webpack_require__(8);
-const move_content_1 = __webpack_require__(39);
+const move_content_1 = __webpack_require__(40);
 const symbol_polyfill_1 = __webpack_require__(16);
-const attachChildComponentElements_1 = __webpack_require__(41);
-const BaseComponent_1 = __webpack_require__(37);
+const attachChildComponentElements_1 = __webpack_require__(42);
+const BaseComponent_1 = __webpack_require__(38);
 const bindContent_1 = __webpack_require__(7);
-const Component_1 = __webpack_require__(25);
-const ElementProtoMixin_1 = __webpack_require__(32);
-const cloneNode_1 = __webpack_require__(53);
+const Component_1 = __webpack_require__(27);
+const ElementProtoMixin_1 = __webpack_require__(33);
+const cloneNode_1 = __webpack_require__(54);
 const KEY_SLOT_CONTENT_MAP = symbol_polyfill_1.Symbol('Rionite/RnSlot[slotContentMap]');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
     static get bindsInputContent() {
@@ -4225,7 +4199,7 @@ exports.RnSlot = RnSlot;
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

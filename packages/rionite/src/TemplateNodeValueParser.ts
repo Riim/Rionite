@@ -1,38 +1,8 @@
-const namePattern = '[$_a-zA-Z][$\\w]*';
-const keypathPattern = `(?:${namePattern}|\\d+)(?:\\.(?:${namePattern}|\\d+))*`;
+import { keypathPattern } from './lib/keypathPattern';
+import { keypathToJSExpression } from './lib/keypathToJSExpression';
+import { namePattern } from './lib/namePattern';
 
-const cache: Record<string, string> = Object.create(null);
-
-export function keypathToJSExpression(keypath: string, cacheKey?: string): string;
-export function keypathToJSExpression(keypath: string | Array<string>, cacheKey: string): string;
-export function keypathToJSExpression(
-	keypath: string | Array<string>,
-	cacheKey: string = keypath as any
-): string {
-	if (cache[cacheKey]) {
-		return cache[cacheKey];
-	}
-
-	let keys = typeof keypath == 'string' ? keypath.split('.') : keypath;
-	let keyCount = keys.length;
-
-	if (keyCount == 1) {
-		return (cache[cacheKey] = `this['${keypath}']`);
-	}
-
-	let index = keyCount - 2;
-	let fragments = Array(index);
-
-	while (index) {
-		fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
-	}
-
-	return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${
-		keys[keyCount - 1]
-	}']`);
-}
-
-export enum ContentNodeValueNodeType {
+export enum TemplateNodeValueNodeType {
 	TEXT = 1,
 	BINDING,
 	BINDING_KEYPATH,
@@ -40,36 +10,36 @@ export enum ContentNodeValueNodeType {
 	BINDING_FORMATTER_ARGUMENTS
 }
 
-export interface IContentNodeValueNode {
-	nodeType: ContentNodeValueNodeType;
+export interface ITemplateNodeValueNode {
+	nodeType: TemplateNodeValueNodeType;
 }
 
-export interface IContentNodeValueText extends IContentNodeValueNode {
-	nodeType: ContentNodeValueNodeType.TEXT;
+export interface ITemplateNodeValueText extends ITemplateNodeValueNode {
+	nodeType: TemplateNodeValueNodeType.TEXT;
 	value: string;
 }
 
-export interface IContentNodeValueBindingFormatterArguments extends IContentNodeValueNode {
-	nodeType: ContentNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS;
+export interface ITemplateNodeValueBindingFormatterArguments extends ITemplateNodeValueNode {
+	nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS;
 	value: Array<string>;
 }
 
-export interface IContentNodeValueBindingFormatter extends IContentNodeValueNode {
-	nodeType: ContentNodeValueNodeType.BINDING_FORMATTER;
+export interface ITemplateNodeValueBindingFormatter extends ITemplateNodeValueNode {
+	nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER;
 	name: string;
-	arguments: IContentNodeValueBindingFormatterArguments | null;
+	arguments: ITemplateNodeValueBindingFormatterArguments | null;
 }
 
-export interface IContentNodeValueBinding extends IContentNodeValueNode {
-	nodeType: ContentNodeValueNodeType.BINDING;
+export interface ITemplateNodeValueBinding extends ITemplateNodeValueNode {
+	nodeType: TemplateNodeValueNodeType.BINDING;
 	prefix: string | null;
 	keypath: string | null;
 	value: string | null;
-	formatters: Array<IContentNodeValueBindingFormatter> | null;
+	formatters: Array<ITemplateNodeValueBindingFormatter> | null;
 	raw: string;
 }
 
-export type TContentNodeValue = Array<IContentNodeValueText | IContentNodeValueBinding>;
+export type TTemplateNodeValue = Array<ITemplateNodeValueText | ITemplateNodeValueBinding>;
 
 const reWhitespace = /\s/;
 
@@ -79,30 +49,30 @@ const reBoolean = /false|true|/g;
 const reNumber = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
 const reVacuum = /null|undefined|void 0|/g;
 
-export class ContentNodeValueParser {
-	contentNodeValue: string;
+export class TemplateNodeValueParser {
+	templateNodeValue: string;
 
 	_pos: number;
 	_chr: string;
 
-	result: TContentNodeValue;
+	result: TTemplateNodeValue;
 
-	constructor(contentNodeValue: string) {
-		this.contentNodeValue = contentNodeValue;
+	constructor(templateNodeValue: string) {
+		this.templateNodeValue = templateNodeValue;
 	}
 
-	parse(index: number): TContentNodeValue {
-		let contentNodeValue = this.contentNodeValue;
+	parse(index: number): TTemplateNodeValue {
+		let templateNodeValue = this.templateNodeValue;
 
 		this._pos = 0;
 
-		let result: TContentNodeValue = (this.result = []);
+		let result: TTemplateNodeValue = (this.result = []);
 
 		do {
-			this._pushText(contentNodeValue.slice(this._pos, index));
+			this._pushText(templateNodeValue.slice(this._pos, index));
 
 			this._pos = index;
-			this._chr = contentNodeValue.charAt(index);
+			this._chr = templateNodeValue.charAt(index);
 
 			let binding = this._readBinding();
 
@@ -113,10 +83,10 @@ export class ContentNodeValueParser {
 				this._next('{');
 			}
 
-			index = contentNodeValue.indexOf('{', this._pos);
+			index = templateNodeValue.indexOf('{', this._pos);
 		} while (index != -1);
 
-		this._pushText(contentNodeValue.slice(this._pos));
+		this._pushText(templateNodeValue.slice(this._pos));
 
 		return result;
 	}
@@ -126,18 +96,18 @@ export class ContentNodeValueParser {
 			let result = this.result;
 			let resultLen = result.length;
 
-			if (resultLen && result[resultLen - 1].nodeType == ContentNodeValueNodeType.TEXT) {
-				(result[resultLen - 1] as IContentNodeValueText).value += value;
+			if (resultLen && result[resultLen - 1].nodeType == TemplateNodeValueNodeType.TEXT) {
+				(result[resultLen - 1] as ITemplateNodeValueText).value += value;
 			} else {
 				result.push({
-					nodeType: ContentNodeValueNodeType.TEXT,
+					nodeType: TemplateNodeValueNodeType.TEXT,
 					value
 				});
 			}
 		}
 	}
 
-	_readBinding(): IContentNodeValueBinding | null {
+	_readBinding(): ITemplateNodeValueBinding | null {
 		let pos = this._pos;
 
 		this._next('{');
@@ -155,10 +125,10 @@ export class ContentNodeValueParser {
 		}
 
 		if (keypath || value) {
-			let formatters: Array<IContentNodeValueBindingFormatter> | undefined;
+			let formatters: Array<ITemplateNodeValueBindingFormatter> | undefined;
 
 			for (
-				let formatter: IContentNodeValueBindingFormatter | null;
+				let formatter: ITemplateNodeValueBindingFormatter | null;
 				this._skipWhitespaces() == '|' && (formatter = this._readFormatter());
 
 			) {
@@ -169,18 +139,18 @@ export class ContentNodeValueParser {
 				this._next();
 
 				return {
-					nodeType: ContentNodeValueNodeType.BINDING,
+					nodeType: TemplateNodeValueNodeType.BINDING,
 					prefix,
 					keypath,
 					value: value || null,
 					formatters: formatters || null,
-					raw: this.contentNodeValue.slice(pos, this._pos)
+					raw: this.templateNodeValue.slice(pos, this._pos)
 				};
 			}
 		}
 
 		this._pos = pos;
-		this._chr = this.contentNodeValue.charAt(pos);
+		this._chr = this.templateNodeValue.charAt(pos);
 
 		return null;
 	}
@@ -196,24 +166,24 @@ export class ContentNodeValueParser {
 		if (chr == '<') {
 			let pos = this._pos;
 
-			if (this.contentNodeValue.charAt(pos + 1) == '-') {
-				if (this.contentNodeValue.charAt(pos + 2) == '>') {
-					this._chr = this.contentNodeValue.charAt((this._pos = pos + 3));
+			if (this.templateNodeValue.charAt(pos + 1) == '-') {
+				if (this.templateNodeValue.charAt(pos + 2) == '>') {
+					this._chr = this.templateNodeValue.charAt((this._pos = pos + 3));
 					return '<->';
 				}
 
-				this._chr = this.contentNodeValue.charAt((this._pos = pos + 2));
+				this._chr = this.templateNodeValue.charAt((this._pos = pos + 2));
 				return '<-';
 			}
-		} else if (chr == '-' && this.contentNodeValue.charAt(this._pos + 1) == '>') {
-			this._chr = this.contentNodeValue.charAt((this._pos += 2));
+		} else if (chr == '-' && this.templateNodeValue.charAt(this._pos + 1) == '>') {
+			this._chr = this.templateNodeValue.charAt((this._pos += 2));
 			return '->';
 		}
 
 		return null;
 	}
 
-	_readFormatter(): IContentNodeValueBindingFormatter | null {
+	_readFormatter(): ITemplateNodeValueBindingFormatter | null {
 		let pos = this._pos;
 
 		this._next('|');
@@ -225,19 +195,19 @@ export class ContentNodeValueParser {
 			let args = this._chr == '(' ? this._readFormatterArguments() : null;
 
 			return {
-				nodeType: ContentNodeValueNodeType.BINDING_FORMATTER,
+				nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER,
 				name,
 				arguments: args
 			};
 		}
 
 		this._pos = pos;
-		this._chr = this.contentNodeValue.charAt(pos);
+		this._chr = this.templateNodeValue.charAt(pos);
 
 		return null;
 	}
 
-	_readFormatterArguments(): IContentNodeValueBindingFormatterArguments | null {
+	_readFormatterArguments(): ITemplateNodeValueBindingFormatterArguments | null {
 		let pos = this._pos;
 
 		this._next('(');
@@ -263,7 +233,7 @@ export class ContentNodeValueParser {
 				}
 
 				this._pos = pos;
-				this._chr = this.contentNodeValue.charAt(pos);
+				this._chr = this.templateNodeValue.charAt(pos);
 
 				return null;
 			}
@@ -272,7 +242,7 @@ export class ContentNodeValueParser {
 		this._next();
 
 		return {
-			nodeType: ContentNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS,
+			nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS,
 			value: args
 		};
 	}
@@ -334,7 +304,7 @@ export class ContentNodeValueParser {
 			}
 
 			this._pos = pos;
-			this._chr = this.contentNodeValue.charAt(pos);
+			this._chr = this.templateNodeValue.charAt(pos);
 
 			return null;
 		}
@@ -366,7 +336,7 @@ export class ContentNodeValueParser {
 					arr += valueOrKeypath;
 				} else {
 					this._pos = pos;
-					this._chr = this.contentNodeValue.charAt(pos);
+					this._chr = this.templateNodeValue.charAt(pos);
 
 					return null;
 				}
@@ -380,10 +350,10 @@ export class ContentNodeValueParser {
 
 	_readBoolean(): string | null {
 		reBoolean.lastIndex = this._pos;
-		let bool = reBoolean.exec(this.contentNodeValue)![0];
+		let bool = reBoolean.exec(this.templateNodeValue)![0];
 
 		if (bool) {
-			this._chr = this.contentNodeValue.charAt((this._pos = reBoolean.lastIndex));
+			this._chr = this.templateNodeValue.charAt((this._pos = reBoolean.lastIndex));
 			return bool;
 		}
 
@@ -392,10 +362,10 @@ export class ContentNodeValueParser {
 
 	_readNumber(): string | null {
 		reNumber.lastIndex = this._pos;
-		let num = reNumber.exec(this.contentNodeValue)![0];
+		let num = reNumber.exec(this.templateNodeValue)![0];
 
 		if (num) {
-			this._chr = this.contentNodeValue.charAt((this._pos = reNumber.lastIndex));
+			this._chr = this.templateNodeValue.charAt((this._pos = reNumber.lastIndex));
 			return num;
 		}
 
@@ -410,7 +380,7 @@ export class ContentNodeValueParser {
 				name: 'SyntaxError',
 				message: `Expected "'" instead of "${this._chr}"`,
 				pos: this._pos,
-				contentNodeValue: this.contentNodeValue
+				templateNodeValue: this.templateNodeValue
 			};
 		}
 
@@ -435,17 +405,17 @@ export class ContentNodeValueParser {
 		}
 
 		this._pos = pos;
-		this._chr = this.contentNodeValue.charAt(pos);
+		this._chr = this.templateNodeValue.charAt(pos);
 
 		return null;
 	}
 
 	_readVacuum(): string | null {
 		reVacuum.lastIndex = this._pos;
-		let vacuum = reVacuum.exec(this.contentNodeValue)![0];
+		let vacuum = reVacuum.exec(this.templateNodeValue)![0];
 
 		if (vacuum) {
-			this._chr = this.contentNodeValue.charAt((this._pos = reVacuum.lastIndex));
+			this._chr = this.templateNodeValue.charAt((this._pos = reVacuum.lastIndex));
 			return vacuum;
 		}
 
@@ -454,10 +424,10 @@ export class ContentNodeValueParser {
 
 	_readKeypath(toJSExpression?: boolean): string | null {
 		reKeypath.lastIndex = this._pos;
-		let keypath = reKeypath.exec(this.contentNodeValue)![0];
+		let keypath = reKeypath.exec(this.templateNodeValue)![0];
 
 		if (keypath) {
-			this._chr = this.contentNodeValue.charAt((this._pos = reKeypath.lastIndex));
+			this._chr = this.templateNodeValue.charAt((this._pos = reKeypath.lastIndex));
 			return toJSExpression ? keypathToJSExpression(keypath) : keypath;
 		}
 
@@ -466,10 +436,10 @@ export class ContentNodeValueParser {
 
 	_readName(): string | null {
 		reName.lastIndex = this._pos;
-		let name = reName.exec(this.contentNodeValue)![0];
+		let name = reName.exec(this.templateNodeValue)![0];
 
 		if (name) {
-			this._chr = this.contentNodeValue.charAt((this._pos = reName.lastIndex));
+			this._chr = this.templateNodeValue.charAt((this._pos = reName.lastIndex));
 			return name;
 		}
 
@@ -492,10 +462,10 @@ export class ContentNodeValueParser {
 				name: 'SyntaxError',
 				message: `Expected "${current}" instead of "${this._chr}"`,
 				pos: this._pos,
-				contentNodeValue: this.contentNodeValue
+				templateNodeValue: this.templateNodeValue
 			};
 		}
 
-		return (this._chr = this.contentNodeValue.charAt(++this._pos));
+		return (this._chr = this.templateNodeValue.charAt(++this._pos));
 	}
 }

@@ -1,10 +1,10 @@
 import { Cell, IEvent, TListener } from 'cellx';
 import { BaseComponent } from './BaseComponent';
 import { IFreezableCell } from './componentBinding';
-import { TContentNodeValue } from './ContentNodeValueParser';
+import { TTemplateNodeValue } from './TemplateNodeValueParser';
 export declare type TContentBindingResult = [Array<BaseComponent> | null, Array<IFreezableCell> | null, Array<BaseComponent | string | TListener> | null];
 export declare const KEY_CONTEXT: unique symbol;
-export declare const contentNodeValueASTCache: Record<string, TContentNodeValue | null>;
+export declare const templateNodeValueASTCache: Record<string, TTemplateNodeValue | null>;
 export interface IAttributeBindingCellMeta {
     element: Element;
     attributeName: string;

@@ -13,69 +13,69 @@ function keypathToJSExpression(keypath, cacheKey = keypath) {
         return (cache[cacheKey] = `this['${keypath}']`);
     }
     let index = keyCount - 2;
-    let jsExpr = Array(index);
+    let fragments = Array(index);
     while (index) {
-        jsExpr[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
+        fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
     }
-    return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${jsExpr.join('')} && tmp['${keys[keyCount - 1]}']`);
+    return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`);
 }
 exports.keypathToJSExpression = keypathToJSExpression;
-var ContentNodeValueNodeType;
-(function (ContentNodeValueNodeType) {
-    ContentNodeValueNodeType[ContentNodeValueNodeType["TEXT"] = 1] = "TEXT";
-    ContentNodeValueNodeType[ContentNodeValueNodeType["BINDING"] = 2] = "BINDING";
-    ContentNodeValueNodeType[ContentNodeValueNodeType["BINDING_KEYPATH"] = 3] = "BINDING_KEYPATH";
-    ContentNodeValueNodeType[ContentNodeValueNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
-    ContentNodeValueNodeType[ContentNodeValueNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
-})(ContentNodeValueNodeType = exports.ContentNodeValueNodeType || (exports.ContentNodeValueNodeType = {}));
+var TemplateNodeValueNodeType;
+(function (TemplateNodeValueNodeType) {
+    TemplateNodeValueNodeType[TemplateNodeValueNodeType["TEXT"] = 1] = "TEXT";
+    TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING"] = 2] = "BINDING";
+    TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING_KEYPATH"] = 3] = "BINDING_KEYPATH";
+    TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
+    TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
+})(TemplateNodeValueNodeType = exports.TemplateNodeValueNodeType || (exports.TemplateNodeValueNodeType = {}));
 const reWhitespace = /\s/;
-const reNameOrNothing = RegExp(namePattern + '|', 'g');
-const reKeypathOrNothing = RegExp(keypathPattern + '|', 'g');
-const reBooleanOrNothing = /false|true|/g;
-const reNumberOrNothing = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
-const reVacuumOrNothing = /null|undefined|void 0|/g;
-class ContentNodeValueParser {
-    constructor(contentNodeValue) {
-        this.contentNodeValue = contentNodeValue;
+const reName = RegExp(namePattern + '|', 'g');
+const reKeypath = RegExp(keypathPattern + '|', 'g');
+const reBoolean = /false|true|/g;
+const reNumber = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
+const reVacuum = /null|undefined|void 0|/g;
+class TemplateNodeValueParser {
+    constructor(templateNodeValue) {
+        this.templateNodeValue = templateNodeValue;
     }
     parse(index) {
-        let contentNodeValue = this.contentNodeValue;
-        this.at = 0;
+        let templateNodeValue = this.templateNodeValue;
+        this._pos = 0;
         let result = (this.result = []);
         do {
-            this._pushText(contentNodeValue.slice(this.at, index));
-            this.at = index;
-            this.chr = contentNodeValue.charAt(index);
+            this._pushText(templateNodeValue.slice(this._pos, index));
+            this._pos = index;
+            this._chr = templateNodeValue.charAt(index);
             let binding = this._readBinding();
             if (binding) {
                 result.push(binding);
             }
             else {
-                this._pushText(this.chr);
+                this._pushText(this._chr);
                 this._next('{');
             }
-            index = contentNodeValue.indexOf('{', this.at);
+            index = templateNodeValue.indexOf('{', this._pos);
         } while (index != -1);
-        this._pushText(contentNodeValue.slice(this.at));
+        this._pushText(templateNodeValue.slice(this._pos));
         return result;
     }
     _pushText(value) {
         if (value) {
             let result = this.result;
             let resultLen = result.length;
-            if (resultLen && result[resultLen - 1].nodeType == ContentNodeValueNodeType.TEXT) {
+            if (resultLen && result[resultLen - 1].nodeType == TemplateNodeValueNodeType.TEXT) {
                 result[resultLen - 1].value += value;
             }
             else {
                 result.push({
-                    nodeType: ContentNodeValueNodeType.TEXT,
+                    nodeType: TemplateNodeValueNodeType.TEXT,
                     value
                 });
             }
         }
     }
     _readBinding() {
-        let at = this.at;
+        let pos = this._pos;
         this._next('{');
         this._skipWhitespaces();
         let prefix = this._readPrefix();
@@ -90,73 +90,73 @@ class ContentNodeValueParser {
             for (let formatter; this._skipWhitespaces() == '|' && (formatter = this._readFormatter());) {
                 (formatters || (formatters = [])).push(formatter);
             }
-            if (this.chr == '}') {
+            if (this._chr == '}') {
                 this._next();
                 return {
-                    nodeType: ContentNodeValueNodeType.BINDING,
+                    nodeType: TemplateNodeValueNodeType.BINDING,
                     prefix,
                     keypath,
                     value: value || null,
                     formatters: formatters || null,
-                    raw: this.contentNodeValue.slice(at, this.at)
+                    raw: this.templateNodeValue.slice(pos, this._pos)
                 };
             }
         }
-        this.at = at;
-        this.chr = this.contentNodeValue.charAt(at);
+        this._pos = pos;
+        this._chr = this.templateNodeValue.charAt(pos);
         return null;
     }
     _readPrefix() {
-        let chr = this.chr;
+        let chr = this._chr;
         if (chr == '=') {
             this._next();
             return '=';
         }
         if (chr == '<') {
-            let at = this.at;
-            if (this.contentNodeValue.charAt(at + 1) == '-') {
-                if (this.contentNodeValue.charAt(at + 2) == '>') {
-                    this.chr = this.contentNodeValue.charAt((this.at = at + 3));
+            let pos = this._pos;
+            if (this.templateNodeValue.charAt(pos + 1) == '-') {
+                if (this.templateNodeValue.charAt(pos + 2) == '>') {
+                    this._chr = this.templateNodeValue.charAt((this._pos = pos + 3));
                     return '<->';
                 }
-                this.chr = this.contentNodeValue.charAt((this.at = at + 2));
+                this._chr = this.templateNodeValue.charAt((this._pos = pos + 2));
                 return '<-';
             }
         }
-        else if (chr == '-' && this.contentNodeValue.charAt(this.at + 1) == '>') {
-            this.chr = this.contentNodeValue.charAt((this.at += 2));
+        else if (chr == '-' && this.templateNodeValue.charAt(this._pos + 1) == '>') {
+            this._chr = this.templateNodeValue.charAt((this._pos += 2));
             return '->';
         }
         return null;
     }
     _readFormatter() {
-        let at = this.at;
+        let pos = this._pos;
         this._next('|');
         this._skipWhitespaces();
         let name = this._readName();
         if (name) {
-            let args = this.chr == '(' ? this._readFormatterArguments() : null;
+            let args = this._chr == '(' ? this._readFormatterArguments() : null;
             return {
-                nodeType: ContentNodeValueNodeType.BINDING_FORMATTER,
+                nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER,
                 name,
                 arguments: args
             };
         }
-        this.at = at;
-        this.chr = this.contentNodeValue.charAt(at);
+        this._pos = pos;
+        this._chr = this.templateNodeValue.charAt(pos);
         return null;
     }
     _readFormatterArguments() {
-        let at = this.at;
+        let pos = this._pos;
         this._next('(');
         let args = [];
         if (this._skipWhitespaces() != ')') {
             for (;;) {
                 let arg = this._readValue() || this._readKeypath(true);
                 if (arg) {
-                    if (this._skipWhitespaces() == ',' || this.chr == ')') {
+                    if (this._skipWhitespaces() == ',' || this._chr == ')') {
                         args.push(arg);
-                        if (this.chr == ',') {
+                        if (this._chr == ',') {
                             this._next();
                             this._skipWhitespaces();
                             continue;
@@ -164,19 +164,19 @@ class ContentNodeValueParser {
                         break;
                     }
                 }
-                this.at = at;
-                this.chr = this.contentNodeValue.charAt(at);
+                this._pos = pos;
+                this._chr = this.templateNodeValue.charAt(pos);
                 return null;
             }
         }
         this._next();
         return {
-            nodeType: ContentNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS,
+            nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS,
             value: args
         };
     }
     _readValue() {
-        switch (this.chr) {
+        switch (this._chr) {
             case '{': {
                 return this._readObject();
             }
@@ -198,11 +198,11 @@ class ContentNodeValueParser {
         return null;
     }
     _readObject() {
-        let at = this.at;
+        let pos = this._pos;
         this._next('{');
         let obj = '{';
         while (this._skipWhitespaces() != '}') {
-            let key = this.chr == "'" || this.chr == '"' ? this._readString() : this._readObjectKey();
+            let key = this._chr == "'" || this._chr == '"' ? this._readString() : this._readObjectKey();
             if (key && this._skipWhitespaces() == ':') {
                 this._next();
                 this._skipWhitespaces();
@@ -213,14 +213,14 @@ class ContentNodeValueParser {
                         this._next();
                         continue;
                     }
-                    else if (this.chr == '}') {
+                    else if (this._chr == '}') {
                         obj += key + ':' + valueOrKeypath + '}';
                         break;
                     }
                 }
             }
-            this.at = at;
-            this.chr = this.contentNodeValue.charAt(at);
+            this._pos = pos;
+            this._chr = this.templateNodeValue.charAt(pos);
             return null;
         }
         this._next();
@@ -230,11 +230,11 @@ class ContentNodeValueParser {
         return this._readName();
     }
     _readArray() {
-        let at = this.at;
+        let pos = this._pos;
         this._next('[');
         let arr = '[';
         while (this._skipWhitespaces() != ']') {
-            if (this.chr == ',') {
+            if (this._chr == ',') {
                 arr += ',';
                 this._next();
             }
@@ -244,8 +244,8 @@ class ContentNodeValueParser {
                     arr += valueOrKeypath;
                 }
                 else {
-                    this.at = at;
-                    this.chr = this.contentNodeValue.charAt(at);
+                    this._pos = pos;
+                    this._chr = this.templateNodeValue.charAt(pos);
                     return null;
                 }
             }
@@ -254,34 +254,34 @@ class ContentNodeValueParser {
         return arr + ']';
     }
     _readBoolean() {
-        reBooleanOrNothing.lastIndex = this.at;
-        let bool = reBooleanOrNothing.exec(this.contentNodeValue)[0];
+        reBoolean.lastIndex = this._pos;
+        let bool = reBoolean.exec(this.templateNodeValue)[0];
         if (bool) {
-            this.chr = this.contentNodeValue.charAt((this.at = reBooleanOrNothing.lastIndex));
+            this._chr = this.templateNodeValue.charAt((this._pos = reBoolean.lastIndex));
             return bool;
         }
         return null;
     }
     _readNumber() {
-        reNumberOrNothing.lastIndex = this.at;
-        let num = reNumberOrNothing.exec(this.contentNodeValue)[0];
+        reNumber.lastIndex = this._pos;
+        let num = reNumber.exec(this.templateNodeValue)[0];
         if (num) {
-            this.chr = this.contentNodeValue.charAt((this.at = reNumberOrNothing.lastIndex));
+            this._chr = this.templateNodeValue.charAt((this._pos = reNumber.lastIndex));
             return num;
         }
         return null;
     }
     _readString() {
-        let quoteChar = this.chr;
+        let quoteChar = this._chr;
         if (quoteChar != "'" && quoteChar != '"') {
             throw {
                 name: 'SyntaxError',
-                message: `Expected "'" instead of "${this.chr}"`,
-                at: this.at,
-                contentNodeValue: this.contentNodeValue
+                message: `Expected "'" instead of "${this._chr}"`,
+                pos: this._pos,
+                templateNodeValue: this.templateNodeValue
             };
         }
-        let at = this.at;
+        let pos = this._pos;
         let str = '';
         for (let next; (next = this._next());) {
             if (next == quoteChar) {
@@ -298,54 +298,54 @@ class ContentNodeValueParser {
                 str += next;
             }
         }
-        this.at = at;
-        this.chr = this.contentNodeValue.charAt(at);
+        this._pos = pos;
+        this._chr = this.templateNodeValue.charAt(pos);
         return null;
     }
     _readVacuum() {
-        reVacuumOrNothing.lastIndex = this.at;
-        let vacuum = reVacuumOrNothing.exec(this.contentNodeValue)[0];
+        reVacuum.lastIndex = this._pos;
+        let vacuum = reVacuum.exec(this.templateNodeValue)[0];
         if (vacuum) {
-            this.chr = this.contentNodeValue.charAt((this.at = reVacuumOrNothing.lastIndex));
+            this._chr = this.templateNodeValue.charAt((this._pos = reVacuum.lastIndex));
             return vacuum;
         }
         return null;
     }
     _readKeypath(toJSExpression) {
-        reKeypathOrNothing.lastIndex = this.at;
-        let keypath = reKeypathOrNothing.exec(this.contentNodeValue)[0];
+        reKeypath.lastIndex = this._pos;
+        let keypath = reKeypath.exec(this.templateNodeValue)[0];
         if (keypath) {
-            this.chr = this.contentNodeValue.charAt((this.at = reKeypathOrNothing.lastIndex));
+            this._chr = this.templateNodeValue.charAt((this._pos = reKeypath.lastIndex));
             return toJSExpression ? keypathToJSExpression(keypath) : keypath;
         }
         return null;
     }
     _readName() {
-        reNameOrNothing.lastIndex = this.at;
-        let name = reNameOrNothing.exec(this.contentNodeValue)[0];
+        reName.lastIndex = this._pos;
+        let name = reName.exec(this.templateNodeValue)[0];
         if (name) {
-            this.chr = this.contentNodeValue.charAt((this.at = reNameOrNothing.lastIndex));
+            this._chr = this.templateNodeValue.charAt((this._pos = reName.lastIndex));
             return name;
         }
         return null;
     }
     _skipWhitespaces() {
-        let chr = this.chr;
+        let chr = this._chr;
         while (chr && reWhitespace.test(chr)) {
             chr = this._next();
         }
         return chr;
     }
     _next(current) {
-        if (current && current != this.chr) {
+        if (current && current != this._chr) {
             throw {
                 name: 'SyntaxError',
-                message: `Expected "${current}" instead of "${this.chr}"`,
-                at: this.at,
-                contentNodeValue: this.contentNodeValue
+                message: `Expected "${current}" instead of "${this._chr}"`,
+                pos: this._pos,
+                templateNodeValue: this.templateNodeValue
             };
         }
-        return (this.chr = this.contentNodeValue.charAt(++this.at));
+        return (this._chr = this.templateNodeValue.charAt(++this._pos));
     }
 }
-exports.ContentNodeValueParser = ContentNodeValueParser;
+exports.TemplateNodeValueParser = TemplateNodeValueParser;
