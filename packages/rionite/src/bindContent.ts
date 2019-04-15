@@ -1,5 +1,4 @@
 import { Set } from '@riim/map-set-polyfill';
-import { setAttribute } from '@riim/set-attribute';
 import { Cell, IEvent, TListener } from 'cellx';
 import {
 	BaseComponent,
@@ -12,6 +11,7 @@ import { IFreezableCell } from './componentBinding';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
 import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
 import { compileKeypath } from './lib/compileKeypath';
+import { setAttribute } from './lib/setAttribute';
 import { ITemplateNodeValueBinding, TTemplateNodeValue } from './TemplateNodeValueParser';
 
 export type TContentBindingResult = [

@@ -20,6 +20,8 @@ import { componentConstructorMap } from './componentConstructorMap';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
 import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
 import { compileKeypath } from './lib/compileKeypath';
+import { setAttribute } from './lib/setAttribute';
+import { svgNamespaceURI } from './lib/svgNamespaceURI';
 import { ITemplateNodeValueBinding } from './TemplateNodeValueParser';
 
 export enum NodeType {
@@ -1034,7 +1036,7 @@ function renderContent<T extends Node = Element>(
 						let el: Element;
 
 						if (isSVG_) {
-							el = document.createElementNS('http://www.w3.org/2000/svg', tagName);
+							el = document.createElementNS(svgNamespaceURI, tagName);
 						} else if ((node as IElement).is) {
 							el = (window as any).innerHTML(
 								document.createElement('div'),
@@ -1075,7 +1077,9 @@ function renderContent<T extends Node = Element>(
 
 							for (let i = 0, l = attrList['length=']; i < l; i++) {
 								let attr = attrList[i];
-								let attrName = attr.name;
+								let attrName = isSVG_
+									? attr.name
+									: snakeCaseAttributeName(attr.name, true);
 								let attrValue: any = attr.value;
 
 								if (attrName == 'class') {
@@ -1202,34 +1206,7 @@ function renderContent<T extends Node = Element>(
 								}
 
 								if (attrValue !== false && attrValue != null) {
-									if (attrValue === true) {
-										attrValue = '';
-									}
-
-									if (isSVG_) {
-										if (
-											attrName == 'xlink:href' ||
-											attrName == 'href' ||
-											attrName == 'xmlns'
-										) {
-											el.setAttributeNS(
-												attrName == 'xmlns'
-													? 'http://www.w3.org/2000/xmlns/'
-													: 'http://www.w3.org/1999/xlink',
-												attrName,
-												attrValue
-											);
-										} else {
-											el.setAttribute(attrName, attrValue);
-										}
-									} else if (attrName == 'class') {
-										el.className = attrValue;
-									} else {
-										el.setAttribute(
-											snakeCaseAttributeName(attrName, true),
-											attrValue
-										);
-									}
+									setAttribute(el, attrName, attrValue);
 								}
 							}
 						}

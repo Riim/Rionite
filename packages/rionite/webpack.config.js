@@ -57,7 +57,6 @@ module.exports = (env = {}) => {
 			'@riim/next-tick',
 			'@riim/next-uid',
 			'@riim/rionite-snake-case-attribute-name',
-			'@riim/set-attribute',
 			'@riim/symbol-polyfill',
 			'cellx',
 			'escape-string'
