@@ -137,7 +137,7 @@ exports.RnSlot = RnSlot_1.RnSlot;
 /* 1 */
 /***/ (function(module, exports) {
 
-if (!('firstElementChild' in DocumentFragment.prototype)) {
+if (!DocumentFragment.prototype.firstElementChild) {
     Object.defineProperty(DocumentFragment.prototype, 'firstElementChild', {
         configurable: true,
         enumerable: false,
@@ -151,7 +151,7 @@ if (!('firstElementChild' in DocumentFragment.prototype)) {
         }
     });
 }
-if (!('nextElementSibling' in DocumentFragment.prototype)) {
+if (!DocumentFragment.prototype.nextElementSibling) {
     Object.defineProperty(DocumentFragment.prototype, 'nextElementSibling', {
         configurable: true,
         enumerable: false,
@@ -251,6 +251,7 @@ const getTemplateNodeValueAST_1 = __webpack_require__(23);
 const compileKeypath_1 = __webpack_require__(24);
 const setAttribute_1 = __webpack_require__(25);
 const svgNamespaceURI_1 = __webpack_require__(26);
+const hasOwn = Object.prototype.hasOwnProperty;
 var NodeType;
 (function (NodeType) {
     NodeType[NodeType["BLOCK"] = 1] = "BLOCK";
@@ -493,16 +494,18 @@ class Template {
                                 list: { __proto__: null, 'length=': 0 }
                             })).list;
                         for (let type in events[name]) {
-                            let attrName = 'oncomponent-' +
-                                (type.charAt(0) == '<'
-                                    ? type.slice(type.indexOf('>', 2) + 1)
-                                    : type);
-                            attrList[attrList[attrName] === undefined
-                                ? (attrList[attrName] = attrList['length=']++)
-                                : attrList[attrName]] = {
-                                name: attrName,
-                                value: ':' + name
-                            };
+                            if (hasOwn.call(events[name], type)) {
+                                let attrName = 'oncomponent-' +
+                                    (type.charAt(0) == '<'
+                                        ? type.slice(type.indexOf('>', 2) + 1)
+                                        : type);
+                                attrList[attrList[attrName] === undefined
+                                    ? (attrList[attrName] = attrList['length=']++)
+                                    : attrList[attrName]] = {
+                                    name: attrName,
+                                    value: ':' + name
+                                };
+                            }
                         }
                     }
                     if (domEvents && domEvents[name]) {
@@ -512,13 +515,15 @@ class Template {
                                 list: { __proto__: null, 'length=': 0 }
                             })).list;
                         for (let type in domEvents[name]) {
-                            let attrName = 'on-' + type;
-                            attrList[attrList[attrName] === undefined
-                                ? (attrList[attrName] = attrList['length=']++)
-                                : attrList[attrName]] = {
-                                name: attrName,
-                                value: ':' + name
-                            };
+                            if (hasOwn.call(domEvents[name], type)) {
+                                let attrName = 'on-' + type;
+                                attrList[attrList[attrName] === undefined
+                                    ? (attrList[attrName] = attrList['length=']++)
+                                    : attrList[attrName]] = {
+                                    name: attrName,
+                                    value: ':' + name
+                                };
+                            }
                         }
                     }
                 }
@@ -798,7 +803,7 @@ class Template {
                     str += String.fromCharCode(code);
                     chr = this._chr = this.template.charAt((this._pos = pos + (hexadecimal ? 2 : 4)));
                 }
-                else if (chr in escapee) {
+                else if (escapee[chr]) {
                     str += escapee[chr];
                     chr = this._next();
                 }
@@ -1494,6 +1499,7 @@ exports.componentParamTypeSerializerMap.set('boolean', exports.componentParamTyp
 exports.componentParamTypeSerializerMap.set('number', exports.componentParamTypeSerializerMap.get(Number));
 exports.componentParamTypeSerializerMap.set('string', exports.componentParamTypeSerializerMap.get(String));
 exports.componentParamTypeSerializerMap.set('object', exports.componentParamTypeSerializerMap.get(Object));
+exports.componentParamTypeSerializerMap.set('eval', exports.componentParamTypeSerializerMap.get(eval));
 
 
 /***/ }),
@@ -2166,16 +2172,19 @@ const Constants_1 = __webpack_require__(22);
 const elementConstructorMap_1 = __webpack_require__(33);
 const ElementProtoMixin_1 = __webpack_require__(34);
 const Template_1 = __webpack_require__(3);
+const hasOwn = Object.prototype.hasOwnProperty;
 const push = Array.prototype.push;
 function inheritProperty(target, source, name, depth) {
     let obj = target[name];
     let parentObj = source[name];
     if (obj && parentObj && obj != parentObj) {
-        let o = (target[name] = { __proto__: parentObj });
+        let inheritedObj = (target[name] = { __proto__: parentObj });
         for (let key in obj) {
-            o[key] = obj[key];
-            if (depth) {
-                inheritProperty(o, parentObj, key, depth - 1);
+            if (hasOwn.call(obj, key)) {
+                inheritedObj[key] = obj[key];
+                if (depth) {
+                    inheritProperty(inheritedObj, parentObj, key, depth - 1);
+                }
             }
         }
     }
@@ -2198,6 +2207,9 @@ function registerComponent(componentConstr) {
     let paramsConfig = componentConstr.params;
     if (paramsConfig) {
         for (let name in paramsConfig) {
+            if (!hasOwn.call(paramsConfig, name)) {
+                continue;
+            }
             let paramConfig = paramsConfig[name];
             if (paramConfig === null) {
                 let parentParamConfig = parentComponentConstr.params && parentComponentConstr.params[name];
@@ -2369,7 +2381,9 @@ function registerComponent(componentConstr) {
             }
             let attrs = [];
             for (let name in paramsConfig) {
-                attrs.push(rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true));
+                if (hasOwn.call(paramsConfig, name)) {
+                    attrs.push(rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true));
+                }
             }
             return attrs;
         }
@@ -2442,6 +2456,7 @@ const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const symbol_polyfill_1 = __webpack_require__(15);
 const componentParamTypeSerializerMap_1 = __webpack_require__(12);
 const Constants_1 = __webpack_require__(22);
+const hasOwn = Object.prototype.hasOwnProperty;
 exports.KEY_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite/ComponentParams[componentParamsInited]');
 function initParam(component, $paramConfig, name) {
     if ($paramConfig === null) {
@@ -2504,7 +2519,9 @@ exports.ComponentParams = {
         if (paramsConfig) {
             let $paramsConfig = component.constructor[Constants_1.KEY_PARAMS_CONFIG];
             for (let name in paramsConfig) {
-                initParam(component, $paramsConfig[name], name);
+                if (hasOwn.call(paramsConfig, name)) {
+                    initParam(component, $paramsConfig[name], name);
+                }
             }
         }
         component[exports.KEY_COMPONENT_PARAMS_INITED] = true;
@@ -2767,11 +2784,12 @@ const ElementProtoMixin_1 = __webpack_require__(34);
 const handleDOMEvent_1 = __webpack_require__(45);
 const handleEvent_1 = __webpack_require__(46);
 const normalizeTextNodes_1 = __webpack_require__(47);
+const hasOwn = Object.prototype.hasOwnProperty;
 const map = Array.prototype.map;
 class BaseComponent extends cellx_1.EventEmitter {
     constructor(el) {
         super();
-        this._disposables = {};
+        this._disposables = { __proto__: null };
         this._parentComponent = null;
         this.$inputContent = null;
         this._attached = false;
@@ -2843,7 +2861,9 @@ class BaseComponent extends cellx_1.EventEmitter {
             }
             else {
                 for (let name in type) {
-                    listenings.push(this.listenTo(target, name, type[name], listener, context));
+                    if (hasOwn.call(type, name)) {
+                        listenings.push(this.listenTo(target, name, type[name], listener, context));
+                    }
                 }
             }
         }

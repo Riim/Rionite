@@ -24,6 +24,8 @@ import { setAttribute } from './lib/setAttribute';
 import { svgNamespaceURI } from './lib/svgNamespaceURI';
 import { ITemplateNodeValueBinding } from './TemplateNodeValueParser';
 
+const hasOwn = Object.prototype.hasOwnProperty;
+
 export enum NodeType {
 	BLOCK = 1,
 	ELEMENT_CALL,
@@ -431,20 +433,22 @@ export class Template {
 						).list;
 
 						for (let type in events[name]) {
-							let attrName =
-								'oncomponent-' +
-								(type.charAt(0) == '<'
-									? type.slice(type.indexOf('>', 2) + 1)
-									: type);
+							if (hasOwn.call(events[name], type)) {
+								let attrName =
+									'oncomponent-' +
+									(type.charAt(0) == '<'
+										? type.slice(type.indexOf('>', 2) + 1)
+										: type);
 
-							attrList[
-								attrList[attrName] === undefined
-									? (attrList[attrName] = attrList['length=']++)
-									: attrList[attrName]
-							] = {
-								name: attrName,
-								value: ':' + name
-							};
+								attrList[
+									attrList[attrName] === undefined
+										? (attrList[attrName] = attrList['length=']++)
+										: attrList[attrName]
+								] = {
+									name: attrName,
+									value: ':' + name
+								};
+							}
 						}
 					}
 
@@ -458,16 +462,18 @@ export class Template {
 						).list;
 
 						for (let type in domEvents[name]) {
-							let attrName = 'on-' + type;
+							if (hasOwn.call(domEvents[name], type)) {
+								let attrName = 'on-' + type;
 
-							attrList[
-								attrList[attrName] === undefined
-									? (attrList[attrName] = attrList['length=']++)
-									: attrList[attrName]
-							] = {
-								name: attrName,
-								value: ':' + name
-							};
+								attrList[
+									attrList[attrName] === undefined
+										? (attrList[attrName] = attrList['length=']++)
+										: attrList[attrName]
+								] = {
+									name: attrName,
+									value: ':' + name
+								};
+							}
 						}
 					}
 				}
@@ -827,7 +833,7 @@ export class Template {
 					chr = this._chr = this.template.charAt(
 						(this._pos = pos + (hexadecimal ? 2 : 4))
 					);
-				} else if (chr in escapee) {
+				} else if (escapee[chr]) {
 					str += escapee[chr];
 					chr = this._next();
 				} else {

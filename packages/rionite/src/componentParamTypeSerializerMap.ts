@@ -111,3 +111,4 @@ componentParamTypeSerializerMap.set('boolean', componentParamTypeSerializerMap.g
 componentParamTypeSerializerMap.set('number', componentParamTypeSerializerMap.get(Number)!);
 componentParamTypeSerializerMap.set('string', componentParamTypeSerializerMap.get(String)!);
 componentParamTypeSerializerMap.set('object', componentParamTypeSerializerMap.get(Object)!);
+componentParamTypeSerializerMap.set('eval', componentParamTypeSerializerMap.get(eval)!);

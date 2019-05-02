@@ -461,7 +461,7 @@ export class TemplateParser {
 					chr = this._chr = this.template.charAt(
 						(this._pos = pos + (hexadecimal ? 2 : 4))
 					);
-				} else if (chr in escapee) {
+				} else if (escapee[chr]) {
 					str += escapee[chr];
 					chr = this._next();
 				} else {

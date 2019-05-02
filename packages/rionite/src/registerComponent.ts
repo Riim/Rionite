@@ -10,6 +10,7 @@ import { elementConstructorMap } from './elementConstructorMap';
 import { ElementProtoMixin } from './ElementProtoMixin';
 import { Template } from './Template';
 
+const hasOwn = Object.prototype.hasOwnProperty;
 const push = Array.prototype.push;
 
 function inheritProperty(
@@ -22,13 +23,15 @@ function inheritProperty(
 	let parentObj = source[name] as Record<string, any> | null | undefined;
 
 	if (obj && parentObj && obj != parentObj) {
-		let o: Record<string, any> = (target[name] = { __proto__: parentObj });
+		let inheritedObj: Record<string, any> = (target[name] = { __proto__: parentObj });
 
 		for (let key in obj) {
-			o[key] = obj[key];
+			if (hasOwn.call(obj, key)) {
+				inheritedObj[key] = obj[key];
 
-			if (depth) {
-				inheritProperty(o, parentObj, key, depth - 1);
+				if (depth) {
+					inheritProperty(inheritedObj, parentObj, key, depth - 1);
+				}
 			}
 		}
 	}
@@ -59,6 +62,10 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 	if (paramsConfig) {
 		for (let name in paramsConfig) {
+			if (!hasOwn.call(paramsConfig, name)) {
+				continue;
+			}
+
 			let paramConfig: IComponentParamConfig = paramsConfig[name];
 
 			if (paramConfig === null) {
@@ -277,7 +284,9 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			let attrs: Array<string> = [];
 
 			for (let name in paramsConfig) {
-				attrs.push(snakeCaseAttributeName(name, true));
+				if (hasOwn.call(paramsConfig, name)) {
+					attrs.push(snakeCaseAttributeName(name, true));
+				}
 			}
 
 			return attrs;

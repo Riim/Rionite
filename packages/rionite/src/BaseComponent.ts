@@ -17,6 +17,7 @@ import { handleEvent } from './handleEvent';
 import { normalizeTextNodes } from './lib/normalizeTextNodes';
 import { IBlock, Template } from './Template';
 
+const hasOwn = Object.prototype.hasOwnProperty;
 const map = Array.prototype.map;
 
 export interface IDisposable {
@@ -122,7 +123,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null = null;
 	static domEvents: IComponentEvents<BaseComponent, Event> | null = null;
 
-	_disposables: Record<string, IDisposable> = {};
+	_disposables: Record<string, IDisposable> = { __proto__: null as any };
 
 	_ownerComponent: BaseComponent | undefined;
 
@@ -247,7 +248,9 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				}
 			} else {
 				for (let name in type) {
-					listenings.push(this.listenTo(target, name, type[name], listener, context));
+					if (hasOwn.call(type, name)) {
+						listenings.push(this.listenTo(target, name, type[name], listener, context));
+					}
 				}
 			}
 		} else {

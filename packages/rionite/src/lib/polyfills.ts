@@ -1,4 +1,4 @@
-if (!('firstElementChild' in DocumentFragment.prototype)) {
+if (!DocumentFragment.prototype.firstElementChild) {
 	Object.defineProperty(DocumentFragment.prototype, 'firstElementChild', {
 		configurable: true,
 		enumerable: false,
@@ -15,7 +15,7 @@ if (!('firstElementChild' in DocumentFragment.prototype)) {
 	});
 }
 
-if (!('nextElementSibling' in DocumentFragment.prototype)) {
+if (!(DocumentFragment.prototype as any).nextElementSibling) {
 	Object.defineProperty(DocumentFragment.prototype, 'nextElementSibling', {
 		configurable: true,
 		enumerable: false,

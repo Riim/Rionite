@@ -4,7 +4,7 @@ const concat = require('gulp-concat');
 gulp.task('polyfills', () => {
 	return gulp
 		.src([
-			'polyfills/document-register-element.max.js',
+			'node_modules/document-register-element/build/document-register-element.max.js',
 			'polyfills/innerHTML.max.js',
 			'polyfills/template-tag.js',
 			'dist/rionite.js'
