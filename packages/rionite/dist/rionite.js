@@ -137,7 +137,7 @@ exports.RnSlot = RnSlot_1.RnSlot;
 /* 1 */
 /***/ (function(module, exports) {
 
-if (!DocumentFragment.prototype.firstElementChild) {
+if (!('firstElementChild' in DocumentFragment.prototype)) {
     Object.defineProperty(DocumentFragment.prototype, 'firstElementChild', {
         configurable: true,
         enumerable: false,
@@ -151,7 +151,7 @@ if (!DocumentFragment.prototype.firstElementChild) {
         }
     });
 }
-if (!DocumentFragment.prototype.nextElementSibling) {
+if (!('nextElementSibling' in DocumentFragment.prototype)) {
     Object.defineProperty(DocumentFragment.prototype, 'nextElementSibling', {
         configurable: true,
         enumerable: false,
