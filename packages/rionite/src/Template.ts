@@ -24,8 +24,6 @@ import { setAttribute } from './lib/setAttribute';
 import { svgNamespaceURI } from './lib/svgNamespaceURI';
 import { ITemplateNodeValueBinding } from './TemplateNodeValueParser';
 
-const hasOwn = Object.prototype.hasOwnProperty;
-
 export enum NodeType {
 	BLOCK = 1,
 	ELEMENT_CALL,
@@ -433,7 +431,7 @@ export class Template {
 						).list;
 
 						for (let type in events[name]) {
-							if (hasOwn.call(events[name], type)) {
+							if (events[name][type] !== Object.prototype[type]) {
 								let attrName =
 									'oncomponent-' +
 									(type.charAt(0) == '<'
@@ -462,7 +460,7 @@ export class Template {
 						).list;
 
 						for (let type in domEvents[name]) {
-							if (hasOwn.call(domEvents[name], type)) {
+							if (domEvents[name][type] !== Object.prototype[type]) {
 								let attrName = 'on-' + type;
 
 								attrList[

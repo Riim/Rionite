@@ -4,8 +4,6 @@ import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';
 
-const hasOwn = Object.prototype.hasOwnProperty;
-
 export const KEY_COMPONENT_PARAMS_INITED = Symbol('Rionite/ComponentParams[componentParamsInited]');
 
 function initParam(
@@ -91,7 +89,7 @@ export const ComponentParams = {
 			let $paramsConfig = component.constructor[KEY_PARAMS_CONFIG];
 
 			for (let name in paramsConfig) {
-				if (hasOwn.call(paramsConfig, name)) {
+				if (paramsConfig[name] !== Object.prototype[name]) {
 					initParam(component, $paramsConfig[name], name);
 				}
 			}

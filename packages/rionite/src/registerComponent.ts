@@ -62,7 +62,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 	if (paramsConfig) {
 		for (let name in paramsConfig) {
-			if (!hasOwn.call(paramsConfig, name)) {
+			if (paramsConfig[name] === Object.prototype[name]) {
 				continue;
 			}
 
@@ -284,7 +284,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			let attrs: Array<string> = [];
 
 			for (let name in paramsConfig) {
-				if (hasOwn.call(paramsConfig, name)) {
+				if (paramsConfig[name] !== Object.prototype[name]) {
 					attrs.push(snakeCaseAttributeName(name, true));
 				}
 			}

@@ -251,7 +251,6 @@ const getTemplateNodeValueAST_1 = __webpack_require__(23);
 const compileKeypath_1 = __webpack_require__(24);
 const setAttribute_1 = __webpack_require__(25);
 const svgNamespaceURI_1 = __webpack_require__(26);
-const hasOwn = Object.prototype.hasOwnProperty;
 var NodeType;
 (function (NodeType) {
     NodeType[NodeType["BLOCK"] = 1] = "BLOCK";
@@ -494,7 +493,7 @@ class Template {
                                 list: { __proto__: null, 'length=': 0 }
                             })).list;
                         for (let type in events[name]) {
-                            if (hasOwn.call(events[name], type)) {
+                            if (events[name][type] !== Object.prototype[type]) {
                                 let attrName = 'oncomponent-' +
                                     (type.charAt(0) == '<'
                                         ? type.slice(type.indexOf('>', 2) + 1)
@@ -515,7 +514,7 @@ class Template {
                                 list: { __proto__: null, 'length=': 0 }
                             })).list;
                         for (let type in domEvents[name]) {
-                            if (hasOwn.call(domEvents[name], type)) {
+                            if (domEvents[name][type] !== Object.prototype[type]) {
                                 let attrName = 'on-' + type;
                                 attrList[attrList[attrName] === undefined
                                     ? (attrList[attrName] = attrList['length=']++)
@@ -2207,7 +2206,7 @@ function registerComponent(componentConstr) {
     let paramsConfig = componentConstr.params;
     if (paramsConfig) {
         for (let name in paramsConfig) {
-            if (!hasOwn.call(paramsConfig, name)) {
+            if (paramsConfig[name] === Object.prototype[name]) {
                 continue;
             }
             let paramConfig = paramsConfig[name];
@@ -2381,7 +2380,7 @@ function registerComponent(componentConstr) {
             }
             let attrs = [];
             for (let name in paramsConfig) {
-                if (hasOwn.call(paramsConfig, name)) {
+                if (paramsConfig[name] !== Object.prototype[name]) {
                     attrs.push(rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true));
                 }
             }
@@ -2456,7 +2455,6 @@ const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const symbol_polyfill_1 = __webpack_require__(15);
 const componentParamTypeSerializerMap_1 = __webpack_require__(12);
 const Constants_1 = __webpack_require__(22);
-const hasOwn = Object.prototype.hasOwnProperty;
 exports.KEY_COMPONENT_PARAMS_INITED = symbol_polyfill_1.Symbol('Rionite/ComponentParams[componentParamsInited]');
 function initParam(component, $paramConfig, name) {
     if ($paramConfig === null) {
@@ -2519,7 +2517,7 @@ exports.ComponentParams = {
         if (paramsConfig) {
             let $paramsConfig = component.constructor[Constants_1.KEY_PARAMS_CONFIG];
             for (let name in paramsConfig) {
-                if (hasOwn.call(paramsConfig, name)) {
+                if (paramsConfig[name] !== Object.prototype[name]) {
                     initParam(component, $paramsConfig[name], name);
                 }
             }
