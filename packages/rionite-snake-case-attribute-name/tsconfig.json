@@ -12,7 +12,7 @@
 		"preserveConstEnums": true,
 		"strictNullChecks": true,
 		"suppressImplicitAnyIndexErrors": true,
-		"target": "es6"
+		"target": "es5"
 	},
 	"files": [
 		"src/index.ts"
