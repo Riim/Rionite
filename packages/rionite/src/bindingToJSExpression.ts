@@ -1,10 +1,8 @@
 import { ITemplateNodeValueBinding, ITemplateNodeValueBindingFormatter } from './TemplateNodeValueParser';
 
 function formattersReducer(jsExpr: string, formatter: ITemplateNodeValueBindingFormatter): string {
-	let args = formatter.arguments;
-
 	return `(this.${formatter.name} || formatters.${formatter.name}).call(this['$/'], ${jsExpr}${
-		args && args.value.length ? ', ' + args.value.join(', ') : ''
+		formatter.arguments ? ', ' + formatter.arguments.join(', ') : ''
 	})`;
 }
 

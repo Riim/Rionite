@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "lerna": "^3.13.4",
+    "lerna": "^3.14.1",
     "typescript": "^3.4.5"
   }
 }

@@ -26,7 +26,6 @@ var TemplateNodeValueNodeType;
     TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING"] = 2] = "BINDING";
     TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING_KEYPATH"] = 3] = "BINDING_KEYPATH";
     TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
-    TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING_FORMATTER_ARGUMENTS"] = 5] = "BINDING_FORMATTER_ARGUMENTS";
 })(TemplateNodeValueNodeType = exports.TemplateNodeValueNodeType || (exports.TemplateNodeValueNodeType = {}));
 const reWhitespace = /\s/;
 const reName = RegExp(namePattern + '|', 'g');
@@ -135,11 +134,10 @@ class TemplateNodeValueParser {
         this._skipWhitespaces();
         let name = this._readName();
         if (name) {
-            let args = this._chr == '(' ? this._readFormatterArguments() : null;
             return {
                 nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER,
                 name,
-                arguments: args
+                arguments: this._chr == '(' ? this._readFormatterArguments() : null
             };
         }
         this._pos = pos;
@@ -149,31 +147,25 @@ class TemplateNodeValueParser {
     _readFormatterArguments() {
         let pos = this._pos;
         this._next('(');
-        let args = [];
+        let args;
         if (this._skipWhitespaces() != ')') {
             for (;;) {
                 let arg = this._readValue() || this._readKeypath(true);
-                if (arg) {
-                    if (this._skipWhitespaces() == ',' || this._chr == ')') {
-                        args.push(arg);
-                        if (this._chr == ',') {
-                            this._next();
-                            this._skipWhitespaces();
-                            continue;
-                        }
-                        break;
-                    }
+                if (!(arg && (this._skipWhitespaces() == ',' || this._chr == ')'))) {
+                    this._pos = pos;
+                    this._chr = this.templateNodeValue.charAt(pos);
+                    return null;
                 }
-                this._pos = pos;
-                this._chr = this.templateNodeValue.charAt(pos);
-                return null;
+                (args || (args = [])).push(arg);
+                if (this._chr == ')') {
+                    break;
+                }
+                this._next();
+                this._skipWhitespaces();
             }
         }
         this._next();
-        return {
-            nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS,
-            value: args
-        };
+        return args || null;
     }
     _readValue() {
         switch (this._chr) {

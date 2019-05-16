@@ -6,8 +6,7 @@ export enum TemplateNodeValueNodeType {
 	TEXT = 1,
 	BINDING,
 	BINDING_KEYPATH,
-	BINDING_FORMATTER,
-	BINDING_FORMATTER_ARGUMENTS
+	BINDING_FORMATTER
 }
 
 export interface ITemplateNodeValueNode {
@@ -19,15 +18,10 @@ export interface ITemplateNodeValueText extends ITemplateNodeValueNode {
 	value: string;
 }
 
-export interface ITemplateNodeValueBindingFormatterArguments extends ITemplateNodeValueNode {
-	nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS;
-	value: Array<string>;
-}
-
 export interface ITemplateNodeValueBindingFormatter extends ITemplateNodeValueNode {
 	nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER;
 	name: string;
-	arguments: ITemplateNodeValueBindingFormatterArguments | null;
+	arguments: Array<string> | null;
 }
 
 export interface ITemplateNodeValueBinding extends ITemplateNodeValueNode {
@@ -192,12 +186,10 @@ export class TemplateNodeValueParser {
 		let name = this._readName();
 
 		if (name) {
-			let args = this._chr == '(' ? this._readFormatterArguments() : null;
-
 			return {
 				nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER,
 				name,
-				arguments: args
+				arguments: this._chr == '(' ? this._readFormatterArguments() : null
 			};
 		}
 
@@ -207,44 +199,38 @@ export class TemplateNodeValueParser {
 		return null;
 	}
 
-	_readFormatterArguments(): ITemplateNodeValueBindingFormatterArguments | null {
+	_readFormatterArguments(): Array<string> | null {
 		let pos = this._pos;
 
 		this._next('(');
 
-		let args: Array<string> = [];
+		let args: Array<string> | undefined;
 
 		if (this._skipWhitespaces() != ')') {
 			for (;;) {
 				let arg = this._readValue() || this._readKeypath(true);
 
-				if (arg) {
-					if (this._skipWhitespaces() == ',' || this._chr == ')') {
-						args.push(arg);
+				if (!(arg && (this._skipWhitespaces() == ',' || this._chr == ')'))) {
+					this._pos = pos;
+					this._chr = this.templateNodeValue.charAt(pos);
 
-						if (this._chr == ',') {
-							this._next();
-							this._skipWhitespaces();
-							continue;
-						}
-
-						break;
-					}
+					return null;
 				}
 
-				this._pos = pos;
-				this._chr = this.templateNodeValue.charAt(pos);
+				(args || (args = [])).push(arg);
 
-				return null;
+				if (this._chr == ')') {
+					break;
+				}
+
+				this._next();
+				this._skipWhitespaces();
 			}
 		}
 
 		this._next();
 
-		return {
-			nodeType: TemplateNodeValueNodeType.BINDING_FORMATTER_ARGUMENTS,
-			value: args
-		};
+		return args || null;
 	}
 
 	_readValue(): string | null {
