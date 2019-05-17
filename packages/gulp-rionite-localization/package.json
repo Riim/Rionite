@@ -1,0 +1,33 @@
+{
+  "name": "gulp-rionite-localization",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Riim/Rionite.git"
+  },
+  "author": "Dmitry Vibe",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Riim/Rionite/issues"
+  },
+  "homepage": "https://github.com/Riim/Rionite#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@riim/nunjucks-walk": "^1.0.0",
+    "@riim/rionite-template-node-value-parser": "^0.36.16",
+    "@riim/rionite-template-parser": "^0.36.16",
+    "@riim/rionite-template-walk": "^0.36.16",
+    "gettext-parser": "^4.0.0",
+    "nunjucks": "^3.2.0",
+    "through2": "^3.0.1",
+    "typescript": "^3.4.5",
+    "vinyl": "^2.2.0"
+  }
+}
