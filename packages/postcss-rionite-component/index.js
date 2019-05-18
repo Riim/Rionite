@@ -1,5 +1,7 @@
 const postcss = require('postcss');
+const postcssNested = require('postcss-nested');
 const { snakeCaseAttributeName } = require('@riim/rionite-snake-case-attribute-name');
+// const { escapeRegExp } = require('@riim/escape-regexp');
 
 const COMPONENT = 'component';
 const ELEMENT = 'el';
@@ -9,7 +11,7 @@ const reComponentParams = /(?:(?:^|\s*:)\s*[a-z][\-_0-9a-z]*)+\s*$/i;
 const reElementParams = /(?:(?:^|\s*,)\s*[a-z][\-_0-9a-z]*)+\s*$/i;
 const reModifierParams = /^(?:(?:^|\s*,)\s*[a-z][\-_0-9a-z]*(?:=[\-_0-9a-z]*)?)+\s*$/i;
 
-function createCallback(parentAtRuleName, parentRule, componentName) {
+function createWalkAtRulesCallback(_topAtRuleName, componentName) {
 	return atRule => {
 		let atRuleName = atRule.name;
 
@@ -42,35 +44,63 @@ function createCallback(parentAtRuleName, parentRule, componentName) {
 
 		atRule.replaceWith(rule);
 
-		rule.walkAtRules(createCallback(atRuleName, rule, componentName));
+		rule.walkAtRules(createWalkAtRulesCallback(atRuleName, componentName));
 	};
 }
 
-module.exports = postcss.plugin('postcss-rionite-component', () => {
+module.exports = postcss.plugin('postcss-rionite-component', opts => {
 	return root => {
-		root.walkAtRules('component', componentAtRule => {
-			if (componentAtRule.parent != root || !reComponentParams.test(componentAtRule.params)) {
+		let componentNames;
+		let componentSelector;
+
+		root.walkAtRules(COMPONENT, atRule => {
+			if (atRule.parent != root || !reComponentParams.test(atRule.params)) {
 				return;
 			}
 
-			let componentNames = componentAtRule.params
-				.split(':')
-				.map(componentName => componentName.trim());
-			let rule = new postcss.rule({ selector: '.' + componentNames.join('.') });
+			componentNames = atRule.params.split(':').map(componentName => componentName.trim());
+			componentSelector = '.' + componentNames.join('.');
+			let rule = new postcss.rule({ selector: componentSelector });
 
-			while (componentAtRule.first) {
-				rule.append(componentAtRule.first);
+			while (atRule.first) {
+				rule.append(atRule.first);
 			}
 
-			componentAtRule.replaceWith(rule);
+			atRule.replaceWith(rule);
 
 			rule.walkAtRules(
-				createCallback(
-					componentAtRule.name,
-					rule,
-					componentNames[componentNames.length - 1]
-				)
+				createWalkAtRulesCallback(atRule.name, componentNames[componentNames.length - 1])
 			);
 		});
+
+		postcssNested.postcss(root, opts);
+
+		// if (!componentNames) {
+		// 	return;
+		// }
+
+		// root.walkRules(
+		// 	RegExp(
+		// 		`^${escapeRegExp(componentSelector)} .${escapeRegExp(
+		// 			componentNames[componentNames.length - 1]
+		// 		)}__`
+		// 	),
+		// 	rule => {
+		// 		let newRule = new postcss.rule({
+		// 			selectors: rule.selectors.map(selector =>
+		// 				componentNames.length == 1
+		// 					? selector.slice(1 + componentNames[0].length + 1)
+		// 					: selector.slice(0, 1 + componentNames.slice(0, -1).join('.').length) +
+		// 					  selector.slice(1 + componentNames.join('.').length)
+		// 			)
+		// 		});
+
+		// 		while (rule.first) {
+		// 			newRule.append(rule.first);
+		// 		}
+
+		// 		rule.replaceWith(newRule);
+		// 	}
+		// );
 	};
 });

@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "dependencies": {
+    "@riim/escape-regexp": "^1.0.0",
     "@riim/rionite-snake-case-attribute-name": "^0.36.18",
-    "postcss": "^7.0.16"
+    "postcss": "^7.0.16",
+    "postcss-nested": "^4.1.2"
   }
 }
