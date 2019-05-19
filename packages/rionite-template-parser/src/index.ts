@@ -216,14 +216,14 @@ export class TemplateParser {
 		let tagName = this._readName(reTagName);
 		let elNames: Array<string | null> | undefined;
 
-		if (this._chr == '/') {
+		if (this._chr == ':') {
 			this._next();
 
 			let pos = this._pos;
 
 			this._skipWhitespaces();
 
-			if ((this._chr as any) == ',') {
+			if (this._chr == ':') {
 				this._next();
 				this._skipWhitespaces();
 				elNames = [null];
@@ -232,7 +232,7 @@ export class TemplateParser {
 			for (let name; (name = this._readName(reElementName)); ) {
 				(elNames || (elNames = [])).push(name);
 
-				if (this._skipWhitespaces() != ',') {
+				if (this._skipWhitespaces() != ':') {
 					break;
 				}
 

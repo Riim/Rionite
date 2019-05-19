@@ -62,7 +62,7 @@ export declare class TemplateParser {
     _readElement(targetContent: TContent): void;
     _readAttributes(targetContent: TContent): IElementAttributes;
     _readSuperCall(): ISuperCall | null;
-    _readName(reNameOrNothing: RegExp): string | null;
+    _readName(reName: RegExp): string | null;
     _readString(): string;
     _readComment(targetContent: TContent): void;
     _skipWhitespaces(): string;

@@ -428,18 +428,18 @@ class Template {
         let tagName = this._readName(reTagName);
         let elNames;
         let elName;
-        if (this._chr == '/') {
+        if (this._chr == ':') {
             this._next();
             let pos = this._pos;
             this._skipWhitespaces();
-            if (this._chr == ',') {
+            if (this._chr == ':') {
                 this._next();
                 this._skipWhitespaces();
                 elNames = [null];
             }
             for (let name; (name = this._readName(reElementName));) {
                 (elNames || (elNames = [])).push(name);
-                if (this._skipWhitespaces() != ',') {
+                if (this._skipWhitespaces() != ':') {
                     break;
                 }
                 this._next();

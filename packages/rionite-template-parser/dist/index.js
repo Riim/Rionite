@@ -23,11 +23,11 @@ const escapee = {
 };
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
-const reWhitespacesOrNothing = /\s+|/g;
-const reTagNameOrNothing = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
-const reElementNameOrNothing = /[a-zA-Z][\-\w]*|/g;
-const reAttributeNameOrNothing = /[^\s'">/=,)]+|/g;
-const reSuperCallOrNothing = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
+const reWhitespaces = /\s+|/g;
+const reTagName = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
+const reElementName = /[a-zA-Z][\-\w]*|/g;
+const reAttributeName = /[^\s'">/=,)]+|/g;
+const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
 function normalizeMultilineText(text) {
     return text
         .trim()
@@ -123,20 +123,20 @@ class TemplateParser {
         if (isHelper) {
             this._next();
         }
-        let tagName = this._readName(reTagNameOrNothing);
+        let tagName = this._readName(reTagName);
         let elNames;
-        if (this._chr == '/') {
+        if (this._chr == ':') {
             this._next();
             let pos = this._pos;
             this._skipWhitespaces();
-            if (this._chr == ',') {
+            if (this._chr == ':') {
                 this._next();
                 this._skipWhitespaces();
                 elNames = [null];
             }
-            for (let name; (name = this._readName(reElementNameOrNothing));) {
+            for (let name; (name = this._readName(reElementName));) {
                 (elNames || (elNames = [])).push(name);
-                if (this._skipWhitespaces() != ',') {
+                if (this._skipWhitespaces() != ':') {
                     break;
                 }
                 this._next();
@@ -190,7 +190,7 @@ class TemplateParser {
             else {
                 let pos = this._pos;
                 let line = this._line;
-                let name = this._readName(reAttributeNameOrNothing);
+                let name = this._readName(reAttributeName);
                 if (!name) {
                     this._throwError('Expected attribute name');
                     throw 1;
@@ -267,10 +267,10 @@ class TemplateParser {
     }
     _readSuperCall() {
         let pos = this._pos;
-        reSuperCallOrNothing.lastIndex = pos;
-        let match = reSuperCallOrNothing.exec(this.template);
+        reSuperCall.lastIndex = pos;
+        let match = reSuperCall.exec(this.template);
         if (match[0]) {
-            this._chr = this.template.charAt((this._pos = reSuperCallOrNothing.lastIndex));
+            this._chr = this.template.charAt((this._pos = reSuperCall.lastIndex));
             return {
                 nodeType: NodeType.SUPER_CALL,
                 elementName: match[1] || null,
@@ -280,11 +280,11 @@ class TemplateParser {
         }
         return null;
     }
-    _readName(reNameOrNothing) {
-        reNameOrNothing.lastIndex = this._pos;
-        let name = reNameOrNothing.exec(this.template)[0];
+    _readName(reName) {
+        reName.lastIndex = this._pos;
+        let name = reName.exec(this.template)[0];
         if (name) {
-            this._chr = this.template.charAt((this._pos = reNameOrNothing.lastIndex));
+            this._chr = this.template.charAt((this._pos = reName.lastIndex));
             return name;
         }
         return null;
@@ -316,7 +316,7 @@ class TemplateParser {
                     str += String.fromCharCode(code);
                     chr = this._chr = this.template.charAt((this._pos = pos + (hexadecimal ? 2 : 4)));
                 }
-                else if (chr in escapee) {
+                else if (escapee[chr]) {
                     str += escapee[chr];
                     chr = this._next();
                 }
@@ -386,11 +386,11 @@ class TemplateParser {
         });
     }
     _skipWhitespaces() {
-        reWhitespacesOrNothing.lastIndex = this._pos;
-        let whitespaces = reWhitespacesOrNothing.exec(this.template)[0];
+        reWhitespaces.lastIndex = this._pos;
+        let whitespaces = reWhitespaces.exec(this.template)[0];
         if (whitespaces) {
             this._line += whitespaces.split(reLineBreak).length - 1;
-            return (this._chr = this.template.charAt((this._pos = reWhitespacesOrNothing.lastIndex)));
+            return (this._chr = this.template.charAt((this._pos = reWhitespaces.lastIndex)));
         }
         return this._chr;
     }
