@@ -24,7 +24,7 @@ const escapee = {
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
 const reWhitespaces = /\s+|/g;
-const reTagName = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
+const reTagName = /[a-zA-Z][\-\w]*|/g;
 const reElementName = /[a-zA-Z][\-\w]*|/g;
 const reAttributeName = /[^\s'">/=,)]+|/g;
 const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;

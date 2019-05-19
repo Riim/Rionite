@@ -106,7 +106,7 @@ const escapee: Record<string, string> = {
 
 const reWhitespace = /\s/;
 
-const reTagName = /[a-zA-Z][\-\w]*(?::[a-zA-Z][\-\w]*)?|/g;
+const reTagName = /[a-zA-Z][\-\w]*|/g;
 const reElementName = /[a-zA-Z][\-\w]*|/g;
 const reAttributeName = /[^\s'">/=,)]+|/g;
 const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
