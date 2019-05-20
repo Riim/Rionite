@@ -214,6 +214,9 @@ export class TemplateParser {
 		}
 
 		let tagName = this._readName(reTagName);
+
+		this._skipWhitespacesAndReadComments(targetContent);
+
 		let elNames: Array<string | null> | undefined;
 
 		if (this._chr == ':') {
@@ -221,30 +224,28 @@ export class TemplateParser {
 
 			let pos = this._pos;
 
-			this._skipWhitespaces();
+			this._skipWhitespacesAndReadComments(targetContent);
 
 			if (this._chr == ':') {
-				this._next();
-				this._skipWhitespaces();
 				elNames = [null];
+				this._next();
+				this._skipWhitespacesAndReadComments(targetContent);
 			}
 
 			for (let name; (name = this._readName(reElementName)); ) {
 				(elNames || (elNames = [])).push(name);
 
-				if (this._skipWhitespaces() != ':') {
+				if (this._skipWhitespacesAndReadComments(targetContent) != ':') {
 					break;
 				}
 
 				this._next();
-				this._skipWhitespaces();
+				this._skipWhitespacesAndReadComments(targetContent);
 			}
 
 			if (!elNames || (!elNames[0] && elNames.length == 1)) {
 				this._throwError('Expected element name', pos);
 			}
-		} else {
-			this._skipWhitespacesAndReadComments(targetContent);
 		}
 
 		if (!tagName && !elNames) {

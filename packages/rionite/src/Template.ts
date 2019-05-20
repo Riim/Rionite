@@ -338,6 +338,9 @@ export class Template {
 		}
 
 		let tagName = this._readName(reTagName);
+
+		this._skipWhitespacesAndComments();
+
 		let elNames: Array<string | null> | undefined;
 		let elName: string | null | undefined;
 
@@ -346,23 +349,23 @@ export class Template {
 
 			let pos = this._pos;
 
-			this._skipWhitespaces();
+			this._skipWhitespacesAndComments();
 
-			if ((this._chr as any) == ':') {
-				this._next();
-				this._skipWhitespaces();
+			if (this._chr == ':') {
 				elNames = [null];
+				this._next();
+				this._skipWhitespacesAndComments();
 			}
 
 			for (let name; (name = this._readName(reElementName)); ) {
 				(elNames || (elNames = [])).push(name);
 
-				if (this._skipWhitespaces() != ':') {
+				if (this._skipWhitespacesAndComments() != ':') {
 					break;
 				}
 
 				this._next();
-				this._skipWhitespaces();
+				this._skipWhitespacesAndComments();
 			}
 
 			if (!elNames || (!elNames[0] && elNames.length == 1)) {
@@ -370,8 +373,6 @@ export class Template {
 			}
 
 			elName = isHelper ? elNames![0] && '@' + elNames![0] : elNames![0];
-		} else {
-			this._skipWhitespacesAndComments();
 		}
 
 		if (tagName) {
