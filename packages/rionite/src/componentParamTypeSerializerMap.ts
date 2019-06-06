@@ -1,7 +1,5 @@
 import { escapeHTML, unescapeHTML } from '@riim/escape-html';
 import { isRegExp } from '@riim/is-regexp';
-import { Map } from '@riim/map-set-polyfill';
-import { Symbol } from '@riim/symbol-polyfill';
 
 export interface IComponentParamTypeSerializer {
 	read: (value: string | null, defaultValue: any, el?: Element) => any;

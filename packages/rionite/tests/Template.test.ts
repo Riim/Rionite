@@ -72,6 +72,7 @@ describe('Template#parse', () => {
 			}
 		});
 	});
+
 	test('именованный элемент', () => {
 		expect(
 			new Template(`
@@ -115,6 +116,7 @@ describe('Template#parse', () => {
 			}
 		});
 	});
+
 	test('встроенный шаблон', () => {
 		let t1 = new Template(`
 			template {

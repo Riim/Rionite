@@ -1,4 +1,3 @@
-import { Map } from '@riim/map-set-polyfill';
 import { nextTick } from '@riim/next-tick';
 import { Cell, ObservableList, TListener } from 'cellx';
 import { moveContent } from '../../node_modules/@riim/move-content';
@@ -460,7 +459,7 @@ export class RnRepeat extends BaseComponent {
 		this._prevList = Array.isArray(list) ? list.slice() : list!.toArray();
 
 		if (fromChangeEvent) {
-			Cell.forceRelease();
+			Cell.release();
 			this.emit('change');
 		}
 	}

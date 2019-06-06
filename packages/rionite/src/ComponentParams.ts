@@ -1,5 +1,4 @@
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
-import { Symbol } from '@riim/symbol-polyfill';
 import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './BaseComponent';
 import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
 import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';

@@ -1,7 +1,5 @@
 import { getUID } from '@riim/get-uid';
-import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
-import { Symbol } from '@riim/symbol-polyfill';
 import { TListener } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent, IComponentElement } from '../BaseComponent';

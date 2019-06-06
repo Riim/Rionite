@@ -52,12 +52,10 @@ module.exports = (env = {}) => {
 			'@riim/is-regexp',
 			'@riim/kebab-case',
 			'@riim/lower-case-first-word',
-			'@riim/map-set-polyfill',
 			'@riim/move-content',
 			'@riim/next-tick',
 			'@riim/next-uid',
 			'@riim/rionite-snake-case-attribute-name',
-			'@riim/symbol-polyfill',
 			'cellx',
 			'escape-string'
 		],

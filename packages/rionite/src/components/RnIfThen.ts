@@ -173,7 +173,7 @@ export class RnIfThen extends BaseComponent {
 		}
 
 		if (changed) {
-			Cell.forceRelease();
+			Cell.release();
 			this.emit('change');
 		}
 	}

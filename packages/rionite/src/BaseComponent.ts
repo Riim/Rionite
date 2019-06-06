@@ -1,6 +1,5 @@
 import { getUID } from '@riim/get-uid';
 import { kebabCase } from '@riim/kebab-case';
-import { Map } from '@riim/map-set-polyfill';
 import { moveContent } from '@riim/move-content';
 import { nextUID } from '@riim/next-uid';
 import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';

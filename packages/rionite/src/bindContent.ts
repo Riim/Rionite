@@ -1,4 +1,3 @@
-import { Set } from '@riim/map-set-polyfill';
 import { Cell, IEvent, TListener } from 'cellx';
 import {
 	BaseComponent,

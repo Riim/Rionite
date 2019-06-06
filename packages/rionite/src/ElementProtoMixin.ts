@@ -1,5 +1,4 @@
 import { defer } from '@riim/defer';
-import { Symbol } from '@riim/symbol-polyfill';
 import { Cell } from 'cellx';
 import { BaseComponent, I$ComponentParamConfig, IComponentElement } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';

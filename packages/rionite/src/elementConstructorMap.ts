@@ -1,5 +1,3 @@
-import { Map } from '@riim/map-set-polyfill';
-
 export const elementConstructorMap = new Map<string, typeof HTMLElement>([
 	['a', (window as any).HTMLAnchorElement],
 	['blockquote', (window as any).HTMLQuoteElement],

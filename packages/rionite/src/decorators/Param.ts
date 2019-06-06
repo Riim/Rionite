@@ -1,5 +1,4 @@
 import { lowerCaseFirstWord } from '@riim/lower-case-first-word';
-import { Set } from '@riim/map-set-polyfill';
 import { BaseComponent, IComponentParamConfig } from '../BaseComponent';
 
 const types = new Set([Boolean, Number, String, Object]);
