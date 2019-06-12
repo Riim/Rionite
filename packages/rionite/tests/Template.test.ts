@@ -17,11 +17,11 @@ Template.prototype.renderToString = function(): string {
 	return fragmentToString(this.render());
 };
 
-Template.helpers.slot = el => {
+Template.transformers.slot = el => {
 	return [
 		{
 			nodeType: NodeType.ELEMENT,
-			isHelper: false,
+			isTransformer: false,
 			tagName: 'rn-slot',
 			is: null,
 			names: el.names,
@@ -45,7 +45,7 @@ describe('Template#parse', () => {
 			elements: {
 				'@root': {
 					nodeType: NodeType.ELEMENT,
-					isHelper: true,
+					isTransformer: true,
 					tagName: 'section',
 					is: null,
 					names: ['root'],
@@ -53,7 +53,7 @@ describe('Template#parse', () => {
 					content: [
 						{
 							nodeType: NodeType.ELEMENT,
-							isHelper: false,
+							isTransformer: false,
 							tagName: 'b',
 							is: null,
 							names: null,
@@ -85,7 +85,7 @@ describe('Template#parse', () => {
 			elements: {
 				'@root': {
 					nodeType: NodeType.ELEMENT,
-					isHelper: true,
+					isTransformer: true,
 					tagName: 'section',
 					is: null,
 					names: ['root'],
@@ -100,7 +100,7 @@ describe('Template#parse', () => {
 				},
 				el1: {
 					nodeType: NodeType.ELEMENT,
-					isHelper: false,
+					isTransformer: false,
 					tagName: 'b',
 					is: null,
 					names: ['el1'],
@@ -128,7 +128,7 @@ describe('Template#parse', () => {
 			elements: {
 				'@root': {
 					nodeType: NodeType.ELEMENT,
-					isHelper: true,
+					isTransformer: true,
 					tagName: 'section',
 					is: null,
 					names: ['root'],
@@ -594,8 +594,8 @@ describe('Template#render', () => {
 		);
 	});
 
-	test('helper', () => {
-		Template.helpers.test = _el => {
+	test('transformer', () => {
+		Template.transformers.test = _el => {
 			return [
 				{ nodeType: NodeType.TEXT, value: '1' },
 				{ nodeType: NodeType.TEXT, value: '2' },
@@ -615,8 +615,8 @@ describe('Template#render', () => {
 		).toBe('<b>123</b>');
 	});
 
-	test('helper (2)', () => {
-		Template.helpers.test = el => {
+	test('transformer (2)', () => {
+		Template.transformers.test = el => {
 			return [
 				{ nodeType: NodeType.TEXT, value: '[' },
 				...el.content!,
@@ -638,12 +638,12 @@ describe('Template#render', () => {
 		).toBe('<b>[<i></i>]</b>');
 	});
 
-	test('доопределение атрибутов helper-а', () => {
-		Template.helpers.test = el => {
+	test('доопределение атрибутов transformer-а', () => {
+		Template.transformers.test = el => {
 			return [
 				{
 					nodeType: NodeType.ELEMENT,
-					isHelper: false,
+					isTransformer: false,
 					tagName: 'b',
 					is: null,
 					names: el.names,
@@ -673,12 +673,12 @@ describe('Template#render', () => {
 		).toBe('<b attr1="value1" attr2="value2" class="block1-x__test block1__test "></b>');
 	});
 
-	test('доопределение атрибутов и содержимого helper-а', () => {
-		Template.helpers.test = el => {
+	test('доопределение атрибутов и содержимого transformer-а', () => {
+		Template.transformers.test = el => {
 			return [
 				{
 					nodeType: NodeType.ELEMENT,
-					isHelper: false,
+					isTransformer: false,
 					tagName: 'b',
 					is: null,
 					names: el.names,
@@ -686,7 +686,7 @@ describe('Template#render', () => {
 					content: el.content && [
 						{
 							nodeType: NodeType.ELEMENT,
-							isHelper: false,
+							isTransformer: false,
 							tagName: 'u',
 							is: null,
 							names: null,
@@ -727,7 +727,7 @@ describe('Template#render', () => {
 		);
 	});
 
-	test('доопределение содержимого helper-а по имени', () => {
+	test('доопределение содержимого transformer-а по имени', () => {
 		let t1 = new Template(
 			`
 				b
@@ -1089,7 +1089,7 @@ describe('Template#render', () => {
 		);
 	});
 
-	test('наследование helper-а', () => {
+	test('наследование transformer-а', () => {
 		let t1 = new Template(
 			`
 				@Slot/slot1 {

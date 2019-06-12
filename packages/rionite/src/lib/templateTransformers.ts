@@ -1,7 +1,7 @@
 import { NodeType, Template } from '../Template';
 
 ['if-then', 'if-else', 'repeat'].forEach(name => {
-	Template.helpers[name] = el => {
+	Template.transformers[name] = el => {
 		let attrs = el.attributes;
 
 		// проверка на attrs для `@/name // ...`
@@ -37,7 +37,7 @@ import { NodeType, Template } from '../Template';
 		return [
 			{
 				nodeType: NodeType.ELEMENT,
-				isHelper: false,
+				isTransformer: false,
 				tagName: 'template',
 				is: 'rn-' + name,
 				names: el.names,
@@ -49,11 +49,11 @@ import { NodeType, Template } from '../Template';
 	};
 });
 
-Template.helpers.slot = el => {
+Template.transformers.slot = el => {
 	return [
 		{
 			nodeType: NodeType.ELEMENT,
-			isHelper: false,
+			isTransformer: false,
 			tagName: 'rn-slot',
 			is: null,
 			names: el.names,

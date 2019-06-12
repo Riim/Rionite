@@ -42,7 +42,7 @@ export interface IElementAttributes {
 
 export interface IElement extends INode {
 	nodeType: NodeType.ELEMENT;
-	isHelper: boolean;
+	isTransformer: boolean;
 	tagName: string | null;
 	names: Array<string | null> | null;
 	attributes: IElementAttributes | null;
@@ -207,9 +207,9 @@ export class TemplateParser {
 	_readElement(targetContent: TContent) {
 		let pos = this._pos;
 		let line = this._line;
-		let isHelper = this._chr == '@';
+		let isTransformer = this._chr == '@';
 
-		if (isHelper) {
+		if (isTransformer) {
 			this._next();
 		}
 
@@ -267,7 +267,7 @@ export class TemplateParser {
 
 		targetContent.push({
 			nodeType: NodeType.ELEMENT,
-			isHelper,
+			isTransformer,
 			tagName: tagName && kebabCase(tagName, true),
 			names: elNames || null,
 			attributes: attrs || null,

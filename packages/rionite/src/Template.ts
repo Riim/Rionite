@@ -71,7 +71,7 @@ export interface IElementAttributes {
 
 export interface IElement extends INode {
 	nodeType: NodeType.ELEMENT;
-	isHelper: boolean;
+	isTransformer: boolean;
 	tagName: string;
 	is: string | null;
 	names: Array<string | null> | null;
@@ -121,7 +121,7 @@ function normalizeMultilineText(text: string): string {
 export const ELEMENT_NAME_DELIMITER = '__';
 
 export class Template {
-	static helpers: Record<string, (el: IElement) => TContent | null> = {
+	static transformers: Record<string, (el: IElement) => TContent | null> = {
 		section: el => el.content
 	};
 
@@ -200,7 +200,7 @@ export class Template {
 						__proto__: null as any,
 						'@root': {
 							nodeType: NodeType.ELEMENT,
-							isHelper: true,
+							isTransformer: true,
 							tagName: 'section',
 							is: null,
 							names: ['root'],
@@ -331,9 +331,9 @@ export class Template {
 		componentConstr?: typeof BaseComponent | null
 	): TContent | null {
 		let pos = this._pos;
-		let isHelper = this._chr == '@';
+		let isTransformer = this._chr == '@';
 
-		if (isHelper) {
+		if (isTransformer) {
 			this._next();
 		}
 
@@ -372,7 +372,7 @@ export class Template {
 				this._throwError('Expected element name', pos);
 			}
 
-			elName = isHelper ? elNames![0] && '@' + elNames![0] : elNames![0];
+			elName = isTransformer ? elNames![0] && '@' + elNames![0] : elNames![0];
 		}
 
 		if (tagName) {
@@ -386,7 +386,7 @@ export class Template {
 				!this.parent ||
 				!(tagName = (this.parent._elements[elName!] || { __proto__: null }).tagName)
 			) {
-				this._throwError('Element.tagName is required', isHelper ? pos + 1 : pos);
+				this._throwError('Element.tagName is required', isTransformer ? pos + 1 : pos);
 				throw 1;
 			}
 		}
@@ -487,16 +487,16 @@ export class Template {
 
 		let el: IElement;
 
-		if (isHelper) {
-			let helper = Template.helpers[tagName];
+		if (isTransformer) {
+			let transformer = Template.transformers[tagName];
 
-			if (!helper) {
-				this._throwError(`Helper "${tagName}" is not defined`, pos);
+			if (!transformer) {
+				this._throwError(`Transformer "${tagName}" is not defined`, pos);
 			}
 
 			el = {
 				nodeType: NodeType.ELEMENT,
-				isHelper: true,
+				isTransformer: true,
 				tagName,
 				is: (attrs && attrs.isAttributeValue) || null,
 				names: elNames || null,
@@ -506,7 +506,7 @@ export class Template {
 				contentTemplateIndex: null
 			};
 
-			content = helper(el);
+			content = transformer(el);
 
 			if (content && content.length) {
 				el.content = content;
@@ -522,7 +522,7 @@ export class Template {
 						) {
 							let el: IElement = {
 								nodeType: NodeType.ELEMENT,
-								isHelper: false,
+								isTransformer: false,
 								tagName: (node as IElement).tagName,
 								is: (node as IElement).is,
 								names: (node as IElement).names,
@@ -577,7 +577,7 @@ export class Template {
 		} else {
 			el = {
 				nodeType: NodeType.ELEMENT,
-				isHelper: false,
+				isTransformer: false,
 				tagName,
 				is: (attrs && attrs.isAttributeValue) || null,
 				names: elNames || null,
@@ -1024,7 +1024,7 @@ function renderContent<T extends Node = Element>(
 
 			switch (node.nodeType) {
 				case NodeType.ELEMENT: {
-					if ((node as IElement).isHelper) {
+					if ((node as IElement).isTransformer) {
 						renderContent(
 							targetNode,
 							(node as IElement).content,
