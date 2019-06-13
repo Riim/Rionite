@@ -17,7 +17,7 @@ Template.prototype.renderToString = function(): string {
 	return fragmentToString(this.render());
 };
 
-Template.transformers.slot = el => {
+Template.transformers.Slot = el => {
 	return [
 		{
 			nodeType: NodeType.ELEMENT,
@@ -76,7 +76,7 @@ describe('Template#parse', () => {
 	test('именованный элемент', () => {
 		expect(
 			new Template(`
-				b/el1 {
+				b:el1 {
 					'text'
 				}
 			`).parse()
@@ -189,7 +189,7 @@ describe('Template#render', () => {
 		expect(
 			new Template(
 				`
-					b/el1 {
+					b:el1 {
 						'text'
 					}
 				`,
@@ -202,7 +202,7 @@ describe('Template#render', () => {
 		expect(
 			new Template(
 				`
-					b/name1, name2 {
+					b:name1:name2 {
 						'text'
 					}
 				`,
@@ -215,7 +215,7 @@ describe('Template#render', () => {
 		expect(
 			new Template(
 				`
-					b/, name1, name2
+					b::name1:name2
 				`,
 				{ blockName: 'block1' }
 			).renderToString()
@@ -225,7 +225,7 @@ describe('Template#render', () => {
 	test('переопределение tagName элемента', () => {
 		let t1 = new Template(
 			`
-				b/el1 {
+				b:el1 {
 					'text'
 				}
 				br
@@ -237,7 +237,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						i/el1 {
+						i:el1 {
 							'text'
 						}
 					`,
@@ -250,7 +250,7 @@ describe('Template#render', () => {
 	test('переопределение содержимого элемента', () => {
 		let t1 = new Template(
 			`
-				b/el1 {
+				b:el1 {
 					'text'
 				}
 				br
@@ -262,7 +262,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						b/el1 {
+						b:el1 {
 							'other text'
 						}
 					`,
@@ -275,7 +275,7 @@ describe('Template#render', () => {
 	test('наследование tagName элемента', () => {
 		let t1 = new Template(
 			`
-				b/el1
+				b:el1
 			`,
 			{ blockName: 'block1' }
 		);
@@ -284,7 +284,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						/el1 {
+						:el1 {
 							'text'
 						}
 					`,
@@ -297,7 +297,7 @@ describe('Template#render', () => {
 	test('наследование tagName элемента (2)', () => {
 		let t1 = new Template(
 			`
-				b/el1
+				b:el1
 			`,
 			{ blockName: 'block1' }
 		);
@@ -308,7 +308,7 @@ describe('Template#render', () => {
 			t2
 				.extend(
 					`
-						/el1 {
+						:el1 {
 							'text'
 						}
 					`,
@@ -321,7 +321,7 @@ describe('Template#render', () => {
 	test('наследование атрибутов элемента', () => {
 		let t1 = new Template(
 			`
-				b/el1 (attr1=value1, attr2=value2)
+				b:el1 (attr1=value1, attr2=value2)
 			`,
 			{ blockName: 'block1' }
 		);
@@ -330,7 +330,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						/el1 (super!)
+						:el1 (super!)
 					`,
 					{ blockName: 'block1-x' }
 				)
@@ -341,7 +341,7 @@ describe('Template#render', () => {
 	test('доопределение атрибутов элемента', () => {
 		let t1 = new Template(
 			`
-				b/el1 (attr1=value1, attr2=value2)
+				b:el1 (attr1=value1, attr2=value2)
 			`,
 			{ blockName: 'block1' }
 		);
@@ -350,7 +350,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						/el1 (super!, attr1=value0, attr3=value3)
+						:el1 (super!, attr1=value0, attr3=value3)
 					`,
 					{ blockName: 'block1-x' }
 				)
@@ -363,7 +363,7 @@ describe('Template#render', () => {
 	test('наследование атрибута class', () => {
 		let t1 = new Template(
 			`
-				b/el1 (class=_mod1)
+				b:el1 (class=_mod1)
 			`,
 			{ blockName: 'block1' }
 		);
@@ -372,7 +372,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						/el1 (super!)
+						:el1 (super!)
 					`,
 					{ blockName: 'block1-x' }
 				)
@@ -383,7 +383,7 @@ describe('Template#render', () => {
 	test('наследование атрибута class (2)', () => {
 		let t1 = new Template(
 			`
-				b/el1 (attr1=value1, attr2=value2)
+				b:el1 (attr1=value1, attr2=value2)
 			`,
 			{ blockName: 'block1' }
 		);
@@ -394,7 +394,7 @@ describe('Template#render', () => {
 			t2
 				.extend(
 					`
-						/el1 (super!)
+						:el1 (super!)
 					`,
 					{ blockName: 'block1-x-x' }
 				)
@@ -407,8 +407,8 @@ describe('Template#render', () => {
 	test('наследование атрибутов по имени', () => {
 		let t1 = new Template(
 			`
-				b/el1 (class=_mod1, attr1=value1, attr2=value2)
-				b/el2 (attr3=value3, attr4=value4)
+				b:el1 (class=_mod1, attr1=value1, attr2=value2)
+				b:el2 (attr3=value3, attr4=value4)
 			`,
 			{ blockName: 'block1' }
 		);
@@ -417,8 +417,8 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						/el1 (super.el2!, class=_mod2)
-						/el2 (super.el1!, class=_mod1)
+						:el1 (super.el2!, class=_mod2)
+						:el2 (super.el1!, class=_mod1)
 					`,
 					{ blockName: 'block1-x' }
 				)
@@ -431,7 +431,7 @@ describe('Template#render', () => {
 	test('наследование содержимого элемента', () => {
 		let t1 = new Template(
 			`
-				b/el1 {
+				b:el1 {
 					'text'
 				}
 			`,
@@ -442,7 +442,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						u/el1 {
+						u:el1 {
 							b {
 								super!
 							}
@@ -457,8 +457,8 @@ describe('Template#render', () => {
 	test('наследование содержимого элемента (2)', () => {
 		let t1 = new Template(
 			`
-				b/el1
-				b/el2
+				b:el1
+				b:el2
 			`,
 			{ blockName: 'block1' }
 		);
@@ -467,7 +467,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						i/el2 {
+						i:el2 {
 							super!
 						}
 					`,
@@ -482,7 +482,7 @@ describe('Template#render', () => {
 	test('наследование содержимого элемента (3)', () => {
 		let t1 = new Template(
 			`
-				b/el1 {
+				b:el1 {
 					'text'
 				}
 			`,
@@ -495,7 +495,7 @@ describe('Template#render', () => {
 			t2
 				.extend(
 					`
-						u/el1 {
+						u:el1 {
 							b {
 								super!
 							}
@@ -510,7 +510,7 @@ describe('Template#render', () => {
 	test('наследование содержимого элемента (3)', () => {
 		let t1 = new Template(
 			`
-				b/el1 {
+				b:el1 {
 					'text'
 				}
 			`,
@@ -519,7 +519,7 @@ describe('Template#render', () => {
 
 		let t2 = t1.extend(
 			`
-				u/el1 {
+				u:el1 {
 					b {
 						super!
 					}
@@ -532,7 +532,7 @@ describe('Template#render', () => {
 			t2
 				.extend(
 					`
-						s/el1 {
+						s:el1 {
 							u {
 								super!
 							}
@@ -547,7 +547,7 @@ describe('Template#render', () => {
 	test('наследование содержимого элемента по имени', () => {
 		let t1 = new Template(
 			`
-				b/el1 {
+				b:el1 {
 					'text'
 				}
 			`,
@@ -558,8 +558,8 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						u/el1 {
-							b/el2 {
+						u:el1 {
+							b:el2 {
 								super.el1!
 							}
 						}
@@ -656,7 +656,7 @@ describe('Template#render', () => {
 
 		let t1 = new Template(
 			`
-				@test/test (attr1=value1)
+				@test:test (attr1=value1)
 			`,
 			{ blockName: 'block1' }
 		);
@@ -665,7 +665,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						@/test (super!, attr2=value2)
+						@:test (super!, attr2=value2)
 					`,
 					{ blockName: 'block1-x' }
 				)
@@ -702,7 +702,7 @@ describe('Template#render', () => {
 
 		let t1 = new Template(
 			`
-				@test/test (attr1=value1) {
+				@test:test (attr1=value1) {
 					'text'
 				}
 			`,
@@ -713,7 +713,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						@/test (super!, attr2=value2) {
+						@:test (super!, attr2=value2) {
 							s {
 								super!
 							}
@@ -739,7 +739,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						@/root {
+						@:root {
 							u {
 								super!
 							}
@@ -822,12 +822,12 @@ describe('Template#render', () => {
 		let t1 = new Template(
 			`
 				template {
-					div/el1 {
+					div:el1 {
 						'text1'
 					}
 				}
 
-				div/el1 {
+				div:el1 {
 					'text2'
 				}
 			`,
@@ -845,7 +845,7 @@ describe('Template#render', () => {
 	test('переопределение содержимого встроенного шаблона', () => {
 		let t1 = new Template(
 			`
-				template/template1 {
+				template:template1 {
 					'text'
 				}
 			`,
@@ -853,7 +853,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				/template1 {
+				:template1 {
 					b {
 						super!
 					}
@@ -877,8 +877,8 @@ describe('Template#render', () => {
 	test('наследование встроенного шаблона', () => {
 		let t1 = new Template(
 			`
-				template/template1 {
-					div/el1
+				template:template1 {
+					div:el1
 				}
 			`,
 			{ blockName: 'block1' }
@@ -896,15 +896,15 @@ describe('Template#render', () => {
 	test('переопределение содержимого элемента встроенного шаблона', () => {
 		let t1 = new Template(
 			`
-				template/template1 {
-					div/el1
+				template:template1 {
+					div:el1
 				}
 			`,
 			{ blockName: 'block1' }
 		);
 		let t2 = t1.extend(
 			`
-				/el1 {
+				:el1 {
 					'text'
 				}
 			`,
@@ -923,14 +923,14 @@ describe('Template#render', () => {
 		let t1 = new Template(
 			`
 				template {
-					div/el1
+					div:el1
 				}
 			`,
 			{ blockName: 'block1' }
 		);
 		let t2 = t1.extend(
 			`
-				span/el1 {
+				span:el1 {
 					'text'
 				}
 			`,
@@ -948,8 +948,8 @@ describe('Template#render', () => {
 	test('доопределение содержимого элемента встроенного шаблона', () => {
 		let t1 = new Template(
 			`
-				template/template1 {
-					div/el1 {
+				template:template1 {
+					div:el1 {
 						'text'
 					}
 				}
@@ -958,7 +958,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				/el1 {
+				:el1 {
 					span {
 						super!
 					}
@@ -978,8 +978,8 @@ describe('Template#render', () => {
 	test('доопределение содержимого элемента встроенного шаблона (2)', () => {
 		let t1 = new Template(
 			`
-				template/template1 {
-					div/el1 {
+				template:template1 {
+					div:el1 {
 						'text'
 					}
 				}
@@ -988,8 +988,8 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				/el1 {
-					span/el2 {
+				:el1 {
+					span:el2 {
 						super.el1!
 					}
 				}
@@ -1009,7 +1009,7 @@ describe('Template#render', () => {
 		let t1 = new Template(
 			`
 				template {
-					div/el1 {
+					div:el1 {
 						'text'
 					}
 				}
@@ -1018,7 +1018,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				/el1 {
+				:el1 {
 					span {
 						super!
 					}
@@ -1039,7 +1039,7 @@ describe('Template#render', () => {
 		let t1 = new Template(
 			`
 				template {
-					div/el1 {
+					div:el1 {
 						'text'
 					}
 				}
@@ -1048,8 +1048,8 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				/el1 {
-					span/el2 {
+				:el1 {
+					span:el2 {
 						super.el1!
 					}
 				}
@@ -1069,14 +1069,14 @@ describe('Template#render', () => {
 		let t1 = new Template(
 			`
 				template {
-					div/el1 (attr1=value1)
+					div:el1 (attr1=value1)
 				}
 			`,
 			{ blockName: 'block1' }
 		);
 		let t2 = t1.extend(
 			`
-				/el1 (super!, attr1=value2)
+				:el1 (super!, attr1=value2)
 			`,
 			{ blockName: 'block1-x' }
 		);
@@ -1092,8 +1092,8 @@ describe('Template#render', () => {
 	test('наследование transformer-а', () => {
 		let t1 = new Template(
 			`
-				@Slot/slot1 {
-					div/el1
+				@Slot:slot1 {
+					div:el1
 				}
 			`,
 			{ blockName: 'block1' }

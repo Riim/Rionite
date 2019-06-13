@@ -65,7 +65,7 @@ export interface IElementAttributeList {
 }
 
 export interface IElementAttributes {
-	isAttributeValue: string | null;
+	attributeIsValue: string | null;
 	list: IElementAttributeList | null;
 }
 
@@ -376,7 +376,9 @@ export class Template {
 		}
 
 		if (tagName) {
+			if (!isTransformer) {
 			tagName = kebabCase(tagName, true);
+			}
 		} else {
 			if (!elName) {
 				this._throwError('Expected element', pos);
@@ -386,8 +388,10 @@ export class Template {
 				!this.parent ||
 				!(tagName = (this.parent._elements[elName!] || { __proto__: null }).tagName)
 			) {
-				this._throwError('Element.tagName is required', isTransformer ? pos + 1 : pos);
-				throw 1;
+				throw this._throwError(
+					'Element.tagName is required',
+					isTransformer ? pos + 1 : pos
+				);
 			}
 		}
 
@@ -426,7 +430,7 @@ export class Template {
 						let attrList = (
 							attrs ||
 							(attrs = {
-								isAttributeValue: null,
+								attributeIsValue: null,
 								list: { __proto__: null, 'length=': 0 } as any
 							})
 						).list;
@@ -455,7 +459,7 @@ export class Template {
 						let attrList = (
 							attrs ||
 							(attrs = {
-								isAttributeValue: null,
+								attributeIsValue: null,
 								list: { __proto__: null, 'length=': 0 } as any
 							})
 						).list;
@@ -498,7 +502,7 @@ export class Template {
 				nodeType: NodeType.ELEMENT,
 				isTransformer: true,
 				tagName,
-				is: (attrs && attrs.isAttributeValue) || null,
+				is: (attrs && attrs.attributeIsValue) || null,
 				names: elNames || null,
 				attributes: attrs || null,
 				$specifiedParams: $specifiedParams || null,
@@ -527,7 +531,7 @@ export class Template {
 								is: (node as IElement).is,
 								names: (node as IElement).names,
 								attributes: (node as IElement).attributes,
-								$specifiedParams: $specifiedParams || null,
+								$specifiedParams: (node as IElement).$specifiedParams,
 								content: (node as IElement).content,
 								contentTemplateIndex:
 									(
@@ -579,7 +583,7 @@ export class Template {
 				nodeType: NodeType.ELEMENT,
 				isTransformer: false,
 				tagName,
-				is: (attrs && attrs.isAttributeValue) || null,
+				is: (attrs && attrs.attributeIsValue) || null,
 				names: elNames || null,
 				attributes: attrs || null,
 				$specifiedParams: $specifiedParams || null,
@@ -630,15 +634,15 @@ export class Template {
 
 		let superCall: ISuperCall | null | undefined;
 
-		let isAttrValue: string | null | undefined;
+		let attrIsValue: string | null | undefined;
 		let list: IElementAttributeList | undefined;
 
-		loop: for (let f = true; ; ) {
-			if (f && this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
+		loop: for (;;) {
+			if (this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
 				let superElAttrs = superCall.element.attributes;
 
 				if (superElAttrs) {
-					isAttrValue = superElAttrs.isAttributeValue;
+					attrIsValue = superElAttrs.attributeIsValue;
 					list = { __proto__: superElAttrs.list } as any;
 				}
 
@@ -647,8 +651,7 @@ export class Template {
 				let name = this._readName(reAttributeName);
 
 				if (!name) {
-					this._throwError('Expected attribute name');
-					throw 1;
+					throw this._throwError('Expected attribute name');
 				}
 
 				if (this._skipWhitespacesAndComments() == '=') {
@@ -658,7 +661,7 @@ export class Template {
 
 					if (chr == "'" || chr == '"' || chr == '`') {
 						if (name == 'is') {
-							isAttrValue = this._readString();
+							attrIsValue = this._readString();
 						} else {
 							(list || (list = { __proto__: null, 'length=': 0 } as any))[
 								list![name] === undefined
@@ -683,7 +686,7 @@ export class Template {
 
 							if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
 								if (name == 'is') {
-									isAttrValue = value.trim();
+									attrIsValue = value.trim();
 								} else {
 									(list || (list = { __proto__: null, 'length=': 0 } as any))[
 										list![name] === undefined
@@ -707,7 +710,7 @@ export class Template {
 						}
 					}
 				} else if (name == 'is') {
-					isAttrValue = '';
+					attrIsValue = '';
 				} else {
 					(list || (list = { __proto__: null, 'length=': 0 } as any))[
 						list![name] === undefined ? (list![name] = list!['length=']++) : list![name]
@@ -738,16 +741,12 @@ export class Template {
 					);
 				}
 			}
-
-			if (f) {
-				f = false;
-			}
 		}
 
-		return isAttrValue == null && !list
+		return attrIsValue == null && !list
 			? null
 			: {
-					isAttributeValue: isAttrValue || null,
+					attributeIsValue: attrIsValue || null,
 					list: list || null
 			  };
 	}

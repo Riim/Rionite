@@ -268,7 +268,7 @@ export class TemplateParser {
 		targetContent.push({
 			nodeType: NodeType.ELEMENT,
 			isTransformer,
-			tagName: tagName && kebabCase(tagName, true),
+			tagName: tagName && (isTransformer ? tagName : kebabCase(tagName, true)),
 			names: elNames || null,
 			attributes: attrs || null,
 			content: content || null,
@@ -292,8 +292,8 @@ export class TemplateParser {
 		let superCall: ISuperCall | null | undefined;
 		let list: TElementAttributeList = [];
 
-		loop: for (let f = true; ; ) {
-			if (f && this._chr == 's' && (superCall = this._readSuperCall())) {
+		loop: for (;;) {
+			if (this._chr == 's' && (superCall = this._readSuperCall())) {
 				this._skipWhitespacesAndReadComments(targetContent);
 			} else {
 				let pos = this._pos;
@@ -301,8 +301,7 @@ export class TemplateParser {
 				let name = this._readName(reAttributeName);
 
 				if (!name) {
-					this._throwError('Expected attribute name');
-					throw 1;
+					throw this._throwError('Expected attribute name');
 				}
 
 				if (this._skipWhitespacesAndReadComments(targetContent) == '=') {
@@ -376,10 +375,6 @@ export class TemplateParser {
 						'Unexpected end of template. Expected "," or ")" to finalize attribute value.'
 					);
 				}
-			}
-
-			if (f) {
-				f = false;
 			}
 		}
 
@@ -523,8 +518,7 @@ export class TemplateParser {
 				break;
 			}
 			default: {
-				this._throwError('Expected comment');
-				throw 1;
+				throw this._throwError('Expected comment');
 			}
 		}
 
