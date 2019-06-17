@@ -17,7 +17,7 @@ Template.prototype.renderToString = function(): string {
 	return fragmentToString(this.render());
 };
 
-Template.transformers.Slot = el => {
+Template.elementTransformers.Slot = el => {
 	return [
 		{
 			nodeType: NodeType.ELEMENT,
@@ -595,7 +595,7 @@ describe('Template#render', () => {
 	});
 
 	test('transformer', () => {
-		Template.transformers.test = _el => {
+		Template.elementTransformers.test = _el => {
 			return [
 				{ nodeType: NodeType.TEXT, value: '1' },
 				{ nodeType: NodeType.TEXT, value: '2' },
@@ -616,7 +616,7 @@ describe('Template#render', () => {
 	});
 
 	test('transformer (2)', () => {
-		Template.transformers.test = el => {
+		Template.elementTransformers.test = el => {
 			return [
 				{ nodeType: NodeType.TEXT, value: '[' },
 				...el.content!,
@@ -639,7 +639,7 @@ describe('Template#render', () => {
 	});
 
 	test('доопределение атрибутов transformer-а', () => {
-		Template.transformers.test = el => {
+		Template.elementTransformers.test = el => {
 			return [
 				{
 					nodeType: NodeType.ELEMENT,
@@ -674,7 +674,7 @@ describe('Template#render', () => {
 	});
 
 	test('доопределение атрибутов и содержимого transformer-а', () => {
-		Template.transformers.test = el => {
+		Template.elementTransformers.test = el => {
 			return [
 				{
 					nodeType: NodeType.ELEMENT,
@@ -1101,6 +1101,9 @@ describe('Template#render', () => {
 		let t2 = t1.extend('', { blockName: 'block1-x' });
 
 		expect(t1.renderToString()).toBe('<rn-slot class="block1__slot1 "></rn-slot>');
+		expect(t2.renderToString()).toBe(
+			'<rn-slot class="block1-x__slot1 block1__slot1 "></rn-slot>'
+		);
 		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
 			'<div class="block1__el1 "></div>'
 		);

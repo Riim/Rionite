@@ -1824,11 +1824,11 @@ if (!('nextElementSibling' in DocumentFragment.prototype)) {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const Template_1 = __webpack_require__(3);
-['if-then', 'if-else', 'repeat'].forEach(name => {
-    Template_1.Template.helpers[name] = el => {
+[['IfThen', 'rn-if-then'], ['IfElse', 'rn-if-else'], ['Repeat', 'rn-repeat']].forEach(([name, is]) => {
+    Template_1.Template.elementTransformers[name] = el => {
         let attrs = el.attributes;
         // проверка на attrs для `@/name // ...`
-        if (name != 'repeat' && attrs) {
+        if (name != 'Repeat' && attrs) {
             let list = attrs.list;
             if (list) {
                 let index = list['length='] - 1;
@@ -1846,8 +1846,10 @@ const Template_1 = __webpack_require__(3);
                     delete list[attr.name];
                     list['if'] = foundIndex;
                     list[foundIndex] = {
+                        isTransformer: false,
                         name: 'if',
-                        value: attr.name
+                        value: attr.name,
+                        pos: -1
                     };
                 }
             }
@@ -1855,31 +1857,59 @@ const Template_1 = __webpack_require__(3);
         return [
             {
                 nodeType: Template_1.NodeType.ELEMENT,
-                isHelper: false,
+                isTransformer: false,
                 tagName: 'template',
-                is: 'rn-' + name,
+                is,
                 names: el.names,
                 attributes: attrs,
+                $specifiedParams: el.$specifiedParams,
                 content: el.content,
                 contentTemplateIndex: null
             }
         ];
     };
 });
-Template_1.Template.helpers.slot = el => {
+Template_1.Template.elementTransformers.Slot = el => {
     return [
         {
             nodeType: Template_1.NodeType.ELEMENT,
-            isHelper: false,
+            isTransformer: false,
             tagName: 'rn-slot',
             is: null,
             names: el.names,
             attributes: el.attributes,
+            $specifiedParams: el.$specifiedParams,
             content: el.content,
             contentTemplateIndex: null
         }
     ];
 };
+[['if', 'rn-if-then'], ['unless', 'rn-if-else'], ['for', 'rn-repeat']].forEach(([name, is]) => {
+    Template_1.Template.attributeTransformers[name] = (el, attr) => {
+        return {
+            nodeType: Template_1.NodeType.ELEMENT,
+            isTransformer: false,
+            tagName: 'template',
+            is,
+            names: null,
+            attributes: {
+                attributeIsValue: is,
+                list: {
+                    0: {
+                        isTransformer: false,
+                        name: name == 'unless' ? 'if' : name,
+                        value: attr.value,
+                        pos: -1
+                    },
+                    'length=': 1
+                }
+            },
+            $specifiedParams: null,
+            content: [el],
+            contentTemplateIndex: null
+        };
+    };
+});
 
 
 /***/ }),
@@ -1981,7 +2011,7 @@ class Template {
                     __proto__: null,
                     '@root': {
                         nodeType: NodeType.ELEMENT,
-                        isHelper: true,
+                        isTransformer: true,
                         tagName: 'section',
                         is: null,
                         names: ['root'],
@@ -2070,8 +2100,8 @@ class Template {
     }
     _readElement(targetContent, superElName, componentConstr) {
         let pos = this._pos;
-        let isHelper = this._chr == '@';
-        if (isHelper) {
+        let isTransformer = this._chr == '@';
+        if (isTransformer) {
             this._next();
         }
         let tagName = this._readName(reTagName);
@@ -2098,10 +2128,12 @@ class Template {
             if (!elNames || (!elNames[0] && elNames.length == 1)) {
                 this._throwError('Expected element name', pos);
             }
-            elName = isHelper ? elNames[0] && '@' + elNames[0] : elNames[0];
+            elName = isTransformer ? elNames[0] && '@' + elNames[0] : elNames[0];
         }
         if (tagName) {
-            tagName = kebab_case_1.kebabCase(tagName, true);
+            if (!isTransformer) {
+                tagName = kebab_case_1.kebabCase(tagName, true);
+            }
         }
         else {
             if (!elName) {
@@ -2109,8 +2141,7 @@ class Template {
             }
             if (!this.parent ||
                 !(tagName = (this.parent._elements[elName] || { __proto__: null }).tagName)) {
-                this._throwError('Element.tagName is required', isHelper ? pos + 1 : pos);
-                throw 1;
+                throw this._throwError('Element.tagName is required', isTransformer ? pos + 1 : pos);
             }
         }
         let elComponentConstr = componentConstructorMap_1.componentConstructorMap.get(tagName);
@@ -2136,7 +2167,7 @@ class Template {
                     if (events && events[name]) {
                         let attrList = (attrs ||
                             (attrs = {
-                                isAttributeValue: null,
+                                attributeIsValue: null,
                                 list: { __proto__: null, 'length=': 0 }
                             })).list;
                         for (let type in events[name]) {
@@ -2157,7 +2188,7 @@ class Template {
                     if (domEvents && domEvents[name]) {
                         let attrList = (attrs ||
                             (attrs = {
-                                isAttributeValue: null,
+                                attributeIsValue: null,
                                 list: { __proto__: null, 'length=': 0 }
                             })).list;
                         for (let type in domEvents[name]) {
@@ -2179,24 +2210,23 @@ class Template {
         if (this._chr == '{') {
             content = this._readContent(null, elName || superElName, true, componentConstr);
         }
-        let el;
-        if (isHelper) {
-            let helper = Template.helpers[tagName];
-            if (!helper) {
-                this._throwError(`Helper "${tagName}" is not defined`, pos);
+        let el = {
+            nodeType: NodeType.ELEMENT,
+            isTransformer,
+            tagName,
+            is: (attrs && attrs.attributeIsValue) || null,
+            names: elNames || null,
+            attributes: attrs || null,
+            $specifiedParams: $specifiedParams || null,
+            content: content || null,
+            contentTemplateIndex: null
+        };
+        if (isTransformer) {
+            let transformer = Template.elementTransformers[tagName];
+            if (!transformer) {
+                this._throwError(`Transformer "${tagName}" is not defined`, pos);
             }
-            el = {
-                nodeType: NodeType.ELEMENT,
-                isHelper: true,
-                tagName,
-                is: (attrs && attrs.isAttributeValue) || null,
-                names: elNames || null,
-                attributes: attrs || null,
-                $specifiedParams: $specifiedParams || null,
-                content: content || null,
-                contentTemplateIndex: null
-            };
-            content = helper(el);
+            content = transformer(el);
             if (content && content.length) {
                 el.content = content;
                 for (let i = 0, l = content.length; i < l; i++) {
@@ -2207,12 +2237,12 @@ class Template {
                                 node.tagName == 'rn-slot')) {
                             let el = {
                                 nodeType: NodeType.ELEMENT,
-                                isHelper: false,
+                                isTransformer: false,
                                 tagName: node.tagName,
                                 is: node.is,
                                 names: node.names,
                                 attributes: node.attributes,
-                                $specifiedParams: $specifiedParams || null,
+                                $specifiedParams: node.$specifiedParams,
                                 content: node.content,
                                 contentTemplateIndex: (this._embeddedTemplates || (this._embeddedTemplates = [])).push(new Template({
                                     nodeType: NodeType.BLOCK,
@@ -2253,26 +2283,30 @@ class Template {
             }
         }
         else {
-            el = {
-                nodeType: NodeType.ELEMENT,
-                isHelper: false,
-                tagName,
-                is: (attrs && attrs.isAttributeValue) || null,
-                names: elNames || null,
-                attributes: attrs || null,
-                $specifiedParams: $specifiedParams || null,
-                content: content || null,
-                contentTemplateIndex: content && (tagName == 'template' || tagName == 'rn-slot')
-                    ? (this._embeddedTemplates || (this._embeddedTemplates = [])).push(new Template({
+            let attrList = attrs && attrs.list;
+            if (attrList) {
+                for (let i = 0, l = attrList['length=']; i < l; i++) {
+                    let attr = attrList[i];
+                    if (attr.isTransformer) {
+                        let transformer = Template.attributeTransformers[attr.name];
+                        if (!transformer) {
+                            this._throwError(`Transformer "${attr.name}" is not defined`, attr.pos);
+                        }
+                        el = transformer(el, attr);
+                    }
+                }
+            }
+            if (el.content && (el.tagName == 'template' || el.tagName == 'rn-slot')) {
+                el.contentTemplateIndex =
+                    (this._embeddedTemplates || (this._embeddedTemplates = [])).push(new Template({
                         nodeType: NodeType.BLOCK,
-                        content,
+                        content: el.content,
                         elements: this._elements
                     }, {
                         _isEmbedded: true,
                         parent: this
-                    })) - 1
-                    : null
-            };
+                    })) - 1;
+            }
         }
         if (elName) {
             this._elements[elName] = el;
@@ -2293,36 +2327,42 @@ class Template {
             return null;
         }
         let superCall;
-        let isAttrValue;
+        let attrIsValue;
         let list;
-        loop: for (let f = true;;) {
-            if (f && this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
+        loop: for (;;) {
+            if (this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
                 let superElAttrs = superCall.element.attributes;
                 if (superElAttrs) {
-                    isAttrValue = superElAttrs.isAttributeValue;
+                    attrIsValue = superElAttrs.attributeIsValue;
                     list = { __proto__: superElAttrs.list };
                 }
                 this._skipWhitespacesAndComments();
             }
             else {
+                let pos = this._pos;
+                let isTransformer = this._chr == '@';
+                if (isTransformer) {
+                    this._next();
+                }
                 let name = this._readName(reAttributeName);
                 if (!name) {
-                    this._throwError('Expected attribute name');
-                    throw 1;
+                    throw this._throwError('Expected attribute name');
                 }
                 if (this._skipWhitespacesAndComments() == '=') {
                     this._next();
                     let chr = this._skipWhitespaces();
                     if (chr == "'" || chr == '"' || chr == '`') {
                         if (name == 'is') {
-                            isAttrValue = this._readString();
+                            attrIsValue = this._readString();
                         }
                         else {
                             (list || (list = { __proto__: null, 'length=': 0 }))[list[name] === undefined
                                 ? (list[name] = list['length=']++)
                                 : list[name]] = {
+                                isTransformer,
                                 name,
-                                value: this._readString()
+                                value: this._readString(),
+                                pos
                             };
                         }
                         this._skipWhitespacesAndComments();
@@ -2335,14 +2375,16 @@ class Template {
                             }
                             if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
                                 if (name == 'is') {
-                                    isAttrValue = value.trim();
+                                    attrIsValue = value.trim();
                                 }
                                 else {
                                     (list || (list = { __proto__: null, 'length=': 0 }))[list[name] === undefined
                                         ? (list[name] = list['length=']++)
                                         : list[name]] = {
+                                        isTransformer,
                                         name,
-                                        value: value.trim()
+                                        value: value.trim(),
+                                        pos
                                     };
                                 }
                                 if (chr == '\n' || chr == '\r') {
@@ -2356,12 +2398,14 @@ class Template {
                     }
                 }
                 else if (name == 'is') {
-                    isAttrValue = '';
+                    attrIsValue = '';
                 }
                 else {
                     (list || (list = { __proto__: null, 'length=': 0 }))[list[name] === undefined ? (list[name] = list['length=']++) : list[name]] = {
+                        isTransformer,
                         name,
-                        value: ''
+                        value: '',
+                        pos
                     };
                 }
                 if ($paramsConfig && $paramsConfig[name]) {
@@ -2382,14 +2426,11 @@ class Template {
                     this._throwError('Unexpected end of template. Expected "," or ")" to finalize attribute value.');
                 }
             }
-            if (f) {
-                f = false;
-            }
         }
-        return isAttrValue == null && !list
+        return attrIsValue == null && !list
             ? null
             : {
-                isAttributeValue: isAttrValue || null,
+                attributeIsValue: attrIsValue || null,
                 list: list || null
             };
     }
@@ -2560,9 +2601,10 @@ class Template {
         return renderContent(document.createDocumentFragment(), block.content || block.elements['@root'].content, this, false, ownerComponent, context, result, parentComponent);
     }
 }
-Template.helpers = {
+Template.elementTransformers = {
     section: el => el.content
 };
+Template.attributeTransformers = {};
 exports.Template = Template;
 function renderContent(targetNode, content, template, isSVG, ownerComponent, context, result, parentComponent) {
     if (content) {
@@ -2579,7 +2621,7 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
             }
             switch (node.nodeType) {
                 case NodeType.ELEMENT: {
-                    if (node.isHelper) {
+                    if (node.isTransformer) {
                         renderContent(targetNode, node.content, template, isSVG, ownerComponent, context, result, parentComponent);
                     }
                     else {
@@ -2614,6 +2656,9 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                             }
                             for (let i = 0, l = attrList['length=']; i < l; i++) {
                                 let attr = attrList[i];
+                                if (attr.isTransformer) {
+                                    continue;
+                                }
                                 let attrName = isSVG_
                                     ? attr.name
                                     : rionite_snake_case_attribute_name_1.snakeCaseAttributeName(attr.name, true);

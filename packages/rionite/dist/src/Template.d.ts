@@ -25,20 +25,22 @@ export interface IDebuggerCall extends INode {
     nodeType: NodeType.DEBUGGER_CALL;
 }
 export interface IElementAttribute {
+    isTransformer: boolean;
     name: string;
     value: string;
+    pos: number;
 }
 export interface IElementAttributeList {
     [attrIndex: number]: IElementAttribute;
     'length=': number;
 }
 export interface IElementAttributes {
-    isAttributeValue: string | null;
+    attributeIsValue: string | null;
     list: IElementAttributeList | null;
 }
 export interface IElement extends INode {
     nodeType: NodeType.ELEMENT;
-    isHelper: boolean;
+    isTransformer: boolean;
     tagName: string;
     is: string | null;
     names: Array<string | null> | null;
@@ -58,7 +60,8 @@ export interface IBlock extends INode {
 }
 export declare const ELEMENT_NAME_DELIMITER = "__";
 export declare class Template {
-    static helpers: Record<string, (el: IElement) => TContent | null>;
+    static elementTransformers: Record<string, (el: IElement) => TContent | null>;
+    static attributeTransformers: Record<string, (el: IElement, attr: IElementAttribute) => IElement>;
     _isEmbedded: boolean;
     parent: Template | null;
     template: string;

@@ -1,5 +1,5 @@
 import './lib/polyfills';
-import './lib/templateHelpers';
+import './lib/templateTransformers';
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';

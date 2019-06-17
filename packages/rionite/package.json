@@ -6,7 +6,8 @@
   "typings": "dist/src/index.d.ts",
   "scripts": {
     "build": "rm -rf dist && webpack && gulp",
-    "test": "jest"
+    "test": "jest",
+	"debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand"
   },
   "repository": {
     "type": "git",
@@ -19,8 +20,8 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "@types/jest": "^24.0.13",
-    "@types/node": "^12.0.5",
+    "@types/jest": "^24.0.14",
+    "@types/node": "^12.0.8",
     "awesome-typescript-loader": "^5.2.1",
     "document-register-element": "^1.13.2",
     "gulp": "^4.0.2",
@@ -29,9 +30,9 @@
     "ts-jest": "^24.0.2",
     "tslint": "^5.17.0",
     "tslint-loader": "^3.6.0",
-    "typescript": "^3.5.1",
-    "webpack": "^4.33.0",
-    "webpack-cli": "^3.3.2"
+    "typescript": "^3.5.2",
+    "webpack": "^4.34.0",
+    "webpack-cli": "^3.3.4"
   },
   "dependencies": {
     "@riim/defer": "^1.1.0",
@@ -50,15 +51,15 @@
     "escape-string": "^1.0.2"
   },
   "jest": {
-    "transform": {
-      "^.+\\.ts$": "ts-jest"
-    },
-    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(js|ts)$",
     "moduleFileExtensions": [
       "ts",
       "js",
       "json",
       "node"
-    ]
+    ],
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(js|ts)$",
+    "transform": {
+      "^.+\\.ts$": "ts-jest"
+    }
   }
 }

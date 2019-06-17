@@ -29,6 +29,7 @@ export interface IDebuggerCall extends INode {
 
 export interface IElementAttribute extends INode {
 	nodeType: NodeType.ELEMENT_ATTRIBUTE;
+	isTransformer: boolean;
 	name: string;
 	value: string;
 }
@@ -298,6 +299,12 @@ export class TemplateParser {
 			} else {
 				let pos = this._pos;
 				let line = this._line;
+				let isTransformer = this._chr == '@';
+
+				if (isTransformer) {
+					this._next();
+				}
+
 				let name = this._readName(reAttributeName);
 
 				if (!name) {
@@ -312,6 +319,7 @@ export class TemplateParser {
 					if (chr == "'" || chr == '"' || chr == '`') {
 						list.push({
 							nodeType: NodeType.ELEMENT_ATTRIBUTE,
+							isTransformer,
 							name,
 							value: this._readString(),
 							pos,
@@ -332,6 +340,7 @@ export class TemplateParser {
 							if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
 								list.push({
 									nodeType: NodeType.ELEMENT_ATTRIBUTE,
+									isTransformer,
 									name,
 									value: value.trim(),
 									pos,
@@ -352,6 +361,7 @@ export class TemplateParser {
 				} else {
 					list.push({
 						nodeType: NodeType.ELEMENT_ATTRIBUTE,
+						isTransformer,
 						name,
 						value: '',
 						pos,

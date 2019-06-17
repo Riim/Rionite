@@ -55,8 +55,10 @@ export interface IDebuggerCall extends INode {
 }
 
 export interface IElementAttribute {
+	isTransformer: boolean;
 	name: string;
 	value: string;
+	pos: number;
 }
 
 export interface IElementAttributeList {
@@ -121,9 +123,14 @@ function normalizeMultilineText(text: string): string {
 export const ELEMENT_NAME_DELIMITER = '__';
 
 export class Template {
-	static transformers: Record<string, (el: IElement) => TContent | null> = {
+	static elementTransformers: Record<string, (el: IElement) => TContent | null> = {
 		section: el => el.content
 	};
+
+	static attributeTransformers: Record<
+		string,
+		(el: IElement, attr: IElementAttribute) => IElement
+	> = {};
 
 	_isEmbedded: boolean;
 
@@ -377,7 +384,7 @@ export class Template {
 
 		if (tagName) {
 			if (!isTransformer) {
-			tagName = kebabCase(tagName, true);
+				tagName = kebabCase(tagName, true);
 			}
 		} else {
 			if (!elName) {
@@ -489,26 +496,24 @@ export class Template {
 			content = this._readContent(null, elName || superElName, true, componentConstr);
 		}
 
-		let el: IElement;
+		let el: IElement = {
+			nodeType: NodeType.ELEMENT,
+			isTransformer,
+			tagName,
+			is: (attrs && attrs.attributeIsValue) || null,
+			names: elNames || null,
+			attributes: attrs || null,
+			$specifiedParams: $specifiedParams || null,
+			content: content || null,
+			contentTemplateIndex: null
+		};
 
 		if (isTransformer) {
-			let transformer = Template.transformers[tagName];
+			let transformer = Template.elementTransformers[tagName];
 
 			if (!transformer) {
 				this._throwError(`Transformer "${tagName}" is not defined`, pos);
 			}
-
-			el = {
-				nodeType: NodeType.ELEMENT,
-				isTransformer: true,
-				tagName,
-				is: (attrs && attrs.attributeIsValue) || null,
-				names: elNames || null,
-				attributes: attrs || null,
-				$specifiedParams: $specifiedParams || null,
-				content: content || null,
-				contentTemplateIndex: null
-			};
 
 			content = transformer(el);
 
@@ -540,7 +545,7 @@ export class Template {
 										new Template(
 											{
 												nodeType: NodeType.BLOCK,
-												content: (node as IElement).content!,
+												content: (node as IElement).content,
 												elements: this._elements
 											},
 											{
@@ -551,7 +556,7 @@ export class Template {
 									) - 1
 							};
 
-							let elName = el.names && el.names![0];
+							let elName = el.names && el.names[0];
 
 							if (elName) {
 								this._elements[elName] = el;
@@ -579,32 +584,40 @@ export class Template {
 				el.content = null;
 			}
 		} else {
-			el = {
-				nodeType: NodeType.ELEMENT,
-				isTransformer: false,
-				tagName,
-				is: (attrs && attrs.attributeIsValue) || null,
-				names: elNames || null,
-				attributes: attrs || null,
-				$specifiedParams: $specifiedParams || null,
-				content: content || null,
-				contentTemplateIndex:
-					content && (tagName == 'template' || tagName == 'rn-slot')
-						? (this._embeddedTemplates || (this._embeddedTemplates = [])).push(
-								new Template(
-									{
-										nodeType: NodeType.BLOCK,
-										content,
-										elements: this._elements
-									},
-									{
-										_isEmbedded: true,
-										parent: this
-									}
-								)
-						  ) - 1
-						: null
-			};
+			let attrList = attrs && attrs.list;
+
+			if (attrList) {
+				for (let i = 0, l = attrList['length=']; i < l; i++) {
+					let attr = attrList[i];
+
+					if (attr.isTransformer) {
+						let transformer = Template.attributeTransformers[attr.name];
+
+						if (!transformer) {
+							this._throwError(`Transformer "${attr.name}" is not defined`, attr.pos);
+						}
+
+						el = transformer(el, attr);
+					}
+				}
+			}
+
+			if (el.content && (el.tagName == 'template' || el.tagName == 'rn-slot')) {
+				el.contentTemplateIndex =
+					(this._embeddedTemplates || (this._embeddedTemplates = [])).push(
+						new Template(
+							{
+								nodeType: NodeType.BLOCK,
+								content: el.content,
+								elements: this._elements
+							},
+							{
+								_isEmbedded: true,
+								parent: this
+							}
+						)
+					) - 1;
+			}
 		}
 
 		if (elName) {
@@ -648,6 +661,13 @@ export class Template {
 
 				this._skipWhitespacesAndComments();
 			} else {
+				let pos = this._pos;
+				let isTransformer = this._chr == '@';
+
+				if (isTransformer) {
+					this._next();
+				}
+
 				let name = this._readName(reAttributeName);
 
 				if (!name) {
@@ -668,8 +688,10 @@ export class Template {
 									? (list![name] = list!['length=']++)
 									: list![name]
 							] = {
+								isTransformer,
 								name,
-								value: this._readString()
+								value: this._readString(),
+								pos
 							};
 						}
 
@@ -693,8 +715,10 @@ export class Template {
 											? (list![name] = list!['length=']++)
 											: list![name]
 									] = {
+										isTransformer,
 										name,
-										value: value.trim()
+										value: value.trim(),
+										pos
 									};
 								}
 
@@ -715,8 +739,10 @@ export class Template {
 					(list || (list = { __proto__: null, 'length=': 0 } as any))[
 						list![name] === undefined ? (list![name] = list!['length=']++) : list![name]
 					] = {
+						isTransformer,
 						name,
-						value: ''
+						value: '',
+						pos
 					};
 				}
 
@@ -1081,6 +1107,11 @@ function renderContent<T extends Node = Element>(
 
 							for (let i = 0, l = attrList['length=']; i < l; i++) {
 								let attr = attrList[i];
+
+								if (attr.isTransformer) {
+									continue;
+								}
+
 								let attrName = isSVG_
 									? attr.name
 									: snakeCaseAttributeName(attr.name, true);
