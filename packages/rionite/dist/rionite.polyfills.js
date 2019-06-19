@@ -2321,13 +2321,13 @@ class Template {
                                     let elName = contentEl.names && contentEl.names[0];
                                     if (elName) {
                                         this._elements[elName] = contentEl;
-                                        contentEl.content[i] = {
+                                        el.content[i] = {
                                             nodeType: NodeType.ELEMENT_CALL,
                                             name: elName
                                         };
                                     }
                                     else {
-                                        contentEl.content[i] = contentEl;
+                                        el.content[i] = contentEl;
                                     }
                                 }
                                 else {

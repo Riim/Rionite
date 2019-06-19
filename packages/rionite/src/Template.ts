@@ -640,12 +640,12 @@ export class Template {
 
 									if (elName) {
 										this._elements[elName] = contentEl;
-										contentEl.content![i] = {
+										el.content![i] = {
 											nodeType: NodeType.ELEMENT_CALL,
 											name: elName
 										} as IElementCall;
 									} else {
-										contentEl.content![i] = contentEl;
+										el.content![i] = contentEl;
 									}
 								} else {
 									let elName =
