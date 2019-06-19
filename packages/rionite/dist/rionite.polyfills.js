@@ -2235,7 +2235,7 @@ class Template {
                         if (node.content &&
                             (node.tagName == 'template' ||
                                 node.tagName == 'rn-slot')) {
-                            let el = {
+                            let contentEl = {
                                 nodeType: NodeType.ELEMENT,
                                 isTransformer: false,
                                 tagName: node.tagName,
@@ -2253,16 +2253,16 @@ class Template {
                                     parent: this
                                 })) - 1
                             };
-                            let elName = el.names && el.names[0];
+                            let elName = contentEl.names && contentEl.names[0];
                             if (elName) {
-                                this._elements[elName] = el;
+                                this._elements[elName] = contentEl;
                                 content[i] = {
                                     nodeType: NodeType.ELEMENT_CALL,
                                     name: elName
                                 };
                             }
                             else {
-                                content[i] = el;
+                                content[i] = contentEl;
                             }
                         }
                         else {
@@ -2293,6 +2293,55 @@ class Template {
                             this._throwError(`Transformer "${attr.name}" is not defined`, attr.pos);
                         }
                         el = transformer(el, attr);
+                        for (let i = 0, l = (el.content || []).length; i < l; i++) {
+                            let node = el.content[i];
+                            if (node.nodeType == NodeType.ELEMENT) {
+                                if (node.content &&
+                                    (node.tagName == 'template' ||
+                                        node.tagName == 'rn-slot')) {
+                                    let contentEl = {
+                                        nodeType: NodeType.ELEMENT,
+                                        isTransformer: false,
+                                        tagName: node.tagName,
+                                        is: node.is,
+                                        names: node.names,
+                                        attributes: node.attributes,
+                                        $specifiedParams: node.$specifiedParams,
+                                        content: node.content,
+                                        contentTemplateIndex: (this._embeddedTemplates ||
+                                            (this._embeddedTemplates = [])).push(new Template({
+                                            nodeType: NodeType.BLOCK,
+                                            content: node.content,
+                                            elements: this._elements
+                                        }, {
+                                            _isEmbedded: true,
+                                            parent: this
+                                        })) - 1
+                                    };
+                                    let elName = contentEl.names && contentEl.names[0];
+                                    if (elName) {
+                                        this._elements[elName] = contentEl;
+                                        contentEl.content[i] = {
+                                            nodeType: NodeType.ELEMENT_CALL,
+                                            name: elName
+                                        };
+                                    }
+                                    else {
+                                        contentEl.content[i] = contentEl;
+                                    }
+                                }
+                                else {
+                                    let elName = node.names && node.names[0];
+                                    if (elName) {
+                                        this._elements[elName] = node;
+                                        el.content[i] = {
+                                            nodeType: NodeType.ELEMENT_CALL,
+                                            name: elName
+                                        };
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -2307,6 +2356,7 @@ class Template {
                         parent: this
                     })) - 1;
             }
+            elName = el.names && el.names[0];
         }
         if (elName) {
             this._elements[elName] = el;
