@@ -135,6 +135,10 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 						enumerable: true,
 
 						get() {
+							if (this[propertyName + 'Cell']) {
+								return this[propertyName + 'Cell'].get();
+							}
+
 							return this[KEY_PARAMS].get(name);
 						},
 

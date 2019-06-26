@@ -1,10 +1,6 @@
-import { lowerCaseFirstWord } from '@riim/lower-case-first-word';
 import { BaseComponent, IComponentParamConfig } from '../BaseComponent';
 
 const types = new Set([Boolean, Number, String, Object]);
-
-const prefix = 'param';
-const prefixLength = prefix.length;
 
 export function Param(
 	target: Object,
@@ -53,9 +49,6 @@ export function Param(
 	let constr = target!.constructor as typeof BaseComponent;
 
 	((constr.hasOwnProperty('params') && constr.params) || (constr.params = {}))[
-		name ||
-			(propertyName.length <= prefixLength || propertyName.lastIndexOf(prefix, 0)
-				? propertyName
-				: lowerCaseFirstWord(propertyName.slice(5)))
+		name || propertyName
 	] = config;
 }

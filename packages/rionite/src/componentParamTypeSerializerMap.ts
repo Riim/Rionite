@@ -1,5 +1,4 @@
-import { escapeHTML, unescapeHTML } from '@riim/escape-html';
-import { isRegExp } from '@riim/is-regexp';
+import { unescapeHTML } from '@riim/escape-html';
 
 export interface IComponentParamTypeSerializer {
 	read: (value: string | null, defaultValue: any, el?: Element) => any;
@@ -97,9 +96,7 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 			},
 
 			write: (value: any): string | null => {
-				return value != null
-					? escapeHTML(isRegExp(value) ? value.toString() : JSON.stringify(value))
-					: null;
+				return value != null ? '' : null;
 			}
 		}
 	]
