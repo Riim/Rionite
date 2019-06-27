@@ -73,7 +73,13 @@ function initParam(
 		}
 	}
 
-	component[KEY_PARAMS].set(name, typeSerializer.read(rawValue, defaultValue, el));
+	let value = typeSerializer.read(rawValue, defaultValue, el);
+
+	if (component[$paramConfig.property + 'Cell']) {
+		component[$paramConfig.property + 'Cell'].set(value);
+	} else {
+		component[KEY_PARAMS].set(name, value);
+	}
 }
 
 export const ComponentParams = {

@@ -4218,7 +4218,13 @@ function initParam(component, $paramConfig, name) {
             el.setAttribute(snakeCaseName, typeSerializer.write(defaultValue));
         }
     }
-    component[Constants_1.KEY_PARAMS].set(name, typeSerializer.read(rawValue, defaultValue, el));
+    let value = typeSerializer.read(rawValue, defaultValue, el);
+    if (component[$paramConfig.property + 'Cell']) {
+        component[$paramConfig.property + 'Cell'].set(value);
+    }
+    else {
+        component[Constants_1.KEY_PARAMS].set(name, value);
+    }
 }
 exports.ComponentParams = {
     init(component) {
