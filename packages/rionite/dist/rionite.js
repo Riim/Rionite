@@ -2326,7 +2326,13 @@ function registerComponent(componentConstr) {
                                 }
                             }
                             else {
-                                this[Constants_1.KEY_PARAMS].set(name, value);
+                                let valueCell = this[propertyName + 'Cell'];
+                                if (valueCell) {
+                                    valueCell.set(value);
+                                }
+                                else {
+                                    this[Constants_1.KEY_PARAMS].set(name, value);
+                                }
                             }
                         }
                     };
@@ -2371,13 +2377,10 @@ function registerComponent(componentConstr) {
                                 else {
                                     this.element.setAttribute(snakeCaseName, rawValue);
                                 }
-                                let valueCell = this[propertyName + 'Cell'];
-                                if (valueCell) {
-                                    valueCell.set(value);
-                                }
-                                else {
-                                    this[Constants_1.KEY_PARAMS].set(name, value);
-                                }
+                            }
+                            let valueCell = this[propertyName + 'Cell'];
+                            if (valueCell) {
+                                valueCell.set(value);
                             }
                             else {
                                 this[Constants_1.KEY_PARAMS].set(name, value);

@@ -148,7 +148,13 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 									throw new TypeError(`Parameter "${name}" is readonly`);
 								}
 							} else {
-								this[KEY_PARAMS].set(name, value);
+								let valueCell = this[propertyName + 'Cell'];
+
+								if (valueCell) {
+									valueCell.set(value);
+								} else {
+									this[KEY_PARAMS].set(name, value);
+								}
 							}
 						}
 					};
@@ -204,14 +210,12 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 								} else {
 									this.element.setAttribute(snakeCaseName, rawValue);
 								}
+							}
 
-								let valueCell = this[propertyName + 'Cell'];
+							let valueCell = this[propertyName + 'Cell'];
 
-								if (valueCell) {
-									valueCell.set(value);
-								} else {
-									this[KEY_PARAMS].set(name, value);
-								}
+							if (valueCell) {
+								valueCell.set(value);
 							} else {
 								this[KEY_PARAMS].set(name, value);
 							}
