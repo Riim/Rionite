@@ -3957,86 +3957,60 @@ function registerComponent(componentConstr) {
                     readonly,
                     paramConfig: paramsConfig[name]
                 });
-                let descriptor;
-                if (readonly) {
-                    descriptor = {
-                        configurable: true,
-                        enumerable: true,
-                        get() {
-                            if (this[propertyName + 'Cell']) {
-                                return this[propertyName + 'Cell'].get();
+                Object.defineProperty(componentProto, propertyName + 'Cell', {
+                    configurable: true,
+                    enumerable: false,
+                    writable: true,
+                    value: undefined
+                });
+                let descriptor = {
+                    configurable: true,
+                    enumerable: true,
+                    get() {
+                        let valueCell = this[propertyName + 'Cell'];
+                        if (valueCell) {
+                            return valueCell.get();
+                        }
+                        let value = this[Constants_1.KEY_PARAMS].get(name);
+                        if (cellx_1.Cell.currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
+                            valueCell = new cellx_1.Cell(value, { context: this });
+                            Object.defineProperty(this, propertyName + 'Cell', {
+                                configurable: true,
+                                enumerable: false,
+                                writable: true,
+                                value: valueCell
+                            });
+                            if (cellx_1.Cell.currentlyPulling) {
+                                return valueCell.get();
                             }
-                            return this[Constants_1.KEY_PARAMS].get(name);
-                        },
-                        set(value) {
-                            if (this[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
+                        }
+                        return value;
+                    },
+                    set(value) {
+                        if (this[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
+                            if (readonly) {
                                 if (value !== this[Constants_1.KEY_PARAMS].get(name)) {
                                     throw new TypeError(`Parameter "${name}" is readonly`);
                                 }
+                                return;
+                            }
+                            let rawValue = $paramConfig.typeSerializer.write(value, $paramConfig.default);
+                            if (rawValue === null) {
+                                this.element.removeAttribute(snakeCaseName);
                             }
                             else {
-                                let valueCell = this[propertyName + 'Cell'];
-                                if (valueCell) {
-                                    valueCell.set(value);
-                                }
-                                else {
-                                    this[Constants_1.KEY_PARAMS].set(name, value);
-                                }
+                                this.element.setAttribute(snakeCaseName, rawValue);
                             }
                         }
-                    };
-                }
-                else {
-                    Object.defineProperty(componentProto, propertyName + 'Cell', {
-                        configurable: true,
-                        enumerable: false,
-                        writable: true,
-                        value: undefined
-                    });
-                    descriptor = {
-                        configurable: true,
-                        enumerable: true,
-                        get() {
-                            let valueCell = this[propertyName + 'Cell'];
-                            if (valueCell) {
-                                return valueCell.get();
-                            }
-                            let currentlyPulling = cellx_1.Cell.currentlyPulling;
-                            let value = this[Constants_1.KEY_PARAMS].get(name);
-                            if (currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
-                                valueCell = new cellx_1.Cell(value, { context: this });
-                                Object.defineProperty(this, propertyName + 'Cell', {
-                                    configurable: true,
-                                    enumerable: false,
-                                    writable: true,
-                                    value: valueCell
-                                });
-                                if (currentlyPulling) {
-                                    return valueCell.get();
-                                }
-                            }
-                            return value;
-                        },
-                        set(value) {
-                            if (this[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
-                                let rawValue = $paramConfig.typeSerializer.write(value, $paramConfig.default);
-                                if (rawValue === null) {
-                                    this.element.removeAttribute(snakeCaseName);
-                                }
-                                else {
-                                    this.element.setAttribute(snakeCaseName, rawValue);
-                                }
-                            }
-                            let valueCell = this[propertyName + 'Cell'];
-                            if (valueCell) {
-                                valueCell.set(value);
-                            }
-                            else {
-                                this[Constants_1.KEY_PARAMS].set(name, value);
-                            }
+                        let valueCell = this[propertyName + 'Cell'];
+                        if (valueCell) {
+                            valueCell.set(value);
                         }
-                    };
-                }
+                        else {
+                            this[Constants_1.KEY_PARAMS].set(name, value);
+                        }
+                    }
+                };
                 Object.defineProperty(componentProto, propertyName, descriptor);
             }
         }
