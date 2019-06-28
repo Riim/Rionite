@@ -148,7 +148,10 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 						let value = this[KEY_PARAMS].get(name);
 
 						if (Cell.currentlyPulling || EventEmitter.currentlySubscribing) {
-							valueCell = new Cell(value, { context: this });
+							valueCell = new Cell(null, {
+								context: this,
+								value
+							});
 
 							Object.defineProperty(this, propertyName + 'Cell', {
 								configurable: true,

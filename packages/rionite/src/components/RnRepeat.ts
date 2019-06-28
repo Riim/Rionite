@@ -331,7 +331,7 @@ export class RnRepeat extends BaseComponent {
 						}
 					}
 				} else {
-					let itemCell = new Cell(item);
+					let itemCell = new Cell(null, { value: item });
 					let indexCell = new Cell(i);
 
 					let context = this.$context!;

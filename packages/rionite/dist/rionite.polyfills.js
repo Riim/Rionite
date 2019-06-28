@@ -3973,7 +3973,10 @@ function registerComponent(componentConstr) {
                         }
                         let value = this[Constants_1.KEY_PARAMS].get(name);
                         if (cellx_1.Cell.currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
-                            valueCell = new cellx_1.Cell(value, { context: this });
+                            valueCell = new cellx_1.Cell(null, {
+                                context: this,
+                                value
+                            });
                             Object.defineProperty(this, propertyName + 'Cell', {
                                 configurable: true,
                                 enumerable: false,
@@ -5635,7 +5638,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                     }
                 }
                 else {
-                    let itemCell = new cellx_1.Cell(item);
+                    let itemCell = new cellx_1.Cell(null, { value: item });
                     let indexCell = new cellx_1.Cell(i);
                     let context = this.$context;
                     let contentBindingResult = [null, null, null];
