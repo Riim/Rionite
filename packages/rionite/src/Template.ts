@@ -739,19 +739,21 @@ export class Template {
 					throw this._throwError('Expected attribute name');
 				}
 
+				let fullName = (isTransformer ? '@' : '') + name;
+
 				if (this._skipWhitespacesAndComments() == '=') {
 					this._next();
 
 					let chr = this._skipWhitespaces();
 
 					if (chr == "'" || chr == '"' || chr == '`') {
-						if (name == 'is') {
+						if (fullName == 'is') {
 							attrIsValue = this._readString();
 						} else {
 							(list || (list = { __proto__: null, 'length=': 0 } as any))[
-								list![name] === undefined
-									? (list![name] = list!['length=']++)
-									: list![name]
+								list![fullName] === undefined
+									? (list![fullName] = list!['length=']++)
+									: list![fullName]
 							] = {
 								isTransformer,
 								name,
@@ -772,13 +774,13 @@ export class Template {
 							}
 
 							if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
-								if (name == 'is') {
+								if (fullName == 'is') {
 									attrIsValue = value.trim();
 								} else {
 									(list || (list = { __proto__: null, 'length=': 0 } as any))[
-										list![name] === undefined
-											? (list![name] = list!['length=']++)
-											: list![name]
+										list![fullName] === undefined
+											? (list![fullName] = list!['length=']++)
+											: list![fullName]
 									] = {
 										isTransformer,
 										name,
@@ -798,11 +800,13 @@ export class Template {
 							chr = this._next();
 						}
 					}
-				} else if (name == 'is') {
+				} else if (fullName == 'is') {
 					attrIsValue = '';
 				} else {
 					(list || (list = { __proto__: null, 'length=': 0 } as any))[
-						list![name] === undefined ? (list![name] = list!['length=']++) : list![name]
+						list![fullName] === undefined
+							? (list![fullName] = list!['length=']++)
+							: list![fullName]
 					] = {
 						isTransformer,
 						name,

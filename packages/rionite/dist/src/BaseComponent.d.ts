@@ -1,6 +1,7 @@
 import { EventEmitter, IEvent } from 'cellx';
 import { IFreezableCell } from './componentBinding';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
+import { KEY_PARAMS } from './Constants';
 import { IBlock, Template } from './Template';
 export interface IDisposable {
     dispose(): any;
@@ -82,6 +83,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;
+    [KEY_PARAMS]: Map<string, any>;
     constructor(el?: HTMLElement);
     handleEvent(evt: IEvent<BaseComponent>): void;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;

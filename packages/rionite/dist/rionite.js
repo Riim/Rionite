@@ -749,17 +749,18 @@ class Template {
                 if (!name) {
                     throw this._throwError('Expected attribute name');
                 }
+                let fullName = (isTransformer ? '@' : '') + name;
                 if (this._skipWhitespacesAndComments() == '=') {
                     this._next();
                     let chr = this._skipWhitespaces();
                     if (chr == "'" || chr == '"' || chr == '`') {
-                        if (name == 'is') {
+                        if (fullName == 'is') {
                             attrIsValue = this._readString();
                         }
                         else {
-                            (list || (list = { __proto__: null, 'length=': 0 }))[list[name] === undefined
-                                ? (list[name] = list['length=']++)
-                                : list[name]] = {
+                            (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
+                                ? (list[fullName] = list['length=']++)
+                                : list[fullName]] = {
                                 isTransformer,
                                 name,
                                 value: this._readString(),
@@ -775,13 +776,13 @@ class Template {
                                 this._throwError('Unexpected end of template. Expected "," or ")" to finalize attribute value.');
                             }
                             if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
-                                if (name == 'is') {
+                                if (fullName == 'is') {
                                     attrIsValue = value.trim();
                                 }
                                 else {
-                                    (list || (list = { __proto__: null, 'length=': 0 }))[list[name] === undefined
-                                        ? (list[name] = list['length=']++)
-                                        : list[name]] = {
+                                    (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
+                                        ? (list[fullName] = list['length=']++)
+                                        : list[fullName]] = {
                                         isTransformer,
                                         name,
                                         value: value.trim(),
@@ -798,11 +799,13 @@ class Template {
                         }
                     }
                 }
-                else if (name == 'is') {
+                else if (fullName == 'is') {
                     attrIsValue = '';
                 }
                 else {
-                    (list || (list = { __proto__: null, 'length=': 0 }))[list[name] === undefined ? (list[name] = list['length=']++) : list[name]] = {
+                    (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
+                        ? (list[fullName] = list['length=']++)
+                        : list[fullName]] = {
                         isTransformer,
                         name,
                         value: '',
@@ -2324,6 +2327,7 @@ function registerComponent(componentConstr) {
                         }
                         let value = this[Constants_1.KEY_PARAMS].get(name);
                         if (cellx_1.Cell.currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
+                            this[Constants_1.KEY_PARAMS].delete(name);
                             valueCell = new cellx_1.Cell(null, {
                                 context: this,
                                 value
