@@ -178,6 +178,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	initialized = false;
 	isReady = false;
 
+	[KEY_PARAMS]: Map<string, any>;
+
 	constructor(el?: HTMLElement) {
 		super();
 

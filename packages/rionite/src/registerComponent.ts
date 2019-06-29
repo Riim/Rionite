@@ -138,7 +138,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 					configurable: true,
 					enumerable: true,
 
-					get() {
+					get(this: BaseComponent) {
 						let valueCell = this[propertyName + 'Cell'];
 
 						if (valueCell) {
@@ -148,6 +148,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 						let value = this[KEY_PARAMS].get(name);
 
 						if (Cell.currentlyPulling || EventEmitter.currentlySubscribing) {
+							this[KEY_PARAMS].delete(name);
 							valueCell = new Cell(null, {
 								context: this,
 								value
