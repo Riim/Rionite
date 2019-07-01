@@ -3981,8 +3981,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                     let indexCell = new cellx_1.Cell(i);
                     let context = this.$context;
                     let contentBindingResult = [null, null, null];
-                    let content = this.element.contentTemplate.render(null, this.ownerComponent, {
-                        __proto__: context,
+                    let content = this.element.contentTemplate.render(null, this.ownerComponent, Object.create(context, {
                         [this._itemName]: {
                             configurable: true,
                             enumerable: true,
@@ -3993,7 +3992,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                             enumerable: true,
                             get: (indexCell => () => indexCell.get())(indexCell)
                         }
-                    }, contentBindingResult);
+                    }), contentBindingResult);
                     let childComponents = contentBindingResult[0];
                     let backBindings = contentBindingResult[2];
                     let new$Item = {
