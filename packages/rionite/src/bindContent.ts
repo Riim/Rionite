@@ -49,12 +49,12 @@ export function bindContent(
 		switch (child.nodeType) {
 			case Node.ELEMENT_NODE: {
 				let childComponent = (child as IPossiblyComponentElement).rioniteComponent;
-				let $paramsConfig: Record<string, I$ComponentParamConfig> | undefined;
-				let $specifiedParams: Set<string> | undefined;
+				let $paramsConfig: Map<string, I$ComponentParamConfig> | null | undefined;
+				let $specifiedParams: Map<string, string> | undefined;
 
 				if (childComponent) {
 					$paramsConfig = childComponent.constructor[KEY_PARAMS_CONFIG];
-					$specifiedParams = new Set();
+					$specifiedParams = new Map();
 				}
 
 				let attrs = (child as Element).attributes;
@@ -77,13 +77,12 @@ export function bindContent(
 						}
 					}
 
-					let $paramConfig = $paramsConfig && $paramsConfig[targetAttrName];
+					let $paramConfig = $paramsConfig && $paramsConfig.get(targetAttrName);
+					let attrValue = attr.value;
 
 					if ($paramConfig) {
-						$specifiedParams!.add($paramConfig.name);
+						$specifiedParams!.set($paramConfig.name, attrValue);
 					}
-
-					let attrValue = attr.value;
 
 					if (!attrValue) {
 						continue;
@@ -129,7 +128,7 @@ export function bindContent(
 							(result[1] || (result[1] = [])).push(cell as IFreezableCell);
 						}
 
-						let paramConfig: IComponentParamConfig | Function | undefined;
+						let paramConfig: IComponentParamConfig | undefined;
 
 						if ($paramConfig) {
 							paramConfig = $paramConfig.paramConfig;
@@ -183,7 +182,7 @@ export function bindContent(
 				if (childComponent) {
 					childComponent._ownerComponent = ownerComponent;
 					childComponent.$context = context;
-					childComponent.$specifiedParams = $specifiedParams;
+					childComponent.$specifiedParams = $specifiedParams!;
 
 					if (parentComponent) {
 						(

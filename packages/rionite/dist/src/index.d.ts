@@ -3,7 +3,7 @@ import './lib/templateTransformers';
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
-export { KEY_PARAMS_CONFIG, KEY_PARAMS } from './Constants';
+export { KEY_PARAMS_CONFIG, KEY_PARAM_VALUES } from './Constants';
 export { IDisposable, IDisposableListening, IDisposableTimeout, IDisposableInterval, IDisposableCallback, TListeningTarget, TListener, IComponentParamConfig, I$ComponentParamConfig, IPossiblyComponentElement, IComponentElement, IComponentElementClassNameMap, TEventHandler, IComponentEvents, BaseComponent } from './BaseComponent';
 export { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';

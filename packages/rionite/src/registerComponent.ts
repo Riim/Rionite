@@ -3,10 +3,10 @@ import { pascalize } from '@riim/pascalize';
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
 import { Cell, EventEmitter } from 'cellx';
 import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './BaseComponent';
-import { componentConstructorMap } from './componentConstructorMap';
+import { componentConstructors } from './componentConstructors';
 import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
-import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';
-import { elementConstructorMap } from './elementConstructorMap';
+import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
+import { elementConstructors } from './elementConstructors';
 import { ElementProtoMixin } from './ElementProtoMixin';
 import { Template } from './Template';
 
@@ -48,7 +48,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 	let kebabCaseElIs = kebabCase(elIs, true);
 
-	if (componentConstructorMap.has(kebabCaseElIs)) {
+	if (componentConstructors.has(kebabCaseElIs)) {
 		throw new TypeError(`Component "${kebabCaseElIs}" already registered`);
 	}
 
@@ -58,152 +58,126 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 	inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
 
+	componentConstr[KEY_PARAMS_CONFIG] = null;
+
 	let paramsConfig = componentConstr.params;
 
-	if (paramsConfig) {
-		for (let name in paramsConfig) {
-			if (paramsConfig[name] === Object.prototype[name]) {
-				continue;
-			}
+	for (let name in paramsConfig) {
+		let paramConfig: IComponentParamConfig | null = paramsConfig[name];
 
-			let paramConfig: IComponentParamConfig = paramsConfig[name];
-
-			if (paramConfig === null) {
-				let parentParamConfig: IComponentParamConfig | null | undefined =
-					parentComponentConstr.params && parentComponentConstr.params[name];
-
-				if (parentParamConfig != null) {
-					Object.defineProperty(
-						componentProto,
-						(typeof parentParamConfig == 'object' &&
-							(parentParamConfig.type || parentParamConfig.default !== undefined) &&
-							parentParamConfig.property) ||
-							name,
-						{
-							configurable: true,
-							enumerable: true,
-							writable: true,
-							value: null
-						}
-					);
-				}
-			} else {
-				let snakeCaseName = snakeCaseAttributeName(name, true);
-
-				let isObject =
-					typeof paramConfig == 'object' &&
-					(!!paramConfig.type || paramConfig.default !== undefined);
-
-				let propertyName = (isObject && paramConfig.property) || name;
-
-				let required: boolean;
-				let readonly: boolean;
-
-				if (isObject) {
-					required = paramConfig.required || false;
-					readonly = paramConfig.readonly || false;
-				} else {
-					required = readonly = false;
-				}
-
-				let $paramConfig: I$ComponentParamConfig = ((componentConstr.hasOwnProperty(
-					KEY_PARAMS_CONFIG
-				)
-					? componentConstr[KEY_PARAMS_CONFIG]
-					: (componentConstr[KEY_PARAMS_CONFIG] = { __proto__: null }))[
-					name
-				] = componentConstr[KEY_PARAMS_CONFIG][snakeCaseName] = {
-					name,
-					property: propertyName,
-
-					type: undefined,
-					typeSerializer: undefined,
-
-					default: undefined,
-
-					required,
-					readonly,
-
-					paramConfig: paramsConfig[name]
-				});
-
-				Object.defineProperty(componentProto, propertyName + 'Cell', {
-					configurable: true,
-					enumerable: false,
-					writable: true,
-					value: undefined
-				});
-
-				let descriptor = {
-					configurable: true,
-					enumerable: true,
-
-					get(this: BaseComponent) {
-						let valueCell = this[propertyName + 'Cell'];
-
-						if (valueCell) {
-							return valueCell.get();
-						}
-
-						let value = this[KEY_PARAMS].get(name);
-
-						if (Cell.currentlyPulling || EventEmitter.currentlySubscribing) {
-							this[KEY_PARAMS].delete(name);
-							valueCell = new Cell(null, {
-								context: this,
-								value
-							});
-
-							Object.defineProperty(this, propertyName + 'Cell', {
-								configurable: true,
-								enumerable: false,
-								writable: true,
-								value: valueCell
-							});
-
-							if (Cell.currentlyPulling) {
-								return valueCell.get();
-							}
-						}
-
-						return value;
-					},
-
-					set(this: BaseComponent, value: any) {
-						if (this[KEY_COMPONENT_PARAMS_INITED]) {
-							if (readonly) {
-								if (value !== this[KEY_PARAMS].get(name)) {
-									throw new TypeError(`Parameter "${name}" is readonly`);
-								}
-
-								return;
-							}
-
-							let rawValue = $paramConfig.typeSerializer!.write(
-								value,
-								$paramConfig.default
-							);
-
-							if (rawValue === null) {
-								this.element.removeAttribute(snakeCaseName);
-							} else {
-								this.element.setAttribute(snakeCaseName, rawValue);
-							}
-						}
-
-						let valueCell = this[propertyName + 'Cell'];
-
-						if (valueCell) {
-							valueCell.set(value);
-						} else {
-							this[KEY_PARAMS].set(name, value);
-						}
-					}
-				};
-
-				Object.defineProperty(componentProto, propertyName, descriptor);
-			}
+		if (paramConfig === null || paramConfig === Object.prototype[name]) {
+			continue;
 		}
+
+		let snakeCaseName = snakeCaseAttributeName(name, true);
+
+		let isObject =
+			typeof paramConfig == 'object' &&
+			(!!paramConfig.type || paramConfig.default !== undefined);
+
+		let propertyName = (isObject && paramConfig.property) || name;
+
+		let required: boolean;
+		let readonly: boolean;
+
+		if (isObject) {
+			required = paramConfig.required || false;
+			readonly = paramConfig.readonly || false;
+		} else {
+			required = readonly = false;
+		}
+
+		let $paramConfig: I$ComponentParamConfig = {
+			name,
+			property: propertyName,
+
+			type: undefined,
+			typeSerializer: undefined,
+
+			default: undefined,
+
+			required,
+			readonly,
+
+			paramConfig
+		};
+
+		(componentConstr[KEY_PARAMS_CONFIG] || (componentConstr[KEY_PARAMS_CONFIG] = new Map()))!
+			.set(name, $paramConfig)
+			.set(snakeCaseName, $paramConfig);
+
+		Object.defineProperty(componentProto, propertyName + 'Cell', {
+			configurable: true,
+			enumerable: false,
+			writable: true,
+			value: null
+		});
+
+		let descriptor = {
+			configurable: true,
+			enumerable: true,
+
+			get(this: BaseComponent) {
+				let valueCell: Cell | null = this[propertyName + 'Cell'];
+
+				if (valueCell) {
+					return valueCell.get();
+				}
+
+				let value = this[KEY_PARAM_VALUES].get(name);
+
+				if (Cell.currentlyPulling || EventEmitter.currentlySubscribing) {
+					this[KEY_PARAM_VALUES].delete(name);
+					valueCell = new Cell(null, {
+						context: this,
+						value
+					});
+
+					Object.defineProperty(this, propertyName + 'Cell', {
+						configurable: true,
+						enumerable: false,
+						writable: true,
+						value: valueCell
+					});
+
+					if (Cell.currentlyPulling) {
+						return valueCell.get();
+					}
+				}
+
+				return value;
+			},
+
+			set(this: BaseComponent, value: any) {
+				if (this[KEY_COMPONENT_PARAMS_INITED]) {
+					if (readonly) {
+						if (value !== this[KEY_PARAM_VALUES].get(name)) {
+							throw new TypeError(`Parameter "${name}" is readonly`);
+						}
+
+						return;
+					}
+
+					let rawValue = $paramConfig.typeSerializer!.write(value, $paramConfig.default);
+
+					if (rawValue === null) {
+						this.element.removeAttribute(snakeCaseName);
+					} else {
+						this.element.setAttribute(snakeCaseName, rawValue);
+					}
+				}
+
+				let valueCell: Cell | null = this[propertyName + 'Cell'];
+
+				if (valueCell) {
+					valueCell.set(value);
+				} else {
+					this[KEY_PARAM_VALUES].set(name, value);
+				}
+			}
+		};
+
+		Object.defineProperty(componentProto, propertyName, descriptor);
 	}
 
 	inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
@@ -243,7 +217,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 	if (elExtends) {
 		parentElConstr =
-			elementConstructorMap.get(elExtends) || window[`HTML${pascalize(elExtends)}Element`];
+			elementConstructors.get(elExtends) || window[`HTML${pascalize(elExtends)}Element`];
 
 		if (!parentElConstr) {
 			throw new TypeError(`Component "${elExtends}" is not registered`);
@@ -262,15 +236,10 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 		get() {
 			let paramsConfig = componentConstr.params;
-
-			if (!paramsConfig) {
-				return [];
-			}
-
 			let attrs: Array<string> = [];
 
 			for (let name in paramsConfig) {
-				if (paramsConfig[name] !== Object.prototype[name]) {
+				if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
 					attrs.push(snakeCaseAttributeName(name, true));
 				}
 			}
@@ -309,8 +278,8 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		elExtends ? { extends: elExtends } : undefined
 	);
 
-	componentConstructorMap.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
-	elementConstructorMap.set(elIs, elConstr);
+	componentConstructors.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
+	elementConstructors.set(elIs, elConstr);
 
 	return componentConstr;
 }

@@ -1,4 +1,4 @@
-export const elementConstructorMap = new Map<string, typeof HTMLElement>([
+export const elementConstructors = new Map<string, typeof HTMLElement>([
 	['a', (window as any).HTMLAnchorElement],
 	['blockquote', (window as any).HTMLQuoteElement],
 	['br', (window as any).HTMLBRElement],
@@ -10,7 +10,6 @@ export const elementConstructorMap = new Map<string, typeof HTMLElement>([
 	['dir', (window as any).HTMLDirectoryElement],
 	['dl', (window as any).HTMLDListElement],
 	['document', (window as any).HTMLDocument],
-	['element', Element],
 	['fieldset', (window as any).HTMLFieldSetElement],
 	['frameset', (window as any).HTMLFrameSetElement],
 	['h1', (window as any).HTMLHeadingElement],

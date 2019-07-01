@@ -45,7 +45,7 @@ export interface IElement extends INode {
     is: string | null;
     names: Array<string | null> | null;
     attributes: IElementAttributes | null;
-    $specifiedParams: Set<string> | null;
+    $specifiedParams: Map<string, string> | null;
     content: TContent | null;
     contentTemplateIndex: number | null;
 }
@@ -62,7 +62,7 @@ export declare const ELEMENT_NAME_DELIMITER = "__";
 export declare class Template {
     static elementTransformers: Record<string, (el: IElement) => TContent | null>;
     static attributeTransformers: Record<string, (el: IElement, attr: IElementAttribute) => IElement>;
-    _isEmbedded: boolean;
+    _embedded: boolean;
     parent: Template | null;
     template: string;
     _elementNamesTemplate: Array<string>;
@@ -73,7 +73,7 @@ export declare class Template {
     block: IBlock | null;
     _embeddedTemplates: Array<Template> | null;
     constructor(template: string | IBlock, options?: {
-        _isEmbedded?: boolean;
+        _embedded?: boolean;
         parent?: Template;
         blockName?: string | Array<string>;
     });
@@ -81,7 +81,7 @@ export declare class Template {
     parse(component?: BaseComponent | null): IBlock;
     _readContent(content: TContent | null, superElName: string | null, brackets: boolean, componentConstr?: typeof BaseComponent | null): TContent | null;
     _readElement(targetContent: TContent | null, superElName: string | null, componentConstr?: typeof BaseComponent | null): TContent | null;
-    _readAttributes(superElName: string | null, $paramsConfig?: Record<string, I$ComponentParamConfig> | null, $specifiedParams?: Set<string>): IElementAttributes | null;
+    _readAttributes(superElName: string | null, $paramsConfig?: Map<string, I$ComponentParamConfig> | null, $specifiedParams?: Map<string, string>): IElementAttributes | null;
     _readSuperCall(defaultElName: string | null): ISuperCall | null;
     _readName(reName: RegExp): string | null;
     _readString(): string;
@@ -91,7 +91,7 @@ export declare class Template {
     _throwError(msg: string, pos?: number): void;
     extend(template: string | IBlock, options?: {
         blockName?: string;
-        _isEmbedded?: boolean;
+        _embedded?: boolean;
     }): Template;
     setBlockName(blockName: string | Array<string>): Template;
     render(component?: BaseComponent | null, ownerComponent?: BaseComponent, context?: object, result?: TContentBindingResult, parentComponent?: BaseComponent): DocumentFragment;

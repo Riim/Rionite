@@ -1,14 +1,15 @@
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
 import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './BaseComponent';
-import { componentParamTypeSerializerMap } from './componentParamTypeSerializerMap';
-import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';
+import { componentParamTypeSerializers } from './componentParamTypeSerializers';
+import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 
 export const KEY_COMPONENT_PARAMS_INITED = Symbol('Rionite/ComponentParams[componentParamsInited]');
 
 function initParam(
 	component: BaseComponent,
 	$paramConfig: I$ComponentParamConfig | null,
-	name: string
+	name: string,
+	_$specifiedParams: Map<string, string> | null
 ) {
 	if ($paramConfig === null) {
 		return;
@@ -48,7 +49,7 @@ function initParam(
 			}
 		}
 
-		typeSerializer = componentParamTypeSerializerMap.get(type);
+		typeSerializer = componentParamTypeSerializers.get(type);
 
 		if (!typeSerializer) {
 			throw new TypeError('Unsupported parameter type');
@@ -61,7 +62,21 @@ function initParam(
 
 	let el = component.element;
 	let snakeCaseName = snakeCaseAttributeName(name, true);
-	let rawValue = el.getAttribute(snakeCaseName);
+	let rawValue: string | null | undefined;
+
+	// if ($specifiedParams) {
+	rawValue = el.getAttribute(snakeCaseName);
+
+	// 	if (rawValue !== null) {
+	// 		$specifiedParams.set(name, rawValue);
+	// 	}
+	// } else {
+	// 	rawValue = component.$specifiedParams.get(name);
+
+	// 	if (rawValue === undefined) {
+	// 		rawValue = null;
+	// 	}
+	// }
 
 	if (rawValue === null) {
 		if ($paramConfig.required) {
@@ -78,7 +93,7 @@ function initParam(
 	if (component[$paramConfig.property + 'Cell']) {
 		component[$paramConfig.property + 'Cell'].set(value);
 	} else {
-		component[KEY_PARAMS].set(name, value);
+		component[KEY_PARAM_VALUES].set(name, value);
 	}
 }
 
@@ -88,14 +103,22 @@ export const ComponentParams = {
 			return;
 		}
 
+		let $specifiedParams: Map<string, string> | null;
+
+		if (component.$specifiedParams) {
+			$specifiedParams = null;
+		} else {
+			$specifiedParams = component.$specifiedParams = new Map();
+		}
+
 		let paramsConfig = (component.constructor as typeof BaseComponent).params;
 
 		if (paramsConfig) {
-			let $paramsConfig = component.constructor[KEY_PARAMS_CONFIG];
+			let $paramsConfig = (component.constructor as typeof BaseComponent)[KEY_PARAMS_CONFIG];
 
 			for (let name in paramsConfig) {
-				if (paramsConfig[name] !== Object.prototype[name]) {
-					initParam(component, $paramsConfig[name], name);
+				if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
+					initParam(component, $paramsConfig!.get(name)!, name, $specifiedParams);
 				}
 			}
 		}

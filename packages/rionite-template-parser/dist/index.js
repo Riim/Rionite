@@ -11,16 +11,15 @@ var NodeType;
     NodeType[NodeType["TEXT"] = 6] = "TEXT";
     NodeType[NodeType["COMMENT"] = 7] = "COMMENT";
 })(NodeType = exports.NodeType || (exports.NodeType = {}));
-const escapee = {
-    __proto__: null,
-    '/': '/',
-    '\\': '\\',
-    b: '\b',
-    f: '\f',
-    n: '\n',
-    r: '\r',
-    t: '\t'
-};
+const escapee = new Map([
+    ['/', '/'],
+    ['\\', '\\'],
+    ['b', '\b'],
+    ['f', '\f'],
+    ['n', '\n'],
+    ['r', '\r'],
+    ['t', '\t']
+]);
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
 const reWhitespaces = /\s+|/g;
@@ -119,8 +118,8 @@ class TemplateParser {
     _readElement(targetContent) {
         let pos = this._pos;
         let line = this._line;
-        let isHelper = this._chr == '@';
-        if (isHelper) {
+        let isTransformer = this._chr == '@';
+        if (isTransformer) {
             this._next();
         }
         let tagName = this._readName(reTagName);
@@ -161,8 +160,8 @@ class TemplateParser {
         }
         targetContent.push({
             nodeType: NodeType.ELEMENT,
-            isHelper,
-            tagName: tagName && kebab_case_1.kebabCase(tagName, true),
+            isTransformer,
+            tagName: tagName && (isTransformer ? tagName : kebab_case_1.kebabCase(tagName, true)),
             names: elNames || null,
             attributes: attrs || null,
             content: content || null,
@@ -181,17 +180,20 @@ class TemplateParser {
         }
         let superCall;
         let list = [];
-        loop: for (let f = true;;) {
+        loop: for (let f = true;; f = false) {
             if (f && this._chr == 's' && (superCall = this._readSuperCall())) {
                 this._skipWhitespacesAndReadComments(targetContent);
             }
             else {
                 let pos = this._pos;
                 let line = this._line;
+                let isTransformer = this._chr == '@';
+                if (isTransformer) {
+                    this._next();
+                }
                 let name = this._readName(reAttributeName);
                 if (!name) {
-                    this._throwError('Expected attribute name');
-                    throw 1;
+                    throw this._throwError('Expected attribute name');
                 }
                 if (this._skipWhitespacesAndReadComments(targetContent) == '=') {
                     this._next();
@@ -199,6 +201,7 @@ class TemplateParser {
                     if (chr == "'" || chr == '"' || chr == '`') {
                         list.push({
                             nodeType: NodeType.ELEMENT_ATTRIBUTE,
+                            isTransformer,
                             name,
                             value: this._readString(),
                             pos,
@@ -215,6 +218,7 @@ class TemplateParser {
                             if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
                                 list.push({
                                     nodeType: NodeType.ELEMENT_ATTRIBUTE,
+                                    isTransformer,
                                     name,
                                     value: value.trim(),
                                     pos,
@@ -233,6 +237,7 @@ class TemplateParser {
                 else {
                     list.push({
                         nodeType: NodeType.ELEMENT_ATTRIBUTE,
+                        isTransformer,
                         name,
                         value: '',
                         pos,
@@ -253,9 +258,6 @@ class TemplateParser {
                 default: {
                     this._throwError('Unexpected end of template. Expected "," or ")" to finalize attribute value.');
                 }
-            }
-            if (f) {
-                f = false;
             }
         }
         return {
@@ -314,8 +316,8 @@ class TemplateParser {
                     str += String.fromCharCode(code);
                     chr = this._chr = this.template.charAt((this._pos = pos + (hexadecimal ? 2 : 4)));
                 }
-                else if (escapee[chr]) {
-                    str += escapee[chr];
+                else if (escapee.has(chr)) {
+                    str += escapee.get(chr);
                     chr = this._next();
                 }
                 else {
@@ -367,8 +369,7 @@ class TemplateParser {
                 break;
             }
             default: {
-                this._throwError('Expected comment');
-                throw 1;
+                throw this._throwError('Expected comment');
             }
         }
         let line = this._line;

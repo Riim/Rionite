@@ -79,16 +79,27 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 	elementExtends: 'template',
 
 	params: {
-		for: { property: 'paramFor', type: String, required: true, readonly: true },
-		trackBy: { property: 'paramTrackBy', type: String, readonly: true },
-		beforeTemplate: { property: 'paramBeforeTemplate', type: Boolean, readonly: true }
+		for: {
+			property: 'paramFor',
+			type: String,
+			required: true,
+			readonly: true
+		},
+		trackBy: {
+			type: String,
+			readonly: true
+		},
+		beforeTemplate: {
+			type: Boolean,
+			readonly: true
+		}
 	}
 })
 export class RnRepeat extends BaseComponent {
 	paramFor: string;
-	paramTrackBy: string;
+	trackBy: string;
 
-	paramBeforeTemplate: boolean;
+	beforeTemplate: boolean;
 
 	_itemName: string;
 
@@ -96,8 +107,6 @@ export class RnRepeat extends BaseComponent {
 	_list: Cell<TList | undefined>;
 
 	_$itemMap: T$ItemMap;
-
-	_trackBy: string | null;
 
 	_active = false;
 
@@ -136,8 +145,6 @@ export class RnRepeat extends BaseComponent {
 
 			this._$itemMap = new Map();
 
-			this._trackBy = this.paramTrackBy;
-
 			this.initialized = true;
 		}
 
@@ -173,7 +180,7 @@ export class RnRepeat extends BaseComponent {
 		let prevListLength = prevList.length;
 		let list = this._list.get();
 		let $itemMap = this._$itemMap;
-		let trackBy = this._trackBy;
+		let trackBy = this.trackBy;
 
 		let startIndex = 0;
 
@@ -216,7 +223,7 @@ export class RnRepeat extends BaseComponent {
 
 						lastNode = insertBefore(
 							$item.nodes,
-							lastNode == el && this.paramBeforeTemplate ? el : lastNode.nextSibling!
+							lastNode == el && this.beforeTemplate ? el : lastNode.nextSibling!
 						);
 
 						i++;
@@ -288,7 +295,7 @@ export class RnRepeat extends BaseComponent {
 
 											lastNode = insertBefore(
 												k$Item[0].nodes,
-												lastNode == el && this.paramBeforeTemplate
+												lastNode == el && this.beforeTemplate
 													? el
 													: lastNode.nextSibling!
 											);
@@ -402,7 +409,7 @@ export class RnRepeat extends BaseComponent {
 					suppressConnectionStatusCallbacks();
 					lastNode.parentNode!.insertBefore(
 						content,
-						lastNode == el && this.paramBeforeTemplate ? el : lastNode.nextSibling
+						lastNode == el && this.beforeTemplate ? el : lastNode.nextSibling
 					);
 					resumeConnectionStatusCallbacks();
 					lastNode = newLastNode;
@@ -475,7 +482,7 @@ export class RnRepeat extends BaseComponent {
 
 		let prevList = this._prevList;
 		let $itemMap = this._$itemMap;
-		let trackBy = this._trackBy;
+		let trackBy = this.trackBy;
 
 		for (let i = 0, l = prevList.length; i < l; i++) {
 			let value = trackBy ? prevList[i][trackBy] : prevList[i];

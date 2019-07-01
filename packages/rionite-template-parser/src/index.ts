@@ -66,17 +66,15 @@ export interface IBlock extends INode {
 	content: TContent;
 }
 
-const escapee: Record<string, string> = {
-	__proto__: null as any,
-
-	'/': '/',
-	'\\': '\\',
-	b: '\b',
-	f: '\f',
-	n: '\n',
-	r: '\r',
-	t: '\t'
-};
+const escapee = new Map([
+	['/', '/'],
+	['\\', '\\'],
+	['b', '\b'],
+	['f', '\f'],
+	['n', '\n'],
+	['r', '\r'],
+	['t', '\t']
+]);
 
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
@@ -293,8 +291,8 @@ export class TemplateParser {
 		let superCall: ISuperCall | null | undefined;
 		let list: TElementAttributeList = [];
 
-		loop: for (;;) {
-			if (this._chr == 's' && (superCall = this._readSuperCall())) {
+		loop: for (let f = true; ; f = false) {
+			if (f && this._chr == 's' && (superCall = this._readSuperCall())) {
 				this._skipWhitespacesAndReadComments(targetContent);
 			} else {
 				let pos = this._pos;
@@ -467,8 +465,8 @@ export class TemplateParser {
 					chr = this._chr = this.template.charAt(
 						(this._pos = pos + (hexadecimal ? 2 : 4))
 					);
-				} else if (escapee[chr]) {
-					str += escapee[chr];
+				} else if (escapee.has(chr)) {
+					str += escapee.get(chr);
 					chr = this._next();
 				} else {
 					this._throwError('Invalid escape sequence', this._pos - 1);

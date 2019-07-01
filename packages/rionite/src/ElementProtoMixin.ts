@@ -1,9 +1,8 @@
 import { defer } from '@riim/defer';
 import { Cell } from 'cellx';
-import { BaseComponent, I$ComponentParamConfig, IComponentElement } from './BaseComponent';
+import { BaseComponent, IComponentElement } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
-import { KEY_PARAMS, KEY_PARAMS_CONFIG } from './Constants';
-import { observedAttributesFeature } from './lib/observedAttributesFeature';
+import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 
 // export const KEY_IS_COMPONENT_ELEMENT = Symbol('Rionite/ElementProtoMixin[isComponentElement]');
 export const KEY_ELEMENT_CONNECTED = Symbol('Rionite/ElementProtoMixin[elementConnected]');
@@ -101,24 +100,21 @@ export const ElementProtoMixin = {
 		let component = this.$component;
 
 		if (component && component.isReady) {
-			let $paramConfig: I$ComponentParamConfig =
-				component.constructor[KEY_PARAMS_CONFIG][name];
+			let $paramConfig = (component.constructor as typeof BaseComponent)[
+				KEY_PARAMS_CONFIG
+			]!.get(name)!;
 
 			if ($paramConfig.readonly) {
-				if (observedAttributesFeature) {
-					throw new TypeError(
-						`Cannot write to readonly parameter "${$paramConfig.name}"`
-					);
-				}
-			} else {
-				let valueCell: Cell | undefined = component[$paramConfig.property + 'Cell'];
-				let value = $paramConfig.typeSerializer!.read(rawValue, $paramConfig.default, this);
+				throw new TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
+			}
 
-				if (valueCell) {
-					valueCell.set(value);
-				} else {
-					component[KEY_PARAMS].set($paramConfig.name, value);
-				}
+			let valueCell: Cell | null = component[$paramConfig.property + 'Cell'];
+			let value = $paramConfig.typeSerializer!.read(rawValue, $paramConfig.default, this);
+
+			if (valueCell) {
+				valueCell.set(value);
+			} else {
+				component[KEY_PARAM_VALUES].set($paramConfig.name, value);
 			}
 		}
 	}

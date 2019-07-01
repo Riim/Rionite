@@ -1,7 +1,7 @@
 import { EventEmitter, IEvent } from 'cellx';
 import { IFreezableCell } from './componentBinding';
-import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
-import { KEY_PARAMS } from './Constants';
+import { IComponentParamTypeSerializer } from './componentParamTypeSerializers';
+import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { IBlock, Template } from './Template';
 export interface IDisposable {
     dispose(): any;
@@ -37,7 +37,7 @@ export interface I$ComponentParamConfig {
     default: any;
     required: boolean;
     readonly: boolean;
-    paramConfig: IComponentParamConfig | Function;
+    paramConfig: any;
 }
 export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
     $component?: T | null;
@@ -69,7 +69,8 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     static readonly bindsInputContent: boolean;
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
     static domEvents: IComponentEvents<BaseComponent, Event> | null;
-    _disposables: Record<string, IDisposable>;
+    static [KEY_PARAMS_CONFIG]: Map<string, I$ComponentParamConfig> | null;
+    _disposables: Map<string, IDisposable>;
     _ownerComponent: BaseComponent | undefined;
     ownerComponent: BaseComponent;
     _parentComponent: BaseComponent | null | undefined;
@@ -77,13 +78,13 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     element: IComponentElement;
     $inputContent: DocumentFragment | null;
     $context: Record<string, any> | undefined;
-    $specifiedParams: ReadonlySet<string> | undefined;
+    $specifiedParams: ReadonlyMap<string, string>;
     _bindings: Array<IFreezableCell> | null;
     _elementListMap: Map<string, HTMLCollectionOf<Element>> | undefined;
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;
-    [KEY_PARAMS]: Map<string, any>;
+    [KEY_PARAM_VALUES]: Map<string, any>;
     constructor(el?: HTMLElement);
     handleEvent(evt: IEvent<BaseComponent>): void;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;

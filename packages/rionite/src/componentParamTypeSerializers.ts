@@ -5,11 +5,11 @@ export interface IComponentParamTypeSerializer {
 	write: (value: any, defaultValue?: any) => string | null;
 }
 
-export const KEY_COMPONENT_PARAM_VALUE_MAP = Symbol(
+export const KEY_COMPONENT_PARAM_VALUES = Symbol(
 	'Rionite/componentParamTypeSerializerMap[componentParamValueMap]'
 );
 
-export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeSerializer>([
+export const componentParamTypeSerializers = new Map<any, IComponentParamTypeSerializer>([
 	[
 		Boolean,
 		{
@@ -69,7 +69,8 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 					return defaultValue || null;
 				}
 
-				let value = (el[KEY_COMPONENT_PARAM_VALUE_MAP] || { __proto__: null })[rawValue];
+				let value =
+					el[KEY_COMPONENT_PARAM_VALUES] && el[KEY_COMPONENT_PARAM_VALUES].get(rawValue);
 
 				if (!value) {
 					throw new TypeError('Value is not an object');
@@ -102,8 +103,8 @@ export const componentParamTypeSerializerMap = new Map<any, IComponentParamTypeS
 	]
 ]);
 
-componentParamTypeSerializerMap.set('boolean', componentParamTypeSerializerMap.get(Boolean)!);
-componentParamTypeSerializerMap.set('number', componentParamTypeSerializerMap.get(Number)!);
-componentParamTypeSerializerMap.set('string', componentParamTypeSerializerMap.get(String)!);
-componentParamTypeSerializerMap.set('object', componentParamTypeSerializerMap.get(Object)!);
-componentParamTypeSerializerMap.set('eval', componentParamTypeSerializerMap.get(eval)!);
+componentParamTypeSerializers.set('boolean', componentParamTypeSerializers.get(Boolean)!);
+componentParamTypeSerializers.set('number', componentParamTypeSerializers.get(Number)!);
+componentParamTypeSerializers.set('string', componentParamTypeSerializers.get(String)!);
+componentParamTypeSerializers.set('object', componentParamTypeSerializers.get(Object)!);
+componentParamTypeSerializers.set('eval', componentParamTypeSerializers.get(eval)!);

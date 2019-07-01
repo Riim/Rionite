@@ -22,6 +22,7 @@ export interface IDebuggerCall extends INode {
 }
 export interface IElementAttribute extends INode {
     nodeType: NodeType.ELEMENT_ATTRIBUTE;
+    isTransformer: boolean;
     name: string;
     value: string;
 }
@@ -32,7 +33,7 @@ export interface IElementAttributes {
 }
 export interface IElement extends INode {
     nodeType: NodeType.ELEMENT;
-    isHelper: boolean;
+    isTransformer: boolean;
     tagName: string | null;
     names: Array<string | null> | null;
     attributes: IElementAttributes | null;

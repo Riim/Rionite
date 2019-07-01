@@ -6,10 +6,10 @@ import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx'
 import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
-import { componentConstructorMap } from './componentConstructorMap';
-import { IComponentParamTypeSerializer } from './componentParamTypeSerializerMap';
-import { KEY_CHILD_COMPONENTS, KEY_PARAMS } from './Constants';
-import { elementConstructorMap } from './elementConstructorMap';
+import { componentConstructors } from './componentConstructors';
+import { IComponentParamTypeSerializer } from './componentParamTypeSerializers';
+import { KEY_CHILD_COMPONENTS, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
+import { elementConstructors } from './elementConstructors';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
@@ -70,7 +70,7 @@ export interface I$ComponentParamConfig {
 	required: boolean;
 	readonly: boolean;
 
-	paramConfig: IComponentParamConfig | Function;
+	paramConfig: any;
 }
 
 export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent>
@@ -122,7 +122,9 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null = null;
 	static domEvents: IComponentEvents<BaseComponent, Event> | null = null;
 
-	_disposables: Record<string, IDisposable> = { __proto__: null as any };
+	static [KEY_PARAMS_CONFIG]: Map<string, I$ComponentParamConfig> | null;
+
+	_disposables = new Map<string, IDisposable>();
 
 	_ownerComponent: BaseComponent | undefined;
 
@@ -167,7 +169,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	$inputContent: DocumentFragment | null = null;
 	$context: Record<string, any> | undefined;
-	$specifiedParams: ReadonlySet<string> | undefined;
+	$specifiedParams: ReadonlyMap<string, string>;
 
 	_bindings: Array<IFreezableCell> | null;
 
@@ -178,14 +180,14 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	initialized = false;
 	isReady = false;
 
-	[KEY_PARAMS]: Map<string, any>;
+	[KEY_PARAM_VALUES]: Map<string, any>;
 
 	constructor(el?: HTMLElement) {
 		super();
 
 		let constr = this.constructor as typeof BaseComponent;
 
-		if (!elementConstructorMap.has(constr.elementIs)) {
+		if (!elementConstructors.has(constr.elementIs)) {
 			throw new TypeError('Component must be registered');
 		}
 
@@ -196,7 +198,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		this.element = el as IComponentElement;
 		(el as IComponentElement).$component = this;
 
-		this[KEY_PARAMS] = new Map();
+		this[KEY_PARAM_VALUES] = new Map();
 	}
 
 	handleEvent(evt: IEvent<BaseComponent>) {
@@ -289,13 +291,14 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				listenings[--i].stop();
 			}
 
-			delete this._disposables[id];
+			this._disposables.delete(id);
 		};
 
-		let listening = (this._disposables[id] = {
+		let listening = {
 			stop: stopListening,
 			dispose: stopListening
-		});
+		};
+		this._disposables.set(id, listening);
 
 		return listening;
 	}
@@ -314,8 +317,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 				if (targetType != '*') {
 					let targetConstr =
-						elementConstructorMap.has(targetType) &&
-						componentConstructorMap.get(targetType);
+						elementConstructors.has(targetType) &&
+						componentConstructors.get(targetType);
 
 					if (!targetConstr) {
 						throw new TypeError(`Component "${targetType}" is not defined`);
@@ -357,21 +360,22 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		let id = nextUID();
 
 		let stopListening = () => {
-			if (this._disposables[id]) {
+			if (this._disposables.has(id)) {
 				if (target instanceof EventEmitter) {
 					target.off(type, listener, context);
 				} else {
 					target.removeEventListener(type, listener, useCapture);
 				}
 
-				delete this._disposables[id];
+				this._disposables.delete(id);
 			}
 		};
 
-		let listening = (this._disposables[id] = {
+		let listening = {
 			stop: stopListening,
 			dispose: stopListening
-		});
+		};
+		this._disposables.set(id, listening);
 
 		return listening;
 	}
@@ -380,21 +384,22 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		let id = nextUID();
 
 		let timeoutId = setTimeout(() => {
-			delete this._disposables[id];
+			this._disposables.delete(id);
 			callback.call(this);
 		}, delay);
 
 		let clearTimeout_ = () => {
-			if (this._disposables[id]) {
+			if (this._disposables.has(id)) {
 				clearTimeout(timeoutId);
-				delete this._disposables[id];
+				this._disposables.delete(id);
 			}
 		};
 
-		let timeout = (this._disposables[id] = {
+		let timeout = {
 			clear: clearTimeout_,
 			dispose: clearTimeout_
-		});
+		};
+		this._disposables.set(id, timeout);
 
 		return timeout;
 	}
@@ -407,16 +412,17 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		}, delay);
 
 		let clearInterval_ = () => {
-			if (this._disposables[id]) {
+			if (this._disposables.has(id)) {
 				clearInterval(intervalId);
-				delete this._disposables[id];
+				this._disposables.delete(id);
 			}
 		};
 
-		let interval = (this._disposables[id] = {
+		let interval = {
 			clear: clearInterval_,
 			dispose: clearInterval_
-		});
+		};
+		this._disposables.set(id, interval);
 
 		return interval;
 	}
@@ -426,19 +432,19 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		let disposable = this;
 
 		let cancelCallback = () => {
-			delete this._disposables[id];
+			this._disposables.delete(id);
 		};
 
 		let registeredCallback = function registeredCallback() {
-			if (disposable._disposables[id]) {
-				delete disposable._disposables[id];
+			if (disposable._disposables.has(id)) {
+				disposable._disposables.delete(id);
 				return callback.apply(disposable, arguments);
 			}
 		} as IDisposableCallback;
 		registeredCallback.cancel = cancelCallback;
 		registeredCallback.dispose = cancelCallback;
 
-		this._disposables[id] = registeredCallback;
+		this._disposables.set(id, registeredCallback);
 
 		return registeredCallback;
 	}
@@ -583,10 +589,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	dispose(): BaseComponent {
 		this._freezeBindings();
 
-		let disposables = this._disposables;
-
-		for (let id in disposables) {
-			disposables[id].dispose();
+		for (let disposable of this._disposables) {
+			disposable[1].dispose();
 		}
 
 		return this;

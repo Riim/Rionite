@@ -11,13 +11,12 @@ export interface I$Item {
 export declare type T$ItemMap = Map<any, Array<I$Item>>;
 export declare class RnRepeat extends BaseComponent {
     paramFor: string;
-    paramTrackBy: string;
-    paramBeforeTemplate: boolean;
+    trackBy: string;
+    beforeTemplate: boolean;
     _itemName: string;
     _prevList: Array<any>;
     _list: Cell<TList | undefined>;
     _$itemMap: T$ItemMap;
-    _trackBy: string | null;
     _active: boolean;
     elementConnected(): void;
     elementDisconnected(): void;

@@ -4,7 +4,7 @@ import './lib/templateTransformers';
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
-export { KEY_PARAMS_CONFIG, KEY_PARAMS } from './Constants';
+export { KEY_PARAMS_CONFIG, KEY_PARAM_VALUES } from './Constants';
 export {
 	IDisposable,
 	IDisposableListening,

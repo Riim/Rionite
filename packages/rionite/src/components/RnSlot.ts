@@ -16,11 +16,27 @@ const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot[slotContentMap]');
 	elementIs: 'RnSlot',
 
 	params: {
-		name: { property: 'paramName', type: String, readonly: true },
-		forTag: { property: 'paramForTag', type: String, readonly: true },
-		for: { property: 'paramFor', type: String, readonly: true },
-		cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
-		getContext: { property: 'paramGetContext', type: Object, readonly: true }
+		name: {
+			type: String,
+			readonly: true
+		},
+		forTag: {
+			type: String,
+			readonly: true
+		},
+		for: {
+			property: 'paramFor',
+			type: String,
+			readonly: true
+		},
+		cloneContent: {
+			default: false,
+			readonly: true
+		},
+		getContext: {
+			type: Object,
+			readonly: true
+		}
 	}
 })
 export class RnSlot extends BaseComponent {
@@ -30,11 +46,11 @@ export class RnSlot extends BaseComponent {
 
 	$context: Record<string, any>;
 
-	paramName: string;
-	paramForTag: string;
+	name: string;
+	forTag: string;
 	paramFor: string;
-	paramCloneContent: boolean;
-	paramGetContext: (
+	cloneContent: boolean;
+	getContext: (
 		this: BaseComponent,
 		context: Record<string, any>,
 		slot: RnSlot
@@ -54,33 +70,33 @@ export class RnSlot extends BaseComponent {
 		let contentOwnerComponent = ownerComponent.ownerComponent;
 		let ownerComponentInputContent = ownerComponent.$inputContent;
 		let el = this.element;
-		let cloneContent = this.paramCloneContent;
+		let cloneContent = this.cloneContent;
 		let content: DocumentFragment | undefined;
 		let childComponents: Array<BaseComponent> | null | undefined;
 		let bindings: Array<IFreezableCell> | null | undefined;
 		let backBindings: Array<BaseComponent | string | TListener> | null | undefined;
 
 		if (ownerComponentInputContent || !cloneContent) {
-			let slotName: string | null = this.paramName;
+			let name: string | null = this.name;
 			let forTag: string | null | undefined;
-			let for$: string | null | undefined;
+			let for_: string | null | undefined;
 
-			if (!slotName) {
-				forTag = this.paramForTag;
+			if (!name) {
+				forTag = this.forTag;
 
 				if (forTag) {
 					forTag = forTag.toUpperCase();
 				} else {
-					for$ = this.paramFor;
+					for_ = this.paramFor;
 				}
 			}
 
 			let key =
 				getUID(ownerComponent) +
 				'/' +
-				(slotName ? 'slot:' + slotName : forTag ? 'tag:' + forTag : for$ || '');
+				(name ? 'slot:' + name : forTag ? 'tag:' + forTag : for_ || '');
 
-			if (slotName || forTag || for$) {
+			if (name || forTag || for_) {
 				let contentMap: Map<string, IComponentElement> | undefined;
 
 				if (
@@ -98,14 +114,14 @@ export class RnSlot extends BaseComponent {
 						bindings = container.$component!._bindings;
 					}
 				} else if (ownerComponentInputContent) {
-					if (for$ && for$.indexOf('__') == -1) {
+					if (for_ && for_.indexOf('__') == -1) {
 						let elementBlockNames = (ownerComponent.constructor as typeof BaseComponent)
 							._elementBlockNames;
-						for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
+						for_ = elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
 					}
 
 					let selectedElements = ownerComponentInputContent.querySelectorAll(
-						for$ ? '.' + for$ : forTag || `[slot=${slotName}]`
+						for_ ? '.' + for_ : forTag || `[slot=${name}]`
 					);
 					let selectedElementCount = selectedElements.length;
 
@@ -163,12 +179,8 @@ export class RnSlot extends BaseComponent {
 					bindContent(
 						content,
 						contentOwnerComponent,
-						this.paramGetContext
-							? this.paramGetContext.call(
-									ownerComponent,
-									ownerComponent.$context,
-									this
-							  )
+						this.getContext
+							? this.getContext.call(ownerComponent, ownerComponent.$context, this)
 							: ownerComponent.$context,
 						contentBindingResult
 					);
@@ -176,8 +188,8 @@ export class RnSlot extends BaseComponent {
 					content = (this.element.contentTemplate as Template).render(
 						null,
 						ownerComponent,
-						this.paramGetContext
-							? this.paramGetContext.call(ownerComponent, this.$context, this)
+						this.getContext
+							? this.getContext.call(ownerComponent, this.$context, this)
 							: this.$context,
 						contentBindingResult
 					);

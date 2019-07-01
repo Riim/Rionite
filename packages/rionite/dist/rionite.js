@@ -7,7 +7,7 @@
 		exports["rionite"] = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("cellx"), require("escape-string"), require("@riim/escape-html"), require("@riim/gettext"), require("@riim/defer"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/next-uid"), require("@riim/next-tick"));
 	else
 		root["rionite"] = factory(root["@riim/kebab-case"], root["@riim/rionite-snake-case-attribute-name"], root["cellx"], root["escape-string"], root["@riim/escape-html"], root["@riim/gettext"], root["@riim/defer"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/next-uid"], root["@riim/next-tick"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__6__, __WEBPACK_EXTERNAL_MODULE__9__, __WEBPACK_EXTERNAL_MODULE__12__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__32__, __WEBPACK_EXTERNAL_MODULE__36__, __WEBPACK_EXTERNAL_MODULE__37__, __WEBPACK_EXTERNAL_MODULE__38__, __WEBPACK_EXTERNAL_MODULE__45__) {
+})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__6__, __WEBPACK_EXTERNAL_MODULE__9__, __WEBPACK_EXTERNAL_MODULE__12__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__32__, __WEBPACK_EXTERNAL_MODULE__35__, __WEBPACK_EXTERNAL_MODULE__36__, __WEBPACK_EXTERNAL_MODULE__37__, __WEBPACK_EXTERNAL_MODULE__44__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -107,12 +107,12 @@ var formatters_1 = __webpack_require__(13);
 exports.formatters = formatters_1.formatters;
 var Component_1 = __webpack_require__(25);
 exports.Component = Component_1.Component;
-var Param_1 = __webpack_require__(34);
+var Param_1 = __webpack_require__(33);
 exports.Param = Param_1.Param;
 var Constants_1 = __webpack_require__(19);
 exports.KEY_PARAMS_CONFIG = Constants_1.KEY_PARAMS_CONFIG;
-exports.KEY_PARAMS = Constants_1.KEY_PARAMS;
-var BaseComponent_1 = __webpack_require__(35);
+exports.KEY_PARAM_VALUES = Constants_1.KEY_PARAM_VALUES;
+var BaseComponent_1 = __webpack_require__(34);
 exports.BaseComponent = BaseComponent_1.BaseComponent;
 var ElementProtoMixin_1 = __webpack_require__(31);
 exports.KEY_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_ELEMENT_CONNECTED;
@@ -123,13 +123,13 @@ exports.TemplateNodeType = Template_1.NodeType;
 exports.Template = Template_1.Template;
 var registerComponent_1 = __webpack_require__(26);
 exports.registerComponent = registerComponent_1.registerComponent;
-var RnIfThen_1 = __webpack_require__(44);
+var RnIfThen_1 = __webpack_require__(43);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
-var RnIfElse_1 = __webpack_require__(50);
+var RnIfElse_1 = __webpack_require__(49);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
-var RnRepeat_1 = __webpack_require__(49);
+var RnRepeat_1 = __webpack_require__(48);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
-var RnSlot_1 = __webpack_require__(51);
+var RnSlot_1 = __webpack_require__(50);
 exports.RnSlot = RnSlot_1.RnSlot;
 
 
@@ -177,10 +177,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const Template_1 = __webpack_require__(3);
 [['IfThen', 'rn-if-then'], ['IfElse', 'rn-if-else'], ['Repeat', 'rn-repeat']].forEach(([name, is]) => {
     Template_1.Template.elementTransformers[name] = el => {
-        let attrs = el.attributes;
-        // проверка на attrs для `@/name // ...`
-        if (name != 'Repeat' && attrs) {
-            let list = attrs.list;
+        if (name != 'Repeat') {
+            let list = el.attributes.list;
             if (list) {
                 let index = list['length='] - 1;
                 let foundIndex;
@@ -212,29 +210,14 @@ const Template_1 = __webpack_require__(3);
                 tagName: 'template',
                 is,
                 names: el.names,
-                attributes: attrs,
-                $specifiedParams: el.$specifiedParams,
+                attributes: el.attributes,
+                $specifiedParams: null,
                 content: el.content,
                 contentTemplateIndex: null
             }
         ];
     };
 });
-Template_1.Template.elementTransformers.Slot = el => {
-    return [
-        {
-            nodeType: Template_1.NodeType.ELEMENT,
-            isTransformer: false,
-            tagName: 'rn-slot',
-            is: null,
-            names: el.names,
-            attributes: el.attributes,
-            $specifiedParams: el.$specifiedParams,
-            content: el.content,
-            contentTemplateIndex: null
-        }
-    ];
-};
 [['if', 'rn-if-then'], ['unless', 'rn-if-else'], ['for', 'rn-repeat']].forEach(([name, is]) => {
     Template_1.Template.attributeTransformers[name] = (el, attr) => {
         return {
@@ -275,7 +258,7 @@ const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const cellx_1 = __webpack_require__(6);
 const bindContent_1 = __webpack_require__(7);
 const compileTemplateNodeValue_1 = __webpack_require__(8);
-const componentConstructorMap_1 = __webpack_require__(24);
+const componentConstructors_1 = __webpack_require__(24);
 const Constants_1 = __webpack_require__(19);
 const getTemplateNodeValueAST_1 = __webpack_require__(20);
 const compileKeypath_1 = __webpack_require__(21);
@@ -290,16 +273,16 @@ var NodeType;
     NodeType[NodeType["ELEMENT"] = 5] = "ELEMENT";
     NodeType[NodeType["TEXT"] = 6] = "TEXT";
 })(NodeType = exports.NodeType || (exports.NodeType = {}));
-const escapee = {
-    __proto__: null,
-    '/': '/',
-    '\\': '\\',
-    b: '\b',
-    f: '\f',
-    n: '\n',
-    r: '\r',
-    t: '\t'
-};
+const emptyObj = { __proto__: null };
+const escapee = new Map([
+    ['/', '/'],
+    ['\\', '\\'],
+    ['b', '\b'],
+    ['f', '\f'],
+    ['n', '\n'],
+    ['r', '\r'],
+    ['t', '\t']
+]);
 const reWhitespace = /\s/;
 const reTagName = /[a-zA-Z][\-\w]*|/g;
 const reElementName = /[a-zA-Z][\-\w]*|/g;
@@ -315,7 +298,7 @@ exports.ELEMENT_NAME_DELIMITER = '__';
 class Template {
     constructor(template, options) {
         this.initialized = false;
-        let isEmbedded = (this._isEmbedded = !!(options && options._isEmbedded));
+        let embedded = (this._embedded = !!(options && options._embedded));
         let parent = (this.parent = (options && options.parent) || null);
         if (typeof template == 'string') {
             this.template = template;
@@ -325,7 +308,7 @@ class Template {
             this.block = template;
             this._elements = template.elements;
         }
-        if (isEmbedded) {
+        if (embedded) {
             this._elementNamesTemplate = parent._elementNamesTemplate;
         }
         else {
@@ -355,7 +338,7 @@ class Template {
             this.parent.parse(component);
         }
         let parent = this.parent;
-        if (!this._isEmbedded) {
+        if (!this._embedded) {
             this._elements = parent
                 ? { __proto__: parent._elements }
                 : {
@@ -373,7 +356,7 @@ class Template {
                     }
                 };
         }
-        this._embeddedTemplates = this._isEmbedded
+        this._embeddedTemplates = this._embedded
             ? parent._embeddedTemplates
             : parent &&
                 parent._embeddedTemplates &&
@@ -382,7 +365,7 @@ class Template {
                     content: template.block.content,
                     elements: this._elements
                 }, {
-                    _isEmbedded: true,
+                    _embedded: true,
                     parent: this
                 }));
     }
@@ -490,21 +473,18 @@ class Template {
             if (!elName) {
                 this._throwError('Expected element', pos);
             }
-            if (!this.parent ||
-                !(tagName = (this.parent._elements[elName] || { __proto__: null }).tagName)) {
+            if (!this.parent || !(tagName = (this.parent._elements[elName] || emptyObj).tagName)) {
                 throw this._throwError('Element.tagName is required', isTransformer ? pos + 1 : pos);
             }
         }
-        let elComponentConstr = componentConstructorMap_1.componentConstructorMap.get(tagName);
+        let elComponentConstr = componentConstructors_1.componentConstructors.get(tagName);
         let attrs;
         let $specifiedParams;
         if (elComponentConstr) {
-            $specifiedParams = new Set();
+            $specifiedParams = new Map();
         }
         if (this._chr == '(') {
-            attrs = this._readAttributes(elName || superElName, elComponentConstr &&
-                elComponentConstr.params &&
-                elComponentConstr[Constants_1.KEY_PARAMS_CONFIG], $specifiedParams);
+            attrs = this._readAttributes(elName || superElName, elComponentConstr && elComponentConstr[Constants_1.KEY_PARAMS_CONFIG], $specifiedParams);
             this._skipWhitespaces();
         }
         if (elNames && componentConstr) {
@@ -600,7 +580,7 @@ class Template {
                                     content: node.content,
                                     elements: this._elements
                                 }, {
-                                    _isEmbedded: true,
+                                    _embedded: true,
                                     parent: this
                                 })) - 1
                             };
@@ -665,7 +645,7 @@ class Template {
                                             content: node.content,
                                             elements: this._elements
                                         }, {
-                                            _isEmbedded: true,
+                                            _embedded: true,
                                             parent: this
                                         })) - 1
                                     };
@@ -703,7 +683,7 @@ class Template {
                         content: el.content,
                         elements: this._elements
                     }, {
-                        _isEmbedded: true,
+                        _embedded: true,
                         parent: this
                     })) - 1;
             }
@@ -730,12 +710,21 @@ class Template {
         let superCall;
         let attrIsValue;
         let list;
-        loop: for (;;) {
-            if (this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
+        loop: for (let f = true;; f = false) {
+            if (f && this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
                 let superElAttrs = superCall.element.attributes;
                 if (superElAttrs) {
+                    let superElAttrList = superElAttrs.list;
                     attrIsValue = superElAttrs.attributeIsValue;
-                    list = { __proto__: superElAttrs.list };
+                    list = { __proto__: superElAttrList };
+                    if ($paramsConfig && superElAttrList) {
+                        for (let i = 0, l = superElAttrList['length=']; i < l; i++) {
+                            let attr = superElAttrList[i];
+                            if (!attr.isTransformer && $paramsConfig.has(attr.name)) {
+                                $specifiedParams.set($paramsConfig.get(attr.name).name, attr.value);
+                            }
+                        }
+                    }
                 }
                 this._skipWhitespacesAndComments();
             }
@@ -750,12 +739,14 @@ class Template {
                     throw this._throwError('Expected attribute name');
                 }
                 let fullName = (isTransformer ? '@' : '') + name;
+                let value;
                 if (this._skipWhitespacesAndComments() == '=') {
                     this._next();
                     let chr = this._skipWhitespaces();
                     if (chr == "'" || chr == '"' || chr == '`') {
+                        value = this._readString();
                         if (fullName == 'is') {
-                            attrIsValue = this._readString();
+                            attrIsValue = value;
                         }
                         else {
                             (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
@@ -763,21 +754,22 @@ class Template {
                                 : list[fullName]] = {
                                 isTransformer,
                                 name,
-                                value: this._readString(),
+                                value,
                                 pos
                             };
                         }
                         this._skipWhitespacesAndComments();
                     }
                     else {
-                        let value = '';
+                        value = '';
                         for (;;) {
                             if (!chr) {
                                 this._throwError('Unexpected end of template. Expected "," or ")" to finalize attribute value.');
                             }
                             if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
+                                value = value.trim();
                                 if (fullName == 'is') {
-                                    attrIsValue = value.trim();
+                                    attrIsValue = value;
                                 }
                                 else {
                                     (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
@@ -785,7 +777,7 @@ class Template {
                                         : list[fullName]] = {
                                         isTransformer,
                                         name,
-                                        value: value.trim(),
+                                        value,
                                         pos
                                     };
                                 }
@@ -799,21 +791,24 @@ class Template {
                         }
                     }
                 }
-                else if (fullName == 'is') {
-                    attrIsValue = '';
-                }
                 else {
-                    (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
-                        ? (list[fullName] = list['length=']++)
-                        : list[fullName]] = {
-                        isTransformer,
-                        name,
-                        value: '',
-                        pos
-                    };
+                    value = '';
+                    if (fullName == 'is') {
+                        attrIsValue = value;
+                    }
+                    else {
+                        (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
+                            ? (list[fullName] = list['length=']++)
+                            : list[fullName]] = {
+                            isTransformer,
+                            name,
+                            value,
+                            pos
+                        };
+                    }
                 }
-                if ($paramsConfig && $paramsConfig[name]) {
-                    $specifiedParams.add($paramsConfig[name].name);
+                if ($paramsConfig && $paramsConfig.has(name)) {
+                    $specifiedParams.set($paramsConfig.get(name).name, value);
                 }
             }
             switch (this._chr) {
@@ -894,8 +889,8 @@ class Template {
                     str += String.fromCharCode(code);
                     chr = this._chr = this.template.charAt((this._pos = pos + (hexadecimal ? 2 : 4)));
                 }
-                else if (escapee[chr]) {
-                    str += escapee[chr];
+                else if (escapee.has(chr)) {
+                    str += escapee.get(chr);
                     chr = this._next();
                 }
                 else {
@@ -1099,7 +1094,7 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                                                     attrValue = cell.get();
                                                     (result[1] || (result[1] = [])).push(cell);
                                                 }
-                                                let $paramConfig = $paramsConfig && $paramsConfig[attrName];
+                                                let $paramConfig = $paramsConfig && $paramsConfig.get(attrName);
                                                 let paramConfig;
                                                 if ($paramConfig) {
                                                     paramConfig = $paramConfig.paramConfig;
@@ -1270,7 +1265,7 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                 let $specifiedParams;
                 if (childComponent) {
                     $paramsConfig = childComponent.constructor[Constants_1.KEY_PARAMS_CONFIG];
-                    $specifiedParams = new Set();
+                    $specifiedParams = new Map();
                 }
                 let attrs = child.attributes;
                 for (let i = attrs.length; i;) {
@@ -1287,11 +1282,11 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                             child[exports.KEY_CONTEXT] = context;
                         }
                     }
-                    let $paramConfig = $paramsConfig && $paramsConfig[targetAttrName];
-                    if ($paramConfig) {
-                        $specifiedParams.add($paramConfig.name);
-                    }
+                    let $paramConfig = $paramsConfig && $paramsConfig.get(targetAttrName);
                     let attrValue = attr.value;
+                    if ($paramConfig) {
+                        $specifiedParams.set($paramConfig.name, attrValue);
+                    }
                     if (!attrValue) {
                         continue;
                     }
@@ -1409,46 +1404,46 @@ exports.bindContent = bindContent;
 Object.defineProperty(exports, "__esModule", { value: true });
 const escape_string_1 = __webpack_require__(9);
 const bindingToJSExpression_1 = __webpack_require__(10);
-const componentParamTypeSerializerMap_1 = __webpack_require__(11);
+const componentParamTypeSerializers_1 = __webpack_require__(11);
 const formatters_1 = __webpack_require__(13);
 const TemplateNodeValueParser_1 = __webpack_require__(15);
-const cache = Object.create(null);
+const cache = new Map();
 function compileTemplateNodeValue(templateNodeValueAST, templateNodeValueString, useComponentParamValueMap) {
     let cacheKey = templateNodeValueString + (useComponentParamValueMap ? ',' : '.');
-    if (cache[cacheKey]) {
-        return cache[cacheKey];
-    }
-    let inner;
-    if (templateNodeValueAST.length == 1) {
-        inner = Function('formatters', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(templateNodeValueAST[0])};`);
-    }
-    else {
-        let fragments = [];
-        for (let node of templateNodeValueAST) {
-            fragments.push(node.nodeType == TemplateNodeValueParser_1.TemplateNodeValueNodeType.TEXT
-                ? `'${escape_string_1.escapeString(node.value)}'`
-                : bindingToJSExpression_1.bindingToJSExpression(node));
+    if (!cache.has(cacheKey)) {
+        let inner;
+        if (templateNodeValueAST.length == 1) {
+            inner = Function('formatters', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(templateNodeValueAST[0])};`);
         }
-        inner = Function('formatters', `var tmp; return [${fragments.join(', ')}].join('');`);
-    }
-    return (cache[cacheKey] = useComponentParamValueMap
-        ? function (cell) {
-            let value = inner.call(this, formatters_1.formatters);
-            if (value) {
-                let valueType = typeof value;
-                if (valueType == 'object' || valueType == 'function') {
-                    let meta = cell.meta;
-                    (meta.element[componentParamTypeSerializerMap_1.KEY_COMPONENT_PARAM_VALUE_MAP] ||
-                        (meta.element[componentParamTypeSerializerMap_1.KEY_COMPONENT_PARAM_VALUE_MAP] = { __proto__: null }))[meta.attributeName] = value;
-                    return meta.attributeName;
-                }
+        else {
+            let fragments = [];
+            for (let node of templateNodeValueAST) {
+                fragments.push(node.nodeType == TemplateNodeValueParser_1.TemplateNodeValueNodeType.TEXT
+                    ? `'${escape_string_1.escapeString(node.value)}'`
+                    : bindingToJSExpression_1.bindingToJSExpression(node));
             }
-            return value;
+            inner = Function('formatters', `var tmp; return [${fragments.join(', ')}].join('');`);
         }
-        : function () {
-            let value = inner.call(this, formatters_1.formatters);
-            return value == null ? '' : value + '';
-        });
+        cache.set(cacheKey, useComponentParamValueMap
+            ? function (cell) {
+                let value = inner.call(this, formatters_1.formatters);
+                if (value) {
+                    let valueType = typeof value;
+                    if (valueType == 'object' || valueType == 'function') {
+                        let meta = cell.meta;
+                        (meta.element[componentParamTypeSerializers_1.KEY_COMPONENT_PARAM_VALUES] ||
+                            (meta.element[componentParamTypeSerializers_1.KEY_COMPONENT_PARAM_VALUES] = new Map())).set(meta.attributeName, value);
+                        return meta.attributeName;
+                    }
+                }
+                return value;
+            }
+            : function () {
+                let value = inner.call(this, formatters_1.formatters);
+                return value == null ? '' : value + '';
+            });
+    }
+    return cache.get(cacheKey);
 }
 exports.compileTemplateNodeValue = compileTemplateNodeValue;
 
@@ -1500,8 +1495,8 @@ exports.bindingToJSExpression = bindingToJSExpression;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const escape_html_1 = __webpack_require__(12);
-exports.KEY_COMPONENT_PARAM_VALUE_MAP = Symbol('Rionite/componentParamTypeSerializerMap[componentParamValueMap]');
-exports.componentParamTypeSerializerMap = new Map([
+exports.KEY_COMPONENT_PARAM_VALUES = Symbol('Rionite/componentParamTypeSerializerMap[componentParamValueMap]');
+exports.componentParamTypeSerializers = new Map([
     [
         Boolean,
         {
@@ -1550,7 +1545,7 @@ exports.componentParamTypeSerializerMap = new Map([
                 if (!rawValue) {
                     return defaultValue || null;
                 }
-                let value = (el[exports.KEY_COMPONENT_PARAM_VALUE_MAP] || { __proto__: null })[rawValue];
+                let value = el[exports.KEY_COMPONENT_PARAM_VALUES] && el[exports.KEY_COMPONENT_PARAM_VALUES].get(rawValue);
                 if (!value) {
                     throw new TypeError('Value is not an object');
                 }
@@ -1577,11 +1572,11 @@ exports.componentParamTypeSerializerMap = new Map([
         }
     ]
 ]);
-exports.componentParamTypeSerializerMap.set('boolean', exports.componentParamTypeSerializerMap.get(Boolean));
-exports.componentParamTypeSerializerMap.set('number', exports.componentParamTypeSerializerMap.get(Number));
-exports.componentParamTypeSerializerMap.set('string', exports.componentParamTypeSerializerMap.get(String));
-exports.componentParamTypeSerializerMap.set('object', exports.componentParamTypeSerializerMap.get(Object));
-exports.componentParamTypeSerializerMap.set('eval', exports.componentParamTypeSerializerMap.get(eval));
+exports.componentParamTypeSerializers.set('boolean', exports.componentParamTypeSerializers.get(Boolean));
+exports.componentParamTypeSerializers.set('number', exports.componentParamTypeSerializers.get(Number));
+exports.componentParamTypeSerializers.set('string', exports.componentParamTypeSerializers.get(String));
+exports.componentParamTypeSerializers.set('object', exports.componentParamTypeSerializers.get(Object));
+exports.componentParamTypeSerializers.set('eval', exports.componentParamTypeSerializers.get(eval));
 
 
 /***/ }),
@@ -2037,22 +2032,22 @@ exports.namePattern = '[$_a-zA-Z][$\\w]*';
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const cache = Object.create(null);
+const cache = new Map();
 function keypathToJSExpression(keypath, cacheKey = keypath) {
-    if (cache[cacheKey]) {
-        return cache[cacheKey];
+    if (!cache.has(cacheKey)) {
+        let keys = typeof keypath == 'string' ? keypath.split('.') : keypath;
+        let keyCount = keys.length;
+        if (keyCount == 1) {
+            return (cache[cacheKey] = `this['${keypath}']`);
+        }
+        let index = keyCount - 2;
+        let fragments = Array(index);
+        while (index) {
+            fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
+        }
+        cache.set(cacheKey, `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`);
     }
-    let keys = typeof keypath == 'string' ? keypath.split('.') : keypath;
-    let keyCount = keys.length;
-    if (keyCount == 1) {
-        return (cache[cacheKey] = `this['${keypath}']`);
-    }
-    let index = keyCount - 2;
-    let fragments = Array(index);
-    while (index) {
-        fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
-    }
-    return (cache[cacheKey] = `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`);
+    return cache.get(cacheKey);
 }
 exports.keypathToJSExpression = keypathToJSExpression;
 
@@ -2065,7 +2060,7 @@ exports.keypathToJSExpression = keypathToJSExpression;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.KEY_PARAMS_CONFIG = Symbol('Rionite/BaseComponent[paramsConfig]');
-exports.KEY_PARAMS = Symbol('Rionite/BaseComponent[params]');
+exports.KEY_PARAM_VALUES = Symbol('Rionite/BaseComponent[paramValues]');
 exports.KEY_CHILD_COMPONENTS = Symbol('Rionite/BaseComponent[childComponents]');
 
 
@@ -2109,10 +2104,12 @@ exports.getTemplateNodeValueAST = getTemplateNodeValueAST;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const keypathToJSExpression_1 = __webpack_require__(18);
-const cache = Object.create(null);
+const cache = new Map();
 function compileKeypath(keypath, cacheKey = keypath) {
-    return (cache[cacheKey] ||
-        (cache[cacheKey] = Function(`var tmp; return ${keypathToJSExpression_1.keypathToJSExpression(keypath, cacheKey)};`)));
+    return (cache.get(cacheKey) ||
+        cache
+            .set(cacheKey, Function(`var tmp; return ${keypathToJSExpression_1.keypathToJSExpression(keypath, cacheKey)};`))
+            .get(cacheKey));
 }
 exports.compileKeypath = compileKeypath;
 
@@ -2173,7 +2170,7 @@ exports.svgNamespaceURI = 'http://www.w3.org/2000/svg';
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.componentConstructorMap = new Map();
+exports.componentConstructors = new Map();
 
 
 /***/ }),
@@ -2226,10 +2223,10 @@ const kebab_case_1 = __webpack_require__(4);
 const pascalize_1 = __webpack_require__(27);
 const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const cellx_1 = __webpack_require__(6);
-const componentConstructorMap_1 = __webpack_require__(24);
+const componentConstructors_1 = __webpack_require__(24);
 const ComponentParams_1 = __webpack_require__(29);
 const Constants_1 = __webpack_require__(19);
-const elementConstructorMap_1 = __webpack_require__(30);
+const elementConstructors_1 = __webpack_require__(30);
 const ElementProtoMixin_1 = __webpack_require__(31);
 const Template_1 = __webpack_require__(3);
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -2257,121 +2254,105 @@ function registerComponent(componentConstr) {
         throw new TypeError('Static property "elementIs" is required');
     }
     let kebabCaseElIs = kebab_case_1.kebabCase(elIs, true);
-    if (componentConstructorMap_1.componentConstructorMap.has(kebabCaseElIs)) {
+    if (componentConstructors_1.componentConstructors.has(kebabCaseElIs)) {
         throw new TypeError(`Component "${kebabCaseElIs}" already registered`);
     }
     let componentProto = componentConstr.prototype;
     let parentComponentConstr = Object.getPrototypeOf(componentProto)
         .constructor;
     inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
+    componentConstr[Constants_1.KEY_PARAMS_CONFIG] = null;
     let paramsConfig = componentConstr.params;
-    if (paramsConfig) {
-        for (let name in paramsConfig) {
-            if (paramsConfig[name] === Object.prototype[name]) {
-                continue;
-            }
-            let paramConfig = paramsConfig[name];
-            if (paramConfig === null) {
-                let parentParamConfig = parentComponentConstr.params && parentComponentConstr.params[name];
-                if (parentParamConfig != null) {
-                    Object.defineProperty(componentProto, (typeof parentParamConfig == 'object' &&
-                        (parentParamConfig.type || parentParamConfig.default !== undefined) &&
-                        parentParamConfig.property) ||
-                        name, {
-                        configurable: true,
-                        enumerable: true,
-                        writable: true,
-                        value: null
-                    });
+    for (let name in paramsConfig) {
+        let paramConfig = paramsConfig[name];
+        if (paramConfig === null || paramConfig === Object.prototype[name]) {
+            continue;
+        }
+        let snakeCaseName = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true);
+        let isObject = typeof paramConfig == 'object' &&
+            (!!paramConfig.type || paramConfig.default !== undefined);
+        let propertyName = (isObject && paramConfig.property) || name;
+        let required;
+        let readonly;
+        if (isObject) {
+            required = paramConfig.required || false;
+            readonly = paramConfig.readonly || false;
+        }
+        else {
+            required = readonly = false;
+        }
+        let $paramConfig = {
+            name,
+            property: propertyName,
+            type: undefined,
+            typeSerializer: undefined,
+            default: undefined,
+            required,
+            readonly,
+            paramConfig
+        };
+        (componentConstr[Constants_1.KEY_PARAMS_CONFIG] || (componentConstr[Constants_1.KEY_PARAMS_CONFIG] = new Map()))
+            .set(name, $paramConfig)
+            .set(snakeCaseName, $paramConfig);
+        Object.defineProperty(componentProto, propertyName + 'Cell', {
+            configurable: true,
+            enumerable: false,
+            writable: true,
+            value: null
+        });
+        let descriptor = {
+            configurable: true,
+            enumerable: true,
+            get() {
+                let valueCell = this[propertyName + 'Cell'];
+                if (valueCell) {
+                    return valueCell.get();
                 }
-            }
-            else {
-                let snakeCaseName = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true);
-                let isObject = typeof paramConfig == 'object' &&
-                    (!!paramConfig.type || paramConfig.default !== undefined);
-                let propertyName = (isObject && paramConfig.property) || name;
-                let required;
-                let readonly;
-                if (isObject) {
-                    required = paramConfig.required || false;
-                    readonly = paramConfig.readonly || false;
+                let value = this[Constants_1.KEY_PARAM_VALUES].get(name);
+                if (cellx_1.Cell.currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
+                    this[Constants_1.KEY_PARAM_VALUES].delete(name);
+                    valueCell = new cellx_1.Cell(null, {
+                        context: this,
+                        value
+                    });
+                    Object.defineProperty(this, propertyName + 'Cell', {
+                        configurable: true,
+                        enumerable: false,
+                        writable: true,
+                        value: valueCell
+                    });
+                    if (cellx_1.Cell.currentlyPulling) {
+                        return valueCell.get();
+                    }
+                }
+                return value;
+            },
+            set(value) {
+                if (this[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
+                    if (readonly) {
+                        if (value !== this[Constants_1.KEY_PARAM_VALUES].get(name)) {
+                            throw new TypeError(`Parameter "${name}" is readonly`);
+                        }
+                        return;
+                    }
+                    let rawValue = $paramConfig.typeSerializer.write(value, $paramConfig.default);
+                    if (rawValue === null) {
+                        this.element.removeAttribute(snakeCaseName);
+                    }
+                    else {
+                        this.element.setAttribute(snakeCaseName, rawValue);
+                    }
+                }
+                let valueCell = this[propertyName + 'Cell'];
+                if (valueCell) {
+                    valueCell.set(value);
                 }
                 else {
-                    required = readonly = false;
+                    this[Constants_1.KEY_PARAM_VALUES].set(name, value);
                 }
-                let $paramConfig = ((componentConstr.hasOwnProperty(Constants_1.KEY_PARAMS_CONFIG)
-                    ? componentConstr[Constants_1.KEY_PARAMS_CONFIG]
-                    : (componentConstr[Constants_1.KEY_PARAMS_CONFIG] = { __proto__: null }))[name] = componentConstr[Constants_1.KEY_PARAMS_CONFIG][snakeCaseName] = {
-                    name,
-                    property: propertyName,
-                    type: undefined,
-                    typeSerializer: undefined,
-                    default: undefined,
-                    required,
-                    readonly,
-                    paramConfig: paramsConfig[name]
-                });
-                Object.defineProperty(componentProto, propertyName + 'Cell', {
-                    configurable: true,
-                    enumerable: false,
-                    writable: true,
-                    value: undefined
-                });
-                let descriptor = {
-                    configurable: true,
-                    enumerable: true,
-                    get() {
-                        let valueCell = this[propertyName + 'Cell'];
-                        if (valueCell) {
-                            return valueCell.get();
-                        }
-                        let value = this[Constants_1.KEY_PARAMS].get(name);
-                        if (cellx_1.Cell.currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
-                            this[Constants_1.KEY_PARAMS].delete(name);
-                            valueCell = new cellx_1.Cell(null, {
-                                context: this,
-                                value
-                            });
-                            Object.defineProperty(this, propertyName + 'Cell', {
-                                configurable: true,
-                                enumerable: false,
-                                writable: true,
-                                value: valueCell
-                            });
-                            if (cellx_1.Cell.currentlyPulling) {
-                                return valueCell.get();
-                            }
-                        }
-                        return value;
-                    },
-                    set(value) {
-                        if (this[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
-                            if (readonly) {
-                                if (value !== this[Constants_1.KEY_PARAMS].get(name)) {
-                                    throw new TypeError(`Parameter "${name}" is readonly`);
-                                }
-                                return;
-                            }
-                            let rawValue = $paramConfig.typeSerializer.write(value, $paramConfig.default);
-                            if (rawValue === null) {
-                                this.element.removeAttribute(snakeCaseName);
-                            }
-                            else {
-                                this.element.setAttribute(snakeCaseName, rawValue);
-                            }
-                        }
-                        let valueCell = this[propertyName + 'Cell'];
-                        if (valueCell) {
-                            valueCell.set(value);
-                        }
-                        else {
-                            this[Constants_1.KEY_PARAMS].set(name, value);
-                        }
-                    }
-                };
-                Object.defineProperty(componentProto, propertyName, descriptor);
             }
-        }
+        };
+        Object.defineProperty(componentProto, propertyName, descriptor);
     }
     inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
     componentConstr._blockNamesString =
@@ -2404,7 +2385,7 @@ function registerComponent(componentConstr) {
     let parentElConstr;
     if (elExtends) {
         parentElConstr =
-            elementConstructorMap_1.elementConstructorMap.get(elExtends) || window[`HTML${pascalize_1.pascalize(elExtends)}Element`];
+            elementConstructors_1.elementConstructors.get(elExtends) || window[`HTML${pascalize_1.pascalize(elExtends)}Element`];
         if (!parentElConstr) {
             throw new TypeError(`Component "${elExtends}" is not registered`);
         }
@@ -2420,12 +2401,9 @@ function registerComponent(componentConstr) {
         enumerable: true,
         get() {
             let paramsConfig = componentConstr.params;
-            if (!paramsConfig) {
-                return [];
-            }
             let attrs = [];
             for (let name in paramsConfig) {
-                if (paramsConfig[name] !== Object.prototype[name]) {
+                if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
                     attrs.push(rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true));
                 }
             }
@@ -2443,8 +2421,8 @@ function registerComponent(componentConstr) {
         Object.defineProperty(elProto, name, Object.getOwnPropertyDescriptor(ElementProtoMixin_1.ElementProtoMixin, name));
     }
     window.customElements.define(kebabCaseElIs, elConstr, elExtends ? { extends: elExtends } : undefined);
-    componentConstructorMap_1.componentConstructorMap.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
-    elementConstructorMap_1.elementConstructorMap.set(elIs, elConstr);
+    componentConstructors_1.componentConstructors.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
+    elementConstructors_1.elementConstructors.set(elIs, elConstr);
     return componentConstr;
 }
 exports.registerComponent = registerComponent;
@@ -2497,10 +2475,10 @@ exports.camelize = camelize;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
-const componentParamTypeSerializerMap_1 = __webpack_require__(11);
+const componentParamTypeSerializers_1 = __webpack_require__(11);
 const Constants_1 = __webpack_require__(19);
 exports.KEY_COMPONENT_PARAMS_INITED = Symbol('Rionite/ComponentParams[componentParamsInited]');
-function initParam(component, $paramConfig, name) {
+function initParam(component, $paramConfig, name, _$specifiedParams) {
     if ($paramConfig === null) {
         return;
     }
@@ -2531,7 +2509,7 @@ function initParam(component, $paramConfig, name) {
                 type = 'object';
             }
         }
-        typeSerializer = componentParamTypeSerializerMap_1.componentParamTypeSerializerMap.get(type);
+        typeSerializer = componentParamTypeSerializers_1.componentParamTypeSerializers.get(type);
         if (!typeSerializer) {
             throw new TypeError('Unsupported parameter type');
         }
@@ -2541,7 +2519,18 @@ function initParam(component, $paramConfig, name) {
     }
     let el = component.element;
     let snakeCaseName = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true);
-    let rawValue = el.getAttribute(snakeCaseName);
+    let rawValue;
+    // if ($specifiedParams) {
+    rawValue = el.getAttribute(snakeCaseName);
+    // 	if (rawValue !== null) {
+    // 		$specifiedParams.set(name, rawValue);
+    // 	}
+    // } else {
+    // 	rawValue = component.$specifiedParams.get(name);
+    // 	if (rawValue === undefined) {
+    // 		rawValue = null;
+    // 	}
+    // }
     if (rawValue === null) {
         if ($paramConfig.required) {
             throw new TypeError(`Parameter "${name}" is required`);
@@ -2555,7 +2544,7 @@ function initParam(component, $paramConfig, name) {
         component[$paramConfig.property + 'Cell'].set(value);
     }
     else {
-        component[Constants_1.KEY_PARAMS].set(name, value);
+        component[Constants_1.KEY_PARAM_VALUES].set(name, value);
     }
 }
 exports.ComponentParams = {
@@ -2563,12 +2552,19 @@ exports.ComponentParams = {
         if (component[exports.KEY_COMPONENT_PARAMS_INITED]) {
             return;
         }
+        let $specifiedParams;
+        if (component.$specifiedParams) {
+            $specifiedParams = null;
+        }
+        else {
+            $specifiedParams = component.$specifiedParams = new Map();
+        }
         let paramsConfig = component.constructor.params;
         if (paramsConfig) {
             let $paramsConfig = component.constructor[Constants_1.KEY_PARAMS_CONFIG];
             for (let name in paramsConfig) {
-                if (paramsConfig[name] !== Object.prototype[name]) {
-                    initParam(component, $paramsConfig[name], name);
+                if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
+                    initParam(component, $paramsConfig.get(name), name, $specifiedParams);
                 }
             }
         }
@@ -2584,7 +2580,7 @@ exports.ComponentParams = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.elementConstructorMap = new Map([
+exports.elementConstructors = new Map([
     ['a', window.HTMLAnchorElement],
     ['blockquote', window.HTMLQuoteElement],
     ['br', window.HTMLBRElement],
@@ -2596,7 +2592,6 @@ exports.elementConstructorMap = new Map([
     ['dir', window.HTMLDirectoryElement],
     ['dl', window.HTMLDListElement],
     ['document', window.HTMLDocument],
-    ['element', Element],
     ['fieldset', window.HTMLFieldSetElement],
     ['frameset', window.HTMLFrameSetElement],
     ['h1', window.HTMLHeadingElement],
@@ -2639,7 +2634,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const defer_1 = __webpack_require__(32);
 const ComponentParams_1 = __webpack_require__(29);
 const Constants_1 = __webpack_require__(19);
-const observedAttributesFeature_1 = __webpack_require__(33);
 // export const KEY_IS_COMPONENT_ELEMENT = Symbol('Rionite/ElementProtoMixin[isComponentElement]');
 exports.KEY_ELEMENT_CONNECTED = Symbol('Rionite/ElementProtoMixin[elementConnected]');
 let connectionStatusCallbacksSuppressed = false;
@@ -2711,21 +2705,17 @@ exports.ElementProtoMixin = {
     attributeChangedCallback(name, _prevRawValue, rawValue) {
         let component = this.$component;
         if (component && component.isReady) {
-            let $paramConfig = component.constructor[Constants_1.KEY_PARAMS_CONFIG][name];
+            let $paramConfig = component.constructor[Constants_1.KEY_PARAMS_CONFIG].get(name);
             if ($paramConfig.readonly) {
-                if (observedAttributesFeature_1.observedAttributesFeature) {
-                    throw new TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
-                }
+                throw new TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
+            }
+            let valueCell = component[$paramConfig.property + 'Cell'];
+            let value = $paramConfig.typeSerializer.read(rawValue, $paramConfig.default, this);
+            if (valueCell) {
+                valueCell.set(value);
             }
             else {
-                let valueCell = component[$paramConfig.property + 'Cell'];
-                let value = $paramConfig.typeSerializer.read(rawValue, $paramConfig.default, this);
-                if (valueCell) {
-                    valueCell.set(value);
-                }
-                else {
-                    component[Constants_1.KEY_PARAMS].set($paramConfig.name, value);
-                }
+                component[Constants_1.KEY_PARAM_VALUES].set($paramConfig.name, value);
             }
         }
     }
@@ -2740,26 +2730,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__32__;
 
 /***/ }),
 /* 33 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-let observedAttributesFeature_ = false;
-window.customElements.define('test-observed-attributes-feature', class extends HTMLElement {
-    static get observedAttributes() {
-        return ['test'];
-    }
-    attributeChangedCallback() {
-        observedAttributesFeature_ = true;
-    }
-});
-document.createElement('test-observed-attributes-feature').setAttribute('test', '');
-exports.observedAttributesFeature = observedAttributesFeature_;
-
-
-/***/ }),
-/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2795,40 +2765,40 @@ exports.Param = Param;
 
 
 /***/ }),
-/* 35 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(36);
+const get_uid_1 = __webpack_require__(35);
 const kebab_case_1 = __webpack_require__(4);
-const move_content_1 = __webpack_require__(37);
-const next_uid_1 = __webpack_require__(38);
+const move_content_1 = __webpack_require__(36);
+const next_uid_1 = __webpack_require__(37);
 const cellx_1 = __webpack_require__(6);
-const attachChildComponentElements_1 = __webpack_require__(39);
+const attachChildComponentElements_1 = __webpack_require__(38);
 const bindContent_1 = __webpack_require__(7);
-const componentBinding_1 = __webpack_require__(40);
-const componentConstructorMap_1 = __webpack_require__(24);
+const componentBinding_1 = __webpack_require__(39);
+const componentConstructors_1 = __webpack_require__(24);
 const Constants_1 = __webpack_require__(19);
-const elementConstructorMap_1 = __webpack_require__(30);
+const elementConstructors_1 = __webpack_require__(30);
 const ElementProtoMixin_1 = __webpack_require__(31);
-const handleDOMEvent_1 = __webpack_require__(41);
-const handleEvent_1 = __webpack_require__(42);
-const normalizeTextNodes_1 = __webpack_require__(43);
+const handleDOMEvent_1 = __webpack_require__(40);
+const handleEvent_1 = __webpack_require__(41);
+const normalizeTextNodes_1 = __webpack_require__(42);
 const hasOwn = Object.prototype.hasOwnProperty;
 const map = Array.prototype.map;
 class BaseComponent extends cellx_1.EventEmitter {
     constructor(el) {
         super();
-        this._disposables = { __proto__: null };
+        this._disposables = new Map();
         this._parentComponent = null;
         this.$inputContent = null;
         this._attached = false;
         this.initialized = false;
         this.isReady = false;
         let constr = this.constructor;
-        if (!elementConstructorMap_1.elementConstructorMap.has(constr.elementIs)) {
+        if (!elementConstructors_1.elementConstructors.has(constr.elementIs)) {
             throw new TypeError('Component must be registered');
         }
         if (!el) {
@@ -2836,7 +2806,7 @@ class BaseComponent extends cellx_1.EventEmitter {
         }
         this.element = el;
         el.$component = this;
-        this[Constants_1.KEY_PARAMS] = new Map();
+        this[Constants_1.KEY_PARAM_VALUES] = new Map();
     }
     static get bindsInputContent() {
         return this.template !== null;
@@ -2923,12 +2893,13 @@ class BaseComponent extends cellx_1.EventEmitter {
             for (let i = listenings.length; i;) {
                 listenings[--i].stop();
             }
-            delete this._disposables[id];
+            this._disposables.delete(id);
         };
-        let listening = (this._disposables[id] = {
+        let listening = {
             stop: stopListening,
             dispose: stopListening
-        });
+        };
+        this._disposables.set(id, listening);
         return listening;
     }
     _listenTo(target, type, listener, context, useCapture) {
@@ -2937,8 +2908,8 @@ class BaseComponent extends cellx_1.EventEmitter {
                 let index = type.indexOf('>', 2);
                 let targetType = type.slice(1, index);
                 if (targetType != '*') {
-                    let targetConstr = elementConstructorMap_1.elementConstructorMap.has(targetType) &&
-                        componentConstructorMap_1.componentConstructorMap.get(targetType);
+                    let targetConstr = elementConstructors_1.elementConstructors.has(targetType) &&
+                        componentConstructors_1.componentConstructors.get(targetType);
                     if (!targetConstr) {
                         throw new TypeError(`Component "${targetType}" is not defined`);
                     }
@@ -2974,38 +2945,40 @@ class BaseComponent extends cellx_1.EventEmitter {
         }
         let id = next_uid_1.nextUID();
         let stopListening = () => {
-            if (this._disposables[id]) {
+            if (this._disposables.has(id)) {
                 if (target instanceof cellx_1.EventEmitter) {
                     target.off(type, listener, context);
                 }
                 else {
                     target.removeEventListener(type, listener, useCapture);
                 }
-                delete this._disposables[id];
+                this._disposables.delete(id);
             }
         };
-        let listening = (this._disposables[id] = {
+        let listening = {
             stop: stopListening,
             dispose: stopListening
-        });
+        };
+        this._disposables.set(id, listening);
         return listening;
     }
     setTimeout(callback, delay) {
         let id = next_uid_1.nextUID();
         let timeoutId = setTimeout(() => {
-            delete this._disposables[id];
+            this._disposables.delete(id);
             callback.call(this);
         }, delay);
         let clearTimeout_ = () => {
-            if (this._disposables[id]) {
+            if (this._disposables.has(id)) {
                 clearTimeout(timeoutId);
-                delete this._disposables[id];
+                this._disposables.delete(id);
             }
         };
-        let timeout = (this._disposables[id] = {
+        let timeout = {
             clear: clearTimeout_,
             dispose: clearTimeout_
-        });
+        };
+        this._disposables.set(id, timeout);
         return timeout;
     }
     setInterval(callback, delay) {
@@ -3014,32 +2987,33 @@ class BaseComponent extends cellx_1.EventEmitter {
             callback.call(this);
         }, delay);
         let clearInterval_ = () => {
-            if (this._disposables[id]) {
+            if (this._disposables.has(id)) {
                 clearInterval(intervalId);
-                delete this._disposables[id];
+                this._disposables.delete(id);
             }
         };
-        let interval = (this._disposables[id] = {
+        let interval = {
             clear: clearInterval_,
             dispose: clearInterval_
-        });
+        };
+        this._disposables.set(id, interval);
         return interval;
     }
     registerCallback(callback) {
         let id = next_uid_1.nextUID();
         let disposable = this;
         let cancelCallback = () => {
-            delete this._disposables[id];
+            this._disposables.delete(id);
         };
         let registeredCallback = function registeredCallback() {
-            if (disposable._disposables[id]) {
-                delete disposable._disposables[id];
+            if (disposable._disposables.has(id)) {
+                disposable._disposables.delete(id);
                 return callback.apply(disposable, arguments);
             }
         };
         registeredCallback.cancel = cancelCallback;
         registeredCallback.dispose = cancelCallback;
-        this._disposables[id] = registeredCallback;
+        this._disposables.set(id, registeredCallback);
         return registeredCallback;
     }
     _attach() {
@@ -3132,9 +3106,8 @@ class BaseComponent extends cellx_1.EventEmitter {
     }
     dispose() {
         this._freezeBindings();
-        let disposables = this._disposables;
-        for (let id in disposables) {
-            disposables[id].dispose();
+        for (let disposable of this._disposables) {
+            disposable[1].dispose();
         }
         return this;
     }
@@ -3232,6 +3205,12 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 
 /***/ }),
+/* 35 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__35__;
+
+/***/ }),
 /* 36 */
 /***/ (function(module, exports) {
 
@@ -3245,12 +3224,6 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__37__;
 
 /***/ }),
 /* 38 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__38__;
-
-/***/ }),
-/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3272,7 +3245,7 @@ exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3323,7 +3296,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3382,7 +3355,7 @@ exports.handleDOMEvent = handleDOMEvent;
 
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3474,7 +3447,7 @@ exports.handleEvent = handleEvent;
 
 
 /***/ }),
-/* 43 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3508,7 +3481,7 @@ exports.normalizeTextNodes = normalizeTextNodes;
 
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3521,19 +3494,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var RnIfThen_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_tick_1 = __webpack_require__(45);
+const next_tick_1 = __webpack_require__(44);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(46);
-const attachChildComponentElements_1 = __webpack_require__(39);
-const BaseComponent_1 = __webpack_require__(35);
-const compileBinding_1 = __webpack_require__(47);
+const move_content_1 = __webpack_require__(45);
+const attachChildComponentElements_1 = __webpack_require__(38);
+const BaseComponent_1 = __webpack_require__(34);
+const compileBinding_1 = __webpack_require__(46);
 const Component_1 = __webpack_require__(25);
 const ElementProtoMixin_1 = __webpack_require__(31);
 const getTemplateNodeValueAST_1 = __webpack_require__(20);
 const compileKeypath_1 = __webpack_require__(21);
 const keypathPattern_1 = __webpack_require__(16);
-const removeNodes_1 = __webpack_require__(48);
-const RnRepeat_1 = __webpack_require__(49);
+const removeNodes_1 = __webpack_require__(47);
+const RnRepeat_1 = __webpack_require__(48);
 const slice = Array.prototype.slice;
 const reKeypath = RegExp(`^${keypathPattern_1.keypathPattern}$`);
 let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent {
@@ -3595,7 +3568,7 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
     }
     _render(changed) {
         if (this._elseMode
-            ? !this._if.get() && (this._if.get() !== undefined || this.paramWithUndefined)
+            ? !this._if.get() && (this._if.get() !== undefined || this.withUndefined)
             : this._if.get()) {
             let contentBindingResult = [null, null, null];
             let content = this.element.contentTemplate.render(null, this.ownerComponent, this.$context, contentBindingResult);
@@ -3671,8 +3644,16 @@ RnIfThen = RnIfThen_1 = __decorate([
         elementIs: 'RnIfThen',
         elementExtends: 'template',
         params: {
-            if: { property: 'paramIf', type: String, required: true, readonly: true },
-            withUndefined: { property: 'paramWithUndefined', type: Boolean, readonly: true }
+            if: {
+                property: 'paramIf',
+                type: String,
+                required: true,
+                readonly: true
+            },
+            withUndefined: {
+                type: Boolean,
+                readonly: true
+            }
         }
     })
 ], RnIfThen);
@@ -3680,13 +3661,13 @@ exports.RnIfThen = RnIfThen;
 
 
 /***/ }),
-/* 45 */
+/* 44 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__45__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__44__;
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3702,7 +3683,7 @@ exports.moveContent = moveContent;
 
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3710,21 +3691,21 @@ exports.moveContent = moveContent;
 Object.defineProperty(exports, "__esModule", { value: true });
 const bindingToJSExpression_1 = __webpack_require__(10);
 const formatters_1 = __webpack_require__(13);
-const cache = Object.create(null);
+const cache = new Map();
 function compileBinding(binding, cacheKey) {
-    if (cache[cacheKey]) {
-        return cache[cacheKey];
+    if (!cache.has(cacheKey)) {
+        let inner = Function('formatters', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(binding[0])};`);
+        cache.set(cacheKey, function () {
+            return inner.call(this, formatters_1.formatters);
+        });
     }
-    let inner = Function('formatters', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(binding[0])};`);
-    return (cache[cacheKey] = function () {
-        return inner.call(this, formatters_1.formatters);
-    });
+    return cache.get(cacheKey);
 }
 exports.compileBinding = compileBinding;
 
 
 /***/ }),
-/* 48 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3751,7 +3732,7 @@ exports.removeNodes = removeNodes;
 
 
 /***/ }),
-/* 49 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3763,20 +3744,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_tick_1 = __webpack_require__(45);
+const next_tick_1 = __webpack_require__(44);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(46);
-const attachChildComponentElements_1 = __webpack_require__(39);
-const BaseComponent_1 = __webpack_require__(35);
-const compileBinding_1 = __webpack_require__(47);
+const move_content_1 = __webpack_require__(45);
+const attachChildComponentElements_1 = __webpack_require__(38);
+const BaseComponent_1 = __webpack_require__(34);
+const compileBinding_1 = __webpack_require__(46);
 const Component_1 = __webpack_require__(25);
 const ElementProtoMixin_1 = __webpack_require__(31);
 const getTemplateNodeValueAST_1 = __webpack_require__(20);
 const compileKeypath_1 = __webpack_require__(21);
 const keypathPattern_1 = __webpack_require__(16);
 const namePattern_1 = __webpack_require__(17);
-const removeNodes_1 = __webpack_require__(48);
-const RnIfThen_1 = __webpack_require__(44);
+const removeNodes_1 = __webpack_require__(47);
+const RnIfThen_1 = __webpack_require__(43);
 const slice = Array.prototype.slice;
 const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern}(?:\\s*(.*\\S))?)\\s*$`);
 function getItem(list, index) {
@@ -3841,7 +3822,6 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
             this._prevList = [];
             this._list = new cellx_1.Cell(getList, { context: this.$context });
             this._$itemMap = new Map();
-            this._trackBy = this.paramTrackBy;
             this.initialized = true;
         }
         if (this.element.contentTemplate) {
@@ -3872,7 +3852,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
         let prevListLength = prevList.length;
         let list = this._list.get();
         let $itemMap = this._$itemMap;
-        let trackBy = this._trackBy;
+        let trackBy = this.trackBy;
         let startIndex = 0;
         let changed = false;
         if (list) {
@@ -3905,7 +3885,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                         }
                         $item.item.set(item);
                         $item.index.set(i);
-                        lastNode = insertBefore($item.nodes, lastNode == el && this.paramBeforeTemplate ? el : lastNode.nextSibling);
+                        lastNode = insertBefore($item.nodes, lastNode == el && this.beforeTemplate ? el : lastNode.nextSibling);
                         i++;
                     }
                     else {
@@ -3962,7 +3942,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                                             let k$Item = new$ItemMap.get(kValue);
                                             k$Item[0].item.set(item);
                                             k$Item[0].index.set(i);
-                                            lastNode = insertBefore(k$Item[0].nodes, lastNode == el && this.paramBeforeTemplate
+                                            lastNode = insertBefore(k$Item[0].nodes, lastNode == el && this.beforeTemplate
                                                 ? el
                                                 : lastNode.nextSibling);
                                         }
@@ -4042,7 +4022,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                     }
                     let newLastNode = content.lastChild;
                     ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                    lastNode.parentNode.insertBefore(content, lastNode == el && this.paramBeforeTemplate ? el : lastNode.nextSibling);
+                    lastNode.parentNode.insertBefore(content, lastNode == el && this.beforeTemplate ? el : lastNode.nextSibling);
                     ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                     lastNode = newLastNode;
                     if (childComponents) {
@@ -4099,7 +4079,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
         this._list.off('change', this._onListChange, this);
         let prevList = this._prevList;
         let $itemMap = this._$itemMap;
-        let trackBy = this._trackBy;
+        let trackBy = this.trackBy;
         for (let i = 0, l = prevList.length; i < l; i++) {
             let value = trackBy ? prevList[i][trackBy] : prevList[i];
             for (let $item of $itemMap.get(value)) {
@@ -4116,9 +4096,20 @@ RnRepeat = __decorate([
         elementIs: 'RnRepeat',
         elementExtends: 'template',
         params: {
-            for: { property: 'paramFor', type: String, required: true, readonly: true },
-            trackBy: { property: 'paramTrackBy', type: String, readonly: true },
-            beforeTemplate: { property: 'paramBeforeTemplate', type: Boolean, readonly: true }
+            for: {
+                property: 'paramFor',
+                type: String,
+                required: true,
+                readonly: true
+            },
+            trackBy: {
+                type: String,
+                readonly: true
+            },
+            beforeTemplate: {
+                type: Boolean,
+                readonly: true
+            }
         }
     })
 ], RnRepeat);
@@ -4126,7 +4117,7 @@ exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
-/* 50 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4139,7 +4130,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Component_1 = __webpack_require__(25);
-const RnIfThen_1 = __webpack_require__(44);
+const RnIfThen_1 = __webpack_require__(43);
 let RnIfElse = class RnIfElse extends RnIfThen_1.RnIfThen {
     constructor() {
         super(...arguments);
@@ -4156,7 +4147,7 @@ exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
-/* 51 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4168,14 +4159,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(36);
-const move_content_1 = __webpack_require__(37);
-const attachChildComponentElements_1 = __webpack_require__(39);
-const BaseComponent_1 = __webpack_require__(35);
+const get_uid_1 = __webpack_require__(35);
+const move_content_1 = __webpack_require__(36);
+const attachChildComponentElements_1 = __webpack_require__(38);
+const BaseComponent_1 = __webpack_require__(34);
 const bindContent_1 = __webpack_require__(7);
 const Component_1 = __webpack_require__(25);
 const ElementProtoMixin_1 = __webpack_require__(31);
-const cloneNode_1 = __webpack_require__(52);
+const cloneNode_1 = __webpack_require__(51);
 const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot[slotContentMap]');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
     static get bindsInputContent() {
@@ -4191,28 +4182,28 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
         let contentOwnerComponent = ownerComponent.ownerComponent;
         let ownerComponentInputContent = ownerComponent.$inputContent;
         let el = this.element;
-        let cloneContent = this.paramCloneContent;
+        let cloneContent = this.cloneContent;
         let content;
         let childComponents;
         let bindings;
         let backBindings;
         if (ownerComponentInputContent || !cloneContent) {
-            let slotName = this.paramName;
+            let name = this.name;
             let forTag;
-            let for$;
-            if (!slotName) {
-                forTag = this.paramForTag;
+            let for_;
+            if (!name) {
+                forTag = this.forTag;
                 if (forTag) {
                     forTag = forTag.toUpperCase();
                 }
                 else {
-                    for$ = this.paramFor;
+                    for_ = this.paramFor;
                 }
             }
             let key = get_uid_1.getUID(ownerComponent) +
                 '/' +
-                (slotName ? 'slot:' + slotName : forTag ? 'tag:' + forTag : for$ || '');
-            if (slotName || forTag || for$) {
+                (name ? 'slot:' + name : forTag ? 'tag:' + forTag : for_ || '');
+            if (name || forTag || for_) {
                 let contentMap;
                 if (!cloneContent &&
                     (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
@@ -4226,12 +4217,12 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
                     }
                 }
                 else if (ownerComponentInputContent) {
-                    if (for$ && for$.indexOf('__') == -1) {
+                    if (for_ && for_.indexOf('__') == -1) {
                         let elementBlockNames = ownerComponent.constructor
                             ._elementBlockNames;
-                        for$ = elementBlockNames[elementBlockNames.length - 1] + '__' + for$;
+                        for_ = elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
                     }
-                    let selectedElements = ownerComponentInputContent.querySelectorAll(for$ ? '.' + for$ : forTag || `[slot=${slotName}]`);
+                    let selectedElements = ownerComponentInputContent.querySelectorAll(for_ ? '.' + for_ : forTag || `[slot=${name}]`);
                     let selectedElementCount = selectedElements.length;
                     if (selectedElementCount) {
                         content = document.createDocumentFragment();
@@ -4268,13 +4259,13 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
             if (content || this.element.contentTemplate) {
                 let contentBindingResult = [null, null, null];
                 if (content) {
-                    bindContent_1.bindContent(content, contentOwnerComponent, this.paramGetContext
-                        ? this.paramGetContext.call(ownerComponent, ownerComponent.$context, this)
+                    bindContent_1.bindContent(content, contentOwnerComponent, this.getContext
+                        ? this.getContext.call(ownerComponent, ownerComponent.$context, this)
                         : ownerComponent.$context, contentBindingResult);
                 }
                 else {
-                    content = this.element.contentTemplate.render(null, ownerComponent, this.paramGetContext
-                        ? this.paramGetContext.call(ownerComponent, this.$context, this)
+                    content = this.element.contentTemplate.render(null, ownerComponent, this.getContext
+                        ? this.getContext.call(ownerComponent, this.$context, this)
                         : this.$context, contentBindingResult);
                 }
                 childComponents = this._childComponents = contentBindingResult[0];
@@ -4324,11 +4315,27 @@ RnSlot = __decorate([
     Component_1.Component({
         elementIs: 'RnSlot',
         params: {
-            name: { property: 'paramName', type: String, readonly: true },
-            forTag: { property: 'paramForTag', type: String, readonly: true },
-            for: { property: 'paramFor', type: String, readonly: true },
-            cloneContent: { property: 'paramCloneContent', default: false, readonly: true },
-            getContext: { property: 'paramGetContext', type: Object, readonly: true }
+            name: {
+                type: String,
+                readonly: true
+            },
+            forTag: {
+                type: String,
+                readonly: true
+            },
+            for: {
+                property: 'paramFor',
+                type: String,
+                readonly: true
+            },
+            cloneContent: {
+                default: false,
+                readonly: true
+            },
+            getContext: {
+                type: Object,
+                readonly: true
+            }
         }
     })
 ], RnSlot);
@@ -4336,7 +4343,7 @@ exports.RnSlot = RnSlot;
 
 
 /***/ }),
-/* 52 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

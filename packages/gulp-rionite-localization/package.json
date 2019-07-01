@@ -24,7 +24,7 @@
     "gettext-parser": "^4.0.0",
     "nunjucks": "^3.2.0",
     "through2": "^3.0.1",
-    "typescript": "^3.4.5",
+    "typescript": "^3.5.2",
     "vinyl": "^2.2.0"
   }
 }

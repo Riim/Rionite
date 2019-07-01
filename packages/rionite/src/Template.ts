@@ -16,7 +16,7 @@ import {
 	} from './bindContent';
 import { compileTemplateNodeValue } from './compileTemplateNodeValue';
 import { IFreezableCell } from './componentBinding';
-import { componentConstructorMap } from './componentConstructorMap';
+import { componentConstructors } from './componentConstructors';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
 import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
 import { compileKeypath } from './lib/compileKeypath';
@@ -78,7 +78,7 @@ export interface IElement extends INode {
 	is: string | null;
 	names: Array<string | null> | null;
 	attributes: IElementAttributes | null;
-	$specifiedParams: Set<string> | null;
+	$specifiedParams: Map<string, string> | null;
 	content: TContent | null;
 	contentTemplateIndex: number | null;
 }
@@ -94,17 +94,17 @@ export interface IBlock extends INode {
 	elements: Record<string, IElement>;
 }
 
-const escapee: Record<string, string> = {
-	__proto__: null as any,
+const emptyObj = { __proto__: null };
 
-	'/': '/',
-	'\\': '\\',
-	b: '\b',
-	f: '\f',
-	n: '\n',
-	r: '\r',
-	t: '\t'
-};
+const escapee = new Map([
+	['/', '/'],
+	['\\', '\\'],
+	['b', '\b'],
+	['f', '\f'],
+	['n', '\n'],
+	['r', '\r'],
+	['t', '\t']
+]);
 
 const reWhitespace = /\s/;
 
@@ -132,7 +132,7 @@ export class Template {
 		(el: IElement, attr: IElementAttribute) => IElement
 	> = {};
 
-	_isEmbedded: boolean;
+	_embedded: boolean;
 
 	parent: Template | null;
 	template: string;
@@ -152,12 +152,12 @@ export class Template {
 	constructor(
 		template: string | IBlock,
 		options?: {
-			_isEmbedded?: boolean;
+			_embedded?: boolean;
 			parent?: Template;
 			blockName?: string | Array<string>;
 		}
 	) {
-		let isEmbedded = (this._isEmbedded = !!(options && options._isEmbedded));
+		let embedded = (this._embedded = !!(options && options._embedded));
 		let parent = (this.parent = (options && options.parent) || null);
 
 		if (typeof template == 'string') {
@@ -168,7 +168,7 @@ export class Template {
 			this._elements = template.elements;
 		}
 
-		if (isEmbedded) {
+		if (embedded) {
 			this._elementNamesTemplate = parent!._elementNamesTemplate;
 		} else {
 			let blockName = options && options.blockName;
@@ -200,7 +200,7 @@ export class Template {
 
 		let parent = this.parent;
 
-		if (!this._isEmbedded) {
+		if (!this._embedded) {
 			this._elements = parent
 				? { __proto__: parent._elements as any }
 				: {
@@ -219,7 +219,7 @@ export class Template {
 				  };
 		}
 
-		this._embeddedTemplates = this._isEmbedded
+		this._embeddedTemplates = this._embedded
 			? parent!._embeddedTemplates
 			: parent &&
 			  parent._embeddedTemplates &&
@@ -232,7 +232,7 @@ export class Template {
 								elements: this._elements
 							},
 							{
-								_isEmbedded: true,
+								_embedded: true,
 								parent: this
 							}
 						)
@@ -391,10 +391,7 @@ export class Template {
 				this._throwError('Expected element', pos);
 			}
 
-			if (
-				!this.parent ||
-				!(tagName = (this.parent._elements[elName!] || { __proto__: null }).tagName)
-			) {
+			if (!this.parent || !(tagName = (this.parent._elements[elName!] || emptyObj).tagName)) {
 				throw this._throwError(
 					'Element.tagName is required',
 					isTransformer ? pos + 1 : pos
@@ -402,21 +399,19 @@ export class Template {
 			}
 		}
 
-		let elComponentConstr = componentConstructorMap.get(tagName);
+		let elComponentConstr = componentConstructors.get(tagName);
 
 		let attrs: IElementAttributes | null | undefined;
-		let $specifiedParams: Set<string> | undefined;
+		let $specifiedParams: Map<string, string> | undefined;
 
 		if (elComponentConstr) {
-			$specifiedParams = new Set();
+			$specifiedParams = new Map();
 		}
 
 		if (this._chr == '(') {
 			attrs = this._readAttributes(
 				elName || superElName,
-				elComponentConstr &&
-					elComponentConstr.params &&
-					elComponentConstr[KEY_PARAMS_CONFIG],
+				elComponentConstr && elComponentConstr[KEY_PARAMS_CONFIG],
 				$specifiedParams
 			);
 
@@ -549,7 +544,7 @@ export class Template {
 												elements: this._elements
 											},
 											{
-												_isEmbedded: true,
+												_embedded: true,
 												parent: this
 											}
 										)
@@ -629,7 +624,7 @@ export class Template {
 														elements: this._elements
 													},
 													{
-														_isEmbedded: true,
+														_embedded: true,
 														parent: this
 													}
 												)
@@ -675,7 +670,7 @@ export class Template {
 								elements: this._elements
 							},
 							{
-								_isEmbedded: true,
+								_embedded: true,
 								parent: this
 							}
 						)
@@ -700,8 +695,8 @@ export class Template {
 
 	_readAttributes(
 		superElName: string | null,
-		$paramsConfig?: Record<string, I$ComponentParamConfig> | null,
-		$specifiedParams?: Set<string>
+		$paramsConfig?: Map<string, I$ComponentParamConfig> | null,
+		$specifiedParams?: Map<string, string>
 	): IElementAttributes | null {
 		this._next('(');
 
@@ -715,13 +710,28 @@ export class Template {
 		let attrIsValue: string | null | undefined;
 		let list: IElementAttributeList | undefined;
 
-		loop: for (;;) {
-			if (this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
+		loop: for (let f = true; ; f = false) {
+			if (f && this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
 				let superElAttrs = superCall.element.attributes;
 
 				if (superElAttrs) {
+					let superElAttrList = superElAttrs.list;
+
 					attrIsValue = superElAttrs.attributeIsValue;
-					list = { __proto__: superElAttrs.list } as any;
+					list = { __proto__: superElAttrList } as any;
+
+					if ($paramsConfig && superElAttrList) {
+						for (let i = 0, l = superElAttrList['length=']; i < l; i++) {
+							let attr = superElAttrList[i];
+
+							if (!attr.isTransformer && $paramsConfig.has(attr.name)) {
+								$specifiedParams!.set(
+									$paramsConfig.get(attr.name)!.name,
+									attr.value
+								);
+							}
+						}
+					}
 				}
 
 				this._skipWhitespacesAndComments();
@@ -740,6 +750,7 @@ export class Template {
 				}
 
 				let fullName = (isTransformer ? '@' : '') + name;
+				let value: string;
 
 				if (this._skipWhitespacesAndComments() == '=') {
 					this._next();
@@ -747,8 +758,10 @@ export class Template {
 					let chr = this._skipWhitespaces();
 
 					if (chr == "'" || chr == '"' || chr == '`') {
+						value = this._readString();
+
 						if (fullName == 'is') {
-							attrIsValue = this._readString();
+							attrIsValue = value;
 						} else {
 							(list || (list = { __proto__: null, 'length=': 0 } as any))[
 								list![fullName] === undefined
@@ -757,14 +770,14 @@ export class Template {
 							] = {
 								isTransformer,
 								name,
-								value: this._readString(),
+								value,
 								pos
 							};
 						}
 
 						this._skipWhitespacesAndComments();
 					} else {
-						let value = '';
+						value = '';
 
 						for (;;) {
 							if (!chr) {
@@ -774,8 +787,10 @@ export class Template {
 							}
 
 							if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
+								value = value.trim();
+
 								if (fullName == 'is') {
-									attrIsValue = value.trim();
+									attrIsValue = value;
 								} else {
 									(list || (list = { __proto__: null, 'length=': 0 } as any))[
 										list![fullName] === undefined
@@ -784,7 +799,7 @@ export class Template {
 									] = {
 										isTransformer,
 										name,
-										value: value.trim(),
+										value,
 										pos
 									};
 								}
@@ -800,23 +815,27 @@ export class Template {
 							chr = this._next();
 						}
 					}
-				} else if (fullName == 'is') {
-					attrIsValue = '';
 				} else {
-					(list || (list = { __proto__: null, 'length=': 0 } as any))[
-						list![fullName] === undefined
-							? (list![fullName] = list!['length=']++)
-							: list![fullName]
-					] = {
-						isTransformer,
-						name,
-						value: '',
-						pos
-					};
+					value = '';
+
+					if (fullName == 'is') {
+						attrIsValue = value;
+					} else {
+						(list || (list = { __proto__: null, 'length=': 0 } as any))[
+							list![fullName] === undefined
+								? (list![fullName] = list!['length=']++)
+								: list![fullName]
+						] = {
+							isTransformer,
+							name,
+							value,
+							pos
+						};
+					}
 				}
 
-				if ($paramsConfig && $paramsConfig[name]) {
-					$specifiedParams!.add($paramsConfig[name].name);
+				if ($paramsConfig && $paramsConfig.has(name)) {
+					$specifiedParams!.set($paramsConfig.get(name)!.name, value);
 				}
 			}
 
@@ -926,8 +945,8 @@ export class Template {
 					chr = this._chr = this.template.charAt(
 						(this._pos = pos + (hexadecimal ? 2 : 4))
 					);
-				} else if (escapee[chr]) {
-					str += escapee[chr];
+				} else if (escapee.has(chr)) {
+					str += escapee.get(chr);
 					chr = this._next();
 				} else {
 					this._throwError('Invalid escape sequence', this._pos - 1);
@@ -1040,7 +1059,7 @@ export class Template {
 		template: string | IBlock,
 		options?: {
 			blockName?: string;
-			_isEmbedded?: boolean;
+			_embedded?: boolean;
 		}
 	): Template {
 		return new Template(template, {
@@ -1168,7 +1187,10 @@ function renderContent<T extends Node = Element>(
 							(node as IElement).attributes && (node as IElement).attributes!.list;
 
 						if (attrList) {
-							let $paramsConfig: Record<string, I$ComponentParamConfig> | undefined;
+							let $paramsConfig:
+								| Map<string, I$ComponentParamConfig>
+								| null
+								| undefined;
 
 							if (nodeComponent) {
 								$paramsConfig = nodeComponent.constructor[KEY_PARAMS_CONFIG];
@@ -1244,11 +1266,8 @@ function renderContent<T extends Node = Element>(
 												}
 
 												let $paramConfig =
-													$paramsConfig && $paramsConfig[attrName];
-												let paramConfig:
-													| IComponentParamConfig
-													| Function
-													| undefined;
+													$paramsConfig && $paramsConfig.get(attrName);
+												let paramConfig: IComponentParamConfig | undefined;
 
 												if ($paramConfig) {
 													paramConfig = $paramConfig.paramConfig;
