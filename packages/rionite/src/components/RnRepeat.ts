@@ -350,13 +350,8 @@ export class RnRepeat extends BaseComponent {
 					let content = (this.element.contentTemplate as Template).render(
 						null,
 						this.ownerComponent,
-						Object.create(context, {
-							'$/': {
-								configurable: false,
-								enumerable: false,
-								writable: false,
-								value: context['$/'] || context
-							},
+						{
+							__proto__: context,
 
 							[this._itemName]: {
 								configurable: true,
@@ -369,7 +364,7 @@ export class RnRepeat extends BaseComponent {
 								enumerable: true,
 								get: (indexCell => () => indexCell.get())(indexCell)
 							}
-						}),
+						},
 						contentBindingResult
 					);
 					let childComponents = contentBindingResult[0];

@@ -1,7 +1,7 @@
 import { EventEmitter, IEvent } from 'cellx';
 import { IFreezableCell } from './componentBinding';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializers';
-import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
+import { KEY_CHILD_COMPONENTS, KEY_COMPONENT_SELF, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { IBlock, Template } from './Template';
 export interface IDisposable {
     dispose(): any;
@@ -70,6 +70,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
     static domEvents: IComponentEvents<BaseComponent, Event> | null;
     static [KEY_PARAMS_CONFIG]: Map<string, I$ComponentParamConfig> | null;
+    [KEY_COMPONENT_SELF]: this;
     _disposables: Map<string, IDisposable>;
     _ownerComponent: BaseComponent | undefined;
     ownerComponent: BaseComponent;
@@ -85,6 +86,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     initialized: boolean;
     isReady: boolean;
     [KEY_PARAM_VALUES]: Map<string, any>;
+    [KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
     constructor(el?: HTMLElement);
     handleEvent(evt: IEvent<BaseComponent>): void;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;

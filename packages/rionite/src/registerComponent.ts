@@ -5,7 +5,7 @@ import { Cell, EventEmitter } from 'cellx';
 import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './BaseComponent';
 import { componentConstructors } from './componentConstructors';
 import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
-import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
+import { KEY_COMPONENT_SELF, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { elementConstructors } from './elementConstructors';
 import { ElementProtoMixin } from './ElementProtoMixin';
 import { Template } from './Template';
@@ -118,22 +118,23 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			enumerable: true,
 
 			get(this: BaseComponent) {
-				let valueCell: Cell | null = this[propertyName + 'Cell'];
+				let self = this[KEY_COMPONENT_SELF];
+				let valueCell: Cell | null = self[propertyName + 'Cell'];
 
 				if (valueCell) {
 					return valueCell.get();
 				}
 
-				let value = this[KEY_PARAM_VALUES].get(name);
+				let value = self[KEY_PARAM_VALUES].get(name);
 
 				if (Cell.currentlyPulling || EventEmitter.currentlySubscribing) {
-					this[KEY_PARAM_VALUES].delete(name);
+					self[KEY_PARAM_VALUES].delete(name);
 					valueCell = new Cell(null, {
-						context: this,
+						context: self,
 						value
 					});
 
-					Object.defineProperty(this, propertyName + 'Cell', {
+					Object.defineProperty(self, propertyName + 'Cell', {
 						configurable: true,
 						enumerable: false,
 						writable: true,
@@ -149,9 +150,11 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			},
 
 			set(this: BaseComponent, value: any) {
-				if (this[KEY_COMPONENT_PARAMS_INITED]) {
+				let self = this[KEY_COMPONENT_SELF];
+
+				if (self[KEY_COMPONENT_PARAMS_INITED]) {
 					if (readonly) {
-						if (value !== this[KEY_PARAM_VALUES].get(name)) {
+						if (value !== self[KEY_PARAM_VALUES].get(name)) {
 							throw new TypeError(`Parameter "${name}" is readonly`);
 						}
 
@@ -161,18 +164,18 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 					let rawValue = $paramConfig.typeSerializer!.write(value, $paramConfig.default);
 
 					if (rawValue === null) {
-						this.element.removeAttribute(snakeCaseName);
+						self.element.removeAttribute(snakeCaseName);
 					} else {
-						this.element.setAttribute(snakeCaseName, rawValue);
+						self.element.setAttribute(snakeCaseName, rawValue);
 					}
 				}
 
-				let valueCell: Cell | null = this[propertyName + 'Cell'];
+				let valueCell: Cell | null = self[propertyName + 'Cell'];
 
 				if (valueCell) {
 					valueCell.set(value);
 				} else {
-					this[KEY_PARAM_VALUES].set(name, value);
+					self[KEY_PARAM_VALUES].set(name, value);
 				}
 			}
 		};

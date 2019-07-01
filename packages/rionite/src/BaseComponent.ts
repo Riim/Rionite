@@ -8,7 +8,12 @@ import { bindContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructors } from './componentConstructors';
 import { IComponentParamTypeSerializer } from './componentParamTypeSerializers';
-import { KEY_CHILD_COMPONENTS, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
+import {
+	KEY_CHILD_COMPONENTS,
+	KEY_COMPONENT_SELF,
+	KEY_PARAM_VALUES,
+	KEY_PARAMS_CONFIG
+	} from './Constants';
 import { elementConstructors } from './elementConstructors';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { handleDOMEvent } from './handleDOMEvent';
@@ -124,6 +129,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	static [KEY_PARAMS_CONFIG]: Map<string, I$ComponentParamConfig> | null;
 
+	[KEY_COMPONENT_SELF]: this;
+
 	_disposables = new Map<string, IDisposable>();
 
 	_ownerComponent: BaseComponent | undefined;
@@ -181,9 +188,12 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	isReady = false;
 
 	[KEY_PARAM_VALUES]: Map<string, any>;
+	[KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
 
 	constructor(el?: HTMLElement) {
 		super();
+
+		this[KEY_COMPONENT_SELF] = this;
 
 		let constr = this.constructor as typeof BaseComponent;
 

@@ -3111,7 +3111,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__9__;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 function formattersReducer(jsExpr, formatter) {
-    return `(this.${formatter.name} || formatters.${formatter.name}).call(this['$/'], ${jsExpr}${formatter.arguments ? ', ' + formatter.arguments.join(', ') : ''})`;
+    return `(this.${formatter.name} || formatters.${formatter.name}).call(this, ${jsExpr}${formatter.arguments ? ', ' + formatter.arguments.join(', ') : ''})`;
 }
 function bindingToJSExpression(binding) {
     let formatters = binding.formatters;
@@ -3708,6 +3708,7 @@ exports.keypathToJSExpression = keypathToJSExpression;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KEY_COMPONENT_SELF = Symbol('Rionite/BaseComponent[componentSelf]');
 exports.KEY_PARAMS_CONFIG = Symbol('Rionite/BaseComponent[paramsConfig]');
 exports.KEY_PARAM_VALUES = Symbol('Rionite/BaseComponent[paramValues]');
 exports.KEY_CHILD_COMPONENTS = Symbol('Rionite/BaseComponent[childComponents]');
@@ -3953,18 +3954,19 @@ function registerComponent(componentConstr) {
             configurable: true,
             enumerable: true,
             get() {
-                let valueCell = this[propertyName + 'Cell'];
+                let self = this[Constants_1.KEY_COMPONENT_SELF];
+                let valueCell = self[propertyName + 'Cell'];
                 if (valueCell) {
                     return valueCell.get();
                 }
-                let value = this[Constants_1.KEY_PARAM_VALUES].get(name);
+                let value = self[Constants_1.KEY_PARAM_VALUES].get(name);
                 if (cellx_1.Cell.currentlyPulling || cellx_1.EventEmitter.currentlySubscribing) {
-                    this[Constants_1.KEY_PARAM_VALUES].delete(name);
+                    self[Constants_1.KEY_PARAM_VALUES].delete(name);
                     valueCell = new cellx_1.Cell(null, {
-                        context: this,
+                        context: self,
                         value
                     });
-                    Object.defineProperty(this, propertyName + 'Cell', {
+                    Object.defineProperty(self, propertyName + 'Cell', {
                         configurable: true,
                         enumerable: false,
                         writable: true,
@@ -3977,27 +3979,28 @@ function registerComponent(componentConstr) {
                 return value;
             },
             set(value) {
-                if (this[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
+                let self = this[Constants_1.KEY_COMPONENT_SELF];
+                if (self[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
                     if (readonly) {
-                        if (value !== this[Constants_1.KEY_PARAM_VALUES].get(name)) {
+                        if (value !== self[Constants_1.KEY_PARAM_VALUES].get(name)) {
                             throw new TypeError(`Parameter "${name}" is readonly`);
                         }
                         return;
                     }
                     let rawValue = $paramConfig.typeSerializer.write(value, $paramConfig.default);
                     if (rawValue === null) {
-                        this.element.removeAttribute(snakeCaseName);
+                        self.element.removeAttribute(snakeCaseName);
                     }
                     else {
-                        this.element.setAttribute(snakeCaseName, rawValue);
+                        self.element.setAttribute(snakeCaseName, rawValue);
                     }
                 }
-                let valueCell = this[propertyName + 'Cell'];
+                let valueCell = self[propertyName + 'Cell'];
                 if (valueCell) {
                     valueCell.set(value);
                 }
                 else {
-                    this[Constants_1.KEY_PARAM_VALUES].set(name, value);
+                    self[Constants_1.KEY_PARAM_VALUES].set(name, value);
                 }
             }
         };
@@ -4446,6 +4449,7 @@ class BaseComponent extends cellx_1.EventEmitter {
         this._attached = false;
         this.initialized = false;
         this.isReady = false;
+        this[Constants_1.KEY_COMPONENT_SELF] = this;
         let constr = this.constructor;
         if (!elementConstructors_1.elementConstructors.has(constr.elementIs)) {
             throw new TypeError('Component must be registered');
@@ -5626,13 +5630,8 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                     let indexCell = new cellx_1.Cell(i);
                     let context = this.$context;
                     let contentBindingResult = [null, null, null];
-                    let content = this.element.contentTemplate.render(null, this.ownerComponent, Object.create(context, {
-                        '$/': {
-                            configurable: false,
-                            enumerable: false,
-                            writable: false,
-                            value: context['$/'] || context
-                        },
+                    let content = this.element.contentTemplate.render(null, this.ownerComponent, {
+                        __proto__: context,
                         [this._itemName]: {
                             configurable: true,
                             enumerable: true,
@@ -5643,7 +5642,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                             enumerable: true,
                             get: (indexCell => () => indexCell.get())(indexCell)
                         }
-                    }), contentBindingResult);
+                    }, contentBindingResult);
                     let childComponents = contentBindingResult[0];
                     let backBindings = contentBindingResult[2];
                     let new$Item = {
