@@ -2747,6 +2747,10 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                                                 if ($paramConfig &&
                                                     (bindingPrefix === '->' ||
                                                         bindingPrefix === '<->')) {
+                                                    if (bindingPrefix == '->' &&
+                                                        attrName.charAt(0) != '_') {
+                                                        attrValue = null;
+                                                    }
                                                     let keypath = attrValueAST[0].keypath.split('.');
                                                     (result[2] || (result[2] = [])).push(nodeComponent, $paramConfig.property, keypath.length == 1
                                                         ? (propertyName => function (evt) {

@@ -1268,6 +1268,13 @@ function renderContent<T extends Node = Element>(
 													(bindingPrefix === '->' ||
 														bindingPrefix === '<->')
 												) {
+													if (
+														bindingPrefix == '->' &&
+														attrName.charAt(0) != '_'
+													) {
+														attrValue = null;
+													}
+
 													let keypath = (attrValueAST[0] as ITemplateNodeValueBinding).keypath!.split(
 														'.'
 													);
