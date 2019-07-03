@@ -109,7 +109,7 @@ export const ElementProtoMixin = {
 			}
 
 			let valueCell: Cell | null = component[$paramConfig.property + 'Cell'];
-			let value = $paramConfig.typeSerializer!.read(rawValue, $paramConfig.default, this);
+			let value = $paramConfig.valueСonverters!.toData(rawValue, $paramConfig.default, this);
 
 			if (valueCell) {
 				valueCell.set(value);

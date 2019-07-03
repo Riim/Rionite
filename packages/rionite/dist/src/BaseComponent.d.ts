@@ -1,6 +1,6 @@
 import { EventEmitter, IEvent } from 'cellx';
 import { IFreezableCell } from './componentBinding';
-import { IComponentParamTypeSerializer } from './componentParamTypeSerializers';
+import { IComponentParamValueСonverters } from './componentParamValueConverters';
 import { KEY_CHILD_COMPONENTS, KEY_COMPONENT_SELF, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { IBlock, Template } from './Template';
 export interface IDisposable {
@@ -33,7 +33,7 @@ export interface I$ComponentParamConfig {
     name: string;
     property: string;
     type: Function | undefined;
-    typeSerializer: IComponentParamTypeSerializer | undefined;
+    valueСonverters: IComponentParamValueСonverters | undefined;
     default: any;
     required: boolean;
     readonly: boolean;
@@ -48,9 +48,6 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
     $component: T | null;
     rioniteComponent: T;
     contentTemplate?: Template;
-}
-export interface IComponentElementClassNameMap {
-    [elName: string]: string;
 }
 export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (this: T, evt: U, context: Record<string, any>, receiver: Element) => any;
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
@@ -81,7 +78,6 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     $context: Record<string, any> | undefined;
     $specifiedParams: ReadonlyMap<string, string>;
     _bindings: Array<IFreezableCell> | null;
-    _elementListMap: Map<string, HTMLCollectionOf<Element>> | undefined;
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;

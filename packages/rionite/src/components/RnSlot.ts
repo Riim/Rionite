@@ -10,7 +10,7 @@ import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } fr
 import { cloneNode } from '../lib/cloneNode';
 import { Template } from '../Template';
 
-const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot[slotContentMap]');
+const KEY_SLOTS_CONTENT = Symbol('Rionite/RnSlot[slotsContent]');
 
 @Component({
 	elementIs: 'RnSlot',
@@ -97,18 +97,18 @@ export class RnSlot extends BaseComponent {
 				(name ? 'slot:' + name : forTag ? 'tag:' + forTag : for_ || '');
 
 			if (name || forTag || for_) {
-				let contentMap: Map<string, IComponentElement> | undefined;
+				let slotsContent: Map<string, IComponentElement> | undefined;
 
 				if (
 					!cloneContent &&
-					(contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
-					contentMap.has(key)
+					(slotsContent = contentOwnerComponent[KEY_SLOTS_CONTENT]) &&
+					slotsContent.has(key)
 				) {
-					let container = contentMap.get(key)!;
+					let container = slotsContent.get(key)!;
 
 					if (container.firstChild) {
 						content = moveContent(document.createDocumentFragment(), container);
-						contentMap.set(key, el);
+						slotsContent.set(key, el);
 
 						childComponents = (container.$component as RnSlot)._childComponents;
 						bindings = container.$component!._bindings;
@@ -137,29 +137,29 @@ export class RnSlot extends BaseComponent {
 
 					if (!cloneContent) {
 						(
-							contentMap ||
-							contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
-							(contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())
+							slotsContent ||
+							contentOwnerComponent[KEY_SLOTS_CONTENT] ||
+							(contentOwnerComponent[KEY_SLOTS_CONTENT] = new Map())
 						).set(key, el);
 					}
 				}
 			} else if (cloneContent) {
 				content = cloneNode(ownerComponentInputContent!);
 			} else {
-				let contentMap: Map<string, IComponentElement> | undefined =
-					contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
+				let slotsContent: Map<string, IComponentElement> | undefined =
+					contentOwnerComponent[KEY_SLOTS_CONTENT];
 
-				if (contentMap && contentMap.has(key)) {
-					let container = contentMap.get(key)!;
+				if (slotsContent && slotsContent.has(key)) {
+					let container = slotsContent.get(key)!;
 
 					content = moveContent(document.createDocumentFragment(), container);
-					contentMap.set(key, el);
+					slotsContent.set(key, el);
 
 					childComponents = (container.$component as RnSlot)._childComponents;
 					bindings = container.$component!._bindings;
 				} else if (ownerComponentInputContent) {
 					content = ownerComponentInputContent;
-					(contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())).set(
+					(slotsContent || (contentOwnerComponent[KEY_SLOTS_CONTENT] = new Map())).set(
 						key,
 						el
 					);

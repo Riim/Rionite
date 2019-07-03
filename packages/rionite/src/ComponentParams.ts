@@ -1,6 +1,6 @@
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
 import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './BaseComponent';
-import { componentParamTypeSerializers } from './componentParamTypeSerializers';
+import { componentParamValueСonverters } from './componentParamValueConverters';
 import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 
 export const KEY_COMPONENT_PARAMS_INITED = Symbol('Rionite/ComponentParams[componentParamsInited]');
@@ -15,10 +15,10 @@ function initParam(
 		return;
 	}
 
-	let typeSerializer = $paramConfig.typeSerializer;
+	let valueСonverters = $paramConfig.valueСonverters;
 	let defaultValue: any;
 
-	if (typeSerializer) {
+	if (valueСonverters) {
 		defaultValue = $paramConfig.default;
 	} else {
 		let paramConfig = $paramConfig.paramConfig;
@@ -26,20 +26,15 @@ function initParam(
 
 		defaultValue = component[$paramConfig.property];
 
-		let isObject =
-			type == 'object' &&
-			(!!(paramConfig as IComponentParamConfig).type ||
-				(paramConfig as IComponentParamConfig).default !== undefined);
-
 		if (defaultValue === undefined) {
-			if (isObject) {
+			if (type == 'object') {
 				defaultValue = (paramConfig as IComponentParamConfig).default;
 			} else if (type != 'function') {
 				defaultValue = paramConfig;
 			}
 		}
 
-		type = isObject ? (paramConfig as IComponentParamConfig).type : paramConfig;
+		type = type == 'object' ? (paramConfig as IComponentParamConfig).type : paramConfig;
 
 		if (defaultValue !== undefined && type !== eval) {
 			type = typeof defaultValue;
@@ -49,14 +44,14 @@ function initParam(
 			}
 		}
 
-		typeSerializer = componentParamTypeSerializers.get(type);
+		valueСonverters = componentParamValueСonverters.get(type);
 
-		if (!typeSerializer) {
+		if (!valueСonverters) {
 			throw new TypeError('Unsupported parameter type');
 		}
 
 		$paramConfig.type = type;
-		$paramConfig.typeSerializer = typeSerializer;
+		$paramConfig.valueСonverters = valueСonverters;
 		$paramConfig.default = defaultValue;
 	}
 
@@ -83,12 +78,12 @@ function initParam(
 			throw new TypeError(`Parameter "${name}" is required`);
 		}
 
-		if (defaultValue != null && defaultValue !== false) {
-			el.setAttribute(snakeCaseName, typeSerializer.write(defaultValue)!);
+		if (defaultValue != null && defaultValue !== false && valueСonverters.toString) {
+			el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue)!);
 		}
 	}
 
-	let value = typeSerializer.read(rawValue, defaultValue, el);
+	let value = valueСonverters.toData(rawValue, defaultValue, el);
 
 	if (component[$paramConfig.property + 'Cell']) {
 		component[$paramConfig.property + 'Cell'].set(value);

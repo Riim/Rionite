@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("cellx"), require("escape-string"), require("@riim/escape-html"), require("@riim/gettext"), require("@riim/defer"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/next-uid"), require("@riim/next-tick"));
+		module.exports = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("cellx"), require("escape-string"), require("@riim/escape-html"), require("@riim/gettext"), require("@riim/defer"), require("@riim/move-content"), require("@riim/next-uid"), require("@riim/next-tick"), require("@riim/get-uid"));
 	else if(typeof define === 'function' && define.amd)
-		define(["@riim/kebab-case", "@riim/rionite-snake-case-attribute-name", "cellx", "escape-string", "@riim/escape-html", "@riim/gettext", "@riim/defer", "@riim/get-uid", "@riim/move-content", "@riim/next-uid", "@riim/next-tick"], factory);
+		define(["@riim/kebab-case", "@riim/rionite-snake-case-attribute-name", "cellx", "escape-string", "@riim/escape-html", "@riim/gettext", "@riim/defer", "@riim/move-content", "@riim/next-uid", "@riim/next-tick", "@riim/get-uid"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("cellx"), require("escape-string"), require("@riim/escape-html"), require("@riim/gettext"), require("@riim/defer"), require("@riim/get-uid"), require("@riim/move-content"), require("@riim/next-uid"), require("@riim/next-tick"));
+		exports["rionite"] = factory(require("@riim/kebab-case"), require("@riim/rionite-snake-case-attribute-name"), require("cellx"), require("escape-string"), require("@riim/escape-html"), require("@riim/gettext"), require("@riim/defer"), require("@riim/move-content"), require("@riim/next-uid"), require("@riim/next-tick"), require("@riim/get-uid"));
 	else
-		root["rionite"] = factory(root["@riim/kebab-case"], root["@riim/rionite-snake-case-attribute-name"], root["cellx"], root["escape-string"], root["@riim/escape-html"], root["@riim/gettext"], root["@riim/defer"], root["@riim/get-uid"], root["@riim/move-content"], root["@riim/next-uid"], root["@riim/next-tick"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__6__, __WEBPACK_EXTERNAL_MODULE__9__, __WEBPACK_EXTERNAL_MODULE__12__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__32__, __WEBPACK_EXTERNAL_MODULE__35__, __WEBPACK_EXTERNAL_MODULE__36__, __WEBPACK_EXTERNAL_MODULE__37__, __WEBPACK_EXTERNAL_MODULE__44__) {
+		root["rionite"] = factory(root["@riim/kebab-case"], root["@riim/rionite-snake-case-attribute-name"], root["cellx"], root["escape-string"], root["@riim/escape-html"], root["@riim/gettext"], root["@riim/defer"], root["@riim/move-content"], root["@riim/next-uid"], root["@riim/next-tick"], root["@riim/get-uid"]);
+})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__5__, __WEBPACK_EXTERNAL_MODULE__6__, __WEBPACK_EXTERNAL_MODULE__9__, __WEBPACK_EXTERNAL_MODULE__12__, __WEBPACK_EXTERNAL_MODULE__14__, __WEBPACK_EXTERNAL_MODULE__32__, __WEBPACK_EXTERNAL_MODULE__35__, __WEBPACK_EXTERNAL_MODULE__36__, __WEBPACK_EXTERNAL_MODULE__43__, __WEBPACK_EXTERNAL_MODULE__50__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -123,13 +123,13 @@ exports.TemplateNodeType = Template_1.NodeType;
 exports.Template = Template_1.Template;
 var registerComponent_1 = __webpack_require__(26);
 exports.registerComponent = registerComponent_1.registerComponent;
-var RnIfThen_1 = __webpack_require__(43);
+var RnIfThen_1 = __webpack_require__(42);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
-var RnIfElse_1 = __webpack_require__(49);
+var RnIfElse_1 = __webpack_require__(48);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
-var RnRepeat_1 = __webpack_require__(48);
+var RnRepeat_1 = __webpack_require__(47);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
-var RnSlot_1 = __webpack_require__(50);
+var RnSlot_1 = __webpack_require__(49);
 exports.RnSlot = RnSlot_1.RnSlot;
 
 
@@ -1095,41 +1095,23 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                                                     (result[1] || (result[1] = [])).push(cell);
                                                 }
                                                 let $paramConfig = $paramsConfig && $paramsConfig.get(attrName);
-                                                let paramConfig;
-                                                if ($paramConfig) {
-                                                    paramConfig = $paramConfig.paramConfig;
-                                                }
-                                                if (paramConfig !== undefined &&
+                                                if ($paramConfig &&
                                                     (bindingPrefix === '->' ||
                                                         bindingPrefix === '<->')) {
-                                                    let keypath = attrValueAST[0]
-                                                        .keypath;
-                                                    let keys = keypath.split('.');
-                                                    let handler;
-                                                    if (keys.length == 1) {
-                                                        handler = (propertyName => function (evt) {
-                                                            this.ownerComponent[propertyName] =
-                                                                evt.data.value;
-                                                        })(keys[0]);
-                                                    }
-                                                    else {
-                                                        handler = ((propertyName, keys) => {
-                                                            let getPropertyHolder = compileKeypath_1.compileKeypath(keys, keys.join('.'));
+                                                    let keypath = attrValueAST[0].keypath.split('.');
+                                                    (result[2] || (result[2] = [])).push(nodeComponent, $paramConfig.property, keypath.length == 1
+                                                        ? (propertyName => function (evt) {
+                                                            this.ownerComponent[propertyName] = evt.data.value;
+                                                        })(keypath[0])
+                                                        : ((propertyName, keypath) => {
+                                                            let getPropertyHolder = compileKeypath_1.compileKeypath(keypath, keypath.join('.'));
                                                             return function (evt) {
                                                                 let propertyHolder = getPropertyHolder.call(this.ownerComponent);
                                                                 if (propertyHolder) {
-                                                                    propertyHolder[propertyName] =
-                                                                        evt.data.value;
+                                                                    propertyHolder[propertyName] = evt.data.value;
                                                                 }
                                                             };
-                                                        })(keys[keys.length - 1], keys.slice(0, -1));
-                                                    }
-                                                    (result[2] || (result[2] = [])).push(nodeComponent, (typeof paramConfig == 'object' &&
-                                                        (paramConfig.type ||
-                                                            paramConfig.default !==
-                                                                undefined) &&
-                                                        paramConfig.property) ||
-                                                        $paramConfig.name, handler);
+                                                        })(keypath[keypath.length - 1], keypath.slice(0, -1)));
                                                 }
                                             }
                                         }
@@ -1313,38 +1295,24 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                             setAttribute_1.setAttribute(child, targetAttrName, cell.get());
                             (result[1] || (result[1] = [])).push(cell);
                         }
-                        let paramConfig;
-                        if ($paramConfig) {
-                            paramConfig = $paramConfig.paramConfig;
-                        }
-                        if (paramConfig !== undefined &&
-                            (bindingPrefix === '->' || bindingPrefix === '<->')) {
+                        if ($paramConfig && (bindingPrefix === '->' || bindingPrefix === '<->')) {
                             if (bindingPrefix == '->' && attrName.charAt(0) != '_') {
                                 child.removeAttribute(attrName);
                             }
-                            let keypath = attrValueAST[0].keypath;
-                            let keys = keypath.split('.');
-                            let handler;
-                            if (keys.length == 1) {
-                                handler = (propertyName => function (evt) {
+                            let keypath = attrValueAST[0].keypath.split('.');
+                            (result[2] || (result[2] = [])).push(childComponent, $paramConfig.property, keypath.length == 1
+                                ? (propertyName => function (evt) {
                                     this.ownerComponent[propertyName] = evt.data.value;
-                                })(keys[0]);
-                            }
-                            else {
-                                handler = ((propertyName, keys) => {
-                                    let getPropertyHolder = compileKeypath_1.compileKeypath(keys, keys.join('.'));
+                                })(keypath[0])
+                                : ((propertyName, keypath) => {
+                                    let getPropertyHolder = compileKeypath_1.compileKeypath(keypath, keypath.join('.'));
                                     return function (evt) {
                                         let propertyHolder = getPropertyHolder.call(this.ownerComponent);
                                         if (propertyHolder) {
                                             propertyHolder[propertyName] = evt.data.value;
                                         }
                                     };
-                                })(keys[keys.length - 1], keys.slice(0, -1));
-                            }
-                            (result[2] || (result[2] = [])).push(childComponent, (typeof paramConfig == 'object' &&
-                                (paramConfig.type || paramConfig.default !== undefined) &&
-                                paramConfig.property) ||
-                                $paramConfig.name, handler);
+                                })(keypath[keypath.length - 1], keypath.slice(0, -1)));
                         }
                     }
                 }
@@ -1404,12 +1372,12 @@ exports.bindContent = bindContent;
 Object.defineProperty(exports, "__esModule", { value: true });
 const escape_string_1 = __webpack_require__(9);
 const bindingToJSExpression_1 = __webpack_require__(10);
-const componentParamTypeSerializers_1 = __webpack_require__(11);
+const componentParamValueConverters_1 = __webpack_require__(11);
 const formatters_1 = __webpack_require__(13);
 const TemplateNodeValueParser_1 = __webpack_require__(15);
 const cache = new Map();
-function compileTemplateNodeValue(templateNodeValueAST, templateNodeValueString, useComponentParamValueMap) {
-    let cacheKey = templateNodeValueString + (useComponentParamValueMap ? ',' : '.');
+function compileTemplateNodeValue(templateNodeValueAST, templateNodeValueString, useComponentParamValues) {
+    let cacheKey = templateNodeValueString + (useComponentParamValues ? ',' : '.');
     if (!cache.has(cacheKey)) {
         let inner;
         if (templateNodeValueAST.length == 1) {
@@ -1424,15 +1392,15 @@ function compileTemplateNodeValue(templateNodeValueAST, templateNodeValueString,
             }
             inner = Function('formatters', `var tmp; return [${fragments.join(', ')}].join('');`);
         }
-        cache.set(cacheKey, useComponentParamValueMap
+        cache.set(cacheKey, useComponentParamValues
             ? function (cell) {
                 let value = inner.call(this, formatters_1.formatters);
                 if (value) {
                     let valueType = typeof value;
                     if (valueType == 'object' || valueType == 'function') {
                         let meta = cell.meta;
-                        (meta.element[componentParamTypeSerializers_1.KEY_COMPONENT_PARAM_VALUES] ||
-                            (meta.element[componentParamTypeSerializers_1.KEY_COMPONENT_PARAM_VALUES] = new Map())).set(meta.attributeName, value);
+                        (meta.element[componentParamValueConverters_1.KEY_COMPONENT_PARAM_VALUES] ||
+                            (meta.element[componentParamValueConverters_1.KEY_COMPONENT_PARAM_VALUES] = new Map())).set(meta.attributeName, value);
                         return meta.attributeName;
                     }
                 }
@@ -1495,15 +1463,15 @@ exports.bindingToJSExpression = bindingToJSExpression;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const escape_html_1 = __webpack_require__(12);
-exports.KEY_COMPONENT_PARAM_VALUES = Symbol('Rionite/componentParamTypeSerializerMap[componentParamValueMap]');
-exports.componentParamTypeSerializers = new Map([
+exports.KEY_COMPONENT_PARAM_VALUES = Symbol('Rionite/componentParamValueСonverters[componentParamValues]');
+exports.componentParamValueСonverters = new Map([
     [
         Boolean,
         {
-            read: (rawValue, defaultValue) => {
+            toData: (rawValue, defaultValue) => {
                 return rawValue !== null ? rawValue != 'no' : !!defaultValue;
             },
-            write: (value, defaultValue) => {
+            toString: (value, defaultValue) => {
                 return value ? '' : defaultValue ? 'no' : null;
             }
         }
@@ -1511,14 +1479,14 @@ exports.componentParamTypeSerializers = new Map([
     [
         Number,
         {
-            read: (rawValue, defaultValue) => {
+            toData: (rawValue, defaultValue) => {
                 return rawValue !== null
                     ? +rawValue
                     : defaultValue !== undefined
                         ? defaultValue
                         : null;
             },
-            write: (value) => {
+            toString: (value) => {
                 return value != null ? +value + '' : null;
             }
         }
@@ -1526,14 +1494,14 @@ exports.componentParamTypeSerializers = new Map([
     [
         String,
         {
-            read: (rawValue, defaultValue) => {
+            toData: (rawValue, defaultValue) => {
                 return rawValue !== null
                     ? rawValue
                     : defaultValue !== undefined
                         ? defaultValue
                         : null;
             },
-            write: (value) => {
+            toString: (value) => {
                 return value != null ? value + '' : null;
             }
         }
@@ -1541,7 +1509,7 @@ exports.componentParamTypeSerializers = new Map([
     [
         Object,
         {
-            read: (rawValue, defaultValue, el) => {
+            toData: (rawValue, defaultValue, el) => {
                 if (!rawValue) {
                     return defaultValue || null;
                 }
@@ -1551,32 +1519,28 @@ exports.componentParamTypeSerializers = new Map([
                 }
                 return value;
             },
-            write: (value) => {
-                return value != null ? '' : null;
-            }
+            toString: null
         }
     ],
     [
         eval,
         {
-            read: (rawValue, defaultValue) => {
+            toData: (rawValue, defaultValue) => {
                 return rawValue !== null
                     ? Function(`return ${escape_html_1.unescapeHTML(rawValue)};`)()
                     : defaultValue !== undefined
                         ? defaultValue
                         : null;
             },
-            write: (value) => {
-                return value != null ? '' : null;
-            }
+            toString: null
         }
     ]
 ]);
-exports.componentParamTypeSerializers.set('boolean', exports.componentParamTypeSerializers.get(Boolean));
-exports.componentParamTypeSerializers.set('number', exports.componentParamTypeSerializers.get(Number));
-exports.componentParamTypeSerializers.set('string', exports.componentParamTypeSerializers.get(String));
-exports.componentParamTypeSerializers.set('object', exports.componentParamTypeSerializers.get(Object));
-exports.componentParamTypeSerializers.set('eval', exports.componentParamTypeSerializers.get(eval));
+exports.componentParamValueСonverters.set('boolean', exports.componentParamValueСonverters.get(Boolean));
+exports.componentParamValueСonverters.set('number', exports.componentParamValueСonverters.get(Number));
+exports.componentParamValueСonverters.set('string', exports.componentParamValueСonverters.get(String));
+exports.componentParamValueСonverters.set('object', exports.componentParamValueСonverters.get(Object));
+exports.componentParamValueСonverters.set('eval', exports.componentParamValueСonverters.get(eval));
 
 
 /***/ }),
@@ -2270,8 +2234,7 @@ function registerComponent(componentConstr) {
             continue;
         }
         let snakeCaseName = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true);
-        let isObject = typeof paramConfig == 'object' &&
-            (!!paramConfig.type || paramConfig.default !== undefined);
+        let isObject = typeof paramConfig == 'object';
         let propertyName = (isObject && paramConfig.property) || name;
         let required;
         let readonly;
@@ -2286,7 +2249,7 @@ function registerComponent(componentConstr) {
             name,
             property: propertyName,
             type: undefined,
-            typeSerializer: undefined,
+            valueСonverters: undefined,
             default: undefined,
             required,
             readonly,
@@ -2331,22 +2294,25 @@ function registerComponent(componentConstr) {
             },
             set(value) {
                 let self = this[Constants_1.KEY_COMPONENT_SELF];
+                let valueCell = self[propertyName + 'Cell'];
                 if (self[ComponentParams_1.KEY_COMPONENT_PARAMS_INITED]) {
                     if (readonly) {
-                        if (value !== self[Constants_1.KEY_PARAM_VALUES].get(name)) {
+                        if (value !==
+                            (valueCell ? valueCell.get() : self[Constants_1.KEY_PARAM_VALUES].get(name))) {
                             throw new TypeError(`Parameter "${name}" is readonly`);
                         }
                         return;
                     }
-                    let rawValue = $paramConfig.typeSerializer.write(value, $paramConfig.default);
-                    if (rawValue === null) {
-                        self.element.removeAttribute(snakeCaseName);
-                    }
-                    else {
-                        self.element.setAttribute(snakeCaseName, rawValue);
+                    if ($paramConfig.valueСonverters.toString) {
+                        let rawValue = $paramConfig.valueСonverters.toString(value, $paramConfig.default);
+                        if (rawValue === null) {
+                            self.element.removeAttribute(snakeCaseName);
+                        }
+                        else {
+                            self.element.setAttribute(snakeCaseName, rawValue);
+                        }
                     }
                 }
-                let valueCell = self[propertyName + 'Cell'];
                 if (valueCell) {
                     valueCell.set(value);
                 }
@@ -2478,46 +2444,43 @@ exports.camelize = camelize;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
-const componentParamTypeSerializers_1 = __webpack_require__(11);
+const componentParamValueConverters_1 = __webpack_require__(11);
 const Constants_1 = __webpack_require__(19);
 exports.KEY_COMPONENT_PARAMS_INITED = Symbol('Rionite/ComponentParams[componentParamsInited]');
 function initParam(component, $paramConfig, name, _$specifiedParams) {
     if ($paramConfig === null) {
         return;
     }
-    let typeSerializer = $paramConfig.typeSerializer;
+    let valueСonverters = $paramConfig.valueСonverters;
     let defaultValue;
-    if (typeSerializer) {
+    if (valueСonverters) {
         defaultValue = $paramConfig.default;
     }
     else {
         let paramConfig = $paramConfig.paramConfig;
         let type = typeof paramConfig;
         defaultValue = component[$paramConfig.property];
-        let isObject = type == 'object' &&
-            (!!paramConfig.type ||
-                paramConfig.default !== undefined);
         if (defaultValue === undefined) {
-            if (isObject) {
+            if (type == 'object') {
                 defaultValue = paramConfig.default;
             }
             else if (type != 'function') {
                 defaultValue = paramConfig;
             }
         }
-        type = isObject ? paramConfig.type : paramConfig;
+        type = type == 'object' ? paramConfig.type : paramConfig;
         if (defaultValue !== undefined && type !== eval) {
             type = typeof defaultValue;
             if (type == 'function') {
                 type = 'object';
             }
         }
-        typeSerializer = componentParamTypeSerializers_1.componentParamTypeSerializers.get(type);
-        if (!typeSerializer) {
+        valueСonverters = componentParamValueConverters_1.componentParamValueСonverters.get(type);
+        if (!valueСonverters) {
             throw new TypeError('Unsupported parameter type');
         }
         $paramConfig.type = type;
-        $paramConfig.typeSerializer = typeSerializer;
+        $paramConfig.valueСonverters = valueСonverters;
         $paramConfig.default = defaultValue;
     }
     let el = component.element;
@@ -2538,11 +2501,11 @@ function initParam(component, $paramConfig, name, _$specifiedParams) {
         if ($paramConfig.required) {
             throw new TypeError(`Parameter "${name}" is required`);
         }
-        if (defaultValue != null && defaultValue !== false) {
-            el.setAttribute(snakeCaseName, typeSerializer.write(defaultValue));
+        if (defaultValue != null && defaultValue !== false && valueСonverters.toString) {
+            el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue));
         }
     }
-    let value = typeSerializer.read(rawValue, defaultValue, el);
+    let value = valueСonverters.toData(rawValue, defaultValue, el);
     if (component[$paramConfig.property + 'Cell']) {
         component[$paramConfig.property + 'Cell'].set(value);
     }
@@ -2713,7 +2676,7 @@ exports.ElementProtoMixin = {
                 throw new TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
             }
             let valueCell = component[$paramConfig.property + 'Cell'];
-            let value = $paramConfig.typeSerializer.read(rawValue, $paramConfig.default, this);
+            let value = $paramConfig.valueСonverters.toData(rawValue, $paramConfig.default, this);
             if (valueCell) {
                 valueCell.set(value);
             }
@@ -2774,21 +2737,20 @@ exports.Param = Param;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(35);
 const kebab_case_1 = __webpack_require__(4);
-const move_content_1 = __webpack_require__(36);
-const next_uid_1 = __webpack_require__(37);
+const move_content_1 = __webpack_require__(35);
+const next_uid_1 = __webpack_require__(36);
 const cellx_1 = __webpack_require__(6);
-const attachChildComponentElements_1 = __webpack_require__(38);
+const attachChildComponentElements_1 = __webpack_require__(37);
 const bindContent_1 = __webpack_require__(7);
-const componentBinding_1 = __webpack_require__(39);
+const componentBinding_1 = __webpack_require__(38);
 const componentConstructors_1 = __webpack_require__(24);
 const Constants_1 = __webpack_require__(19);
 const elementConstructors_1 = __webpack_require__(30);
 const ElementProtoMixin_1 = __webpack_require__(31);
-const handleDOMEvent_1 = __webpack_require__(40);
-const handleEvent_1 = __webpack_require__(41);
-const normalizeTextNodes_1 = __webpack_require__(42);
+const handleDOMEvent_1 = __webpack_require__(39);
+const handleEvent_1 = __webpack_require__(40);
+const normalizeTextNodes_1 = __webpack_require__(41);
 const hasOwn = Object.prototype.hasOwnProperty;
 const map = Array.prototype.map;
 class BaseComponent extends cellx_1.EventEmitter {
@@ -3156,26 +3118,19 @@ class BaseComponent extends cellx_1.EventEmitter {
             : [];
     }
     _getElementList(name, container) {
-        let elListMap = this._elementListMap ||
-            (this._elementListMap = new Map());
-        let containerEl;
         if (container) {
             if (typeof container == 'string') {
                 container = this.$(container);
             }
-            containerEl = container instanceof BaseComponent ? container.element : container;
+            if (container instanceof BaseComponent) {
+                container = container.element;
+            }
         }
         else {
-            containerEl = this.element;
+            container = this.element;
         }
-        let key = container ? get_uid_1.getUID(containerEl) + '/' + name : name;
-        let elList = elListMap.get(key);
-        if (!elList) {
-            let elementBlockNames = this.constructor._elementBlockNames;
-            elList = containerEl.getElementsByClassName(elementBlockNames[elementBlockNames.length - 1] + '__' + name);
-            elListMap.set(key, elList);
-        }
-        return elList;
+        let elementBlockNames = this.constructor._elementBlockNames;
+        return container.getElementsByClassName(elementBlockNames[elementBlockNames.length - 1] + '__' + name);
     }
 }
 BaseComponent.elementExtends = null;
@@ -3222,34 +3177,25 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__36__;
 
 /***/ }),
 /* 37 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__37__;
-
-/***/ }),
-/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const ComponentParams_1 = __webpack_require__(29);
-// import { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 function attachChildComponentElements(childComponents) {
     for (let childComponent of childComponents) {
-        // if (childComponent.element[KEY_ELEMENT_CONNECTED]) {
         childComponent._parentComponent = undefined;
         ComponentParams_1.ComponentParams.init(childComponent);
         childComponent.elementConnected();
         childComponent._attach();
-        // }
     }
 }
 exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
-/* 39 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3300,7 +3246,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 40 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3359,7 +3305,7 @@ exports.handleDOMEvent = handleDOMEvent;
 
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3451,7 +3397,7 @@ exports.handleEvent = handleEvent;
 
 
 /***/ }),
-/* 42 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3485,7 +3431,7 @@ exports.normalizeTextNodes = normalizeTextNodes;
 
 
 /***/ }),
-/* 43 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3498,19 +3444,19 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var RnIfThen_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_tick_1 = __webpack_require__(44);
+const next_tick_1 = __webpack_require__(43);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(45);
-const attachChildComponentElements_1 = __webpack_require__(38);
+const move_content_1 = __webpack_require__(44);
+const attachChildComponentElements_1 = __webpack_require__(37);
 const BaseComponent_1 = __webpack_require__(34);
-const compileBinding_1 = __webpack_require__(46);
+const compileBinding_1 = __webpack_require__(45);
 const Component_1 = __webpack_require__(25);
 const ElementProtoMixin_1 = __webpack_require__(31);
 const getTemplateNodeValueAST_1 = __webpack_require__(20);
 const compileKeypath_1 = __webpack_require__(21);
 const keypathPattern_1 = __webpack_require__(16);
-const removeNodes_1 = __webpack_require__(47);
-const RnRepeat_1 = __webpack_require__(48);
+const removeNodes_1 = __webpack_require__(46);
+const RnRepeat_1 = __webpack_require__(47);
 const slice = Array.prototype.slice;
 const reKeypath = RegExp(`^${keypathPattern_1.keypathPattern}$`);
 let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent {
@@ -3665,13 +3611,13 @@ exports.RnIfThen = RnIfThen;
 
 
 /***/ }),
-/* 44 */
+/* 43 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__44__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__43__;
 
 /***/ }),
-/* 45 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3687,7 +3633,7 @@ exports.moveContent = moveContent;
 
 
 /***/ }),
-/* 46 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3709,7 +3655,7 @@ exports.compileBinding = compileBinding;
 
 
 /***/ }),
-/* 47 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3736,7 +3682,7 @@ exports.removeNodes = removeNodes;
 
 
 /***/ }),
-/* 48 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3748,20 +3694,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_tick_1 = __webpack_require__(44);
+const next_tick_1 = __webpack_require__(43);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(45);
-const attachChildComponentElements_1 = __webpack_require__(38);
+const move_content_1 = __webpack_require__(44);
+const attachChildComponentElements_1 = __webpack_require__(37);
 const BaseComponent_1 = __webpack_require__(34);
-const compileBinding_1 = __webpack_require__(46);
+const compileBinding_1 = __webpack_require__(45);
 const Component_1 = __webpack_require__(25);
 const ElementProtoMixin_1 = __webpack_require__(31);
 const getTemplateNodeValueAST_1 = __webpack_require__(20);
 const compileKeypath_1 = __webpack_require__(21);
 const keypathPattern_1 = __webpack_require__(16);
 const namePattern_1 = __webpack_require__(17);
-const removeNodes_1 = __webpack_require__(47);
-const RnIfThen_1 = __webpack_require__(43);
+const removeNodes_1 = __webpack_require__(46);
+const RnIfThen_1 = __webpack_require__(42);
 const slice = Array.prototype.slice;
 const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern}(?:\\s*(.*\\S))?)\\s*$`);
 function getItem(list, index) {
@@ -3825,7 +3771,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
             this._itemName = for_[1];
             this._prevList = [];
             this._list = new cellx_1.Cell(getList, { context: this.$context });
-            this._$itemMap = new Map();
+            this._$itemsMap = new Map();
             this.initialized = true;
         }
         if (this.element.contentTemplate) {
@@ -3855,30 +3801,30 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
         let prevList = this._prevList;
         let prevListLength = prevList.length;
         let list = this._list.get();
-        let $itemMap = this._$itemMap;
+        let $itemsMap = this._$itemsMap;
         let trackBy = this.trackBy;
         let startIndex = 0;
         let changed = false;
         if (list) {
-            let new$ItemMap = new Map();
+            let new$ItemsMap = new Map();
             let removedValues = new Map();
             let el = this.element;
             let lastNode = el;
             for (let i = 0, l = list.length; i < l;) {
                 let item = getItem(list, i);
                 let value = trackBy ? item[trackBy] : item;
-                let $items = $itemMap.get(value);
+                let $items = $itemsMap.get(value);
                 if ($items) {
                     if (removedValues.has(value)) {
                         let $item = $items.shift();
-                        if (new$ItemMap.has(value)) {
-                            new$ItemMap.get(value).push($item);
+                        if (new$ItemsMap.has(value)) {
+                            new$ItemsMap.get(value).push($item);
                         }
                         else {
-                            new$ItemMap.set(value, [$item]);
+                            new$ItemsMap.set(value, [$item]);
                         }
                         if (!$items.length) {
-                            $itemMap.delete(value);
+                            $itemsMap.delete(value);
                         }
                         let removedCount = removedValues.get(value);
                         if (removedCount == 1) {
@@ -3898,14 +3844,14 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                             if (foundIndex === undefined) {
                                 if (value === (trackBy ? prevList[j][trackBy] : prevList[j])) {
                                     let $item = $items.shift();
-                                    if (new$ItemMap.has(value)) {
-                                        new$ItemMap.get(value).push($item);
+                                    if (new$ItemsMap.has(value)) {
+                                        new$ItemsMap.get(value).push($item);
                                     }
                                     else {
-                                        new$ItemMap.set(value, [$item]);
+                                        new$ItemsMap.set(value, [$item]);
                                     }
                                     if (!$items.length) {
-                                        $itemMap.delete(value);
+                                        $itemsMap.delete(value);
                                     }
                                     if (j == startIndex) {
                                         lastNode = $item.nodes[$item.nodes.length - 1];
@@ -3926,15 +3872,15 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                                             ? (iiValue = getItem(list, ii)[trackBy]) ===
                                                 prevList[j][trackBy]
                                             : (iiValue = getItem(list, ii)) === prevList[j])) {
-                                        let ii$Items = $itemMap.get(iiValue);
-                                        if (new$ItemMap.has(iiValue)) {
-                                            new$ItemMap.get(iiValue).push(ii$Items.shift());
+                                        let ii$Items = $itemsMap.get(iiValue);
+                                        if (new$ItemsMap.has(iiValue)) {
+                                            new$ItemsMap.get(iiValue).push(ii$Items.shift());
                                         }
                                         else {
-                                            new$ItemMap.set(iiValue, [ii$Items.shift()]);
+                                            new$ItemsMap.set(iiValue, [ii$Items.shift()]);
                                         }
                                         if (!ii$Items.length) {
-                                            $itemMap.delete(iiValue);
+                                            $itemsMap.delete(iiValue);
                                         }
                                         continue;
                                     }
@@ -3943,7 +3889,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                                             let kValue = trackBy
                                                 ? prevList[k][trackBy]
                                                 : prevList[k];
-                                            let k$Item = new$ItemMap.get(kValue);
+                                            let k$Item = new$ItemsMap.get(kValue);
                                             k$Item[0].item.set(item);
                                             k$Item[0].index.set(i);
                                             lastNode = insertBefore(k$Item[0].nodes, lastNode == el && this.beforeTemplate
@@ -3960,13 +3906,13 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                                 for (let k = startIndex; k < foundIndex; k++) {
                                     let kValue = trackBy ? prevList[k][trackBy] : prevList[k];
                                     let index = removedValues.get(kValue) || 0;
-                                    removeNodes_1.removeNodes($itemMap.get(kValue)[index].nodes);
+                                    removeNodes_1.removeNodes($itemsMap.get(kValue)[index].nodes);
                                     removedValues.set(kValue, index + 1);
                                 }
                                 let lastFoundValue = trackBy
                                     ? prevList[j - 1][trackBy]
                                     : prevList[j - 1];
-                                let nodes = new$ItemMap.get(lastFoundValue)[removedValues.get(lastFoundValue) || 0].nodes;
+                                let nodes = new$ItemsMap.get(lastFoundValue)[removedValues.get(lastFoundValue) || 0].nodes;
                                 lastNode = nodes[nodes.length - 1];
                                 startIndex = j;
                                 i = ii;
@@ -4002,11 +3948,11 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                         bindings: contentBindingResult[1],
                         childComponents
                     };
-                    if (new$ItemMap.has(value)) {
-                        new$ItemMap.get(value).push(new$Item);
+                    if (new$ItemsMap.has(value)) {
+                        new$ItemsMap.get(value).push(new$Item);
                     }
                     else {
-                        new$ItemMap.set(value, [new$Item]);
+                        new$ItemsMap.set(value, [new$Item]);
                     }
                     if (childComponents) {
                         for (let i = childComponents.length; i;) {
@@ -4036,24 +3982,24 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                 }
             }
             if (removedValues.size) {
-                ($itemMap => {
+                ($itemsMap => {
                     removedValues.forEach((_removedCount, value) => {
-                        for (let $item of $itemMap.get(value)) {
+                        for (let $item of $itemsMap.get(value)) {
                             offBindings($item.bindings);
                             deactivateChildComponents($item.childComponents);
                         }
                     });
-                })($itemMap);
+                })($itemsMap);
             }
-            this._$itemMap = new$ItemMap;
+            this._$itemsMap = new$ItemsMap;
         }
         else {
-            this._$itemMap = new Map();
+            this._$itemsMap = new Map();
         }
         if (startIndex < prevListLength) {
             for (let i = startIndex; i < prevListLength; i++) {
                 let value = trackBy ? prevList[i][trackBy] : prevList[i];
-                for (let $item of $itemMap.get(value)) {
+                for (let $item of $itemsMap.get(value)) {
                     removeNodes_1.removeNodes($item.nodes);
                     offBindings($item.bindings);
                     deactivateChildComponents($item.childComponents);
@@ -4076,17 +4022,17 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
         this._active = false;
         this._list.off('change', this._onListChange, this);
         let prevList = this._prevList;
-        let $itemMap = this._$itemMap;
+        let $itemsMap = this._$itemsMap;
         let trackBy = this.trackBy;
         for (let i = 0, l = prevList.length; i < l; i++) {
             let value = trackBy ? prevList[i][trackBy] : prevList[i];
-            for (let $item of $itemMap.get(value)) {
+            for (let $item of $itemsMap.get(value)) {
                 removeNodes_1.removeNodes($item.nodes);
                 offBindings($item.bindings);
                 deactivateChildComponents($item.childComponents);
             }
         }
-        $itemMap.clear();
+        $itemsMap.clear();
     }
 };
 RnRepeat = __decorate([
@@ -4115,7 +4061,7 @@ exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
-/* 49 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4128,7 +4074,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Component_1 = __webpack_require__(25);
-const RnIfThen_1 = __webpack_require__(43);
+const RnIfThen_1 = __webpack_require__(42);
 let RnIfElse = class RnIfElse extends RnIfThen_1.RnIfThen {
     constructor() {
         super(...arguments);
@@ -4145,7 +4091,7 @@ exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
-/* 50 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4157,15 +4103,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(35);
-const move_content_1 = __webpack_require__(36);
-const attachChildComponentElements_1 = __webpack_require__(38);
+const get_uid_1 = __webpack_require__(50);
+const move_content_1 = __webpack_require__(35);
+const attachChildComponentElements_1 = __webpack_require__(37);
 const BaseComponent_1 = __webpack_require__(34);
 const bindContent_1 = __webpack_require__(7);
 const Component_1 = __webpack_require__(25);
 const ElementProtoMixin_1 = __webpack_require__(31);
 const cloneNode_1 = __webpack_require__(51);
-const KEY_SLOT_CONTENT_MAP = Symbol('Rionite/RnSlot[slotContentMap]');
+const KEY_SLOTS_CONTENT = Symbol('Rionite/RnSlot[slotsContent]');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
     static get bindsInputContent() {
         return true;
@@ -4202,14 +4148,14 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
                 '/' +
                 (name ? 'slot:' + name : forTag ? 'tag:' + forTag : for_ || '');
             if (name || forTag || for_) {
-                let contentMap;
+                let slotsContent;
                 if (!cloneContent &&
-                    (contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP]) &&
-                    contentMap.has(key)) {
-                    let container = contentMap.get(key);
+                    (slotsContent = contentOwnerComponent[KEY_SLOTS_CONTENT]) &&
+                    slotsContent.has(key)) {
+                    let container = slotsContent.get(key);
                     if (container.firstChild) {
                         content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                        contentMap.set(key, el);
+                        slotsContent.set(key, el);
                         childComponents = container.$component._childComponents;
                         bindings = container.$component._bindings;
                     }
@@ -4229,9 +4175,9 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
                         }
                     }
                     if (!cloneContent) {
-                        (contentMap ||
-                            contentOwnerComponent[KEY_SLOT_CONTENT_MAP] ||
-                            (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())).set(key, el);
+                        (slotsContent ||
+                            contentOwnerComponent[KEY_SLOTS_CONTENT] ||
+                            (contentOwnerComponent[KEY_SLOTS_CONTENT] = new Map())).set(key, el);
                     }
                 }
             }
@@ -4239,17 +4185,17 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
                 content = cloneNode_1.cloneNode(ownerComponentInputContent);
             }
             else {
-                let contentMap = contentOwnerComponent[KEY_SLOT_CONTENT_MAP];
-                if (contentMap && contentMap.has(key)) {
-                    let container = contentMap.get(key);
+                let slotsContent = contentOwnerComponent[KEY_SLOTS_CONTENT];
+                if (slotsContent && slotsContent.has(key)) {
+                    let container = slotsContent.get(key);
                     content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                    contentMap.set(key, el);
+                    slotsContent.set(key, el);
                     childComponents = container.$component._childComponents;
                     bindings = container.$component._bindings;
                 }
                 else if (ownerComponentInputContent) {
                     content = ownerComponentInputContent;
-                    (contentMap || (contentOwnerComponent[KEY_SLOT_CONTENT_MAP] = new Map())).set(key, el);
+                    (slotsContent || (contentOwnerComponent[KEY_SLOTS_CONTENT] = new Map())).set(key, el);
                 }
             }
         }
@@ -4339,6 +4285,12 @@ RnSlot = __decorate([
 ], RnSlot);
 exports.RnSlot = RnSlot;
 
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__50__;
 
 /***/ }),
 /* 51 */

@@ -1,4 +1,3 @@
-import { getUID } from '@riim/get-uid';
 import { kebabCase } from '@riim/kebab-case';
 import { moveContent } from '@riim/move-content';
 import { nextUID } from '@riim/next-uid';
@@ -7,7 +6,7 @@ import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
 import { componentConstructors } from './componentConstructors';
-import { IComponentParamTypeSerializer } from './componentParamTypeSerializers';
+import { IComponentParamValueСonverters } from './componentParamValueConverters';
 import {
 	KEY_CHILD_COMPONENTS,
 	KEY_COMPONENT_SELF,
@@ -68,7 +67,7 @@ export interface I$ComponentParamConfig {
 	property: string;
 
 	type: Function | undefined;
-	typeSerializer: IComponentParamTypeSerializer | undefined;
+	valueСonverters: IComponentParamValueСonverters | undefined;
 
 	default: any;
 
@@ -89,10 +88,6 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
 	$component: T | null;
 	rioniteComponent: T;
 	contentTemplate?: Template;
-}
-
-export interface IComponentElementClassNameMap {
-	[elName: string]: string;
 }
 
 export type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (
@@ -179,8 +174,6 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	$specifiedParams: ReadonlyMap<string, string>;
 
 	_bindings: Array<IFreezableCell> | null;
-
-	_elementListMap: Map<string, HTMLCollectionOf<Element>> | undefined;
 
 	_attached = false;
 
@@ -667,34 +660,23 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		name: string,
 		container?: Element | BaseComponent | string
 	): HTMLCollectionOf<Element> | undefined {
-		let elListMap =
-			this._elementListMap ||
-			(this._elementListMap = new Map<string, HTMLCollectionOf<Element>>());
-		let containerEl: Element;
-
 		if (container) {
 			if (typeof container == 'string') {
 				container = this.$(container)!;
 			}
 
-			containerEl = container instanceof BaseComponent ? container.element : container;
+			if (container instanceof BaseComponent) {
+				container = container.element;
+			}
 		} else {
-			containerEl = this.element;
+			container = this.element;
 		}
 
-		let key = container ? getUID(containerEl) + '/' + name : name;
-		let elList = elListMap.get(key);
+		let elementBlockNames = (this.constructor as typeof BaseComponent)._elementBlockNames;
 
-		if (!elList) {
-			let elementBlockNames = (this.constructor as typeof BaseComponent)._elementBlockNames;
-
-			elList = containerEl.getElementsByClassName(
-				elementBlockNames[elementBlockNames.length - 1] + '__' + name
-			);
-			elListMap.set(key, elList);
-		}
-
-		return elList;
+		return container.getElementsByClassName(
+			elementBlockNames[elementBlockNames.length - 1] + '__' + name
+		);
 	}
 }
 

@@ -1,12 +1,7 @@
 import { kebabCase } from '@riim/kebab-case';
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
-import { Cell, IEvent, TListener } from 'cellx';
-import {
-	BaseComponent,
-	I$ComponentParamConfig,
-	IComponentParamConfig,
-	IPossiblyComponentElement
-	} from './BaseComponent';
+import { Cell, IEvent } from 'cellx';
+import { BaseComponent, I$ComponentParamConfig, IPossiblyComponentElement } from './BaseComponent';
 import {
 	IAttributeBindingCellMeta,
 	KEY_CONTEXT,
@@ -1267,60 +1262,47 @@ function renderContent<T extends Node = Element>(
 
 												let $paramConfig =
 													$paramsConfig && $paramsConfig.get(attrName);
-												let paramConfig: IComponentParamConfig | undefined;
-
-												if ($paramConfig) {
-													paramConfig = $paramConfig.paramConfig;
-												}
 
 												if (
-													paramConfig !== undefined &&
+													$paramConfig &&
 													(bindingPrefix === '->' ||
 														bindingPrefix === '<->')
 												) {
-													let keypath = (attrValueAST[0] as ITemplateNodeValueBinding)
-														.keypath!;
-													let keys = keypath.split('.');
-													let handler: TListener;
-
-													if (keys.length == 1) {
-														handler = (propertyName =>
-															function(evt: IEvent) {
-																this.ownerComponent[propertyName] =
-																	evt.data.value;
-															})(keys[0]);
-													} else {
-														handler = ((propertyName, keys) => {
-															let getPropertyHolder = compileKeypath(
-																keys,
-																keys.join('.')
-															);
-
-															return function(evt: IEvent) {
-																let propertyHolder = getPropertyHolder.call(
-																	this.ownerComponent
-																);
-
-																if (propertyHolder) {
-																	propertyHolder[propertyName] =
-																		evt.data.value;
-																}
-															};
-														})(
-															keys[keys.length - 1],
-															keys.slice(0, -1)
-														);
-													}
+													let keypath = (attrValueAST[0] as ITemplateNodeValueBinding).keypath!.split(
+														'.'
+													);
 
 													(result[2] || (result[2] = [])).push(
 														nodeComponent!,
-														(typeof paramConfig == 'object' &&
-															(paramConfig.type ||
-																paramConfig.default !==
-																	undefined) &&
-															paramConfig.property) ||
-															$paramConfig!.name,
-														handler
+														$paramConfig.property,
+														keypath.length == 1
+															? (propertyName =>
+																	function(evt: IEvent) {
+																		this.ownerComponent[
+																			propertyName
+																		] = evt.data.value;
+																	})(keypath[0])
+															: ((propertyName, keypath) => {
+																	let getPropertyHolder = compileKeypath(
+																		keypath,
+																		keypath.join('.')
+																	);
+
+																	return function(evt: IEvent) {
+																		let propertyHolder = getPropertyHolder.call(
+																			this.ownerComponent
+																		);
+
+																		if (propertyHolder) {
+																			propertyHolder[
+																				propertyName
+																			] = evt.data.value;
+																		}
+																	};
+															  })(
+																	keypath[keypath.length - 1],
+																	keypath.slice(0, -1)
+															  )
 													);
 												}
 											}

@@ -8,7 +8,7 @@ export interface I$Item {
     bindings: Array<Cell> | null;
     childComponents: Array<BaseComponent> | null;
 }
-export declare type T$ItemMap = Map<any, Array<I$Item>>;
+export declare type T$ItemsMap = Map<any, Array<I$Item>>;
 export declare class RnRepeat extends BaseComponent {
     paramFor: string;
     trackBy: string;
@@ -16,7 +16,7 @@ export declare class RnRepeat extends BaseComponent {
     _itemName: string;
     _prevList: Array<any>;
     _list: Cell<TList | undefined>;
-    _$itemMap: T$ItemMap;
+    _$itemsMap: T$ItemsMap;
     _active: boolean;
     elementConnected(): void;
     elementDisconnected(): void;

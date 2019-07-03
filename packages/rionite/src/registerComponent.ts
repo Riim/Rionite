@@ -71,9 +71,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 		let snakeCaseName = snakeCaseAttributeName(name, true);
 
-		let isObject =
-			typeof paramConfig == 'object' &&
-			(!!paramConfig.type || paramConfig.default !== undefined);
+		let isObject = typeof paramConfig == 'object';
 
 		let propertyName = (isObject && paramConfig.property) || name;
 
@@ -92,7 +90,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			property: propertyName,
 
 			type: undefined,
-			typeSerializer: undefined,
+			valueСonverters: undefined,
 
 			default: undefined,
 
@@ -151,26 +149,33 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 			set(this: BaseComponent, value: any) {
 				let self = this[KEY_COMPONENT_SELF];
+				let valueCell: Cell | null = self[propertyName + 'Cell'];
 
 				if (self[KEY_COMPONENT_PARAMS_INITED]) {
 					if (readonly) {
-						if (value !== self[KEY_PARAM_VALUES].get(name)) {
+						if (
+							value !==
+							(valueCell ? valueCell.get() : self[KEY_PARAM_VALUES].get(name))
+						) {
 							throw new TypeError(`Parameter "${name}" is readonly`);
 						}
 
 						return;
 					}
 
-					let rawValue = $paramConfig.typeSerializer!.write(value, $paramConfig.default);
+					if ($paramConfig.valueСonverters!.toString) {
+						let rawValue = $paramConfig.valueСonverters!.toString(
+							value,
+							$paramConfig.default
+						);
 
-					if (rawValue === null) {
-						self.element.removeAttribute(snakeCaseName);
-					} else {
-						self.element.setAttribute(snakeCaseName, rawValue);
+						if (rawValue === null) {
+							self.element.removeAttribute(snakeCaseName);
+						} else {
+							self.element.setAttribute(snakeCaseName, rawValue);
+						}
 					}
 				}
-
-				let valueCell: Cell | null = self[propertyName + 'Cell'];
 
 				if (valueCell) {
 					valueCell.set(value);

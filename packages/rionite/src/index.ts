@@ -17,7 +17,6 @@ export {
 	I$ComponentParamConfig,
 	IPossiblyComponentElement,
 	IComponentElement,
-	IComponentElementClassNameMap,
 	TEventHandler,
 	IComponentEvents,
 	BaseComponent
@@ -31,7 +30,7 @@ export { RnIfElse } from './components/RnIfElse';
 export {
 	TList as TRnRepeatList,
 	I$Item as IRnRepeatItem,
-	T$ItemMap as TRnRepeatItemMap,
+	T$ItemsMap as TRnRepeatItemsMap,
 	RnRepeat
 } from './components/RnRepeat';
 export { RnSlot } from './components/RnSlot';

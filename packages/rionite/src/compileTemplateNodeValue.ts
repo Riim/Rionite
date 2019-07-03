@@ -2,7 +2,7 @@ import { Cell, TCellPull } from 'cellx';
 import { escapeString } from 'escape-string';
 import { IAttributeBindingCellMeta } from './bindContent';
 import { bindingToJSExpression } from './bindingToJSExpression';
-import { KEY_COMPONENT_PARAM_VALUES } from './componentParamTypeSerializers';
+import { KEY_COMPONENT_PARAM_VALUES } from './componentParamValueConverters';
 import { formatters } from './lib/formatters';
 import { ITemplateNodeValueBinding, TemplateNodeValueNodeType, TTemplateNodeValue } from './TemplateNodeValueParser';
 
@@ -11,9 +11,9 @@ const cache = new Map<string, TCellPull<any>>();
 export function compileTemplateNodeValue(
 	templateNodeValueAST: TTemplateNodeValue,
 	templateNodeValueString: string,
-	useComponentParamValueMap: boolean
+	useComponentParamValues: boolean
 ): TCellPull<any> {
-	let cacheKey = templateNodeValueString + (useComponentParamValueMap ? ',' : '.');
+	let cacheKey = templateNodeValueString + (useComponentParamValues ? ',' : '.');
 
 	if (!cache.has(cacheKey)) {
 		let inner: (formatters: Record<string, Function>) => any;
@@ -44,7 +44,7 @@ export function compileTemplateNodeValue(
 
 		cache.set(
 			cacheKey,
-			useComponentParamValueMap
+			useComponentParamValues
 				? function(cell: Cell<any, IAttributeBindingCellMeta>): any {
 						let value = inner.call(this, formatters);
 
