@@ -14,7 +14,7 @@ export type TContentBindingResult = [
 	Array<BaseComponent | string | TListener> | null
 ];
 
-export const KEY_CONTEXT = Symbol('Rionite/bindContent[context]');
+export const KEY_CONTEXT = Symbol('context');
 
 export const templateNodeValueASTCache: Record<string, TTemplateNodeValue | null> = Object.create(
 	null

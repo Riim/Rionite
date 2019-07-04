@@ -221,20 +221,24 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	listenTo(
 		target: TListeningTarget | string | Array<TListeningTarget>,
-		type: string | Array<string>,
+		type: string | symbol | Array<string | symbol>,
 		listener: TListener | Array<TListener>,
 		context?: any,
 		useCapture?: boolean
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | string | Array<TListeningTarget>,
-		listeners: Record<string, TListener | Array<TListener>>,
+		listeners: Record<string | symbol, TListener | Array<TListener>>,
 		context?: any,
 		useCapture?: boolean
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | string | Array<TListeningTarget>,
-		type: string | Array<string> | Record<string, TListener | Array<TListener>>,
+		type:
+			| string
+			| symbol
+			| Array<string | symbol>
+			| Record<string | symbol, TListener | Array<TListener>>,
 		listener?: TListener | Array<TListener> | any,
 		context?: any,
 		useCapture?: boolean
@@ -308,12 +312,12 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	_listenTo(
 		target: EventEmitter | EventTarget,
-		type: string,
+		type: string | symbol,
 		listener: TListener,
 		context: any,
 		useCapture: boolean
 	): IDisposableListening {
-		if (target instanceof BaseComponent) {
+		if (target instanceof BaseComponent && typeof type == 'string') {
 			if (type.charAt(0) == '<') {
 				let index = type.indexOf('>', 2);
 				let targetType = type.slice(1, index);
@@ -355,7 +359,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				listener = listener.bind(context);
 			}
 
-			target.addEventListener(type, listener, useCapture);
+			target.addEventListener(type as string, listener, useCapture);
 		} else {
 			throw new TypeError('Unable to add a listener');
 		}
@@ -367,7 +371,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				if (target instanceof EventEmitter) {
 					target.off(type, listener, context);
 				} else {
-					target.removeEventListener(type, listener, useCapture);
+					target.removeEventListener(type as string, listener, useCapture);
 				}
 
 				this._disposables.delete(id);

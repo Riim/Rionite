@@ -10,7 +10,7 @@ import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } fr
 import { cloneNode } from '../lib/cloneNode';
 import { Template } from '../Template';
 
-const KEY_SLOTS_CONTENT = Symbol('Rionite/RnSlot[slotsContent]');
+const KEY_SLOTS_CONTENT = Symbol('slotsContent');
 
 @Component({
 	elementIs: 'RnSlot',

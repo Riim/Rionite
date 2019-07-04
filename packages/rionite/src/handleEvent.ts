@@ -22,7 +22,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 
 	stack.length = 0;
 
-	let attrName = 'oncomponent-' + evt.type;
+	let attrName = 'oncomponent-' + (evt.type as string);
 	let ownerComponentEl = ownerComponent.element;
 	let receivers: Array<Element> | undefined;
 
@@ -42,7 +42,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 						let events = (ownerComponent.constructor as typeof BaseComponent).events!;
 
 						if (receiver == targetEl) {
-							handler = events[handlerName.slice(1)][evt.type];
+							handler = events[handlerName.slice(1)][evt.type as string];
 						} else {
 							let elementBlockNames = (target.constructor as typeof BaseComponent)
 								._elementBlockNames;
@@ -50,7 +50,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 							for (let j = 0, m = elementBlockNames.length; j < m; j++) {
 								let typedHandler =
 									events[handlerName.slice(1)][
-										`<${elementBlockNames[j]}>` + evt.type
+										`<${elementBlockNames[j]}>` + (evt.type as string)
 									];
 
 								if (
@@ -66,7 +66,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 								}
 							}
 
-							handler = events[handlerName.slice(1)]['<*>' + evt.type];
+							handler = events[handlerName.slice(1)]['<*>' + (evt.type as string)];
 						}
 					} else {
 						handler = ownerComponent[handlerName];

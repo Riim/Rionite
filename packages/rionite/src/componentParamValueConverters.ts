@@ -5,9 +5,7 @@ export interface IComponentParamValueСonverters {
 	toString: ((value: any, defaultValue?: any) => string | null) | null;
 }
 
-export const KEY_COMPONENT_PARAM_VALUES = Symbol(
-	'Rionite/componentParamValueСonverters[componentParamValues]'
-);
+export const KEY_COMPONENT_PARAM_VALUES = Symbol('componentParamValues');
 
 export const componentParamValueСonverters = new Map<any, IComponentParamValueСonverters>([
 	[

@@ -3,7 +3,7 @@ import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './
 import { componentParamValueСonverters } from './componentParamValueConverters';
 import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 
-export const KEY_COMPONENT_PARAMS_INITED = Symbol('Rionite/ComponentParams[componentParamsInited]');
+export const KEY_COMPONENT_PARAMS_INITED = Symbol('componentParamsInited');
 
 function initParam(
 	component: BaseComponent,

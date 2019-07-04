@@ -45,17 +45,17 @@ module.exports = (env = {}) => {
 		context: __dirname,
 
 		externals: [
-			'@riim/defer',
-			'@riim/escape-html',
-			'@riim/get-uid',
+			// '@riim/defer',
+			// '@riim/escape-html',
+			// '@riim/get-uid',
 			'@riim/gettext',
-			'@riim/kebab-case',
-			'@riim/move-content',
-			'@riim/next-tick',
-			'@riim/next-uid',
-			'@riim/rionite-snake-case-attribute-name',
+			// '@riim/kebab-case',
+			// '@riim/move-content',
+			// '@riim/next-tick',
+			// '@riim/next-uid',
+			// '@riim/rionite-snake-case-attribute-name',
 			'cellx',
-			'escape-string'
+			// 'escape-string'
 		],
 
 		plugins,

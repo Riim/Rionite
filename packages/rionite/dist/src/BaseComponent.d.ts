@@ -85,9 +85,9 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     [KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
     constructor(el?: HTMLElement);
     handleEvent(evt: IEvent<BaseComponent>): void;
-    listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | Array<string>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
-    listenTo(target: TListeningTarget | string | Array<TListeningTarget>, listeners: Record<string, TListener | Array<TListener>>, context?: any, useCapture?: boolean): IDisposableListening;
-    _listenTo(target: EventEmitter | EventTarget, type: string, listener: TListener, context: any, useCapture: boolean): IDisposableListening;
+    listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | symbol | Array<string | symbol>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
+    listenTo(target: TListeningTarget | string | Array<TListeningTarget>, listeners: Record<string | symbol, TListener | Array<TListener>>, context?: any, useCapture?: boolean): IDisposableListening;
+    _listenTo(target: EventEmitter | EventTarget, type: string | symbol, listener: TListener, context: any, useCapture: boolean): IDisposableListening;
     setTimeout(callback: Function, delay: number): IDisposableTimeout;
     setInterval(callback: Function, delay: number): IDisposableInterval;
     registerCallback(callback: Function): IDisposableCallback;
