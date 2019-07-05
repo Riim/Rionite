@@ -1649,14 +1649,14 @@ window.innerHTML = (function (document) {
 
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("cellx"), require("@riim/gettext"));
+		module.exports = factory(require("cellx"));
 	else if(typeof define === 'function' && define.amd)
-		define(["cellx", "@riim/gettext"], factory);
+		define(["cellx"], factory);
 	else if(typeof exports === 'object')
-		exports["rionite"] = factory(require("cellx"), require("@riim/gettext"));
+		exports["rionite"] = factory(require("cellx"));
 	else
-		root["rionite"] = factory(root["cellx"], root["@riim/gettext"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__6__, __WEBPACK_EXTERNAL_MODULE__16__) {
+		root["rionite"] = factory(root["cellx"]);
+})(window, function(__WEBPACK_EXTERNAL_MODULE__6__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -1752,6 +1752,8 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(1);
 __webpack_require__(2);
+var config_1 = __webpack_require__(16);
+exports.config = config_1.config;
 var formatters_1 = __webpack_require__(15);
 exports.formatters = formatters_1.formatters;
 var Component_1 = __webpack_require__(27);
@@ -3314,7 +3316,7 @@ exports.unescapeHTML = unescapeHTML;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const gettext_1 = __webpack_require__(16);
+const config_1 = __webpack_require__(16);
 exports.formatters = {
     default(value, defaultValue) {
         return value === undefined ? defaultValue : value;
@@ -3325,8 +3327,11 @@ exports.formatters = {
     placeholder(value, placeholderValue) {
         return value === null ? placeholderValue : value;
     },
-    or(value, orValue) {
-        return value || orValue;
+    and(value1, value2) {
+        return value1 && value2;
+    },
+    or(value1, value2) {
+        return value1 || value2;
     },
     cond(condition, value1, value2) {
         return condition ? value1 : value2;
@@ -3365,11 +3370,10 @@ exports.formatters = {
         return target && target.get(key);
     },
     key(target, key) {
-        return target && target[key];
+        return target && (Array.isArray(target) ? target.map(item => item[key]) : target[key]);
     },
     contains(target, value) {
-        return (!!target &&
-            (Array.isArray(target) ? target.indexOf(value) != -1 : target.contains(value)));
+        return (!!target && (Array.isArray(target) ? target.includes(value) : target.contains(value)));
     },
     join(target, separator = ', ') {
         return target && target.join(separator);
@@ -3378,10 +3382,10 @@ exports.formatters = {
         return value == null ? value : JSON.stringify(value);
     },
     t(msgid, ...args) {
-        return gettext_1.getText('', msgid, args);
+        return config_1.config.getText('', msgid, args);
     },
     pt(msgid, msgctxt, ...args) {
-        return gettext_1.getText(msgctxt, msgid, args);
+        return config_1.config.getText(msgctxt, msgid, args);
     }
 };
 exports.formatters.seq = exports.formatters.identical;
@@ -3389,9 +3393,20 @@ exports.formatters.seq = exports.formatters.identical;
 
 /***/ }),
 /* 16 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__16__;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.config = {
+    getText: ((_msgctxt, msgid) => msgid)
+};
+function configure(options) {
+    Object.assign(exports.config, options);
+    return exports.config;
+}
+exports.configure = configure;
+
 
 /***/ }),
 /* 17 */
@@ -4998,13 +5013,9 @@ const handledEvents = [
 ];
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
     document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
-    handledEvents.forEach(type => {
-        document.body.addEventListener(type, evt => {
-            if (evt.target != document.body) {
-                handleDOMEvent_1.handleDOMEvent(evt);
-            }
-        });
-    });
+    for (let type of handledEvents) {
+        document.body.addEventListener(type, handleDOMEvent_1.handleDOMEvent);
+    }
 });
 
 
@@ -5117,17 +5128,24 @@ exports.unfreezeBindings = unfreezeBindings;
 Object.defineProperty(exports, "__esModule", { value: true });
 const bindContent_1 = __webpack_require__(7);
 function handleDOMEvent(evt) {
+    if (evt.target == document.body) {
+        return;
+    }
     let attrName = 'on-' + evt.type;
     let el = evt.target;
     let parentEl = el.parentElement;
     let receivers;
     while (parentEl) {
+        if (parentEl == document.body) {
+            return;
+        }
         if (el.hasAttribute(attrName)) {
             (receivers || (receivers = [])).push(el);
         }
         let component = parentEl.$component;
         if (component && receivers && receivers.length) {
-            for (let i = 0;;) {
+            let i = 0;
+            do {
                 let receiver = receivers[i];
                 let handlerName = receiver.getAttribute(attrName);
                 let handler;
@@ -5152,13 +5170,7 @@ function handleDOMEvent(evt) {
                 else {
                     i++;
                 }
-                if (i == receivers.length) {
-                    break;
-                }
-            }
-        }
-        if (parentEl == document.body) {
-            break;
+            } while (i < receivers.length);
         }
         el = parentEl;
         parentEl = el.parentElement;

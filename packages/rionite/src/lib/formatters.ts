@@ -1,4 +1,4 @@
-import { ObservableList, ObservableMap } from 'cellx';
+import { ObservableList } from 'cellx';
 import { config } from '../config';
 
 export const formatters: Record<string, Function> = {
@@ -14,8 +14,12 @@ export const formatters: Record<string, Function> = {
 		return value === null ? placeholderValue : value;
 	},
 
-	or(value: any, orValue: any): any {
-		return value || orValue;
+	and(value1: any, value2: any): any {
+		return value1 && value2;
+	},
+
+	or(value1: any, value2: any): any {
+		return value1 || value2;
 	},
 
 	cond(condition: any, value1: any, value2: any): any {
@@ -54,7 +58,7 @@ export const formatters: Record<string, Function> = {
 		return value1 >= value2;
 	},
 
-	has(target: ObservableMap | null | undefined, key: any): boolean {
+	has(target: { has(key: any): boolean } | null | undefined, key: any): boolean {
 		return !!target && target.has(key);
 	},
 
@@ -62,23 +66,22 @@ export const formatters: Record<string, Function> = {
 		return !!target && target.hasOwnProperty(propertyName);
 	},
 
-	get(target: ObservableMap | ObservableList | null | undefined, key: any): any {
+	get(target: { get(key: any): any } | null | undefined, key: any): any {
 		return target && target.get(key);
 	},
 
-	key(target: object | null | undefined, key: any): any {
-		return target && target[key];
+	key(target: object | null | undefined | Array<object>, key: any): any {
+		return target && (Array.isArray(target) ? target.map(item => item[key]) : target[key]);
 	},
 
 	contains(target: Array<any> | ObservableList | null | undefined, value: any): boolean {
 		return (
-			!!target &&
-			(Array.isArray(target) ? target.indexOf(value) != -1 : target.contains(value))
+			!!target && (Array.isArray(target) ? target.includes(value) : target.contains(value))
 		);
 	},
 
 	join(
-		target: Array<any> | ObservableList | null | undefined,
+		target: { join(separator?: string): string } | null | undefined,
 		separator = ', '
 	): string | null | undefined {
 		return target && target.join(separator);
