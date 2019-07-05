@@ -290,11 +290,10 @@ const reTagName = /[a-zA-Z][\-\w]*|/g;
 const reElementName = /[a-zA-Z][\-\w]*|/g;
 const reAttributeName = /[^\s'">/=,)]+|/g;
 const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
+const reTrimStartLine = /^[ \t]+/gm;
+const reTrimEndLine = /[ \t]+$/gm;
 function normalizeMultilineText(text) {
-    return text
-        .trim()
-        .replace(/[ \t]*(?:\n|\r\n?)/g, '\n')
-        .replace(/\n[ \t]+/g, '\n');
+    return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
 }
 exports.ELEMENT_NAME_DELIMITER = '__';
 class Template {
@@ -900,9 +899,6 @@ class Template {
                 }
             }
             else {
-                if (quoteChar != '`' && (chr == '\n' || chr == '\r')) {
-                    this._throwError('Unexpected line break in string literal');
-                }
                 str += chr;
                 chr = this._next();
             }
@@ -1273,7 +1269,7 @@ const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
 const setAttribute_1 = __webpack_require__(24);
 exports.KEY_CONTEXT = Symbol('context');
-exports.templateNodeValueASTCache = Object.create(null);
+exports.templateNodeValueASTCache = new Map();
 function onAttributeBindingCellChange(evt) {
     setAttribute_1.setAttribute(evt.target.meta.element, evt.target.meta.attributeName, evt.data.value);
 }
@@ -2130,14 +2126,16 @@ function keypathToJSExpression(keypath, cacheKey = keypath) {
         let keys = typeof keypath == 'string' ? keypath.split('.') : keypath;
         let keyCount = keys.length;
         if (keyCount == 1) {
-            return (cache[cacheKey] = `this['${keypath}']`);
+            cache.set(cacheKey, `this['${keypath}']`);
         }
-        let index = keyCount - 2;
-        let fragments = Array(index);
-        while (index) {
-            fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
+        else {
+            let index = keyCount - 2;
+            let fragments = Array(index);
+            while (index) {
+                fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
+            }
+            cache.set(cacheKey, `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`);
         }
-        cache.set(cacheKey, `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`);
     }
     return cache.get(cacheKey);
 }
@@ -2167,24 +2165,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bindContent_1 = __webpack_require__(7);
 const TemplateNodeValueParser_1 = __webpack_require__(17);
 function getTemplateNodeValueAST(templateNodeValue) {
-    let templateNodeValueAST = bindContent_1.templateNodeValueASTCache[templateNodeValue];
-    if (templateNodeValueAST === undefined) {
+    if (!bindContent_1.templateNodeValueASTCache.has(templateNodeValue)) {
         let bracketIndex = templateNodeValue.indexOf('{');
         if (bracketIndex == -1) {
-            templateNodeValueAST = bindContent_1.templateNodeValueASTCache[templateNodeValue] = null;
+            bindContent_1.templateNodeValueASTCache.set(templateNodeValue, null);
         }
         else {
-            templateNodeValueAST = new TemplateNodeValueParser_1.TemplateNodeValueParser(templateNodeValue).parse(bracketIndex);
+            let templateNodeValueAST = new TemplateNodeValueParser_1.TemplateNodeValueParser(templateNodeValue).parse(bracketIndex);
             if (templateNodeValueAST.length == 1 &&
                 templateNodeValueAST[0].nodeType == TemplateNodeValueParser_1.TemplateNodeValueNodeType.TEXT) {
-                templateNodeValueAST = bindContent_1.templateNodeValueASTCache[templateNodeValue] = null;
+                templateNodeValueAST = null;
             }
-            else {
-                bindContent_1.templateNodeValueASTCache[templateNodeValue] = templateNodeValueAST;
-            }
+            bindContent_1.templateNodeValueASTCache.set(templateNodeValue, templateNodeValueAST);
         }
     }
-    return templateNodeValueAST;
+    return bindContent_1.templateNodeValueASTCache.get(templateNodeValue);
 }
 exports.getTemplateNodeValueAST = getTemplateNodeValueAST;
 
@@ -3089,8 +3084,7 @@ class BaseComponent extends cellx_1.EventEmitter {
                 let index = type.indexOf('>', 2);
                 let targetType = type.slice(1, index);
                 if (targetType != '*') {
-                    let targetConstr = elementConstructors_1.elementConstructors.has(targetType) &&
-                        componentConstructors_1.componentConstructors.get(targetType);
+                    let targetConstr = componentConstructors_1.componentConstructors.get(targetType);
                     if (!targetConstr) {
                         throw new TypeError(`Component "${targetType}" is not defined`);
                     }

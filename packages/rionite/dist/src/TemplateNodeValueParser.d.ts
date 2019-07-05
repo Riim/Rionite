@@ -24,14 +24,14 @@ export interface ITemplateNodeValueBinding extends ITemplateNodeValueNode {
     formatters: Array<ITemplateNodeValueBindingFormatter> | null;
     raw: string;
 }
-export declare type TTemplateNodeValue = Array<ITemplateNodeValueText | ITemplateNodeValueBinding>;
+export declare type TTemplateNodeValueAST = Array<ITemplateNodeValueText | ITemplateNodeValueBinding>;
 export declare class TemplateNodeValueParser {
     templateNodeValue: string;
     _pos: number;
     _chr: string;
-    result: TTemplateNodeValue;
+    result: TTemplateNodeValueAST;
     constructor(templateNodeValue: string);
-    parse(index: number): TTemplateNodeValue;
+    parse(index: number): TTemplateNodeValueAST;
     _pushText(value: string): void;
     _readBinding(): ITemplateNodeValueBinding | null;
     _readPrefix(): string | null;

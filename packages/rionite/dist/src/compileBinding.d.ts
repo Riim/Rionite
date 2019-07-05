@@ -1,2 +1,2 @@
-import { TTemplateNodeValue } from './TemplateNodeValueParser';
-export declare function compileBinding(binding: TTemplateNodeValue, cacheKey: string): (this: object) => any;
+import { TTemplateNodeValueAST } from './TemplateNodeValueParser';
+export declare function compileBinding(binding: TTemplateNodeValueAST, cacheKey: string): (this: object) => any;

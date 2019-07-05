@@ -108,11 +108,11 @@ const reElementName = /[a-zA-Z][\-\w]*|/g;
 const reAttributeName = /[^\s'">/=,)]+|/g;
 const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
 
+const reTrimStartLine = /^[ \t]+/gm;
+const reTrimEndLine = /[ \t]+$/gm;
+
 function normalizeMultilineText(text: string): string {
-	return text
-		.trim()
-		.replace(/[ \t]*(?:\n|\r\n?)/g, '\n')
-		.replace(/\n[ \t]+/g, '\n');
+	return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
 }
 
 export const ELEMENT_NAME_DELIMITER = '__';
@@ -947,10 +947,6 @@ export class Template {
 					this._throwError('Invalid escape sequence', this._pos - 1);
 				}
 			} else {
-				if (quoteChar != '`' && (chr == '\n' || chr == '\r')) {
-					this._throwError('Unexpected line break in string literal');
-				}
-
 				str += chr;
 				chr = this._next();
 			}
