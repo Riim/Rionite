@@ -11,20 +11,20 @@ export function keypathToJSExpression(
 		let keyCount = keys.length;
 
 		if (keyCount == 1) {
-			return (cache[cacheKey] = `this['${keypath}']`);
+			cache.set(cacheKey, `this['${keypath}']`);
+		} else {
+			let index = keyCount - 2;
+			let fragments = Array(index);
+
+			while (index) {
+				fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
+			}
+
+			cache.set(
+				cacheKey,
+				`(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`
+			);
 		}
-
-		let index = keyCount - 2;
-		let fragments = Array(index);
-
-		while (index) {
-			fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
-		}
-
-		cache.set(
-			cacheKey,
-			`(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`
-		);
 	}
 
 	return cache.get(cacheKey)!;

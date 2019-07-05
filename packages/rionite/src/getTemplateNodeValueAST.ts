@@ -1,29 +1,27 @@
 import { templateNodeValueASTCache } from './bindContent';
-import { TemplateNodeValueNodeType, TemplateNodeValueParser, TTemplateNodeValue } from './TemplateNodeValueParser';
+import { TemplateNodeValueNodeType, TemplateNodeValueParser, TTemplateNodeValueAST } from './TemplateNodeValueParser';
 
-export function getTemplateNodeValueAST(templateNodeValue: string): TTemplateNodeValue | null {
-	let templateNodeValueAST = templateNodeValueASTCache[templateNodeValue];
-
-	if (templateNodeValueAST === undefined) {
+export function getTemplateNodeValueAST(templateNodeValue: string): TTemplateNodeValueAST | null {
+	if (!templateNodeValueASTCache.has(templateNodeValue)) {
 		let bracketIndex = templateNodeValue.indexOf('{');
 
 		if (bracketIndex == -1) {
-			templateNodeValueAST = templateNodeValueASTCache[templateNodeValue] = null;
+			templateNodeValueASTCache.set(templateNodeValue, null);
 		} else {
-			templateNodeValueAST = new TemplateNodeValueParser(templateNodeValue).parse(
-				bracketIndex
-			);
+			let templateNodeValueAST: TTemplateNodeValueAST | null = new TemplateNodeValueParser(
+				templateNodeValue
+			).parse(bracketIndex);
 
 			if (
 				templateNodeValueAST.length == 1 &&
 				templateNodeValueAST[0].nodeType == TemplateNodeValueNodeType.TEXT
 			) {
-				templateNodeValueAST = templateNodeValueASTCache[templateNodeValue] = null;
-			} else {
-				templateNodeValueASTCache[templateNodeValue] = templateNodeValueAST;
+				templateNodeValueAST = null;
 			}
+
+			templateNodeValueASTCache.set(templateNodeValue, templateNodeValueAST);
 		}
 	}
 
-	return templateNodeValueAST;
+	return templateNodeValueASTCache.get(templateNodeValue)!;
 }

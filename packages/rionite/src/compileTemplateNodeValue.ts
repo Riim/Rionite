@@ -4,12 +4,12 @@ import { IAttributeBindingCellMeta } from './bindContent';
 import { bindingToJSExpression } from './bindingToJSExpression';
 import { KEY_COMPONENT_PARAM_VALUES } from './componentParamValueConverters';
 import { formatters } from './lib/formatters';
-import { ITemplateNodeValueBinding, TemplateNodeValueNodeType, TTemplateNodeValue } from './TemplateNodeValueParser';
+import { ITemplateNodeValueBinding, TemplateNodeValueNodeType, TTemplateNodeValueAST } from './TemplateNodeValueParser';
 
 const cache = new Map<string, TCellPull<any>>();
 
 export function compileTemplateNodeValue(
-	templateNodeValueAST: TTemplateNodeValue,
+	templateNodeValueAST: TTemplateNodeValueAST,
 	templateNodeValueString: string,
 	useComponentParamValues: boolean
 ): TCellPull<any> {

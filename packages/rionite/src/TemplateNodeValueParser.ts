@@ -33,7 +33,7 @@ export interface ITemplateNodeValueBinding extends ITemplateNodeValueNode {
 	raw: string;
 }
 
-export type TTemplateNodeValue = Array<ITemplateNodeValueText | ITemplateNodeValueBinding>;
+export type TTemplateNodeValueAST = Array<ITemplateNodeValueText | ITemplateNodeValueBinding>;
 
 const reWhitespace = /\s/;
 
@@ -49,18 +49,18 @@ export class TemplateNodeValueParser {
 	_pos: number;
 	_chr: string;
 
-	result: TTemplateNodeValue;
+	result: TTemplateNodeValueAST;
 
 	constructor(templateNodeValue: string) {
 		this.templateNodeValue = templateNodeValue;
 	}
 
-	parse(index: number): TTemplateNodeValue {
+	parse(index: number): TTemplateNodeValueAST {
 		let templateNodeValue = this.templateNodeValue;
 
 		this._pos = 0;
 
-		let result: TTemplateNodeValue = (this.result = []);
+		let result: TTemplateNodeValueAST = (this.result = []);
 
 		do {
 			this._pushText(templateNodeValue.slice(this._pos, index));

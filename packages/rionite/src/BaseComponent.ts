@@ -323,9 +323,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				let targetType = type.slice(1, index);
 
 				if (targetType != '*') {
-					let targetConstr =
-						elementConstructors.has(targetType) &&
-						componentConstructors.get(targetType);
+					let targetConstr = componentConstructors.get(targetType);
 
 					if (!targetConstr) {
 						throw new TypeError(`Component "${targetType}" is not defined`);

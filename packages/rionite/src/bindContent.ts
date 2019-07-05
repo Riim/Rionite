@@ -6,7 +6,7 @@ import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
 import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
 import { compileKeypath } from './lib/compileKeypath';
 import { setAttribute } from './lib/setAttribute';
-import { ITemplateNodeValueBinding, TTemplateNodeValue } from './TemplateNodeValueParser';
+import { ITemplateNodeValueBinding, TTemplateNodeValueAST } from './TemplateNodeValueParser';
 
 export type TContentBindingResult = [
 	Array<BaseComponent> | null,
@@ -16,9 +16,7 @@ export type TContentBindingResult = [
 
 export const KEY_CONTEXT = Symbol('context');
 
-export const templateNodeValueASTCache: Record<string, TTemplateNodeValue | null> = Object.create(
-	null
-);
+export const templateNodeValueASTCache = new Map<string, TTemplateNodeValueAST | null>();
 
 export interface IAttributeBindingCellMeta {
 	element: Element;

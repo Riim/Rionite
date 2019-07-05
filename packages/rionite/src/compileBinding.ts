@@ -1,11 +1,11 @@
 import { bindingToJSExpression } from './bindingToJSExpression';
 import { formatters } from './lib/formatters';
-import { ITemplateNodeValueBinding, TTemplateNodeValue } from './TemplateNodeValueParser';
+import { ITemplateNodeValueBinding, TTemplateNodeValueAST } from './TemplateNodeValueParser';
 
 const cache = new Map<string, (this: object) => any>();
 
 export function compileBinding(
-	binding: TTemplateNodeValue,
+	binding: TTemplateNodeValueAST,
 	cacheKey: string
 ): (this: object) => any {
 	if (!cache.has(cacheKey)) {
