@@ -70,8 +70,13 @@ export const formatters: Record<string, Function> = {
 		return target && target.get(key);
 	},
 
-	key(target: object | null | undefined | Array<object>, key: any): any {
-		return target && (Array.isArray(target) ? target.map(item => item[key]) : target[key]);
+	key(target: object | Array<object> | ObservableList<object> | null | undefined, key: any): any {
+		return (
+			target &&
+			(Array.isArray(target) || target instanceof ObservableList
+				? (target as Array<any>).map(item => item[key])
+				: target[key])
+		);
 	},
 
 	contains(target: Array<any> | ObservableList | null | undefined, value: any): boolean {

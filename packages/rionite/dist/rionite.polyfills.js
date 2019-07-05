@@ -3316,6 +3316,7 @@ exports.unescapeHTML = unescapeHTML;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const cellx_1 = __webpack_require__(6);
 const config_1 = __webpack_require__(16);
 exports.formatters = {
     default(value, defaultValue) {
@@ -3370,7 +3371,10 @@ exports.formatters = {
         return target && target.get(key);
     },
     key(target, key) {
-        return target && (Array.isArray(target) ? target.map(item => item[key]) : target[key]);
+        return (target &&
+            (Array.isArray(target) || target instanceof cellx_1.ObservableList
+                ? target.map(item => item[key])
+                : target[key]));
     },
     contains(target, value) {
         return (!!target && (Array.isArray(target) ? target.includes(value) : target.contains(value)));
