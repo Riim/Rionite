@@ -2,12 +2,20 @@ import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseC
 import { KEY_CONTEXT } from './bindContent';
 
 export function handleDOMEvent(evt: Event) {
+	if (evt.target == document.body) {
+		return;
+	}
+
 	let attrName = 'on-' + evt.type;
 	let el = evt.target as Element;
 	let parentEl = el.parentElement;
 	let receivers: Array<Element> | undefined;
 
 	while (parentEl) {
+		if (parentEl == document.body) {
+			return;
+		}
+
 		if (el.hasAttribute(attrName)) {
 			(receivers || (receivers = [])).push(el);
 		}
@@ -15,7 +23,9 @@ export function handleDOMEvent(evt: Event) {
 		let component = (parentEl as IPossiblyComponentElement).$component;
 
 		if (component && receivers && receivers.length) {
-			for (let i = 0; ; ) {
+			let i = 0;
+
+			do {
 				let receiver = receivers[i];
 				let handlerName = receiver.getAttribute(attrName)!;
 				let handler: TEventHandler | undefined;
@@ -43,15 +53,7 @@ export function handleDOMEvent(evt: Event) {
 				} else {
 					i++;
 				}
-
-				if (i == receivers.length) {
-					break;
-				}
-			}
-		}
-
-		if (parentEl == document.body) {
-			break;
+			} while (i < receivers.length);
 		}
 
 		el = parentEl;

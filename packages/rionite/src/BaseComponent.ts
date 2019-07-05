@@ -699,11 +699,7 @@ const handledEvents = [
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
-	handledEvents.forEach(type => {
-		document.body.addEventListener(type, evt => {
-			if (evt.target != document.body) {
-				handleDOMEvent(evt);
-			}
-		});
-	});
+	for (let type of handledEvents) {
+		document.body.addEventListener(type, handleDOMEvent);
+	}
 });
