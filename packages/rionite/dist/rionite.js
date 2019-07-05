@@ -104,7 +104,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(1);
 __webpack_require__(2);
 var config_1 = __webpack_require__(16);
-exports.config = config_1.config;
+exports.configure = config_1.configure;
 var formatters_1 = __webpack_require__(15);
 exports.formatters = formatters_1.formatters;
 var Component_1 = __webpack_require__(27);

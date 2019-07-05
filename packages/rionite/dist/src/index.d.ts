@@ -1,6 +1,6 @@
 import './lib/polyfills';
 import './lib/templateTransformers';
-export { config } from './config';
+export { configure } from './config';
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
