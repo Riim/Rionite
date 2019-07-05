@@ -48,7 +48,7 @@ module.exports = (env = {}) => {
 			// '@riim/defer',
 			// '@riim/escape-html',
 			// '@riim/get-uid',
-			'@riim/gettext',
+			// '@riim/gettext',
 			// '@riim/kebab-case',
 			// '@riim/move-content',
 			// '@riim/next-tick',

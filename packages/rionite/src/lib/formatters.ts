@@ -1,5 +1,5 @@
-import { getText } from '@riim/gettext';
 import { ObservableList, ObservableMap } from 'cellx';
+import { config } from '../config';
 
 export const formatters: Record<string, Function> = {
 	default(value: any, defaultValue: any): any {
@@ -89,11 +89,11 @@ export const formatters: Record<string, Function> = {
 	},
 
 	t(msgid: string, ...args: Array<any>): string {
-		return getText('', msgid, args);
+		return config.getText('', msgid, args);
 	},
 
 	pt(msgid: string, msgctxt: string, ...args: Array<any>): string {
-		return getText(msgctxt, msgid, args);
+		return config.getText(msgctxt, msgid, args);
 	}
 };
 
