@@ -27,11 +27,10 @@ const reTagName = /[a-zA-Z][\-\w]*|/g;
 const reElementName = /[a-zA-Z][\-\w]*|/g;
 const reAttributeName = /[^\s'">/=,)]+|/g;
 const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
+const reTrimStartLine = /^[ \t]+/gm;
+const reTrimEndLine = /[ \t]+$/gm;
 function normalizeMultilineText(text) {
-    return text
-        .trim()
-        .replace(/[ \t]*(?:\n|\r\n?)/g, '\n')
-        .replace(/\n[ \t]+/g, '\n');
+    return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
 }
 class TemplateParser {
     constructor(template) {
@@ -325,9 +324,6 @@ class TemplateParser {
                 }
             }
             else {
-                if (quoteChar != '`' && (chr == '\n' || chr == '\r')) {
-                    this._throwError('Unexpected line break in string literal');
-                }
                 str += chr;
                 chr = this._next();
             }
