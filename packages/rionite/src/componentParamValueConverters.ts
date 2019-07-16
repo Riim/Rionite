@@ -64,7 +64,9 @@ export const componentParamValue–°onverters = new Map<any, IComponentParamValue–
 				el: Element
 			): object | null => {
 				if (!rawValue) {
-					return defaultValue || null;
+					return defaultValue && (defaultValue as any).clone
+						? (defaultValue as any).clone(true)
+						: defaultValue || null;
 				}
 
 				let value =

@@ -49,9 +49,7 @@ export function compileTemplateNodeValue(
 						let value = inner.call(this, formatters);
 
 						if (value) {
-							let valueType = typeof value;
-
-							if (valueType == 'object' || valueType == 'function') {
+							if (typeof value == 'object' || typeof value == 'function') {
 								let meta = cell.meta!;
 
 								(

@@ -21,7 +21,7 @@
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
     "@types/jest": "^24.0.15",
-    "@types/node": "^12.0.12",
+    "@types/node": "^12.6.3",
     "awesome-typescript-loader": "^5.2.1",
     "document-register-element": "^1.13.2",
     "gulp": "^4.0.2",
@@ -30,22 +30,22 @@
     "ts-jest": "^24.0.2",
     "tslint": "^5.18.0",
     "tslint-loader": "^3.6.0",
-    "typescript": "^3.5.2",
-    "webpack": "^4.35.2",
-    "webpack-cli": "^3.3.5"
+    "typescript": "^3.5.3",
+    "webpack": "^4.35.3",
+    "webpack-cli": "^3.3.6"
   },
   "dependencies": {
-    "@riim/defer": "^1.1.1",
+    "@riim/defer": "^1.1.2",
     "@riim/escape-html": "^1.1.5",
     "@riim/get-uid": "^1.0.1",
     "@riim/gettext": "^2.0.0",
     "@riim/kebab-case": "^1.0.0",
     "@riim/move-content": "^1.0.0",
-    "@riim/next-tick": "^1.2.0",
+    "@riim/next-tick": "^1.2.3",
     "@riim/next-uid": "^1.0.0",
     "@riim/pascalize": "^1.0.1",
     "@riim/rionite-snake-case-attribute-name": "^0.37.15",
-    "cellx": "^1.8.10",
+    "cellx": "^1.9.1",
     "escape-string": "^1.0.2"
   },
   "jest": {

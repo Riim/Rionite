@@ -1436,8 +1436,7 @@ function compileTemplateNodeValue(templateNodeValueAST, templateNodeValueString,
             ? function (cell) {
                 let value = inner.call(this, formatters_1.formatters);
                 if (value) {
-                    let valueType = typeof value;
-                    if (valueType == 'object' || valueType == 'function') {
+                    if (typeof value == 'object' || typeof value == 'function') {
                         let meta = cell.meta;
                         (meta.element[componentParamValueConverters_1.KEY_COMPONENT_PARAM_VALUES] ||
                             (meta.element[componentParamValueConverters_1.KEY_COMPONENT_PARAM_VALUES] = new Map())).set(meta.attributeName, value);
@@ -1565,7 +1564,9 @@ exports.componentParamValueСonverters = new Map([
         {
             toData: (rawValue, defaultValue, el) => {
                 if (!rawValue) {
-                    return defaultValue || null;
+                    return defaultValue && defaultValue.clone
+                        ? defaultValue.clone(true)
+                        : defaultValue || null;
                 }
                 let value = el[exports.KEY_COMPONENT_PARAM_VALUES] && el[exports.KEY_COMPONENT_PARAM_VALUES].get(rawValue);
                 if (!value) {
@@ -3836,12 +3837,12 @@ exports.RnIfThen = RnIfThen;
 
 /***/ }),
 /* 48 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.nextTick = (() => {
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "nextTick", function() { return nextTick; });
+const nextTick = (() => {
     const global = Function('return this;')();
     if (global.process &&
         global.process.toString() == '[object process]' &&
@@ -3856,9 +3857,7 @@ exports.nextTick = (() => {
     }
     const promise = Promise.resolve();
     return (cb) => {
-        promise.then(() => {
-            cb();
-        });
+        promise.then(cb);
     };
 })();
 
