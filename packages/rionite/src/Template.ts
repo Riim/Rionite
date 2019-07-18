@@ -433,22 +433,24 @@ export class Template {
 						).list;
 
 						for (let type in events[name]) {
-							if (events[name][type] !== Object.prototype[type]) {
-								let attrName =
-									'oncomponent-' +
-									(type.charAt(0) == '<'
-										? type.slice(type.indexOf('>', 2) + 1)
-										: type);
-
-								attrList[
-									attrList[attrName] === undefined
-										? (attrList[attrName] = attrList['length=']++)
-										: attrList[attrName]
-								] = {
-									name: attrName,
-									value: ':' + name
-								};
+							if (events[name][type] === Object.prototype[type]) {
+								continue;
 							}
+
+							let attrName =
+								'oncomponent-' +
+								(type.charAt(0) == '<'
+									? type.slice(type.indexOf('>', 2) + 1)
+									: type);
+
+							attrList[
+								attrList[attrName] === undefined
+									? (attrList[attrName] = attrList['length=']++)
+									: attrList[attrName]
+							] = {
+								name: attrName,
+								value: ':' + name
+							};
 						}
 					}
 
@@ -462,18 +464,20 @@ export class Template {
 						).list;
 
 						for (let type in domEvents[name]) {
-							if (domEvents[name][type] !== Object.prototype[type]) {
-								let attrName = 'on-' + type;
-
-								attrList[
-									attrList[attrName] === undefined
-										? (attrList[attrName] = attrList['length=']++)
-										: attrList[attrName]
-								] = {
-									name: attrName,
-									value: ':' + name
-								};
+							if (domEvents[name][type] === Object.prototype[type]) {
+								continue;
 							}
+
+							let attrName = 'on-' + type;
+
+							attrList[
+								attrList[attrName] === undefined
+									? (attrList[attrName] = attrList['length=']++)
+									: attrList[attrName]
+							] = {
+								name: attrName,
+								value: ':' + name
+							};
 						}
 					}
 				}

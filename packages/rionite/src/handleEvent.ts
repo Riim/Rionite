@@ -2,7 +2,9 @@ import { IEvent } from 'cellx';
 import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 import { KEY_CONTEXT } from './bindContent';
 
-const stack: Array<[BaseComponent, Array<Element> | undefined]> = [];
+// export const KEY_EVENTS = Symbol('events');
+
+const componentStack: Array<[BaseComponent, Array<Element> | null]> = [];
 
 export function handleEvent(evt: IEvent<BaseComponent>) {
 	let target = evt.target;
@@ -20,21 +22,19 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 		return;
 	}
 
-	stack.length = 0;
+	componentStack.length = 0;
 
 	let attrName = 'oncomponent-' + (evt.type as string);
-	let ownerComponentEl = ownerComponent.element;
-	let receivers: Array<Element> | undefined;
+	let receivers: Array<Element> | null | undefined;
 
 	for (let component: BaseComponent | null | undefined; ; ) {
 		if (el.hasAttribute(attrName)) {
 			(receivers || (receivers = [])).push(el);
 		}
 
-		if (parentEl == ownerComponentEl) {
+		if (parentEl == ownerComponent.element) {
 			if (receivers) {
-				for (let i = 0, l = receivers.length; i < l; i++) {
-					let receiver = receivers[i];
+				for (let receiver of receivers) {
 					let handlerName = receiver.getAttribute(attrName)!;
 					let handler: TEventHandler | undefined;
 
@@ -81,7 +81,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 				}
 			}
 
-			if (!stack.length) {
+			if (!componentStack.length) {
 				break;
 			}
 
@@ -92,8 +92,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 				break;
 			}
 
-			[ownerComponent, receivers] = stack.pop()!;
-			ownerComponentEl = ownerComponent.element;
+			[ownerComponent, receivers] = componentStack.pop()!;
 		} else {
 			el = parentEl;
 			parentEl = el.parentElement;
@@ -105,10 +104,9 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 			component = (el as IPossiblyComponentElement).$component;
 
 			if (component && component.ownerComponent != ownerComponent) {
-				stack.push([ownerComponent, receivers]);
+				componentStack.push([ownerComponent, receivers || null]);
 				ownerComponent = component.ownerComponent;
-				ownerComponentEl = ownerComponent.element;
-				receivers = undefined;
+				receivers = null;
 			}
 		}
 	}
