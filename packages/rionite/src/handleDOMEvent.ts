@@ -1,12 +1,15 @@
 import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 import { KEY_CONTEXT } from './bindContent';
 
+export const KEY_DOM_EVENTS = Symbol('domEvents');
+
 export function handleDOMEvent(evt: Event) {
 	if (evt.target == document.body) {
 		return;
 	}
 
-	let attrName = 'on-' + evt.type;
+	let evtType = evt.type;
+	let attrName = 'on-' + evtType;
 	let el = evt.target as Element;
 	let parentEl = el.parentElement;
 	let receivers: Array<Element> | undefined;
@@ -16,7 +19,7 @@ export function handleDOMEvent(evt: Event) {
 			return;
 		}
 
-		if (el.hasAttribute(attrName)) {
+		if ((el[KEY_DOM_EVENTS] && el[KEY_DOM_EVENTS].has(evtType)) || el.hasAttribute(attrName)) {
 			(receivers || (receivers = [])).push(el);
 		}
 
@@ -27,21 +30,20 @@ export function handleDOMEvent(evt: Event) {
 
 			do {
 				let receiver = receivers[i];
-				let handlerName = receiver.getAttribute(attrName)!;
+				let elName = receiver[KEY_DOM_EVENTS] && receiver[KEY_DOM_EVENTS].get(evtType);
+				let events: any;
 				let handler: TEventHandler | undefined;
 
-				if (handlerName.charAt(0) == ':') {
-					let events: any = (component.constructor as typeof BaseComponent).domEvents;
+				if (
+					elName &&
+					(events = (component.constructor as typeof BaseComponent).domEvents) &&
+					events[elName]
+				) {
+					handler = events[elName][evtType];
+				}
 
-					if (events) {
-						events = events[handlerName.slice(1)];
-
-						if (events) {
-							handler = events[evt.type];
-						}
-					}
-				} else {
-					handler = component[handlerName];
+				if (!handler) {
+					handler = component[receiver.getAttribute(attrName)!];
 				}
 
 				if (handler) {

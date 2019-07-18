@@ -14,6 +14,7 @@ import { IFreezableCell } from './componentBinding';
 import { componentConstructors } from './componentConstructors';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
 import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
+import { KEY_DOM_EVENTS } from './handleDOMEvent';
 import { compileKeypath } from './lib/compileKeypath';
 import { setAttribute } from './lib/setAttribute';
 import { svgNamespaceURI } from './lib/svgNamespaceURI';
@@ -74,6 +75,7 @@ export interface IElement extends INode {
 	names: Array<string | null> | null;
 	attributes: IElementAttributes | null;
 	$specifiedParams: Map<string, string> | null;
+	domEvents: Map<string, string> | null;
 	content: TContent | null;
 	contentTemplateIndex: number | null;
 }
@@ -208,6 +210,7 @@ export class Template {
 							names: ['root'],
 							attributes: null,
 							$specifiedParams: null,
+							domEvents: null,
 							content: [],
 							contentTemplateIndex: null
 						}
@@ -413,17 +416,19 @@ export class Template {
 			this._skipWhitespaces();
 		}
 
-		if (elNames && componentConstr) {
-			let events = componentConstr.events;
-			let domEvents = componentConstr.domEvents;
+		let domEvents: Map<string, string> | undefined;
 
-			if (events || domEvents) {
+		if (elNames && componentConstr) {
+			let componentEvents = componentConstr.events;
+			let componentDOMEvents = componentConstr.domEvents;
+
+			if (componentEvents || componentDOMEvents) {
 				for (let name of elNames) {
 					if (!name) {
 						continue;
 					}
 
-					if (events && events[name]) {
+					if (componentEvents && componentEvents[name]) {
 						let attrList = (
 							attrs ||
 							(attrs = {
@@ -432,8 +437,8 @@ export class Template {
 							})
 						).list;
 
-						for (let type in events[name]) {
-							if (events[name][type] === Object.prototype[type]) {
+						for (let type in componentEvents[name]) {
+							if (componentEvents[name][type] === Object.prototype[type]) {
 								continue;
 							}
 
@@ -454,30 +459,11 @@ export class Template {
 						}
 					}
 
-					if (domEvents && domEvents[name]) {
-						let attrList = (
-							attrs ||
-							(attrs = {
-								attributeIsValue: null,
-								list: { __proto__: null, 'length=': 0 } as any
-							})
-						).list;
+					let elDOMEvents = componentDOMEvents && componentDOMEvents[name];
 
-						for (let type in domEvents[name]) {
-							if (domEvents[name][type] === Object.prototype[type]) {
-								continue;
-							}
-
-							let attrName = 'on-' + type;
-
-							attrList[
-								attrList[attrName] === undefined
-									? (attrList[attrName] = attrList['length=']++)
-									: attrList[attrName]
-							] = {
-								name: attrName,
-								value: ':' + name
-							};
+					for (let type in elDOMEvents) {
+						if (elDOMEvents[type] !== Object.prototype[type]) {
+							(domEvents || (domEvents = new Map())).set(type, name);
 						}
 					}
 				}
@@ -498,6 +484,7 @@ export class Template {
 			names: elNames || null,
 			attributes: attrs || null,
 			$specifiedParams: $specifiedParams || null,
+			domEvents: domEvents || null,
 			content: content || null,
 			contentTemplateIndex: null
 		};
@@ -531,6 +518,7 @@ export class Template {
 								names: (node as IElement).names,
 								attributes: (node as IElement).attributes,
 								$specifiedParams: (node as IElement).$specifiedParams,
+								domEvents: (node as IElement).domEvents,
 								content: (node as IElement).content,
 								contentTemplateIndex:
 									(
@@ -610,6 +598,7 @@ export class Template {
 										names: (node as IElement).names,
 										attributes: (node as IElement).attributes,
 										$specifiedParams: (node as IElement).$specifiedParams,
+										domEvents: (node as IElement).domEvents,
 										content: (node as IElement).content,
 										contentTemplateIndex:
 											(
@@ -1329,6 +1318,11 @@ function renderContent<T extends Node = Element>(
 							} else {
 								el.className = className;
 							}
+						}
+
+						if ((node as IElement).domEvents) {
+							el[KEY_DOM_EVENTS] = (node as IElement).domEvents;
+							el[KEY_CONTEXT] = context;
 						}
 
 						if (nodeComponent) {
