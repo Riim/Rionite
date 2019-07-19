@@ -21,9 +21,9 @@
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
     "@types/jest": "^24.0.15",
-    "@types/node": "^12.6.3",
+    "@types/node": "^12.6.8",
     "awesome-typescript-loader": "^5.2.1",
-    "document-register-element": "^1.13.2",
+    "document-register-element": "^1.13.3",
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
     "jest": "^24.8.0",
@@ -31,7 +31,7 @@
     "tslint": "^5.18.0",
     "tslint-loader": "^3.6.0",
     "typescript": "^3.5.3",
-    "webpack": "^4.35.3",
+    "webpack": "^4.36.1",
     "webpack-cli": "^3.3.6"
   },
   "dependencies": {
