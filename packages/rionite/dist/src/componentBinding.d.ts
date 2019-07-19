@@ -1,15 +1,13 @@
-import { Cell, IEvent, TListener } from 'cellx';
+import { Cell, TListener } from 'cellx';
 export interface IFrozenState {
     changeEventListener: TListener;
     changeEventContext: any;
     value: any;
 }
-export interface IFreezableCell extends Cell {
-    _value: any;
-    _changeEvent: IEvent | null;
-    _canCancelChange: boolean;
-    _frozenState: IFrozenState | null;
-    _addToRelease(): void;
+declare const KEY_FROZEN_STATE: unique symbol;
+export interface IBinding extends Cell {
+    [KEY_FROZEN_STATE]: IFrozenState | null;
 }
-export declare function freezeBindings(bindings: Array<IFreezableCell>): void;
-export declare function unfreezeBindings(bindings: Array<IFreezableCell>): void;
+export declare function freezeBindings(bindings: Array<IBinding>): void;
+export declare function unfreezeBindings(bindings: Array<IBinding>): void;
+export {};

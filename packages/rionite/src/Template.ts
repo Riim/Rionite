@@ -10,7 +10,7 @@ import {
 	TContentBindingResult
 	} from './bindContent';
 import { compileTemplateNodeValue } from './compileTemplateNodeValue';
-import { IFreezableCell } from './componentBinding';
+import { IBinding } from './componentBinding';
 import { componentConstructors } from './componentConstructors';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
 import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
@@ -1245,7 +1245,7 @@ function renderContent<T extends Node = Element>(
 													attrValue = cell.get();
 
 													(result[1] || (result[1] = [])).push(
-														cell as IFreezableCell
+														cell as IBinding
 													);
 												}
 
@@ -1404,7 +1404,7 @@ function renderContent<T extends Node = Element>(
 									document.createTextNode(cell.get())
 								);
 
-								(result[1] || (result[1] = [])).push(cell as IFreezableCell);
+								(result[1] || (result[1] = [])).push(cell as IBinding);
 							}
 
 							break;

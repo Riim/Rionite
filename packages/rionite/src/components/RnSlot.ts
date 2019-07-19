@@ -4,7 +4,7 @@ import { TListener } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent, IComponentElement } from '../BaseComponent';
 import { bindContent } from '../bindContent';
-import { IFreezableCell } from '../componentBinding';
+import { IBinding } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { cloneNode } from '../lib/cloneNode';
@@ -78,7 +78,7 @@ export class RnSlot extends BaseComponent {
 		let cloneContent = this.cloneContent;
 		let content: DocumentFragment | undefined;
 		let childComponents: Array<BaseComponent> | null | undefined;
-		let bindings: Array<IFreezableCell> | null | undefined;
+		let bindings: Array<IBinding> | null | undefined;
 		let backBindings: Array<BaseComponent | string | TListener> | null | undefined;
 
 		if (ownerComponentInputContent || !cloneContent) {
@@ -176,7 +176,7 @@ export class RnSlot extends BaseComponent {
 			if (content || this.element.contentTemplate) {
 				let contentBindingResult: [
 					Array<BaseComponent> | null,
-					Array<IFreezableCell> | null,
+					Array<IBinding> | null,
 					Array<BaseComponent | string | TListener> | null
 				] = [null, null, null];
 

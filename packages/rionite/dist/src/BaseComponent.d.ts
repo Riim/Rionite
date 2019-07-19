@@ -1,5 +1,5 @@
 import { EventEmitter, IEvent } from 'cellx';
-import { IFreezableCell } from './componentBinding';
+import { IBinding } from './componentBinding';
 import { IComponentParamValueСonverters } from './componentParamValueConverters';
 import { KEY_CHILD_COMPONENTS, KEY_COMPONENT_SELF, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { IBlock, Template } from './Template';
@@ -77,7 +77,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     $inputContent: DocumentFragment | null;
     $context: Record<string, any> | undefined;
     $specifiedParams: ReadonlyMap<string, string>;
-    _bindings: Array<IFreezableCell> | null;
+    _bindings: Array<IBinding> | null;
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;

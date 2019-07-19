@@ -4,7 +4,7 @@ import { nextUID } from '@riim/next-uid';
 import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
 import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
-import { freezeBindings, IFreezableCell, unfreezeBindings } from './componentBinding';
+import { freezeBindings, IBinding, unfreezeBindings } from './componentBinding';
 import { componentConstructors } from './componentConstructors';
 import { IComponentParamValueСonverters } from './componentParamValueConverters';
 import {
@@ -174,7 +174,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	$context: Record<string, any> | undefined;
 	$specifiedParams: ReadonlyMap<string, string>;
 
-	_bindings: Array<IFreezableCell> | null;
+	_bindings: Array<IBinding> | null;
 
 	_attached = false;
 
@@ -494,7 +494,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				if (this.ownerComponent == this) {
 					let contentBindingResult: [
 						Array<BaseComponent> | null,
-						Array<IFreezableCell> | null,
+						Array<IBinding> | null,
 						Array<BaseComponent | string | TEventEmitterListener> | null
 					] = [null, null, null];
 
@@ -537,7 +537,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 				let contentBindingResult: [
 					Array<BaseComponent> | null,
-					Array<IFreezableCell> | null,
+					Array<IBinding> | null,
 					Array<BaseComponent | string | TEventEmitterListener> | null
 				] = [null, null, null];
 				let content = (constr.template as Template).render(

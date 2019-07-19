@@ -4,7 +4,7 @@ import { moveContent } from '../../node_modules/@riim/move-content';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
 import { compileBinding } from '../compileBinding';
-import { IFreezableCell } from '../componentBinding';
+import { IBinding } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { getTemplateNodeValueAST } from '../getTemplateNodeValueAST';
@@ -348,7 +348,7 @@ export class RnRepeat extends BaseComponent {
 					let context = this.$context!;
 					let contentBindingResult: [
 						Array<BaseComponent> | null,
-						Array<IFreezableCell> | null,
+						Array<IBinding> | null,
 						Array<BaseComponent | string | TListener> | null
 					] = [null, null, null];
 					let content = (this.element.contentTemplate as Template).render(

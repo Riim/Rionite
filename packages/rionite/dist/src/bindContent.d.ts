@@ -1,8 +1,8 @@
 import { Cell, IEvent, TListener } from 'cellx';
 import { BaseComponent } from './BaseComponent';
-import { IFreezableCell } from './componentBinding';
+import { IBinding } from './componentBinding';
 import { ITemplateNodeValueBinding } from './TemplateNodeValueParser';
-export declare type TContentBindingResult = [Array<BaseComponent> | null, Array<IFreezableCell> | null, Array<BaseComponent | string | TListener> | null];
+export declare type TContentBindingResult = [Array<BaseComponent> | null, Array<IBinding> | null, Array<BaseComponent | string | TListener> | null];
 export declare const KEY_CONTEXT: unique symbol;
 export declare const templateNodeValueASTCache: Map<string, (import("./TemplateNodeValueParser").ITemplateNodeValueText | ITemplateNodeValueBinding)[] | null>;
 export interface IAttributeBindingCellMeta {

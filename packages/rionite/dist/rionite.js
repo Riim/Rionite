@@ -3491,31 +3491,25 @@ exports.attachChildComponentElements = attachChildComponentElements;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const cellx_1 = __webpack_require__(6);
+const KEY_FROZEN_STATE = Symbol('frozenState');
 function freezeBinding(binding) {
     let changeEvent = binding._events.get('change');
     binding._events.delete('change');
-    binding._frozenState = {
+    binding[KEY_FROZEN_STATE] = {
         changeEventListener: changeEvent.listener,
         changeEventContext: changeEvent.context,
         value: binding._value
     };
 }
 function unfreezeBinding(binding) {
-    let frozenState = binding._frozenState;
-    binding._frozenState = null;
+    let frozenState = binding[KEY_FROZEN_STATE];
+    binding[KEY_FROZEN_STATE] = null;
     binding.on('change', frozenState.changeEventListener, frozenState.changeEventContext);
     if (frozenState.value !== binding._value) {
-        binding._changeEvent = {
-            target: binding,
-            type: 'change',
-            data: {
-                prevEvent: null,
-                prevValue: frozenState.value,
-                value: binding._value
-            }
-        };
-        binding._canCancelChange = true;
-        binding._addToRelease();
+        binding.emit('change', {
+            prevValue: frozenState.value,
+            value: binding._value
+        });
     }
 }
 function freezeBindings(bindings) {

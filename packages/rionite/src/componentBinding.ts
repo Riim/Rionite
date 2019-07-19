@@ -1,9 +1,4 @@
-import {
-	Cell,
-	IEvent,
-	IRegisteredEvent,
-	TListener
-	} from 'cellx';
+import { Cell, IRegisteredEvent, TListener } from 'cellx';
 
 export interface IFrozenState {
 	changeEventListener: TListener;
@@ -11,53 +6,40 @@ export interface IFrozenState {
 	value: any;
 }
 
-export interface IFreezableCell extends Cell {
-	_value: any;
+const KEY_FROZEN_STATE = Symbol('frozenState');
 
-	_changeEvent: IEvent | null;
-	_canCancelChange: boolean;
-
-	_frozenState: IFrozenState | null;
-
-	_addToRelease(): void;
+export interface IBinding extends Cell {
+	[KEY_FROZEN_STATE]: IFrozenState | null;
 }
 
-function freezeBinding(binding: IFreezableCell) {
+function freezeBinding(binding: IBinding) {
 	let changeEvent = binding._events.get('change') as IRegisteredEvent;
 
 	binding._events.delete('change');
 
-	binding._frozenState = {
+	binding[KEY_FROZEN_STATE] = {
 		changeEventListener: changeEvent.listener,
 		changeEventContext: changeEvent.context,
 		value: binding._value
 	};
 }
 
-function unfreezeBinding(binding: IFreezableCell) {
-	let frozenState = binding._frozenState!;
+function unfreezeBinding(binding: IBinding) {
+	let frozenState = binding[KEY_FROZEN_STATE]!;
 
-	binding._frozenState = null;
+	binding[KEY_FROZEN_STATE] = null;
 
 	binding.on('change', frozenState.changeEventListener, frozenState.changeEventContext);
 
 	if (frozenState.value !== binding._value) {
-		binding._changeEvent = {
-			target: binding,
-			type: 'change',
-			data: {
-				prevEvent: null,
-				prevValue: frozenState.value,
-				value: binding._value
-			}
-		};
-		binding._canCancelChange = true;
-
-		binding._addToRelease();
+		binding.emit('change', {
+			prevValue: frozenState.value,
+			value: binding._value
+		});
 	}
 }
 
-export function freezeBindings(bindings: Array<IFreezableCell>) {
+export function freezeBindings(bindings: Array<IBinding>) {
 	Cell.release();
 
 	for (let binding of bindings) {
@@ -65,7 +47,7 @@ export function freezeBindings(bindings: Array<IFreezableCell>) {
 	}
 }
 
-export function unfreezeBindings(bindings: Array<IFreezableCell>) {
+export function unfreezeBindings(bindings: Array<IBinding>) {
 	for (let binding of bindings) {
 		unfreezeBinding(binding);
 	}

@@ -1,7 +1,7 @@
 import { Cell, IEvent, TListener } from 'cellx';
 import { BaseComponent, I$ComponentParamConfig, IPossiblyComponentElement } from './BaseComponent';
 import { compileTemplateNodeValue } from './compileTemplateNodeValue';
-import { IFreezableCell } from './componentBinding';
+import { IBinding } from './componentBinding';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
 import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
 import { compileKeypath } from './lib/compileKeypath';
@@ -10,7 +10,7 @@ import { ITemplateNodeValueBinding, TTemplateNodeValueAST } from './TemplateNode
 
 export type TContentBindingResult = [
 	Array<BaseComponent> | null,
-	Array<IFreezableCell> | null,
+	Array<IBinding> | null,
 	Array<BaseComponent | string | TListener> | null
 ];
 
@@ -118,7 +118,7 @@ export function bindContent(
 
 							setAttribute(child as Element, targetAttrName, cell.get());
 
-							(result[1] || (result[1] = [])).push(cell as IFreezableCell);
+							(result[1] || (result[1] = [])).push(cell as IBinding);
 						}
 
 						if ($paramConfig && (bindingPrefix === '->' || bindingPrefix === '<->')) {
@@ -213,7 +213,7 @@ export function bindContent(
 
 					child.nodeValue = cell.get();
 
-					(result[1] || (result[1] = [])).push(cell as IFreezableCell);
+					(result[1] || (result[1] = [])).push(cell as IBinding);
 				}
 
 				break;
