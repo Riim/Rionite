@@ -17,6 +17,7 @@ import { elementConstructors } from './elementConstructors';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
+import { findChildComponents } from './lib/findChildComponents';
 import { normalizeTextNodes } from './lib/normalizeTextNodes';
 import { IBlock, Template } from './Template';
 
@@ -476,6 +477,12 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 		if (this.isReady) {
 			this._unfreezeBindings();
+
+			let childComponents = findChildComponents(this.element);
+
+			if (childComponents) {
+				attachChildComponentElements(childComponents);
+			}
 		} else {
 			let el = this.element;
 

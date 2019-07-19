@@ -96,6 +96,10 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 	}
 })
 export class RnRepeat extends BaseComponent {
+	static get bindsInputContent() {
+		return true;
+	}
+
 	paramFor: string;
 	trackBy: string;
 

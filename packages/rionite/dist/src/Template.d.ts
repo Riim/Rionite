@@ -46,6 +46,7 @@ export interface IElement extends INode {
     names: Array<string | null> | null;
     attributes: IElementAttributes | null;
     $specifiedParams: Map<string, string> | null;
+    domEvents: Map<string, string> | null;
     content: TContent | null;
     contentTemplateIndex: number | null;
 }

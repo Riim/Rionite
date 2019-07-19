@@ -63,6 +63,11 @@ export class RnSlot extends BaseComponent {
 
 		if (this.isReady) {
 			this._unfreezeBindings();
+
+			if (this._childComponents) {
+				attachChildComponentElements(this._childComponents);
+			}
+
 			return;
 		}
 
@@ -221,6 +226,7 @@ export class RnSlot extends BaseComponent {
 		} else {
 			this._childComponents = childComponents as any;
 			this._bindings = bindings;
+
 			this._unfreezeBindings();
 		}
 
