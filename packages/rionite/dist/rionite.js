@@ -107,23 +107,23 @@ var config_1 = __webpack_require__(16);
 exports.configure = config_1.configure;
 var formatters_1 = __webpack_require__(15);
 exports.formatters = formatters_1.formatters;
-var Component_1 = __webpack_require__(28);
+var Component_1 = __webpack_require__(29);
 exports.Component = Component_1.Component;
-var Param_1 = __webpack_require__(39);
+var Param_1 = __webpack_require__(40);
 exports.Param = Param_1.Param;
 var Constants_1 = __webpack_require__(21);
 exports.KEY_PARAMS_CONFIG = Constants_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAM_VALUES = Constants_1.KEY_PARAM_VALUES;
-var BaseComponent_1 = __webpack_require__(40);
+var BaseComponent_1 = __webpack_require__(41);
 exports.BaseComponent = BaseComponent_1.BaseComponent;
-var ElementProtoMixin_1 = __webpack_require__(34);
+var ElementProtoMixin_1 = __webpack_require__(35);
 exports.KEY_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_ELEMENT_CONNECTED;
-var ComponentParams_1 = __webpack_require__(32);
+var ComponentParams_1 = __webpack_require__(33);
 exports.ComponentParams = ComponentParams_1.ComponentParams;
 var Template_1 = __webpack_require__(3);
 exports.TemplateNodeType = Template_1.NodeType;
 exports.Template = Template_1.Template;
-var registerComponent_1 = __webpack_require__(29);
+var registerComponent_1 = __webpack_require__(30);
 exports.registerComponent = registerComponent_1.registerComponent;
 var RnIfThen_1 = __webpack_require__(48);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
@@ -214,6 +214,7 @@ const Template_1 = __webpack_require__(3);
                 names: el.names,
                 attributes: el.attributes,
                 $specifiedParams: null,
+                events: null,
                 domEvents: null,
                 content: el.content,
                 contentTemplateIndex: null
@@ -242,6 +243,7 @@ const Template_1 = __webpack_require__(3);
                 }
             },
             $specifiedParams: null,
+            events: null,
             domEvents: null,
             content: [el],
             contentTemplateIndex: null
@@ -266,6 +268,7 @@ const componentConstructors_1 = __webpack_require__(26);
 const Constants_1 = __webpack_require__(21);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const handleDOMEvent_1 = __webpack_require__(27);
+const handleEvent_1 = __webpack_require__(28);
 const compileKeypath_1 = __webpack_require__(23);
 const setAttribute_1 = __webpack_require__(24);
 const svgNamespaceURI_1 = __webpack_require__(25);
@@ -355,6 +358,7 @@ class Template {
                         names: ['root'],
                         attributes: null,
                         $specifiedParams: null,
+                        events: null,
                         domEvents: null,
                         content: [],
                         contentTemplateIndex: null
@@ -492,6 +496,7 @@ class Template {
             attrs = this._readAttributes(elName || superElName, elComponentConstr && elComponentConstr[Constants_1.KEY_PARAMS_CONFIG], $specifiedParams);
             this._skipWhitespaces();
         }
+        let events;
         let domEvents;
         if (elNames && componentConstr) {
             let componentEvents = componentConstr.events;
@@ -501,26 +506,21 @@ class Template {
                     if (!name) {
                         continue;
                     }
-                    if (componentEvents && componentEvents[name]) {
-                        let attrList = (attrs ||
-                            (attrs = {
-                                attributeIsValue: null,
-                                list: { __proto__: null, 'length=': 0 }
-                            })).list;
-                        for (let type in componentEvents[name]) {
-                            if (componentEvents[name][type] === Object.prototype[type]) {
-                                continue;
+                    let elEvents = componentEvents && componentEvents[name];
+                    for (let type in elEvents) {
+                        if (elEvents[type] !== Object.prototype[type]) {
+                            (events || (events = new Map())).set(type, name);
+                        }
+                    }
+                    while (elEvents) {
+                        for (let type of Object.getOwnPropertySymbols(elEvents)) {
+                            if (!events || !events.has(type)) {
+                                (events || (events = new Map())).set(type, name);
                             }
-                            let attrName = 'oncomponent-' +
-                                (type.charAt(0) == '<'
-                                    ? type.slice(type.indexOf('>', 2) + 1)
-                                    : type);
-                            attrList[attrList[attrName] === undefined
-                                ? (attrList[attrName] = attrList['length=']++)
-                                : attrList[attrName]] = {
-                                name: attrName,
-                                value: ':' + name
-                            };
+                        }
+                        elEvents = elEvents.__proto__;
+                        if (elEvents == Object.prototype) {
+                            break;
                         }
                     }
                     let elDOMEvents = componentDOMEvents && componentDOMEvents[name];
@@ -544,6 +544,7 @@ class Template {
             names: elNames || null,
             attributes: attrs || null,
             $specifiedParams: $specifiedParams || null,
+            events: events || null,
             domEvents: domEvents || null,
             content: content || null,
             contentTemplateIndex: null
@@ -570,6 +571,7 @@ class Template {
                                 names: node.names,
                                 attributes: node.attributes,
                                 $specifiedParams: node.$specifiedParams,
+                                events: node.events,
                                 domEvents: node.domEvents,
                                 content: node.content,
                                 contentTemplateIndex: (this._embeddedTemplates || (this._embeddedTemplates = [])).push(new Template({
@@ -635,6 +637,7 @@ class Template {
                                         names: node.names,
                                         attributes: node.attributes,
                                         $specifiedParams: node.$specifiedParams,
+                                        events: node.events,
                                         domEvents: node.domEvents,
                                         content: node.content,
                                         contentTemplateIndex: (this._embeddedTemplates ||
@@ -1128,6 +1131,10 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                             else {
                                 el.className = className;
                             }
+                        }
+                        if (node.events) {
+                            el[handleEvent_1.KEY_EVENTS] = node.events;
+                            el[bindContent_1.KEY_CONTEXT] = context;
                         }
                         if (node.domEvents) {
                             el[handleDOMEvent_1.KEY_DOM_EVENTS] = node.domEvents;
@@ -2273,12 +2280,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bindContent_1 = __webpack_require__(7);
 exports.KEY_DOM_EVENTS = Symbol('domEvents');
 function handleDOMEvent(evt) {
-    if (evt.target == document.body) {
+    let el = evt.target;
+    if (el == document.body) {
         return;
     }
     let evtType = evt.type;
     let attrName = 'on-' + evtType;
-    let el = evt.target;
     let parentEl = el.parentElement;
     let receivers;
     while (parentEl) {
@@ -2293,24 +2300,32 @@ function handleDOMEvent(evt) {
             let i = 0;
             do {
                 let receiver = receivers[i];
-                let elName = receiver[exports.KEY_DOM_EVENTS] && receiver[exports.KEY_DOM_EVENTS].get(evtType);
-                let events;
                 let handler;
-                if (elName &&
-                    (events = component.constructor.domEvents) &&
-                    events[elName]) {
-                    handler = events[elName][evtType];
+                if (receiver[exports.KEY_DOM_EVENTS]) {
+                    let elName = receiver[exports.KEY_DOM_EVENTS].get(evtType);
+                    if (elName) {
+                        let events = component.constructor.domEvents;
+                        if (events && events[elName]) {
+                            handler = events[elName][evtType];
+                            if (handler) {
+                                if (handler.call(component, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
+                                    return;
+                                }
+                                receivers.splice(i, 1);
+                            }
+                        }
+                    }
                 }
-                if (!handler) {
-                    handler = component[receiver.getAttribute(attrName)];
-                }
+                handler = component[receiver.getAttribute(attrName)];
                 if (handler) {
                     if (handler.call(component, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
                         return;
                     }
-                    receivers.splice(i, 1);
+                    if (i != receivers.length && receivers[i] == receiver) {
+                        receivers.splice(i, 1);
+                    }
                 }
-                else {
+                if (i != receivers.length && receivers[i] == receiver) {
                     i++;
                 }
             } while (i < receivers.length);
@@ -2329,7 +2344,104 @@ exports.handleDOMEvent = handleDOMEvent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const registerComponent_1 = __webpack_require__(29);
+const bindContent_1 = __webpack_require__(7);
+exports.KEY_EVENTS = Symbol('events');
+const componentStack = [];
+function handleEvent(evt) {
+    let target = evt.target;
+    let ownerComponent = target.ownerComponent;
+    if (target == ownerComponent) {
+        return;
+    }
+    let targetEl = target.element;
+    let el = targetEl;
+    if (!el.parentElement) {
+        return;
+    }
+    componentStack.length = 0;
+    let evtType = evt.type;
+    let attrName = typeof evtType == 'string' ? 'oncomponent-' + evtType : null;
+    let receivers;
+    for (;;) {
+        if ((el[exports.KEY_EVENTS] && el[exports.KEY_EVENTS].has(evtType)) ||
+            (attrName && el.hasAttribute(attrName))) {
+            (receivers || (receivers = [])).push(el);
+        }
+        if (el.parentElement == ownerComponent.element) {
+            if (receivers) {
+                for (let receiver of receivers) {
+                    let handler;
+                    if (receiver[exports.KEY_EVENTS]) {
+                        let elName = receiver[exports.KEY_EVENTS].get(evtType);
+                        if (elName) {
+                            let events = ownerComponent.constructor
+                                .events;
+                            if (!attrName || receiver == targetEl) {
+                                handler = events[elName][evtType];
+                            }
+                            else {
+                                let elementBlockNames = target.constructor
+                                    ._elementBlockNames;
+                                for (let elementBlockName of elementBlockNames) {
+                                    let handler = events[elName][`<${elementBlockName}>` + evtType];
+                                    if (handler &&
+                                        handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
+                                        return;
+                                    }
+                                }
+                                handler = events[elName]['<*>' + evtType];
+                            }
+                            if (handler &&
+                                handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
+                                return;
+                            }
+                        }
+                    }
+                    if (attrName) {
+                        handler = ownerComponent[receiver.getAttribute(attrName)];
+                        if (handler &&
+                            handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) ===
+                                false) {
+                            return;
+                        }
+                    }
+                }
+                receivers.length = 0;
+            }
+            if (!componentStack.length) {
+                break;
+            }
+            el = el.parentElement;
+            if (!el.parentElement) {
+                break;
+            }
+            [ownerComponent, receivers] = componentStack.pop();
+        }
+        else {
+            el = el.parentElement;
+            if (!el.parentElement) {
+                break;
+            }
+            let component = el.$component;
+            if (component && component.ownerComponent != ownerComponent) {
+                componentStack.push([ownerComponent, receivers || null]);
+                ownerComponent = component.ownerComponent;
+                receivers = null;
+            }
+        }
+    }
+}
+exports.handleEvent = handleEvent;
+
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const registerComponent_1 = __webpack_require__(30);
 function Component(config) {
     return (componentConstr) => {
         if (config) {
@@ -2362,21 +2474,21 @@ exports.Component = Component;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const kebab_case_1 = __webpack_require__(4);
-const pascalize_1 = __webpack_require__(30);
+const pascalize_1 = __webpack_require__(31);
 const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const cellx_1 = __webpack_require__(6);
 const componentConstructors_1 = __webpack_require__(26);
-const ComponentParams_1 = __webpack_require__(32);
+const ComponentParams_1 = __webpack_require__(33);
 const Constants_1 = __webpack_require__(21);
-const elementConstructors_1 = __webpack_require__(33);
-const ElementProtoMixin_1 = __webpack_require__(34);
+const elementConstructors_1 = __webpack_require__(34);
+const ElementProtoMixin_1 = __webpack_require__(35);
 const Template_1 = __webpack_require__(3);
 const hasOwn = Object.prototype.hasOwnProperty;
 const push = Array.prototype.push;
@@ -2582,13 +2694,13 @@ exports.registerComponent = registerComponent;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(31);
+var camelize_1 = __webpack_require__(32);
 var cache = Object.create(null);
 function pascalize(str, useCache) {
     str = String(str);
@@ -2602,7 +2714,7 @@ exports.pascalize = pascalize;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2621,7 +2733,7 @@ exports.camelize = camelize;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2724,7 +2836,7 @@ exports.ComponentParams = {
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2775,16 +2887,16 @@ exports.elementConstructors = new Map([
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const defer_1 = __webpack_require__(35);
-const ComponentParams_1 = __webpack_require__(32);
+const defer_1 = __webpack_require__(36);
+const ComponentParams_1 = __webpack_require__(33);
 const Constants_1 = __webpack_require__(21);
-const observedAttributesFeature_1 = __webpack_require__(38);
+const observedAttributesFeature_1 = __webpack_require__(39);
 // export const KEY_IS_COMPONENT_ELEMENT = Symbol('isComponentElement');
 exports.KEY_ELEMENT_CONNECTED = Symbol('elementConnected');
 let connectionStatusCallbacksSuppressed = false;
@@ -2878,14 +2990,14 @@ exports.ElementProtoMixin = {
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils_1 = __webpack_require__(36);
-var config_1 = __webpack_require__(37);
+const utils_1 = __webpack_require__(37);
+var config_1 = __webpack_require__(38);
 exports.configure = config_1.configure;
 let queue;
 function run() {
@@ -2913,13 +3025,13 @@ exports.defer = defer;
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const config_1 = __webpack_require__(37);
+const config_1 = __webpack_require__(38);
 function logError(...args) {
     config_1.config.logError(...args);
 }
@@ -2927,7 +3039,7 @@ exports.logError = logError;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2946,7 +3058,7 @@ exports.configure = configure;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2966,7 +3078,7 @@ exports.observedAttributesFeature = observedAttributesFeature_;
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3002,25 +3114,25 @@ exports.Param = Param;
 
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const kebab_case_1 = __webpack_require__(4);
-const move_content_1 = __webpack_require__(41);
-const next_uid_1 = __webpack_require__(42);
+const move_content_1 = __webpack_require__(42);
+const next_uid_1 = __webpack_require__(43);
 const cellx_1 = __webpack_require__(6);
-const attachChildComponentElements_1 = __webpack_require__(43);
+const attachChildComponentElements_1 = __webpack_require__(44);
 const bindContent_1 = __webpack_require__(7);
-const componentBinding_1 = __webpack_require__(44);
+const componentBinding_1 = __webpack_require__(45);
 const componentConstructors_1 = __webpack_require__(26);
 const Constants_1 = __webpack_require__(21);
-const elementConstructors_1 = __webpack_require__(33);
-const ElementProtoMixin_1 = __webpack_require__(34);
+const elementConstructors_1 = __webpack_require__(34);
+const ElementProtoMixin_1 = __webpack_require__(35);
 const handleDOMEvent_1 = __webpack_require__(27);
-const handleEvent_1 = __webpack_require__(45);
+const handleEvent_1 = __webpack_require__(28);
 const findChildComponents_1 = __webpack_require__(46);
 const normalizeTextNodes_1 = __webpack_require__(47);
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -3435,7 +3547,7 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3451,7 +3563,7 @@ exports.moveContent = moveContent;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3465,13 +3577,13 @@ exports.nextUID = nextUID;
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const ComponentParams_1 = __webpack_require__(32);
+const ComponentParams_1 = __webpack_require__(33);
 function attachChildComponentElements(childComponents) {
     for (let childComponent of childComponents) {
         childComponent._parentComponent = undefined;
@@ -3484,7 +3596,7 @@ exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3526,95 +3638,6 @@ function unfreezeBindings(bindings) {
     cellx_1.Cell.release();
 }
 exports.unfreezeBindings = unfreezeBindings;
-
-
-/***/ }),
-/* 45 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const bindContent_1 = __webpack_require__(7);
-// export const KEY_EVENTS = Symbol('events');
-const componentStack = [];
-function handleEvent(evt) {
-    let target = evt.target;
-    let ownerComponent = target.ownerComponent;
-    if (target == ownerComponent) {
-        return;
-    }
-    let targetEl = target.element;
-    let el = targetEl;
-    let parentEl = el.parentElement;
-    if (!parentEl) {
-        return;
-    }
-    componentStack.length = 0;
-    let attrName = 'oncomponent-' + evt.type;
-    let receivers;
-    for (let component;;) {
-        if (el.hasAttribute(attrName)) {
-            (receivers || (receivers = [])).push(el);
-        }
-        if (parentEl == ownerComponent.element) {
-            if (receivers) {
-                for (let receiver of receivers) {
-                    let handlerName = receiver.getAttribute(attrName);
-                    let handler;
-                    if (handlerName.charAt(0) == ':') {
-                        let events = ownerComponent.constructor.events;
-                        if (receiver == targetEl) {
-                            handler = events[handlerName.slice(1)][evt.type];
-                        }
-                        else {
-                            let elementBlockNames = target.constructor
-                                ._elementBlockNames;
-                            for (let j = 0, m = elementBlockNames.length; j < m; j++) {
-                                let typedHandler = events[handlerName.slice(1)][`<${elementBlockNames[j]}>` + evt.type];
-                                if (typedHandler &&
-                                    typedHandler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
-                                    return;
-                                }
-                            }
-                            handler = events[handlerName.slice(1)]['<*>' + evt.type];
-                        }
-                    }
-                    else {
-                        handler = ownerComponent[handlerName];
-                    }
-                    if (handler &&
-                        handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
-                        return;
-                    }
-                }
-            }
-            if (!componentStack.length) {
-                break;
-            }
-            el = parentEl;
-            parentEl = el.parentElement;
-            if (!parentEl) {
-                break;
-            }
-            [ownerComponent, receivers] = componentStack.pop();
-        }
-        else {
-            el = parentEl;
-            parentEl = el.parentElement;
-            if (!parentEl) {
-                break;
-            }
-            component = el.$component;
-            if (component && component.ownerComponent != ownerComponent) {
-                componentStack.push([ownerComponent, receivers || null]);
-                ownerComponent = component.ownerComponent;
-                receivers = null;
-            }
-        }
-    }
-}
-exports.handleEvent = handleEvent;
 
 
 /***/ }),
@@ -3693,12 +3716,12 @@ var RnIfThen_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 const next_tick_1 = __webpack_require__(49);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(41);
-const attachChildComponentElements_1 = __webpack_require__(43);
-const BaseComponent_1 = __webpack_require__(40);
+const move_content_1 = __webpack_require__(42);
+const attachChildComponentElements_1 = __webpack_require__(44);
+const BaseComponent_1 = __webpack_require__(41);
 const compileBinding_1 = __webpack_require__(50);
-const Component_1 = __webpack_require__(28);
-const ElementProtoMixin_1 = __webpack_require__(34);
+const Component_1 = __webpack_require__(29);
+const ElementProtoMixin_1 = __webpack_require__(35);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
 const keypathPattern_1 = __webpack_require__(18);
@@ -3948,12 +3971,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 const next_tick_1 = __webpack_require__(49);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(41);
-const attachChildComponentElements_1 = __webpack_require__(43);
-const BaseComponent_1 = __webpack_require__(40);
+const move_content_1 = __webpack_require__(42);
+const attachChildComponentElements_1 = __webpack_require__(44);
+const BaseComponent_1 = __webpack_require__(41);
 const compileBinding_1 = __webpack_require__(50);
-const Component_1 = __webpack_require__(28);
-const ElementProtoMixin_1 = __webpack_require__(34);
+const Component_1 = __webpack_require__(29);
+const ElementProtoMixin_1 = __webpack_require__(35);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
 const keypathPattern_1 = __webpack_require__(18);
@@ -4328,7 +4351,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Component_1 = __webpack_require__(28);
+const Component_1 = __webpack_require__(29);
 const RnIfThen_1 = __webpack_require__(48);
 let RnIfElse = class RnIfElse extends RnIfThen_1.RnIfThen {
     constructor() {
@@ -4359,12 +4382,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const get_uid_1 = __webpack_require__(55);
-const move_content_1 = __webpack_require__(41);
-const attachChildComponentElements_1 = __webpack_require__(43);
-const BaseComponent_1 = __webpack_require__(40);
+const move_content_1 = __webpack_require__(42);
+const attachChildComponentElements_1 = __webpack_require__(44);
+const BaseComponent_1 = __webpack_require__(41);
 const bindContent_1 = __webpack_require__(7);
-const Component_1 = __webpack_require__(28);
-const ElementProtoMixin_1 = __webpack_require__(34);
+const Component_1 = __webpack_require__(29);
+const ElementProtoMixin_1 = __webpack_require__(35);
 const cloneNode_1 = __webpack_require__(56);
 const KEY_SLOTS_CONTENT = Symbol('slotsContent');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
@@ -4551,7 +4574,7 @@ exports.RnSlot = RnSlot;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_uid_1 = __webpack_require__(42);
+const next_uid_1 = __webpack_require__(43);
 const hasOwn = Object.prototype.hasOwnProperty;
 const KEY_UID = Symbol('uid');
 exports.getUID = (obj) => hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : (obj[KEY_UID] = next_uid_1.nextUID());

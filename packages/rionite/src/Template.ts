@@ -15,6 +15,7 @@ import { componentConstructors } from './componentConstructors';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
 import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
 import { KEY_DOM_EVENTS } from './handleDOMEvent';
+import { KEY_EVENTS } from './handleEvent';
 import { compileKeypath } from './lib/compileKeypath';
 import { setAttribute } from './lib/setAttribute';
 import { svgNamespaceURI } from './lib/svgNamespaceURI';
@@ -75,6 +76,7 @@ export interface IElement extends INode {
 	names: Array<string | null> | null;
 	attributes: IElementAttributes | null;
 	$specifiedParams: Map<string, string> | null;
+	events: Map<string | symbol, string> | null;
 	domEvents: Map<string, string> | null;
 	content: TContent | null;
 	contentTemplateIndex: number | null;
@@ -210,6 +212,7 @@ export class Template {
 							names: ['root'],
 							attributes: null,
 							$specifiedParams: null,
+							events: null,
 							domEvents: null,
 							content: [],
 							contentTemplateIndex: null
@@ -416,6 +419,7 @@ export class Template {
 			this._skipWhitespaces();
 		}
 
+		let events: Map<string | symbol, string> | undefined;
 		let domEvents: Map<string, string> | undefined;
 
 		if (elNames && componentConstr) {
@@ -428,34 +432,25 @@ export class Template {
 						continue;
 					}
 
-					if (componentEvents && componentEvents[name]) {
-						let attrList = (
-							attrs ||
-							(attrs = {
-								attributeIsValue: null,
-								list: { __proto__: null, 'length=': 0 } as any
-							})
-						).list;
+					let elEvents = componentEvents && componentEvents[name];
 
-						for (let type in componentEvents[name]) {
-							if (componentEvents[name][type] === Object.prototype[type]) {
-								continue;
+					for (let type in elEvents) {
+						if (elEvents[type] !== Object.prototype[type]) {
+							(events || (events = new Map())).set(type, name);
+						}
+					}
+
+					while (elEvents) {
+						for (let type of Object.getOwnPropertySymbols(elEvents)) {
+							if (!events || !events.has(type)) {
+								(events || (events = new Map())).set(type, name);
 							}
+						}
 
-							let attrName =
-								'oncomponent-' +
-								(type.charAt(0) == '<'
-									? type.slice(type.indexOf('>', 2) + 1)
-									: type);
+						elEvents = elEvents.__proto__ as any;
 
-							attrList[
-								attrList[attrName] === undefined
-									? (attrList[attrName] = attrList['length=']++)
-									: attrList[attrName]
-							] = {
-								name: attrName,
-								value: ':' + name
-							};
+						if (elEvents == Object.prototype) {
+							break;
 						}
 					}
 
@@ -484,6 +479,7 @@ export class Template {
 			names: elNames || null,
 			attributes: attrs || null,
 			$specifiedParams: $specifiedParams || null,
+			events: events || null,
 			domEvents: domEvents || null,
 			content: content || null,
 			contentTemplateIndex: null
@@ -518,6 +514,7 @@ export class Template {
 								names: (node as IElement).names,
 								attributes: (node as IElement).attributes,
 								$specifiedParams: (node as IElement).$specifiedParams,
+								events: (node as IElement).events,
 								domEvents: (node as IElement).domEvents,
 								content: (node as IElement).content,
 								contentTemplateIndex:
@@ -598,6 +595,7 @@ export class Template {
 										names: (node as IElement).names,
 										attributes: (node as IElement).attributes,
 										$specifiedParams: (node as IElement).$specifiedParams,
+										events: (node as IElement).events,
 										domEvents: (node as IElement).domEvents,
 										content: (node as IElement).content,
 										contentTemplateIndex:
@@ -1320,6 +1318,10 @@ function renderContent<T extends Node = Element>(
 							}
 						}
 
+						if ((node as IElement).events) {
+							el[KEY_EVENTS] = (node as IElement).events;
+							el[KEY_CONTEXT] = context;
+						}
 						if ((node as IElement).domEvents) {
 							el[KEY_DOM_EVENTS] = (node as IElement).domEvents;
 							el[KEY_CONTEXT] = context;

@@ -4,13 +4,14 @@ import { KEY_CONTEXT } from './bindContent';
 export const KEY_DOM_EVENTS = Symbol('domEvents');
 
 export function handleDOMEvent(evt: Event) {
-	if (evt.target == document.body) {
+	let el = evt.target as Element;
+
+	if (el == document.body) {
 		return;
 	}
 
 	let evtType = evt.type;
 	let attrName = 'on-' + evtType;
-	let el = evt.target as Element;
 	let parentEl = el.parentElement;
 	let receivers: Array<Element> | undefined;
 
@@ -30,29 +31,48 @@ export function handleDOMEvent(evt: Event) {
 
 			do {
 				let receiver = receivers[i];
-				let elName = receiver[KEY_DOM_EVENTS] && receiver[KEY_DOM_EVENTS].get(evtType);
-				let events: any;
 				let handler: TEventHandler | undefined;
 
-				if (
-					elName &&
-					(events = (component.constructor as typeof BaseComponent).domEvents) &&
-					events[elName]
-				) {
-					handler = events[elName][evtType];
+				if (receiver[KEY_DOM_EVENTS]) {
+					let elName = receiver[KEY_DOM_EVENTS].get(evtType);
+
+					if (elName) {
+						let events = (component.constructor as typeof BaseComponent).domEvents;
+
+						if (events && events[elName]) {
+							handler = events[elName][evtType];
+
+							if (handler) {
+								if (
+									handler.call(
+										component,
+										evt,
+										receiver[KEY_CONTEXT],
+										receiver
+									) === false
+								) {
+									return;
+								}
+
+								receivers.splice(i, 1);
+							}
+						}
+					}
 				}
 
-				if (!handler) {
-					handler = component[receiver.getAttribute(attrName)!];
-				}
+				handler = component[receiver.getAttribute(attrName)!];
 
 				if (handler) {
 					if (handler.call(component, evt, receiver[KEY_CONTEXT], receiver) === false) {
 						return;
 					}
 
-					receivers.splice(i, 1);
-				} else {
+					if (i != receivers.length && receivers[i] == receiver) {
+						receivers.splice(i, 1);
+					}
+				}
+
+				if (i != receivers.length && receivers[i] == receiver) {
 					i++;
 				}
 			} while (i < receivers.length);

@@ -43,6 +43,7 @@ import { NodeType, Template } from '../Template';
 					names: el.names,
 					attributes: el.attributes,
 					$specifiedParams: null,
+					events: null,
 					domEvents: null,
 					content: el.content,
 					contentTemplateIndex: null
@@ -73,6 +74,7 @@ import { NodeType, Template } from '../Template';
 				}
 			},
 			$specifiedParams: null,
+			events: null,
 			domEvents: null,
 			content: [el],
 			contentTemplateIndex: null

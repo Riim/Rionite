@@ -2,7 +2,7 @@ import { IEvent } from 'cellx';
 import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 import { KEY_CONTEXT } from './bindContent';
 
-// export const KEY_EVENTS = Symbol('events');
+export const KEY_EVENTS = Symbol('events');
 
 const componentStack: Array<[BaseComponent, Array<Element> | null]> = [];
 
@@ -16,92 +16,114 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 
 	let targetEl: Element = target.element;
 	let el = targetEl;
-	let parentEl = el.parentElement;
 
-	if (!parentEl) {
+	if (!el.parentElement) {
 		return;
 	}
 
 	componentStack.length = 0;
 
-	let attrName = 'oncomponent-' + (evt.type as string);
+	let evtType = evt.type;
+	let attrName = typeof evtType == 'string' ? 'oncomponent-' + (evtType as string) : null;
 	let receivers: Array<Element> | null | undefined;
 
-	for (let component: BaseComponent | null | undefined; ; ) {
-		if (el.hasAttribute(attrName)) {
+	for (;;) {
+		if (
+			(el[KEY_EVENTS] && el[KEY_EVENTS].has(evtType)) ||
+			(attrName && el.hasAttribute(attrName))
+		) {
 			(receivers || (receivers = [])).push(el);
 		}
 
-		if (parentEl == ownerComponent.element) {
+		if (el.parentElement == ownerComponent.element) {
 			if (receivers) {
 				for (let receiver of receivers) {
-					let handlerName = receiver.getAttribute(attrName)!;
 					let handler: TEventHandler | undefined;
 
-					if (handlerName.charAt(0) == ':') {
-						let events = (ownerComponent.constructor as typeof BaseComponent).events!;
+					if (receiver[KEY_EVENTS]) {
+						let elName = receiver[KEY_EVENTS].get(evtType);
 
-						if (receiver == targetEl) {
-							handler = events[handlerName.slice(1)][evt.type as string];
-						} else {
-							let elementBlockNames = (target.constructor as typeof BaseComponent)
-								._elementBlockNames;
+						if (elName) {
+							let events = (ownerComponent.constructor as typeof BaseComponent)
+								.events!;
 
-							for (let j = 0, m = elementBlockNames.length; j < m; j++) {
-								let typedHandler =
-									events[handlerName.slice(1)][
-										`<${elementBlockNames[j]}>` + (evt.type as string)
-									];
+							if (!attrName || receiver == targetEl) {
+								handler = events[elName][evtType as any];
+							} else {
+								let elementBlockNames = (target.constructor as typeof BaseComponent)
+									._elementBlockNames;
 
-								if (
-									typedHandler &&
-									typedHandler.call(
-										ownerComponent,
-										evt,
-										receiver[KEY_CONTEXT],
-										receiver
-									) === false
-								) {
-									return;
+								for (let elementBlockName of elementBlockNames) {
+									let handler =
+										events[elName][
+											`<${elementBlockName}>` + (evtType as string)
+										];
+
+									if (
+										handler &&
+										handler.call(
+											ownerComponent,
+											evt,
+											receiver[KEY_CONTEXT],
+											receiver
+										) === false
+									) {
+										return;
+									}
 								}
+
+								handler = events[elName]['<*>' + (evtType as string)];
 							}
 
-							handler = events[handlerName.slice(1)]['<*>' + (evt.type as string)];
+							if (
+								handler &&
+								handler.call(
+									ownerComponent,
+									evt,
+									receiver[KEY_CONTEXT],
+									receiver
+								) === false
+							) {
+								return;
+							}
 						}
-					} else {
-						handler = ownerComponent[handlerName];
 					}
 
-					if (
-						handler &&
-						handler.call(ownerComponent, evt, receiver[KEY_CONTEXT], receiver) === false
-					) {
-						return;
+					if (attrName) {
+						handler = ownerComponent[receiver.getAttribute(attrName)!];
+
+						if (
+							handler &&
+							handler.call(ownerComponent, evt, receiver[KEY_CONTEXT], receiver) ===
+								false
+						) {
+							return;
+						}
 					}
 				}
+
+				receivers.length = 0;
 			}
 
 			if (!componentStack.length) {
 				break;
 			}
 
-			el = parentEl;
-			parentEl = el.parentElement;
+			el = el.parentElement;
 
-			if (!parentEl) {
+			if (!el.parentElement) {
 				break;
 			}
 
 			[ownerComponent, receivers] = componentStack.pop()!;
 		} else {
-			el = parentEl;
-			parentEl = el.parentElement;
+			el = el.parentElement;
 
-			if (!parentEl) {
+			if (!el.parentElement) {
 				break;
 			}
 
-			component = (el as IPossiblyComponentElement).$component;
+			let component = (el as IPossiblyComponentElement).$component;
 
 			if (component && component.ownerComponent != ownerComponent) {
 				componentStack.push([ownerComponent, receivers || null]);
