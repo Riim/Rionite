@@ -2,7 +2,7 @@ import { EventEmitter, IEvent } from 'cellx';
 import { IBinding } from './componentBinding';
 import { IComponentParamValueСonverters } from './componentParamValueConverters';
 import { KEY_CHILD_COMPONENTS, KEY_COMPONENT_SELF, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
-import { IBlock, Template } from './Template';
+import { IBlock, KEY_CONTENT_TEMPLATE, Template } from './Template';
 export interface IDisposable {
     dispose(): any;
     [key: string]: any;
@@ -42,12 +42,12 @@ export interface I$ComponentParamConfig {
 export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
     $component?: T | null;
     rioniteComponent?: T;
-    contentTemplate?: Template;
+    [KEY_CONTENT_TEMPLATE]?: Template;
 }
 export interface IComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
     $component: T | null;
     rioniteComponent: T;
-    contentTemplate?: Template;
+    [KEY_CONTENT_TEMPLATE]?: Template;
 }
 export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (this: T, evt: U, context: Record<string, any>, receiver: Element) => any;
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {

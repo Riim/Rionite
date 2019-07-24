@@ -1771,6 +1771,7 @@ var ComponentParams_1 = __webpack_require__(33);
 exports.ComponentParams = ComponentParams_1.ComponentParams;
 var Template_1 = __webpack_require__(3);
 exports.TemplateNodeType = Template_1.NodeType;
+exports.KEY_CONTENT_TEMPLATE = Template_1.KEY_CONTENT_TEMPLATE;
 exports.Template = Template_1.Template;
 var registerComponent_1 = __webpack_require__(30);
 exports.registerComponent = registerComponent_1.registerComponent;
@@ -1930,6 +1931,7 @@ var NodeType;
     NodeType[NodeType["ELEMENT"] = 5] = "ELEMENT";
     NodeType[NodeType["TEXT"] = 6] = "TEXT";
 })(NodeType = exports.NodeType || (exports.NodeType = {}));
+exports.KEY_CONTENT_TEMPLATE = Symbol('contentTemplate');
 const emptyObj = { __proto__: null };
 const escapee = new Map([
     ['/', '/'],
@@ -2158,7 +2160,7 @@ class Template {
                     let elEvents = componentEvents && componentEvents[name];
                     for (let type in elEvents) {
                         if (elEvents[type] !== Object.prototype[type]) {
-                            (events || (events = new Map())).set(type, name);
+                            (events || (events = new Map())).set(type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type, name);
                         }
                     }
                     while (elEvents) {
@@ -2802,7 +2804,7 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                             }
                         }
                         if (node.contentTemplateIndex !== null) {
-                            el.contentTemplate = template._embeddedTemplates[node.contentTemplateIndex];
+                            el[exports.KEY_CONTENT_TEMPLATE] = template._embeddedTemplates[node.contentTemplateIndex];
                         }
                         else if (result &&
                             (!nodeComponent ||
@@ -4784,6 +4786,7 @@ const handleDOMEvent_1 = __webpack_require__(27);
 const handleEvent_1 = __webpack_require__(28);
 const findChildComponents_1 = __webpack_require__(46);
 const normalizeTextNodes_1 = __webpack_require__(47);
+const Template_1 = __webpack_require__(3);
 const hasOwn = Object.prototype.hasOwnProperty;
 const map = Array.prototype.map;
 class BaseComponent extends cellx_1.EventEmitter {
@@ -5375,6 +5378,7 @@ const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
 const keypathPattern_1 = __webpack_require__(18);
 const removeNodes_1 = __webpack_require__(51);
+const Template_1 = __webpack_require__(3);
 const RnRepeat_1 = __webpack_require__(52);
 const slice = Array.prototype.slice;
 const reKeypath = RegExp(`^${keypathPattern_1.keypathPattern}$`);
@@ -5412,7 +5416,7 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
             }, { context: this.$context });
             this.initialized = true;
         }
-        if (this.element.contentTemplate) {
+        if (this.element[Template_1.KEY_CONTENT_TEMPLATE]) {
             this._if.on('change', this._onIfChange, this);
             this._render(false);
         }
@@ -5440,7 +5444,7 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
             ? !this._if.get() && (this._if.get() !== undefined || this.withUndefined)
             : this._if.get()) {
             let contentBindingResult = [null, null, null];
-            let content = this.element.contentTemplate.render(null, this.ownerComponent, this.$context, contentBindingResult);
+            let content = this.element[Template_1.KEY_CONTENT_TEMPLATE].render(null, this.ownerComponent, this.$context, contentBindingResult);
             let childComponents = contentBindingResult[0];
             let backBindings = contentBindingResult[2];
             this._nodes = slice.call(content.childNodes);
@@ -5631,6 +5635,7 @@ const compileKeypath_1 = __webpack_require__(23);
 const keypathPattern_1 = __webpack_require__(18);
 const namePattern_1 = __webpack_require__(19);
 const removeNodes_1 = __webpack_require__(51);
+const Template_1 = __webpack_require__(3);
 const RnIfThen_1 = __webpack_require__(48);
 const slice = Array.prototype.slice;
 const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern}(?:\\s*(.*\\S))?)\\s*$`);
@@ -5701,7 +5706,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
             this._$itemsMap = new Map();
             this.initialized = true;
         }
-        if (this.element.contentTemplate) {
+        if (this.element[Template_1.KEY_CONTENT_TEMPLATE]) {
             this._list.on('change', this._onListChange, this);
             this._render(false);
         }
@@ -5854,7 +5859,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
                     let indexCell = new cellx_1.Cell(i);
                     let context = this.$context;
                     let contentBindingResult = [null, null, null];
-                    let content = this.element.contentTemplate.render(null, this.ownerComponent, Object.create(context, {
+                    let content = this.element[Template_1.KEY_CONTENT_TEMPLATE].render(null, this.ownerComponent, Object.create(context, {
                         [this._itemName]: {
                             configurable: true,
                             enumerable: true,
@@ -6038,6 +6043,7 @@ const bindContent_1 = __webpack_require__(7);
 const Component_1 = __webpack_require__(29);
 const ElementProtoMixin_1 = __webpack_require__(35);
 const cloneNode_1 = __webpack_require__(56);
+const Template_1 = __webpack_require__(3);
 const KEY_SLOTS_CONTENT = Symbol('slotsContent');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
     static get bindsInputContent() {
@@ -6130,7 +6136,7 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
             }
         }
         if (bindings === undefined) {
-            if (content || this.element.contentTemplate) {
+            if (content || this.element[Template_1.KEY_CONTENT_TEMPLATE]) {
                 let contentBindingResult = [null, null, null];
                 if (content) {
                     bindContent_1.bindContent(content, contentOwnerComponent, this.getContext
@@ -6138,7 +6144,7 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
                         : ownerComponent.$context, contentBindingResult);
                 }
                 else {
-                    content = this.element.contentTemplate.render(null, ownerComponent, this.getContext
+                    content = this.element[Template_1.KEY_CONTENT_TEMPLATE].render(null, ownerComponent, this.getContext
                         ? this.getContext.call(ownerComponent, this.$context, this)
                         : this.$context, contentBindingResult);
                 }
@@ -6236,6 +6242,9 @@ exports.getUID = (obj) => hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : (obj[KEY_UI
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const handleDOMEvent_1 = __webpack_require__(27);
+const handleEvent_1 = __webpack_require__(28);
+const Template_1 = __webpack_require__(3);
 const IE = !!document.documentMode || navigator.userAgent.indexOf('Edge/') != -1;
 function cloneNode(node) {
     let copy;
@@ -6260,9 +6269,14 @@ function cloneNode(node) {
             else {
                 copy = document.createElementNS(node.namespaceURI, tagName);
             }
-            if ((tagName == 'template' || tagName == 'rn-slot') &&
-                node.contentTemplate) {
-                copy.contentTemplate = node.contentTemplate;
+            if ((tagName == 'template' || tagName == 'rn-slot') && node[Template_1.KEY_CONTENT_TEMPLATE]) {
+                copy[Template_1.KEY_CONTENT_TEMPLATE] = node[Template_1.KEY_CONTENT_TEMPLATE];
+            }
+            if (node[handleEvent_1.KEY_EVENTS]) {
+                copy[handleEvent_1.KEY_EVENTS] = node[handleEvent_1.KEY_EVENTS];
+            }
+            if (node[handleDOMEvent_1.KEY_DOM_EVENTS]) {
+                copy[handleDOMEvent_1.KEY_DOM_EVENTS] = node[handleDOMEvent_1.KEY_DOM_EVENTS];
             }
             let attrs = node.attributes;
             for (let i = 0, l = attrs.length; i < l; i++) {

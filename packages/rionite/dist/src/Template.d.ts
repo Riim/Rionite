@@ -60,6 +60,7 @@ export interface IBlock extends INode {
     content: TContent | null;
     elements: Record<string, IElement>;
 }
+export declare const KEY_CONTENT_TEMPLATE: unique symbol;
 export declare const ELEMENT_NAME_DELIMITER = "__";
 export declare class Template {
     static elementTransformers: Record<string, (el: IElement) => TContent | null>;
