@@ -93,6 +93,8 @@ export interface IBlock extends INode {
 	elements: Record<string, IElement>;
 }
 
+export const KEY_CONTENT_TEMPLATE = Symbol('contentTemplate');
+
 const emptyObj = { __proto__: null };
 
 const escapee = new Map([
@@ -1346,7 +1348,7 @@ function renderContent<T extends Node = Element>(
 						}
 
 						if ((node as IElement).contentTemplateIndex !== null) {
-							(el as any).contentTemplate = template._embeddedTemplates![
+							el[KEY_CONTENT_TEMPLATE] = template._embeddedTemplates![
 								(node as IElement).contentTemplateIndex!
 							];
 						} else if (

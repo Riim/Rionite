@@ -1,4 +1,6 @@
-import { IComponentElement, IPossiblyComponentElement } from '../BaseComponent';
+import { KEY_DOM_EVENTS } from '../handleDOMEvent';
+import { KEY_EVENTS } from '../handleEvent';
+import { KEY_CONTENT_TEMPLATE } from '../Template';
 
 const IE = !!(document as any).documentMode || navigator.userAgent.indexOf('Edge/') != -1;
 
@@ -31,11 +33,14 @@ export function cloneNode<T extends Node>(node: T): T {
 				copy = document.createElementNS(node.namespaceURI, tagName);
 			}
 
-			if (
-				(tagName == 'template' || tagName == 'rn-slot') &&
-				((node as any) as IPossiblyComponentElement).contentTemplate
-			) {
-				(copy as IComponentElement).contentTemplate = ((node as any) as IComponentElement).contentTemplate;
+			if ((tagName == 'template' || tagName == 'rn-slot') && node[KEY_CONTENT_TEMPLATE]) {
+				copy[KEY_CONTENT_TEMPLATE] = node[KEY_CONTENT_TEMPLATE];
+			}
+			if (node[KEY_EVENTS]) {
+				copy[KEY_EVENTS] = node[KEY_EVENTS];
+			}
+			if (node[KEY_DOM_EVENTS]) {
+				copy[KEY_DOM_EVENTS] = node[KEY_DOM_EVENTS];
 			}
 
 			let attrs = ((node as any) as Element).attributes;

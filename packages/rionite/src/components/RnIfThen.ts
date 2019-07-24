@@ -11,7 +11,7 @@ import { getTemplateNodeValueAST } from '../getTemplateNodeValueAST';
 import { compileKeypath } from '../lib/compileKeypath';
 import { keypathPattern } from '../lib/keypathPattern';
 import { removeNodes } from '../lib/removeNodes';
-import { Template } from '../Template';
+import { KEY_CONTENT_TEMPLATE } from '../Template';
 import { RnRepeat } from './RnRepeat';
 
 const slice = Array.prototype.slice;
@@ -85,7 +85,7 @@ export class RnIfThen extends BaseComponent {
 			this.initialized = true;
 		}
 
-		if (this.element.contentTemplate) {
+		if (this.element[KEY_CONTENT_TEMPLATE]) {
 			this._if.on('change', this._onIfChange, this);
 			this._render(false);
 		}
@@ -123,7 +123,7 @@ export class RnIfThen extends BaseComponent {
 				Array<IBinding> | null,
 				Array<BaseComponent | string | TListener> | null
 			] = [null, null, null];
-			let content = (this.element.contentTemplate as Template).render(
+			let content = this.element[KEY_CONTENT_TEMPLATE]!.render(
 				null,
 				this.ownerComponent,
 				this.$context!,

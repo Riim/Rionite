@@ -8,7 +8,7 @@ import { IBinding } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { cloneNode } from '../lib/cloneNode';
-import { Template } from '../Template';
+import { KEY_CONTENT_TEMPLATE } from '../Template';
 
 const KEY_SLOTS_CONTENT = Symbol('slotsContent');
 
@@ -173,7 +173,7 @@ export class RnSlot extends BaseComponent {
 		}
 
 		if (bindings === undefined) {
-			if (content || this.element.contentTemplate) {
+			if (content || this.element[KEY_CONTENT_TEMPLATE]) {
 				let contentBindingResult: [
 					Array<BaseComponent> | null,
 					Array<IBinding> | null,
@@ -190,7 +190,7 @@ export class RnSlot extends BaseComponent {
 						contentBindingResult
 					);
 				} else {
-					content = (this.element.contentTemplate as Template).render(
+					content = this.element[KEY_CONTENT_TEMPLATE]!.render(
 						null,
 						ownerComponent,
 						this.getContext

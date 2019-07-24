@@ -12,7 +12,7 @@ import { compileKeypath } from '../lib/compileKeypath';
 import { keypathPattern } from '../lib/keypathPattern';
 import { namePattern } from '../lib/namePattern';
 import { removeNodes } from '../lib/removeNodes';
-import { Template } from '../Template';
+import { KEY_CONTENT_TEMPLATE } from '../Template';
 import { RnIfThen } from './RnIfThen';
 
 const slice = Array.prototype.slice;
@@ -152,7 +152,7 @@ export class RnRepeat extends BaseComponent {
 			this.initialized = true;
 		}
 
-		if (this.element.contentTemplate) {
+		if (this.element[KEY_CONTENT_TEMPLATE]) {
 			this._list.on('change', this._onListChange, this);
 			this._render(false);
 		}
@@ -351,7 +351,7 @@ export class RnRepeat extends BaseComponent {
 						Array<IBinding> | null,
 						Array<BaseComponent | string | TListener> | null
 					] = [null, null, null];
-					let content = (this.element.contentTemplate as Template).render(
+					let content = this.element[KEY_CONTENT_TEMPLATE]!.render(
 						null,
 						this.ownerComponent,
 						Object.create(context, {

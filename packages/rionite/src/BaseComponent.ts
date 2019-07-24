@@ -19,7 +19,7 @@ import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
 import { findChildComponents } from './lib/findChildComponents';
 import { normalizeTextNodes } from './lib/normalizeTextNodes';
-import { IBlock, Template } from './Template';
+import { IBlock, KEY_CONTENT_TEMPLATE, Template } from './Template';
 
 const hasOwn = Object.prototype.hasOwnProperty;
 const map = Array.prototype.map;
@@ -82,13 +82,13 @@ export interface IPossiblyComponentElement<T extends BaseComponent = BaseCompone
 	extends HTMLElement {
 	$component?: T | null;
 	rioniteComponent?: T;
-	contentTemplate?: Template;
+	[KEY_CONTENT_TEMPLATE]?: Template;
 }
 
 export interface IComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
 	$component: T | null;
 	rioniteComponent: T;
-	contentTemplate?: Template;
+	[KEY_CONTENT_TEMPLATE]?: Template;
 }
 
 export type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (
