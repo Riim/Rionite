@@ -436,7 +436,10 @@ export class Template {
 
 					for (let type in elEvents) {
 						if (elEvents[type] !== Object.prototype[type]) {
-							(events || (events = new Map())).set(type, name);
+							(events || (events = new Map())).set(
+								type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type,
+								name
+							);
 						}
 					}
 
