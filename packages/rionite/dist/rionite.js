@@ -3191,6 +3191,12 @@ class BaseComponent extends cellx_1.EventEmitter {
         }
         return (this._parentComponent = null);
     }
+    onChange(listener, context) {
+        return this.on(this.constructor.EVENT_CHANGE, listener, context);
+    }
+    offChange(listener, context) {
+        return this.off(this.constructor.EVENT_CHANGE, listener, context);
+    }
     handleEvent(evt) {
         super.handleEvent(evt);
         if (evt.bubbles !== false && !evt.propagationStopped) {
@@ -3523,6 +3529,7 @@ class BaseComponent extends cellx_1.EventEmitter {
         return container.getElementsByClassName(elementBlockNames[elementBlockNames.length - 1] + '__' + name);
     }
 }
+BaseComponent.EVENT_CHANGE = 'change';
 BaseComponent.elementExtends = null;
 BaseComponent.params = null;
 BaseComponent.i18n = null;
@@ -3608,8 +3615,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const cellx_1 = __webpack_require__(6);
 const KEY_FROZEN_STATE = Symbol('frozenState');
 function freezeBinding(binding) {
-    let changeEvent = binding._events.get('change');
-    binding._events.delete('change');
+    let changeEvent = binding._events.get(cellx_1.Cell.EVENT_CHANGE);
+    binding._events.delete(cellx_1.Cell.EVENT_CHANGE);
     binding[KEY_FROZEN_STATE] = {
         changeEventListener: changeEvent.listener,
         changeEventContext: changeEvent.context,
@@ -3619,9 +3626,9 @@ function freezeBinding(binding) {
 function unfreezeBinding(binding) {
     let frozenState = binding[KEY_FROZEN_STATE];
     binding[KEY_FROZEN_STATE] = null;
-    binding.on('change', frozenState.changeEventListener, frozenState.changeEventContext);
+    binding.onChange(frozenState.changeEventListener, frozenState.changeEventContext);
     if (frozenState.value !== binding._value) {
-        binding.emit('change', {
+        binding.emit(cellx_1.Cell.EVENT_CHANGE, {
             prevValue: frozenState.value,
             value: binding._value
         });
@@ -3768,7 +3775,7 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
             this.initialized = true;
         }
         if (this.element[Template_1.KEY_CONTENT_TEMPLATE]) {
-            this._if.on('change', this._onIfChange, this);
+            this._if.onChange(this._onIfChange, this);
             this._render(false);
         }
     }
@@ -3833,7 +3840,7 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
         }
         if (changed) {
             cellx_1.Cell.release();
-            this.emit('change');
+            this.emit(RnIfThen_1.EVENT_CHANGE);
         }
     }
     _deactivate() {
@@ -3841,7 +3848,7 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
             return;
         }
         this._active = false;
-        this._if.off('change', this._onIfChange, this);
+        this._if.offChange(this._onIfChange, this);
         let nodes = this._nodes;
         if (nodes) {
             removeNodes_1.removeNodes(nodes);
@@ -3863,6 +3870,7 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
         this._childComponents = null;
     }
 };
+RnIfThen.EVENT_CHANGE = Symbol('change');
 RnIfThen = RnIfThen_1 = __decorate([
     Component_1.Component({
         elementIs: 'RnIfThen',
@@ -3972,6 +3980,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var RnRepeat_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 const next_tick_1 = __webpack_require__(49);
 const cellx_1 = __webpack_require__(6);
@@ -4022,7 +4031,7 @@ function deactivateChildComponents(childComponents) {
         }
     }
 }
-let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
+let RnRepeat = RnRepeat_1 = class RnRepeat extends BaseComponent_1.BaseComponent {
     constructor() {
         super(...arguments);
         this._active = false;
@@ -4058,7 +4067,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
             this.initialized = true;
         }
         if (this.element[Template_1.KEY_CONTENT_TEMPLATE]) {
-            this._list.on('change', this._onListChange, this);
+            this._list.onChange(this._onListChange, this);
             this._render(false);
         }
     }
@@ -4295,7 +4304,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
         this._prevList = Array.isArray(list) ? list.slice() : list.toArray();
         if (fromChangeEvent) {
             cellx_1.Cell.release();
-            this.emit('change');
+            this.emit(RnRepeat_1.EVENT_CHANGE);
         }
     }
     _deactivate() {
@@ -4303,7 +4312,7 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
             return;
         }
         this._active = false;
-        this._list.off('change', this._onListChange, this);
+        this._list.offChange(this._onListChange, this);
         let prevList = this._prevList;
         let $itemsMap = this._$itemsMap;
         let trackBy = this.trackBy;
@@ -4318,7 +4327,8 @@ let RnRepeat = class RnRepeat extends BaseComponent_1.BaseComponent {
         $itemsMap.clear();
     }
 };
-RnRepeat = __decorate([
+RnRepeat.EVENT_CHANGE = Symbol('change');
+RnRepeat = RnRepeat_1 = __decorate([
     Component_1.Component({
         elementIs: 'RnRepeat',
         elementExtends: 'template',

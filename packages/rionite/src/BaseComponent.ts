@@ -105,6 +105,8 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 }
 
 export class BaseComponent extends EventEmitter implements IDisposable {
+	static EVENT_CHANGE: string | symbol = 'change';
+
 	static elementIs: string;
 	static elementExtends: string | null = null;
 
@@ -203,6 +205,14 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		(el as IComponentElement).$component = this;
 
 		this[KEY_PARAM_VALUES] = new Map();
+	}
+
+	onChange(listener: TListener, context?: any): this {
+		return this.on((this.constructor as typeof BaseComponent).EVENT_CHANGE, listener, context);
+	}
+
+	offChange(listener: TListener, context?: any): this {
+		return this.off((this.constructor as typeof BaseComponent).EVENT_CHANGE, listener, context);
 	}
 
 	handleEvent(evt: IEvent<BaseComponent>) {

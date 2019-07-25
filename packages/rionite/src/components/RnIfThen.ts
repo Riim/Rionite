@@ -36,6 +36,8 @@ const reKeypath = RegExp(`^${keypathPattern}$`);
 	}
 })
 export class RnIfThen extends BaseComponent {
+	static EVENT_CHANGE = Symbol('change');
+
 	static get bindsInputContent() {
 		return true;
 	}
@@ -86,7 +88,7 @@ export class RnIfThen extends BaseComponent {
 		}
 
 		if (this.element[KEY_CONTENT_TEMPLATE]) {
-			this._if.on('change', this._onIfChange, this);
+			this._if.onChange(this._onIfChange, this);
 			this._render(false);
 		}
 	}
@@ -182,7 +184,7 @@ export class RnIfThen extends BaseComponent {
 
 		if (changed) {
 			Cell.release();
-			this.emit('change');
+			this.emit(RnIfThen.EVENT_CHANGE);
 		}
 	}
 
@@ -193,7 +195,7 @@ export class RnIfThen extends BaseComponent {
 
 		this._active = false;
 
-		this._if.off('change', this._onIfChange, this);
+		this._if.offChange(this._onIfChange, this);
 
 		let nodes = this._nodes;
 

@@ -56,6 +56,7 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
     };
 }
 export declare class BaseComponent extends EventEmitter implements IDisposable {
+    static EVENT_CHANGE: string | symbol;
     static elementIs: string;
     static elementExtends: string | null;
     static params: Record<string, any> | null;
@@ -84,6 +85,8 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     [KEY_PARAM_VALUES]: Map<string, any>;
     [KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
     constructor(el?: HTMLElement);
+    onChange(listener: TListener, context?: any): this;
+    offChange(listener: TListener, context?: any): this;
     handleEvent(evt: IEvent<BaseComponent>): void;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | symbol | Array<string | symbol>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, listeners: Record<string | symbol, TListener | Array<TListener>>, context?: any, useCapture?: boolean): IDisposableListening;

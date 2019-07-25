@@ -13,9 +13,9 @@ export interface IBinding extends Cell {
 }
 
 function freezeBinding(binding: IBinding) {
-	let changeEvent = binding._events.get('change') as IRegisteredEvent;
+	let changeEvent = binding._events.get(Cell.EVENT_CHANGE) as IRegisteredEvent;
 
-	binding._events.delete('change');
+	binding._events.delete(Cell.EVENT_CHANGE);
 
 	binding[KEY_FROZEN_STATE] = {
 		changeEventListener: changeEvent.listener,
@@ -29,10 +29,10 @@ function unfreezeBinding(binding: IBinding) {
 
 	binding[KEY_FROZEN_STATE] = null;
 
-	binding.on('change', frozenState.changeEventListener, frozenState.changeEventContext);
+	binding.onChange(frozenState.changeEventListener, frozenState.changeEventContext);
 
 	if (frozenState.value !== binding._value) {
-		binding.emit('change', {
+		binding.emit(Cell.EVENT_CHANGE, {
 			prevValue: frozenState.value,
 			value: binding._value
 		});

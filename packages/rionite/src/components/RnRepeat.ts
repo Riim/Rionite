@@ -96,6 +96,8 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 	}
 })
 export class RnRepeat extends BaseComponent {
+	static EVENT_CHANGE = Symbol('change');
+
 	static get bindsInputContent() {
 		return true;
 	}
@@ -153,7 +155,7 @@ export class RnRepeat extends BaseComponent {
 		}
 
 		if (this.element[KEY_CONTENT_TEMPLATE]) {
-			this._list.on('change', this._onListChange, this);
+			this._list.onChange(this._onListChange, this);
 			this._render(false);
 		}
 	}
@@ -464,7 +466,7 @@ export class RnRepeat extends BaseComponent {
 
 		if (fromChangeEvent) {
 			Cell.release();
-			this.emit('change');
+			this.emit(RnRepeat.EVENT_CHANGE);
 		}
 	}
 
@@ -475,7 +477,7 @@ export class RnRepeat extends BaseComponent {
 
 		this._active = false;
 
-		this._list.off('change', this._onListChange, this);
+		this._list.offChange(this._onListChange, this);
 
 		let prevList = this._prevList;
 		let $itemsMap = this._$itemsMap;
