@@ -4870,10 +4870,13 @@ class BaseComponent extends cellx_1.EventEmitter {
                 }
             }
             else {
-                for (let name in type) {
-                    if (hasOwn.call(type, name)) {
-                        listenings.push(this.listenTo(target, name, type[name], listener, context));
+                for (let type_ in type) {
+                    if (hasOwn.call(type, type_)) {
+                        listenings.push(this.listenTo(target, type_, type[type_], listener, context));
                     }
+                }
+                for (let type_ of Object.getOwnPropertySymbols(type)) {
+                    listenings.push(this.listenTo(target, type_, type[type_], listener, context));
                 }
             }
         }
@@ -4969,11 +4972,11 @@ class BaseComponent extends cellx_1.EventEmitter {
         this._disposables.set(id, listening);
         return listening;
     }
-    setTimeout(callback, delay) {
+    setTimeout(cb, delay) {
         let id = next_uid_1.nextUID();
         let timeoutId = setTimeout(() => {
             this._disposables.delete(id);
-            callback.call(this);
+            cb.call(this);
         }, delay);
         let clearTimeout_ = () => {
             if (this._disposables.has(id)) {
@@ -4988,10 +4991,10 @@ class BaseComponent extends cellx_1.EventEmitter {
         this._disposables.set(id, timeout);
         return timeout;
     }
-    setInterval(callback, delay) {
+    setInterval(cb, delay) {
         let id = next_uid_1.nextUID();
         let intervalId = setInterval(() => {
-            callback.call(this);
+            cb.call(this);
         }, delay);
         let clearInterval_ = () => {
             if (this._disposables.has(id)) {
@@ -5006,7 +5009,7 @@ class BaseComponent extends cellx_1.EventEmitter {
         this._disposables.set(id, interval);
         return interval;
     }
-    registerCallback(callback) {
+    registerCallback(cb) {
         let id = next_uid_1.nextUID();
         let disposable = this;
         let cancelCallback = () => {
@@ -5015,7 +5018,7 @@ class BaseComponent extends cellx_1.EventEmitter {
         let registeredCallback = function registeredCallback() {
             if (disposable._disposables.has(id)) {
                 disposable._disposables.delete(id);
-                return callback.apply(disposable, arguments);
+                return cb.apply(disposable, arguments);
             }
         };
         registeredCallback.cancel = cancelCallback;

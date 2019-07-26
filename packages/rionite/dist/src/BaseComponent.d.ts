@@ -51,9 +51,7 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
 }
 export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (this: T, evt: U, context: Record<string, any>, receiver: Element) => any;
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
-    [name: string]: {
-        [eventName: string]: TEventHandler<T, U>;
-    };
+    [elementName: string]: Record<string, TEventHandler<T, U>>;
 }
 export declare class BaseComponent extends EventEmitter implements IDisposable {
     static EVENT_CHANGE: string | symbol;
@@ -91,9 +89,9 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | symbol | Array<string | symbol>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, listeners: Record<string | symbol, TListener | Array<TListener>>, context?: any, useCapture?: boolean): IDisposableListening;
     _listenTo(target: EventEmitter | EventTarget, type: string | symbol, listener: TListener, context: any, useCapture: boolean): IDisposableListening;
-    setTimeout(callback: Function, delay: number): IDisposableTimeout;
-    setInterval(callback: Function, delay: number): IDisposableInterval;
-    registerCallback(callback: Function): IDisposableCallback;
+    setTimeout(cb: Function, delay: number): IDisposableTimeout;
+    setInterval(cb: Function, delay: number): IDisposableInterval;
+    registerCallback(cb: Function): IDisposableCallback;
     _attach(): void;
     _detach(): void;
     dispose(): BaseComponent;
