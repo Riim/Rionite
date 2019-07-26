@@ -99,9 +99,7 @@ export type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | 
 ) => any;
 
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
-	[name: string]: {
-		[eventName: string]: TEventHandler<T, U>;
-	};
+	[elementName: string]: Record<string, TEventHandler<T, U>>;
 }
 
 export class BaseComponent extends EventEmitter implements IDisposable {
@@ -268,10 +266,18 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					listenings.push(this.listenTo(target, type[i], listener, context, useCapture));
 				}
 			} else {
-				for (let name in type) {
-					if (hasOwn.call(type, name)) {
-						listenings.push(this.listenTo(target, name, type[name], listener, context));
+				for (let type_ in type) {
+					if (hasOwn.call(type, type_)) {
+						listenings.push(
+							this.listenTo(target, type_, type[type_], listener, context)
+						);
 					}
+				}
+
+				for (let type_ of Object.getOwnPropertySymbols(type)) {
+					listenings.push(
+						this.listenTo(target, type_, type[type_ as any], listener, context)
+					);
 				}
 			}
 		} else {
@@ -396,12 +402,12 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return listening;
 	}
 
-	setTimeout(callback: Function, delay: number): IDisposableTimeout {
+	setTimeout(cb: Function, delay: number): IDisposableTimeout {
 		let id = nextUID();
 
 		let timeoutId = setTimeout(() => {
 			this._disposables.delete(id);
-			callback.call(this);
+			cb.call(this);
 		}, delay);
 
 		let clearTimeout_ = () => {
@@ -420,11 +426,11 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return timeout;
 	}
 
-	setInterval(callback: Function, delay: number): IDisposableInterval {
+	setInterval(cb: Function, delay: number): IDisposableInterval {
 		let id = nextUID();
 
 		let intervalId = setInterval(() => {
-			callback.call(this);
+			cb.call(this);
 		}, delay);
 
 		let clearInterval_ = () => {
@@ -443,7 +449,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return interval;
 	}
 
-	registerCallback(callback: Function): IDisposableCallback {
+	registerCallback(cb: Function): IDisposableCallback {
 		let id = nextUID();
 		let disposable = this;
 
@@ -454,7 +460,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		let registeredCallback = function registeredCallback() {
 			if (disposable._disposables.has(id)) {
 				disposable._disposables.delete(id);
-				return callback.apply(disposable, arguments);
+				return cb.apply(disposable, arguments);
 			}
 		} as IDisposableCallback;
 		registeredCallback.cancel = cancelCallback;
