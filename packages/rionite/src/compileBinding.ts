@@ -1,4 +1,5 @@
 import { bindingToJSExpression } from './bindingToJSExpression';
+import { KEY_COMPONENT_SELF } from './Constants';
 import { formatters } from './lib/formatters';
 import { ITemplateNodeValueBinding, TTemplateNodeValueAST } from './TemplateNodeValueParser';
 
@@ -9,13 +10,16 @@ export function compileBinding(
 	cacheKey: string
 ): (this: object) => any {
 	if (!cache.has(cacheKey)) {
-		let inner: (formatters: Record<string, Function>) => any = Function(
-			'formatters',
+		let inner: (
+			formatters: Record<string, Function>,
+			KEY_COMPONENT_SELF: symbol
+		) => any = Function(
+			'formatters, KEY_COMPONENT_SELF',
 			`var tmp; return ${bindingToJSExpression(binding[0] as ITemplateNodeValueBinding)};`
 		) as any;
 
 		cache.set(cacheKey, function() {
-			return inner.call(this, formatters);
+			return inner.call(this, formatters, KEY_COMPONENT_SELF);
 		});
 	}
 

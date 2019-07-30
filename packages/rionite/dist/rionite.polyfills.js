@@ -1752,15 +1752,15 @@ return /******/ (function(modules) { // webpackBootstrap
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(1);
 __webpack_require__(2);
-var config_1 = __webpack_require__(16);
+var config_1 = __webpack_require__(17);
 exports.configure = config_1.configure;
-var formatters_1 = __webpack_require__(15);
+var formatters_1 = __webpack_require__(16);
 exports.formatters = formatters_1.formatters;
 var Component_1 = __webpack_require__(29);
 exports.Component = Component_1.Component;
 var Param_1 = __webpack_require__(40);
 exports.Param = Param_1.Param;
-var Constants_1 = __webpack_require__(21);
+var Constants_1 = __webpack_require__(15);
 exports.KEY_PARAMS_CONFIG = Constants_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAM_VALUES = Constants_1.KEY_PARAM_VALUES;
 var BaseComponent_1 = __webpack_require__(41);
@@ -1915,7 +1915,7 @@ const cellx_1 = __webpack_require__(6);
 const bindContent_1 = __webpack_require__(7);
 const compileTemplateNodeValue_1 = __webpack_require__(8);
 const componentConstructors_1 = __webpack_require__(26);
-const Constants_1 = __webpack_require__(21);
+const Constants_1 = __webpack_require__(15);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const handleDOMEvent_1 = __webpack_require__(27);
 const handleEvent_1 = __webpack_require__(28);
@@ -2923,7 +2923,7 @@ module.exports = __WEBPACK_EXTERNAL_MODULE__6__;
 Object.defineProperty(exports, "__esModule", { value: true });
 const cellx_1 = __webpack_require__(6);
 const compileTemplateNodeValue_1 = __webpack_require__(8);
-const Constants_1 = __webpack_require__(21);
+const Constants_1 = __webpack_require__(15);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
 const setAttribute_1 = __webpack_require__(24);
@@ -3072,15 +3072,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const escape_string_1 = __webpack_require__(9);
 const bindingToJSExpression_1 = __webpack_require__(10);
 const componentParamValueConverters_1 = __webpack_require__(11);
-const formatters_1 = __webpack_require__(15);
-const TemplateNodeValueParser_1 = __webpack_require__(17);
+const Constants_1 = __webpack_require__(15);
+const formatters_1 = __webpack_require__(16);
+const TemplateNodeValueParser_1 = __webpack_require__(18);
 const cache = new Map();
 function compileTemplateNodeValue(templateNodeValueAST, templateNodeValueString, useComponentParamValues) {
     let cacheKey = templateNodeValueString + (useComponentParamValues ? ',' : '.');
     if (!cache.has(cacheKey)) {
         let inner;
         if (templateNodeValueAST.length == 1) {
-            inner = Function('formatters', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(templateNodeValueAST[0])};`);
+            inner = Function('formatters, KEY_COMPONENT_SELF', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(templateNodeValueAST[0])};`);
         }
         else {
             let fragments = [];
@@ -3089,11 +3090,11 @@ function compileTemplateNodeValue(templateNodeValueAST, templateNodeValueString,
                     ? `'${escape_string_1.escapeString(node.value)}'`
                     : bindingToJSExpression_1.bindingToJSExpression(node));
             }
-            inner = Function('formatters', `var tmp; return [${fragments.join(', ')}].join('');`);
+            inner = Function('formatters, KEY_COMPONENT_SELF', `var tmp; return [${fragments.join(', ')}].join('');`);
         }
         cache.set(cacheKey, useComponentParamValues
             ? function (cell) {
-                let value = inner.call(this, formatters_1.formatters);
+                let value = inner.call(this, formatters_1.formatters, Constants_1.KEY_COMPONENT_SELF);
                 if (value) {
                     if (typeof value == 'object' || typeof value == 'function') {
                         let meta = cell.meta;
@@ -3142,7 +3143,7 @@ exports.escapeString = escapeString;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 function formattersReducer(jsExpr, formatter) {
-    return `(this.${formatter.name} || formatters.${formatter.name}).call(this, ${jsExpr}${formatter.arguments ? ', ' + formatter.arguments.join(', ') : ''})`;
+    return `(this.${formatter.name} || formatters.${formatter.name}).call(this[KEY_COMPONENT_SELF], ${jsExpr}${formatter.arguments ? ', ' + formatter.arguments.join(', ') : ''})`;
 }
 function bindingToJSExpression(binding) {
     let formatters = binding.formatters;
@@ -3323,8 +3324,21 @@ exports.unescapeHTML = unescapeHTML;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.KEY_COMPONENT_SELF = Symbol('componentSelf');
+exports.KEY_PARAMS_CONFIG = Symbol('paramsConfig');
+exports.KEY_PARAM_VALUES = Symbol('paramValues');
+exports.KEY_CHILD_COMPONENTS = Symbol('childComponents');
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 const cellx_1 = __webpack_require__(6);
-const config_1 = __webpack_require__(16);
+const config_1 = __webpack_require__(17);
 exports.formatters = {
     default(value, defaultValue) {
         return value === undefined ? defaultValue : value;
@@ -3403,7 +3417,7 @@ exports.formatters.seq = exports.formatters.identical;
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3420,15 +3434,15 @@ exports.configure = configure;
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const keypathPattern_1 = __webpack_require__(18);
-const keypathToJSExpression_1 = __webpack_require__(20);
-const namePattern_1 = __webpack_require__(19);
+const keypathPattern_1 = __webpack_require__(19);
+const keypathToJSExpression_1 = __webpack_require__(21);
+const namePattern_1 = __webpack_require__(20);
 var TemplateNodeValueNodeType;
 (function (TemplateNodeValueNodeType) {
     TemplateNodeValueNodeType[TemplateNodeValueNodeType["TEXT"] = 1] = "TEXT";
@@ -3753,18 +3767,18 @@ exports.TemplateNodeValueParser = TemplateNodeValueParser;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const namePattern_1 = __webpack_require__(19);
+const namePattern_1 = __webpack_require__(20);
 exports.keypathPattern = `(?:${namePattern_1.namePattern}|\\d+)(?:\\.(?:${namePattern_1.namePattern}|\\d+))*`;
 
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3774,7 +3788,7 @@ exports.namePattern = '[$_a-zA-Z][$\\w]*';
 
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3803,19 +3817,6 @@ exports.keypathToJSExpression = keypathToJSExpression;
 
 
 /***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.KEY_COMPONENT_SELF = Symbol('componentSelf');
-exports.KEY_PARAMS_CONFIG = Symbol('paramsConfig');
-exports.KEY_PARAM_VALUES = Symbol('paramValues');
-exports.KEY_CHILD_COMPONENTS = Symbol('childComponents');
-
-
-/***/ }),
 /* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3823,7 +3824,7 @@ exports.KEY_CHILD_COMPONENTS = Symbol('childComponents');
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const bindContent_1 = __webpack_require__(7);
-const TemplateNodeValueParser_1 = __webpack_require__(17);
+const TemplateNodeValueParser_1 = __webpack_require__(18);
 function getTemplateNodeValueAST(templateNodeValue) {
     if (!bindContent_1.templateNodeValueASTCache.has(templateNodeValue)) {
         let bracketIndex = templateNodeValue.indexOf('{');
@@ -3851,7 +3852,7 @@ exports.getTemplateNodeValueAST = getTemplateNodeValueAST;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const keypathToJSExpression_1 = __webpack_require__(20);
+const keypathToJSExpression_1 = __webpack_require__(21);
 const cache = new Map();
 function compileKeypath(keypath, cacheKey = keypath) {
     return (cache.get(cacheKey) ||
@@ -4137,7 +4138,7 @@ const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const cellx_1 = __webpack_require__(6);
 const componentConstructors_1 = __webpack_require__(26);
 const ComponentParams_1 = __webpack_require__(33);
-const Constants_1 = __webpack_require__(21);
+const Constants_1 = __webpack_require__(15);
 const elementConstructors_1 = __webpack_require__(34);
 const ElementProtoMixin_1 = __webpack_require__(35);
 const Template_1 = __webpack_require__(3);
@@ -4392,7 +4393,7 @@ exports.camelize = camelize;
 Object.defineProperty(exports, "__esModule", { value: true });
 const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const componentParamValueConverters_1 = __webpack_require__(11);
-const Constants_1 = __webpack_require__(21);
+const Constants_1 = __webpack_require__(15);
 exports.KEY_COMPONENT_PARAMS_INITED = Symbol('componentParamsInited');
 function initParam(component, $paramConfig, name, _$specifiedParams) {
     if ($paramConfig === null) {
@@ -4546,7 +4547,7 @@ exports.elementConstructors = new Map([
 Object.defineProperty(exports, "__esModule", { value: true });
 const defer_1 = __webpack_require__(36);
 const ComponentParams_1 = __webpack_require__(33);
-const Constants_1 = __webpack_require__(21);
+const Constants_1 = __webpack_require__(15);
 const observedAttributesFeature_1 = __webpack_require__(39);
 // export const KEY_IS_COMPONENT_ELEMENT = Symbol('isComponentElement');
 exports.KEY_ELEMENT_CONNECTED = Symbol('elementConnected');
@@ -4779,7 +4780,7 @@ const attachChildComponentElements_1 = __webpack_require__(44);
 const bindContent_1 = __webpack_require__(7);
 const componentBinding_1 = __webpack_require__(45);
 const componentConstructors_1 = __webpack_require__(26);
-const Constants_1 = __webpack_require__(21);
+const Constants_1 = __webpack_require__(15);
 const elementConstructors_1 = __webpack_require__(34);
 const ElementProtoMixin_1 = __webpack_require__(35);
 const handleDOMEvent_1 = __webpack_require__(27);
@@ -5386,7 +5387,7 @@ const Component_1 = __webpack_require__(29);
 const ElementProtoMixin_1 = __webpack_require__(35);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
-const keypathPattern_1 = __webpack_require__(18);
+const keypathPattern_1 = __webpack_require__(19);
 const removeNodes_1 = __webpack_require__(51);
 const Template_1 = __webpack_require__(3);
 const RnRepeat_1 = __webpack_require__(52);
@@ -5579,13 +5580,14 @@ const nextTick = (() => {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const bindingToJSExpression_1 = __webpack_require__(10);
-const formatters_1 = __webpack_require__(15);
+const Constants_1 = __webpack_require__(15);
+const formatters_1 = __webpack_require__(16);
 const cache = new Map();
 function compileBinding(binding, cacheKey) {
     if (!cache.has(cacheKey)) {
-        let inner = Function('formatters', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(binding[0])};`);
+        let inner = Function('formatters, KEY_COMPONENT_SELF', `var tmp; return ${bindingToJSExpression_1.bindingToJSExpression(binding[0])};`);
         cache.set(cacheKey, function () {
-            return inner.call(this, formatters_1.formatters);
+            return inner.call(this, formatters_1.formatters, Constants_1.KEY_COMPONENT_SELF);
         });
     }
     return cache.get(cacheKey);
@@ -5644,8 +5646,8 @@ const Component_1 = __webpack_require__(29);
 const ElementProtoMixin_1 = __webpack_require__(35);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
-const keypathPattern_1 = __webpack_require__(18);
-const namePattern_1 = __webpack_require__(19);
+const keypathPattern_1 = __webpack_require__(19);
+const namePattern_1 = __webpack_require__(20);
 const removeNodes_1 = __webpack_require__(51);
 const Template_1 = __webpack_require__(3);
 const RnIfThen_1 = __webpack_require__(48);

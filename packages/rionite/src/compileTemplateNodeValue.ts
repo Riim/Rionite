@@ -3,6 +3,7 @@ import { escapeString } from 'escape-string';
 import { IAttributeBindingCellMeta } from './bindContent';
 import { bindingToJSExpression } from './bindingToJSExpression';
 import { KEY_COMPONENT_PARAM_VALUES } from './componentParamValueConverters';
+import { KEY_COMPONENT_SELF } from './Constants';
 import { formatters } from './lib/formatters';
 import { ITemplateNodeValueBinding, TemplateNodeValueNodeType, TTemplateNodeValueAST } from './TemplateNodeValueParser';
 
@@ -20,7 +21,7 @@ export function compileTemplateNodeValue(
 
 		if (templateNodeValueAST.length == 1) {
 			inner = Function(
-				'formatters',
+				'formatters, KEY_COMPONENT_SELF',
 				`var tmp; return ${bindingToJSExpression(
 					templateNodeValueAST[0] as ITemplateNodeValueBinding
 				)};`
@@ -37,7 +38,7 @@ export function compileTemplateNodeValue(
 			}
 
 			inner = Function(
-				'formatters',
+				'formatters, KEY_COMPONENT_SELF',
 				`var tmp; return [${fragments.join(', ')}].join('');`
 			) as any;
 		}
@@ -46,7 +47,7 @@ export function compileTemplateNodeValue(
 			cacheKey,
 			useComponentParamValues
 				? function(cell: Cell<any, IAttributeBindingCellMeta>): any {
-						let value = inner.call(this, formatters);
+						let value = inner.call(this, formatters, KEY_COMPONENT_SELF);
 
 						if (value) {
 							if (typeof value == 'object' || typeof value == 'function') {
