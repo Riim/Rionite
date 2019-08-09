@@ -436,8 +436,11 @@ PERFORMANCE OF THIS SOFTWARE.
     // V0 polyfill entry
     REGISTER_ELEMENT = 'registerElement',
 
+    // pseudo-random number used as expando/unique name on feature detection
+    UID = window.Math.random() * 10e4 >> 0,
+
     // IE < 11 only + old WebKit for attributes + feature detection
-    EXPANDO_UID = '__' + REGISTER_ELEMENT + (window.Math.random() * 10e4 >> 0),
+    EXPANDO_UID = '__' + REGISTER_ELEMENT + UID,
 
     // shortcuts and costants
     ADD_EVENT_LISTENER = 'addEventListener',
@@ -638,6 +641,12 @@ PERFORMANCE OF THIS SOFTWARE.
 
     attachShadow = HTMLElementPrototype.attachShadow,
     cloneNode = HTMLElementPrototype.cloneNode,
+    closest = HTMLElementPrototype.closest || function (name) {
+      var self = this;
+      while (self && self.nodeName !== name)
+        self = self.parentNode;
+      return self;
+    },
     dispatchEvent = HTMLElementPrototype.dispatchEvent,
     getAttribute = HTMLElementPrototype.getAttribute,
     hasAttribute = HTMLElementPrototype.hasAttribute,
@@ -1251,7 +1260,7 @@ PERFORMANCE OF THIS SOFTWARE.
       i = getTypeIndex(node),
       counterAction
     ;
-    if (-1 < i) {
+    if ((-1 < i) && !closest.call(node, 'TEMPLATE')) {
       patchIfNotAlready(node, protos[i]);
       i = 0;
       if (action === ATTACHED && !node[ATTACHED]) {
@@ -1274,8 +1283,6 @@ PERFORMANCE OF THIS SOFTWARE.
       ))) fn.call(node);
     }
   }
-
-
 
   // V1 in da House!
   function CustomElementRegistry() {}
@@ -1485,7 +1492,7 @@ PERFORMANCE OF THIS SOFTWARE.
           return Reflect.construct(HTMLAnchorElement, [], DRE);
         },
         {},
-        'document-register-element-a'
+        'document-register-element-a' + UID
       ));
     } catch(o_O) {
       // or force the polyfill if not
