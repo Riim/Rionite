@@ -5,7 +5,6 @@ import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx'
 import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { freezeBindings, IBinding, unfreezeBindings } from './componentBinding';
-import { componentConstructors } from './componentConstructors';
 import { IComponentParamValueСonverters } from './componentParamValueConverters';
 import {
 	KEY_CHILD_COMPONENTS,
@@ -334,49 +333,18 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		context: any,
 		useCapture: boolean
 	): IDisposableListening {
-		if (target instanceof BaseComponent && typeof type == 'string') {
-			if (type.charAt(0) == '<') {
-				let index = type.indexOf('>', 2);
-				let targetType = type.slice(1, index);
-
-				if (targetType != '*') {
-					let targetConstr = componentConstructors.get(targetType);
-
-					if (!targetConstr) {
-						throw new TypeError(`Component "${targetType}" is not defined`);
-					}
-
-					let inner = listener;
-
-					listener = function(evt) {
-						if (evt.target instanceof (targetConstr as any)) {
-							return inner.call(this, evt);
-						}
-					};
-				}
-
-				type = type.slice(index + 1);
-			} else if (type.indexOf(':') == -1) {
-				let inner = listener;
-
-				listener = function(evt) {
-					if (evt.target == target) {
-						return inner.call(this, evt);
-					}
-				};
-			}
+		if (!target) {
+			throw TypeError('"target" is required');
 		}
 
 		if (target instanceof EventEmitter) {
 			target.on(type, listener, context);
-		} else if (target.addEventListener) {
+		} else {
 			if (target !== context) {
 				listener = listener.bind(context);
 			}
 
 			target.addEventListener(type as string, listener, useCapture);
-		} else {
-			throw new TypeError('Unable to add a listener');
 		}
 
 		let id = nextUID();

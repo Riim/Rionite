@@ -38,42 +38,13 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 		if (el.parentElement == ownerComponent.element) {
 			if (receivers) {
 				for (let receiver of receivers) {
-					let handler: TEventHandler | undefined;
-
 					if (receiver[KEY_EVENTS]) {
 						let elName = receiver[KEY_EVENTS].get(evtType);
 
 						if (elName) {
 							let events = (ownerComponent.constructor as typeof BaseComponent)
 								.events!;
-
-							if (!attrName || receiver == targetEl) {
-								handler = events[elName][evtType as any];
-							} else {
-								let elementBlockNames = (target.constructor as typeof BaseComponent)
-									._elementBlockNames;
-
-								for (let elementBlockName of elementBlockNames) {
-									let handler =
-										events[elName][
-											`<${elementBlockName}>` + (evtType as string)
-										];
-
-									if (
-										handler &&
-										handler.call(
-											ownerComponent,
-											evt,
-											receiver[KEY_CONTEXT],
-											receiver
-										) === false
-									) {
-										return;
-									}
-								}
-
-								handler = events[elName]['<*>' + (evtType as string)];
-							}
+							let handler = events[elName][evtType as any];
 
 							if (
 								handler &&
@@ -90,7 +61,8 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 					}
 
 					if (attrName) {
-						handler = ownerComponent[receiver.getAttribute(attrName)!];
+						let handler: TEventHandler | undefined =
+							ownerComponent[receiver.getAttribute(attrName)!];
 
 						if (
 							handler &&

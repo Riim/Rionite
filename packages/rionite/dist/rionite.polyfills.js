@@ -436,8 +436,11 @@ PERFORMANCE OF THIS SOFTWARE.
     // V0 polyfill entry
     REGISTER_ELEMENT = 'registerElement',
   
+    // pseudo-random number used as expando/unique name on feature detection
+    UID = window.Math.random() * 10e4 >> 0,
+  
     // IE < 11 only + old WebKit for attributes + feature detection
-    EXPANDO_UID = '__' + REGISTER_ELEMENT + (window.Math.random() * 10e4 >> 0),
+    EXPANDO_UID = '__' + REGISTER_ELEMENT + UID,
   
     // shortcuts and costants
     ADD_EVENT_LISTENER = 'addEventListener',
@@ -638,6 +641,12 @@ PERFORMANCE OF THIS SOFTWARE.
   
     attachShadow = HTMLElementPrototype.attachShadow,
     cloneNode = HTMLElementPrototype.cloneNode,
+    closest = HTMLElementPrototype.closest || function (name) {
+      var self = this;
+      while (self && self.nodeName !== name)
+        self = self.parentNode;
+      return self;
+    },
     dispatchEvent = HTMLElementPrototype.dispatchEvent,
     getAttribute = HTMLElementPrototype.getAttribute,
     hasAttribute = HTMLElementPrototype.hasAttribute,
@@ -1246,7 +1255,7 @@ PERFORMANCE OF THIS SOFTWARE.
       i = getTypeIndex(node),
       counterAction
     ;
-    if (-1 < i) {
+    if ((-1 < i) && !closest.call(node, 'TEMPLATE')) {
       patchIfNotAlready(node, protos[i]);
       i = 0;
       if (action === ATTACHED && !node[ATTACHED]) {
@@ -1269,8 +1278,6 @@ PERFORMANCE OF THIS SOFTWARE.
       ))) fn.call(node);
     }
   }
-  
-  
   
   // V1 in da House!
   function CustomElementRegistry() {}
@@ -1480,7 +1487,7 @@ PERFORMANCE OF THIS SOFTWARE.
           return Reflect.construct(HTMLAnchorElement, [], DRE);
         },
         {},
-        'document-register-element-a'
+        'document-register-element-a' + UID
       ));
     } catch(o_O) {
       // or force the polyfill if not
@@ -2160,7 +2167,7 @@ class Template {
                     let elEvents = componentEvents && componentEvents[name];
                     for (let type in elEvents) {
                         if (elEvents[type] !== Object.prototype[type]) {
-                            (events || (events = new Map())).set(type.charAt(0) == '<' ? type.slice(type.indexOf('>', 2) + 1) : type, name);
+                            (events || (events = new Map())).set(type, name);
                         }
                     }
                     while (elEvents) {
@@ -4022,27 +4029,12 @@ function handleEvent(evt) {
         if (el.parentElement == ownerComponent.element) {
             if (receivers) {
                 for (let receiver of receivers) {
-                    let handler;
                     if (receiver[exports.KEY_EVENTS]) {
                         let elName = receiver[exports.KEY_EVENTS].get(evtType);
                         if (elName) {
                             let events = ownerComponent.constructor
                                 .events;
-                            if (!attrName || receiver == targetEl) {
-                                handler = events[elName][evtType];
-                            }
-                            else {
-                                let elementBlockNames = target.constructor
-                                    ._elementBlockNames;
-                                for (let elementBlockName of elementBlockNames) {
-                                    let handler = events[elName][`<${elementBlockName}>` + evtType];
-                                    if (handler &&
-                                        handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
-                                        return;
-                                    }
-                                }
-                                handler = events[elName]['<*>' + evtType];
-                            }
+                            let handler = events[elName][evtType];
                             if (handler &&
                                 handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
                                 return;
@@ -4050,7 +4042,7 @@ function handleEvent(evt) {
                         }
                     }
                     if (attrName) {
-                        handler = ownerComponent[receiver.getAttribute(attrName)];
+                        let handler = ownerComponent[receiver.getAttribute(attrName)];
                         if (handler &&
                             handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) ===
                                 false) {
@@ -4779,7 +4771,6 @@ const cellx_1 = __webpack_require__(6);
 const attachChildComponentElements_1 = __webpack_require__(44);
 const bindContent_1 = __webpack_require__(7);
 const componentBinding_1 = __webpack_require__(45);
-const componentConstructors_1 = __webpack_require__(26);
 const Constants_1 = __webpack_require__(15);
 const elementConstructors_1 = __webpack_require__(34);
 const ElementProtoMixin_1 = __webpack_require__(35);
@@ -4915,44 +4906,17 @@ class BaseComponent extends cellx_1.EventEmitter {
         return listening;
     }
     _listenTo(target, type, listener, context, useCapture) {
-        if (target instanceof BaseComponent && typeof type == 'string') {
-            if (type.charAt(0) == '<') {
-                let index = type.indexOf('>', 2);
-                let targetType = type.slice(1, index);
-                if (targetType != '*') {
-                    let targetConstr = componentConstructors_1.componentConstructors.get(targetType);
-                    if (!targetConstr) {
-                        throw new TypeError(`Component "${targetType}" is not defined`);
-                    }
-                    let inner = listener;
-                    listener = function (evt) {
-                        if (evt.target instanceof targetConstr) {
-                            return inner.call(this, evt);
-                        }
-                    };
-                }
-                type = type.slice(index + 1);
-            }
-            else if (type.indexOf(':') == -1) {
-                let inner = listener;
-                listener = function (evt) {
-                    if (evt.target == target) {
-                        return inner.call(this, evt);
-                    }
-                };
-            }
+        if (!target) {
+            throw TypeError('"target" is required');
         }
         if (target instanceof cellx_1.EventEmitter) {
             target.on(type, listener, context);
         }
-        else if (target.addEventListener) {
+        else {
             if (target !== context) {
                 listener = listener.bind(context);
             }
             target.addEventListener(type, listener, useCapture);
-        }
-        else {
-            throw new TypeError('Unable to add a listener');
         }
         let id = next_uid_1.nextUID();
         let stopListening = () => {
