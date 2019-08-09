@@ -462,7 +462,7 @@ export class RnRepeat extends BaseComponent {
 			return;
 		}
 
-		this._prevList = Array.isArray(list) ? list.slice() : list!.toArray();
+		this._prevList = list ? (Array.isArray(list) ? list.slice() : list!.toArray()) : [];
 
 		if (fromChangeEvent) {
 			Cell.release();

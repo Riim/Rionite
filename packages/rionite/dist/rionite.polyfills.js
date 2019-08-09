@@ -5919,7 +5919,7 @@ let RnRepeat = RnRepeat_1 = class RnRepeat extends BaseComponent_1.BaseComponent
         else if (!changed) {
             return;
         }
-        this._prevList = Array.isArray(list) ? list.slice() : list.toArray();
+        this._prevList = list ? (Array.isArray(list) ? list.slice() : list.toArray()) : [];
         if (fromChangeEvent) {
             cellx_1.Cell.release();
             this.emit(RnRepeat_1.EVENT_CHANGE);
