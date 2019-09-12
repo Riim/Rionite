@@ -171,7 +171,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	$inputContent: DocumentFragment | null = null;
 	$context: Record<string, any> | undefined;
-	$specifiedParams: ReadonlyMap<string, string>;
+	$specifiedParams: ReadonlySet<string>;
 
 	_bindings: Array<IBinding> | null;
 

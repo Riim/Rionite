@@ -43,11 +43,11 @@ export function bindContent(
 			case Node.ELEMENT_NODE: {
 				let childComponent = (child as IPossiblyComponentElement).rioniteComponent;
 				let $paramsConfig: Map<string, I$ComponentParamConfig> | null | undefined;
-				let $specifiedParams: Map<string, string> | undefined;
+				let $specifiedParams: Set<string> | undefined;
 
 				if (childComponent) {
 					$paramsConfig = childComponent.constructor[KEY_PARAMS_CONFIG];
-					$specifiedParams = new Map();
+					$specifiedParams = new Set();
 				}
 
 				let attrs = (child as Element).attributes;
@@ -74,7 +74,7 @@ export function bindContent(
 					let attrValue = attr.value;
 
 					if ($paramConfig) {
-						$specifiedParams!.set($paramConfig.name, attrValue);
+						$specifiedParams!.add($paramConfig.name);
 					}
 
 					if (!attrValue) {

@@ -9,7 +9,7 @@ function initParam(
 	component: BaseComponent,
 	$paramConfig: I$ComponentParamConfig | null,
 	name: string,
-	_$specifiedParams: Map<string, string> | null
+	$specifiedParams: Set<string> | null
 ) {
 	if ($paramConfig === null) {
 		return;
@@ -57,21 +57,7 @@ function initParam(
 
 	let el = component.element;
 	let snakeCaseName = snakeCaseAttributeName(name, true);
-	let rawValue: string | null | undefined;
-
-	// if ($specifiedParams) {
-	rawValue = el.getAttribute(snakeCaseName);
-
-	// 	if (rawValue !== null) {
-	// 		$specifiedParams.set(name, rawValue);
-	// 	}
-	// } else {
-	// 	rawValue = component.$specifiedParams.get(name);
-
-	// 	if (rawValue === undefined) {
-	// 		rawValue = null;
-	// 	}
-	// }
+	let rawValue = el.getAttribute(snakeCaseName);
 
 	if (rawValue === null) {
 		if ($paramConfig.required) {
@@ -81,6 +67,8 @@ function initParam(
 		if (defaultValue != null && defaultValue !== false && valueСonverters.toString) {
 			el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue)!);
 		}
+	} else if ($specifiedParams) {
+		$specifiedParams.add(name);
 	}
 
 	let value = valueСonverters.toData(rawValue, defaultValue, el);
@@ -98,12 +86,12 @@ export const ComponentParams = {
 			return;
 		}
 
-		let $specifiedParams: Map<string, string> | null;
+		let $specifiedParams: Set<string> | null;
 
 		if (component.$specifiedParams) {
 			$specifiedParams = null;
 		} else {
-			$specifiedParams = component.$specifiedParams = new Map();
+			$specifiedParams = component.$specifiedParams = new Set();
 		}
 
 		let paramsConfig = (component.constructor as typeof BaseComponent).params;

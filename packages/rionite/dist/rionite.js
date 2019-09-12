@@ -492,7 +492,7 @@ class Template {
         let attrs;
         let $specifiedParams;
         if (elComponentConstr) {
-            $specifiedParams = new Map();
+            $specifiedParams = new Set();
         }
         if (this._chr == '(') {
             attrs = this._readAttributes(elName || superElName, elComponentConstr && elComponentConstr[Constants_1.KEY_PARAMS_CONFIG], $specifiedParams);
@@ -724,7 +724,7 @@ class Template {
                         for (let i = 0, l = superElAttrList['length=']; i < l; i++) {
                             let attr = superElAttrList[i];
                             if (!attr.isTransformer && $paramsConfig.has(attr.name)) {
-                                $specifiedParams.set($paramsConfig.get(attr.name).name, attr.value);
+                                $specifiedParams.add($paramsConfig.get(attr.name).name);
                             }
                         }
                     }
@@ -811,7 +811,7 @@ class Template {
                     }
                 }
                 if ($paramsConfig && $paramsConfig.has(name)) {
-                    $specifiedParams.set($paramsConfig.get(name).name, value);
+                    $specifiedParams.add($paramsConfig.get(name).name);
                 }
             }
             switch (this._chr) {
@@ -1000,11 +1000,11 @@ class Template {
         return renderContent(document.createDocumentFragment(), block.content || block.elements['@root'].content, this, false, ownerComponent, context, result, parentComponent);
     }
 }
+exports.Template = Template;
 Template.elementTransformers = {
     section: el => el.content
 };
 Template.attributeTransformers = {};
-exports.Template = Template;
 function renderContent(targetNode, content, template, isSVG, ownerComponent, context, result, parentComponent) {
     if (content) {
         for (let node of content) {
@@ -1297,7 +1297,7 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                 let $specifiedParams;
                 if (childComponent) {
                     $paramsConfig = childComponent.constructor[Constants_1.KEY_PARAMS_CONFIG];
-                    $specifiedParams = new Map();
+                    $specifiedParams = new Set();
                 }
                 let attrs = child.attributes;
                 for (let i = attrs.length; i;) {
@@ -1317,7 +1317,7 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                     let $paramConfig = $paramsConfig && $paramsConfig.get(targetAttrName);
                     let attrValue = attr.value;
                     if ($paramConfig) {
-                        $specifiedParams.set($paramConfig.name, attrValue);
+                        $specifiedParams.add($paramConfig.name);
                     }
                     if (!attrValue) {
                         continue;
@@ -2731,7 +2731,7 @@ const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const componentParamValueConverters_1 = __webpack_require__(11);
 const Constants_1 = __webpack_require__(15);
 exports.KEY_COMPONENT_PARAMS_INITED = Symbol('componentParamsInited');
-function initParam(component, $paramConfig, name, _$specifiedParams) {
+function initParam(component, $paramConfig, name, $specifiedParams) {
     if ($paramConfig === null) {
         return;
     }
@@ -2769,18 +2769,7 @@ function initParam(component, $paramConfig, name, _$specifiedParams) {
     }
     let el = component.element;
     let snakeCaseName = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true);
-    let rawValue;
-    // if ($specifiedParams) {
-    rawValue = el.getAttribute(snakeCaseName);
-    // 	if (rawValue !== null) {
-    // 		$specifiedParams.set(name, rawValue);
-    // 	}
-    // } else {
-    // 	rawValue = component.$specifiedParams.get(name);
-    // 	if (rawValue === undefined) {
-    // 		rawValue = null;
-    // 	}
-    // }
+    let rawValue = el.getAttribute(snakeCaseName);
     if (rawValue === null) {
         if ($paramConfig.required) {
             throw new TypeError(`Parameter "${name}" is required`);
@@ -2788,6 +2777,9 @@ function initParam(component, $paramConfig, name, _$specifiedParams) {
         if (defaultValue != null && defaultValue !== false && valueСonverters.toString) {
             el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue));
         }
+    }
+    else if ($specifiedParams) {
+        $specifiedParams.add(name);
     }
     let value = valueСonverters.toData(rawValue, defaultValue, el);
     if (component[$paramConfig.property + 'Cell']) {
@@ -2807,7 +2799,7 @@ exports.ComponentParams = {
             $specifiedParams = null;
         }
         else {
-            $specifiedParams = component.$specifiedParams = new Map();
+            $specifiedParams = component.$specifiedParams = new Set();
         }
         let paramsConfig = component.constructor.params;
         if (paramsConfig) {
@@ -3490,6 +3482,7 @@ class BaseComponent extends cellx_1.EventEmitter {
         return container.getElementsByClassName(elementBlockNames[elementBlockNames.length - 1] + '__' + name);
     }
 }
+exports.BaseComponent = BaseComponent;
 BaseComponent.EVENT_CHANGE = 'change';
 BaseComponent.elementExtends = null;
 BaseComponent.params = null;
@@ -3497,7 +3490,6 @@ BaseComponent.i18n = null;
 BaseComponent.template = null;
 BaseComponent.events = null;
 BaseComponent.domEvents = null;
-exports.BaseComponent = BaseComponent;
 const handledEvents = [
     'change',
     'click',

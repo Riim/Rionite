@@ -75,7 +75,7 @@ export interface IElement extends INode {
 	is: string | null;
 	names: Array<string | null> | null;
 	attributes: IElementAttributes | null;
-	$specifiedParams: Map<string, string> | null;
+	$specifiedParams: Set<string> | null;
 	events: Map<string | symbol, string> | null;
 	domEvents: Map<string, string> | null;
 	content: TContent | null;
@@ -405,10 +405,10 @@ export class Template {
 		let elComponentConstr = componentConstructors.get(tagName);
 
 		let attrs: IElementAttributes | null | undefined;
-		let $specifiedParams: Map<string, string> | undefined;
+		let $specifiedParams: Set<string> | undefined;
 
 		if (elComponentConstr) {
-			$specifiedParams = new Map();
+			$specifiedParams = new Set();
 		}
 
 		if (this._chr == '(') {
@@ -684,7 +684,7 @@ export class Template {
 	_readAttributes(
 		superElName: string | null,
 		$paramsConfig?: Map<string, I$ComponentParamConfig> | null,
-		$specifiedParams?: Map<string, string>
+		$specifiedParams?: Set<string>
 	): IElementAttributes | null {
 		this._next('(');
 
@@ -713,10 +713,7 @@ export class Template {
 							let attr = superElAttrList[i];
 
 							if (!attr.isTransformer && $paramsConfig.has(attr.name)) {
-								$specifiedParams!.set(
-									$paramsConfig.get(attr.name)!.name,
-									attr.value
-								);
+								$specifiedParams!.add($paramsConfig.get(attr.name)!.name);
 							}
 						}
 					}
@@ -823,7 +820,7 @@ export class Template {
 				}
 
 				if ($paramsConfig && $paramsConfig.has(name)) {
-					$specifiedParams!.set($paramsConfig.get(name)!.name, value);
+					$specifiedParams!.add($paramsConfig.get(name)!.name);
 				}
 			}
 
