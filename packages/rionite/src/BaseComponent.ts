@@ -648,9 +648,27 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 		if (listenings) {
 			for (let listening of listenings) {
+				let target: TListeningTarget | string | Array<TListeningTarget>;
+
+				switch (listening.target) {
+					case '$parent':
+					case '@parent': {
+						target = this.parentComponent!;
+						break;
+					}
+					case '$element':
+					case '@element': {
+						target = this.element;
+						break;
+					}
+					default: {
+						target = listening.target;
+					}
+				}
+
 				try {
 					this.listenTo(
-						listening.target == '$element' ? this.element : listening.target,
+						target,
 						listening.type,
 						listening.listener,
 						this,

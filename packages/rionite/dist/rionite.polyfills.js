@@ -5207,8 +5207,24 @@ class BaseComponent extends cellx_1.EventEmitter {
         let listenings = this.constructor.listenings;
         if (listenings) {
             for (let listening of listenings) {
+                let target;
+                switch (listening.target) {
+                    case '$parent':
+                    case '@parent': {
+                        target = this.parentComponent;
+                        break;
+                    }
+                    case '$element':
+                    case '@element': {
+                        target = this.element;
+                        break;
+                    }
+                    default: {
+                        target = listening.target;
+                    }
+                }
                 try {
-                    this.listenTo(listening.target == '$element' ? this.element : listening.target, listening.type, listening.listener, this, listening.useCapture);
+                    this.listenTo(target, listening.type, listening.listener, this, listening.useCapture);
                 }
                 catch (err) {
                     config_1.config.logError(err);
