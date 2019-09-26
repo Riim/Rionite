@@ -52,7 +52,7 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
 export interface IComponentListening {
     target?: TListeningTarget | string | Array<TListeningTarget>;
     type: string | symbol;
-    listener: TListener;
+    listener: TListener | string;
     useCapture?: boolean;
 }
 export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (this: T, evt: U, context: Record<string, any>, receiver: Element) => any;

@@ -94,7 +94,7 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
 export interface IComponentListening {
 	target?: TListeningTarget | string | Array<TListeningTarget>;
 	type: string | symbol;
-	listener: TListener;
+	listener: TListener | string;
 	useCapture?: boolean;
 }
 
@@ -651,9 +651,18 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				let target: TListeningTarget | string | Array<TListeningTarget>;
 
 				switch (listening.target) {
+					case '$body': {
+						target = document.body;
+						break;
+					}
 					case '$self':
 					case '@self': {
 						target = this;
+						break;
+					}
+					case '$owner':
+					case '@owner': {
+						target = this.ownerComponent;
 						break;
 					}
 					case '$parent':
@@ -675,7 +684,9 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					this.listenTo(
 						target,
 						listening.type,
-						listening.listener,
+						typeof listening.listener == 'string'
+							? this[listening.listener]
+							: listening.listener,
 						this,
 						listening.useCapture
 					);

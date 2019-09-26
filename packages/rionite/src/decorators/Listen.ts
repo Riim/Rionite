@@ -8,12 +8,40 @@ export function Listen(
 		target?: TListeningTarget | string | Array<TListeningTarget>;
 		useCapture?: boolean;
 	}
+): any;
+export function Listen(
+	evtType: string | symbol,
+	target: TListeningTarget | string | Array<TListeningTarget>,
+	useCapture?: boolean
+): any;
+export function Listen(
+	evtType: string | symbol,
+	optionsOrTarget?:
+		| {
+				target?: TListeningTarget | string | Array<TListeningTarget>;
+				useCapture?: boolean;
+		  }
+		| TListeningTarget
+		| string
+		| Array<TListeningTarget>,
+	useCapture?: boolean
 ) {
 	return (
 		target: BaseComponent,
 		propertyName: string,
-		propertyDesc?: PropertyDescriptor
+		_propertyDesc?: PropertyDescriptor
 	): void => {
+		let options: {
+			target?: TListeningTarget | string | Array<TListeningTarget>;
+			useCapture?: boolean;
+		} | null =
+			optionsOrTarget &&
+			typeof optionsOrTarget == 'object' &&
+			!Array.isArray(optionsOrTarget) &&
+			Object.getPrototypeOf(optionsOrTarget) === Object.prototype
+				? (optionsOrTarget as any)
+				: null;
+
 		(hasOwn.call(target.constructor, 'listenings')
 			? (target.constructor as typeof BaseComponent).listenings ||
 			  ((target.constructor as typeof BaseComponent).listenings = [])
@@ -21,11 +49,10 @@ export function Listen(
 					(target.constructor as typeof BaseComponent).listenings || []
 			  ).slice())
 		).push({
-			target: options && options.target,
+			target: options ? options.target : (optionsOrTarget as any),
 			type: evtType,
-			listener: (propertyDesc || Object.getOwnPropertyDescriptor(target, propertyName)!)
-				.value,
-			useCapture: options && options.useCapture
+			listener: propertyName,
+			useCapture: options ? options.useCapture : useCapture
 		});
 	};
 }

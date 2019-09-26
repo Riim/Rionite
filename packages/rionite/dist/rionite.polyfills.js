@@ -4822,17 +4822,22 @@ exports.Param = Param;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const hasOwn = Object.prototype.hasOwnProperty;
-function Listen(evtType, options) {
-    return (target, propertyName, propertyDesc) => {
+function Listen(evtType, optionsOrTarget, useCapture) {
+    return (target, propertyName, _propertyDesc) => {
+        let options = optionsOrTarget &&
+            typeof optionsOrTarget == 'object' &&
+            !Array.isArray(optionsOrTarget) &&
+            Object.getPrototypeOf(optionsOrTarget) === Object.prototype
+            ? optionsOrTarget
+            : null;
         (hasOwn.call(target.constructor, 'listenings')
             ? target.constructor.listenings ||
                 (target.constructor.listenings = [])
             : (target.constructor.listenings = (target.constructor.listenings || []).slice())).push({
-            target: options && options.target,
+            target: options ? options.target : optionsOrTarget,
             type: evtType,
-            listener: (propertyDesc || Object.getOwnPropertyDescriptor(target, propertyName))
-                .value,
-            useCapture: options && options.useCapture
+            listener: propertyName,
+            useCapture: options ? options.useCapture : useCapture
         });
     };
 }
@@ -5209,9 +5214,18 @@ class BaseComponent extends cellx_1.EventEmitter {
             for (let listening of listenings) {
                 let target;
                 switch (listening.target) {
+                    case '$body': {
+                        target = document.body;
+                        break;
+                    }
                     case '$self':
                     case '@self': {
                         target = this;
+                        break;
+                    }
+                    case '$owner':
+                    case '@owner': {
+                        target = this.ownerComponent;
                         break;
                     }
                     case '$parent':
@@ -5229,7 +5243,9 @@ class BaseComponent extends cellx_1.EventEmitter {
                     }
                 }
                 try {
-                    this.listenTo(target, listening.type, listening.listener, this, listening.useCapture);
+                    this.listenTo(target, listening.type, typeof listening.listener == 'string'
+                        ? this[listening.listener]
+                        : listening.listener, this, listening.useCapture);
                 }
                 catch (err) {
                     config_1.config.logError(err);
