@@ -38,7 +38,7 @@ export const formatters: Record<string, Function> = {
 		return value1 == value2;
 	},
 
-	identical(value1: any, value2: any): boolean {
+	seq(value1: any, value2: any): boolean {
 		return value1 === value2;
 	},
 
@@ -102,7 +102,10 @@ export const formatters: Record<string, Function> = {
 
 	pt(msgid: string, msgctxt: string, ...args: Array<any>): string {
 		return config.getText(msgctxt, msgid, args);
+	},
+
+	log(msg: any, ...optionalParams: Array<any>) {
+		console.log(msg, ...optionalParams);
+		return msg;
 	}
 };
-
-formatters.seq = formatters.identical;

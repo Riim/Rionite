@@ -46,9 +46,10 @@ export declare class TemplateNodeValueParser {
     _readBoolean(): string | null;
     _readNumber(): string | null;
     _readString(): string | null;
+    _readRegExp(): string | null;
     _readVacuum(): string | null;
     _readKeypath(toJSExpression?: boolean): string | null;
     _readName(): string | null;
     _skipWhitespaces(): string;
-    _next(current?: string): string;
+    _next(): string;
 }

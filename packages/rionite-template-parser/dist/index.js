@@ -22,11 +22,11 @@ const escapee = new Map([
 ]);
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
-const reWhitespaces = /\s+|/g;
-const reTagName = /[a-zA-Z][\-\w]*|/g;
-const reElementName = /[a-zA-Z][\-\w]*|/g;
-const reAttributeName = /[^\s'">/=,)]+|/g;
-const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
+const reWhitespaces = /\s+/gy;
+const reTagName = /[a-zA-Z][\-\w]*/gy;
+const reElementName = /[a-zA-Z][\-\w]*/gy;
+const reAttributeName = /[^\s'">/=,)]+/gy;
+const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
 const reTrimStartLine = /^[ \t]+/gm;
 const reTrimEndLine = /[ \t]+$/gm;
 function normalizeMultilineText(text) {
@@ -52,7 +52,7 @@ class TemplateParser {
     }
     _readContent(brackets) {
         if (brackets) {
-            this._next('{');
+            this._next( /* '{' */);
             this._skipWhitespaces();
         }
         let content = [];
@@ -169,7 +169,7 @@ class TemplateParser {
         });
     }
     _readAttributes(targetContent) {
-        this._next('(');
+        this._next( /* '(' */);
         if (this._skipWhitespacesAndReadComments(targetContent) == ')') {
             this._next();
             return {
@@ -268,7 +268,7 @@ class TemplateParser {
         let pos = this._pos;
         reSuperCall.lastIndex = pos;
         let match = reSuperCall.exec(this.template);
-        if (match[0]) {
+        if (match) {
             this._chr = this.template.charAt((this._pos = reSuperCall.lastIndex));
             return {
                 nodeType: NodeType.SUPER_CALL,
@@ -281,18 +281,18 @@ class TemplateParser {
     }
     _readName(reName) {
         reName.lastIndex = this._pos;
-        let name = reName.exec(this.template)[0];
-        if (name) {
+        let match = reName.exec(this.template);
+        if (match) {
             this._chr = this.template.charAt((this._pos = reName.lastIndex));
-            return name;
+            return match[0];
         }
         return null;
     }
     _readString() {
         let quoteChar = this._chr;
-        if (quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
-            this._throwError('Expected string');
-        }
+        // if (quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
+        // 	this._throwError('Expected string');
+        // }
         let str = '';
         for (let chr = this._next(); chr;) {
             if (chr == quoteChar) {
@@ -334,7 +334,7 @@ class TemplateParser {
         let pos = this._pos;
         let value = '';
         let multiline;
-        switch (this._next('/')) {
+        switch (this._next( /* '/' */)) {
             case '/': {
                 for (let chr; (chr = this._next()) && chr != '\n' && chr != '\r';) {
                     value += chr;
@@ -382,9 +382,9 @@ class TemplateParser {
     }
     _skipWhitespaces() {
         reWhitespaces.lastIndex = this._pos;
-        let whitespaces = reWhitespaces.exec(this.template)[0];
-        if (whitespaces) {
-            this._line += whitespaces.split(reLineBreak).length - 1;
+        let match = reWhitespaces.exec(this.template);
+        if (match) {
+            this._line += match[0].split(reLineBreak).length - 1;
             return (this._chr = this.template.charAt((this._pos = reWhitespaces.lastIndex)));
         }
         return this._chr;
@@ -401,10 +401,10 @@ class TemplateParser {
         }
         return this._chr;
     }
-    _next(current) {
-        if (current && current != this._chr) {
-            this._throwError(`Expected "${current}" instead of "${this._chr}"`);
-        }
+    _next( /* current?: string */) {
+        // if (current && current != this._chr) {
+        // 	this._throwError(`Expected "${current}" instead of "${this._chr}"`);
+        // }
         return (this._chr = this.template.charAt(++this._pos));
     }
     _throwError(msg, pos = this._pos) {

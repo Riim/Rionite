@@ -68,11 +68,12 @@ export type TTemplateNodeValue = Array<ITemplateNodeValueText | ITemplateNodeVal
 
 const reWhitespace = /\s/;
 
-const reName = RegExp(namePattern + '|', 'g');
-const reKeypath = RegExp(keypathPattern + '|', 'g');
-const reBoolean = /false|true|/g;
-const reNumber = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
-const reVacuum = /null|undefined|void 0|/g;
+const reName = RegExp(namePattern, 'gy');
+const reKeypath = RegExp(keypathPattern, 'gy');
+const reBoolean = /false|true/gy;
+const reNumber = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)/gy;
+const reRegExpModifiers = /[gimyu]+/gy;
+const reVacuum = /null|undefined|void 0/gy;
 
 export class TemplateNodeValueParser {
 	templateNodeValue: string;
@@ -105,7 +106,7 @@ export class TemplateNodeValueParser {
 				result.push(binding);
 			} else {
 				this._pushText(this._chr);
-				this._next('{');
+				this._next();
 			}
 
 			index = templateNodeValue.indexOf('{', this._pos);
@@ -135,7 +136,7 @@ export class TemplateNodeValueParser {
 	_readBinding(): ITemplateNodeValueBinding | null {
 		let pos = this._pos;
 
-		this._next('{');
+		this._next(/* '{' */);
 		this._skipWhitespaces();
 
 		let prefix = this._readPrefix();
@@ -211,7 +212,7 @@ export class TemplateNodeValueParser {
 	_readFormatter(): ITemplateNodeValueBindingFormatter | null {
 		let pos = this._pos;
 
-		this._next('|');
+		this._next(/* '|' */);
 		this._skipWhitespaces();
 
 		let name = this._readName();
@@ -233,7 +234,7 @@ export class TemplateNodeValueParser {
 	_readFormatterArguments(): Array<string> | null {
 		let pos = this._pos;
 
-		this._next('(');
+		this._next(/* '(' */);
 
 		let args: Array<string> | undefined;
 
@@ -276,6 +277,9 @@ export class TemplateNodeValueParser {
 			case '"': {
 				return this._readString();
 			}
+			case '/': {
+				return this._readRegExp();
+			}
 		}
 
 		let readers = ['_readBoolean', '_readNumber', '_readVacuum'];
@@ -294,7 +298,7 @@ export class TemplateNodeValueParser {
 	_readObject(): string | null {
 		let pos = this._pos;
 
-		this._next('{');
+		this._next(/* '{' */);
 
 		let obj = '{';
 
@@ -338,7 +342,7 @@ export class TemplateNodeValueParser {
 	_readArray(): string | null {
 		let pos = this._pos;
 
-		this._next('[');
+		this._next(/* '[' */);
 
 		let arr = '[';
 
@@ -367,11 +371,11 @@ export class TemplateNodeValueParser {
 
 	_readBoolean(): string | null {
 		reBoolean.lastIndex = this._pos;
-		let bool = reBoolean.exec(this.templateNodeValue)![0];
+		let match = reBoolean.exec(this.templateNodeValue);
 
-		if (bool) {
+		if (match) {
 			this._chr = this.templateNodeValue.charAt((this._pos = reBoolean.lastIndex));
-			return bool;
+			return match[0];
 		}
 
 		return null;
@@ -379,32 +383,22 @@ export class TemplateNodeValueParser {
 
 	_readNumber(): string | null {
 		reNumber.lastIndex = this._pos;
-		let num = reNumber.exec(this.templateNodeValue)![0];
+		let match = reNumber.exec(this.templateNodeValue);
 
-		if (num) {
+		if (match) {
 			this._chr = this.templateNodeValue.charAt((this._pos = reNumber.lastIndex));
-			return num;
+			return match[0];
 		}
 
 		return null;
 	}
 
 	_readString(): string | null {
-		let quoteChar = this._chr;
-
-		if (quoteChar != "'" && quoteChar != '"') {
-			throw {
-				name: 'SyntaxError',
-				message: `Expected "'" instead of "${this._chr}"`,
-				pos: this._pos,
-				templateNodeValue: this.templateNodeValue
-			};
-		}
-
 		let pos = this._pos;
+		let quoteChar = this._chr;
 		let str = '';
 
-		for (let next; (next = this._next()); ) {
+		for (let next /* = this._next(quoteChar == '"' ? null : "'") */; (next = this._next()); ) {
 			if (next == quoteChar) {
 				this._next();
 				return quoteChar + str + quoteChar;
@@ -427,13 +421,58 @@ export class TemplateNodeValueParser {
 		return null;
 	}
 
+	_readRegExp(): string | null {
+		let pos = this._pos;
+		let next = this._next(/* '/' */);
+		let regex = '';
+
+		while (next) {
+			if (next == '/') {
+				if (!regex) {
+					break;
+				}
+
+				this._next();
+
+				reRegExpModifiers.lastIndex = this._pos;
+				let match = reRegExpModifiers.exec(this.templateNodeValue);
+
+				if (match) {
+					this._chr = this.templateNodeValue.charAt(
+						(this._pos = reRegExpModifiers.lastIndex)
+					);
+					return '/' + regex + '/' + match[0];
+				}
+
+				return '/' + regex + '/';
+			}
+
+			if (next == '\\') {
+				regex += next + this._next();
+			} else {
+				if (next == '\n' || next == '\r') {
+					break;
+				}
+
+				regex += next;
+			}
+
+			next = this._next();
+		}
+
+		this._pos = pos;
+		this._chr = this.templateNodeValue.charAt(pos);
+
+		return null;
+	}
+
 	_readVacuum(): string | null {
 		reVacuum.lastIndex = this._pos;
-		let vacuum = reVacuum.exec(this.templateNodeValue)![0];
+		let match = reVacuum.exec(this.templateNodeValue);
 
-		if (vacuum) {
+		if (match) {
 			this._chr = this.templateNodeValue.charAt((this._pos = reVacuum.lastIndex));
-			return vacuum;
+			return match[0];
 		}
 
 		return null;
@@ -441,11 +480,11 @@ export class TemplateNodeValueParser {
 
 	_readKeypath(toJSExpression?: boolean): string | null {
 		reKeypath.lastIndex = this._pos;
-		let keypath = reKeypath.exec(this.templateNodeValue)![0];
+		let match = reKeypath.exec(this.templateNodeValue);
 
-		if (keypath) {
+		if (match) {
 			this._chr = this.templateNodeValue.charAt((this._pos = reKeypath.lastIndex));
-			return toJSExpression ? keypathToJSExpression(keypath) : keypath;
+			return toJSExpression ? keypathToJSExpression(match[0]) : match[0];
 		}
 
 		return null;
@@ -453,11 +492,11 @@ export class TemplateNodeValueParser {
 
 	_readName(): string | null {
 		reName.lastIndex = this._pos;
-		let name = reName.exec(this.templateNodeValue)![0];
+		let match = reName.exec(this.templateNodeValue);
 
-		if (name) {
+		if (match) {
 			this._chr = this.templateNodeValue.charAt((this._pos = reName.lastIndex));
-			return name;
+			return match[0];
 		}
 
 		return null;
@@ -473,15 +512,15 @@ export class TemplateNodeValueParser {
 		return chr;
 	}
 
-	_next(current?: string): string {
-		if (current && current != this._chr) {
-			throw {
-				name: 'SyntaxError',
-				message: `Expected "${current}" instead of "${this._chr}"`,
-				pos: this._pos,
-				templateNodeValue: this.templateNodeValue
-			};
-		}
+	_next(/* current?: string | null */): string {
+		// if (current != null && current != this._chr) {
+		// 	throw {
+		// 		name: 'SyntaxError',
+		// 		message: `Expected "${current}" instead of "${this._chr}"`,
+		// 		pos: this._pos,
+		// 		templateNodeValue: this.templateNodeValue
+		// 	};
+		// }
 
 		return (this._chr = this.templateNodeValue.charAt(++this._pos));
 	}

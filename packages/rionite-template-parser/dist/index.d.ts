@@ -68,6 +68,6 @@ export declare class TemplateParser {
     _readComment(targetContent: TContent): void;
     _skipWhitespaces(): string;
     _skipWhitespacesAndReadComments(targetContent: TContent): string;
-    _next(current?: string): string;
+    _next(): string;
     _throwError(msg: string, pos?: number): void;
 }

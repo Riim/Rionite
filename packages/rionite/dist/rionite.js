@@ -294,10 +294,10 @@ const escapee = new Map([
     ['t', '\t']
 ]);
 const reWhitespace = /\s/;
-const reTagName = /[a-zA-Z][\-\w]*|/g;
-const reElementName = /[a-zA-Z][\-\w]*|/g;
-const reAttributeName = /[^\s'">/=,)]+|/g;
-const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
+const reTagName = /[a-zA-Z][\-\w]*/gy;
+const reElementName = /[a-zA-Z][\-\w]*/gy;
+const reAttributeName = /[^\s'">/=,)]+/gy;
+const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
 const reTrimStartLine = /^[ \t]+/gm;
 const reTrimEndLine = /[ \t]+$/gm;
 function normalizeMultilineText(text) {
@@ -398,7 +398,7 @@ class Template {
     }
     _readContent(content, superElName, brackets, componentConstr) {
         if (brackets) {
-            this._next('{');
+            this._next( /* '{' */);
             this._skipWhitespacesAndComments();
         }
         for (;;) {
@@ -705,7 +705,7 @@ class Template {
         return targetContent;
     }
     _readAttributes(superElName, $paramsConfig, $specifiedParams) {
-        this._next('(');
+        this._next( /* '(' */);
         if (this._skipWhitespacesAndComments() == ')') {
             this._next();
             return null;
@@ -839,7 +839,7 @@ class Template {
     _readSuperCall(defaultElName) {
         reSuperCall.lastIndex = this._pos;
         let match = reSuperCall.exec(this.template);
-        if (match[0]) {
+        if (match) {
             if (!this.parent) {
                 this._throwError('SuperCall is impossible if no parent is defined');
             }
@@ -862,16 +862,16 @@ class Template {
     }
     _readName(reName) {
         reName.lastIndex = this._pos;
-        let name = reName.exec(this.template)[0];
-        if (name) {
+        let match = reName.exec(this.template);
+        if (match) {
             this._chr = this.template.charAt((this._pos = reName.lastIndex));
-            return name;
+            return match[0];
         }
         return null;
     }
     _readString() {
         let quoteChar = this._chr;
-        // if (process.env.DEBUG && quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
+        // if (quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
         // 	this._throwError('Expected string');
         // }
         let str = '';
@@ -957,10 +957,10 @@ class Template {
         }
         return chr;
     }
-    _next(current) {
-        if (current && current != this._chr) {
-            this._throwError(`Expected "${current}" instead of "${this._chr}"`);
-        }
+    _next( /* current?: string */) {
+        // if (current && current != this._chr) {
+        // 	this._throwError(`Expected "${current}" instead of "${this._chr}"`);
+        // }
         return (this._chr = this.template.charAt(++this._pos));
     }
     _throwError(msg, pos = this._pos) {
@@ -1718,7 +1718,7 @@ exports.formatters = {
     eq(value1, value2) {
         return value1 == value2;
     },
-    identical(value1, value2) {
+    seq(value1, value2) {
         return value1 === value2;
     },
     lt(value1, value2) {
@@ -1762,9 +1762,12 @@ exports.formatters = {
     },
     pt(msgid, msgctxt, ...args) {
         return config_1.config.getText(msgctxt, msgid, args);
+    },
+    log(msg, ...optionalParams) {
+        console.log(msg, ...optionalParams);
+        return msg;
     }
 };
-exports.formatters.seq = exports.formatters.identical;
 
 
 /***/ }),
@@ -1802,11 +1805,12 @@ var TemplateNodeValueNodeType;
     TemplateNodeValueNodeType[TemplateNodeValueNodeType["BINDING_FORMATTER"] = 4] = "BINDING_FORMATTER";
 })(TemplateNodeValueNodeType = exports.TemplateNodeValueNodeType || (exports.TemplateNodeValueNodeType = {}));
 const reWhitespace = /\s/;
-const reName = RegExp(namePattern_1.namePattern + '|', 'g');
-const reKeypath = RegExp(keypathPattern_1.keypathPattern + '|', 'g');
-const reBoolean = /false|true|/g;
-const reNumber = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)|/g;
-const reVacuum = /null|undefined|void 0|/g;
+const reName = RegExp(namePattern_1.namePattern, 'gy');
+const reKeypath = RegExp(keypathPattern_1.keypathPattern, 'gy');
+const reBoolean = /false|true/gy;
+const reNumber = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)/gy;
+const reRegExpModifiers = /[gimyu]+/gy;
+const reVacuum = /null|undefined|void 0/gy;
 class TemplateNodeValueParser {
     constructor(templateNodeValue) {
         this.templateNodeValue = templateNodeValue;
@@ -1825,7 +1829,7 @@ class TemplateNodeValueParser {
             }
             else {
                 this._pushText(this._chr);
-                this._next('{');
+                this._next();
             }
             index = templateNodeValue.indexOf('{', this._pos);
         } while (index != -1);
@@ -1849,7 +1853,7 @@ class TemplateNodeValueParser {
     }
     _readBinding() {
         let pos = this._pos;
-        this._next('{');
+        this._next( /* '{' */);
         this._skipWhitespaces();
         let prefix = this._readPrefix();
         this._skipWhitespaces();
@@ -1904,7 +1908,7 @@ class TemplateNodeValueParser {
     }
     _readFormatter() {
         let pos = this._pos;
-        this._next('|');
+        this._next( /* '|' */);
         this._skipWhitespaces();
         let name = this._readName();
         if (name) {
@@ -1920,7 +1924,7 @@ class TemplateNodeValueParser {
     }
     _readFormatterArguments() {
         let pos = this._pos;
-        this._next('(');
+        this._next( /* '(' */);
         let args;
         if (this._skipWhitespaces() != ')') {
             for (;;) {
@@ -1953,6 +1957,9 @@ class TemplateNodeValueParser {
             case '"': {
                 return this._readString();
             }
+            case '/': {
+                return this._readRegExp();
+            }
         }
         let readers = ['_readBoolean', '_readNumber', '_readVacuum'];
         for (let reader of readers) {
@@ -1965,7 +1972,7 @@ class TemplateNodeValueParser {
     }
     _readObject() {
         let pos = this._pos;
-        this._next('{');
+        this._next( /* '{' */);
         let obj = '{';
         while (this._skipWhitespaces() != '}') {
             let key = this._chr == "'" || this._chr == '"' ? this._readString() : this._readObjectKey();
@@ -1997,7 +2004,7 @@ class TemplateNodeValueParser {
     }
     _readArray() {
         let pos = this._pos;
-        this._next('[');
+        this._next( /* '[' */);
         let arr = '[';
         while (this._skipWhitespaces() != ']') {
             if (this._chr == ',') {
@@ -2021,35 +2028,27 @@ class TemplateNodeValueParser {
     }
     _readBoolean() {
         reBoolean.lastIndex = this._pos;
-        let bool = reBoolean.exec(this.templateNodeValue)[0];
-        if (bool) {
+        let match = reBoolean.exec(this.templateNodeValue);
+        if (match) {
             this._chr = this.templateNodeValue.charAt((this._pos = reBoolean.lastIndex));
-            return bool;
+            return match[0];
         }
         return null;
     }
     _readNumber() {
         reNumber.lastIndex = this._pos;
-        let num = reNumber.exec(this.templateNodeValue)[0];
-        if (num) {
+        let match = reNumber.exec(this.templateNodeValue);
+        if (match) {
             this._chr = this.templateNodeValue.charAt((this._pos = reNumber.lastIndex));
-            return num;
+            return match[0];
         }
         return null;
     }
     _readString() {
-        let quoteChar = this._chr;
-        if (quoteChar != "'" && quoteChar != '"') {
-            throw {
-                name: 'SyntaxError',
-                message: `Expected "'" instead of "${this._chr}"`,
-                pos: this._pos,
-                templateNodeValue: this.templateNodeValue
-            };
-        }
         let pos = this._pos;
+        let quoteChar = this._chr;
         let str = '';
-        for (let next; (next = this._next());) {
+        for (let next /* = this._next(quoteChar == '"' ? null : "'") */; (next = this._next());) {
             if (next == quoteChar) {
                 this._next();
                 return quoteChar + str + quoteChar;
@@ -2068,30 +2067,63 @@ class TemplateNodeValueParser {
         this._chr = this.templateNodeValue.charAt(pos);
         return null;
     }
+    _readRegExp() {
+        let pos = this._pos;
+        let next = this._next( /* '/' */);
+        let regex = '';
+        while (next) {
+            if (next == '/') {
+                if (!regex) {
+                    break;
+                }
+                this._next();
+                reRegExpModifiers.lastIndex = this._pos;
+                let match = reRegExpModifiers.exec(this.templateNodeValue);
+                if (match) {
+                    this._chr = this.templateNodeValue.charAt((this._pos = reRegExpModifiers.lastIndex));
+                    return '/' + regex + '/' + match[0];
+                }
+                return '/' + regex + '/';
+            }
+            if (next == '\\') {
+                regex += next + this._next();
+            }
+            else {
+                if (next == '\n' || next == '\r') {
+                    break;
+                }
+                regex += next;
+            }
+            next = this._next();
+        }
+        this._pos = pos;
+        this._chr = this.templateNodeValue.charAt(pos);
+        return null;
+    }
     _readVacuum() {
         reVacuum.lastIndex = this._pos;
-        let vacuum = reVacuum.exec(this.templateNodeValue)[0];
-        if (vacuum) {
+        let match = reVacuum.exec(this.templateNodeValue);
+        if (match) {
             this._chr = this.templateNodeValue.charAt((this._pos = reVacuum.lastIndex));
-            return vacuum;
+            return match[0];
         }
         return null;
     }
     _readKeypath(toJSExpression) {
         reKeypath.lastIndex = this._pos;
-        let keypath = reKeypath.exec(this.templateNodeValue)[0];
-        if (keypath) {
+        let match = reKeypath.exec(this.templateNodeValue);
+        if (match) {
             this._chr = this.templateNodeValue.charAt((this._pos = reKeypath.lastIndex));
-            return toJSExpression ? keypathToJSExpression_1.keypathToJSExpression(keypath) : keypath;
+            return toJSExpression ? keypathToJSExpression_1.keypathToJSExpression(match[0]) : match[0];
         }
         return null;
     }
     _readName() {
         reName.lastIndex = this._pos;
-        let name = reName.exec(this.templateNodeValue)[0];
-        if (name) {
+        let match = reName.exec(this.templateNodeValue);
+        if (match) {
             this._chr = this.templateNodeValue.charAt((this._pos = reName.lastIndex));
-            return name;
+            return match[0];
         }
         return null;
     }
@@ -2102,15 +2134,15 @@ class TemplateNodeValueParser {
         }
         return chr;
     }
-    _next(current) {
-        if (current && current != this._chr) {
-            throw {
-                name: 'SyntaxError',
-                message: `Expected "${current}" instead of "${this._chr}"`,
-                pos: this._pos,
-                templateNodeValue: this.templateNodeValue
-            };
-        }
+    _next( /* current?: string | null */) {
+        // if (current != null && current != this._chr) {
+        // 	throw {
+        // 		name: 'SyntaxError',
+        // 		message: `Expected "${current}" instead of "${this._chr}"`,
+        // 		pos: this._pos,
+        // 		templateNodeValue: this.templateNodeValue
+        // 	};
+        // }
         return (this._chr = this.templateNodeValue.charAt(++this._pos));
     }
 }

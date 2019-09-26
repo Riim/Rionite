@@ -90,7 +90,7 @@ export declare class Template {
     _readString(): string;
     _skipWhitespaces(): string;
     _skipWhitespacesAndComments(): string;
-    _next(current?: string): string;
+    _next(): string;
     _throwError(msg: string, pos?: number): void;
     extend(template: string | IBlock, options?: {
         blockName?: string;

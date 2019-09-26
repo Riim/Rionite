@@ -109,10 +109,10 @@ const escapee = new Map([
 
 const reWhitespace = /\s/;
 
-const reTagName = /[a-zA-Z][\-\w]*|/g;
-const reElementName = /[a-zA-Z][\-\w]*|/g;
-const reAttributeName = /[^\s'">/=,)]+|/g;
-const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!|/g;
+const reTagName = /[a-zA-Z][\-\w]*/gy;
+const reElementName = /[a-zA-Z][\-\w]*/gy;
+const reAttributeName = /[^\s'">/=,)]+/gy;
+const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
 
 const reTrimStartLine = /^[ \t]+/gm;
 const reTrimEndLine = /[ \t]+$/gm;
@@ -277,7 +277,7 @@ export class Template {
 		componentConstr?: typeof BaseComponent | null
 	): TContent | null {
 		if (brackets) {
-			this._next('{');
+			this._next(/* '{' */);
 			this._skipWhitespacesAndComments();
 		}
 
@@ -686,7 +686,7 @@ export class Template {
 		$paramsConfig?: Map<string, I$ComponentParamConfig> | null,
 		$specifiedParams?: Set<string>
 	): IElementAttributes | null {
-		this._next('(');
+		this._next(/* '(' */);
 
 		if (this._skipWhitespacesAndComments() == ')') {
 			this._next();
@@ -852,9 +852,9 @@ export class Template {
 
 	_readSuperCall(defaultElName: string | null): ISuperCall | null {
 		reSuperCall.lastIndex = this._pos;
-		let match = reSuperCall.exec(this.template)!;
+		let match = reSuperCall.exec(this.template);
 
-		if (match[0]) {
+		if (match) {
 			if (!this.parent) {
 				this._throwError('SuperCall is impossible if no parent is defined');
 			}
@@ -885,11 +885,11 @@ export class Template {
 
 	_readName(reName: RegExp): string | null {
 		reName.lastIndex = this._pos;
-		let name = reName.exec(this.template)![0];
+		let match = reName.exec(this.template);
 
-		if (name) {
+		if (match) {
 			this._chr = this.template.charAt((this._pos = reName.lastIndex));
-			return name;
+			return match[0];
 		}
 
 		return null;
@@ -898,7 +898,7 @@ export class Template {
 	_readString(): string {
 		let quoteChar = this._chr;
 
-		// if (process.env.DEBUG && quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
+		// if (quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
 		// 	this._throwError('Expected string');
 		// }
 
@@ -1006,10 +1006,10 @@ export class Template {
 		return chr;
 	}
 
-	_next(current?: string): string {
-		if (current && current != this._chr) {
-			this._throwError(`Expected "${current}" instead of "${this._chr}"`);
-		}
+	_next(/* current?: string */): string {
+		// if (current && current != this._chr) {
+		// 	this._throwError(`Expected "${current}" instead of "${this._chr}"`);
+		// }
 
 		return (this._chr = this.template.charAt(++this._pos));
 	}
