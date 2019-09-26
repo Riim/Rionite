@@ -115,6 +115,10 @@ var Constants_1 = __webpack_require__(15);
 exports.KEY_PARAMS_CONFIG = Constants_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAM_VALUES = Constants_1.KEY_PARAM_VALUES;
 var BaseComponent_1 = __webpack_require__(41);
+exports.onReady = BaseComponent_1.onReady;
+exports.onElementAttached = BaseComponent_1.onElementAttached;
+exports.onElementDetached = BaseComponent_1.onElementDetached;
+exports.onElementMoved = BaseComponent_1.onElementMoved;
 exports.BaseComponent = BaseComponent_1.BaseComponent;
 var ElementProtoMixin_1 = __webpack_require__(35);
 exports.KEY_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_ELEMENT_CONNECTED;
@@ -1733,6 +1737,9 @@ exports.formatters = {
     gte(value1, value2) {
         return value1 >= value2;
     },
+    replace(str, searchValue, replaceValue) {
+        return str && str.replace(searchValue, replaceValue);
+    },
     has(target, key) {
         return !!target && target.has(key);
     },
@@ -1778,6 +1785,9 @@ exports.formatters = {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = {
+    logError: (...args) => {
+        console.error(...args);
+    },
     getText: ((_msgctxt, msgid) => msgid)
 };
 function configure(options) {
@@ -2907,6 +2917,7 @@ exports.elementConstructors = new Map([
 Object.defineProperty(exports, "__esModule", { value: true });
 const defer_1 = __webpack_require__(36);
 const ComponentParams_1 = __webpack_require__(33);
+const config_1 = __webpack_require__(17);
 const Constants_1 = __webpack_require__(15);
 const observedAttributesFeature_1 = __webpack_require__(39);
 // export const KEY_IS_COMPONENT_ELEMENT = Symbol('isComponentElement');
@@ -2939,7 +2950,22 @@ exports.ElementProtoMixin = {
             if (component._attached) {
                 if (component._parentComponent === null) {
                     component._parentComponent = undefined;
-                    component.elementMoved();
+                    try {
+                        component.elementMoved();
+                    }
+                    catch (err) {
+                        config_1.config.logError(err);
+                    }
+                    if (component._onElementMovedHooks) {
+                        for (let onElementMovedHook of component._onElementMovedHooks) {
+                            try {
+                                onElementMovedHook.call(component);
+                            }
+                            catch (err) {
+                                config_1.config.logError(err);
+                            }
+                        }
+                    }
                 }
             }
             else {
@@ -3139,6 +3165,7 @@ const cellx_1 = __webpack_require__(6);
 const attachChildComponentElements_1 = __webpack_require__(44);
 const bindContent_1 = __webpack_require__(7);
 const componentBinding_1 = __webpack_require__(45);
+const config_1 = __webpack_require__(17);
 const Constants_1 = __webpack_require__(15);
 const elementConstructors_1 = __webpack_require__(34);
 const ElementProtoMixin_1 = __webpack_require__(35);
@@ -3149,6 +3176,25 @@ const normalizeTextNodes_1 = __webpack_require__(47);
 const Template_1 = __webpack_require__(3);
 const hasOwn = Object.prototype.hasOwnProperty;
 const map = Array.prototype.map;
+let currentComponent = null;
+function onReady(cb) {
+    (currentComponent._onReadyHooks || (currentComponent._onReadyHooks = [])).push(cb);
+}
+exports.onReady = onReady;
+function onElementAttached(cb) {
+    (currentComponent._onElementAttachedHooks ||
+        (currentComponent._onElementAttachedHooks = [])).push(cb);
+}
+exports.onElementAttached = onElementAttached;
+function onElementDetached(cb) {
+    (currentComponent._onElementDetachedHooks ||
+        (currentComponent._onElementDetachedHooks = [])).push(cb);
+}
+exports.onElementDetached = onElementDetached;
+function onElementMoved(cb) {
+    (currentComponent._onElementMovedHooks || (currentComponent._onElementMovedHooks = [])).push(cb);
+}
+exports.onElementMoved = onElementMoved;
 class BaseComponent extends cellx_1.EventEmitter {
     constructor(el) {
         super();
@@ -3158,6 +3204,7 @@ class BaseComponent extends cellx_1.EventEmitter {
         this._attached = false;
         this.initialized = false;
         this.isReady = false;
+        currentComponent = this;
         this[Constants_1.KEY_COMPONENT_SELF] = this;
         let constr = this.constructor;
         if (!elementConstructors_1.elementConstructors.has(constr.elementIs)) {
@@ -3362,11 +3409,21 @@ class BaseComponent extends cellx_1.EventEmitter {
     _attach() {
         this._attached = true;
         if (!this.initialized) {
-            let initializationResult = this.initialize();
+            currentComponent = this;
+            let initializationResult;
+            try {
+                initializationResult = this.initialize();
+            }
+            catch (err) {
+                config_1.config.logError(err);
+                return;
+            }
             if (initializationResult) {
                 initializationResult.then(() => {
                     this.initialized = true;
                     this._attach();
+                }, err => {
+                    config_1.config.logError(err);
                 });
                 return;
             }
@@ -3441,14 +3498,59 @@ class BaseComponent extends cellx_1.EventEmitter {
                     }
                 }
             }
-            this.ready();
+            try {
+                this.ready();
+            }
+            catch (err) {
+                config_1.config.logError(err);
+            }
+            if (this._onReadyHooks) {
+                for (let onReadyHook of this._onReadyHooks) {
+                    try {
+                        onReadyHook.call(this);
+                    }
+                    catch (err) {
+                        config_1.config.logError(err);
+                    }
+                }
+            }
             this.isReady = true;
         }
-        this.elementAttached();
+        try {
+            this.elementAttached();
+        }
+        catch (err) {
+            config_1.config.logError(err);
+        }
+        if (this._onElementAttachedHooks) {
+            for (let onElementAttachedHook of this._onElementAttachedHooks) {
+                try {
+                    onElementAttachedHook.call(this);
+                }
+                catch (err) {
+                    config_1.config.logError(err);
+                }
+            }
+        }
     }
     _detach() {
         this._attached = false;
-        this.elementDetached();
+        try {
+            this.elementDetached();
+        }
+        catch (err) {
+            config_1.config.logError(err);
+        }
+        if (this._onElementDetachedHooks) {
+            for (let onElementDetachedHook of this._onElementDetachedHooks) {
+                try {
+                    onElementDetachedHook.call(this);
+                }
+                catch (err) {
+                    config_1.config.logError(err);
+                }
+            }
+        }
         this.dispose();
     }
     dispose() {

@@ -53,6 +53,11 @@ export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = I
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
     [elementName: string]: Record<string, TEventHandler<T, U>>;
 }
+export declare type THookCallback = () => void;
+export declare function onReady(cb: THookCallback): void;
+export declare function onElementAttached(cb: THookCallback): void;
+export declare function onElementDetached(cb: THookCallback): void;
+export declare function onElementMoved(cb: THookCallback): void;
 export declare class BaseComponent extends EventEmitter implements IDisposable {
     static EVENT_CHANGE: string | symbol;
     static elementIs: string;
@@ -80,6 +85,10 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     _attached: boolean;
     initialized: boolean;
     isReady: boolean;
+    _onReadyHooks: Array<THookCallback> | undefined;
+    _onElementAttachedHooks: Array<THookCallback> | undefined;
+    _onElementDetachedHooks: Array<THookCallback> | undefined;
+    _onElementMovedHooks: Array<THookCallback> | undefined;
     [KEY_PARAM_VALUES]: Map<string, any>;
     [KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
     constructor(el?: HTMLElement);

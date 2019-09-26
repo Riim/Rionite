@@ -58,6 +58,10 @@ export const formatters: Record<string, Function> = {
 		return value1 >= value2;
 	},
 
+	replace(str: string | null, searchValue: string | RegExp, replaceValue: string): string | null {
+		return str && str.replace(searchValue, replaceValue);
+	},
+
 	has(target: { has(key: any): boolean } | null | undefined, key: any): boolean {
 		return !!target && target.has(key);
 	},
