@@ -5,6 +5,7 @@ export { configure } from './config';
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
+export { Listen } from './decorators/Listen';
 export { KEY_PARAMS_CONFIG, KEY_PARAM_VALUES } from './Constants';
 export {
 	IDisposable,
@@ -18,6 +19,7 @@ export {
 	I$ComponentParamConfig,
 	IPossiblyComponentElement,
 	IComponentElement,
+	IComponentListening,
 	TEventHandler,
 	IComponentEvents,
 	THookCallback,

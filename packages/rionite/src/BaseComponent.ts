@@ -91,6 +91,13 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
 	[KEY_CONTENT_TEMPLATE]?: Template;
 }
 
+export interface IComponentListening {
+	target: TListeningTarget | string | Array<TListeningTarget>;
+	type: string | symbol;
+	listener: TListener;
+	useCapture?: boolean;
+}
+
 export type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (
 	this: T,
 	evt: U,
@@ -102,7 +109,7 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	[elementName: string]: Record<string, TEventHandler<T, U>>;
 }
 
-export type THookCallback = () => void;
+export type THookCallback = (this: BaseComponent) => void;
 
 let currentComponent: BaseComponent | null = null;
 
@@ -144,6 +151,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	static get bindsInputContent() {
 		return this.template !== null;
 	}
+
+	static listenings: Array<IComponentListening> | null = null;
 
 	static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null = null;
 	static domEvents: IComponentEvents<BaseComponent, Event> | null = null;
@@ -633,6 +642,24 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			}
 
 			this.isReady = true;
+		}
+
+		let listenings = (this.constructor as typeof BaseComponent).listenings;
+
+		if (listenings) {
+			for (let listening of listenings) {
+				try {
+					this.listenTo(
+						listening.target == '$element' ? this.element : listening.target,
+						listening.type,
+						listening.listener,
+						this,
+						listening.useCapture
+					);
+				} catch (err) {
+					config.logError(err);
+				}
+			}
 		}
 
 		try {

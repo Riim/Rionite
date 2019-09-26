@@ -1772,10 +1772,12 @@ var Component_1 = __webpack_require__(29);
 exports.Component = Component_1.Component;
 var Param_1 = __webpack_require__(40);
 exports.Param = Param_1.Param;
+var Listen_1 = __webpack_require__(41);
+exports.Listen = Listen_1.Listen;
 var Constants_1 = __webpack_require__(15);
 exports.KEY_PARAMS_CONFIG = Constants_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAM_VALUES = Constants_1.KEY_PARAM_VALUES;
-var BaseComponent_1 = __webpack_require__(41);
+var BaseComponent_1 = __webpack_require__(42);
 exports.onReady = BaseComponent_1.onReady;
 exports.onElementAttached = BaseComponent_1.onElementAttached;
 exports.onElementDetached = BaseComponent_1.onElementDetached;
@@ -1791,13 +1793,13 @@ exports.KEY_CONTENT_TEMPLATE = Template_1.KEY_CONTENT_TEMPLATE;
 exports.Template = Template_1.Template;
 var registerComponent_1 = __webpack_require__(30);
 exports.registerComponent = registerComponent_1.registerComponent;
-var RnIfThen_1 = __webpack_require__(48);
+var RnIfThen_1 = __webpack_require__(49);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
-var RnIfElse_1 = __webpack_require__(53);
+var RnIfElse_1 = __webpack_require__(54);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
-var RnRepeat_1 = __webpack_require__(52);
+var RnRepeat_1 = __webpack_require__(53);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
-var RnSlot_1 = __webpack_require__(54);
+var RnSlot_1 = __webpack_require__(55);
 exports.RnSlot = RnSlot_1.RnSlot;
 
 
@@ -4819,21 +4821,46 @@ exports.Param = Param;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const hasOwn = Object.prototype.hasOwnProperty;
+function Listen(evtType, options) {
+    return (target, propertyName, propertyDesc) => {
+        (hasOwn.call(target.constructor, 'listenings')
+            ? target.constructor.listenings ||
+                (target.constructor.listenings = [])
+            : (target.constructor.listenings = (target.constructor.listenings || []).slice())).push({
+            target: (options && options.target) || target,
+            type: evtType,
+            listener: (propertyDesc || Object.getOwnPropertyDescriptor(target, propertyName))
+                .value,
+            useCapture: options && options.useCapture
+        });
+    };
+}
+exports.Listen = Listen;
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 const kebab_case_1 = __webpack_require__(4);
-const move_content_1 = __webpack_require__(42);
-const next_uid_1 = __webpack_require__(43);
+const move_content_1 = __webpack_require__(43);
+const next_uid_1 = __webpack_require__(44);
 const cellx_1 = __webpack_require__(6);
-const attachChildComponentElements_1 = __webpack_require__(44);
+const attachChildComponentElements_1 = __webpack_require__(45);
 const bindContent_1 = __webpack_require__(7);
-const componentBinding_1 = __webpack_require__(45);
+const componentBinding_1 = __webpack_require__(46);
 const config_1 = __webpack_require__(17);
 const Constants_1 = __webpack_require__(15);
 const elementConstructors_1 = __webpack_require__(34);
 const ElementProtoMixin_1 = __webpack_require__(35);
 const handleDOMEvent_1 = __webpack_require__(27);
 const handleEvent_1 = __webpack_require__(28);
-const findChildComponents_1 = __webpack_require__(46);
-const normalizeTextNodes_1 = __webpack_require__(47);
+const findChildComponents_1 = __webpack_require__(47);
+const normalizeTextNodes_1 = __webpack_require__(48);
 const Template_1 = __webpack_require__(3);
 const hasOwn = Object.prototype.hasOwnProperty;
 const map = Array.prototype.map;
@@ -5177,6 +5204,17 @@ class BaseComponent extends cellx_1.EventEmitter {
             }
             this.isReady = true;
         }
+        let listenings = this.constructor.listenings;
+        if (listenings) {
+            for (let listening of listenings) {
+                try {
+                    this.listenTo(listening.target == '$element' ? this.element : listening.target, listening.type, listening.listener, this, listening.useCapture);
+                }
+                catch (err) {
+                    config_1.config.logError(err);
+                }
+            }
+        }
         try {
             this.elementAttached();
         }
@@ -5283,6 +5321,7 @@ BaseComponent.elementExtends = null;
 BaseComponent.params = null;
 BaseComponent.i18n = null;
 BaseComponent.template = null;
+BaseComponent.listenings = null;
 BaseComponent.events = null;
 BaseComponent.domEvents = null;
 const handledEvents = [
@@ -5305,7 +5344,7 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5321,7 +5360,7 @@ exports.moveContent = moveContent;
 
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5335,7 +5374,7 @@ exports.nextUID = nextUID;
 
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5354,7 +5393,7 @@ exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5399,7 +5438,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5425,7 +5464,7 @@ exports.findChildComponents = findChildComponents;
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5459,7 +5498,7 @@ exports.normalizeTextNodes = normalizeTextNodes;
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5472,20 +5511,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var RnIfThen_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_tick_1 = __webpack_require__(49);
+const next_tick_1 = __webpack_require__(50);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(42);
-const attachChildComponentElements_1 = __webpack_require__(44);
-const BaseComponent_1 = __webpack_require__(41);
-const compileBinding_1 = __webpack_require__(50);
+const move_content_1 = __webpack_require__(43);
+const attachChildComponentElements_1 = __webpack_require__(45);
+const BaseComponent_1 = __webpack_require__(42);
+const compileBinding_1 = __webpack_require__(51);
 const Component_1 = __webpack_require__(29);
 const ElementProtoMixin_1 = __webpack_require__(35);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
 const keypathPattern_1 = __webpack_require__(19);
-const removeNodes_1 = __webpack_require__(51);
+const removeNodes_1 = __webpack_require__(52);
 const Template_1 = __webpack_require__(3);
-const RnRepeat_1 = __webpack_require__(52);
+const RnRepeat_1 = __webpack_require__(53);
 const slice = Array.prototype.slice;
 const reKeypath = RegExp(`^${keypathPattern_1.keypathPattern}$`);
 let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent {
@@ -5641,7 +5680,7 @@ exports.RnIfThen = RnIfThen;
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -5668,7 +5707,7 @@ const nextTick = (() => {
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5691,7 +5730,7 @@ exports.compileBinding = compileBinding;
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5718,7 +5757,7 @@ exports.removeNodes = removeNodes;
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5731,21 +5770,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var RnRepeat_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_tick_1 = __webpack_require__(49);
+const next_tick_1 = __webpack_require__(50);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(42);
-const attachChildComponentElements_1 = __webpack_require__(44);
-const BaseComponent_1 = __webpack_require__(41);
-const compileBinding_1 = __webpack_require__(50);
+const move_content_1 = __webpack_require__(43);
+const attachChildComponentElements_1 = __webpack_require__(45);
+const BaseComponent_1 = __webpack_require__(42);
+const compileBinding_1 = __webpack_require__(51);
 const Component_1 = __webpack_require__(29);
 const ElementProtoMixin_1 = __webpack_require__(35);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
 const keypathPattern_1 = __webpack_require__(19);
 const namePattern_1 = __webpack_require__(20);
-const removeNodes_1 = __webpack_require__(51);
+const removeNodes_1 = __webpack_require__(52);
 const Template_1 = __webpack_require__(3);
-const RnIfThen_1 = __webpack_require__(48);
+const RnIfThen_1 = __webpack_require__(49);
 const slice = Array.prototype.slice;
 const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern}(?:\\s*(.*\\S))?)\\s*$`);
 function getItem(list, index) {
@@ -6103,7 +6142,7 @@ exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6116,7 +6155,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const Component_1 = __webpack_require__(29);
-const RnIfThen_1 = __webpack_require__(48);
+const RnIfThen_1 = __webpack_require__(49);
 let RnIfElse = class RnIfElse extends RnIfThen_1.RnIfThen {
     constructor() {
         super(...arguments);
@@ -6133,7 +6172,7 @@ exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6145,14 +6184,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(55);
-const move_content_1 = __webpack_require__(42);
-const attachChildComponentElements_1 = __webpack_require__(44);
-const BaseComponent_1 = __webpack_require__(41);
+const get_uid_1 = __webpack_require__(56);
+const move_content_1 = __webpack_require__(43);
+const attachChildComponentElements_1 = __webpack_require__(45);
+const BaseComponent_1 = __webpack_require__(42);
 const bindContent_1 = __webpack_require__(7);
 const Component_1 = __webpack_require__(29);
 const ElementProtoMixin_1 = __webpack_require__(35);
-const cloneNode_1 = __webpack_require__(56);
+const cloneNode_1 = __webpack_require__(57);
 const Template_1 = __webpack_require__(3);
 const KEY_SLOTS_CONTENT = Symbol('slotsContent');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
@@ -6333,20 +6372,20 @@ exports.RnSlot = RnSlot;
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_uid_1 = __webpack_require__(43);
+const next_uid_1 = __webpack_require__(44);
 const hasOwn = Object.prototype.hasOwnProperty;
 const KEY_UID = Symbol('uid');
 exports.getUID = (obj) => hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : (obj[KEY_UID] = next_uid_1.nextUID());
 
 
 /***/ }),
-/* 56 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

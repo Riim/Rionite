@@ -49,11 +49,17 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
     rioniteComponent: T;
     [KEY_CONTENT_TEMPLATE]?: Template;
 }
+export interface IComponentListening {
+    target: TListeningTarget | string | Array<TListeningTarget>;
+    type: string | symbol;
+    listener: TListener;
+    useCapture?: boolean;
+}
 export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (this: T, evt: U, context: Record<string, any>, receiver: Element) => any;
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
     [elementName: string]: Record<string, TEventHandler<T, U>>;
 }
-export declare type THookCallback = () => void;
+export declare type THookCallback = (this: BaseComponent) => void;
 export declare function onReady(cb: THookCallback): void;
 export declare function onElementAttached(cb: THookCallback): void;
 export declare function onElementDetached(cb: THookCallback): void;
@@ -68,6 +74,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     static _elementBlockNames: Array<string>;
     static template: string | IBlock | Template | null;
     static readonly bindsInputContent: boolean;
+    static listenings: Array<IComponentListening> | null;
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
     static domEvents: IComponentEvents<BaseComponent, Event> | null;
     static [KEY_PARAMS_CONFIG]: Map<string, I$ComponentParamConfig> | null;
