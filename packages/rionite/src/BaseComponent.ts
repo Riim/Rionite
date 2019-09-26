@@ -92,7 +92,7 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
 }
 
 export interface IComponentListening {
-	target: TListeningTarget | string | Array<TListeningTarget>;
+	target?: TListeningTarget | string | Array<TListeningTarget>;
 	type: string | symbol;
 	listener: TListener;
 	useCapture?: boolean;
@@ -651,6 +651,11 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				let target: TListeningTarget | string | Array<TListeningTarget>;
 
 				switch (listening.target) {
+					case '$self':
+					case '@self': {
+						target = this;
+						break;
+					}
 					case '$parent':
 					case '@parent': {
 						target = this.parentComponent!;
@@ -662,7 +667,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 						break;
 					}
 					default: {
-						target = listening.target;
+						target = listening.target || this;
 					}
 				}
 

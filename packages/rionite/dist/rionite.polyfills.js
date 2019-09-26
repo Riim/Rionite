@@ -4828,7 +4828,7 @@ function Listen(evtType, options) {
             ? target.constructor.listenings ||
                 (target.constructor.listenings = [])
             : (target.constructor.listenings = (target.constructor.listenings || []).slice())).push({
-            target: (options && options.target) || target,
+            target: options && options.target,
             type: evtType,
             listener: (propertyDesc || Object.getOwnPropertyDescriptor(target, propertyName))
                 .value,
@@ -5209,6 +5209,11 @@ class BaseComponent extends cellx_1.EventEmitter {
             for (let listening of listenings) {
                 let target;
                 switch (listening.target) {
+                    case '$self':
+                    case '@self': {
+                        target = this;
+                        break;
+                    }
                     case '$parent':
                     case '@parent': {
                         target = this.parentComponent;
@@ -5220,7 +5225,7 @@ class BaseComponent extends cellx_1.EventEmitter {
                         break;
                     }
                     default: {
-                        target = listening.target;
+                        target = listening.target || this;
                     }
                 }
                 try {

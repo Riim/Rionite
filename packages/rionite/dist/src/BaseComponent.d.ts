@@ -50,7 +50,7 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
     [KEY_CONTENT_TEMPLATE]?: Template;
 }
 export interface IComponentListening {
-    target: TListeningTarget | string | Array<TListeningTarget>;
+    target?: TListeningTarget | string | Array<TListeningTarget>;
     type: string | symbol;
     listener: TListener;
     useCapture?: boolean;

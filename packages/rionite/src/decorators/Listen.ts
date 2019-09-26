@@ -5,7 +5,7 @@ const hasOwn = Object.prototype.hasOwnProperty;
 export function Listen(
 	evtType: string | symbol,
 	options?: {
-		target: TListeningTarget | string | Array<TListeningTarget>;
+		target?: TListeningTarget | string | Array<TListeningTarget>;
 		useCapture?: boolean;
 	}
 ) {
@@ -21,7 +21,7 @@ export function Listen(
 					(target.constructor as typeof BaseComponent).listenings || []
 			  ).slice())
 		).push({
-			target: (options && options.target) || target,
+			target: options && options.target,
 			type: evtType,
 			listener: (propertyDesc || Object.getOwnPropertyDescriptor(target, propertyName)!)
 				.value,
