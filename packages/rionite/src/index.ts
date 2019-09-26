@@ -20,6 +20,11 @@ export {
 	IComponentElement,
 	TEventHandler,
 	IComponentEvents,
+	THookCallback,
+	onReady,
+	onElementAttached,
+	onElementDetached,
+	onElementMoved,
 	BaseComponent
 } from './BaseComponent';
 export { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';

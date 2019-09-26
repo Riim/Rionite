@@ -6,6 +6,7 @@ import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { freezeBindings, IBinding, unfreezeBindings } from './componentBinding';
 import { IComponentParamValueСonverters } from './componentParamValueConverters';
+import { config } from './config';
 import {
 	KEY_CHILD_COMPONENTS,
 	KEY_COMPONENT_SELF,
@@ -101,6 +102,31 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	[elementName: string]: Record<string, TEventHandler<T, U>>;
 }
 
+export type THookCallback = () => void;
+
+let currentComponent: BaseComponent | null = null;
+
+export function onReady(cb: THookCallback) {
+	(currentComponent!._onReadyHooks || (currentComponent!._onReadyHooks = [])).push(cb);
+}
+export function onElementAttached(cb: THookCallback) {
+	(
+		currentComponent!._onElementAttachedHooks ||
+		(currentComponent!._onElementAttachedHooks = [])
+	).push(cb);
+}
+export function onElementDetached(cb: THookCallback) {
+	(
+		currentComponent!._onElementDetachedHooks ||
+		(currentComponent!._onElementDetachedHooks = [])
+	).push(cb);
+}
+export function onElementMoved(cb: THookCallback) {
+	(currentComponent!._onElementMovedHooks || (currentComponent!._onElementMovedHooks = [])).push(
+		cb
+	);
+}
+
 export class BaseComponent extends EventEmitter implements IDisposable {
 	static EVENT_CHANGE: string | symbol = 'change';
 
@@ -180,11 +206,18 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	initialized = false;
 	isReady = false;
 
+	_onReadyHooks: Array<THookCallback> | undefined;
+	_onElementAttachedHooks: Array<THookCallback> | undefined;
+	_onElementDetachedHooks: Array<THookCallback> | undefined;
+	_onElementMovedHooks: Array<THookCallback> | undefined;
+
 	[KEY_PARAM_VALUES]: Map<string, any>;
 	[KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
 
 	constructor(el?: HTMLElement) {
 		super();
+
+		currentComponent = this;
 
 		this[KEY_COMPONENT_SELF] = this;
 
@@ -443,13 +476,27 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		this._attached = true;
 
 		if (!this.initialized) {
-			let initializationResult = this.initialize();
+			currentComponent = this;
+
+			let initializationResult: Promise<any> | void;
+
+			try {
+				initializationResult = this.initialize();
+			} catch (err) {
+				config.logError(err);
+				return;
+			}
 
 			if (initializationResult) {
-				initializationResult.then(() => {
-					this.initialized = true;
-					this._attach();
-				});
+				initializationResult.then(
+					() => {
+						this.initialized = true;
+						this._attach();
+					},
+					err => {
+						config.logError(err);
+					}
+				);
 
 				return;
 			}
@@ -569,16 +616,61 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				}
 			}
 
-			this.ready();
+			try {
+				this.ready();
+			} catch (err) {
+				config.logError(err);
+			}
+
+			if (this._onReadyHooks) {
+				for (let onReadyHook of this._onReadyHooks) {
+					try {
+						onReadyHook.call(this);
+					} catch (err) {
+						config.logError(err);
+					}
+				}
+			}
+
 			this.isReady = true;
 		}
 
-		this.elementAttached();
+		try {
+			this.elementAttached();
+		} catch (err) {
+			config.logError(err);
+		}
+
+		if (this._onElementAttachedHooks) {
+			for (let onElementAttachedHook of this._onElementAttachedHooks) {
+				try {
+					onElementAttachedHook.call(this);
+				} catch (err) {
+					config.logError(err);
+				}
+			}
+		}
 	}
 
 	_detach() {
 		this._attached = false;
-		this.elementDetached();
+
+		try {
+			this.elementDetached();
+		} catch (err) {
+			config.logError(err);
+		}
+
+		if (this._onElementDetachedHooks) {
+			for (let onElementDetachedHook of this._onElementDetachedHooks) {
+				try {
+					onElementDetachedHook.call(this);
+				} catch (err) {
+					config.logError(err);
+				}
+			}
+		}
+
 		this.dispose();
 	}
 
