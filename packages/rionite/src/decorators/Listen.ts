@@ -1,21 +1,21 @@
-import { BaseComponent, TComponentListeningTarget } from '../BaseComponent';
+import { BaseComponent, TComponentListeningTarget, TComponentListeningType } from '../BaseComponent';
 
 const hasOwn = Object.prototype.hasOwnProperty;
 
 export function Listen<T = BaseComponent>(
-	evtType: string | symbol | Array<string | symbol>,
+	evtType: TComponentListeningType<T>,
 	options?: {
 		target?: TComponentListeningTarget<T>;
 		useCapture?: boolean;
 	}
 ): any;
 export function Listen<T = BaseComponent>(
-	evtType: string | symbol | Array<string | symbol>,
+	evtType: TComponentListeningType<T>,
 	target: TComponentListeningTarget<T>,
 	useCapture?: boolean
 ): any;
 export function Listen<T = BaseComponent>(
-	evtType: string | symbol | Array<string | symbol>,
+	evtType: TComponentListeningType<T>,
 	optionsOrTarget?:
 		| {
 				target?: TComponentListeningTarget<T>;
@@ -48,7 +48,7 @@ export function Listen<T = BaseComponent>(
 			  ).slice())
 		).push({
 			target: options ? options.target : (optionsOrTarget as any),
-			type: evtType,
+			type: evtType as TComponentListeningType,
 			listener: propertyName,
 			useCapture: options ? options.useCapture : useCapture
 		});

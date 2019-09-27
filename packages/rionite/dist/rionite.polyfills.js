@@ -5241,7 +5241,9 @@ class BaseComponent extends cellx_1.EventEmitter {
                     target = this;
                 }
                 try {
-                    this.listenTo(target, listening.type, typeof listening.listener == 'string'
+                    this.listenTo(target, typeof listening.type == 'function'
+                        ? listening.type.call(this, this.constructor)
+                        : listening.type, typeof listening.listener == 'string'
                         ? this[listening.listener]
                         : listening.listener, this, listening.useCapture);
                 }

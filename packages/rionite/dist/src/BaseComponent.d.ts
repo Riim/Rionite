@@ -50,9 +50,10 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
     [KEY_CONTENT_TEMPLATE]?: Template;
 }
 export declare type TComponentListeningTarget<T = BaseComponent> = TListeningTarget | string | Array<TListeningTarget> | ((this: T, self: T) => TListeningTarget | string | Array<TListeningTarget>);
+export declare type TComponentListeningType<T = BaseComponent> = string | symbol | Array<string | symbol> | ((this: T, ctor: typeof BaseComponent) => string | symbol | Array<string | symbol>);
 export interface IComponentListening<T = BaseComponent> {
     target?: TComponentListeningTarget<T>;
-    type: string | symbol | Array<string | symbol>;
+    type: TComponentListeningType<T>;
     listener: TListener | string;
     useCapture?: boolean;
 }

@@ -97,9 +97,15 @@ export type TComponentListeningTarget<T = BaseComponent> =
 	| Array<TListeningTarget>
 	| ((this: T, self: T) => TListeningTarget | string | Array<TListeningTarget>);
 
+export type TComponentListeningType<T = BaseComponent> =
+	| string
+	| symbol
+	| Array<string | symbol>
+	| ((this: T, ctor: typeof BaseComponent) => string | symbol | Array<string | symbol>);
+
 export interface IComponentListening<T = BaseComponent> {
 	target?: TComponentListeningTarget<T>;
-	type: string | symbol | Array<string | symbol>;
+	type: TComponentListeningType<T>;
 	listener: TListener | string;
 	useCapture?: boolean;
 }
@@ -687,7 +693,9 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				try {
 					this.listenTo(
 						target as TListeningTarget,
-						listening.type,
+						typeof listening.type == 'function'
+							? listening.type.call(this, this.constructor)
+							: listening.type,
 						typeof listening.listener == 'string'
 							? this[listening.listener]
 							: listening.listener,

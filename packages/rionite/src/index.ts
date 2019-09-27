@@ -20,6 +20,7 @@ export {
 	IPossiblyComponentElement,
 	IComponentElement,
 	TComponentListeningTarget,
+	TComponentListeningType,
 	IComponentListening,
 	TEventHandler,
 	IComponentEvents,
