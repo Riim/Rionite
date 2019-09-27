@@ -52,7 +52,7 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
 export declare type TComponentListeningTarget<T = BaseComponent> = TListeningTarget | string | Array<TListeningTarget> | ((this: T, self: T) => TListeningTarget | string | Array<TListeningTarget>);
 export interface IComponentListening<T = BaseComponent> {
     target?: TComponentListeningTarget<T>;
-    type: string | symbol;
+    type: string | symbol | Array<string | symbol>;
     listener: TListener | string;
     useCapture?: boolean;
 }

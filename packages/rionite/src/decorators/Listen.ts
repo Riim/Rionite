@@ -3,19 +3,19 @@ import { BaseComponent, TComponentListeningTarget } from '../BaseComponent';
 const hasOwn = Object.prototype.hasOwnProperty;
 
 export function Listen<T = BaseComponent>(
-	evtType: string | symbol,
+	evtType: string | symbol | Array<string | symbol>,
 	options?: {
 		target?: TComponentListeningTarget<T>;
 		useCapture?: boolean;
 	}
 ): any;
 export function Listen<T = BaseComponent>(
-	evtType: string | symbol,
+	evtType: string | symbol | Array<string | symbol>,
 	target: TComponentListeningTarget<T>,
 	useCapture?: boolean
 ): any;
 export function Listen<T = BaseComponent>(
-	evtType: string | symbol,
+	evtType: string | symbol | Array<string | symbol>,
 	optionsOrTarget?:
 		| {
 				target?: TComponentListeningTarget<T>;

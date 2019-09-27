@@ -99,7 +99,7 @@ export type TComponentListeningTarget<T = BaseComponent> =
 
 export interface IComponentListening<T = BaseComponent> {
 	target?: TComponentListeningTarget<T>;
-	type: string | symbol;
+	type: string | symbol | Array<string | symbol>;
 	listener: TListener | string;
 	useCapture?: boolean;
 }
