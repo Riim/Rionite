@@ -5233,34 +5233,8 @@ class BaseComponent extends cellx_1.EventEmitter {
                     if (typeof target == 'function') {
                         target = target.call(this, this);
                     }
-                    if (typeof target == 'string') {
-                        switch (target) {
-                            case '$body': {
-                                target = document.body;
-                                break;
-                            }
-                            case '$self': {
-                                target = this;
-                                break;
-                            }
-                            case '$owner': {
-                                target = this.ownerComponent;
-                                break;
-                            }
-                            case '$parent': {
-                                target = this.parentComponent;
-                                break;
-                            }
-                            case '$element': {
-                                target = this.element;
-                                break;
-                            }
-                            default: {
-                                if (target.charAt(0) == '@') {
-                                    target = Function(`return this.${target.slice(1)};`).call(this);
-                                }
-                            }
-                        }
+                    if (typeof target == 'string' && target.charAt(0) == '@') {
+                        target = Function(`return this.${target.slice(1)};`).call(this);
                     }
                 }
                 else {
