@@ -1,29 +1,27 @@
-import { BaseComponent, TListeningTarget } from '../BaseComponent';
+import { BaseComponent, TComponentListeningTarget } from '../BaseComponent';
 
 const hasOwn = Object.prototype.hasOwnProperty;
 
-export function Listen(
+export function Listen<T = BaseComponent>(
 	evtType: string | symbol,
 	options?: {
-		target?: TListeningTarget | string | Array<TListeningTarget>;
+		target?: TComponentListeningTarget<T>;
 		useCapture?: boolean;
 	}
 ): any;
-export function Listen(
+export function Listen<T = BaseComponent>(
 	evtType: string | symbol,
-	target: TListeningTarget | string | Array<TListeningTarget>,
+	target: TComponentListeningTarget<T>,
 	useCapture?: boolean
 ): any;
-export function Listen(
+export function Listen<T = BaseComponent>(
 	evtType: string | symbol,
 	optionsOrTarget?:
 		| {
-				target?: TListeningTarget | string | Array<TListeningTarget>;
+				target?: TComponentListeningTarget<T>;
 				useCapture?: boolean;
 		  }
-		| TListeningTarget
-		| string
-		| Array<TListeningTarget>,
+		| TComponentListeningTarget<T>,
 	useCapture?: boolean
 ) {
 	return (
@@ -32,7 +30,7 @@ export function Listen(
 		_propertyDesc?: PropertyDescriptor
 	): void => {
 		let options: {
-			target?: TListeningTarget | string | Array<TListeningTarget>;
+			target?: TComponentListeningTarget;
 			useCapture?: boolean;
 		} | null =
 			optionsOrTarget &&

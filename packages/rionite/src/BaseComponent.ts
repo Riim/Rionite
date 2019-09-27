@@ -91,8 +91,14 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
 	[KEY_CONTENT_TEMPLATE]?: Template;
 }
 
-export interface IComponentListening {
-	target?: TListeningTarget | string | Array<TListeningTarget>;
+export type TComponentListeningTarget<T = BaseComponent> =
+	| TListeningTarget
+	| string
+	| Array<TListeningTarget>
+	| ((this: T, self: T) => TListeningTarget | string | Array<TListeningTarget>);
+
+export interface IComponentListening<T = BaseComponent> {
+	target?: TComponentListeningTarget<T>;
 	type: string | symbol;
 	listener: TListener | string;
 	useCapture?: boolean;
@@ -644,58 +650,6 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			this.isReady = true;
 		}
 
-		let listenings = (this.constructor as typeof BaseComponent).listenings;
-
-		if (listenings) {
-			for (let listening of listenings) {
-				let target: TListeningTarget | string | Array<TListeningTarget>;
-
-				switch (listening.target) {
-					case '$body': {
-						target = document.body;
-						break;
-					}
-					case '$self':
-					case '@self': {
-						target = this;
-						break;
-					}
-					case '$owner':
-					case '@owner': {
-						target = this.ownerComponent;
-						break;
-					}
-					case '$parent':
-					case '@parent': {
-						target = this.parentComponent!;
-						break;
-					}
-					case '$element':
-					case '@element': {
-						target = this.element;
-						break;
-					}
-					default: {
-						target = listening.target || this;
-					}
-				}
-
-				try {
-					this.listenTo(
-						target,
-						listening.type,
-						typeof listening.listener == 'string'
-							? this[listening.listener]
-							: listening.listener,
-						this,
-						listening.useCapture
-					);
-				} catch (err) {
-					config.logError(err);
-				}
-			}
-		}
-
 		try {
 			this.elementAttached();
 		} catch (err) {
@@ -706,6 +660,66 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			for (let onElementAttachedHook of this._onElementAttachedHooks) {
 				try {
 					onElementAttachedHook.call(this);
+				} catch (err) {
+					config.logError(err);
+				}
+			}
+		}
+
+		let listenings = (this.constructor as typeof BaseComponent).listenings;
+
+		if (listenings) {
+			for (let listening of listenings) {
+				let target = listening.target;
+
+				if (target) {
+					if (typeof target == 'function') {
+						target = target.call(this, this);
+					}
+
+					if (typeof target == 'string') {
+						switch (target) {
+							case '$body': {
+								target = document.body;
+								break;
+							}
+							case '$self': {
+								target = this;
+								break;
+							}
+							case '$owner': {
+								target = this.ownerComponent;
+								break;
+							}
+							case '$parent': {
+								target = this.parentComponent!;
+								break;
+							}
+							case '$element': {
+								target = this.element;
+								break;
+							}
+							default: {
+								if (target.charAt(0) == '@') {
+									target = Function(`return this.${target.slice(1)};`).call(this);
+								}
+							}
+						}
+					}
+				} else {
+					target = this;
+				}
+
+				try {
+					this.listenTo(
+						target as TListeningTarget,
+						listening.type,
+						typeof listening.listener == 'string'
+							? this[listening.listener]
+							: listening.listener,
+						this,
+						listening.useCapture
+					);
 				} catch (err) {
 					config.logError(err);
 				}

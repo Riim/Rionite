@@ -3548,49 +3548,6 @@ class BaseComponent extends cellx_1.EventEmitter {
             }
             this.isReady = true;
         }
-        let listenings = this.constructor.listenings;
-        if (listenings) {
-            for (let listening of listenings) {
-                let target;
-                switch (listening.target) {
-                    case '$body': {
-                        target = document.body;
-                        break;
-                    }
-                    case '$self':
-                    case '@self': {
-                        target = this;
-                        break;
-                    }
-                    case '$owner':
-                    case '@owner': {
-                        target = this.ownerComponent;
-                        break;
-                    }
-                    case '$parent':
-                    case '@parent': {
-                        target = this.parentComponent;
-                        break;
-                    }
-                    case '$element':
-                    case '@element': {
-                        target = this.element;
-                        break;
-                    }
-                    default: {
-                        target = listening.target || this;
-                    }
-                }
-                try {
-                    this.listenTo(target, listening.type, typeof listening.listener == 'string'
-                        ? this[listening.listener]
-                        : listening.listener, this, listening.useCapture);
-                }
-                catch (err) {
-                    config_1.config.logError(err);
-                }
-            }
-        }
         try {
             this.elementAttached();
         }
@@ -3601,6 +3558,57 @@ class BaseComponent extends cellx_1.EventEmitter {
             for (let onElementAttachedHook of this._onElementAttachedHooks) {
                 try {
                     onElementAttachedHook.call(this);
+                }
+                catch (err) {
+                    config_1.config.logError(err);
+                }
+            }
+        }
+        let listenings = this.constructor.listenings;
+        if (listenings) {
+            for (let listening of listenings) {
+                let target = listening.target;
+                if (target) {
+                    if (typeof target == 'function') {
+                        target = target.call(this, this);
+                    }
+                    if (typeof target == 'string') {
+                        switch (target) {
+                            case '$body': {
+                                target = document.body;
+                                break;
+                            }
+                            case '$self': {
+                                target = this;
+                                break;
+                            }
+                            case '$owner': {
+                                target = this.ownerComponent;
+                                break;
+                            }
+                            case '$parent': {
+                                target = this.parentComponent;
+                                break;
+                            }
+                            case '$element': {
+                                target = this.element;
+                                break;
+                            }
+                            default: {
+                                if (target.charAt(0) == '@') {
+                                    target = Function(`return this.${target.slice(1)};`).call(this);
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    target = this;
+                }
+                try {
+                    this.listenTo(target, listening.type, typeof listening.listener == 'string'
+                        ? this[listening.listener]
+                        : listening.listener, this, listening.useCapture);
                 }
                 catch (err) {
                     config_1.config.logError(err);

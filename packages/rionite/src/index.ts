@@ -19,6 +19,7 @@ export {
 	I$ComponentParamConfig,
 	IPossiblyComponentElement,
 	IComponentElement,
+	TComponentListeningTarget,
 	IComponentListening,
 	TEventHandler,
 	IComponentEvents,
