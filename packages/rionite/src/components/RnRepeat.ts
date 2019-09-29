@@ -174,7 +174,7 @@ export class RnRepeat extends BaseComponent {
 		}
 	}
 
-	async _attach() {
+	_attach() {
 		this._attached = true;
 	}
 	_detach() {

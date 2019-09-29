@@ -3189,15 +3189,6 @@ exports.Listen = Listen;
 
 "use strict";
 
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const kebab_case_1 = __webpack_require__(4);
 const move_content_1 = __webpack_require__(43);
@@ -3448,89 +3439,48 @@ class BaseComponent extends cellx_1.EventEmitter {
         return registeredCallback;
     }
     _attach() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this._attached = true;
-            if (!this.initialized) {
-                currentComponent = this;
-                let initializationResult;
-                try {
-                    initializationResult = this.initialize();
-                }
-                catch (err) {
+        this._attached = true;
+        if (!this.initialized) {
+            currentComponent = this;
+            let initializationResult;
+            try {
+                initializationResult = this.initialize();
+            }
+            catch (err) {
+                config_1.config.logError(err);
+                return;
+            }
+            if (initializationResult) {
+                initializationResult.then(() => {
+                    this.initialized = true;
+                    this._attach();
+                }, err => {
                     config_1.config.logError(err);
-                    return;
-                }
-                if (initializationResult) {
-                    initializationResult.then(() => {
-                        this.initialized = true;
-                        this._attach();
-                    }, err => {
-                        config_1.config.logError(err);
-                    });
-                    return;
-                }
-                this.initialized = true;
+                });
+                return;
             }
-            let constr = this.constructor;
-            if (this.isReady) {
-                this._unfreezeBindings();
-                let childComponents = findChildComponents_1.findChildComponents(this.element);
-                if (childComponents) {
-                    attachChildComponentElements_1.attachChildComponentElements(childComponents);
-                }
+            this.initialized = true;
+        }
+        let constr = this.constructor;
+        if (this.isReady) {
+            this._unfreezeBindings();
+            let childComponents = findChildComponents_1.findChildComponents(this.element);
+            if (childComponents) {
+                attachChildComponentElements_1.attachChildComponentElements(childComponents);
             }
-            else {
-                let el = this.element;
-                if (el.className.lastIndexOf(constr._blockNamesString, 0)) {
-                    el.className = constr._blockNamesString + el.className;
-                }
-                if (constr.template === null) {
-                    if (this.ownerComponent == this) {
-                        let contentBindingResult = [null, null, null];
-                        bindContent_1.bindContent(el, this, this, contentBindingResult);
-                        let childComponents = contentBindingResult[0];
-                        let backBindings = contentBindingResult[2];
-                        this._bindings = contentBindingResult[1];
-                        if (childComponents) {
-                            attachChildComponentElements_1.attachChildComponentElements(childComponents);
-                        }
-                        if (backBindings) {
-                            for (let i = backBindings.length; i; i -= 3) {
-                                backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
-                            }
-                        }
-                    }
-                    else {
-                        this._bindings = null;
-                        if (this[Constants_1.KEY_CHILD_COMPONENTS]) {
-                            attachChildComponentElements_1.attachChildComponentElements(this[Constants_1.KEY_CHILD_COMPONENTS]);
-                        }
-                    }
-                }
-                else {
-                    if (el.firstChild) {
-                        ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                        move_content_1.moveContent(this.$inputContent ||
-                            (this.$inputContent = document.createDocumentFragment()), normalizeTextNodes_1.normalizeTextNodes(el));
-                        ElementProtoMixin_1.resumeConnectionStatusCallbacks();
-                    }
+        }
+        else {
+            let el = this.element;
+            if (el.className.lastIndexOf(constr._blockNamesString, 0)) {
+                el.className = constr._blockNamesString + el.className;
+            }
+            if (constr.template === null) {
+                if (this.ownerComponent == this) {
                     let contentBindingResult = [null, null, null];
-                    let content = constr.template.render(this, this, this, contentBindingResult);
+                    bindContent_1.bindContent(el, this, this, contentBindingResult);
                     let childComponents = contentBindingResult[0];
                     let backBindings = contentBindingResult[2];
                     this._bindings = contentBindingResult[1];
-                    if (childComponents) {
-                        for (let i = childComponents.length; i;) {
-                            let childComponent = childComponents[--i];
-                            if (childComponent.element.firstChild &&
-                                childComponent.constructor.bindsInputContent) {
-                                childComponent.$inputContent = move_content_1.moveContent(document.createDocumentFragment(), childComponent.element);
-                            }
-                        }
-                    }
-                    ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                    this.element.appendChild(content);
-                    ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                     if (childComponents) {
                         attachChildComponentElements_1.attachChildComponentElements(childComponents);
                     }
@@ -3540,68 +3490,107 @@ class BaseComponent extends cellx_1.EventEmitter {
                         }
                     }
                 }
-                try {
-                    yield this.ready();
+                else {
+                    this._bindings = null;
+                    if (this[Constants_1.KEY_CHILD_COMPONENTS]) {
+                        attachChildComponentElements_1.attachChildComponentElements(this[Constants_1.KEY_CHILD_COMPONENTS]);
+                    }
                 }
-                catch (err) {
-                    config_1.config.logError(err);
+            }
+            else {
+                if (el.firstChild) {
+                    ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+                    move_content_1.moveContent(this.$inputContent ||
+                        (this.$inputContent = document.createDocumentFragment()), normalizeTextNodes_1.normalizeTextNodes(el));
+                    ElementProtoMixin_1.resumeConnectionStatusCallbacks();
                 }
-                if (this._onReadyHooks) {
-                    for (let onReadyHook of this._onReadyHooks) {
-                        try {
-                            yield onReadyHook.call(this);
-                        }
-                        catch (err) {
-                            config_1.config.logError(err);
+                let contentBindingResult = [null, null, null];
+                let content = constr.template.render(this, this, this, contentBindingResult);
+                let childComponents = contentBindingResult[0];
+                let backBindings = contentBindingResult[2];
+                this._bindings = contentBindingResult[1];
+                if (childComponents) {
+                    for (let i = childComponents.length; i;) {
+                        let childComponent = childComponents[--i];
+                        if (childComponent.element.firstChild &&
+                            childComponent.constructor.bindsInputContent) {
+                            childComponent.$inputContent = move_content_1.moveContent(document.createDocumentFragment(), childComponent.element);
                         }
                     }
                 }
-                this.isReady = true;
+                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+                this.element.appendChild(content);
+                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+                if (childComponents) {
+                    attachChildComponentElements_1.attachChildComponentElements(childComponents);
+                }
+                if (backBindings) {
+                    for (let i = backBindings.length; i; i -= 3) {
+                        backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
+                    }
+                }
             }
             try {
-                yield this.elementAttached();
+                this.ready();
             }
             catch (err) {
                 config_1.config.logError(err);
             }
-            if (this._onElementAttachedHooks) {
-                for (let onElementAttachedHook of this._onElementAttachedHooks) {
+            if (this._onReadyHooks) {
+                for (let onReadyHook of this._onReadyHooks) {
                     try {
-                        yield onElementAttachedHook.call(this);
+                        onReadyHook.call(this);
                     }
                     catch (err) {
                         config_1.config.logError(err);
                     }
                 }
             }
-            let listenings = this.constructor.listenings;
-            if (listenings) {
-                for (let listening of listenings) {
-                    let target = listening.target;
-                    if (target) {
-                        if (typeof target == 'function') {
-                            target = target.call(this, this);
-                        }
-                        if (typeof target == 'string' && target.charAt(0) == '@') {
-                            target = Function(`return this.${target.slice(1)};`).call(this);
-                        }
-                    }
-                    else {
-                        target = this;
-                    }
-                    try {
-                        this.listenTo(target, typeof listening.type == 'function'
-                            ? listening.type.call(this, this.constructor)
-                            : listening.type, typeof listening.listener == 'string'
-                            ? this[listening.listener]
-                            : listening.listener, this, listening.useCapture);
-                    }
-                    catch (err) {
-                        config_1.config.logError(err);
-                    }
+            this.isReady = true;
+        }
+        try {
+            this.elementAttached();
+        }
+        catch (err) {
+            config_1.config.logError(err);
+        }
+        if (this._onElementAttachedHooks) {
+            for (let onElementAttachedHook of this._onElementAttachedHooks) {
+                try {
+                    onElementAttachedHook.call(this);
+                }
+                catch (err) {
+                    config_1.config.logError(err);
                 }
             }
-        });
+        }
+        let listenings = this.constructor.listenings;
+        if (listenings) {
+            for (let listening of listenings) {
+                let target = listening.target;
+                if (target) {
+                    if (typeof target == 'function') {
+                        target = target.call(this, this);
+                    }
+                    if (typeof target == 'string' && target.charAt(0) == '@') {
+                        target = Function(`return this.${target.slice(1)};`).call(this);
+                    }
+                }
+                else {
+                    target = this;
+                }
+                try {
+                    this.listenTo(target, typeof listening.type == 'function'
+                        ? listening.type.call(this, this.constructor)
+                        : listening.type, typeof listening.listener == 'string'
+                        ? this[listening.listener]
+                        : listening.listener, this, listening.useCapture);
+                }
+                catch (err) {
+                    config_1.config.logError(err);
+                }
+            }
+        }
     }
     _detach() {
         this._attached = false;
@@ -3880,15 +3869,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var RnIfThen_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 const next_tick_1 = __webpack_require__(50);
@@ -3959,9 +3939,7 @@ let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent
         }
     }
     _attach() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this._attached = true;
-        });
+        this._attached = true;
     }
     _detach() {
         this._attached = false;
@@ -4150,15 +4128,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var RnRepeat_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 const next_tick_1 = __webpack_require__(50);
@@ -4263,9 +4232,7 @@ let RnRepeat = RnRepeat_1 = class RnRepeat extends BaseComponent_1.BaseComponent
         }
     }
     _attach() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this._attached = true;
-        });
+        this._attached = true;
     }
     _detach() {
         this._attached = false;
@@ -4576,15 +4543,6 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const get_uid_1 = __webpack_require__(56);
 const move_content_1 = __webpack_require__(43);
@@ -4601,143 +4559,141 @@ let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
         return true;
     }
     _attach() {
-        return __awaiter(this, void 0, void 0, function* () {
-            this._attached = true;
-            if (this.isReady) {
-                this._unfreezeBindings();
-                if (this._childComponents) {
-                    attachChildComponentElements_1.attachChildComponentElements(this._childComponents);
-                }
-                return;
+        this._attached = true;
+        if (this.isReady) {
+            this._unfreezeBindings();
+            if (this._childComponents) {
+                attachChildComponentElements_1.attachChildComponentElements(this._childComponents);
             }
-            let ownerComponent = this.ownerComponent;
-            let contentOwnerComponent = ownerComponent.ownerComponent;
-            let ownerComponentInputContent = ownerComponent.$inputContent;
-            let el = this.element;
-            let cloneContent = this.cloneContent;
-            let content;
-            let childComponents;
-            let bindings;
-            let backBindings;
-            if (ownerComponentInputContent || !cloneContent) {
-                let name = this.name;
-                let forTag;
-                let for_;
-                if (!name) {
-                    forTag = this.forTag;
-                    if (forTag) {
-                        forTag = forTag.toUpperCase();
-                    }
-                    else {
-                        for_ = this.paramFor;
-                    }
-                }
-                let key = get_uid_1.getUID(ownerComponent) +
-                    '/' +
-                    (name ? 'slot:' + name : forTag ? 'tag:' + forTag : for_ || '');
-                if (name || forTag || for_) {
-                    let slotsContent;
-                    if (!cloneContent &&
-                        (slotsContent = contentOwnerComponent[KEY_SLOTS_CONTENT]) &&
-                        slotsContent.has(key)) {
-                        let container = slotsContent.get(key);
-                        if (container.firstChild) {
-                            content = move_content_1.moveContent(document.createDocumentFragment(), container);
-                            slotsContent.set(key, el);
-                            childComponents = container.$component._childComponents;
-                            bindings = container.$component._bindings;
-                        }
-                    }
-                    else if (ownerComponentInputContent) {
-                        if (for_ && for_.indexOf('__') == -1) {
-                            let elementBlockNames = ownerComponent.constructor
-                                ._elementBlockNames;
-                            for_ = elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
-                        }
-                        let selectedElements = ownerComponentInputContent.querySelectorAll(for_ ? '.' + for_ : forTag || `[slot=${name}]`);
-                        let selectedElementCount = selectedElements.length;
-                        if (selectedElementCount) {
-                            content = document.createDocumentFragment();
-                            for (let i = 0; i < selectedElementCount; i++) {
-                                content.appendChild(cloneContent ? cloneNode_1.cloneNode(selectedElements[i]) : selectedElements[i]);
-                            }
-                        }
-                        if (!cloneContent) {
-                            (slotsContent ||
-                                contentOwnerComponent[KEY_SLOTS_CONTENT] ||
-                                (contentOwnerComponent[KEY_SLOTS_CONTENT] = new Map())).set(key, el);
-                        }
-                    }
-                }
-                else if (cloneContent) {
-                    content = cloneNode_1.cloneNode(ownerComponentInputContent);
+            return;
+        }
+        let ownerComponent = this.ownerComponent;
+        let contentOwnerComponent = ownerComponent.ownerComponent;
+        let ownerComponentInputContent = ownerComponent.$inputContent;
+        let el = this.element;
+        let cloneContent = this.cloneContent;
+        let content;
+        let childComponents;
+        let bindings;
+        let backBindings;
+        if (ownerComponentInputContent || !cloneContent) {
+            let name = this.name;
+            let forTag;
+            let for_;
+            if (!name) {
+                forTag = this.forTag;
+                if (forTag) {
+                    forTag = forTag.toUpperCase();
                 }
                 else {
-                    let slotsContent = contentOwnerComponent[KEY_SLOTS_CONTENT];
-                    if (slotsContent && slotsContent.has(key)) {
-                        let container = slotsContent.get(key);
+                    for_ = this.paramFor;
+                }
+            }
+            let key = get_uid_1.getUID(ownerComponent) +
+                '/' +
+                (name ? 'slot:' + name : forTag ? 'tag:' + forTag : for_ || '');
+            if (name || forTag || for_) {
+                let slotsContent;
+                if (!cloneContent &&
+                    (slotsContent = contentOwnerComponent[KEY_SLOTS_CONTENT]) &&
+                    slotsContent.has(key)) {
+                    let container = slotsContent.get(key);
+                    if (container.firstChild) {
                         content = move_content_1.moveContent(document.createDocumentFragment(), container);
                         slotsContent.set(key, el);
                         childComponents = container.$component._childComponents;
                         bindings = container.$component._bindings;
                     }
-                    else if (ownerComponentInputContent) {
-                        content = ownerComponentInputContent;
-                        (slotsContent || (contentOwnerComponent[KEY_SLOTS_CONTENT] = new Map())).set(key, el);
+                }
+                else if (ownerComponentInputContent) {
+                    if (for_ && for_.indexOf('__') == -1) {
+                        let elementBlockNames = ownerComponent.constructor
+                            ._elementBlockNames;
+                        for_ = elementBlockNames[elementBlockNames.length - 1] + '__' + for_;
+                    }
+                    let selectedElements = ownerComponentInputContent.querySelectorAll(for_ ? '.' + for_ : forTag || `[slot=${name}]`);
+                    let selectedElementCount = selectedElements.length;
+                    if (selectedElementCount) {
+                        content = document.createDocumentFragment();
+                        for (let i = 0; i < selectedElementCount; i++) {
+                            content.appendChild(cloneContent ? cloneNode_1.cloneNode(selectedElements[i]) : selectedElements[i]);
+                        }
+                    }
+                    if (!cloneContent) {
+                        (slotsContent ||
+                            contentOwnerComponent[KEY_SLOTS_CONTENT] ||
+                            (contentOwnerComponent[KEY_SLOTS_CONTENT] = new Map())).set(key, el);
                     }
                 }
             }
-            if (bindings === undefined) {
-                if (content || this.element[Template_1.KEY_CONTENT_TEMPLATE]) {
-                    let contentBindingResult = [null, null, null];
-                    if (content) {
-                        bindContent_1.bindContent(content, contentOwnerComponent, this.getContext
-                            ? this.getContext.call(ownerComponent, ownerComponent.$context, this)
-                            : ownerComponent.$context, contentBindingResult);
-                    }
-                    else {
-                        content = this.element[Template_1.KEY_CONTENT_TEMPLATE].render(null, ownerComponent, this.getContext
-                            ? this.getContext.call(ownerComponent, this.$context, this)
-                            : this.$context, contentBindingResult);
-                    }
-                    childComponents = this._childComponents = contentBindingResult[0];
-                    this._bindings = contentBindingResult[1];
-                    backBindings = contentBindingResult[2];
-                    if (childComponents) {
-                        for (let i = childComponents.length; i;) {
-                            let childComponent = childComponents[--i];
-                            if (childComponent.element.firstChild &&
-                                childComponent.constructor.bindsInputContent) {
-                                childComponent.$inputContent = move_content_1.moveContent(document.createDocumentFragment(), childComponent.element);
-                            }
+            else if (cloneContent) {
+                content = cloneNode_1.cloneNode(ownerComponentInputContent);
+            }
+            else {
+                let slotsContent = contentOwnerComponent[KEY_SLOTS_CONTENT];
+                if (slotsContent && slotsContent.has(key)) {
+                    let container = slotsContent.get(key);
+                    content = move_content_1.moveContent(document.createDocumentFragment(), container);
+                    slotsContent.set(key, el);
+                    childComponents = container.$component._childComponents;
+                    bindings = container.$component._bindings;
+                }
+                else if (ownerComponentInputContent) {
+                    content = ownerComponentInputContent;
+                    (slotsContent || (contentOwnerComponent[KEY_SLOTS_CONTENT] = new Map())).set(key, el);
+                }
+            }
+        }
+        if (bindings === undefined) {
+            if (content || this.element[Template_1.KEY_CONTENT_TEMPLATE]) {
+                let contentBindingResult = [null, null, null];
+                if (content) {
+                    bindContent_1.bindContent(content, contentOwnerComponent, this.getContext
+                        ? this.getContext.call(ownerComponent, ownerComponent.$context, this)
+                        : ownerComponent.$context, contentBindingResult);
+                }
+                else {
+                    content = this.element[Template_1.KEY_CONTENT_TEMPLATE].render(null, ownerComponent, this.getContext
+                        ? this.getContext.call(ownerComponent, this.$context, this)
+                        : this.$context, contentBindingResult);
+                }
+                childComponents = this._childComponents = contentBindingResult[0];
+                this._bindings = contentBindingResult[1];
+                backBindings = contentBindingResult[2];
+                if (childComponents) {
+                    for (let i = childComponents.length; i;) {
+                        let childComponent = childComponents[--i];
+                        if (childComponent.element.firstChild &&
+                            childComponent.constructor.bindsInputContent) {
+                            childComponent.$inputContent = move_content_1.moveContent(document.createDocumentFragment(), childComponent.element);
                         }
                     }
                 }
-                else {
-                    this._childComponents = null;
-                    this._bindings = null;
-                }
             }
             else {
-                this._childComponents = childComponents;
-                this._bindings = bindings;
-                this._unfreezeBindings();
+                this._childComponents = null;
+                this._bindings = null;
             }
-            if (content) {
-                ElementProtoMixin_1.suppressConnectionStatusCallbacks();
-                el.appendChild(content);
-                ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+        }
+        else {
+            this._childComponents = childComponents;
+            this._bindings = bindings;
+            this._unfreezeBindings();
+        }
+        if (content) {
+            ElementProtoMixin_1.suppressConnectionStatusCallbacks();
+            el.appendChild(content);
+            ElementProtoMixin_1.resumeConnectionStatusCallbacks();
+        }
+        if (childComponents) {
+            attachChildComponentElements_1.attachChildComponentElements(childComponents);
+        }
+        if (backBindings) {
+            for (let i = backBindings.length; i; i -= 3) {
+                backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
             }
-            if (childComponents) {
-                attachChildComponentElements_1.attachChildComponentElements(childComponents);
-            }
-            if (backBindings) {
-                for (let i = backBindings.length; i; i -= 3) {
-                    backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
-                }
-            }
-            this.isReady = true;
-        });
+        }
+        this.isReady = true;
     }
     _detach() {
         this._attached = false;

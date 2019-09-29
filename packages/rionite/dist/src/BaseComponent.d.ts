@@ -110,7 +110,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     setTimeout(cb: Function, delay: number): IDisposableTimeout;
     setInterval(cb: Function, delay: number): IDisposableInterval;
     registerCallback(cb: Function): IDisposableCallback;
-    _attach(): Promise<void>;
+    _attach(): void;
     _detach(): void;
     dispose(): BaseComponent;
     _freezeBindings(): void;
@@ -119,8 +119,8 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     elementConnected(): void;
     elementDisconnected(): void;
     initialize(): Promise<any> | void;
-    ready(): Promise<any> | void;
-    elementAttached(): Promise<any> | void;
+    ready(): void;
+    elementAttached(): void;
     elementDetached(): void;
     elementMoved(): void;
     $<R = BaseComponent | Element>(name: string, container?: Element | BaseComponent | string): R | null;

@@ -13,7 +13,7 @@ export declare class RnIfThen extends BaseComponent {
     elementConnected(): void;
     elementDisconnected(): void;
     _onIfChange(): void;
-    _attach(): Promise<void>;
+    _attach(): void;
     _detach(): void;
     _render(changed: boolean): void;
     _deactivate(): void;
