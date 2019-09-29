@@ -58,7 +58,7 @@ export class RnSlot extends BaseComponent {
 
 	_childComponents: Array<BaseComponent> | null;
 
-	_attach() {
+	async _attach() {
 		this._attached = true;
 
 		if (this.isReady) {

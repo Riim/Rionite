@@ -493,7 +493,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return registeredCallback;
 	}
 
-	_attach() {
+	async _attach() {
 		this._attached = true;
 
 		if (!this.initialized) {
@@ -638,7 +638,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			}
 
 			try {
-				this.ready();
+				await this.ready();
 			} catch (err) {
 				config.logError(err);
 			}
@@ -646,7 +646,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			if (this._onReadyHooks) {
 				for (let onReadyHook of this._onReadyHooks) {
 					try {
-						onReadyHook.call(this);
+						await onReadyHook.call(this);
 					} catch (err) {
 						config.logError(err);
 					}
@@ -657,7 +657,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		}
 
 		try {
-			this.elementAttached();
+			await this.elementAttached();
 		} catch (err) {
 			config.logError(err);
 		}
@@ -665,7 +665,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		if (this._onElementAttachedHooks) {
 			for (let onElementAttachedHook of this._onElementAttachedHooks) {
 				try {
-					onElementAttachedHook.call(this);
+					await onElementAttachedHook.call(this);
 				} catch (err) {
 					config.logError(err);
 				}
@@ -770,8 +770,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	elementConnected() {}
 	elementDisconnected() {}
 	initialize(): Promise<any> | void {}
-	ready() {}
-	elementAttached() {}
+	ready(): Promise<any> | void {}
+	elementAttached(): Promise<any> | void {}
 	elementDetached() {}
 	elementMoved() {}
 

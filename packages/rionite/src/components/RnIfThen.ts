@@ -107,7 +107,7 @@ export class RnIfThen extends BaseComponent {
 		}
 	}
 
-	_attach() {
+	async _attach() {
 		this._attached = true;
 	}
 	_detach() {
