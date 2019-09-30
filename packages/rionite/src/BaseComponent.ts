@@ -652,22 +652,38 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				}
 			}
 
-			callWithInterruptionHandling(this.ready, this);
+			try {
+				callWithInterruptionHandling(this.ready, this);
+			} catch (err) {
+				config.logError(err);
+			}
 
 			if (this._onReadyHooks) {
 				for (let onReadyHook of this._onReadyHooks) {
-					callWithInterruptionHandling(onReadyHook, this);
+					try {
+						callWithInterruptionHandling(onReadyHook, this);
+					} catch (err) {
+						config.logError(err);
+					}
 				}
 			}
 
 			this.isReady = true;
 		}
 
-		callWithInterruptionHandling(this.elementAttached, this);
+		try {
+			callWithInterruptionHandling(this.elementAttached, this);
+		} catch (err) {
+			config.logError(err);
+		}
 
 		if (this._onElementAttachedHooks) {
 			for (let onElementAttachedHook of this._onElementAttachedHooks) {
-				callWithInterruptionHandling(onElementAttachedHook, this);
+				try {
+					callWithInterruptionHandling(onElementAttachedHook, this);
+				} catch (err) {
+					config.logError(err);
+				}
 			}
 		}
 
@@ -711,11 +727,19 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	_detach() {
 		this._attached = false;
 
-		callWithInterruptionHandling(this.elementDetached, this);
+		try {
+			callWithInterruptionHandling(this.elementDetached, this);
+		} catch (err) {
+			config.logError(err);
+		}
 
 		if (this._onElementDetachedHooks) {
 			for (let onElementDetachedHook of this._onElementDetachedHooks) {
-				callWithInterruptionHandling(onElementDetachedHook, this);
+				try {
+					callWithInterruptionHandling(onElementDetachedHook, this);
+				} catch (err) {
+					config.logError(err);
+				}
 			}
 		}
 

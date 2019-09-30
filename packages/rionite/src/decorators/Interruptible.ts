@@ -11,13 +11,15 @@ export function Interruptible(
 	let method = propertyDesc!.value;
 
 	propertyDesc!.value = function(...args: Array<any>) {
-		try {
-			return method.call(this, ...args);
-		} catch (err) {
+		let result: Promise<any> = method.call(this, ...args);
+
+		result.catch(err => {
 			if (!(err instanceof InterruptError)) {
 				throw err;
 			}
-		}
+		});
+
+		return result;
 	};
 
 	return propertyDesc!;

@@ -4642,6 +4642,7 @@ exports.elementConstructors = new Map([
 Object.defineProperty(exports, "__esModule", { value: true });
 const defer_1 = __webpack_require__(37);
 const ComponentParams_1 = __webpack_require__(34);
+const config_1 = __webpack_require__(17);
 const Constants_1 = __webpack_require__(15);
 const callWithInterruptionHandling_1 = __webpack_require__(40);
 const observedAttributesFeature_1 = __webpack_require__(41);
@@ -4675,10 +4676,20 @@ exports.ElementProtoMixin = {
             if (component._attached) {
                 if (component._parentComponent === null) {
                     component._parentComponent = undefined;
-                    callWithInterruptionHandling_1.callWithInterruptionHandling(component.elementMoved, component);
+                    try {
+                        callWithInterruptionHandling_1.callWithInterruptionHandling(component.elementMoved, component);
+                    }
+                    catch (err) {
+                        config_1.config.logError(err);
+                    }
                     if (component._onElementMovedHooks) {
                         for (let onElementMovedHook of component._onElementMovedHooks) {
-                            callWithInterruptionHandling_1.callWithInterruptionHandling(onElementMovedHook, component);
+                            try {
+                                callWithInterruptionHandling_1.callWithInterruptionHandling(onElementMovedHook, component);
+                            }
+                            catch (err) {
+                                config_1.config.logError(err);
+                            }
                         }
                     }
                 }
@@ -4820,13 +4831,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = __webpack_require__(17);
 const InterruptError_1 = __webpack_require__(28);
 function callWithInterruptionHandling(fn, context) {
-    let result;
-    try {
-        result = fn.call(context);
-    }
-    catch (err) {
-        config_1.config.logError(err);
-    }
+    let result = fn.call(context);
     if (result instanceof Promise) {
         result.catch(err => {
             if (!(err instanceof InterruptError_1.InterruptError)) {
@@ -4958,14 +4963,13 @@ function Interruptible(target, propertyName, propertyDesc) {
     }
     let method = propertyDesc.value;
     propertyDesc.value = function (...args) {
-        try {
-            return method.call(this, ...args);
-        }
-        catch (err) {
+        let result = method.call(this, ...args);
+        result.catch(err => {
             if (!(err instanceof InterruptError_1.InterruptError)) {
                 throw err;
             }
-        }
+        });
+        return result;
     };
     return propertyDesc;
 }
@@ -5331,18 +5335,38 @@ class BaseComponent extends cellx_1.EventEmitter {
                     }
                 }
             }
-            callWithInterruptionHandling_1.callWithInterruptionHandling(this.ready, this);
+            try {
+                callWithInterruptionHandling_1.callWithInterruptionHandling(this.ready, this);
+            }
+            catch (err) {
+                config_1.config.logError(err);
+            }
             if (this._onReadyHooks) {
                 for (let onReadyHook of this._onReadyHooks) {
-                    callWithInterruptionHandling_1.callWithInterruptionHandling(onReadyHook, this);
+                    try {
+                        callWithInterruptionHandling_1.callWithInterruptionHandling(onReadyHook, this);
+                    }
+                    catch (err) {
+                        config_1.config.logError(err);
+                    }
                 }
             }
             this.isReady = true;
         }
-        callWithInterruptionHandling_1.callWithInterruptionHandling(this.elementAttached, this);
+        try {
+            callWithInterruptionHandling_1.callWithInterruptionHandling(this.elementAttached, this);
+        }
+        catch (err) {
+            config_1.config.logError(err);
+        }
         if (this._onElementAttachedHooks) {
             for (let onElementAttachedHook of this._onElementAttachedHooks) {
-                callWithInterruptionHandling_1.callWithInterruptionHandling(onElementAttachedHook, this);
+                try {
+                    callWithInterruptionHandling_1.callWithInterruptionHandling(onElementAttachedHook, this);
+                }
+                catch (err) {
+                    config_1.config.logError(err);
+                }
             }
         }
         let listenings = this.constructor.listenings;
@@ -5375,10 +5399,20 @@ class BaseComponent extends cellx_1.EventEmitter {
     }
     _detach() {
         this._attached = false;
-        callWithInterruptionHandling_1.callWithInterruptionHandling(this.elementDetached, this);
+        try {
+            callWithInterruptionHandling_1.callWithInterruptionHandling(this.elementDetached, this);
+        }
+        catch (err) {
+            config_1.config.logError(err);
+        }
         if (this._onElementDetachedHooks) {
             for (let onElementDetachedHook of this._onElementDetachedHooks) {
-                callWithInterruptionHandling_1.callWithInterruptionHandling(onElementDetachedHook, this);
+                try {
+                    callWithInterruptionHandling_1.callWithInterruptionHandling(onElementDetachedHook, this);
+                }
+                catch (err) {
+                    config_1.config.logError(err);
+                }
             }
         }
         this.dispose();

@@ -2,6 +2,7 @@ import { defer } from '@riim/defer';
 import { Cell } from 'cellx';
 import { BaseComponent, IComponentElement } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
+import { config } from './config';
 import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { callWithInterruptionHandling } from './lib/callWithInterruptionHandling';
 import { observedAttributesFeature } from './lib/observedAttributesFeature';
@@ -48,11 +49,19 @@ export const ElementProtoMixin = {
 				if (component._parentComponent === null) {
 					component._parentComponent = undefined;
 
-					callWithInterruptionHandling(component.elementMoved, component);
+					try {
+						callWithInterruptionHandling(component.elementMoved, component);
+					} catch (err) {
+						config.logError(err);
+					}
 
 					if (component._onElementMovedHooks) {
 						for (let onElementMovedHook of component._onElementMovedHooks) {
-							callWithInterruptionHandling(onElementMovedHook, component);
+							try {
+								callWithInterruptionHandling(onElementMovedHook, component);
+							} catch (err) {
+								config.logError(err);
+							}
 						}
 					}
 				}
