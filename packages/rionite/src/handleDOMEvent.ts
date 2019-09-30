@@ -1,5 +1,7 @@
 import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 import { KEY_CONTEXT } from './bindContent';
+import { config } from './config';
+import { InterruptError } from './lib/InterruptError';
 
 export const KEY_DOM_EVENTS = Symbol('domEvents');
 
@@ -43,15 +45,23 @@ export function handleDOMEvent(evt: Event) {
 							handler = events[elName][evtType];
 
 							if (handler) {
-								if (
-									handler.call(
-										component,
-										evt,
-										receiver[KEY_CONTEXT],
-										receiver
-									) === false
-								) {
+								let result = handler.call(
+									component,
+									evt,
+									receiver[KEY_CONTEXT],
+									receiver
+								);
+
+								if (result === false) {
 									return;
+								}
+
+								if (result instanceof Promise) {
+									result.catch(err => {
+										if (!(err instanceof InterruptError)) {
+											config.logError(err);
+										}
+									});
 								}
 
 								receivers.splice(i, 1);
@@ -63,8 +73,18 @@ export function handleDOMEvent(evt: Event) {
 				handler = component[receiver.getAttribute(attrName)!];
 
 				if (handler) {
-					if (handler.call(component, evt, receiver[KEY_CONTEXT], receiver) === false) {
+					let result = handler.call(component, evt, receiver[KEY_CONTEXT], receiver);
+
+					if (result === false) {
 						return;
+					}
+
+					if (result instanceof Promise) {
+						result.catch(err => {
+							if (!(err instanceof InterruptError)) {
+								config.logError(err);
+							}
+						});
 					}
 
 					if (i != receivers.length && receivers[i] == receiver) {

@@ -105,40 +105,46 @@ __webpack_require__(1);
 __webpack_require__(2);
 var config_1 = __webpack_require__(17);
 exports.configure = config_1.configure;
+var InterruptError_1 = __webpack_require__(28);
+exports.InterruptError = InterruptError_1.InterruptError;
 var formatters_1 = __webpack_require__(16);
 exports.formatters = formatters_1.formatters;
-var Component_1 = __webpack_require__(29);
+var Component_1 = __webpack_require__(30);
 exports.Component = Component_1.Component;
-var Param_1 = __webpack_require__(40);
+var Param_1 = __webpack_require__(42);
 exports.Param = Param_1.Param;
-var Listen_1 = __webpack_require__(41);
+var Listen_1 = __webpack_require__(43);
 exports.Listen = Listen_1.Listen;
+var Callback_1 = __webpack_require__(44);
+exports.Callback = Callback_1.Callback;
+var Interruptible_1 = __webpack_require__(45);
+exports.Interruptible = Interruptible_1.Interruptible;
 var Constants_1 = __webpack_require__(15);
 exports.KEY_PARAMS_CONFIG = Constants_1.KEY_PARAMS_CONFIG;
 exports.KEY_PARAM_VALUES = Constants_1.KEY_PARAM_VALUES;
-var BaseComponent_1 = __webpack_require__(42);
+var BaseComponent_1 = __webpack_require__(46);
 exports.onReady = BaseComponent_1.onReady;
 exports.onElementAttached = BaseComponent_1.onElementAttached;
 exports.onElementDetached = BaseComponent_1.onElementDetached;
 exports.onElementMoved = BaseComponent_1.onElementMoved;
 exports.BaseComponent = BaseComponent_1.BaseComponent;
-var ElementProtoMixin_1 = __webpack_require__(35);
+var ElementProtoMixin_1 = __webpack_require__(36);
 exports.KEY_ELEMENT_CONNECTED = ElementProtoMixin_1.KEY_ELEMENT_CONNECTED;
-var ComponentParams_1 = __webpack_require__(33);
+var ComponentParams_1 = __webpack_require__(34);
 exports.ComponentParams = ComponentParams_1.ComponentParams;
 var Template_1 = __webpack_require__(3);
 exports.TemplateNodeType = Template_1.NodeType;
 exports.KEY_CONTENT_TEMPLATE = Template_1.KEY_CONTENT_TEMPLATE;
 exports.Template = Template_1.Template;
-var registerComponent_1 = __webpack_require__(30);
+var registerComponent_1 = __webpack_require__(31);
 exports.registerComponent = registerComponent_1.registerComponent;
-var RnIfThen_1 = __webpack_require__(49);
+var RnIfThen_1 = __webpack_require__(53);
 exports.RnIfThen = RnIfThen_1.RnIfThen;
-var RnIfElse_1 = __webpack_require__(54);
+var RnIfElse_1 = __webpack_require__(58);
 exports.RnIfElse = RnIfElse_1.RnIfElse;
-var RnRepeat_1 = __webpack_require__(53);
+var RnRepeat_1 = __webpack_require__(57);
 exports.RnRepeat = RnRepeat_1.RnRepeat;
-var RnSlot_1 = __webpack_require__(55);
+var RnSlot_1 = __webpack_require__(59);
 exports.RnSlot = RnSlot_1.RnSlot;
 
 
@@ -275,7 +281,7 @@ const componentConstructors_1 = __webpack_require__(26);
 const Constants_1 = __webpack_require__(15);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const handleDOMEvent_1 = __webpack_require__(27);
-const handleEvent_1 = __webpack_require__(28);
+const handleEvent_1 = __webpack_require__(29);
 const compileKeypath_1 = __webpack_require__(23);
 const setAttribute_1 = __webpack_require__(24);
 const svgNamespaceURI_1 = __webpack_require__(25);
@@ -2325,6 +2331,8 @@ exports.componentConstructors = new Map();
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const bindContent_1 = __webpack_require__(7);
+const config_1 = __webpack_require__(17);
+const InterruptError_1 = __webpack_require__(28);
 exports.KEY_DOM_EVENTS = Symbol('domEvents');
 function handleDOMEvent(evt) {
     let el = evt.target;
@@ -2355,8 +2363,16 @@ function handleDOMEvent(evt) {
                         if (events && events[elName]) {
                             handler = events[elName][evtType];
                             if (handler) {
-                                if (handler.call(component, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
+                                let result = handler.call(component, evt, receiver[bindContent_1.KEY_CONTEXT], receiver);
+                                if (result === false) {
                                     return;
+                                }
+                                if (result instanceof Promise) {
+                                    result.catch(err => {
+                                        if (!(err instanceof InterruptError_1.InterruptError)) {
+                                            config_1.config.logError(err);
+                                        }
+                                    });
                                 }
                                 receivers.splice(i, 1);
                             }
@@ -2365,8 +2381,16 @@ function handleDOMEvent(evt) {
                 }
                 handler = component[receiver.getAttribute(attrName)];
                 if (handler) {
-                    if (handler.call(component, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
+                    let result = handler.call(component, evt, receiver[bindContent_1.KEY_CONTEXT], receiver);
+                    if (result === false) {
                         return;
+                    }
+                    if (result instanceof Promise) {
+                        result.catch(err => {
+                            if (!(err instanceof InterruptError_1.InterruptError)) {
+                                config_1.config.logError(err);
+                            }
+                        });
                     }
                     if (i != receivers.length && receivers[i] == receiver) {
                         receivers.splice(i, 1);
@@ -2391,7 +2415,28 @@ exports.handleDOMEvent = handleDOMEvent;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+function InterruptError() {
+    if (!(this instanceof InterruptError)) {
+        return new InterruptError();
+    }
+}
+exports.InterruptError = InterruptError;
+InterruptError.prototype = {
+    __proto__: Error.prototype,
+    constructor: InterruptError
+};
+
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
 const bindContent_1 = __webpack_require__(7);
+const config_1 = __webpack_require__(17);
+const InterruptError_1 = __webpack_require__(28);
 exports.KEY_EVENTS = Symbol('events');
 const componentStack = [];
 function handleEvent(evt) {
@@ -2423,18 +2468,35 @@ function handleEvent(evt) {
                             let events = ownerComponent.constructor
                                 .events;
                             let handler = events[elName][evtType];
-                            if (handler &&
-                                handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) === false) {
-                                return;
+                            if (handler) {
+                                let result = handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver);
+                                if (result === false) {
+                                    return;
+                                }
+                                if (result instanceof Promise) {
+                                    result.catch(err => {
+                                        if (!(err instanceof InterruptError_1.InterruptError)) {
+                                            config_1.config.logError(err);
+                                        }
+                                    });
+                                }
                             }
                         }
                     }
                     if (attrName) {
                         let handler = ownerComponent[receiver.getAttribute(attrName)];
-                        if (handler &&
-                            handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver) ===
-                                false) {
-                            return;
+                        if (handler) {
+                            let result = handler.call(ownerComponent, evt, receiver[bindContent_1.KEY_CONTEXT], receiver);
+                            if (result === false) {
+                                return;
+                            }
+                            if (result instanceof Promise) {
+                                result.catch(err => {
+                                    if (!(err instanceof InterruptError_1.InterruptError)) {
+                                        config_1.config.logError(err);
+                                    }
+                                });
+                            }
                         }
                     }
                 }
@@ -2467,13 +2529,13 @@ exports.handleEvent = handleEvent;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const registerComponent_1 = __webpack_require__(30);
+const registerComponent_1 = __webpack_require__(31);
 function Component(config) {
     return (componentConstr) => {
         if (config) {
@@ -2506,21 +2568,21 @@ exports.Component = Component;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const kebab_case_1 = __webpack_require__(4);
-const pascalize_1 = __webpack_require__(31);
+const pascalize_1 = __webpack_require__(32);
 const rionite_snake_case_attribute_name_1 = __webpack_require__(5);
 const cellx_1 = __webpack_require__(6);
 const componentConstructors_1 = __webpack_require__(26);
-const ComponentParams_1 = __webpack_require__(33);
+const ComponentParams_1 = __webpack_require__(34);
 const Constants_1 = __webpack_require__(15);
-const elementConstructors_1 = __webpack_require__(34);
-const ElementProtoMixin_1 = __webpack_require__(35);
+const elementConstructors_1 = __webpack_require__(35);
+const ElementProtoMixin_1 = __webpack_require__(36);
 const Template_1 = __webpack_require__(3);
 const hasOwn = Object.prototype.hasOwnProperty;
 const push = Array.prototype.push;
@@ -2726,13 +2788,13 @@ exports.registerComponent = registerComponent;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(32);
+var camelize_1 = __webpack_require__(33);
 var cache = Object.create(null);
 function pascalize(str, useCache) {
     str = String(str);
@@ -2746,7 +2808,7 @@ exports.pascalize = pascalize;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2765,7 +2827,7 @@ exports.camelize = camelize;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2860,7 +2922,7 @@ exports.ComponentParams = {
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2911,17 +2973,17 @@ exports.elementConstructors = new Map([
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const defer_1 = __webpack_require__(36);
-const ComponentParams_1 = __webpack_require__(33);
-const config_1 = __webpack_require__(17);
+const defer_1 = __webpack_require__(37);
+const ComponentParams_1 = __webpack_require__(34);
 const Constants_1 = __webpack_require__(15);
-const observedAttributesFeature_1 = __webpack_require__(39);
+const callWithInterruptionHandling_1 = __webpack_require__(40);
+const observedAttributesFeature_1 = __webpack_require__(41);
 // export const KEY_IS_COMPONENT_ELEMENT = Symbol('isComponentElement');
 exports.KEY_ELEMENT_CONNECTED = Symbol('elementConnected');
 let connectionStatusCallbacksSuppressed = false;
@@ -2952,20 +3014,10 @@ exports.ElementProtoMixin = {
             if (component._attached) {
                 if (component._parentComponent === null) {
                     component._parentComponent = undefined;
-                    try {
-                        component.elementMoved();
-                    }
-                    catch (err) {
-                        config_1.config.logError(err);
-                    }
+                    callWithInterruptionHandling_1.callWithInterruptionHandling(component.elementMoved, component);
                     if (component._onElementMovedHooks) {
                         for (let onElementMovedHook of component._onElementMovedHooks) {
-                            try {
-                                onElementMovedHook.call(component);
-                            }
-                            catch (err) {
-                                config_1.config.logError(err);
-                            }
+                            callWithInterruptionHandling_1.callWithInterruptionHandling(onElementMovedHook, component);
                         }
                     }
                 }
@@ -3030,14 +3082,14 @@ exports.ElementProtoMixin = {
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils_1 = __webpack_require__(37);
-var config_1 = __webpack_require__(38);
+const utils_1 = __webpack_require__(38);
+var config_1 = __webpack_require__(39);
 exports.configure = config_1.configure;
 let queue;
 function run() {
@@ -3065,13 +3117,13 @@ exports.defer = defer;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const config_1 = __webpack_require__(38);
+const config_1 = __webpack_require__(39);
 function logError(...args) {
     config_1.config.logError(...args);
 }
@@ -3079,7 +3131,7 @@ exports.logError = logError;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3098,7 +3150,35 @@ exports.configure = configure;
 
 
 /***/ }),
-/* 39 */
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const config_1 = __webpack_require__(17);
+const InterruptError_1 = __webpack_require__(28);
+function callWithInterruptionHandling(fn, context) {
+    let result;
+    try {
+        result = fn.call(context);
+    }
+    catch (err) {
+        config_1.config.logError(err);
+    }
+    if (result instanceof Promise) {
+        result.catch(err => {
+            if (!(err instanceof InterruptError_1.InterruptError)) {
+                config_1.config.logError(err);
+            }
+        });
+    }
+}
+exports.callWithInterruptionHandling = callWithInterruptionHandling;
+
+
+/***/ }),
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3118,7 +3198,7 @@ exports.observedAttributesFeature = observedAttributesFeature_;
 
 
 /***/ }),
-/* 40 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3154,7 +3234,7 @@ exports.Param = Param;
 
 
 /***/ }),
-/* 41 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3184,27 +3264,77 @@ exports.Listen = Listen;
 
 
 /***/ }),
-/* 42 */
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function Callback(target, propertyName, propertyDesc) {
+    if (!propertyDesc) {
+        propertyDesc = Object.getOwnPropertyDescriptor(target, propertyName);
+    }
+    let method = propertyDesc.value;
+    propertyDesc.value = function (...args) {
+        return this._attached ? method.call(this, ...args) : Promise.resolve();
+    };
+    return propertyDesc;
+}
+exports.Callback = Callback;
+
+
+/***/ }),
+/* 45 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const InterruptError_1 = __webpack_require__(28);
+function Interruptible(target, propertyName, propertyDesc) {
+    if (!propertyDesc) {
+        propertyDesc = Object.getOwnPropertyDescriptor(target, propertyName);
+    }
+    let method = propertyDesc.value;
+    propertyDesc.value = function (...args) {
+        try {
+            return method.call(this, ...args);
+        }
+        catch (err) {
+            if (!(err instanceof InterruptError_1.InterruptError)) {
+                throw err;
+            }
+        }
+    };
+    return propertyDesc;
+}
+exports.Interruptible = Interruptible;
+
+
+/***/ }),
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const kebab_case_1 = __webpack_require__(4);
-const move_content_1 = __webpack_require__(43);
-const next_uid_1 = __webpack_require__(44);
+const move_content_1 = __webpack_require__(47);
+const next_uid_1 = __webpack_require__(48);
 const cellx_1 = __webpack_require__(6);
-const attachChildComponentElements_1 = __webpack_require__(45);
+const attachChildComponentElements_1 = __webpack_require__(49);
 const bindContent_1 = __webpack_require__(7);
-const componentBinding_1 = __webpack_require__(46);
+const componentBinding_1 = __webpack_require__(50);
 const config_1 = __webpack_require__(17);
 const Constants_1 = __webpack_require__(15);
-const elementConstructors_1 = __webpack_require__(34);
-const ElementProtoMixin_1 = __webpack_require__(35);
+const elementConstructors_1 = __webpack_require__(35);
+const ElementProtoMixin_1 = __webpack_require__(36);
 const handleDOMEvent_1 = __webpack_require__(27);
-const handleEvent_1 = __webpack_require__(28);
-const findChildComponents_1 = __webpack_require__(47);
-const normalizeTextNodes_1 = __webpack_require__(48);
+const handleEvent_1 = __webpack_require__(29);
+const callWithInterruptionHandling_1 = __webpack_require__(40);
+const findChildComponents_1 = __webpack_require__(51);
+const InterruptError_1 = __webpack_require__(28);
+const normalizeTextNodes_1 = __webpack_require__(52);
 const Template_1 = __webpack_require__(3);
 const hasOwn = Object.prototype.hasOwnProperty;
 const map = Array.prototype.map;
@@ -3438,6 +3568,12 @@ class BaseComponent extends cellx_1.EventEmitter {
         this._disposables.set(id, registeredCallback);
         return registeredCallback;
     }
+    $interruptIfNotAttached(value) {
+        if (!this._attached) {
+            throw InterruptError_1.InterruptError();
+        }
+        return value;
+    }
     _attach() {
         this._attached = true;
         if (!this.initialized) {
@@ -3453,9 +3589,13 @@ class BaseComponent extends cellx_1.EventEmitter {
             if (initializationResult) {
                 initializationResult.then(() => {
                     this.initialized = true;
-                    this._attach();
+                    if (this._attached) {
+                        this._attach();
+                    }
                 }, err => {
-                    config_1.config.logError(err);
+                    if (!(err instanceof InterruptError_1.InterruptError)) {
+                        config_1.config.logError(err);
+                    }
                 });
                 return;
             }
@@ -3530,38 +3670,18 @@ class BaseComponent extends cellx_1.EventEmitter {
                     }
                 }
             }
-            try {
-                this.ready();
-            }
-            catch (err) {
-                config_1.config.logError(err);
-            }
+            callWithInterruptionHandling_1.callWithInterruptionHandling(this.ready, this);
             if (this._onReadyHooks) {
                 for (let onReadyHook of this._onReadyHooks) {
-                    try {
-                        onReadyHook.call(this);
-                    }
-                    catch (err) {
-                        config_1.config.logError(err);
-                    }
+                    callWithInterruptionHandling_1.callWithInterruptionHandling(onReadyHook, this);
                 }
             }
             this.isReady = true;
         }
-        try {
-            this.elementAttached();
-        }
-        catch (err) {
-            config_1.config.logError(err);
-        }
+        callWithInterruptionHandling_1.callWithInterruptionHandling(this.elementAttached, this);
         if (this._onElementAttachedHooks) {
             for (let onElementAttachedHook of this._onElementAttachedHooks) {
-                try {
-                    onElementAttachedHook.call(this);
-                }
-                catch (err) {
-                    config_1.config.logError(err);
-                }
+                callWithInterruptionHandling_1.callWithInterruptionHandling(onElementAttachedHook, this);
             }
         }
         let listenings = this.constructor.listenings;
@@ -3594,20 +3714,10 @@ class BaseComponent extends cellx_1.EventEmitter {
     }
     _detach() {
         this._attached = false;
-        try {
-            this.elementDetached();
-        }
-        catch (err) {
-            config_1.config.logError(err);
-        }
+        callWithInterruptionHandling_1.callWithInterruptionHandling(this.elementDetached, this);
         if (this._onElementDetachedHooks) {
             for (let onElementDetachedHook of this._onElementDetachedHooks) {
-                try {
-                    onElementDetachedHook.call(this);
-                }
-                catch (err) {
-                    config_1.config.logError(err);
-                }
+                callWithInterruptionHandling_1.callWithInterruptionHandling(onElementDetachedHook, this);
             }
         }
         this.dispose();
@@ -3704,7 +3814,7 @@ document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 
 
 /***/ }),
-/* 43 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3720,7 +3830,7 @@ exports.moveContent = moveContent;
 
 
 /***/ }),
-/* 44 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3734,13 +3844,13 @@ exports.nextUID = nextUID;
 
 
 /***/ }),
-/* 45 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const ComponentParams_1 = __webpack_require__(33);
+const ComponentParams_1 = __webpack_require__(34);
 function attachChildComponentElements(childComponents) {
     for (let childComponent of childComponents) {
         childComponent._parentComponent = undefined;
@@ -3753,7 +3863,7 @@ exports.attachChildComponentElements = attachChildComponentElements;
 
 
 /***/ }),
-/* 46 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3798,7 +3908,7 @@ exports.unfreezeBindings = unfreezeBindings;
 
 
 /***/ }),
-/* 47 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3824,7 +3934,7 @@ exports.findChildComponents = findChildComponents;
 
 
 /***/ }),
-/* 48 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3858,7 +3968,7 @@ exports.normalizeTextNodes = normalizeTextNodes;
 
 
 /***/ }),
-/* 49 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3871,20 +3981,20 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var RnIfThen_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_tick_1 = __webpack_require__(50);
+const next_tick_1 = __webpack_require__(54);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(43);
-const attachChildComponentElements_1 = __webpack_require__(45);
-const BaseComponent_1 = __webpack_require__(42);
-const compileBinding_1 = __webpack_require__(51);
-const Component_1 = __webpack_require__(29);
-const ElementProtoMixin_1 = __webpack_require__(35);
+const move_content_1 = __webpack_require__(47);
+const attachChildComponentElements_1 = __webpack_require__(49);
+const BaseComponent_1 = __webpack_require__(46);
+const compileBinding_1 = __webpack_require__(55);
+const Component_1 = __webpack_require__(30);
+const ElementProtoMixin_1 = __webpack_require__(36);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
 const keypathPattern_1 = __webpack_require__(19);
-const removeNodes_1 = __webpack_require__(52);
+const removeNodes_1 = __webpack_require__(56);
 const Template_1 = __webpack_require__(3);
-const RnRepeat_1 = __webpack_require__(53);
+const RnRepeat_1 = __webpack_require__(57);
 const slice = Array.prototype.slice;
 const reKeypath = RegExp(`^${keypathPattern_1.keypathPattern}$`);
 let RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_1.BaseComponent {
@@ -4040,7 +4150,7 @@ exports.RnIfThen = RnIfThen;
 
 
 /***/ }),
-/* 50 */
+/* 54 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -4067,7 +4177,7 @@ const nextTick = (() => {
 
 
 /***/ }),
-/* 51 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4090,7 +4200,7 @@ exports.compileBinding = compileBinding;
 
 
 /***/ }),
-/* 52 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4117,7 +4227,7 @@ exports.removeNodes = removeNodes;
 
 
 /***/ }),
-/* 53 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4130,21 +4240,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var RnRepeat_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_tick_1 = __webpack_require__(50);
+const next_tick_1 = __webpack_require__(54);
 const cellx_1 = __webpack_require__(6);
-const move_content_1 = __webpack_require__(43);
-const attachChildComponentElements_1 = __webpack_require__(45);
-const BaseComponent_1 = __webpack_require__(42);
-const compileBinding_1 = __webpack_require__(51);
-const Component_1 = __webpack_require__(29);
-const ElementProtoMixin_1 = __webpack_require__(35);
+const move_content_1 = __webpack_require__(47);
+const attachChildComponentElements_1 = __webpack_require__(49);
+const BaseComponent_1 = __webpack_require__(46);
+const compileBinding_1 = __webpack_require__(55);
+const Component_1 = __webpack_require__(30);
+const ElementProtoMixin_1 = __webpack_require__(36);
 const getTemplateNodeValueAST_1 = __webpack_require__(22);
 const compileKeypath_1 = __webpack_require__(23);
 const keypathPattern_1 = __webpack_require__(19);
 const namePattern_1 = __webpack_require__(20);
-const removeNodes_1 = __webpack_require__(52);
+const removeNodes_1 = __webpack_require__(56);
 const Template_1 = __webpack_require__(3);
-const RnIfThen_1 = __webpack_require__(49);
+const RnIfThen_1 = __webpack_require__(53);
 const slice = Array.prototype.slice;
 const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\\s+(${keypathPattern_1.keypathPattern}(?:\\s*(.*\\S))?)\\s*$`);
 function getItem(list, index) {
@@ -4502,7 +4612,7 @@ exports.RnRepeat = RnRepeat;
 
 
 /***/ }),
-/* 54 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4514,8 +4624,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Component_1 = __webpack_require__(29);
-const RnIfThen_1 = __webpack_require__(49);
+const Component_1 = __webpack_require__(30);
+const RnIfThen_1 = __webpack_require__(53);
 let RnIfElse = class RnIfElse extends RnIfThen_1.RnIfThen {
     constructor() {
         super(...arguments);
@@ -4532,7 +4642,7 @@ exports.RnIfElse = RnIfElse;
 
 
 /***/ }),
-/* 55 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4544,14 +4654,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const get_uid_1 = __webpack_require__(56);
-const move_content_1 = __webpack_require__(43);
-const attachChildComponentElements_1 = __webpack_require__(45);
-const BaseComponent_1 = __webpack_require__(42);
+const get_uid_1 = __webpack_require__(60);
+const move_content_1 = __webpack_require__(47);
+const attachChildComponentElements_1 = __webpack_require__(49);
+const BaseComponent_1 = __webpack_require__(46);
 const bindContent_1 = __webpack_require__(7);
-const Component_1 = __webpack_require__(29);
-const ElementProtoMixin_1 = __webpack_require__(35);
-const cloneNode_1 = __webpack_require__(57);
+const Component_1 = __webpack_require__(30);
+const ElementProtoMixin_1 = __webpack_require__(36);
+const cloneNode_1 = __webpack_require__(61);
 const Template_1 = __webpack_require__(3);
 const KEY_SLOTS_CONTENT = Symbol('slotsContent');
 let RnSlot = class RnSlot extends BaseComponent_1.BaseComponent {
@@ -4732,27 +4842,27 @@ exports.RnSlot = RnSlot;
 
 
 /***/ }),
-/* 56 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const next_uid_1 = __webpack_require__(44);
+const next_uid_1 = __webpack_require__(48);
 const hasOwn = Object.prototype.hasOwnProperty;
 const KEY_UID = Symbol('uid');
 exports.getUID = (obj) => hasOwn.call(obj, KEY_UID) ? obj[KEY_UID] : (obj[KEY_UID] = next_uid_1.nextUID());
 
 
 /***/ }),
-/* 57 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const handleDOMEvent_1 = __webpack_require__(27);
-const handleEvent_1 = __webpack_require__(28);
+const handleEvent_1 = __webpack_require__(29);
 const Template_1 = __webpack_require__(3);
 const IE = !!document.documentMode || navigator.userAgent.indexOf('Edge/') != -1;
 function cloneNode(node) {

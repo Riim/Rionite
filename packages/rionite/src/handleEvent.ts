@@ -1,6 +1,8 @@
 import { IEvent } from 'cellx';
 import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 import { KEY_CONTEXT } from './bindContent';
+import { config } from './config';
+import { InterruptError } from './lib/InterruptError';
 
 export const KEY_EVENTS = Symbol('events');
 
@@ -46,16 +48,25 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 								.events!;
 							let handler = events[elName][evtType as any];
 
-							if (
-								handler &&
-								handler.call(
+							if (handler) {
+								let result = handler.call(
 									ownerComponent,
 									evt,
 									receiver[KEY_CONTEXT],
 									receiver
-								) === false
-							) {
-								return;
+								);
+
+								if (result === false) {
+									return;
+								}
+
+								if (result instanceof Promise) {
+									result.catch(err => {
+										if (!(err instanceof InterruptError)) {
+											config.logError(err);
+										}
+									});
+								}
 							}
 						}
 					}
@@ -64,12 +75,25 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 						let handler: TEventHandler | undefined =
 							ownerComponent[receiver.getAttribute(attrName)!];
 
-						if (
-							handler &&
-							handler.call(ownerComponent, evt, receiver[KEY_CONTEXT], receiver) ===
-								false
-						) {
-							return;
+						if (handler) {
+							let result = handler.call(
+								ownerComponent,
+								evt,
+								receiver[KEY_CONTEXT],
+								receiver
+							);
+
+							if (result === false) {
+								return;
+							}
+
+							if (result instanceof Promise) {
+								result.catch(err => {
+									if (!(err instanceof InterruptError)) {
+										config.logError(err);
+									}
+								});
+							}
 						}
 					}
 				}

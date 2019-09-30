@@ -2,10 +2,13 @@ import './lib/polyfills';
 import './lib/templateTransformers';
 
 export { configure } from './config';
+export { InterruptError } from './lib/InterruptError';
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
 export { Listen } from './decorators/Listen';
+export { Callback } from './decorators/Callback';
+export { Interruptible } from './decorators/Interruptible';
 export { KEY_PARAMS_CONFIG, KEY_PARAM_VALUES } from './Constants';
 export {
 	IDisposable,

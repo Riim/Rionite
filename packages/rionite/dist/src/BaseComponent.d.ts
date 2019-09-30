@@ -110,6 +110,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     setTimeout(cb: Function, delay: number): IDisposableTimeout;
     setInterval(cb: Function, delay: number): IDisposableInterval;
     registerCallback(cb: Function): IDisposableCallback;
+    $interruptIfNotAttached<V>(value: V): V;
     _attach(): void;
     _detach(): void;
     dispose(): BaseComponent;

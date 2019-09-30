@@ -17,7 +17,9 @@ import { elementConstructors } from './elementConstructors';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
+import { callWithInterruptionHandling } from './lib/callWithInterruptionHandling';
 import { findChildComponents } from './lib/findChildComponents';
+import { InterruptError } from './lib/InterruptError';
 import { normalizeTextNodes } from './lib/normalizeTextNodes';
 import { IBlock, KEY_CONTENT_TEMPLATE, Template } from './Template';
 
@@ -493,6 +495,14 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return registeredCallback;
 	}
 
+	$interruptIfNotAttached<V>(value: V): V {
+		if (!this._attached) {
+			throw InterruptError();
+		}
+
+		return value;
+	}
+
 	_attach() {
 		this._attached = true;
 
@@ -512,10 +522,15 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				initializationResult.then(
 					() => {
 						this.initialized = true;
-						this._attach();
+
+						if (this._attached) {
+							this._attach();
+						}
 					},
 					err => {
-						config.logError(err);
+						if (!(err instanceof InterruptError)) {
+							config.logError(err);
+						}
 					}
 				);
 
@@ -637,38 +652,22 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				}
 			}
 
-			try {
-				this.ready();
-			} catch (err) {
-				config.logError(err);
-			}
+			callWithInterruptionHandling(this.ready, this);
 
 			if (this._onReadyHooks) {
 				for (let onReadyHook of this._onReadyHooks) {
-					try {
-						onReadyHook.call(this);
-					} catch (err) {
-						config.logError(err);
-					}
+					callWithInterruptionHandling(onReadyHook, this);
 				}
 			}
 
 			this.isReady = true;
 		}
 
-		try {
-			this.elementAttached();
-		} catch (err) {
-			config.logError(err);
-		}
+		callWithInterruptionHandling(this.elementAttached, this);
 
 		if (this._onElementAttachedHooks) {
 			for (let onElementAttachedHook of this._onElementAttachedHooks) {
-				try {
-					onElementAttachedHook.call(this);
-				} catch (err) {
-					config.logError(err);
-				}
+				callWithInterruptionHandling(onElementAttachedHook, this);
 			}
 		}
 
@@ -712,19 +711,11 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	_detach() {
 		this._attached = false;
 
-		try {
-			this.elementDetached();
-		} catch (err) {
-			config.logError(err);
-		}
+		callWithInterruptionHandling(this.elementDetached, this);
 
 		if (this._onElementDetachedHooks) {
 			for (let onElementDetachedHook of this._onElementDetachedHooks) {
-				try {
-					onElementDetachedHook.call(this);
-				} catch (err) {
-					config.logError(err);
-				}
+				callWithInterruptionHandling(onElementDetachedHook, this);
 			}
 		}
 
