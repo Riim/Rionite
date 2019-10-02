@@ -38,6 +38,7 @@ import { NodeType, Template } from '../Template';
 				{
 					nodeType: NodeType.ELEMENT,
 					isTransformer: false,
+					nsSVG: el.nsSVG,
 					tagName: 'template',
 					is,
 					names: el.names,
@@ -58,6 +59,7 @@ import { NodeType, Template } from '../Template';
 		return {
 			nodeType: NodeType.ELEMENT,
 			isTransformer: false,
+			nsSVG: el.nsSVG,
 			tagName: 'template',
 			is,
 			names: null,

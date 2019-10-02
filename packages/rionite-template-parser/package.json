@@ -20,8 +20,5 @@
   "homepage": "https://github.com/Riim/Rionite#readme",
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "@riim/kebab-case": "^1.0.0"
   }
 }

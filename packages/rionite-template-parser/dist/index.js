@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const kebab_case_1 = require("@riim/kebab-case");
 var NodeType;
 (function (NodeType) {
     NodeType[NodeType["BLOCK"] = 1] = "BLOCK";
@@ -160,7 +159,7 @@ class TemplateParser {
         targetContent.push({
             nodeType: NodeType.ELEMENT,
             isTransformer,
-            tagName: tagName && (isTransformer ? tagName : kebab_case_1.kebabCase(tagName, true)),
+            tagName,
             names: elNames || null,
             attributes: attrs || null,
             content: content || null,

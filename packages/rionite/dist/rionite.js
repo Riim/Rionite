@@ -222,6 +222,7 @@ const Template_1 = __webpack_require__(3);
             {
                 nodeType: Template_1.NodeType.ELEMENT,
                 isTransformer: false,
+                nsSVG: el.nsSVG,
                 tagName: 'template',
                 is,
                 names: el.names,
@@ -240,6 +241,7 @@ const Template_1 = __webpack_require__(3);
         return {
             nodeType: Template_1.NodeType.ELEMENT,
             isTransformer: false,
+            nsSVG: el.nsSVG,
             tagName: 'template',
             is,
             names: null,
@@ -295,7 +297,6 @@ var NodeType;
     NodeType[NodeType["TEXT"] = 6] = "TEXT";
 })(NodeType = exports.NodeType || (exports.NodeType = {}));
 exports.KEY_CONTENT_TEMPLATE = Symbol('contentTemplate');
-const emptyObj = { __proto__: null };
 const escapee = new Map([
     ['/', '/'],
     ['\\', '\\'],
@@ -367,6 +368,7 @@ class Template {
                     '@root': {
                         nodeType: NodeType.ELEMENT,
                         isTransformer: true,
+                        nsSVG: false,
                         tagName: 'section',
                         is: null,
                         names: ['root'],
@@ -405,10 +407,10 @@ class Template {
             content: null,
             elements: this._elements
         });
-        this._readContent(this.parent ? null : block.elements['@root'].content, null, false, component && component.constructor);
+        this._readContent(this.parent ? null : block.elements['@root'].content, false, null, false, component && component.constructor);
         return block;
     }
-    _readContent(content, superElName, brackets, componentConstr) {
+    _readContent(targetContent, nsSVG, superElName, brackets, componentConstr) {
         if (brackets) {
             this._next( /* '{' */);
             this._skipWhitespacesAndComments();
@@ -418,7 +420,7 @@ class Template {
                 case "'":
                 case '"':
                 case '`': {
-                    (content || (content = [])).push({
+                    (targetContent || (targetContent = [])).push({
                         nodeType: NodeType.TEXT,
                         value: this._readString()
                     });
@@ -428,34 +430,36 @@ class Template {
                     if (brackets) {
                         this._throwError('Unexpected end of template. Expected "}" to close block.');
                     }
-                    return content;
+                    return targetContent;
                 }
                 default: {
                     let chr = this._chr;
                     if (chr == 'd' && this.template.substr(this._pos, 9) == 'debugger!') {
                         this._chr = this.template.charAt((this._pos += 9));
-                        (content || (content = [])).push({ nodeType: NodeType.DEBUGGER_CALL });
+                        (targetContent || (targetContent = [])).push({
+                            nodeType: NodeType.DEBUGGER_CALL
+                        });
                         break;
                     }
                     if (brackets) {
                         if (chr == '}') {
                             this._next();
-                            return content;
+                            return targetContent;
                         }
                         let superCall = this._readSuperCall(superElName);
                         if (superCall) {
-                            (content || (content = [])).push(superCall);
+                            (targetContent || (targetContent = [])).push(superCall);
                             break;
                         }
                     }
-                    content = this._readElement(content, superElName, componentConstr);
+                    targetContent = this._readElement(targetContent, nsSVG, superElName, componentConstr);
                     break;
                 }
             }
             this._skipWhitespacesAndComments();
         }
     }
-    _readElement(targetContent, superElName, componentConstr) {
+    _readElement(targetContent, nsSVG, superElName, componentConstr) {
         let pos = this._pos;
         let isTransformer = this._chr == '@';
         if (isTransformer) {
@@ -488,7 +492,10 @@ class Template {
             elName = isTransformer ? elNames[0] && '@' + elNames[0] : elNames[0];
         }
         if (tagName) {
-            if (!isTransformer) {
+            if (!nsSVG && tagName.toLowerCase() == 'svg') {
+                nsSVG = true;
+            }
+            if (!isTransformer && !nsSVG) {
                 tagName = kebab_case_1.kebabCase(tagName, true);
             }
         }
@@ -496,18 +503,21 @@ class Template {
             if (!elName) {
                 this._throwError('Expected element', pos);
             }
-            if (!this.parent || !(tagName = (this.parent._elements[elName] || emptyObj).tagName)) {
+            let parentEl;
+            if (!this.parent || !(parentEl = this.parent._elements[elName])) {
                 throw this._throwError('Element.tagName is required', isTransformer ? pos + 1 : pos);
             }
+            nsSVG = parentEl.nsSVG;
+            tagName = parentEl.tagName;
         }
-        let elComponentConstr = componentConstructors_1.componentConstructors.get(tagName);
+        let elComponentConstr = isTransformer || nsSVG ? null : componentConstructors_1.componentConstructors.get(tagName);
         let attrs;
         let $specifiedParams;
         if (elComponentConstr) {
             $specifiedParams = new Set();
         }
         if (this._chr == '(') {
-            attrs = this._readAttributes(elName || superElName, elComponentConstr && elComponentConstr[Constants_1.KEY_PARAMS_CONFIG], $specifiedParams);
+            attrs = this._readAttributes(nsSVG, elName || superElName, elComponentConstr && elComponentConstr[Constants_1.KEY_PARAMS_CONFIG], $specifiedParams);
             this._skipWhitespaces();
         }
         let events;
@@ -548,11 +558,12 @@ class Template {
         }
         let content;
         if (this._chr == '{') {
-            content = this._readContent(null, elName || superElName, true, componentConstr);
+            content = this._readContent(null, nsSVG, elName || superElName, true, componentConstr);
         }
         let el = {
             nodeType: NodeType.ELEMENT,
             isTransformer,
+            nsSVG,
             tagName,
             is: (attrs && attrs.attributeIsValue) || null,
             names: elNames || null,
@@ -574,12 +585,14 @@ class Template {
                 for (let i = 0, l = content.length; i < l; i++) {
                     let node = content[i];
                     if (node.nodeType == NodeType.ELEMENT) {
-                        if (node.content &&
+                        if (!nsSVG &&
+                            node.content &&
                             (node.tagName == 'template' ||
                                 node.tagName == 'rn-slot')) {
                             let contentEl = {
                                 nodeType: NodeType.ELEMENT,
                                 isTransformer: false,
+                                nsSVG: node.nsSVG,
                                 tagName: node.tagName,
                                 is: node.is,
                                 names: node.names,
@@ -640,12 +653,14 @@ class Template {
                         for (let i = 0, l = (el.content || []).length; i < l; i++) {
                             let node = el.content[i];
                             if (node.nodeType == NodeType.ELEMENT) {
-                                if (node.content &&
+                                if (!nsSVG &&
+                                    node.content &&
                                     (node.tagName == 'template' ||
                                         node.tagName == 'rn-slot')) {
                                     let contentEl = {
                                         nodeType: NodeType.ELEMENT,
                                         isTransformer: false,
+                                        nsSVG: node.nsSVG,
                                         tagName: node.tagName,
                                         is: node.is,
                                         names: node.names,
@@ -716,7 +731,7 @@ class Template {
         }
         return targetContent;
     }
-    _readAttributes(superElName, $paramsConfig, $specifiedParams) {
+    _readAttributes(nsSVG, superElName, $paramsConfig, $specifiedParams) {
         this._next( /* '(' */);
         if (this._skipWhitespacesAndComments() == ')') {
             this._next();
@@ -752,6 +767,9 @@ class Template {
                 let name = this._readName(reAttributeName);
                 if (!name) {
                     throw this._throwError('Expected attribute name');
+                }
+                if (!isTransformer && !nsSVG) {
+                    name = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true);
                 }
                 let fullName = (isTransformer ? '@' : '') + name;
                 let value;
@@ -1009,7 +1027,7 @@ class Template {
     }
     render(component, ownerComponent, context, result, parentComponent) {
         let block = this.parse(component);
-        return renderContent(document.createDocumentFragment(), block.content || block.elements['@root'].content, this, false, ownerComponent, context, result, parentComponent);
+        return renderContent(document.createDocumentFragment(), block.content || block.elements['@root'].content, this, ownerComponent, context, result, parentComponent);
     }
 }
 exports.Template = Template;
@@ -1017,7 +1035,7 @@ Template.elementTransformers = {
     section: el => el.content
 };
 Template.attributeTransformers = {};
-function renderContent(targetNode, content, template, isSVG, ownerComponent, context, result, parentComponent) {
+function renderContent(targetNode, content, template, ownerComponent, context, result, parentComponent) {
     if (content) {
         for (let node of content) {
             switch (node.nodeType) {
@@ -1026,20 +1044,19 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                     break;
                 }
                 case NodeType.SUPER_CALL: {
-                    renderContent(targetNode, node.element.content, template, isSVG, ownerComponent, context, result, parentComponent);
+                    renderContent(targetNode, node.element.content, template, ownerComponent, context, result, parentComponent);
                     continue;
                 }
             }
             switch (node.nodeType) {
                 case NodeType.ELEMENT: {
                     if (node.isTransformer) {
-                        renderContent(targetNode, node.content, template, isSVG, ownerComponent, context, result, parentComponent);
+                        renderContent(targetNode, node.content, template, ownerComponent, context, result, parentComponent);
                     }
                     else {
                         let tagName = node.tagName;
-                        let isSVG_ = isSVG || tagName == 'svg';
                         let el;
-                        if (isSVG_) {
+                        if (node.nsSVG) {
                             el = document.createElementNS(svgNamespaceURI_1.svgNamespaceURI, tagName);
                         }
                         else if (node.is) {
@@ -1070,9 +1087,7 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                                 if (attr.isTransformer) {
                                     continue;
                                 }
-                                let attrName = isSVG_
-                                    ? attr.name
-                                    : rionite_snake_case_attribute_name_1.snakeCaseAttributeName(attr.name, true);
+                                let attrName = attr.name;
                                 let attrValue = attr.value;
                                 if (attrName == 'class') {
                                     attrValue = (className || '') + attrValue;
@@ -1139,7 +1154,7 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                             }
                         }
                         if (className) {
-                            if (isSVG_) {
+                            if (node.nsSVG) {
                                 el.setAttribute('class', className);
                             }
                             else {
@@ -1173,10 +1188,10 @@ function renderContent(targetNode, content, template, isSVG, ownerComponent, con
                             (!nodeComponent ||
                                 !nodeComponent.constructor
                                     .bindsInputContent)) {
-                            renderContent(el, node.content, template, isSVG_, ownerComponent, context, result, nodeComponent);
+                            renderContent(el, node.content, template, ownerComponent, context, result, nodeComponent);
                         }
                         else {
-                            renderContent(el, node.content, template, isSVG_);
+                            renderContent(el, node.content, template);
                         }
                         targetNode.appendChild(el);
                     }

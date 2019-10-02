@@ -1,5 +1,3 @@
-import { kebabCase } from '@riim/kebab-case';
-
 export enum NodeType {
 	BLOCK = 1,
 	SUPER_CALL,
@@ -267,7 +265,7 @@ export class TemplateParser {
 		targetContent.push({
 			nodeType: NodeType.ELEMENT,
 			isTransformer,
-			tagName: tagName && (isTransformer ? tagName : kebabCase(tagName, true)),
+			tagName,
 			names: elNames || null,
 			attributes: attrs || null,
 			content: content || null,

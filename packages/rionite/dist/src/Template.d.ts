@@ -41,6 +41,7 @@ export interface IElementAttributes {
 export interface IElement extends INode {
     nodeType: NodeType.ELEMENT;
     isTransformer: boolean;
+    nsSVG: boolean;
     tagName: string;
     is: string | null;
     names: Array<string | null> | null;
@@ -82,9 +83,9 @@ export declare class Template {
     });
     initialize(component?: BaseComponent | null): void;
     parse(component?: BaseComponent | null): IBlock;
-    _readContent(content: TContent | null, superElName: string | null, brackets: boolean, componentConstr?: typeof BaseComponent | null): TContent | null;
-    _readElement(targetContent: TContent | null, superElName: string | null, componentConstr?: typeof BaseComponent | null): TContent | null;
-    _readAttributes(superElName: string | null, $paramsConfig?: Map<string, I$ComponentParamConfig> | null, $specifiedParams?: Set<string>): IElementAttributes | null;
+    _readContent(targetContent: TContent | null, nsSVG: boolean, superElName: string | null, brackets: boolean, componentConstr?: typeof BaseComponent | null): TContent | null;
+    _readElement(targetContent: TContent | null, nsSVG: boolean, superElName: string | null, componentConstr?: typeof BaseComponent | null): TContent | null;
+    _readAttributes(nsSVG: boolean, superElName: string | null, $paramsConfig?: Map<string, I$ComponentParamConfig> | null, $specifiedParams?: Set<string>): IElementAttributes | null;
     _readSuperCall(defaultElName: string | null): ISuperCall | null;
     _readName(reName: RegExp): string | null;
     _readString(): string;

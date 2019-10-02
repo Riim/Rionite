@@ -71,6 +71,7 @@ export interface IElementAttributes {
 export interface IElement extends INode {
 	nodeType: NodeType.ELEMENT;
 	isTransformer: boolean;
+	nsSVG: boolean;
 	tagName: string;
 	is: string | null;
 	names: Array<string | null> | null;
@@ -94,8 +95,6 @@ export interface IBlock extends INode {
 }
 
 export const KEY_CONTENT_TEMPLATE = Symbol('contentTemplate');
-
-const emptyObj = { __proto__: null };
 
 const escapee = new Map([
 	['/', '/'],
@@ -209,6 +208,7 @@ export class Template {
 						'@root': {
 							nodeType: NodeType.ELEMENT,
 							isTransformer: true,
+							nsSVG: false,
 							tagName: 'section',
 							is: null,
 							names: ['root'],
@@ -262,6 +262,7 @@ export class Template {
 
 		this._readContent(
 			this.parent ? null : block.elements['@root'].content,
+			false,
 			null,
 			false,
 			component && (component.constructor as typeof BaseComponent)
@@ -271,7 +272,8 @@ export class Template {
 	}
 
 	_readContent(
-		content: TContent | null,
+		targetContent: TContent | null,
+		nsSVG: boolean,
 		superElName: string | null,
 		brackets: boolean,
 		componentConstr?: typeof BaseComponent | null
@@ -286,7 +288,7 @@ export class Template {
 				case "'":
 				case '"':
 				case '`': {
-					(content || (content = [])).push({
+					(targetContent || (targetContent = [])).push({
 						nodeType: NodeType.TEXT,
 						value: this._readString()
 					} as ITextNode);
@@ -300,32 +302,40 @@ export class Template {
 						);
 					}
 
-					return content;
+					return targetContent;
 				}
 				default: {
 					let chr = this._chr;
 
 					if (chr == 'd' && this.template.substr(this._pos, 9) == 'debugger!') {
 						this._chr = this.template.charAt((this._pos += 9));
-						(content || (content = [])).push({ nodeType: NodeType.DEBUGGER_CALL });
+						(targetContent || (targetContent = [])).push({
+							nodeType: NodeType.DEBUGGER_CALL
+						});
+
 						break;
 					}
 
 					if (brackets) {
 						if (chr == '}') {
 							this._next();
-							return content;
+							return targetContent;
 						}
 
 						let superCall = this._readSuperCall(superElName);
 
 						if (superCall) {
-							(content || (content = [])).push(superCall);
+							(targetContent || (targetContent = [])).push(superCall);
 							break;
 						}
 					}
 
-					content = this._readElement(content, superElName, componentConstr);
+					targetContent = this._readElement(
+						targetContent,
+						nsSVG,
+						superElName,
+						componentConstr
+					);
 
 					break;
 				}
@@ -337,6 +347,7 @@ export class Template {
 
 	_readElement(
 		targetContent: TContent | null,
+		nsSVG: boolean,
 		superElName: string | null,
 		componentConstr?: typeof BaseComponent | null
 	): TContent | null {
@@ -386,7 +397,11 @@ export class Template {
 		}
 
 		if (tagName) {
-			if (!isTransformer) {
+			if (!nsSVG && tagName.toLowerCase() == 'svg') {
+				nsSVG = true;
+			}
+
+			if (!isTransformer && !nsSVG) {
 				tagName = kebabCase(tagName, true);
 			}
 		} else {
@@ -394,15 +409,20 @@ export class Template {
 				this._throwError('Expected element', pos);
 			}
 
-			if (!this.parent || !(tagName = (this.parent._elements[elName!] || emptyObj).tagName)) {
+			let parentEl: IElement | undefined;
+
+			if (!this.parent || !(parentEl = this.parent._elements[elName!])) {
 				throw this._throwError(
 					'Element.tagName is required',
 					isTransformer ? pos + 1 : pos
 				);
 			}
+
+			nsSVG = parentEl.nsSVG;
+			tagName = parentEl.tagName;
 		}
 
-		let elComponentConstr = componentConstructors.get(tagName);
+		let elComponentConstr = isTransformer || nsSVG ? null : componentConstructors.get(tagName);
 
 		let attrs: IElementAttributes | null | undefined;
 		let $specifiedParams: Set<string> | undefined;
@@ -413,6 +433,7 @@ export class Template {
 
 		if (this._chr == '(') {
 			attrs = this._readAttributes(
+				nsSVG,
 				elName || superElName,
 				elComponentConstr && elComponentConstr[KEY_PARAMS_CONFIG],
 				$specifiedParams
@@ -470,12 +491,13 @@ export class Template {
 		let content: TContent | null | undefined;
 
 		if (this._chr == '{') {
-			content = this._readContent(null, elName || superElName, true, componentConstr);
+			content = this._readContent(null, nsSVG, elName || superElName, true, componentConstr);
 		}
 
 		let el: IElement = {
 			nodeType: NodeType.ELEMENT,
 			isTransformer,
+			nsSVG,
 			tagName,
 			is: (attrs && attrs.attributeIsValue) || null,
 			names: elNames || null,
@@ -504,6 +526,7 @@ export class Template {
 
 					if (node.nodeType == NodeType.ELEMENT) {
 						if (
+							!nsSVG &&
 							(node as IElement).content &&
 							((node as IElement).tagName == 'template' ||
 								(node as IElement).tagName == 'rn-slot')
@@ -511,6 +534,7 @@ export class Template {
 							let contentEl: IElement = {
 								nodeType: NodeType.ELEMENT,
 								isTransformer: false,
+								nsSVG: (node as IElement).nsSVG,
 								tagName: (node as IElement).tagName,
 								is: (node as IElement).is,
 								names: (node as IElement).names,
@@ -585,6 +609,7 @@ export class Template {
 
 							if (node.nodeType == NodeType.ELEMENT) {
 								if (
+									!nsSVG &&
 									(node as IElement).content &&
 									((node as IElement).tagName == 'template' ||
 										(node as IElement).tagName == 'rn-slot')
@@ -592,6 +617,7 @@ export class Template {
 									let contentEl: IElement = {
 										nodeType: NodeType.ELEMENT,
 										isTransformer: false,
+										nsSVG: (node as IElement).nsSVG,
 										tagName: (node as IElement).tagName,
 										is: (node as IElement).is,
 										names: (node as IElement).names,
@@ -682,6 +708,7 @@ export class Template {
 	}
 
 	_readAttributes(
+		nsSVG: boolean,
 		superElName: string | null,
 		$paramsConfig?: Map<string, I$ComponentParamConfig> | null,
 		$specifiedParams?: Set<string>
@@ -732,6 +759,10 @@ export class Template {
 
 				if (!name) {
 					throw this._throwError('Expected attribute name');
+				}
+
+				if (!isTransformer && !nsSVG) {
+					name = snakeCaseAttributeName(name, true);
 				}
 
 				let fullName = (isTransformer ? '@' : '') + name;
@@ -1074,7 +1105,6 @@ export class Template {
 			document.createDocumentFragment(),
 			block.content || block.elements['@root'].content,
 			this,
-			false,
 			ownerComponent,
 			context,
 			result,
@@ -1087,7 +1117,6 @@ function renderContent<T extends Node = Element>(
 	targetNode: T,
 	content: TContent | null,
 	template: Template,
-	isSVG: boolean,
 	ownerComponent?: BaseComponent,
 	context?: object,
 	result?: TContentBindingResult,
@@ -1105,7 +1134,6 @@ function renderContent<T extends Node = Element>(
 						targetNode,
 						(node as ISuperCall).element.content,
 						template,
-						isSVG,
 						ownerComponent,
 						context,
 						result,
@@ -1123,7 +1151,6 @@ function renderContent<T extends Node = Element>(
 							targetNode,
 							(node as IElement).content,
 							template,
-							isSVG,
 							ownerComponent,
 							context,
 							result,
@@ -1131,10 +1158,9 @@ function renderContent<T extends Node = Element>(
 						);
 					} else {
 						let tagName = (node as IElement).tagName;
-						let isSVG_ = isSVG || tagName == 'svg';
 						let el: Element;
 
-						if (isSVG_) {
+						if ((node as IElement).nsSVG) {
 							el = document.createElementNS(svgNamespaceURI, tagName);
 						} else if ((node as IElement).is) {
 							el = (window as any).innerHTML(
@@ -1184,9 +1210,7 @@ function renderContent<T extends Node = Element>(
 									continue;
 								}
 
-								let attrName = isSVG_
-									? attr.name
-									: snakeCaseAttributeName(attr.name, true);
+								let attrName = attr.name;
 								let attrValue: any = attr.value;
 
 								if (attrName == 'class') {
@@ -1310,7 +1334,7 @@ function renderContent<T extends Node = Element>(
 						}
 
 						if (className) {
-							if (isSVG_) {
+							if ((node as IElement).nsSVG) {
 								el.setAttribute('class', className);
 							} else {
 								el.className = className;
@@ -1355,14 +1379,13 @@ function renderContent<T extends Node = Element>(
 								el,
 								(node as IElement).content,
 								template,
-								isSVG_,
 								ownerComponent,
 								context,
 								result,
 								nodeComponent
 							);
 						} else {
-							renderContent(el, (node as IElement).content, template, isSVG_);
+							renderContent(el, (node as IElement).content, template);
 						}
 
 						targetNode.appendChild(el);
