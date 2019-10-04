@@ -433,7 +433,6 @@ export class Template {
 
 		if (this._chr == '(') {
 			attrs = this._readAttributes(
-				nsSVG,
 				elName || superElName,
 				elComponentConstr && elComponentConstr[KEY_PARAMS_CONFIG],
 				$specifiedParams
@@ -708,7 +707,6 @@ export class Template {
 	}
 
 	_readAttributes(
-		nsSVG: boolean,
 		superElName: string | null,
 		$paramsConfig?: Map<string, I$ComponentParamConfig> | null,
 		$specifiedParams?: Set<string>
@@ -761,9 +759,9 @@ export class Template {
 					throw this._throwError('Expected attribute name');
 				}
 
-				if (!isTransformer && !nsSVG) {
-					name = snakeCaseAttributeName(name, true);
-				}
+				// if (!isTransformer && !nsSVG) {
+				// 	name = snakeCaseAttributeName(name, true);
+				// }
 
 				let fullName = (isTransformer ? '@' : '') + name;
 				let value: string;
@@ -1210,7 +1208,10 @@ function renderContent<T extends Node = Element>(
 									continue;
 								}
 
-								let attrName = attr.name;
+								// let attrName = attr.name;
+								let attrName = (node as IElement).nsSVG
+									? attr.name
+									: snakeCaseAttributeName(attr.name, true);
 								let attrValue: any = attr.value;
 
 								if (attrName == 'class') {

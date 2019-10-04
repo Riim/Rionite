@@ -517,7 +517,7 @@ class Template {
             $specifiedParams = new Set();
         }
         if (this._chr == '(') {
-            attrs = this._readAttributes(nsSVG, elName || superElName, elComponentConstr && elComponentConstr[Constants_1.KEY_PARAMS_CONFIG], $specifiedParams);
+            attrs = this._readAttributes(elName || superElName, elComponentConstr && elComponentConstr[Constants_1.KEY_PARAMS_CONFIG], $specifiedParams);
             this._skipWhitespaces();
         }
         let events;
@@ -731,7 +731,7 @@ class Template {
         }
         return targetContent;
     }
-    _readAttributes(nsSVG, superElName, $paramsConfig, $specifiedParams) {
+    _readAttributes(superElName, $paramsConfig, $specifiedParams) {
         this._next( /* '(' */);
         if (this._skipWhitespacesAndComments() == ')') {
             this._next();
@@ -768,9 +768,9 @@ class Template {
                 if (!name) {
                     throw this._throwError('Expected attribute name');
                 }
-                if (!isTransformer && !nsSVG) {
-                    name = rionite_snake_case_attribute_name_1.snakeCaseAttributeName(name, true);
-                }
+                // if (!isTransformer && !nsSVG) {
+                // 	name = snakeCaseAttributeName(name, true);
+                // }
                 let fullName = (isTransformer ? '@' : '') + name;
                 let value;
                 if (this._skipWhitespacesAndComments() == '=') {
@@ -1087,7 +1087,10 @@ function renderContent(targetNode, content, template, ownerComponent, context, r
                                 if (attr.isTransformer) {
                                     continue;
                                 }
-                                let attrName = attr.name;
+                                // let attrName = attr.name;
+                                let attrName = node.nsSVG
+                                    ? attr.name
+                                    : rionite_snake_case_attribute_name_1.snakeCaseAttributeName(attr.name, true);
                                 let attrValue = attr.value;
                                 if (attrName == 'class') {
                                     attrValue = (className || '') + attrValue;
