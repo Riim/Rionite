@@ -1763,8 +1763,23 @@ exports.formatters = {
     gte(value1, value2) {
         return value1 >= value2;
     },
+    startsWith(str, searchString, pos) {
+        return (str || '').startsWith(searchString, pos);
+    },
+    endsWith(str, searchString, pos) {
+        return (str || '').endsWith(searchString, pos);
+    },
+    padStart(str, maxLength, fillString) {
+        return str && str.padStart(maxLength, fillString);
+    },
+    padEnd(str, maxLength, fillString) {
+        return str && str.padEnd(maxLength, fillString);
+    },
     replace(str, searchValue, replaceValue) {
         return str && str.replace(searchValue, replaceValue);
+    },
+    trim(str) {
+        return str && str.trim();
     },
     has(target, key) {
         return !!target && target.has(key);

@@ -58,8 +58,28 @@ export const formatters: Record<string, Function> = {
 		return value1 >= value2;
 	},
 
+	startsWith(str: string | null, searchString: string, pos?: number): boolean {
+		return (str || '').startsWith(searchString, pos);
+	},
+
+	endsWith(str: string | null, searchString: string, pos?: number): boolean {
+		return (str || '').endsWith(searchString, pos);
+	},
+
+	padStart(str: string | null, maxLength: number, fillString?: string): string | null {
+		return str && str.padStart(maxLength, fillString);
+	},
+
+	padEnd(str: string | null, maxLength: number, fillString?: string): string | null {
+		return str && str.padEnd(maxLength, fillString);
+	},
+
 	replace(str: string | null, searchValue: string | RegExp, replaceValue: string): string | null {
 		return str && str.replace(searchValue, replaceValue);
+	},
+
+	trim(str: string | null): string | null {
+		return str && str.trim();
 	},
 
 	has(target: { has(key: any): boolean } | null | undefined, key: any): boolean {
