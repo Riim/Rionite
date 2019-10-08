@@ -3265,16 +3265,22 @@ exports.componentParamValueСonverters = new Map([
         Object,
         {
             toData: (rawValue, defaultValue, el) => {
-                if (!rawValue) {
-                    return defaultValue && defaultValue.clone
+                if (rawValue) {
+                    let value = el[exports.KEY_COMPONENT_PARAM_VALUES] && el[exports.KEY_COMPONENT_PARAM_VALUES].get(rawValue);
+                    if (!value) {
+                        throw new TypeError('Value is not an object');
+                    }
+                    return value;
+                }
+                if (!defaultValue) {
+                    return null;
+                }
+                if (typeof defaultValue == 'object' && defaultValue.clone) {
+                    return defaultValue.clone.length
                         ? defaultValue.clone(true)
-                        : defaultValue || null;
+                        : defaultValue.clone();
                 }
-                let value = el[exports.KEY_COMPONENT_PARAM_VALUES] && el[exports.KEY_COMPONENT_PARAM_VALUES].get(rawValue);
-                if (!value) {
-                    throw new TypeError('Value is not an object');
-                }
-                return value;
+                return defaultValue;
             },
             toString: null
         }
@@ -3283,11 +3289,18 @@ exports.componentParamValueСonverters = new Map([
         eval,
         {
             toData: (rawValue, defaultValue) => {
-                return rawValue !== null
-                    ? Function(`return ${escape_html_1.unescapeHTML(rawValue)};`)()
-                    : defaultValue !== undefined
-                        ? defaultValue
-                        : null;
+                if (rawValue !== null) {
+                    return Function(`return ${escape_html_1.unescapeHTML(rawValue)};`)();
+                }
+                if (defaultValue == null) {
+                    return null;
+                }
+                if (defaultValue && typeof defaultValue == 'object' && defaultValue.clone) {
+                    return defaultValue.clone.length
+                        ? defaultValue.clone(true)
+                        : defaultValue.clone();
+                }
+                return defaultValue;
             },
             toString: null
         }

@@ -63,20 +63,28 @@ export const componentParamValue–°onverters = new Map<any, IComponentParamValue–
 				defaultValue: object | null | undefined,
 				el: Element
 			): object | null => {
-				if (!rawValue) {
-					return defaultValue && (defaultValue as any).clone
+				if (rawValue) {
+					let value =
+						el[KEY_COMPONENT_PARAM_VALUES] && el[KEY_COMPONENT_PARAM_VALUES].get(rawValue);
+
+					if (!value) {
+						throw new TypeError('Value is not an object');
+					}
+
+					return value;
+				}
+
+				if (!defaultValue) {
+					return null;
+				}
+
+				if (typeof defaultValue == 'object' && (defaultValue as any).clone) {
+					return (defaultValue as any).clone.length
 						? (defaultValue as any).clone(true)
-						: defaultValue || null;
+						: (defaultValue as any).clone();
 				}
 
-				let value =
-					el[KEY_COMPONENT_PARAM_VALUES] && el[KEY_COMPONENT_PARAM_VALUES].get(rawValue);
-
-				if (!value) {
-					throw new TypeError('Value is not an object');
-				}
-
-				return value;
+				return defaultValue;
 			},
 
 			toString: null
@@ -87,11 +95,21 @@ export const componentParamValue–°onverters = new Map<any, IComponentParamValue–
 		eval,
 		{
 			toData: (rawValue: string | null, defaultValue: any): any => {
-				return rawValue !== null
-					? Function(`return ${unescapeHTML(rawValue)};`)()
-					: defaultValue !== undefined
-					? defaultValue
-					: null;
+				if (rawValue !== null) {
+					return Function(`return ${unescapeHTML(rawValue)};`)();
+				}
+
+				if (defaultValue == null) {
+					return null;
+				}
+
+				if (defaultValue && typeof defaultValue == 'object' && (defaultValue as any).clone) {
+					return (defaultValue as any).clone.length
+						? (defaultValue as any).clone(true)
+						: (defaultValue as any).clone();
+				}
+
+				return defaultValue;
 			},
 
 			toString: null
