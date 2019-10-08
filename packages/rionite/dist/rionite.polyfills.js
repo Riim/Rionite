@@ -1902,7 +1902,7 @@ const Template_1 = __webpack_require__(3);
         return {
             nodeType: Template_1.NodeType.ELEMENT,
             isTransformer: false,
-            nsSVG: el.nsSVG,
+            nsSVG: false,
             tagName: 'template',
             is,
             names: null,

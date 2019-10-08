@@ -59,7 +59,7 @@ import { NodeType, Template } from '../Template';
 		return {
 			nodeType: NodeType.ELEMENT,
 			isTransformer: false,
-			nsSVG: el.nsSVG,
+			nsSVG: false,
 			tagName: 'template',
 			is,
 			names: null,

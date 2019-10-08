@@ -45,7 +45,7 @@
     "@riim/next-uid": "^1.0.0",
     "@riim/pascalize": "^1.0.1",
     "@riim/rionite-snake-case-attribute-name": "^0.37.27",
-    "cellx": "^1.9.11",
+    "cellx": "^1.9.12",
     "escape-string": "^1.0.2"
   },
   "jest": {
