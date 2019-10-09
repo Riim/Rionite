@@ -6003,15 +6003,14 @@ const reForAttrValue = RegExp(`^\\s*(${namePattern_1.namePattern})\\s+(?:in|of)\
 function getItem(list, index) {
     return Array.isArray(list) ? list[index] : list.get(index);
 }
-function insertBefore(nodes, beforeNode) {
+function insertBefore(nodes, beforeNode, parentNode) {
     let nodeCount = nodes.length;
     if (nodeCount == 1) {
-        beforeNode.parentNode.insertBefore(nodes[0], beforeNode);
+        parentNode.insertBefore(nodes[0], beforeNode);
         return nodes[0];
     }
-    let parent = beforeNode.parentNode;
     for (let i = 0; i < nodeCount; i++) {
-        parent.insertBefore(nodes[i], beforeNode);
+        parentNode.insertBefore(nodes[i], beforeNode);
     }
     return nodes[nodeCount - 1];
 }
@@ -6128,7 +6127,7 @@ let RnRepeat = RnRepeat_1 = class RnRepeat extends BaseComponent_1.BaseComponent
                         }
                         $item.item.set(item);
                         $item.index.set(i);
-                        lastNode = insertBefore($item.nodes, lastNode == el && this.beforeTemplate ? el : lastNode.nextSibling);
+                        lastNode = insertBefore($item.nodes, lastNode == el && this.beforeTemplate ? el : lastNode.nextSibling, el.parentNode);
                         i++;
                     }
                     else {
@@ -6187,7 +6186,7 @@ let RnRepeat = RnRepeat_1 = class RnRepeat extends BaseComponent_1.BaseComponent
                                             k$Item[0].index.set(i);
                                             lastNode = insertBefore(k$Item[0].nodes, lastNode == el && this.beforeTemplate
                                                 ? el
-                                                : lastNode.nextSibling);
+                                                : lastNode.nextSibling, el.parentNode);
                                         }
                                         prevList.splice(foundIndex, foundCount);
                                         prevListLength -= foundCount;

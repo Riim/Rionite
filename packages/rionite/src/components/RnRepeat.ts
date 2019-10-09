@@ -37,18 +37,16 @@ function getItem(list: TList, index: number): any {
 	return Array.isArray(list) ? list[index] : list.get(index);
 }
 
-function insertBefore(nodes: Array<Node>, beforeNode: Node): Node {
+function insertBefore(nodes: Array<Node>, beforeNode: Node, parentNode: Node): Node {
 	let nodeCount = nodes.length;
 
 	if (nodeCount == 1) {
-		beforeNode.parentNode!.insertBefore(nodes[0], beforeNode);
+		parentNode.insertBefore(nodes[0], beforeNode);
 		return nodes[0];
 	}
 
-	let parent = beforeNode.parentNode!;
-
 	for (let i = 0; i < nodeCount; i++) {
-		parent.insertBefore(nodes[i], beforeNode);
+		parentNode.insertBefore(nodes[i], beforeNode);
 	}
 
 	return nodes[nodeCount - 1];
@@ -229,7 +227,8 @@ export class RnRepeat extends BaseComponent {
 
 						lastNode = insertBefore(
 							$item.nodes,
-							lastNode == el && this.beforeTemplate ? el : lastNode.nextSibling!
+							lastNode == el && this.beforeTemplate ? el : lastNode.nextSibling!,
+							el.parentNode!
 						);
 
 						i++;
@@ -303,7 +302,8 @@ export class RnRepeat extends BaseComponent {
 												k$Item[0].nodes,
 												lastNode == el && this.beforeTemplate
 													? el
-													: lastNode.nextSibling!
+													: lastNode.nextSibling!,
+												el.parentNode!
 											);
 										}
 
