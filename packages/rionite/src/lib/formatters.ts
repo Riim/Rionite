@@ -1,3 +1,4 @@
+import { getUID } from '@riim/get-uid';
 import { ObservableList } from 'cellx';
 import { config } from '../config';
 
@@ -58,28 +59,44 @@ export const formatters: Record<string, Function> = {
 		return value1 >= value2;
 	},
 
-	startsWith(str: string | null, searchString: string, pos?: number): boolean {
+	startsWith(str: string | null | undefined, searchString: string, pos?: number): boolean {
 		return (str || '').startsWith(searchString, pos);
 	},
 
-	endsWith(str: string | null, searchString: string, pos?: number): boolean {
+	endsWith(str: string | null | undefined, searchString: string, pos?: number): boolean {
 		return (str || '').endsWith(searchString, pos);
 	},
 
-	padStart(str: string | null, maxLength: number, fillString?: string): string | null {
+	padStart(
+		str: string | null | undefined,
+		maxLength: number,
+		fillString?: string
+	): string | null | undefined {
 		return str && str.padStart(maxLength, fillString);
 	},
 
-	padEnd(str: string | null, maxLength: number, fillString?: string): string | null {
+	padEnd(
+		str: string | null | undefined,
+		maxLength: number,
+		fillString?: string
+	): string | null | undefined {
 		return str && str.padEnd(maxLength, fillString);
 	},
 
-	replace(str: string | null, searchValue: string | RegExp, replaceValue: string): string | null {
+	replace(
+		str: string | null | undefined,
+		searchValue: string | RegExp,
+		replaceValue: string
+	): string | null | undefined {
 		return str && str.replace(searchValue, replaceValue);
 	},
 
-	trim(str: string | null): string | null {
+	trim(str: string | null | undefined): string | null | undefined {
 		return str && str.trim();
+	},
+
+	uid(target: object | null | undefined): string | null | undefined {
+		return target && getUID(target);
 	},
 
 	has(target: { has(key: any): boolean } | null | undefined, key: any): boolean {
