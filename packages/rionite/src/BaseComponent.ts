@@ -1,6 +1,6 @@
 import { kebabCase } from '@riim/kebab-case';
 import { moveContent } from '@riim/move-content';
-import { nextUID } from '@riim/next-uid';
+import { nextUID } from '@riim/uid';
 import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
 import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';

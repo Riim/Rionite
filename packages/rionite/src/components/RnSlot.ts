@@ -1,5 +1,5 @@
-import { getUID } from '@riim/get-uid';
 import { moveContent } from '@riim/move-content';
+import { getUID } from '@riim/uid';
 import { TListener } from 'cellx';
 import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent, IComponentElement } from '../BaseComponent';

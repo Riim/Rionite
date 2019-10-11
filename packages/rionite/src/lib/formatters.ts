@@ -1,4 +1,4 @@
-import { getUID } from '@riim/get-uid';
+import { getUID } from '@riim/uid';
 import { ObservableList } from 'cellx';
 import { config } from '../config';
 

@@ -47,14 +47,13 @@ module.exports = (env = {}) => {
 		externals: [
 			// '@riim/defer',
 			// '@riim/escape-html',
-			// '@riim/get-uid',
 			// '@riim/gettext',
 			// '@riim/kebab-case',
 			// '@riim/move-content',
 			// '@riim/next-tick',
-			// '@riim/next-uid',
 			// '@riim/rionite-snake-case-attribute-name',
-			'cellx',
+			'@riim/uid',
+			'cellx'
 			// 'escape-string'
 		],
 

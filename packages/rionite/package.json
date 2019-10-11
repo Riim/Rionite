@@ -37,15 +37,14 @@
   "dependencies": {
     "@riim/defer": "^1.1.2",
     "@riim/escape-html": "^1.1.5",
-    "@riim/get-uid": "^1.0.2",
     "@riim/gettext": "^2.0.0",
     "@riim/kebab-case": "^1.0.0",
     "@riim/move-content": "^1.0.0",
-    "@riim/next-tick": "^1.2.3",
-    "@riim/next-uid": "^1.0.0",
+    "@riim/next-tick": "^1.2.4",
     "@riim/pascalize": "^1.0.1",
     "@riim/rionite-snake-case-attribute-name": "^0.37.27",
-    "cellx": "^1.9.15",
+    "@riim/uid": "^1.0.0",
+    "cellx": "^1.9.16",
     "escape-string": "^1.0.2"
   },
   "jest": {

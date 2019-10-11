@@ -1,9 +1,8 @@
 {
 	"compilerOptions": {
 		"declaration": true,
-		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
-		"lib": ["dom", "es2017"],
+		"lib": ["es2017", "dom"],
 		"module": "commonjs",
 		"newLine": "lf",
 		"noImplicitAny": true,
@@ -13,6 +12,6 @@
 		"preserveConstEnums": true,
 		"strictNullChecks": true,
 		"suppressImplicitAnyIndexErrors": true,
-		"target": "es6"
+		"target": "es2017"
 	}
 }
