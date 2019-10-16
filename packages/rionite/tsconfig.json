@@ -3,7 +3,7 @@
 		"declaration": true,
 		"experimentalDecorators": true,
 		"lib": ["es2017", "dom"],
-		"module": "commonjs",
+		"module": "es2015",
 		"newLine": "lf",
 		"noImplicitAny": true,
 		"noImplicitReturns": true,

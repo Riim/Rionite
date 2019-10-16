@@ -5,7 +5,7 @@
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/src/index.d.ts",
   "scripts": {
-    "build": "rm -rf dist && webpack && gulp",
+    "build": "rm -rf dist && rollup -c && gulp",
     "test": "jest",
     "debug": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand"
   },
@@ -21,18 +21,18 @@
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
     "@types/jest": "^24.0.19",
-    "@types/node": "^12.11.1",
-    "awesome-typescript-loader": "^5.2.1",
     "document-register-element": "^1.14.3",
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
     "jest": "^24.9.0",
+    "rollup": "^1.24.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-tslint": "^0.2.2",
+    "rollup-plugin-typescript2": "^0.24.3",
     "ts-jest": "^24.1.0",
     "tslint": "^5.20.0",
-    "tslint-loader": "^3.6.0",
-    "typescript": "^3.6.4",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9"
+    "typescript": "^3.6.4"
   },
   "dependencies": {
     "@riim/defer": "^1.1.2",
@@ -58,9 +58,9 @@
     "transform": {
       "^.+\\.ts$": "ts-jest"
     },
-	"moduleNameMapper": {
-		"cellx": "<rootDir>/node_modules/cellx/dist/cellx.umd.js",
-		"@riim/uid": "<rootDir>/node_modules/@riim/uid/dist/uid.umd.js"
-	}
+    "moduleNameMapper": {
+      "cellx": "<rootDir>/node_modules/cellx/dist/cellx.umd.js",
+      "@riim/uid": "<rootDir>/node_modules/@riim/uid/dist/uid.umd.js"
+    }
   }
 }
