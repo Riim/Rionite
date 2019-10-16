@@ -12,34 +12,28 @@ export function Component<T extends BaseComponent>(config?: {
 	events?: IComponentEvents<T, IEvent<BaseComponent>> | null;
 	domEvents?: IComponentEvents<T, Event> | null;
 }) {
-	return (componentConstr: Function) => {
+	return (componentConstr: typeof BaseComponent) => {
 		if (config) {
 			if (config.elementIs !== undefined) {
-				(componentConstr as typeof BaseComponent).elementIs = config.elementIs;
+				componentConstr.elementIs = config.elementIs;
 			}
-
 			if (config.elementExtends !== undefined) {
-				(componentConstr as typeof BaseComponent).elementExtends = config.elementExtends;
+				componentConstr.elementExtends = config.elementExtends;
 			}
-
 			if (config.params !== undefined) {
-				(componentConstr as typeof BaseComponent).params = config.params;
+				componentConstr.params = config.params;
 			}
-
 			if (config.i18n !== undefined) {
-				(componentConstr as typeof BaseComponent).i18n = config.i18n;
+				componentConstr.i18n = config.i18n;
 			}
-
 			if (config.template !== undefined) {
-				(componentConstr as typeof BaseComponent).template = config.template;
+				componentConstr.template = config.template;
 			}
-
 			if (config.events !== undefined) {
-				(componentConstr as typeof BaseComponent).events = config.events;
+				componentConstr.events = config.events;
 			}
-
 			if (config.domEvents !== undefined) {
-				(componentConstr as typeof BaseComponent).domEvents = config.domEvents;
+				componentConstr.domEvents = config.domEvents;
 			}
 		}
 

@@ -24,11 +24,7 @@ export function Listen<T = BaseComponent>(
 		| TComponentListeningTarget<T>,
 	useCapture?: boolean
 ) {
-	return (
-		target: BaseComponent,
-		propertyName: string,
-		_propertyDesc?: PropertyDescriptor
-	): void => {
+	return (target: BaseComponent, methodName: string, _methodDesc?: PropertyDescriptor): void => {
 		let options: {
 			target?: TComponentListeningTarget;
 			useCapture?: boolean;
@@ -49,7 +45,7 @@ export function Listen<T = BaseComponent>(
 		).push({
 			target: options ? options.target : (optionsOrTarget as any),
 			type: evtType as TComponentListeningType,
-			listener: propertyName,
+			listener: methodName,
 			useCapture: options ? options.useCapture : useCapture
 		});
 	};

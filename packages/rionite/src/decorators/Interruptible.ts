@@ -2,15 +2,15 @@ import { InterruptError } from '../lib/InterruptError';
 
 export function Interruptible(
 	target: Object,
-	propertyName: string,
-	propertyDesc?: PropertyDescriptor
+	methodName: string,
+	methodDesc?: PropertyDescriptor
 ): PropertyDescriptor {
-	if (!propertyDesc) {
-		propertyDesc = Object.getOwnPropertyDescriptor(target, propertyName);
+	if (!methodDesc) {
+		methodDesc = Object.getOwnPropertyDescriptor(target, methodName);
 	}
-	let method = propertyDesc!.value;
+	let method = methodDesc!.value;
 
-	propertyDesc!.value = function(...args: Array<any>) {
+	methodDesc!.value = function(...args: Array<any>) {
 		let result: Promise<any> = method.call(this, ...args);
 
 		result.catch(err => {
@@ -22,5 +22,5 @@ export function Interruptible(
 		return result;
 	};
 
-	return propertyDesc!;
+	return methodDesc!;
 }

@@ -4964,7 +4964,7 @@ exports.Param = Param;
 Object.defineProperty(exports, "__esModule", { value: true });
 const hasOwn = Object.prototype.hasOwnProperty;
 function Listen(evtType, optionsOrTarget, useCapture) {
-    return (target, propertyName, _propertyDesc) => {
+    return (target, methodName, _methodDesc) => {
         let options = optionsOrTarget &&
             typeof optionsOrTarget == 'object' &&
             !Array.isArray(optionsOrTarget) &&
@@ -4977,7 +4977,7 @@ function Listen(evtType, optionsOrTarget, useCapture) {
             : (target.constructor.listenings = (target.constructor.listenings || []).slice())).push({
             target: options ? options.target : optionsOrTarget,
             type: evtType,
-            listener: propertyName,
+            listener: methodName,
             useCapture: options ? options.useCapture : useCapture
         });
     };
@@ -4992,15 +4992,15 @@ exports.Listen = Listen;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-function Callback(target, propertyName, propertyDesc) {
-    if (!propertyDesc) {
-        propertyDesc = Object.getOwnPropertyDescriptor(target, propertyName);
+function Callback(target, methodName, methodDesc) {
+    if (!methodDesc) {
+        methodDesc = Object.getOwnPropertyDescriptor(target, methodName);
     }
-    let method = propertyDesc.value;
-    propertyDesc.value = function (...args) {
+    let method = methodDesc.value;
+    methodDesc.value = function (...args) {
         return this._attached ? method.call(this, ...args) : Promise.resolve();
     };
-    return propertyDesc;
+    return methodDesc;
 }
 exports.Callback = Callback;
 
@@ -5013,12 +5013,12 @@ exports.Callback = Callback;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const InterruptError_1 = __webpack_require__(29);
-function Interruptible(target, propertyName, propertyDesc) {
-    if (!propertyDesc) {
-        propertyDesc = Object.getOwnPropertyDescriptor(target, propertyName);
+function Interruptible(target, methodName, methodDesc) {
+    if (!methodDesc) {
+        methodDesc = Object.getOwnPropertyDescriptor(target, methodName);
     }
-    let method = propertyDesc.value;
-    propertyDesc.value = function (...args) {
+    let method = methodDesc.value;
+    methodDesc.value = function (...args) {
         let result = method.call(this, ...args);
         result.catch(err => {
             if (!(err instanceof InterruptError_1.InterruptError)) {
@@ -5027,7 +5027,7 @@ function Interruptible(target, propertyName, propertyDesc) {
         });
         return result;
     };
-    return propertyDesc;
+    return methodDesc;
 }
 exports.Interruptible = Interruptible;
 

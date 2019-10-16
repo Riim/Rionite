@@ -2,17 +2,17 @@ import { BaseComponent } from '../BaseComponent';
 
 export function Callback(
 	target: BaseComponent,
-	propertyName: string,
-	propertyDesc?: PropertyDescriptor
+	methodName: string,
+	methodDesc?: PropertyDescriptor
 ): PropertyDescriptor {
-	if (!propertyDesc) {
-		propertyDesc = Object.getOwnPropertyDescriptor(target, propertyName);
+	if (!methodDesc) {
+		methodDesc = Object.getOwnPropertyDescriptor(target, methodName);
 	}
-	let method = propertyDesc!.value;
+	let method = methodDesc!.value;
 
-	propertyDesc!.value = function(this: BaseComponent, ...args: Array<any>) {
+	methodDesc!.value = function(this: BaseComponent, ...args: Array<any>) {
 		return this._attached ? method.call(this, ...args) : Promise.resolve();
 	};
 
-	return propertyDesc!;
+	return methodDesc!;
 }

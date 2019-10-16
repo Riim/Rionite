@@ -1,1 +1,1 @@
-export declare function Interruptible(target: Object, propertyName: string, propertyDesc?: PropertyDescriptor): PropertyDescriptor;
+export declare function Interruptible(target: Object, methodName: string, methodDesc?: PropertyDescriptor): PropertyDescriptor;

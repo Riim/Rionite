@@ -9,4 +9,4 @@ export declare function Component<T extends BaseComponent>(config?: {
     template?: string | IBlock | Template | null;
     events?: IComponentEvents<T, IEvent<BaseComponent>> | null;
     domEvents?: IComponentEvents<T, Event> | null;
-}): (componentConstr: Function) => void;
+}): (componentConstr: typeof BaseComponent) => void;
