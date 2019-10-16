@@ -57,6 +57,10 @@
     "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(js|ts)$",
     "transform": {
       "^.+\\.ts$": "ts-jest"
-    }
+    },
+	"moduleNameMapper": {
+		"cellx": "<rootDir>/node_modules/cellx/dist/cellx.umd.js",
+		"@riim/uid": "<rootDir>/node_modules/@riim/uid/dist/uid.umd.js"
+	}
   }
 }

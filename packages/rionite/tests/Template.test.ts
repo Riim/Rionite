@@ -1,4 +1,4 @@
-import { NodeType, Template } from '../src/Template';
+import { KEY_CONTENT_TEMPLATE, NodeType, Template } from '../src/Template';
 
 function fragmentToString(df: DocumentFragment): string {
 	let el = document.createElement('div');
@@ -783,7 +783,9 @@ describe('Template#render', () => {
 		);
 
 		expect(t1.renderToString()).toBe('<template></template>');
-		expect((t1.render().firstChild as any).contentTemplate.renderToString()).toBe('text');
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
+			'text'
+		);
 	});
 
 	test('встроенный шаблон (2)', () => {
@@ -797,11 +799,11 @@ describe('Template#render', () => {
 			`,
 			{ blockName: 'block1' }
 		);
-		let t2 = (t1.render().firstChild as any).contentTemplate as Template;
+		let t2 = t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template;
 
 		expect(t1.renderToString()).toBe('<template></template>');
 		expect(t2.renderToString()).toBe('<template></template>');
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'text'
 		);
 	});
@@ -818,11 +820,11 @@ describe('Template#render', () => {
 			{ blockName: 'block1' }
 		);
 		let t2 = t1.extend('', { blockName: 'block1-x' });
-		let t3 = (t2.render().firstChild as any).contentTemplate as Template;
+		let t3 = t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template;
 
 		expect(t2.renderToString()).toBe('<template></template>');
 		expect(t3.renderToString()).toBe('<template></template>');
-		expect(((t3.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t3.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'text'
 		);
 	});
@@ -846,7 +848,7 @@ describe('Template#render', () => {
 		expect(t1.renderToString()).toBe(
 			'<template></template><div class="block1__el1 ">text2</div>'
 		);
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1__el1 ">text2</div>'
 		);
 	});
@@ -872,13 +874,13 @@ describe('Template#render', () => {
 		);
 
 		expect(t1.renderToString()).toBe('<template class="block1__template1 "></template>');
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'text'
 		);
 		expect(t2.renderToString()).toBe(
 			'<template class="block1-x__template1 block1__template1 "></template>'
 		);
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<b>text</b>'
 		);
 	});
@@ -894,10 +896,10 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend('', { blockName: 'block1-x' });
 
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1__el1 "></div>'
 		);
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1-x__el1 block1__el1 "></div>'
 		);
 	});
@@ -920,10 +922,10 @@ describe('Template#render', () => {
 			{ blockName: 'block1-x' }
 		);
 
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1__el1 "></div>'
 		);
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1-x__el1 block1__el1 ">text</div>'
 		);
 	});
@@ -946,10 +948,10 @@ describe('Template#render', () => {
 			{ blockName: 'block1-x' }
 		);
 
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1__el1 "></div>'
 		);
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<span class="block1-x__el1 block1__el1 ">text</span>'
 		);
 	});
@@ -976,10 +978,10 @@ describe('Template#render', () => {
 			{ blockName: 'block1-x' }
 		);
 
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1__el1 ">text</div>'
 		);
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1-x__el1 block1__el1 "><span>text</span></div>'
 		);
 	});
@@ -1006,10 +1008,10 @@ describe('Template#render', () => {
 			{ blockName: 'block1-x' }
 		);
 
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1__el1 ">text</div>'
 		);
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1-x__el1 block1__el1 "><span class="block1-x__el2 block1__el2 ">text</span></div>'
 		);
 	});
@@ -1036,10 +1038,10 @@ describe('Template#render', () => {
 			{ blockName: 'block1-x' }
 		);
 
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1__el1 ">text</div>'
 		);
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1-x__el1 block1__el1 "><span>text</span></div>'
 		);
 	});
@@ -1066,10 +1068,10 @@ describe('Template#render', () => {
 			{ blockName: 'block1-x' }
 		);
 
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1__el1 ">text</div>'
 		);
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1-x__el1 block1__el1 "><span class="block1-x__el2 block1__el2 ">text</span></div>'
 		);
 	});
@@ -1090,10 +1092,10 @@ describe('Template#render', () => {
 			{ blockName: 'block1-x' }
 		);
 
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div attr1="value1" class="block1__el1 "></div>'
 		);
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div attr1="value2" class="block1-x__el1 block1__el1 "></div>'
 		);
 	});
@@ -1113,10 +1115,10 @@ describe('Template#render', () => {
 		expect(t2.renderToString()).toBe(
 			'<rn-slot class="block1-x__slot1 block1__slot1 "></rn-slot>'
 		);
-		expect(((t1.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t1.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1__el1 "></div>'
 		);
-		expect(((t2.render().firstChild as any).contentTemplate as Template).renderToString()).toBe(
+		expect((t2.render().firstChild![KEY_CONTENT_TEMPLATE] as Template).renderToString()).toBe(
 			'<div class="block1-x__el1 block1__el1 "></div>'
 		);
 	});
