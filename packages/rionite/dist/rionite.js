@@ -787,13 +787,11 @@
 	        cache$1.set(cacheKey, useComponentParamValues
 	            ? function (cell) {
 	                let value = inner.call(this, formatters, KEY_COMPONENT_SELF);
-	                if (value) {
-	                    if (typeof value == 'object' || typeof value == 'function') {
-	                        let meta = cell.meta;
-	                        (meta.element[KEY_COMPONENT_PARAM_VALUES] ||
-	                            (meta.element[KEY_COMPONENT_PARAM_VALUES] = new Map())).set(meta.attributeName, value);
-	                        return meta.attributeName;
-	                    }
+	                if (value && (typeof value == 'object' || typeof value == 'function')) {
+	                    let meta = cell.meta;
+	                    (meta.element[KEY_COMPONENT_PARAM_VALUES] ||
+	                        (meta.element[KEY_COMPONENT_PARAM_VALUES] = new Map())).set(meta.attributeName, value);
+	                    return meta.attributeName;
 	                }
 	                return value;
 	            }
@@ -912,7 +910,12 @@
 	                        ? attrValueAST[0].prefix
 	                        : null;
 	                    if (bindingPrefix === '=') {
-	                        setAttribute(child, targetAttrName, compileTemplateNodeValue(attrValueAST, attrValue, true).call(context));
+	                        setAttribute(child, targetAttrName, compileTemplateNodeValue(attrValueAST, attrValue, true).call(context, {
+	                            meta: {
+	                                element: child,
+	                                attributeName: targetAttrName
+	                            }
+	                        }));
 	                    }
 	                    else {
 	                        if (bindingPrefix !== '->') {
@@ -1987,7 +1990,12 @@
 	                                                    .prefix
 	                                                : null;
 	                                            if (bindingPrefix === '=') {
-	                                                attrValue = compileTemplateNodeValue(attrValueAST, attrValue, true).call(context);
+	                                                attrValue = compileTemplateNodeValue(attrValueAST, attrValue, true).call(context, {
+	                                                    meta: {
+	                                                        element: el,
+	                                                        attributeName: attrName
+	                                                    }
+	                                                });
 	                                            }
 	                                            else {
 	                                                if (bindingPrefix !== '->') {

@@ -1242,7 +1242,12 @@ function renderContent<T extends Node = Element>(
 													attrValueAST,
 													attrValue,
 													true
-												).call(context);
+												).call(context, {
+													meta: {
+														element: el,
+														attributeName: attrName
+													}
+												});
 											} else {
 												if (bindingPrefix !== '->') {
 													let cell = new Cell<

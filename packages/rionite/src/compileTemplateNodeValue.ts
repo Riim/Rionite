@@ -49,17 +49,15 @@ export function compileTemplateNodeValue(
 				? function(cell: Cell<any, IAttributeBindingCellMeta>): any {
 						let value = inner.call(this, formatters, KEY_COMPONENT_SELF);
 
-						if (value) {
-							if (typeof value == 'object' || typeof value == 'function') {
-								let meta = cell.meta!;
+						if (value && (typeof value == 'object' || typeof value == 'function')) {
+							let meta = cell.meta!;
 
-								(
-									meta.element[KEY_COMPONENT_PARAM_VALUES] ||
-									(meta.element[KEY_COMPONENT_PARAM_VALUES] = new Map())
-								).set(meta.attributeName, value);
+							(
+								meta.element[KEY_COMPONENT_PARAM_VALUES] ||
+								(meta.element[KEY_COMPONENT_PARAM_VALUES] = new Map())
+							).set(meta.attributeName, value);
 
-								return meta.attributeName;
-							}
+							return meta.attributeName;
 						}
 
 						return value;

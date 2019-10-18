@@ -96,7 +96,12 @@ export function bindContent(
 						setAttribute(
 							child as Element,
 							targetAttrName,
-							compileTemplateNodeValue(attrValueAST, attrValue, true).call(context)
+							compileTemplateNodeValue(attrValueAST, attrValue, true).call(context, {
+								meta: {
+									element: child,
+									attributeName: targetAttrName
+								}
+							})
 						);
 					} else {
 						if (bindingPrefix !== '->') {
