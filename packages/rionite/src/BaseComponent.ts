@@ -503,10 +503,17 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return value;
 	}
 
+	_beforeInitializationWait() {}
+	_afterInitializationWait() {}
+
 	_attach() {
 		this._attached = true;
 
-		if (!this.initialized) {
+		if (this.initialized) {
+			if (!this.isReady) {
+				this._afterInitializationWait();
+			}
+		} else {
 			currentComponent = this;
 
 			let initializationResult: Promise<any> | void;
@@ -519,6 +526,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			}
 
 			if (initializationResult) {
+				this._beforeInitializationWait();
 				initializationResult.then(
 					() => {
 						this.initialized = true;

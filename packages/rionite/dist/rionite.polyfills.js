@@ -4853,9 +4853,16 @@ window.innerHTML = (function (document) {
 	        }
 	        return value;
 	    }
+	    _beforeInitializationWait() { }
+	    _afterInitializationWait() { }
 	    _attach() {
 	        this._attached = true;
-	        if (!this.initialized) {
+	        if (this.initialized) {
+	            if (!this.isReady) {
+	                this._afterInitializationWait();
+	            }
+	        }
+	        else {
 	            currentComponent = this;
 	            let initializationResult;
 	            try {
@@ -4866,6 +4873,7 @@ window.innerHTML = (function (document) {
 	                return;
 	            }
 	            if (initializationResult) {
+	                this._beforeInitializationWait();
 	                initializationResult.then(() => {
 	                    this.initialized = true;
 	                    if (this._attached) {
