@@ -4133,11 +4133,10 @@ window.innerHTML = (function (document) {
 	        }
 	        let component = this.$component;
 	        if (component) {
-	            ComponentParams.init(component);
-	            component.elementConnected();
 	            if (component._attached) {
 	                if (component._parentComponent === null) {
 	                    component._parentComponent = undefined;
+	                    component.elementConnected();
 	                    try {
 	                        callWithInterruptionHandling(component.elementMoved, component);
 	                    }
@@ -4155,9 +4154,14 @@ window.innerHTML = (function (document) {
 	                        }
 	                    }
 	                }
+	                else {
+	                    component.elementConnected();
+	                }
 	            }
 	            else {
 	                component._parentComponent = undefined;
+	                ComponentParams.init(component);
+	                component.elementConnected();
 	                component._attach();
 	            }
 	        }
@@ -4165,8 +4169,8 @@ window.innerHTML = (function (document) {
 	            dist_2$1(() => {
 	                if (this[KEY_ELEMENT_CONNECTED]) {
 	                    let component = this.rioniteComponent;
-	                    component._parentComponent = undefined;
-	                    if (!component.parentComponent && !component._attached) {
+	                    if (!component._attached) {
+	                        component._parentComponent = undefined;
 	                        ComponentParams.init(component);
 	                        component.elementConnected();
 	                        component._attach();
