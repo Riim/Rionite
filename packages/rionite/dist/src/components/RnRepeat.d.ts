@@ -23,7 +23,7 @@ export declare class RnRepeat extends BaseComponent {
     elementConnected(): void;
     elementDisconnected(): void;
     _onListChange(): void;
-    _attach(): void;
+    _attach(): null;
     _detach(): void;
     _render(fromChangeEvent: boolean): void;
     _deactivate(): void;

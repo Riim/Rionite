@@ -61,7 +61,7 @@ export class RnIfThen extends BaseComponent {
 
 		this._active = true;
 
-		if (!this.initialized) {
+		if (!this._initialized) {
 			let if_ = this.paramIf.trim();
 			let getIfValue: (this: object) => any;
 
@@ -84,7 +84,7 @@ export class RnIfThen extends BaseComponent {
 				{ context: this.$context }
 			);
 
-			this.initialized = true;
+			this._initialized = true;
 		}
 
 		if (this.element[KEY_CONTENT_TEMPLATE]) {
@@ -109,6 +109,7 @@ export class RnIfThen extends BaseComponent {
 
 	_attach() {
 		this._attached = true;
+		return null;
 	}
 	_detach() {
 		this._attached = false;

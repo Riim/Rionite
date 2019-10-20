@@ -53,10 +53,10 @@ export const ElementProtoMixin = {
 						config.logError(err);
 					}
 
-					if (component._onElementMovedHooks) {
-						for (let onElementMovedHook of component._onElementMovedHooks) {
+					if (component._elementMovedHooks) {
+						for (let elementMovedHook of component._elementMovedHooks) {
 							try {
-								callWithInterruptionHandling(onElementMovedHook, component);
+								callWithInterruptionHandling(elementMovedHook, component);
 							} catch (err) {
 								config.logError(err);
 							}
@@ -73,22 +73,37 @@ export const ElementProtoMixin = {
 				component.elementConnected();
 				component._attach();
 			}
+
+			return;
 		} else {
-			defer(() => {
-				if (this[KEY_ELEMENT_CONNECTED]) {
-					let component = this.rioniteComponent;
+			component = this.rioniteComponent;
 
-					if (!component._attached) {
-						component._parentComponent = undefined;
+			component._parentComponent = undefined;
 
-						ComponentParams.init(component);
+			if (component.parentComponent && component._parentComponent!._isReady) {
+				ComponentParams.init(component);
 
-						component.elementConnected();
-						component._attach();
-					}
-				}
-			});
+				component.elementConnected();
+				component._attach();
+
+				return;
+			}
 		}
+
+		defer(() => {
+			if (this[KEY_ELEMENT_CONNECTED]) {
+				let component = this.rioniteComponent;
+
+				component._parentComponent = undefined;
+
+				if (!component._attached && !component.parentComponent) {
+					ComponentParams.init(component);
+
+					component.elementConnected();
+					component._attach();
+				}
+			}
+		});
 	},
 
 	disconnectedCallback(this: IComponentElement) {
@@ -121,7 +136,7 @@ export const ElementProtoMixin = {
 	) {
 		let component = this.$component;
 
-		if (component && component.isReady) {
+		if (component && component._isReady) {
 			let $paramConfig = (component.constructor as typeof BaseComponent)[
 				KEY_PARAMS_CONFIG
 			]!.get(name)!;

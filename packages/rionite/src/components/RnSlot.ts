@@ -61,14 +61,14 @@ export class RnSlot extends BaseComponent {
 	_attach() {
 		this._attached = true;
 
-		if (this.isReady) {
+		if (this._isReady) {
 			this._unfreezeBindings();
 
 			if (this._childComponents) {
 				attachChildComponentElements(this._childComponents);
 			}
 
-			return;
+			return null;
 		}
 
 		let ownerComponent = this.ownerComponent;
@@ -249,7 +249,9 @@ export class RnSlot extends BaseComponent {
 			}
 		}
 
-		this.isReady = true;
+		this._isReady = true;
+
+		return null;
 	}
 
 	_detach() {

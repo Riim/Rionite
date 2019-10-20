@@ -121,7 +121,7 @@ export class RnRepeat extends BaseComponent {
 
 		this._active = true;
 
-		if (!this.initialized) {
+		if (!this._initialized) {
 			let for_ = this.paramFor.match(reForAttrValue);
 
 			if (!for_) {
@@ -149,7 +149,7 @@ export class RnRepeat extends BaseComponent {
 
 			this._$itemsMap = new Map();
 
-			this.initialized = true;
+			this._initialized = true;
 		}
 
 		if (this.element[KEY_CONTENT_TEMPLATE]) {
@@ -174,6 +174,7 @@ export class RnRepeat extends BaseComponent {
 
 	_attach() {
 		this._attached = true;
+		return null;
 	}
 	_detach() {
 		this._attached = false;

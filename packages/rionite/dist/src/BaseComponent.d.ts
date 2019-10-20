@@ -61,11 +61,11 @@ export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = I
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
     [elementName: string]: Record<string, TEventHandler<T, U>>;
 }
-export declare type THookCallback = (this: BaseComponent) => void;
-export declare function onReady(cb: THookCallback): void;
-export declare function onElementAttached(cb: THookCallback): void;
-export declare function onElementDetached(cb: THookCallback): void;
-export declare function onElementMoved(cb: THookCallback): void;
+export declare type THook = (this: BaseComponent) => void;
+export declare function onReady(hook: THook): void;
+export declare function onElementAttached(hook: THook): void;
+export declare function onElementDetached(hook: THook): void;
+export declare function onElementMoved(hook: THook): void;
 export declare class BaseComponent extends EventEmitter implements IDisposable {
     static EVENT_CHANGE: string | symbol;
     static elementIs: string;
@@ -87,19 +87,23 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     _parentComponent: BaseComponent | null | undefined;
     readonly parentComponent: BaseComponent | null;
     element: IComponentElement;
-    $inputContent: DocumentFragment | null;
     $context: Record<string, any> | undefined;
     $specifiedParams: ReadonlySet<string>;
-    _bindings: Array<IBinding> | null;
-    _attached: boolean;
-    initialized: boolean;
-    isReady: boolean;
-    _onReadyHooks: Array<THookCallback> | undefined;
-    _onElementAttachedHooks: Array<THookCallback> | undefined;
-    _onElementDetachedHooks: Array<THookCallback> | undefined;
-    _onElementMovedHooks: Array<THookCallback> | undefined;
     [KEY_PARAM_VALUES]: Map<string, any>;
+    $inputContent: DocumentFragment | null;
+    _bindings: Array<IBinding> | null;
     [KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
+    initializationWait: Promise<any> | null;
+    _attached: boolean;
+    readonly attached: boolean;
+    _initialized: boolean;
+    readonly initialized: boolean;
+    _isReady: boolean;
+    readonly isReady: boolean;
+    _readyHooks: Array<THook> | undefined;
+    _elementAttachedHooks: Array<THook> | undefined;
+    _elementDetachedHooks: Array<THook> | undefined;
+    _elementMovedHooks: Array<THook> | undefined;
     constructor(el?: HTMLElement);
     onChange(listener: TListener, context?: any): this;
     offChange(listener: TListener, context?: any): this;
@@ -113,7 +117,8 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     $interruptIfNotAttached<V>(value: V): V;
     _beforeInitializationWait(): void;
     _afterInitializationWait(): void;
-    _attach(): void;
+    attach(ownerComponent?: BaseComponent): Promise<any> | null;
+    _attach(): Promise<any> | null;
     _detach(): void;
     dispose(): BaseComponent;
     _freezeBindings(): void;

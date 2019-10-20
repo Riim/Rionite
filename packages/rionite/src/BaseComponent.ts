@@ -5,6 +5,7 @@ import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx'
 import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { freezeBindings, IBinding, unfreezeBindings } from './componentBinding';
+import { ComponentParams } from './ComponentParams';
 import { IComponentParamValueСonverters } from './componentParamValueConverters';
 import { config } from './config';
 import {
@@ -123,28 +124,26 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	[elementName: string]: Record<string, TEventHandler<T, U>>;
 }
 
-export type THookCallback = (this: BaseComponent) => void;
+export type THook = (this: BaseComponent) => void;
 
 let currentComponent: BaseComponent | null = null;
 
-export function onReady(cb: THookCallback) {
-	(currentComponent!._onReadyHooks || (currentComponent!._onReadyHooks = [])).push(cb);
+export function onReady(hook: THook) {
+	(currentComponent!._readyHooks || (currentComponent!._readyHooks = [])).push(hook);
 }
-export function onElementAttached(cb: THookCallback) {
+export function onElementAttached(hook: THook) {
 	(
-		currentComponent!._onElementAttachedHooks ||
-		(currentComponent!._onElementAttachedHooks = [])
-	).push(cb);
+		currentComponent!._elementAttachedHooks || (currentComponent!._elementAttachedHooks = [])
+	).push(hook);
 }
-export function onElementDetached(cb: THookCallback) {
+export function onElementDetached(hook: THook) {
 	(
-		currentComponent!._onElementDetachedHooks ||
-		(currentComponent!._onElementDetachedHooks = [])
-	).push(cb);
+		currentComponent!._elementDetachedHooks || (currentComponent!._elementDetachedHooks = [])
+	).push(hook);
 }
-export function onElementMoved(cb: THookCallback) {
-	(currentComponent!._onElementMovedHooks || (currentComponent!._onElementMovedHooks = [])).push(
-		cb
+export function onElementMoved(hook: THook) {
+	(currentComponent!._elementMovedHooks || (currentComponent!._elementMovedHooks = [])).push(
+		hook
 	);
 }
 
@@ -218,24 +217,38 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	element: IComponentElement;
 
-	$inputContent: DocumentFragment | null = null;
 	$context: Record<string, any> | undefined;
+
 	$specifiedParams: ReadonlySet<string>;
+	[KEY_PARAM_VALUES]: Map<string, any>;
+
+	$inputContent: DocumentFragment | null = null;
 
 	_bindings: Array<IBinding> | null;
 
-	_attached = false;
-
-	initialized = false;
-	isReady = false;
-
-	_onReadyHooks: Array<THookCallback> | undefined;
-	_onElementAttachedHooks: Array<THookCallback> | undefined;
-	_onElementDetachedHooks: Array<THookCallback> | undefined;
-	_onElementMovedHooks: Array<THookCallback> | undefined;
-
-	[KEY_PARAM_VALUES]: Map<string, any>;
 	[KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
+
+	initializationWait: Promise<any> | null = null;
+
+	_attached = false;
+	get attached() {
+		return this._attached;
+	}
+
+	_initialized = false;
+	get initialized() {
+		return this._initialized;
+	}
+
+	_isReady = false;
+	get isReady() {
+		return this._isReady;
+	}
+
+	_readyHooks: Array<THook> | undefined;
+	_elementAttachedHooks: Array<THook> | undefined;
+	_elementDetachedHooks: Array<THook> | undefined;
+	_elementMovedHooks: Array<THook> | undefined;
 
 	constructor(el?: HTMLElement) {
 		super();
@@ -506,30 +519,48 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	_beforeInitializationWait() {}
 	_afterInitializationWait() {}
 
-	_attach() {
+	attach(ownerComponent?: BaseComponent): Promise<any> | null {
+		if (ownerComponent) {
+			this._ownerComponent = ownerComponent;
+		}
+
+		if (this._attached) {
+			return this.initializationWait;
+		}
+
+		this._parentComponent = undefined;
+
+		ComponentParams.init(this);
+
+		this.elementConnected();
+		return this._attach();
+	}
+
+	_attach(): Promise<any> | null {
 		this._attached = true;
 
-		if (this.initialized) {
-			if (!this.isReady) {
+		if (this._initialized) {
+			if (!this._isReady) {
 				this._afterInitializationWait();
 			}
 		} else {
 			currentComponent = this;
 
-			let initializationResult: Promise<any> | void;
+			let initializationWait: Promise<any> | void;
 
 			try {
-				initializationResult = this.initialize();
+				initializationWait = this.initialize();
 			} catch (err) {
 				config.logError(err);
-				return;
+				return null;
 			}
 
-			if (initializationResult) {
+			if (initializationWait) {
 				this._beforeInitializationWait();
-				initializationResult.then(
+
+				return (this.initializationWait = initializationWait.then(
 					() => {
-						this.initialized = true;
+						this._initialized = true;
 
 						if (this._attached) {
 							this._attach();
@@ -540,17 +571,15 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 							config.logError(err);
 						}
 					}
-				);
-
-				return;
+				));
 			}
 
-			this.initialized = true;
+			this._initialized = true;
 		}
 
 		let constr = this.constructor as typeof BaseComponent;
 
-		if (this.isReady) {
+		if (this._isReady) {
 			this._unfreezeBindings();
 
 			let childComponents = findChildComponents(this.element);
@@ -666,17 +695,17 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				config.logError(err);
 			}
 
-			if (this._onReadyHooks) {
-				for (let onReadyHook of this._onReadyHooks) {
+			if (this._readyHooks) {
+				for (let readyHook of this._readyHooks) {
 					try {
-						callWithInterruptionHandling(onReadyHook, this);
+						callWithInterruptionHandling(readyHook, this);
 					} catch (err) {
 						config.logError(err);
 					}
 				}
 			}
 
-			this.isReady = true;
+			this._isReady = true;
 		}
 
 		try {
@@ -685,10 +714,10 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			config.logError(err);
 		}
 
-		if (this._onElementAttachedHooks) {
-			for (let onElementAttachedHook of this._onElementAttachedHooks) {
+		if (this._elementAttachedHooks) {
+			for (let elementAttachedHook of this._elementAttachedHooks) {
 				try {
-					callWithInterruptionHandling(onElementAttachedHook, this);
+					callWithInterruptionHandling(elementAttachedHook, this);
 				} catch (err) {
 					config.logError(err);
 				}
@@ -730,6 +759,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				}
 			}
 		}
+
+		return this.initializationWait;
 	}
 
 	_detach() {
@@ -741,10 +772,10 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			config.logError(err);
 		}
 
-		if (this._onElementDetachedHooks) {
-			for (let onElementDetachedHook of this._onElementDetachedHooks) {
+		if (this._elementDetachedHooks) {
+			for (let elementDetachedHook of this._elementDetachedHooks) {
 				try {
-					callWithInterruptionHandling(onElementDetachedHook, this);
+					callWithInterruptionHandling(elementDetachedHook, this);
 				} catch (err) {
 					config.logError(err);
 				}

@@ -27,7 +27,7 @@ export {
 	IComponentListening,
 	TEventHandler,
 	IComponentEvents,
-	THookCallback,
+	THook,
 	onReady,
 	onElementAttached,
 	onElementDetached,

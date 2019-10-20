@@ -2482,10 +2482,10 @@
 	                    catch (err) {
 	                        config.logError(err);
 	                    }
-	                    if (component._onElementMovedHooks) {
-	                        for (let onElementMovedHook of component._onElementMovedHooks) {
+	                    if (component._elementMovedHooks) {
+	                        for (let elementMovedHook of component._elementMovedHooks) {
 	                            try {
-	                                callWithInterruptionHandling(onElementMovedHook, component);
+	                                callWithInterruptionHandling(elementMovedHook, component);
 	                            }
 	                            catch (err) {
 	                                config.logError(err);
@@ -2503,20 +2503,29 @@
 	                component.elementConnected();
 	                component._attach();
 	            }
+	            return;
 	        }
 	        else {
-	            dist_2$1(() => {
-	                if (this[KEY_ELEMENT_CONNECTED]) {
-	                    let component = this.rioniteComponent;
-	                    if (!component._attached) {
-	                        component._parentComponent = undefined;
-	                        ComponentParams.init(component);
-	                        component.elementConnected();
-	                        component._attach();
-	                    }
-	                }
-	            });
+	            component = this.rioniteComponent;
+	            component._parentComponent = undefined;
+	            if (component.parentComponent && component._parentComponent._isReady) {
+	                ComponentParams.init(component);
+	                component.elementConnected();
+	                component._attach();
+	                return;
+	            }
 	        }
+	        dist_2$1(() => {
+	            if (this[KEY_ELEMENT_CONNECTED]) {
+	                let component = this.rioniteComponent;
+	                component._parentComponent = undefined;
+	                if (!component._attached && !component.parentComponent) {
+	                    ComponentParams.init(component);
+	                    component.elementConnected();
+	                    component._attach();
+	                }
+	            }
+	        });
 	    },
 	    disconnectedCallback() {
 	        this[KEY_ELEMENT_CONNECTED] = false;
@@ -2536,7 +2545,7 @@
 	    },
 	    attributeChangedCallback(name, _prevRawValue, rawValue) {
 	        let component = this.$component;
-	        if (component && component.isReady) {
+	        if (component && component._isReady) {
 	            let $paramConfig = component.constructor[KEY_PARAMS_CONFIG].get(name);
 	            if ($paramConfig.readonly) {
 	                if (observedAttributesFeature) {
@@ -2878,11 +2887,11 @@
 	var dist_1$7 = dist$7.moveContent;
 
 	function attachChildComponentElements(childComponents) {
-	    for (let childComponent of childComponents) {
-	        childComponent._parentComponent = undefined;
-	        ComponentParams.init(childComponent);
-	        childComponent.elementConnected();
-	        childComponent._attach();
+	    for (let component of childComponents) {
+	        component._parentComponent = undefined;
+	        ComponentParams.init(component);
+	        component.elementConnected();
+	        component._attach();
 	    }
 	}
 
@@ -2965,19 +2974,17 @@
 	const hasOwn$2 = Object.prototype.hasOwnProperty;
 	const map = Array.prototype.map;
 	let currentComponent = null;
-	function onReady(cb) {
-	    (currentComponent._onReadyHooks || (currentComponent._onReadyHooks = [])).push(cb);
+	function onReady(hook) {
+	    (currentComponent._readyHooks || (currentComponent._readyHooks = [])).push(hook);
 	}
-	function onElementAttached(cb) {
-	    (currentComponent._onElementAttachedHooks ||
-	        (currentComponent._onElementAttachedHooks = [])).push(cb);
+	function onElementAttached(hook) {
+	    (currentComponent._elementAttachedHooks || (currentComponent._elementAttachedHooks = [])).push(hook);
 	}
-	function onElementDetached(cb) {
-	    (currentComponent._onElementDetachedHooks ||
-	        (currentComponent._onElementDetachedHooks = [])).push(cb);
+	function onElementDetached(hook) {
+	    (currentComponent._elementDetachedHooks || (currentComponent._elementDetachedHooks = [])).push(hook);
 	}
-	function onElementMoved(cb) {
-	    (currentComponent._onElementMovedHooks || (currentComponent._onElementMovedHooks = [])).push(cb);
+	function onElementMoved(hook) {
+	    (currentComponent._elementMovedHooks || (currentComponent._elementMovedHooks = [])).push(hook);
 	}
 	class BaseComponent extends cellx.EventEmitter {
 	    constructor(el) {
@@ -2985,9 +2992,10 @@
 	        this._disposables = new Map();
 	        this._parentComponent = null;
 	        this.$inputContent = null;
+	        this.initializationWait = null;
 	        this._attached = false;
-	        this.initialized = false;
-	        this.isReady = false;
+	        this._initialized = false;
+	        this._isReady = false;
 	        currentComponent = this;
 	        this[KEY_COMPONENT_SELF] = this;
 	        let constr = this.constructor;
@@ -3030,6 +3038,15 @@
 	            }
 	        }
 	        return (this._parentComponent = null);
+	    }
+	    get attached() {
+	        return this._attached;
+	    }
+	    get initialized() {
+	        return this._initialized;
+	    }
+	    get isReady() {
+	        return this._isReady;
 	    }
 	    onChange(listener, context) {
 	        return this.on(this.constructor.EVENT_CHANGE, listener, context);
@@ -3198,27 +3215,39 @@
 	    }
 	    _beforeInitializationWait() { }
 	    _afterInitializationWait() { }
+	    attach(ownerComponent) {
+	        if (ownerComponent) {
+	            this._ownerComponent = ownerComponent;
+	        }
+	        if (this._attached) {
+	            return this.initializationWait;
+	        }
+	        this._parentComponent = undefined;
+	        ComponentParams.init(this);
+	        this.elementConnected();
+	        return this._attach();
+	    }
 	    _attach() {
 	        this._attached = true;
-	        if (this.initialized) {
-	            if (!this.isReady) {
+	        if (this._initialized) {
+	            if (!this._isReady) {
 	                this._afterInitializationWait();
 	            }
 	        }
 	        else {
 	            currentComponent = this;
-	            let initializationResult;
+	            let initializationWait;
 	            try {
-	                initializationResult = this.initialize();
+	                initializationWait = this.initialize();
 	            }
 	            catch (err) {
 	                config.logError(err);
-	                return;
+	                return null;
 	            }
-	            if (initializationResult) {
+	            if (initializationWait) {
 	                this._beforeInitializationWait();
-	                initializationResult.then(() => {
-	                    this.initialized = true;
+	                return (this.initializationWait = initializationWait.then(() => {
+	                    this._initialized = true;
 	                    if (this._attached) {
 	                        this._attach();
 	                    }
@@ -3226,13 +3255,12 @@
 	                    if (!(err instanceof InterruptError)) {
 	                        config.logError(err);
 	                    }
-	                });
-	                return;
+	                }));
 	            }
-	            this.initialized = true;
+	            this._initialized = true;
 	        }
 	        let constr = this.constructor;
-	        if (this.isReady) {
+	        if (this._isReady) {
 	            this._unfreezeBindings();
 	            let childComponents = findChildComponents(this.element);
 	            if (childComponents) {
@@ -3306,17 +3334,17 @@
 	            catch (err) {
 	                config.logError(err);
 	            }
-	            if (this._onReadyHooks) {
-	                for (let onReadyHook of this._onReadyHooks) {
+	            if (this._readyHooks) {
+	                for (let readyHook of this._readyHooks) {
 	                    try {
-	                        callWithInterruptionHandling(onReadyHook, this);
+	                        callWithInterruptionHandling(readyHook, this);
 	                    }
 	                    catch (err) {
 	                        config.logError(err);
 	                    }
 	                }
 	            }
-	            this.isReady = true;
+	            this._isReady = true;
 	        }
 	        try {
 	            callWithInterruptionHandling(this.elementAttached, this);
@@ -3324,10 +3352,10 @@
 	        catch (err) {
 	            config.logError(err);
 	        }
-	        if (this._onElementAttachedHooks) {
-	            for (let onElementAttachedHook of this._onElementAttachedHooks) {
+	        if (this._elementAttachedHooks) {
+	            for (let elementAttachedHook of this._elementAttachedHooks) {
 	                try {
-	                    callWithInterruptionHandling(onElementAttachedHook, this);
+	                    callWithInterruptionHandling(elementAttachedHook, this);
 	                }
 	                catch (err) {
 	                    config.logError(err);
@@ -3361,6 +3389,7 @@
 	                }
 	            }
 	        }
+	        return this.initializationWait;
 	    }
 	    _detach() {
 	        this._attached = false;
@@ -3370,10 +3399,10 @@
 	        catch (err) {
 	            config.logError(err);
 	        }
-	        if (this._onElementDetachedHooks) {
-	            for (let onElementDetachedHook of this._onElementDetachedHooks) {
+	        if (this._elementDetachedHooks) {
+	            for (let elementDetachedHook of this._elementDetachedHooks) {
 	                try {
-	                    callWithInterruptionHandling(onElementDetachedHook, this);
+	                    callWithInterruptionHandling(elementDetachedHook, this);
 	                }
 	                catch (err) {
 	                    config.logError(err);
@@ -3588,7 +3617,7 @@
 	            return;
 	        }
 	        this._active = true;
-	        if (!this.initialized) {
+	        if (!this._initialized) {
 	            let for_ = this.paramFor.match(reForAttrValue);
 	            if (!for_) {
 	                throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
@@ -3608,7 +3637,7 @@
 	            this._prevList = [];
 	            this._list = new cellx.Cell(getList, { context: this.$context });
 	            this._$itemsMap = new Map();
-	            this.initialized = true;
+	            this._initialized = true;
 	        }
 	        if (this.element[KEY_CONTENT_TEMPLATE]) {
 	            this._list.onChange(this._onListChange, this);
@@ -3629,6 +3658,7 @@
 	    }
 	    _attach() {
 	        this._attached = true;
+	        return null;
 	    }
 	    _detach() {
 	        this._attached = false;
@@ -3914,7 +3944,7 @@
 	            return;
 	        }
 	        this._active = true;
-	        if (!this.initialized) {
+	        if (!this._initialized) {
 	            let if_ = this.paramIf.trim();
 	            let getIfValue;
 	            if (reKeypath$1.test(if_)) {
@@ -3930,7 +3960,7 @@
 	            this._if = new cellx.Cell(function () {
 	                return !!getIfValue.call(this);
 	            }, { context: this.$context });
-	            this.initialized = true;
+	            this._initialized = true;
 	        }
 	        if (this.element[KEY_CONTENT_TEMPLATE]) {
 	            this._if.onChange(this._onIfChange, this);
@@ -3951,6 +3981,7 @@
 	    }
 	    _attach() {
 	        this._attached = true;
+	        return null;
 	    }
 	    _detach() {
 	        this._attached = false;
@@ -4121,12 +4152,12 @@
 	    }
 	    _attach() {
 	        this._attached = true;
-	        if (this.isReady) {
+	        if (this._isReady) {
 	            this._unfreezeBindings();
 	            if (this._childComponents) {
 	                attachChildComponentElements(this._childComponents);
 	            }
-	            return;
+	            return null;
 	        }
 	        let ownerComponent = this.ownerComponent;
 	        let contentOwnerComponent = ownerComponent.ownerComponent;
@@ -4254,7 +4285,8 @@
 	                backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
 	            }
 	        }
-	        this.isReady = true;
+	        this._isReady = true;
+	        return null;
 	    }
 	    _detach() {
 	        this._attached = false;

@@ -2,12 +2,12 @@ import { BaseComponent } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
 
 export function attachChildComponentElements(childComponents: Array<BaseComponent>) {
-	for (let childComponent of childComponents) {
-		childComponent._parentComponent = undefined;
+	for (let component of childComponents) {
+		component._parentComponent = undefined;
 
-		ComponentParams.init(childComponent);
+		ComponentParams.init(component);
 
-		childComponent.elementConnected();
-		childComponent._attach();
+		component.elementConnected();
+		component._attach();
 	}
 }
