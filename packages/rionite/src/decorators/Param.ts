@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { BaseComponent, IComponentParamConfig } from '../BaseComponent';
 
 const types = new Set([Boolean, Number, String, Object]);

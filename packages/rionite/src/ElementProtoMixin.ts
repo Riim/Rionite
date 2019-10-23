@@ -91,17 +91,19 @@ export const ElementProtoMixin = {
 		}
 
 		defer(() => {
-			if (this[KEY_ELEMENT_CONNECTED]) {
-				let component = this.rioniteComponent;
+			if (!this[KEY_ELEMENT_CONNECTED]) {
+				return;
+			}
 
-				component._parentComponent = undefined;
+			let component = this.rioniteComponent;
 
-				if (!component._attached && !component.parentComponent) {
-					ComponentParams.init(component);
+			component._parentComponent = undefined;
 
-					component.elementConnected();
-					component._attach();
-				}
+			if (!component._attached && !component.parentComponent) {
+				ComponentParams.init(component);
+
+				component.elementConnected();
+				component._attach();
 			}
 		});
 	},

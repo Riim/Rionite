@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('cellx'), require('@riim/uid')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'cellx', '@riim/uid'], factory) :
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('cellx'), require('@riim/uid'), require('reflect-metadata')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'cellx', '@riim/uid', 'reflect-metadata'], factory) :
 	(global = global || self, factory(global.rionite = {}, global.cellx, global['@riim/uid']));
-}(this, function (exports, cellx, uid) { 'use strict';
+}(this, (function (exports, cellx, uid) { 'use strict';
 
 	if (!('firstElementChild' in DocumentFragment.prototype)) {
 	    Object.defineProperty(DocumentFragment.prototype, 'firstElementChild', {
@@ -2516,14 +2516,15 @@
 	            }
 	        }
 	        dist_2$1(() => {
-	            if (this[KEY_ELEMENT_CONNECTED]) {
-	                let component = this.rioniteComponent;
-	                component._parentComponent = undefined;
-	                if (!component._attached && !component.parentComponent) {
-	                    ComponentParams.init(component);
-	                    component.elementConnected();
-	                    component._attach();
-	                }
+	            if (!this[KEY_ELEMENT_CONNECTED]) {
+	                return;
+	            }
+	            let component = this.rioniteComponent;
+	            component._parentComponent = undefined;
+	            if (!component._attached && !component.parentComponent) {
+	                ComponentParams.init(component);
+	                component.elementConnected();
+	                component._attach();
 	            }
 	        });
 	    },
@@ -4345,4 +4346,4 @@
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));

@@ -26,12 +26,13 @@ export default {
 		// '@riim/next-tick',
 		// '@riim/rionite-snake-case-attribute-name',
 		'@riim/uid',
-		'cellx'
+		'cellx',
 		// 'escape-string'
+		'reflect-metadata'
 	],
 
 	plugins: [
-		nodeResolve(/* { browser: true } */),
+		nodeResolve({ browser: true }),
 		commonjs({ include: /node_modules/ }),
 		tslint(),
 		typescript({ clean: true })
