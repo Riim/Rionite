@@ -7,7 +7,7 @@ import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { callWithInterruptionHandling } from './lib/callWithInterruptionHandling';
 import { observedAttributesFeature } from './lib/observedAttributesFeature';
 
-// export const KEY_IS_COMPONENT_ELEMENT = Symbol('isComponentElement');
+export const KEY_RIONITE_COMPONENT_CONSTRUCTOR = Symbol('rioniteComponentConstructor');
 export const KEY_ELEMENT_CONNECTED = Symbol('elementConnected');
 
 let connectionStatusCallbacksSuppressed = false;
@@ -21,12 +21,10 @@ export function resumeConnectionStatusCallbacks() {
 }
 
 export const ElementProtoMixin = {
-	// [KEY_IS_COMPONENT_ELEMENT]: true,
-
 	$component: null,
 
 	get rioniteComponent(): BaseComponent {
-		return this.$component || new this.constructor._rioniteComponentConstructor(this);
+		return this.$component || new this.constructor[KEY_RIONITE_COMPONENT_CONSTRUCTOR](this);
 	},
 
 	[KEY_ELEMENT_CONNECTED]: false,

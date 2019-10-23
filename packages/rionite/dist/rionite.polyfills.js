@@ -4110,7 +4110,7 @@ window.innerHTML = (function (document) {
 	document.createElement('test-observed-attributes-feature').setAttribute('test', '');
 	const observedAttributesFeature = observedAttributesFeature_;
 
-	// export const KEY_IS_COMPONENT_ELEMENT = Symbol('isComponentElement');
+	const KEY_RIONITE_COMPONENT_CONSTRUCTOR = Symbol('rioniteComponentConstructor');
 	const KEY_ELEMENT_CONNECTED = Symbol('elementConnected');
 	let connectionStatusCallbacksSuppressed = false;
 	function suppressConnectionStatusCallbacks() {
@@ -4120,10 +4120,9 @@ window.innerHTML = (function (document) {
 	    connectionStatusCallbacksSuppressed = false;
 	}
 	const ElementProtoMixin = {
-	    // [KEY_IS_COMPONENT_ELEMENT]: true,
 	    $component: null,
 	    get rioniteComponent() {
-	        return this.$component || new this.constructor._rioniteComponentConstructor(this);
+	        return this.$component || new this.constructor[KEY_RIONITE_COMPONENT_CONSTRUCTOR](this);
 	    },
 	    [KEY_ELEMENT_CONNECTED]: false,
 	    connectedCallback() {
@@ -4246,6 +4245,7 @@ window.innerHTML = (function (document) {
 	    }
 	}
 	function registerComponent(componentConstr) {
+	    var _a, _b;
 	    let elIs = componentConstr.hasOwnProperty('elementIs')
 	        ? componentConstr.elementIs
 	        : (componentConstr.elementIs = componentConstr.name);
@@ -4396,23 +4396,21 @@ window.innerHTML = (function (document) {
 	    else {
 	        parentElConstr = HTMLElement;
 	    }
-	    let elConstr = class extends parentElConstr {
-	    };
-	    elConstr._rioniteComponentConstructor = componentConstr;
-	    Object.defineProperty(elConstr, 'observedAttributes', {
-	        configurable: true,
-	        enumerable: true,
-	        get() {
-	            let paramsConfig = componentConstr.params;
-	            let attrs = [];
-	            for (let name in paramsConfig) {
-	                if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
-	                    attrs.push(dist_1$1(name, true));
+	    let elConstr = (_b = class extends parentElConstr {
+	            static get observedAttributes() {
+	                let paramsConfig = componentConstr.params;
+	                let attrs = [];
+	                for (let name in paramsConfig) {
+	                    if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
+	                        attrs.push(dist_1$1(name, true));
+	                    }
 	                }
+	                return attrs;
 	            }
-	            return attrs;
-	        }
-	    });
+	        },
+	        _a = KEY_RIONITE_COMPONENT_CONSTRUCTOR,
+	        _b[_a] = componentConstr,
+	        _b);
 	    let elProto = elConstr.prototype;
 	    elProto.constructor = elConstr;
 	    let names = Object.getOwnPropertyNames(ElementProtoMixin);
@@ -4423,9 +4421,9 @@ window.innerHTML = (function (document) {
 	    for (let name of names) {
 	        Object.defineProperty(elProto, name, Object.getOwnPropertyDescriptor(ElementProtoMixin, name));
 	    }
-	    window.customElements.define(kebabCaseElIs, elConstr, elExtends ? { extends: elExtends } : undefined);
 	    componentConstructors.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
 	    elementConstructors.set(elIs, elConstr);
+	    window.customElements.define(kebabCaseElIs, elConstr, elExtends ? { extends: elExtends } : undefined);
 	    return componentConstr;
 	}
 

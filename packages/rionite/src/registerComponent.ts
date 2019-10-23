@@ -7,7 +7,7 @@ import { componentConstructors } from './componentConstructors';
 import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { KEY_COMPONENT_SELF, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { elementConstructors } from './elementConstructors';
-import { ElementProtoMixin } from './ElementProtoMixin';
+import { ElementProtoMixin, KEY_RIONITE_COMPONENT_CONSTRUCTOR } from './ElementProtoMixin';
 import { Template } from './Template';
 
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -234,15 +234,10 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		parentElConstr = HTMLElement;
 	}
 
-	let elConstr = class extends parentElConstr {};
+	let elConstr = class extends parentElConstr {
+		static [KEY_RIONITE_COMPONENT_CONSTRUCTOR] = componentConstr;
 
-	(elConstr as any)._rioniteComponentConstructor = componentConstr;
-
-	Object.defineProperty(elConstr, 'observedAttributes', {
-		configurable: true,
-		enumerable: true,
-
-		get() {
+		static get observedAttributes() {
 			let paramsConfig = componentConstr.params;
 			let attrs: Array<string> = [];
 
@@ -254,7 +249,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 
 			return attrs;
 		}
-	});
+	};
 
 	let elProto = elConstr.prototype;
 
@@ -280,14 +275,14 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		);
 	}
 
+	componentConstructors.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
+	elementConstructors.set(elIs, elConstr);
+
 	window.customElements.define(
 		kebabCaseElIs,
 		elConstr,
 		elExtends ? { extends: elExtends } : undefined
 	);
-
-	componentConstructors.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
-	elementConstructors.set(elIs, elConstr);
 
 	return componentConstr;
 }
