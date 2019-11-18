@@ -1,8 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 let reCamelCase = /^_?[a-z][0-9a-z]*$/i;
 let reLetters = /[A-Z][^A-Z]/g;
 let reLetters2 = /[A-Z]{2,}/g;
 let cache = new Map();
-export function snakeCaseAttributeName(str, useCache) {
+function snakeCaseAttributeName(str, useCache) {
     let value;
     return ((useCache && cache.get(str)) ||
         ((value = reCamelCase.test(str)
@@ -14,3 +16,4 @@ export function snakeCaseAttributeName(str, useCache) {
             useCache && cache.set(str, value),
             value));
 }
+exports.snakeCaseAttributeName = snakeCaseAttributeName;
