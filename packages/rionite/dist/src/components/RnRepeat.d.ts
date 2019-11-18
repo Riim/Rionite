@@ -11,7 +11,7 @@ export interface I$Item {
 export declare type T$ItemsMap = Map<any, Array<I$Item>>;
 export declare class RnRepeat extends BaseComponent {
     static EVENT_CHANGE: symbol;
-    static readonly bindsInputContent: boolean;
+    static get bindsInputContent(): boolean;
     paramFor: string;
     trackBy: string;
     beforeTemplate: boolean;

@@ -1,6 +1,6 @@
 import { BaseComponent } from '../BaseComponent';
 export declare class RnSlot extends BaseComponent {
-    static readonly bindsInputContent: boolean;
+    static get bindsInputContent(): boolean;
     $context: Record<string, any>;
     name: string;
     forTag: string;

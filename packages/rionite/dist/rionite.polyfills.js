@@ -1724,31 +1724,24 @@ window.innerHTML = (function (document) {
 	unwrapExports(dist);
 	var dist_1 = dist.kebabCase;
 
-	var dist$1 = createCommonjsModule(function (module, exports) {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	var reCamelCase = /^_?[a-z][0-9a-z]*$/i;
-	var reLetters = /[A-Z][^A-Z]/g;
-	var reLetters2 = /[A-Z]{2,}/g;
-	var cache = new Map();
+	let reCamelCase = /^_?[a-z][0-9a-z]*$/i;
+	let reLetters = /[A-Z][^A-Z]/g;
+	let reLetters2 = /[A-Z]{2,}/g;
+	let cache = new Map();
 	function snakeCaseAttributeName(str, useCache) {
-	    var value;
+	    let value;
 	    return ((useCache && cache.get(str)) ||
 	        ((value = reCamelCase.test(str)
 	            ? str
-	                .replace(reLetters, function (word) { return '_' + word; })
-	                .replace(reLetters2, function (word) { return '_' + word; })
+	                .replace(reLetters, word => '_' + word)
+	                .replace(reLetters2, word => '_' + word)
 	                .toLowerCase()
 	            : str),
 	            useCache && cache.set(str, value),
 	            value));
 	}
-	exports.snakeCaseAttributeName = snakeCaseAttributeName;
-	});
 
-	unwrapExports(dist$1);
-	var dist_1$1 = dist$1.snakeCaseAttributeName;
-
-	var dist$2 = createCommonjsModule(function (module, exports) {
+	var dist$1 = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var reEscapableChars = /[\\'"\r\n]/g;
 	var charToEscapedMap = Object.create(null);
@@ -1763,8 +1756,8 @@ window.innerHTML = (function (document) {
 	exports.escapeString = escapeString;
 	});
 
-	unwrapExports(dist$2);
-	var dist_1$2 = dist$2.escapeString;
+	unwrapExports(dist$1);
+	var dist_1$1 = dist$1.escapeString;
 
 	function formattersReducer(jsExpr, formatter) {
 	    return `(this.${formatter.name} || formatters.${formatter.name}).call(this[KEY_COMPONENT_SELF], ${jsExpr}${formatter.arguments ? ', ' + formatter.arguments.join(', ') : ''})`;
@@ -1832,7 +1825,7 @@ window.innerHTML = (function (document) {
 	unwrapExports(unescapeHTML_1);
 	var unescapeHTML_2 = unescapeHTML_1.unescapeHTML;
 
-	var dist$3 = createCommonjsModule(function (module, exports) {
+	var dist$2 = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 
 	exports.escapeHTML = escapeHTML_1.escapeHTML;
@@ -1840,9 +1833,9 @@ window.innerHTML = (function (document) {
 	exports.unescapeHTML = unescapeHTML_1.unescapeHTML;
 	});
 
-	unwrapExports(dist$3);
-	var dist_1$3 = dist$3.escapeHTML;
-	var dist_2 = dist$3.unescapeHTML;
+	unwrapExports(dist$2);
+	var dist_1$2 = dist$2.escapeHTML;
+	var dist_2 = dist$2.unescapeHTML;
 
 	const KEY_COMPONENT_PARAM_VALUES = Symbol('componentParamValues');
 	const componentParamValueСonverters = new Map([
@@ -2058,13 +2051,13 @@ window.innerHTML = (function (document) {
 
 	const keypathPattern = `(?:${namePattern}|\\d+)(?:\\.(?:${namePattern}|\\d+))*`;
 
-	const cache = new Map();
+	const cache$1 = new Map();
 	function keypathToJSExpression(keypath, cacheKey = keypath) {
-	    if (!cache.has(cacheKey)) {
+	    if (!cache$1.has(cacheKey)) {
 	        let keys = typeof keypath == 'string' ? keypath.split('.') : keypath;
 	        let keyCount = keys.length;
 	        if (keyCount == 1) {
-	            cache.set(cacheKey, `this['${keypath}']`);
+	            cache$1.set(cacheKey, `this['${keypath}']`);
 	        }
 	        else {
 	            let index = keyCount - 2;
@@ -2072,10 +2065,10 @@ window.innerHTML = (function (document) {
 	            while (index) {
 	                fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
 	            }
-	            cache.set(cacheKey, `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`);
+	            cache$1.set(cacheKey, `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`);
 	        }
 	    }
-	    return cache.get(cacheKey);
+	    return cache$1.get(cacheKey);
 	}
 
 	var TemplateNodeValueNodeType;
@@ -2428,10 +2421,10 @@ window.innerHTML = (function (document) {
 	    }
 	}
 
-	const cache$1 = new Map();
+	const cache$2 = new Map();
 	function compileTemplateNodeValue(templateNodeValueAST, templateNodeValueString, useComponentParamValues) {
 	    let cacheKey = templateNodeValueString + (useComponentParamValues ? ',' : '.');
-	    if (!cache$1.has(cacheKey)) {
+	    if (!cache$2.has(cacheKey)) {
 	        let inner;
 	        if (templateNodeValueAST.length == 1) {
 	            inner = Function('formatters, KEY_COMPONENT_SELF', `var tmp; return ${bindingToJSExpression(templateNodeValueAST[0])};`);
@@ -2440,12 +2433,12 @@ window.innerHTML = (function (document) {
 	            let fragments = [];
 	            for (let node of templateNodeValueAST) {
 	                fragments.push(node.nodeType == TemplateNodeValueNodeType.TEXT
-	                    ? `'${dist_1$2(node.value)}'`
+	                    ? `'${dist_1$1(node.value)}'`
 	                    : bindingToJSExpression(node));
 	            }
 	            inner = Function('formatters, KEY_COMPONENT_SELF', `var tmp; return [${fragments.join(', ')}].join('');`);
 	        }
-	        cache$1.set(cacheKey, useComponentParamValues
+	        cache$2.set(cacheKey, useComponentParamValues
 	            ? function (cell) {
 	                let value = inner.call(this, formatters, KEY_COMPONENT_SELF);
 	                if (value && (typeof value == 'object' || typeof value == 'function')) {
@@ -2461,7 +2454,7 @@ window.innerHTML = (function (document) {
 	                return value == null ? '' : value + '';
 	            });
 	    }
-	    return cache$1.get(cacheKey);
+	    return cache$2.get(cacheKey);
 	}
 
 	function getTemplateNodeValueAST(templateNodeValue) {
@@ -2482,10 +2475,10 @@ window.innerHTML = (function (document) {
 	    return templateNodeValueASTCache.get(templateNodeValue);
 	}
 
-	const cache$2 = new Map();
+	const cache$3 = new Map();
 	function compileKeypath(keypath, cacheKey = keypath) {
-	    return (cache$2.get(cacheKey) ||
-	        cache$2
+	    return (cache$3.get(cacheKey) ||
+	        cache$3
 	            .set(cacheKey, Function(`var tmp; return ${keypathToJSExpression(keypath, cacheKey)};`))
 	            .get(cacheKey));
 	}
@@ -3632,7 +3625,7 @@ window.innerHTML = (function (document) {
 	                                // let attrName = attr.name;
 	                                let attrName = node.nsSVG
 	                                    ? attr.name
-	                                    : dist_1$1(attr.name, true);
+	                                    : snakeCaseAttributeName(attr.name, true);
 	                                let attrValue = attr.value;
 	                                if (attrName == 'class') {
 	                                    attrValue = (className || '') + attrValue;
@@ -3861,7 +3854,7 @@ window.innerHTML = (function (document) {
 	    };
 	});
 
-	var dist$4 = createCommonjsModule(function (module, exports) {
+	var dist$3 = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	var reHyphen = /[-_]+([a-z])/g;
 	var cache = Object.create(null);
@@ -3875,10 +3868,10 @@ window.innerHTML = (function (document) {
 	exports.camelize = camelize;
 	});
 
-	unwrapExports(dist$4);
-	var dist_1$4 = dist$4.camelize;
+	unwrapExports(dist$3);
+	var dist_1$3 = dist$3.camelize;
 
-	var dist$5 = createCommonjsModule(function (module, exports) {
+	var dist$4 = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 
 	var cache = Object.create(null);
@@ -3886,15 +3879,15 @@ window.innerHTML = (function (document) {
 	    str = String(str);
 	    var value;
 	    return ((useCache && cache[str]) ||
-	        ((value = dist$4.camelize(str)),
+	        ((value = dist$3.camelize(str)),
 	            (value = value.charAt(0).toUpperCase() + value.slice(1)),
 	            useCache ? (cache[str] = value) : value));
 	}
 	exports.pascalize = pascalize;
 	});
 
-	unwrapExports(dist$5);
-	var dist_1$5 = dist$5.pascalize;
+	unwrapExports(dist$4);
+	var dist_1$4 = dist$4.pascalize;
 
 	const KEY_COMPONENT_PARAMS_INITED = Symbol('componentParamsInited');
 	function initParam(component, $paramConfig, name, $specifiedParams) {
@@ -3934,7 +3927,7 @@ window.innerHTML = (function (document) {
 	        $paramConfig.default = defaultValue;
 	    }
 	    let el = component.element;
-	    let snakeCaseName = dist_1$1(name, true);
+	    let snakeCaseName = snakeCaseAttributeName(name, true);
 	    let rawValue = el.getAttribute(snakeCaseName);
 	    if (rawValue === null) {
 	        if ($paramConfig.required) {
@@ -4053,7 +4046,7 @@ window.innerHTML = (function (document) {
 	unwrapExports(utils);
 	var utils_1 = utils.logError;
 
-	var dist$6 = createCommonjsModule(function (module, exports) {
+	var dist$5 = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 
 
@@ -4083,9 +4076,9 @@ window.innerHTML = (function (document) {
 	exports.defer = defer;
 	});
 
-	unwrapExports(dist$6);
-	var dist_1$6 = dist$6.configure;
-	var dist_2$1 = dist$6.defer;
+	unwrapExports(dist$5);
+	var dist_1$5 = dist$5.configure;
+	var dist_2$1 = dist$5.defer;
 
 	function callWithInterruptionHandling(fn, context) {
 	    let result = fn.call(context);
@@ -4267,7 +4260,7 @@ window.innerHTML = (function (document) {
 	        if (paramConfig === null || paramConfig === Object.prototype[name]) {
 	            continue;
 	        }
-	        let snakeCaseName = dist_1$1(name, true);
+	        let snakeCaseName = snakeCaseAttributeName(name, true);
 	        let isObject = typeof paramConfig == 'object';
 	        let propertyName = (isObject && paramConfig.property) || name;
 	        let required;
@@ -4388,7 +4381,7 @@ window.innerHTML = (function (document) {
 	    let parentElConstr;
 	    if (elExtends) {
 	        parentElConstr =
-	            elementConstructors.get(elExtends) || window[`HTML${dist_1$5(elExtends)}Element`];
+	            elementConstructors.get(elExtends) || window[`HTML${dist_1$4(elExtends)}Element`];
 	        if (!parentElConstr) {
 	            throw new TypeError(`Component "${elExtends}" is not registered`);
 	        }
@@ -4402,7 +4395,7 @@ window.innerHTML = (function (document) {
 	                let attrs = [];
 	                for (let name in paramsConfig) {
 	                    if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
-	                        attrs.push(dist_1$1(name, true));
+	                        attrs.push(snakeCaseAttributeName(name, true));
 	                    }
 	                }
 	                return attrs;
@@ -4532,7 +4525,7 @@ window.innerHTML = (function (document) {
 	    return methodDesc;
 	}
 
-	var dist$7 = createCommonjsModule(function (module, exports) {
+	var dist$6 = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	function moveContent(target, source) {
 	    for (var child = void 0; (child = source.firstChild);) {
@@ -4543,8 +4536,8 @@ window.innerHTML = (function (document) {
 	exports.moveContent = moveContent;
 	});
 
-	unwrapExports(dist$7);
-	var dist_1$7 = dist$7.moveContent;
+	unwrapExports(dist$6);
+	var dist_1$6 = dist$6.moveContent;
 
 	function attachChildComponentElements(childComponents) {
 	    for (let component of childComponents) {
@@ -4958,7 +4951,7 @@ window.innerHTML = (function (document) {
 	            else {
 	                if (el.firstChild) {
 	                    suppressConnectionStatusCallbacks();
-	                    dist_1$7(this.$inputContent ||
+	                    dist_1$6(this.$inputContent ||
 	                        (this.$inputContent = document.createDocumentFragment()), normalizeTextNodes(el));
 	                    resumeConnectionStatusCallbacks();
 	                }
@@ -4972,7 +4965,7 @@ window.innerHTML = (function (document) {
 	                        let childComponent = childComponents[--i];
 	                        if (childComponent.element.firstChild &&
 	                            childComponent.constructor.bindsInputContent) {
-	                            childComponent.$inputContent = dist_1$7(document.createDocumentFragment(), childComponent.element);
+	                            childComponent.$inputContent = dist_1$6(document.createDocumentFragment(), childComponent.element);
 	                        }
 	                    }
 	                }
@@ -5201,15 +5194,15 @@ window.innerHTML = (function (document) {
 	    };
 	})();
 
-	const cache$3 = new Map();
+	const cache$4 = new Map();
 	function compileBinding(binding, cacheKey) {
-	    if (!cache$3.has(cacheKey)) {
+	    if (!cache$4.has(cacheKey)) {
 	        let inner = Function('formatters, KEY_COMPONENT_SELF', `var tmp; return ${bindingToJSExpression(binding[0])};`);
-	        cache$3.set(cacheKey, function () {
+	        cache$4.set(cacheKey, function () {
 	            return inner.call(this, formatters, KEY_COMPONENT_SELF);
 	        });
 	    }
-	    return cache$3.get(cacheKey);
+	    return cache$4.get(cacheKey);
 	}
 
 	function removeNodes(nodes) {
@@ -5486,7 +5479,7 @@ window.innerHTML = (function (document) {
 	                            if (childComponent.element.firstChild &&
 	                                childComponent.constructor
 	                                    .bindsInputContent) {
-	                                childComponent.$inputContent = dist_1$7(document.createDocumentFragment(), childComponent.element);
+	                                childComponent.$inputContent = dist_1$6(document.createDocumentFragment(), childComponent.element);
 	                            }
 	                        }
 	                    }
@@ -5662,7 +5655,7 @@ window.innerHTML = (function (document) {
 	                    let childComponent = childComponents[--i];
 	                    if (childComponent.element.firstChild &&
 	                        childComponent.constructor.bindsInputContent) {
-	                        childComponent.$inputContent = dist_1$7(document.createDocumentFragment(), childComponent.element);
+	                        childComponent.$inputContent = dist_1$6(document.createDocumentFragment(), childComponent.element);
 	                    }
 	                }
 	            }
@@ -5851,7 +5844,7 @@ window.innerHTML = (function (document) {
 	                    slotsContent.has(key)) {
 	                    let container = slotsContent.get(key);
 	                    if (container.firstChild) {
-	                        content = dist_1$7(document.createDocumentFragment(), container);
+	                        content = dist_1$6(document.createDocumentFragment(), container);
 	                        slotsContent.set(key, el);
 	                        childComponents = container.$component._childComponents;
 	                        bindings = container.$component._bindings;
@@ -5885,7 +5878,7 @@ window.innerHTML = (function (document) {
 	                let slotsContent = contentOwnerComponent[KEY_SLOTS_CONTENT];
 	                if (slotsContent && slotsContent.has(key)) {
 	                    let container = slotsContent.get(key);
-	                    content = dist_1$7(document.createDocumentFragment(), container);
+	                    content = dist_1$6(document.createDocumentFragment(), container);
 	                    slotsContent.set(key, el);
 	                    childComponents = container.$component._childComponents;
 	                    bindings = container.$component._bindings;
@@ -5917,7 +5910,7 @@ window.innerHTML = (function (document) {
 	                        let childComponent = childComponents[--i];
 	                        if (childComponent.element.firstChild &&
 	                            childComponent.constructor.bindsInputContent) {
-	                            childComponent.$inputContent = dist_1$7(document.createDocumentFragment(), childComponent.element);
+	                            childComponent.$inputContent = dist_1$6(document.createDocumentFragment(), childComponent.element);
 	                        }
 	                    }
 	                }

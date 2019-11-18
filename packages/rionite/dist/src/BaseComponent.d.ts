@@ -75,7 +75,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     static _blockNamesString: string;
     static _elementBlockNames: Array<string>;
     static template: string | IBlock | Template | null;
-    static readonly bindsInputContent: boolean;
+    static get bindsInputContent(): boolean;
     static listenings: Array<IComponentListening> | null;
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
     static domEvents: IComponentEvents<BaseComponent, Event> | null;
@@ -83,9 +83,10 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     [KEY_COMPONENT_SELF]: this;
     _disposables: Map<string, IDisposable>;
     _ownerComponent: BaseComponent | undefined;
-    ownerComponent: BaseComponent;
+    get ownerComponent(): BaseComponent;
+    set ownerComponent(ownerComponent: BaseComponent);
     _parentComponent: BaseComponent | null | undefined;
-    readonly parentComponent: BaseComponent | null;
+    get parentComponent(): BaseComponent | null;
     element: IComponentElement;
     $context: Record<string, any> | undefined;
     $specifiedParams: ReadonlySet<string>;
@@ -95,11 +96,11 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     [KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
     initializationWait: Promise<any> | null;
     _attached: boolean;
-    readonly attached: boolean;
+    get attached(): boolean;
     _initialized: boolean;
-    readonly initialized: boolean;
+    get initialized(): boolean;
     _isReady: boolean;
-    readonly isReady: boolean;
+    get isReady(): boolean;
     _readyHooks: Array<THook> | undefined;
     _elementAttachedHooks: Array<THook> | undefined;
     _elementDetachedHooks: Array<THook> | undefined;

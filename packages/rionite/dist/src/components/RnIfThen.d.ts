@@ -2,7 +2,7 @@ import { Cell } from 'cellx';
 import { BaseComponent } from '../BaseComponent';
 export declare class RnIfThen extends BaseComponent {
     static EVENT_CHANGE: symbol;
-    static readonly bindsInputContent: boolean;
+    static get bindsInputContent(): boolean;
     paramIf: string;
     withUndefined: boolean;
     _elseMode: boolean;
