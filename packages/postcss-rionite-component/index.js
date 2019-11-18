@@ -7,9 +7,9 @@ const COMPONENT = 'component';
 const ELEMENT = 'el';
 const MODIFIER = 'mod';
 
-const reComponentParams = /(?:(?:^|\s*:)\s*[a-z][\-_0-9a-z]*)+\s*$/i;
-const reElementParams = /(?:(?:^|\s*,)\s*[a-z][\-_0-9a-z]*)+\s*$/i;
-const reModifierParams = /^(?:(?:^|\s*,)\s*[a-z][\-_0-9a-z]*(?:=[\-_0-9a-z]*)?)+\s*$/i;
+const reComponentParams = /^\s*(?:[a-z][\-_0-9a-z]*\s*(?::\s*|$))+/i;
+const reElementParams = /^\s*(?:[a-z][\-_0-9a-z]*\s*(?:,\s*|$))+/i;
+const reModifierParams = /^\s*(?:[a-z][\-_0-9a-z]*(?:=[\-_0-9a-z]*)?\s*(?:,\s*|$))+/i;
 
 function createWalkAtRulesCallback(_topAtRuleName, componentName) {
 	return atRule => {
