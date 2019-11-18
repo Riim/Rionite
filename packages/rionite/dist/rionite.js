@@ -568,7 +568,6 @@ function configure(options) {
 // CONCATENATED MODULE: ./src/lib/formatters.ts
 
 
-
 const formatters = {
     default(value, defaultValue) {
         return value === undefined ? defaultValue : value;
@@ -643,10 +642,7 @@ const formatters = {
         return target && target.get(key);
     },
     key(target, key) {
-        return (target &&
-            (Array.isArray(target) || target instanceof external_cellx_["ObservableList"]
-                ? target.map(item => item[key])
-                : target[key]));
+        return target && target[key];
     },
     contains(target, value) {
         return (!!target && (Array.isArray(target) ? target.includes(value) : target.contains(value)));
