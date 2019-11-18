@@ -9,7 +9,7 @@ const MODIFIER = 'mod';
 
 const reComponentParams = /^\s*(?:[a-z][\-_0-9a-z]*\s*(?::\s*|$))+/i;
 const reElementParams = /^\s*(?:[a-z][\-_0-9a-z]*\s*(?:,\s*|$))+/i;
-const reModifierParams = /^\s*(?:[a-z][\-_0-9a-z]*(?:=[\-_0-9a-z]*)?\s*(?:,\s*|$))+/i;
+const reModifierParams = /^\s*(?:(?:not\s+)?[a-z][\-_0-9a-z]*(?:=[\-_0-9a-z]*)?\s*(?:,\s*|$))+/i;
 
 function createWalkAtRulesCallback(_topAtRuleName, componentName) {
 	return atRule => {
@@ -29,11 +29,26 @@ function createWalkAtRulesCallback(_topAtRuleName, componentName) {
 				.map(
 					atRuleName == ELEMENT
 						? elName => `& .${componentName}__${elName.trim()}`
-						: modifier =>
-								`&[${modifier
-									.trim()
-									.replace(/^[^=]+/, name => snakeCaseAttributeName(name, true))
-									.replace(/=(\d+)$/, "='$1'")}]`
+						: (modifier: string) => {
+								modifier = modifier.trim();
+
+								let notMode = false;
+
+								if (/^not\s/i.test(modifier)) {
+									modifier = modifier.slice(4).trimStart();
+									notMode = true;
+								}
+
+								return (
+									(notMode ? '&:not([' : '&[') +
+									modifier
+										.replace(/^[^=]+/, name =>
+											snakeCaseAttributeName(name, true)
+										)
+										.replace(/=(\d+)$/, "='$1'") +
+									(notMode ? '])' : ']')
+								);
+						  }
 				)
 				.join(',\n')
 		});
