@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.37.70",
+  "version": "0.37.74",
   "description": "Реактивная обёртка над [custom-elements](https://www.w3.org/TR/custom-elements/).",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/src/index.d.ts",
@@ -45,7 +45,7 @@
     "@riim/move-content": "^1.0.0",
     "@riim/next-tick": "^1.2.4",
     "@riim/pascalize": "^1.0.1",
-    "@riim/rionite-snake-case-attribute-name": "^0.37.70",
+    "@riim/rionite-snake-case-attribute-name": "^0.37.74",
     "@riim/uid": "^1.0.0",
     "cellx": "^1.9.16",
     "escape-string": "^1.0.2",
