@@ -20,5 +20,8 @@
   "homepage": "https://github.com/Riim/Rionite#readme",
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "typescript": "^3.7.2"
   }
 }

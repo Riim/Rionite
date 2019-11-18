@@ -16,15 +16,18 @@
     "url": "https://github.com/Riim/Rionite/issues"
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@riim/nunjucks-walk": "^1.0.0",
     "@riim/rionite-template-node-value-parser": "^0.37.37",
     "@riim/rionite-template-parser": "^0.37.51",
     "@riim/rionite-template-walk": "^0.37.51",
-    "gettext-parser": "^4.0.1",
+    "gettext-parser": "^4.0.2",
     "nunjucks": "^3.2.0",
     "through2": "^3.0.1",
-    "typescript": "^3.5.3",
+    "typescript": "^3.7.2",
     "vinyl": "^2.2.0"
   }
 }

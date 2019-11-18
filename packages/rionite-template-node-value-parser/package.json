@@ -21,6 +21,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "devDependencies": {
+    "typescript": "^3.7.2"
+  },
   "dependencies": {
     "@riim/kebab-case": "^1.0.0"
   }

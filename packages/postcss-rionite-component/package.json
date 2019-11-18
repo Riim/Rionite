@@ -16,10 +16,13 @@
     "url": "https://github.com/Riim/Rionite/issues"
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@riim/escape-regexp": "^1.0.0",
     "@riim/rionite-snake-case-attribute-name": "^0.37.27",
-    "postcss": "^7.0.17",
-    "postcss-nested": "^4.1.2"
+    "postcss": "^7.0.21",
+    "postcss-nested": "^4.2.1"
   }
 }

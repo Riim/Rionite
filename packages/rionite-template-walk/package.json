@@ -21,6 +21,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "devDependencies": {
+    "typescript": "^3.7.2"
+  },
   "dependencies": {
     "@riim/rionite-template-parser": "^0.37.51"
   }
