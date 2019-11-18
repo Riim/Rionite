@@ -1,6 +1,6 @@
 {
   "name": "postcss-rionite-component",
-  "version": "0.37.27",
+  "version": "0.37.70",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@riim/escape-regexp": "^1.0.0",
-    "@riim/rionite-snake-case-attribute-name": "^0.37.27",
+    "@riim/rionite-snake-case-attribute-name": "^0.37.70",
     "postcss": "^7.0.21",
     "postcss-nested": "^4.2.1"
   }
