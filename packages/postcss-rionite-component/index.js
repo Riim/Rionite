@@ -6,16 +6,17 @@ const { snakeCaseAttributeName } = require('@riim/rionite-snake-case-attribute-n
 const COMPONENT = 'component';
 const ELEMENT = 'el';
 const MODIFIER = 'mod';
+const MODIFIER_NOT = 'mod-not';
 
 const reComponentParams = /^\s*(?:[a-z][\-_0-9a-z]*\s*(?::\s*|$))+/i;
 const reElementParams = /^\s*(?:[a-z][\-_0-9a-z]*\s*(?:,\s*|$))+/i;
-const reModifierParams = /^\s*(?:(?:not\s+)?[a-z][\-_0-9a-z]*(?:=[\-_0-9a-z]*)?\s*(?:,\s*|$))+/i;
+const reModifierParams = /^\s*(?:[a-z][\-_0-9a-z]*(?:=[\-_0-9a-z]*)?\s*(?:,\s*|$))+/i;
 
 function createWalkAtRulesCallback(_topAtRuleName, componentName) {
 	return atRule => {
 		let atRuleName = atRule.name;
 
-		if (atRuleName != ELEMENT && atRuleName != MODIFIER) {
+		if (atRuleName != ELEMENT && atRuleName != MODIFIER && atRuleName != MODIFIER_NOT) {
 			return;
 		}
 
@@ -29,26 +30,13 @@ function createWalkAtRulesCallback(_topAtRuleName, componentName) {
 				.map(
 					atRuleName == ELEMENT
 						? elName => `& .${componentName}__${elName.trim()}`
-						: (modifier: string) => {
-								modifier = modifier.trim();
-
-								let notMode = false;
-
-								if (/^not\s/i.test(modifier)) {
-									modifier = modifier.slice(4).trimStart();
-									notMode = true;
-								}
-
-								return (
-									(notMode ? '&:not([' : '&[') +
-									modifier
-										.replace(/^[^=]+/, name =>
-											snakeCaseAttributeName(name, true)
-										)
-										.replace(/=(\d+)$/, "='$1'") +
-									(notMode ? '])' : ']')
-								);
-						  }
+						: modifier =>
+								(atRuleName == MODIFIER ? '&[' : '&:not([') +
+								modifier
+									.trim()
+									.replace(/^[^=]+/, name => snakeCaseAttributeName(name, true))
+									.replace(/=(\d+)$/, "='$1'") +
+								(atRuleName == MODIFIER ? ']' : '])')
 				)
 				.join(',\n')
 		});
