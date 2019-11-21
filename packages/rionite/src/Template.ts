@@ -13,21 +13,21 @@ import { compileTemplateNodeValue } from './compileTemplateNodeValue';
 import { IBinding } from './componentBinding';
 import { componentConstructors } from './componentConstructors';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
-import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
 import { KEY_DOM_EVENTS } from './handleDOMEvent';
 import { KEY_EVENTS } from './handleEvent';
 import { compileKeypath } from './lib/compileKeypath';
 import { setAttribute } from './lib/setAttribute';
 import { svgNamespaceURI } from './lib/svgNamespaceURI';
+import { parseTemplateNodeValue } from './parseTemplateNodeValue';
 import { ITemplateNodeValueBinding } from './TemplateNodeValueParser';
 
 export enum NodeType {
 	BLOCK = 1,
+	ELEMENT,
+	TEXT,
 	ELEMENT_CALL,
 	SUPER_CALL,
-	DEBUGGER_CALL,
-	ELEMENT,
-	TEXT
+	DEBUGGER_CALL
 }
 
 export interface INode {
@@ -35,21 +35,6 @@ export interface INode {
 }
 
 export type TContent = Array<INode>;
-
-export interface IElementCall extends INode {
-	nodeType: NodeType.ELEMENT_CALL;
-	name: string;
-}
-
-export interface ISuperCall extends INode {
-	nodeType: NodeType.SUPER_CALL;
-	elementName: string;
-	element: IElement;
-}
-
-export interface IDebuggerCall extends INode {
-	nodeType: NodeType.DEBUGGER_CALL;
-}
 
 export interface IElementAttribute {
 	isTransformer: boolean;
@@ -94,6 +79,21 @@ export interface IBlock extends INode {
 	elements: Record<string, IElement>;
 }
 
+export interface IElementCall extends INode {
+	nodeType: NodeType.ELEMENT_CALL;
+	name: string;
+}
+
+export interface ISuperCall extends INode {
+	nodeType: NodeType.SUPER_CALL;
+	elementName: string;
+	element: IElement;
+}
+
+export interface IDebuggerCall extends INode {
+	nodeType: NodeType.DEBUGGER_CALL;
+}
+
 export const KEY_CONTENT_TEMPLATE = Symbol('contentTemplate');
 
 const escapee = new Map([
@@ -113,8 +113,8 @@ const reElementName = /[a-zA-Z][\-\w]*/gy;
 const reAttributeName = /[^\s'">/=,)]+/gy;
 const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
 
-const reTrimStartLine = /^[ \t]+/gm;
-const reTrimEndLine = /[ \t]+$/gm;
+const reTrimStartLine = /^[\x20\t]+/gm;
+const reTrimEndLine = /[\x20\t]+$/gm;
 
 function normalizeMultilineText(text: string): string {
 	return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
@@ -137,16 +137,13 @@ export class Template {
 	parent: Template | null;
 	template: string;
 
-	_elementNamesTemplate: Array<string>;
-
-	initialized = false;
-
-	_elements: Record<string, IElement>;
-
 	_pos: number;
 	_chr: string;
 
+	initialized = false;
 	block: IBlock | null;
+	_elements: Record<string, IElement>;
+	_elementNamesTemplate: Array<string>;
 	_embeddedTemplates: Array<Template> | null;
 
 	constructor(
@@ -254,7 +251,7 @@ export class Template {
 
 		this._skipWhitespacesAndComments();
 
-		let block: IBlock = (this.block = {
+		let block = (this.block = {
 			nodeType: NodeType.BLOCK,
 			content: null,
 			elements: this._elements
@@ -276,7 +273,7 @@ export class Template {
 		nsSVG: boolean,
 		superElName: string | null,
 		brackets: boolean,
-		componentConstr?: typeof BaseComponent | null
+		componentCtor?: typeof BaseComponent | null
 	): TContent | null {
 		if (brackets) {
 			this._next(/* '{' */);
@@ -311,7 +308,7 @@ export class Template {
 						this._chr = this.template.charAt((this._pos += 9));
 						(targetContent || (targetContent = [])).push({
 							nodeType: NodeType.DEBUGGER_CALL
-						});
+						} as IDebuggerCall);
 
 						break;
 					}
@@ -334,7 +331,7 @@ export class Template {
 						targetContent,
 						nsSVG,
 						superElName,
-						componentConstr
+						componentCtor
 					);
 
 					break;
@@ -349,7 +346,7 @@ export class Template {
 		targetContent: TContent | null,
 		nsSVG: boolean,
 		superElName: string | null,
-		componentConstr?: typeof BaseComponent | null
+		componentCtor?: typeof BaseComponent | null
 	): TContent | null {
 		let pos = this._pos;
 		let isTransformer = this._chr == '@';
@@ -397,8 +394,17 @@ export class Template {
 		}
 
 		if (tagName) {
-			if (!nsSVG && tagName.toLowerCase() == 'svg') {
-				nsSVG = true;
+			if (!nsSVG) {
+				if (tagName.toLowerCase() == 'svg') {
+					nsSVG = true;
+					tagName = 'svg';
+				} else {
+					let superEl: IElement | undefined;
+
+					if (this.parent && (superEl = this.parent._elements[elName!])) {
+						nsSVG = superEl.nsSVG;
+					}
+				}
 			}
 
 			if (!isTransformer && !nsSVG) {
@@ -409,32 +415,35 @@ export class Template {
 				this._throwError('Expected element', pos);
 			}
 
-			let parentEl: IElement | undefined;
+			let superEl: IElement | undefined;
 
-			if (!this.parent || !(parentEl = this.parent._elements[elName!])) {
+			if (!this.parent || !(superEl = this.parent._elements[elName!])) {
 				throw this._throwError(
 					'Element.tagName is required',
 					isTransformer ? pos + 1 : pos
 				);
 			}
 
-			nsSVG = parentEl.nsSVG;
-			tagName = parentEl.tagName;
+			if (!nsSVG) {
+				nsSVG = superEl.nsSVG;
+			}
+			tagName = superEl.tagName;
 		}
 
-		let elComponentConstr = isTransformer || nsSVG ? null : componentConstructors.get(tagName);
+		let elComponentCtor = isTransformer || nsSVG ? null : componentConstructors.get(tagName);
 
 		let attrs: IElementAttributes | null | undefined;
 		let $specifiedParams: Set<string> | undefined;
 
-		if (elComponentConstr) {
+		if (elComponentCtor) {
 			$specifiedParams = new Set();
 		}
 
 		if (this._chr == '(') {
 			attrs = this._readAttributes(
+				nsSVG,
 				elName || superElName,
-				elComponentConstr && elComponentConstr[KEY_PARAMS_CONFIG],
+				elComponentCtor && elComponentCtor[KEY_PARAMS_CONFIG],
 				$specifiedParams
 			);
 
@@ -444,9 +453,9 @@ export class Template {
 		let events: Map<string | symbol, string> | undefined;
 		let domEvents: Map<string, string> | undefined;
 
-		if (elNames && componentConstr) {
-			let componentEvents = componentConstr.events;
-			let componentDOMEvents = componentConstr.domEvents;
+		if (elNames && componentCtor) {
+			let componentEvents = componentCtor.events;
+			let componentDOMEvents = componentCtor.domEvents;
 
 			if (componentEvents || componentDOMEvents) {
 				for (let name of elNames) {
@@ -490,7 +499,7 @@ export class Template {
 		let content: TContent | null | undefined;
 
 		if (this._chr == '{') {
-			content = this._readContent(null, nsSVG, elName || superElName, true, componentConstr);
+			content = this._readContent(null, nsSVG, elName || superElName, true, componentCtor);
 		}
 
 		let el: IElement = {
@@ -707,6 +716,7 @@ export class Template {
 	}
 
 	_readAttributes(
+		nsSVG: boolean,
 		superElName: string | null,
 		$paramsConfig?: Map<string, I$ComponentParamConfig> | null,
 		$specifiedParams?: Set<string>
@@ -759,9 +769,9 @@ export class Template {
 					throw this._throwError('Expected attribute name');
 				}
 
-				// if (!isTransformer && !nsSVG) {
-				// 	name = snakeCaseAttributeName(name, true);
-				// }
+				if (!isTransformer && !nsSVG) {
+					name = snakeCaseAttributeName(name, true);
+				}
 
 				let fullName = (isTransformer ? '@' : '') + name;
 				let value: string;
@@ -885,7 +895,7 @@ export class Template {
 
 		if (match) {
 			if (!this.parent) {
-				this._throwError('SuperCall is impossible if no parent is defined');
+				this._throwError('SuperCall is impossible if there is no parent');
 			}
 
 			let elName =
@@ -944,20 +954,18 @@ export class Template {
 
 				if (chr == 'x' || chr == 'u') {
 					let pos = this._pos + 1;
-
-					let hexadecimal = chr == 'x';
-					let code = parseInt(this.template.slice(pos, pos + (hexadecimal ? 2 : 4)), 16);
+					let code = parseInt(this.template.slice(pos, pos + (chr == 'x' ? 2 : 4)), 16);
 
 					if (!isFinite(code)) {
 						this._throwError(
-							`Invalid ${hexadecimal ? 'hexadecimal' : 'unicode'} escape sequence`,
+							`Invalid ${chr == 'x' ? 'hexadecimal' : 'unicode'} escape sequence`,
 							pos
 						);
 					}
 
 					str += String.fromCharCode(code);
 					chr = this._chr = this.template.charAt(
-						(this._pos = pos + (hexadecimal ? 2 : 4))
+						(this._pos = pos + (chr == 'x' ? 2 : 4))
 					);
 				} else if (escapee.has(chr)) {
 					str += escapee.get(chr);
@@ -1208,10 +1216,7 @@ function renderContent<T extends Node = Element>(
 									continue;
 								}
 
-								// let attrName = attr.name;
-								let attrName = (node as IElement).nsSVG
-									? attr.name
-									: snakeCaseAttributeName(attr.name, true);
+								let attrName = attr.name;
 								let attrValue: any = attr.value;
 
 								if (attrName == 'class') {
@@ -1228,7 +1233,7 @@ function renderContent<T extends Node = Element>(
 									}
 
 									if (attrValue) {
-										let attrValueAST = getTemplateNodeValueAST(attrValue);
+										let attrValueAST = parseTemplateNodeValue(attrValue);
 
 										if (attrValueAST) {
 											let bindingPrefix =
@@ -1237,7 +1242,12 @@ function renderContent<T extends Node = Element>(
 															.prefix
 													: null;
 
-											if (bindingPrefix === '=') {
+											if (
+												bindingPrefix === '=' ||
+												(bindingPrefix === null &&
+													($paramsConfig && $paramsConfig.get(attrName))
+														?.readonly)
+											) {
 												attrValue = compileTemplateNodeValue(
 													attrValueAST,
 													attrValue,
@@ -1403,7 +1413,7 @@ function renderContent<T extends Node = Element>(
 					let nodeValue = (node as ITextNode).value;
 
 					if (result) {
-						let nodeValueAST = getTemplateNodeValueAST(nodeValue);
+						let nodeValueAST = parseTemplateNodeValue(nodeValue);
 
 						if (nodeValueAST) {
 							if (

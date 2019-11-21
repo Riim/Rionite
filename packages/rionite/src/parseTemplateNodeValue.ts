@@ -1,7 +1,7 @@
 import { templateNodeValueASTCache } from './bindContent';
 import { TemplateNodeValueNodeType, TemplateNodeValueParser, TTemplateNodeValueAST } from './TemplateNodeValueParser';
 
-export function getTemplateNodeValueAST(templateNodeValue: string): TTemplateNodeValueAST | null {
+export function parseTemplateNodeValue(templateNodeValue: string): TTemplateNodeValueAST | null {
 	if (!templateNodeValueASTCache.has(templateNodeValue)) {
 		let bracketIndex = templateNodeValue.indexOf('{');
 

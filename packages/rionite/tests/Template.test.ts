@@ -128,6 +128,7 @@ describe('Template#parse', () => {
 				'text'
 			}
 		`);
+
 		expect(t1.parse()).toMatchObject({
 			nodeType: NodeType.BLOCK,
 			elements: {
@@ -342,6 +343,32 @@ describe('Template#render', () => {
 				)
 				.renderToString()
 		).toBe('<b attr1="value1" attr2="value2" class="block1-x__el1 block1__el1 "></b>');
+	});
+
+	test('наследование атрибутов элемента (2)', () => {
+		let t1 = new Template(
+			`
+				b:el1 (attr_name=value1)
+			`,
+			{ blockName: 'block1' }
+		);
+		let t2 = t1.extend(
+			`
+				:el1 (super!, attrName=value2)
+			`,
+			{ blockName: 'block1-x' }
+		);
+
+		expect(
+			t2
+				.extend(
+					`
+						:el1 (super!, attr_name=value3)
+					`,
+					{ blockName: 'block1-x-x' }
+				)
+				.renderToString()
+		).toBe('<b attr_name="value3" class="block1-x-x__el1 block1-x__el1 block1__el1 "></b>');
 	});
 
 	test('доопределение атрибутов элемента', () => {

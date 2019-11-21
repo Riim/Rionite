@@ -37,10 +37,10 @@ function inheritProperty(
 	}
 }
 
-export function registerComponent(componentConstr: typeof BaseComponent) {
-	let elIs = componentConstr.hasOwnProperty('elementIs')
-		? componentConstr.elementIs
-		: (componentConstr.elementIs = componentConstr.name);
+export function registerComponent(componentCtor: typeof BaseComponent) {
+	let elIs = componentCtor.hasOwnProperty('elementIs')
+		? componentCtor.elementIs
+		: (componentCtor.elementIs = componentCtor.name);
 
 	if (!elIs) {
 		throw new TypeError('Static property "elementIs" is required');
@@ -52,15 +52,15 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		throw new TypeError(`Component "${kebabCaseElIs}" already registered`);
 	}
 
-	let componentProto = componentConstr.prototype;
-	let parentComponentConstr = Object.getPrototypeOf(componentProto)
+	let componentProto = componentCtor.prototype;
+	let parentComponentCtor = Object.getPrototypeOf(componentProto)
 		.constructor as typeof BaseComponent;
 
-	inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
+	inheritProperty(componentCtor, parentComponentCtor, 'params', 0);
 
-	componentConstr[KEY_PARAMS_CONFIG] = null;
+	componentCtor[KEY_PARAMS_CONFIG] = null;
 
-	let paramsConfig = componentConstr.params;
+	let paramsConfig = componentCtor.params;
 
 	for (let name in paramsConfig) {
 		let paramConfig: IComponentParamConfig | null = paramsConfig[name];
@@ -100,7 +100,7 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 			paramConfig
 		};
 
-		(componentConstr[KEY_PARAMS_CONFIG] || (componentConstr[KEY_PARAMS_CONFIG] = new Map()))!
+		(componentCtor[KEY_PARAMS_CONFIG] || (componentCtor[KEY_PARAMS_CONFIG] = new Map()))!
 			.set(name, $paramConfig)
 			.set(snakeCaseName, $paramConfig);
 
@@ -188,57 +188,56 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		Object.defineProperty(componentProto, propertyName, descriptor);
 	}
 
-	inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
+	inheritProperty(componentCtor, parentComponentCtor, 'i18n', 0);
 
-	componentConstr._blockNamesString =
-		elIs + ' ' + (parentComponentConstr._blockNamesString || '');
+	componentCtor._blockNamesString = elIs + ' ' + (parentComponentCtor._blockNamesString || '');
 
-	componentConstr._elementBlockNames = [elIs];
+	componentCtor._elementBlockNames = [elIs];
 
-	if (parentComponentConstr._elementBlockNames) {
-		push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
+	if (parentComponentCtor._elementBlockNames) {
+		push.apply(componentCtor._elementBlockNames, parentComponentCtor._elementBlockNames);
 	}
 
-	let template = componentConstr.template;
+	let template = componentCtor.template;
 
 	if (template !== null) {
-		if (template === parentComponentConstr.template) {
-			componentConstr.template = (template as Template).extend('', {
+		if (template === parentComponentCtor.template) {
+			componentCtor.template = (template as Template).extend('', {
 				blockName: elIs
 			});
 		} else if (template instanceof Template) {
-			template.setBlockName(componentConstr._elementBlockNames);
+			template.setBlockName(componentCtor._elementBlockNames);
 		} else {
-			componentConstr.template = parentComponentConstr.template
-				? (parentComponentConstr.template as Template).extend(template, {
+			componentCtor.template = parentComponentCtor.template
+				? (parentComponentCtor.template as Template).extend(template, {
 						blockName: elIs
 				  })
-				: new Template(template, { blockName: componentConstr._elementBlockNames });
+				: new Template(template, { blockName: componentCtor._elementBlockNames });
 		}
 	}
 
-	inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
-	inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
+	inheritProperty(componentCtor, parentComponentCtor, 'events', 1);
+	inheritProperty(componentCtor, parentComponentCtor, 'domEvents', 1);
 
-	let elExtends = componentConstr.elementExtends;
-	let parentElConstr: typeof HTMLElement;
+	let elExtends = componentCtor.elementExtends;
+	let parentElCtor: typeof HTMLElement;
 
 	if (elExtends) {
-		parentElConstr =
+		parentElCtor =
 			elementConstructors.get(elExtends) || window[`HTML${pascalize(elExtends)}Element`];
 
-		if (!parentElConstr) {
+		if (!parentElCtor) {
 			throw new TypeError(`Component "${elExtends}" is not registered`);
 		}
 	} else {
-		parentElConstr = HTMLElement;
+		parentElCtor = HTMLElement;
 	}
 
-	let elConstr = class extends parentElConstr {
-		static [KEY_RIONITE_COMPONENT_CONSTRUCTOR] = componentConstr;
+	let elCtor = class extends parentElCtor {
+		static [KEY_RIONITE_COMPONENT_CONSTRUCTOR] = componentCtor;
 
 		static get observedAttributes() {
-			let paramsConfig = componentConstr.params;
+			let paramsConfig = componentCtor.params;
 			let attrs: Array<string> = [];
 
 			for (let name in paramsConfig) {
@@ -251,9 +250,9 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		}
 	};
 
-	let elProto = elConstr.prototype;
+	let elProto = elCtor.prototype;
 
-	elProto.constructor = elConstr;
+	elProto.constructor = elCtor;
 
 	let names: Array<string | symbol> = Object.getOwnPropertyNames(ElementProtoMixin);
 
@@ -275,14 +274,14 @@ export function registerComponent(componentConstr: typeof BaseComponent) {
 		);
 	}
 
-	componentConstructors.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
-	elementConstructors.set(elIs, elConstr);
+	componentConstructors.set(elIs, componentCtor).set(kebabCaseElIs, componentCtor);
+	elementConstructors.set(elIs, elCtor);
 
 	window.customElements.define(
 		kebabCaseElIs,
-		elConstr,
+		elCtor,
 		elExtends ? { extends: elExtends } : undefined
 	);
 
-	return componentConstr;
+	return componentCtor;
 }

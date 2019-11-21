@@ -47,9 +47,9 @@ export function Param(
 		config.type = types.has(type) ? type : Object;
 	}
 
-	let constr = target!.constructor as typeof BaseComponent;
+	let ctor = target!.constructor as typeof BaseComponent;
 
-	((constr.hasOwnProperty('params') && constr.params) || (constr.params = {}))[
+	((ctor.hasOwnProperty('params') && ctor.params) || (ctor.params = {}))[
 		name || propertyName
 	] = config;
 }

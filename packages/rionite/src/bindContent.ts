@@ -3,9 +3,9 @@ import { BaseComponent, I$ComponentParamConfig, IPossiblyComponentElement } from
 import { compileTemplateNodeValue } from './compileTemplateNodeValue';
 import { IBinding } from './componentBinding';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
-import { getTemplateNodeValueAST } from './getTemplateNodeValueAST';
 import { compileKeypath } from './lib/compileKeypath';
 import { setAttribute } from './lib/setAttribute';
+import { parseTemplateNodeValue } from './parseTemplateNodeValue';
 import { ITemplateNodeValueBinding, TTemplateNodeValueAST } from './TemplateNodeValueParser';
 
 export type TContentBindingResult = [
@@ -81,7 +81,7 @@ export function bindContent(
 						continue;
 					}
 
-					let attrValueAST = getTemplateNodeValueAST(attrValue);
+					let attrValueAST = parseTemplateNodeValue(attrValue);
 
 					if (!attrValueAST) {
 						continue;
@@ -191,7 +191,7 @@ export function bindContent(
 			}
 			case Node.TEXT_NODE: {
 				let childValue = child.nodeValue!;
-				let childValueAST = getTemplateNodeValueAST(childValue);
+				let childValueAST = parseTemplateNodeValue(childValue);
 
 				if (!childValueAST) {
 					break;

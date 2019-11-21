@@ -257,14 +257,14 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 		this[KEY_COMPONENT_SELF] = this;
 
-		let constr = this.constructor as typeof BaseComponent;
+		let ctor = this.constructor as typeof BaseComponent;
 
-		if (!elementConstructors.has(constr.elementIs)) {
+		if (!elementConstructors.has(ctor.elementIs)) {
 			throw new TypeError('Component must be registered');
 		}
 
 		if (!el) {
-			el = document.createElement(kebabCase(constr.elementIs, true));
+			el = document.createElement(kebabCase(ctor.elementIs, true));
 		}
 
 		this.element = el as IComponentElement;
@@ -577,7 +577,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			this._initialized = true;
 		}
 
-		let constr = this.constructor as typeof BaseComponent;
+		let ctor = this.constructor as typeof BaseComponent;
 
 		if (this._isReady) {
 			this._unfreezeBindings();
@@ -590,11 +590,11 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		} else {
 			let el = this.element;
 
-			if (el.className.lastIndexOf(constr._blockNamesString, 0)) {
-				el.className = constr._blockNamesString + el.className;
+			if (el.className.lastIndexOf(ctor._blockNamesString, 0)) {
+				el.className = ctor._blockNamesString + el.className;
 			}
 
-			if (constr.template === null) {
+			if (ctor.template === null) {
 				if (this.ownerComponent == this) {
 					let contentBindingResult: [
 						Array<BaseComponent> | null,
@@ -644,7 +644,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					Array<IBinding> | null,
 					Array<BaseComponent | string | TEventEmitterListener> | null
 				] = [null, null, null];
-				let content = (constr.template as Template).render(
+				let content = (ctor.template as Template).render(
 					this,
 					this,
 					this,

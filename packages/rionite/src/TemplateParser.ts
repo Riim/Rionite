@@ -1,17 +1,13 @@
 export enum NodeType {
-	BLOCK = 1,
-	ELEMENT,
+	ELEMENT = 1,
 	ELEMENT_ATTRIBUTE,
 	TEXT,
-	COMMENT,
 	SUPER_CALL,
 	DEBUGGER_CALL
 }
 
 export interface INode {
 	nodeType: NodeType;
-	pos: number;
-	line: number;
 }
 
 export type TContent = Array<INode>;
@@ -53,17 +49,6 @@ export interface ITextNode extends INode {
 	value: string;
 }
 
-export interface IComment extends INode {
-	nodeType: NodeType.COMMENT;
-	value: string;
-	multiline: boolean;
-}
-
-export interface IBlock extends INode {
-	nodeType: NodeType.BLOCK;
-	content: TContent;
-}
-
 const escapee = new Map([
 	['/', '/'],
 	['\\', '\\'],
@@ -77,7 +62,6 @@ const escapee = new Map([
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
 
-const reWhitespaces = /\s+/gy;
 const reTagName = /[a-zA-Z][\-\w]*/gy;
 const reElementName = /[a-zA-Z][\-\w]*/gy;
 const reAttributeName = /[^\s'">/=,)]+/gy;
@@ -93,34 +77,25 @@ function normalizeMultilineText(text: string): string {
 export class TemplateParser {
 	template: string;
 	_pos: number;
-	_line = 1;
 	_chr: string;
 
 	constructor(template: string) {
 		this.template = template;
 	}
 
-	parse(): IBlock {
+	parse(): TContent {
 		this._pos = 0;
 		this._chr = this.template.charAt(0);
 
-		this._skipWhitespaces();
+		this._skipWhitespacesAndComments();
 
-		let pos = this._pos;
-		let line = this._line;
-
-		return {
-			nodeType: NodeType.BLOCK,
-			content: this._readContent(false),
-			pos,
-			line
-		};
+		return this._readContent(false);
 	}
 
 	_readContent(brackets: boolean): TContent {
 		if (brackets) {
 			this._next(/* '{' */);
-			this._skipWhitespaces();
+			this._skipWhitespacesAndComments();
 		}
 
 		let content: TContent = [];
@@ -130,14 +105,9 @@ export class TemplateParser {
 				case "'":
 				case '"':
 				case '`': {
-					let pos = this._pos;
-					let line = this._line;
-
 					content.push({
 						nodeType: NodeType.TEXT,
-						value: this._readString(),
-						pos,
-						line
+						value: this._readString()
 					} as ITextNode);
 
 					break;
@@ -154,23 +124,9 @@ export class TemplateParser {
 				default: {
 					let chr = this._chr;
 
-					if (chr == '/') {
-						let nextChr = this.template.charAt(this._pos + 1);
-
-						if (nextChr == '/' || nextChr == '*') {
-							this._readComment(content);
-							break;
-						}
-					} else if (chr == 'd' && this.template.substr(this._pos, 9) == 'debugger!') {
-						let pos = this._pos;
-
+					if (chr == 'd' && this.template.substr(this._pos, 9) == 'debugger!') {
 						this._chr = this.template.charAt((this._pos += 9));
-
-						content.push({
-							nodeType: NodeType.DEBUGGER_CALL,
-							pos,
-							line: this._line
-						} as IDebuggerCall);
+						content.push({ nodeType: NodeType.DEBUGGER_CALL } as IDebuggerCall);
 
 						break;
 					}
@@ -195,13 +151,12 @@ export class TemplateParser {
 				}
 			}
 
-			this._skipWhitespaces();
+			this._skipWhitespacesAndComments();
 		}
 	}
 
 	_readElement(targetContent: TContent) {
 		let pos = this._pos;
-		let line = this._line;
 		let isTransformer = this._chr == '@';
 
 		if (isTransformer) {
@@ -210,7 +165,7 @@ export class TemplateParser {
 
 		let tagName = this._readName(reTagName);
 
-		this._skipWhitespacesAndReadComments(targetContent);
+		this._skipWhitespacesAndComments();
 
 		let elNames: Array<string | null> | undefined;
 
@@ -219,23 +174,23 @@ export class TemplateParser {
 
 			let pos = this._pos;
 
-			this._skipWhitespacesAndReadComments(targetContent);
+			this._skipWhitespacesAndComments();
 
 			if (this._chr == ':') {
 				elNames = [null];
 				this._next();
-				this._skipWhitespacesAndReadComments(targetContent);
+				this._skipWhitespacesAndComments();
 			}
 
 			for (let name; (name = this._readName(reElementName)); ) {
 				(elNames || (elNames = [])).push(name);
 
-				if (this._skipWhitespacesAndReadComments(targetContent) != ':') {
+				if (this._skipWhitespacesAndComments() != ':') {
 					break;
 				}
 
 				this._next();
-				this._skipWhitespacesAndReadComments(targetContent);
+				this._skipWhitespacesAndComments();
 			}
 
 			if (!elNames || (!elNames[0] && elNames.length == 1)) {
@@ -250,8 +205,8 @@ export class TemplateParser {
 		let attrs: IElementAttributes | undefined;
 
 		if (this._chr == '(') {
-			attrs = this._readAttributes(targetContent);
-			this._skipWhitespacesAndReadComments(targetContent);
+			attrs = this._readAttributes();
+			this._skipWhitespacesAndComments();
 		}
 
 		let content: TContent | undefined;
@@ -266,16 +221,14 @@ export class TemplateParser {
 			tagName,
 			names: elNames || null,
 			attributes: attrs || null,
-			content: content || null,
-			pos,
-			line
+			content: content || null
 		} as IElement);
 	}
 
-	_readAttributes(targetContent: TContent): IElementAttributes {
+	_readAttributes(): IElementAttributes {
 		this._next(/* '(' */);
 
-		if (this._skipWhitespacesAndReadComments(targetContent) == ')') {
+		if (this._skipWhitespacesAndComments() == ')') {
 			this._next();
 
 			return {
@@ -289,10 +242,8 @@ export class TemplateParser {
 
 		loop: for (let f = true; ; f = false) {
 			if (f && this._chr == 's' && (superCall = this._readSuperCall())) {
-				this._skipWhitespacesAndReadComments(targetContent);
+				this._skipWhitespacesAndComments();
 			} else {
-				let pos = this._pos;
-				let line = this._line;
 				let isTransformer = this._chr == '@';
 
 				if (isTransformer) {
@@ -305,7 +256,7 @@ export class TemplateParser {
 					throw this._throwError('Expected attribute name');
 				}
 
-				if (this._skipWhitespacesAndReadComments(targetContent) == '=') {
+				if (this._skipWhitespacesAndComments() == '=') {
 					this._next();
 
 					let chr = this._skipWhitespaces();
@@ -315,12 +266,10 @@ export class TemplateParser {
 							nodeType: NodeType.ELEMENT_ATTRIBUTE,
 							isTransformer,
 							name,
-							value: this._readString(),
-							pos,
-							line
+							value: this._readString()
 						});
 
-						this._skipWhitespacesAndReadComments(targetContent);
+						this._skipWhitespacesAndComments();
 					} else {
 						let value = '';
 
@@ -336,13 +285,11 @@ export class TemplateParser {
 									nodeType: NodeType.ELEMENT_ATTRIBUTE,
 									isTransformer,
 									name,
-									value: value.trim(),
-									pos,
-									line
+									value: value.trim()
 								});
 
 								if (chr == '\n' || chr == '\r') {
-									this._skipWhitespacesAndReadComments(targetContent);
+									this._skipWhitespacesAndComments();
 								}
 
 								break;
@@ -357,9 +304,7 @@ export class TemplateParser {
 						nodeType: NodeType.ELEMENT_ATTRIBUTE,
 						isTransformer,
 						name,
-						value: '',
-						pos,
-						line
+						value: ''
 					});
 				}
 			}
@@ -371,7 +316,7 @@ export class TemplateParser {
 				}
 				case ',': {
 					this._next();
-					this._skipWhitespacesAndReadComments(targetContent);
+					this._skipWhitespacesAndComments();
 					break;
 				}
 				default: {
@@ -389,9 +334,7 @@ export class TemplateParser {
 	}
 
 	_readSuperCall(): ISuperCall | null {
-		let pos = this._pos;
-
-		reSuperCall.lastIndex = pos;
+		reSuperCall.lastIndex = this._pos;
 		let match = reSuperCall.exec(this.template);
 
 		if (match) {
@@ -399,9 +342,7 @@ export class TemplateParser {
 
 			return {
 				nodeType: NodeType.SUPER_CALL,
-				elementName: match[1] || null,
-				pos,
-				line: this._line
+				elementName: match[1] || null
 			};
 		}
 
@@ -432,13 +373,7 @@ export class TemplateParser {
 		for (let chr = this._next(); chr; ) {
 			if (chr == quoteChar) {
 				this._next();
-
-				if (quoteChar == '`') {
-					this._line += str.split(reLineBreak).length - 1;
-					return normalizeMultilineText(str);
-				}
-
-				return str;
+				return quoteChar == '`' ? normalizeMultilineText(str) : str;
 			}
 
 			if (chr == '\\') {
@@ -474,92 +409,65 @@ export class TemplateParser {
 		throw 1;
 	}
 
-	_readComment(targetContent: TContent) {
-		let pos = this._pos;
-		let value = '';
-		let multiline: boolean;
+	_skipWhitespaces(): string {
+		let chr = this._chr;
 
-		switch (this._next(/* '/' */)) {
-			case '/': {
-				for (let chr; (chr = this._next()) && chr != '\n' && chr != '\r'; ) {
-					value += chr;
-				}
+		while (chr && reWhitespace.test(chr)) {
+			chr = this._next();
+		}
 
-				multiline = false;
+		return chr;
+	}
 
-				break;
-			}
-			case '*': {
-				loop: for (;;) {
-					switch (this._next()) {
-						case '*': {
-							if (this._next() == '/') {
-								this._next();
-								break loop;
+	_skipWhitespacesAndComments(): string {
+		let chr = this._chr;
+
+		loop1: for (;;) {
+			if (chr == '/') {
+				switch (this.template.charAt(this._pos + 1)) {
+					case '/': {
+						this._next();
+						while ((chr = this._next()) && chr != '\n' && chr != '\r') {}
+						break;
+					}
+					case '*': {
+						let pos = this._pos;
+
+						this._next();
+
+						loop2: for (;;) {
+							switch (this._next()) {
+								case '*': {
+									if (this._next() == '/') {
+										chr = this._next();
+										break loop2;
+									}
+
+									break;
+								}
+								case '': {
+									this._throwError(
+										'Expected "*/" to close multiline comment',
+										pos
+									);
+								}
 							}
+						}
 
-							value += '*' + this._chr;
-
-							break;
-						}
-						case '': {
-							this._throwError('Expected "*/" to close multiline comment', pos + 2);
-						}
-						default: {
-							value += this._chr;
-						}
+						break;
+					}
+					default: {
+						break loop1;
 					}
 				}
-
-				multiline = true;
-
-				break;
-			}
-			default: {
-				throw this._throwError('Expected comment');
-			}
-		}
-
-		let line = this._line;
-
-		if (multiline) {
-			this._line = line + value.split(reWhitespace).length - 1;
-		}
-
-		targetContent.push({
-			nodeType: NodeType.COMMENT,
-			value,
-			multiline,
-			pos,
-			line
-		} as IComment);
-	}
-
-	_skipWhitespaces(): string {
-		reWhitespaces.lastIndex = this._pos;
-		let match = reWhitespaces.exec(this.template);
-
-		if (match) {
-			this._line += match[0].split(reLineBreak).length - 1;
-			return (this._chr = this.template.charAt((this._pos = reWhitespaces.lastIndex)));
-		}
-
-		return this._chr;
-	}
-
-	_skipWhitespacesAndReadComments(targetContent: TContent): string {
-		for (let nextChr; ; ) {
-			if (
-				this._skipWhitespaces() == '/' &&
-				((nextChr = this.template.charAt(this._pos + 1)) == '/' || nextChr == '*')
-			) {
-				this._readComment(targetContent);
+			} else if (chr && reWhitespace.test(chr)) {
+				chr = this._next();
 			} else {
 				break;
 			}
 		}
 
-		return this._chr;
+		return chr;
 	}
 
 	_next(/* current?: string */): string {

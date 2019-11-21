@@ -7,11 +7,11 @@ import { compileBinding } from '../compileBinding';
 import { IBinding } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
-import { getTemplateNodeValueAST } from '../getTemplateNodeValueAST';
 import { compileKeypath } from '../lib/compileKeypath';
 import { keypathPattern } from '../lib/keypathPattern';
 import { namePattern } from '../lib/namePattern';
 import { removeNodes } from '../lib/removeNodes';
+import { parseTemplateNodeValue } from '../parseTemplateNodeValue';
 import { KEY_CONTENT_TEMPLATE } from '../Template';
 import { RnIfThen } from './RnIfThen';
 
@@ -30,7 +30,7 @@ export interface I$Item {
 export type T$ItemsMap = Map<any, Array<I$Item>>;
 
 const reForAttrValue = RegExp(
-	`^\\s*(${namePattern})\\s+(?:in|of)\\s+(${keypathPattern}(?:\\s*(.*\\S))?)\\s*$`
+	`^\\s*(${namePattern})\\s+in\\s+(${keypathPattern}(?:\\s*(.*\\S))?)\\s*$`
 );
 
 function getItem(list: TList, index: number): any {
@@ -83,6 +83,16 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 			required: true,
 			readonly: true
 		},
+		in: {
+			property: 'paramIn',
+			type: Object,
+			readonly: true
+		},
+		inKeypath: {
+			property: 'paramInKeypath',
+			type: String,
+			readonly: true
+		},
 		trackBy: {
 			type: String,
 			readonly: true
@@ -101,6 +111,8 @@ export class RnRepeat extends BaseComponent {
 	}
 
 	paramFor: string;
+	paramIn: TList | null;
+	paramInKeypath: string | null;
 	trackBy: string;
 
 	beforeTemplate: boolean;
@@ -108,7 +120,7 @@ export class RnRepeat extends BaseComponent {
 	_itemName: string;
 
 	_prevList: Array<any>;
-	_list: Cell<TList | undefined>;
+	_list: TList | Cell<TList | undefined>;
 
 	_$itemsMap: T$ItemsMap;
 
@@ -122,30 +134,42 @@ export class RnRepeat extends BaseComponent {
 		this._active = true;
 
 		if (!this._initialized) {
-			let for_ = this.paramFor.match(reForAttrValue);
+			this._prevList = [];
 
-			if (!for_) {
-				throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
-			}
+			if (this.paramIn) {
+				this._itemName = this.paramFor;
+				this._list = this.paramIn;
+			} else if (this.paramInKeypath) {
+				this._itemName = this.paramFor;
+				this._list = new Cell<any>(compileKeypath(this.paramInKeypath), {
+					context: this.$context
+				});
+			} else {
+				let for_ = this.paramFor.match(reForAttrValue);
 
-			let getList: (this: object) => any;
-
-			if (for_[3]) {
-				let inListAST = getTemplateNodeValueAST(`{${for_[2]}}`);
-
-				if (!inListAST || inListAST.length != 1) {
+				if (!for_) {
 					throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
 				}
 
-				getList = compileBinding(inListAST, for_[2]);
-			} else {
-				getList = compileKeypath(for_[2]);
+				let getList: (this: object) => any;
+
+				if (for_[3]) {
+					let inListAST = parseTemplateNodeValue(`{${for_[2]}}`);
+
+					if (!inListAST || inListAST.length != 1) {
+						throw new SyntaxError(
+							`Invalid value in parameter "for" (${this.paramFor})`
+						);
+					}
+
+					getList = compileBinding(inListAST, for_[2]);
+				} else {
+					getList = compileKeypath(for_[2]);
+				}
+
+				this._itemName = for_[1];
+				this._list = new Cell<any>(getList, { context: this.$context });
 			}
-
-			this._itemName = for_[1];
-
-			this._prevList = [];
-			this._list = new Cell<any>(getList, { context: this.$context });
 
 			this._$itemsMap = new Map();
 
@@ -153,7 +177,12 @@ export class RnRepeat extends BaseComponent {
 		}
 
 		if (this.element[KEY_CONTENT_TEMPLATE]) {
-			this._list.onChange(this._onListChange, this);
+			let list = this._list;
+
+			if (list instanceof Cell || list instanceof ObservableList) {
+				list.onChange(this._onListChange, this);
+			}
+
 			this._render(false);
 		}
 	}
@@ -183,7 +212,7 @@ export class RnRepeat extends BaseComponent {
 	_render(fromChangeEvent: boolean) {
 		let prevList = this._prevList;
 		let prevListLength = prevList.length;
-		let list = this._list.get();
+		let list = this._list instanceof Cell ? this._list.get() : this._list;
 		let $itemsMap = this._$itemsMap;
 		let trackBy = this.trackBy;
 
@@ -478,7 +507,11 @@ export class RnRepeat extends BaseComponent {
 
 		this._active = false;
 
-		this._list.offChange(this._onListChange, this);
+		let list = this._list;
+
+		if (list instanceof Cell || list instanceof ObservableList) {
+			list.offChange(this._onListChange, this);
+		}
 
 		let prevList = this._prevList;
 		let $itemsMap = this._$itemsMap;

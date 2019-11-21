@@ -3,12 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var NodeType;
 (function (NodeType) {
     NodeType[NodeType["BLOCK"] = 1] = "BLOCK";
-    NodeType[NodeType["SUPER_CALL"] = 2] = "SUPER_CALL";
-    NodeType[NodeType["DEBUGGER_CALL"] = 3] = "DEBUGGER_CALL";
-    NodeType[NodeType["ELEMENT"] = 4] = "ELEMENT";
-    NodeType[NodeType["ELEMENT_ATTRIBUTE"] = 5] = "ELEMENT_ATTRIBUTE";
-    NodeType[NodeType["TEXT"] = 6] = "TEXT";
-    NodeType[NodeType["COMMENT"] = 7] = "COMMENT";
+    NodeType[NodeType["ELEMENT"] = 2] = "ELEMENT";
+    NodeType[NodeType["ELEMENT_ATTRIBUTE"] = 3] = "ELEMENT_ATTRIBUTE";
+    NodeType[NodeType["TEXT"] = 4] = "TEXT";
+    NodeType[NodeType["COMMENT"] = 5] = "COMMENT";
+    NodeType[NodeType["SUPER_CALL"] = 6] = "SUPER_CALL";
+    NodeType[NodeType["DEBUGGER_CALL"] = 7] = "DEBUGGER_CALL";
 })(NodeType = exports.NodeType || (exports.NodeType = {}));
 const escapee = new Map([
     ['/', '/'],
@@ -144,13 +144,13 @@ class TemplateParser {
                 this._throwError('Expected element name', pos);
             }
         }
-        if (!tagName && !elNames) {
+        if (!tagName && !(elNames && elNames[0])) {
             this._throwError('Expected element', pos);
         }
         let attrs;
         if (this._chr == '(') {
             attrs = this._readAttributes(targetContent);
-            this._skipWhitespaces();
+            this._skipWhitespacesAndReadComments(targetContent);
         }
         let content;
         if (this._chr == '{') {
@@ -306,13 +306,12 @@ class TemplateParser {
                 chr = this._next();
                 if (chr == 'x' || chr == 'u') {
                     let pos = this._pos + 1;
-                    let hexadecimal = chr == 'x';
-                    let code = parseInt(this.template.slice(pos, pos + (hexadecimal ? 2 : 4)), 16);
+                    let code = parseInt(this.template.slice(pos, pos + (chr == 'x' ? 2 : 4)), 16);
                     if (!isFinite(code)) {
-                        this._throwError(`Invalid ${hexadecimal ? 'hexadecimal' : 'unicode'} escape sequence`, pos);
+                        this._throwError(`Invalid ${chr == 'x' ? 'hexadecimal' : 'unicode'} escape sequence`, pos);
                     }
                     str += String.fromCharCode(code);
-                    chr = this._chr = this.template.charAt((this._pos = pos + (hexadecimal ? 2 : 4)));
+                    chr = this._chr = this.template.charAt((this._pos = pos + (chr == 'x' ? 2 : 4)));
                 }
                 else if (escapee.has(chr)) {
                     str += escapee.get(chr);

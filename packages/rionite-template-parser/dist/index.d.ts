@@ -1,11 +1,11 @@
 export declare enum NodeType {
     BLOCK = 1,
-    SUPER_CALL = 2,
-    DEBUGGER_CALL = 3,
-    ELEMENT = 4,
-    ELEMENT_ATTRIBUTE = 5,
-    TEXT = 6,
-    COMMENT = 7
+    ELEMENT = 2,
+    ELEMENT_ATTRIBUTE = 3,
+    TEXT = 4,
+    COMMENT = 5,
+    SUPER_CALL = 6,
+    DEBUGGER_CALL = 7
 }
 export interface INode {
     nodeType: NodeType;

@@ -7,10 +7,10 @@ import { compileBinding } from '../compileBinding';
 import { IBinding } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
-import { getTemplateNodeValueAST } from '../getTemplateNodeValueAST';
 import { compileKeypath } from '../lib/compileKeypath';
 import { keypathPattern } from '../lib/keypathPattern';
 import { removeNodes } from '../lib/removeNodes';
+import { parseTemplateNodeValue } from '../parseTemplateNodeValue';
 import { KEY_CONTENT_TEMPLATE } from '../Template';
 import { RnRepeat } from './RnRepeat';
 
@@ -68,7 +68,7 @@ export class RnIfThen extends BaseComponent {
 			if (reKeypath.test(if_)) {
 				getIfValue = compileKeypath(if_);
 			} else {
-				let ifAST = getTemplateNodeValueAST(`{${if_}}`);
+				let ifAST = parseTemplateNodeValue(`{${if_}}`);
 
 				if (!ifAST || ifAST.length != 1) {
 					throw new SyntaxError(`Invalid value in parameter "if" (${if_})`);

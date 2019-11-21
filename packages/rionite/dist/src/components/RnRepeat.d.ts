@@ -13,11 +13,13 @@ export declare class RnRepeat extends BaseComponent {
     static EVENT_CHANGE: symbol;
     static get bindsInputContent(): boolean;
     paramFor: string;
+    paramIn: TList | null;
+    paramInKeypath: string | null;
     trackBy: string;
     beforeTemplate: boolean;
     _itemName: string;
     _prevList: Array<any>;
-    _list: Cell<TList | undefined>;
+    _list: TList | Cell<TList | undefined>;
     _$itemsMap: T$ItemsMap;
     _active: boolean;
     elementConnected(): void;

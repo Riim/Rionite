@@ -30,7 +30,7 @@
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
     "jest": "^24.9.0",
-    "rollup": "^1.27.1",
+    "rollup": "^1.27.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-tslint": "^0.2.2",

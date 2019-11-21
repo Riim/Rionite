@@ -2751,27 +2751,6 @@ function compileTemplateNodeValue(templateNodeValueAST, templateNodeValueString,
     return compileTemplateNodeValue_cache.get(cacheKey);
 }
 
-// CONCATENATED MODULE: ./src/getTemplateNodeValueAST.ts
-
-
-function getTemplateNodeValueAST(templateNodeValue) {
-    if (!templateNodeValueASTCache.has(templateNodeValue)) {
-        let bracketIndex = templateNodeValue.indexOf('{');
-        if (bracketIndex == -1) {
-            templateNodeValueASTCache.set(templateNodeValue, null);
-        }
-        else {
-            let templateNodeValueAST = new TemplateNodeValueParser_TemplateNodeValueParser(templateNodeValue).parse(bracketIndex);
-            if (templateNodeValueAST.length == 1 &&
-                templateNodeValueAST[0].nodeType == TemplateNodeValueNodeType.TEXT) {
-                templateNodeValueAST = null;
-            }
-            templateNodeValueASTCache.set(templateNodeValue, templateNodeValueAST);
-        }
-    }
-    return templateNodeValueASTCache.get(templateNodeValue);
-}
-
 // CONCATENATED MODULE: ./src/lib/compileKeypath.ts
 
 const compileKeypath_cache = new Map();
@@ -2814,6 +2793,27 @@ function setAttribute(el, name, value) {
         el.setAttribute(name, value);
     }
     return el;
+}
+
+// CONCATENATED MODULE: ./src/parseTemplateNodeValue.ts
+
+
+function parseTemplateNodeValue(templateNodeValue) {
+    if (!templateNodeValueASTCache.has(templateNodeValue)) {
+        let bracketIndex = templateNodeValue.indexOf('{');
+        if (bracketIndex == -1) {
+            templateNodeValueASTCache.set(templateNodeValue, null);
+        }
+        else {
+            let templateNodeValueAST = new TemplateNodeValueParser_TemplateNodeValueParser(templateNodeValue).parse(bracketIndex);
+            if (templateNodeValueAST.length == 1 &&
+                templateNodeValueAST[0].nodeType == TemplateNodeValueNodeType.TEXT) {
+                templateNodeValueAST = null;
+            }
+            templateNodeValueASTCache.set(templateNodeValue, templateNodeValueAST);
+        }
+    }
+    return templateNodeValueASTCache.get(templateNodeValue);
 }
 
 // CONCATENATED MODULE: ./src/bindContent.ts
@@ -2865,7 +2865,7 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
                     if (!attrValue) {
                         continue;
                     }
-                    let attrValueAST = getTemplateNodeValueAST(attrValue);
+                    let attrValueAST = parseTemplateNodeValue(attrValue);
                     if (!attrValueAST) {
                         continue;
                     }
@@ -2935,7 +2935,7 @@ function bindContent(node, ownerComponent, context, result, parentComponent) {
             }
             case Node.TEXT_NODE: {
                 let childValue = child.nodeValue;
-                let childValueAST = getTemplateNodeValueAST(childValue);
+                let childValueAST = parseTemplateNodeValue(childValue);
                 if (!childValueAST) {
                     break;
                 }
@@ -3160,11 +3160,11 @@ function handleEvent(evt) {
 var NodeType;
 (function (NodeType) {
     NodeType[NodeType["BLOCK"] = 1] = "BLOCK";
-    NodeType[NodeType["ELEMENT_CALL"] = 2] = "ELEMENT_CALL";
-    NodeType[NodeType["SUPER_CALL"] = 3] = "SUPER_CALL";
-    NodeType[NodeType["DEBUGGER_CALL"] = 4] = "DEBUGGER_CALL";
-    NodeType[NodeType["ELEMENT"] = 5] = "ELEMENT";
-    NodeType[NodeType["TEXT"] = 6] = "TEXT";
+    NodeType[NodeType["ELEMENT"] = 2] = "ELEMENT";
+    NodeType[NodeType["TEXT"] = 3] = "TEXT";
+    NodeType[NodeType["ELEMENT_CALL"] = 4] = "ELEMENT_CALL";
+    NodeType[NodeType["SUPER_CALL"] = 5] = "SUPER_CALL";
+    NodeType[NodeType["DEBUGGER_CALL"] = 6] = "DEBUGGER_CALL";
 })(NodeType || (NodeType = {}));
 const KEY_CONTENT_TEMPLATE = Symbol('contentTemplate');
 const escapee = new Map([
@@ -3181,8 +3181,8 @@ const reTagName = /[a-zA-Z][\-\w]*/gy;
 const reElementName = /[a-zA-Z][\-\w]*/gy;
 const reAttributeName = /[^\s'">/=,)]+/gy;
 const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
-const reTrimStartLine = /^[ \t]+/gm;
-const reTrimEndLine = /[ \t]+$/gm;
+const reTrimStartLine = /^[\x20\t]+/gm;
+const reTrimEndLine = /[\x20\t]+$/gm;
 function normalizeMultilineText(text) {
     return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
 }
@@ -3280,7 +3280,7 @@ class Template_Template {
         this._readContent(this.parent ? null : block.elements['@root'].content, false, null, false, component && component.constructor);
         return block;
     }
-    _readContent(targetContent, nsSVG, superElName, brackets, componentConstr) {
+    _readContent(targetContent, nsSVG, superElName, brackets, componentCtor) {
         if (brackets) {
             this._next( /* '{' */);
             this._skipWhitespacesAndComments();
@@ -3322,14 +3322,14 @@ class Template_Template {
                             break;
                         }
                     }
-                    targetContent = this._readElement(targetContent, nsSVG, superElName, componentConstr);
+                    targetContent = this._readElement(targetContent, nsSVG, superElName, componentCtor);
                     break;
                 }
             }
             this._skipWhitespacesAndComments();
         }
     }
-    _readElement(targetContent, nsSVG, superElName, componentConstr) {
+    _readElement(targetContent, nsSVG, superElName, componentCtor) {
         let pos = this._pos;
         let isTransformer = this._chr == '@';
         if (isTransformer) {
@@ -3362,8 +3362,17 @@ class Template_Template {
             elName = isTransformer ? elNames[0] && '@' + elNames[0] : elNames[0];
         }
         if (tagName) {
-            if (!nsSVG && tagName.toLowerCase() == 'svg') {
-                nsSVG = true;
+            if (!nsSVG) {
+                if (tagName.toLowerCase() == 'svg') {
+                    nsSVG = true;
+                    tagName = 'svg';
+                }
+                else {
+                    let superEl;
+                    if (this.parent && (superEl = this.parent._elements[elName])) {
+                        nsSVG = superEl.nsSVG;
+                    }
+                }
             }
             if (!isTransformer && !nsSVG) {
                 tagName = Object(dist["kebabCase"])(tagName, true);
@@ -3373,28 +3382,30 @@ class Template_Template {
             if (!elName) {
                 this._throwError('Expected element', pos);
             }
-            let parentEl;
-            if (!this.parent || !(parentEl = this.parent._elements[elName])) {
+            let superEl;
+            if (!this.parent || !(superEl = this.parent._elements[elName])) {
                 throw this._throwError('Element.tagName is required', isTransformer ? pos + 1 : pos);
             }
-            nsSVG = parentEl.nsSVG;
-            tagName = parentEl.tagName;
+            if (!nsSVG) {
+                nsSVG = superEl.nsSVG;
+            }
+            tagName = superEl.tagName;
         }
-        let elComponentConstr = isTransformer || nsSVG ? null : componentConstructors.get(tagName);
+        let elComponentCtor = isTransformer || nsSVG ? null : componentConstructors.get(tagName);
         let attrs;
         let $specifiedParams;
-        if (elComponentConstr) {
+        if (elComponentCtor) {
             $specifiedParams = new Set();
         }
         if (this._chr == '(') {
-            attrs = this._readAttributes(elName || superElName, elComponentConstr && elComponentConstr[KEY_PARAMS_CONFIG], $specifiedParams);
+            attrs = this._readAttributes(nsSVG, elName || superElName, elComponentCtor && elComponentCtor[KEY_PARAMS_CONFIG], $specifiedParams);
             this._skipWhitespaces();
         }
         let events;
         let domEvents;
-        if (elNames && componentConstr) {
-            let componentEvents = componentConstr.events;
-            let componentDOMEvents = componentConstr.domEvents;
+        if (elNames && componentCtor) {
+            let componentEvents = componentCtor.events;
+            let componentDOMEvents = componentCtor.domEvents;
             if (componentEvents || componentDOMEvents) {
                 for (let name of elNames) {
                     if (!name) {
@@ -3428,7 +3439,7 @@ class Template_Template {
         }
         let content;
         if (this._chr == '{') {
-            content = this._readContent(null, nsSVG, elName || superElName, true, componentConstr);
+            content = this._readContent(null, nsSVG, elName || superElName, true, componentCtor);
         }
         let el = {
             nodeType: NodeType.ELEMENT,
@@ -3601,7 +3612,7 @@ class Template_Template {
         }
         return targetContent;
     }
-    _readAttributes(superElName, $paramsConfig, $specifiedParams) {
+    _readAttributes(nsSVG, superElName, $paramsConfig, $specifiedParams) {
         this._next( /* '(' */);
         if (this._skipWhitespacesAndComments() == ')') {
             this._next();
@@ -3638,9 +3649,9 @@ class Template_Template {
                 if (!name) {
                     throw this._throwError('Expected attribute name');
                 }
-                // if (!isTransformer && !nsSVG) {
-                // 	name = snakeCaseAttributeName(name, true);
-                // }
+                if (!isTransformer && !nsSVG) {
+                    name = Object(_snake_case_attribute_name_dist["snakeCaseAttributeName"])(name, true);
+                }
                 let fullName = (isTransformer ? '@' : '') + name;
                 let value;
                 if (this._skipWhitespacesAndComments() == '=') {
@@ -3741,7 +3752,7 @@ class Template_Template {
         let match = reSuperCall.exec(this.template);
         if (match) {
             if (!this.parent) {
-                this._throwError('SuperCall is impossible if no parent is defined');
+                this._throwError('SuperCall is impossible if there is no parent');
             }
             let elName = match[1] ||
                 defaultElName ||
@@ -3784,13 +3795,12 @@ class Template_Template {
                 chr = this._next();
                 if (chr == 'x' || chr == 'u') {
                     let pos = this._pos + 1;
-                    let hexadecimal = chr == 'x';
-                    let code = parseInt(this.template.slice(pos, pos + (hexadecimal ? 2 : 4)), 16);
+                    let code = parseInt(this.template.slice(pos, pos + (chr == 'x' ? 2 : 4)), 16);
                     if (!isFinite(code)) {
-                        this._throwError(`Invalid ${hexadecimal ? 'hexadecimal' : 'unicode'} escape sequence`, pos);
+                        this._throwError(`Invalid ${chr == 'x' ? 'hexadecimal' : 'unicode'} escape sequence`, pos);
                     }
                     str += String.fromCharCode(code);
-                    chr = this._chr = this.template.charAt((this._pos = pos + (hexadecimal ? 2 : 4)));
+                    chr = this._chr = this.template.charAt((this._pos = pos + (chr == 'x' ? 2 : 4)));
                 }
                 else if (escapee.has(chr)) {
                     str += escapee.get(chr);
@@ -3905,6 +3915,7 @@ Template_Template.elementTransformers = {
 };
 Template_Template.attributeTransformers = {};
 function renderContent(targetNode, content, template, ownerComponent, context, result, parentComponent) {
+    var _a;
     if (content) {
         for (let node of content) {
             switch (node.nodeType) {
@@ -3956,10 +3967,7 @@ function renderContent(targetNode, content, template, ownerComponent, context, r
                                 if (attr.isTransformer) {
                                     continue;
                                 }
-                                // let attrName = attr.name;
-                                let attrName = node.nsSVG
-                                    ? attr.name
-                                    : Object(_snake_case_attribute_name_dist["snakeCaseAttributeName"])(attr.name, true);
+                                let attrName = attr.name;
                                 let attrValue = attr.value;
                                 if (attrName == 'class') {
                                     attrValue = (className || '') + attrValue;
@@ -3971,13 +3979,14 @@ function renderContent(targetNode, content, template, ownerComponent, context, r
                                         el[KEY_CONTEXT] = context;
                                     }
                                     if (attrValue) {
-                                        let attrValueAST = getTemplateNodeValueAST(attrValue);
+                                        let attrValueAST = parseTemplateNodeValue(attrValue);
                                         if (attrValueAST) {
                                             let bindingPrefix = attrValueAST.length == 1
                                                 ? attrValueAST[0]
                                                     .prefix
                                                 : null;
-                                            if (bindingPrefix === '=') {
+                                            if (bindingPrefix === '=' ||
+                                                (bindingPrefix === null && ((_a = ($paramsConfig && $paramsConfig.get(attrName))) === null || _a === void 0 ? void 0 : _a.readonly))) {
                                                 attrValue = compileTemplateNodeValue(attrValueAST, attrValue, true).call(context, {
                                                     meta: {
                                                         element: el,
@@ -4077,7 +4086,7 @@ function renderContent(targetNode, content, template, ownerComponent, context, r
                 case NodeType.TEXT: {
                     let nodeValue = node.value;
                     if (result) {
-                        let nodeValueAST = getTemplateNodeValueAST(nodeValue);
+                        let nodeValueAST = parseTemplateNodeValue(nodeValue);
                         if (nodeValueAST) {
                             if (nodeValueAST.length == 1 &&
                                 nodeValueAST[0].prefix === '=') {
@@ -4114,34 +4123,12 @@ function renderElementClasses(elementNamesTemplate, elNames) {
 
 // CONCATENATED MODULE: ./src/lib/templateTransformers.ts
 
-[['IfThen', 'rn-if-then'], ['IfElse', 'rn-if-else'], ['Repeat', 'rn-repeat']].forEach(([name, is]) => {
+[
+    ['IfThen', 'rn-if-then'],
+    ['IfElse', 'rn-if-else'],
+    ['Repeat', 'rn-repeat']
+].forEach(([name, is]) => {
     Template_Template.elementTransformers[name] = el => {
-        if (name != 'Repeat') {
-            let list = el.attributes.list;
-            if (list) {
-                let index = list['length='] - 1;
-                let foundIndex;
-                for (; index >= 0; index--) {
-                    if (list[index].value == '') {
-                        foundIndex = index;
-                    }
-                    else if (list[index].name == 'if') {
-                        break;
-                    }
-                }
-                if (index == -1 && foundIndex !== undefined) {
-                    let attr = list[foundIndex];
-                    delete list[attr.name];
-                    list['if'] = foundIndex;
-                    list[foundIndex] = {
-                        isTransformer: false,
-                        name: 'if',
-                        value: attr.name,
-                        pos: -1
-                    };
-                }
-            }
-        }
         return [
             {
                 nodeType: NodeType.ELEMENT,
@@ -4160,7 +4147,11 @@ function renderElementClasses(elementNamesTemplate, elNames) {
         ];
     };
 });
-[['if', 'rn-if-then'], ['unless', 'rn-if-else'], ['for', 'rn-repeat']].forEach(([name, is]) => {
+[
+    ['if', 'rn-if-then'],
+    ['unless', 'rn-if-else'],
+    ['for', 'rn-repeat']
+].forEach(([name, is]) => {
     Template_Template.attributeTransformers[name] = (el, attr) => {
         return {
             nodeType: NodeType.ELEMENT,
@@ -4507,11 +4498,11 @@ function inheritProperty(target, source, name, depth) {
         }
     }
 }
-function registerComponent(componentConstr) {
+function registerComponent(componentCtor) {
     var _a, _b;
-    let elIs = componentConstr.hasOwnProperty('elementIs')
-        ? componentConstr.elementIs
-        : (componentConstr.elementIs = componentConstr.name);
+    let elIs = componentCtor.hasOwnProperty('elementIs')
+        ? componentCtor.elementIs
+        : (componentCtor.elementIs = componentCtor.name);
     if (!elIs) {
         throw new TypeError('Static property "elementIs" is required');
     }
@@ -4519,12 +4510,12 @@ function registerComponent(componentConstr) {
     if (componentConstructors.has(kebabCaseElIs)) {
         throw new TypeError(`Component "${kebabCaseElIs}" already registered`);
     }
-    let componentProto = componentConstr.prototype;
-    let parentComponentConstr = Object.getPrototypeOf(componentProto)
+    let componentProto = componentCtor.prototype;
+    let parentComponentCtor = Object.getPrototypeOf(componentProto)
         .constructor;
-    inheritProperty(componentConstr, parentComponentConstr, 'params', 0);
-    componentConstr[KEY_PARAMS_CONFIG] = null;
-    let paramsConfig = componentConstr.params;
+    inheritProperty(componentCtor, parentComponentCtor, 'params', 0);
+    componentCtor[KEY_PARAMS_CONFIG] = null;
+    let paramsConfig = componentCtor.params;
     for (let name in paramsConfig) {
         let paramConfig = paramsConfig[name];
         if (paramConfig === null || paramConfig === Object.prototype[name]) {
@@ -4552,7 +4543,7 @@ function registerComponent(componentConstr) {
             readonly,
             paramConfig
         };
-        (componentConstr[KEY_PARAMS_CONFIG] || (componentConstr[KEY_PARAMS_CONFIG] = new Map()))
+        (componentCtor[KEY_PARAMS_CONFIG] || (componentCtor[KEY_PARAMS_CONFIG] = new Map()))
             .set(name, $paramConfig)
             .set(snakeCaseName, $paramConfig);
         Object.defineProperty(componentProto, propertyName + 'Cell', {
@@ -4620,48 +4611,47 @@ function registerComponent(componentConstr) {
         };
         Object.defineProperty(componentProto, propertyName, descriptor);
     }
-    inheritProperty(componentConstr, parentComponentConstr, 'i18n', 0);
-    componentConstr._blockNamesString =
-        elIs + ' ' + (parentComponentConstr._blockNamesString || '');
-    componentConstr._elementBlockNames = [elIs];
-    if (parentComponentConstr._elementBlockNames) {
-        push.apply(componentConstr._elementBlockNames, parentComponentConstr._elementBlockNames);
+    inheritProperty(componentCtor, parentComponentCtor, 'i18n', 0);
+    componentCtor._blockNamesString = elIs + ' ' + (parentComponentCtor._blockNamesString || '');
+    componentCtor._elementBlockNames = [elIs];
+    if (parentComponentCtor._elementBlockNames) {
+        push.apply(componentCtor._elementBlockNames, parentComponentCtor._elementBlockNames);
     }
-    let template = componentConstr.template;
+    let template = componentCtor.template;
     if (template !== null) {
-        if (template === parentComponentConstr.template) {
-            componentConstr.template = template.extend('', {
+        if (template === parentComponentCtor.template) {
+            componentCtor.template = template.extend('', {
                 blockName: elIs
             });
         }
         else if (template instanceof Template_Template) {
-            template.setBlockName(componentConstr._elementBlockNames);
+            template.setBlockName(componentCtor._elementBlockNames);
         }
         else {
-            componentConstr.template = parentComponentConstr.template
-                ? parentComponentConstr.template.extend(template, {
+            componentCtor.template = parentComponentCtor.template
+                ? parentComponentCtor.template.extend(template, {
                     blockName: elIs
                 })
-                : new Template_Template(template, { blockName: componentConstr._elementBlockNames });
+                : new Template_Template(template, { blockName: componentCtor._elementBlockNames });
         }
     }
-    inheritProperty(componentConstr, parentComponentConstr, 'events', 1);
-    inheritProperty(componentConstr, parentComponentConstr, 'domEvents', 1);
-    let elExtends = componentConstr.elementExtends;
-    let parentElConstr;
+    inheritProperty(componentCtor, parentComponentCtor, 'events', 1);
+    inheritProperty(componentCtor, parentComponentCtor, 'domEvents', 1);
+    let elExtends = componentCtor.elementExtends;
+    let parentElCtor;
     if (elExtends) {
-        parentElConstr =
+        parentElCtor =
             elementConstructors.get(elExtends) || window[`HTML${Object(pascalize_dist["pascalize"])(elExtends)}Element`];
-        if (!parentElConstr) {
+        if (!parentElCtor) {
             throw new TypeError(`Component "${elExtends}" is not registered`);
         }
     }
     else {
-        parentElConstr = HTMLElement;
+        parentElCtor = HTMLElement;
     }
-    let elConstr = (_b = class extends parentElConstr {
+    let elCtor = (_b = class extends parentElCtor {
             static get observedAttributes() {
-                let paramsConfig = componentConstr.params;
+                let paramsConfig = componentCtor.params;
                 let attrs = [];
                 for (let name in paramsConfig) {
                     if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
@@ -4672,10 +4662,10 @@ function registerComponent(componentConstr) {
             }
         },
         _a = KEY_RIONITE_COMPONENT_CONSTRUCTOR,
-        _b[_a] = componentConstr,
+        _b[_a] = componentCtor,
         _b);
-    let elProto = elConstr.prototype;
-    elProto.constructor = elConstr;
+    let elProto = elCtor.prototype;
+    elProto.constructor = elCtor;
     let names = Object.getOwnPropertyNames(ElementProtoMixin);
     for (let name of names) {
         Object.defineProperty(elProto, name, Object.getOwnPropertyDescriptor(ElementProtoMixin, name));
@@ -4684,40 +4674,40 @@ function registerComponent(componentConstr) {
     for (let name of names) {
         Object.defineProperty(elProto, name, Object.getOwnPropertyDescriptor(ElementProtoMixin, name));
     }
-    componentConstructors.set(elIs, componentConstr).set(kebabCaseElIs, componentConstr);
-    elementConstructors.set(elIs, elConstr);
-    window.customElements.define(kebabCaseElIs, elConstr, elExtends ? { extends: elExtends } : undefined);
-    return componentConstr;
+    componentConstructors.set(elIs, componentCtor).set(kebabCaseElIs, componentCtor);
+    elementConstructors.set(elIs, elCtor);
+    window.customElements.define(kebabCaseElIs, elCtor, elExtends ? { extends: elExtends } : undefined);
+    return componentCtor;
 }
 
 // CONCATENATED MODULE: ./src/decorators/Component.ts
 
 function Component(config) {
-    return (componentConstr) => {
+    return (componentCtor) => {
         if (config) {
             if (config.elementIs !== undefined) {
-                componentConstr.elementIs = config.elementIs;
+                componentCtor.elementIs = config.elementIs;
             }
             if (config.elementExtends !== undefined) {
-                componentConstr.elementExtends = config.elementExtends;
+                componentCtor.elementExtends = config.elementExtends;
             }
             if (config.params !== undefined) {
-                componentConstr.params = config.params;
+                componentCtor.params = config.params;
             }
             if (config.i18n !== undefined) {
-                componentConstr.i18n = config.i18n;
+                componentCtor.i18n = config.i18n;
             }
             if (config.template !== undefined) {
-                componentConstr.template = config.template;
+                componentCtor.template = config.template;
             }
             if (config.events !== undefined) {
-                componentConstr.events = config.events;
+                componentCtor.events = config.events;
             }
             if (config.domEvents !== undefined) {
-                componentConstr.domEvents = config.domEvents;
+                componentCtor.domEvents = config.domEvents;
             }
         }
-        registerComponent(componentConstr);
+        registerComponent(componentCtor);
     };
 }
 
@@ -4749,8 +4739,8 @@ function Param(target, propertyName, _propertyDesc, name, config) {
         let type = Reflect.getMetadata('design:type', target, propertyName);
         config.type = types.has(type) ? type : Object;
     }
-    let constr = target.constructor;
-    ((constr.hasOwnProperty('params') && constr.params) || (constr.params = {}))[name || propertyName] = config;
+    let ctor = target.constructor;
+    ((ctor.hasOwnProperty('params') && ctor.params) || (ctor.params = {}))[name || propertyName] = config;
 }
 
 // CONCATENATED MODULE: ./src/decorators/Listen.ts
@@ -4947,12 +4937,12 @@ class BaseComponent_BaseComponent extends external_cellx_["EventEmitter"] {
         this._isReady = false;
         currentComponent = this;
         this[KEY_COMPONENT_SELF] = this;
-        let constr = this.constructor;
-        if (!elementConstructors.has(constr.elementIs)) {
+        let ctor = this.constructor;
+        if (!elementConstructors.has(ctor.elementIs)) {
             throw new TypeError('Component must be registered');
         }
         if (!el) {
-            el = document.createElement(Object(dist["kebabCase"])(constr.elementIs, true));
+            el = document.createElement(Object(dist["kebabCase"])(ctor.elementIs, true));
         }
         this.element = el;
         el.$component = this;
@@ -5208,7 +5198,7 @@ class BaseComponent_BaseComponent extends external_cellx_["EventEmitter"] {
             }
             this._initialized = true;
         }
-        let constr = this.constructor;
+        let ctor = this.constructor;
         if (this._isReady) {
             this._unfreezeBindings();
             let childComponents = findChildComponents(this.element);
@@ -5218,10 +5208,10 @@ class BaseComponent_BaseComponent extends external_cellx_["EventEmitter"] {
         }
         else {
             let el = this.element;
-            if (el.className.lastIndexOf(constr._blockNamesString, 0)) {
-                el.className = constr._blockNamesString + el.className;
+            if (el.className.lastIndexOf(ctor._blockNamesString, 0)) {
+                el.className = ctor._blockNamesString + el.className;
             }
-            if (constr.template === null) {
+            if (ctor.template === null) {
                 if (this.ownerComponent == this) {
                     let contentBindingResult = [null, null, null];
                     bindContent(el, this, this, contentBindingResult);
@@ -5252,7 +5242,7 @@ class BaseComponent_BaseComponent extends external_cellx_["EventEmitter"] {
                     resumeConnectionStatusCallbacks();
                 }
                 let contentBindingResult = [null, null, null];
-                let content = constr.template.render(this, this, this, contentBindingResult);
+                let content = ctor.template.render(this, this, this, contentBindingResult);
                 let childComponents = contentBindingResult[0];
                 let backBindings = contentBindingResult[2];
                 this._bindings = contentBindingResult[1];
@@ -5527,7 +5517,7 @@ var RnRepeat_1;
 
 
 const slice = Array.prototype.slice;
-const reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+(?:in|of)\\s+(${keypathPattern}(?:\\s*(.*\\S))?)\\s*$`);
+const reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+in\\s+(${keypathPattern}(?:\\s*(.*\\S))?)\\s*$`);
 function getItem(list, index) {
     return Array.isArray(list) ? list[index] : list.get(index);
 }
@@ -5573,29 +5563,44 @@ let RnRepeat_RnRepeat = RnRepeat_1 = class RnRepeat extends BaseComponent_BaseCo
         }
         this._active = true;
         if (!this._initialized) {
-            let for_ = this.paramFor.match(reForAttrValue);
-            if (!for_) {
-                throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
+            this._prevList = [];
+            if (this.paramIn) {
+                this._itemName = this.paramFor;
+                this._list = this.paramIn;
             }
-            let getList;
-            if (for_[3]) {
-                let inListAST = getTemplateNodeValueAST(`{${for_[2]}}`);
-                if (!inListAST || inListAST.length != 1) {
-                    throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
-                }
-                getList = compileBinding(inListAST, for_[2]);
+            else if (this.paramInKeypath) {
+                this._itemName = this.paramFor;
+                this._list = new external_cellx_["Cell"](compileKeypath(this.paramInKeypath), {
+                    context: this.$context
+                });
             }
             else {
-                getList = compileKeypath(for_[2]);
+                let for_ = this.paramFor.match(reForAttrValue);
+                if (!for_) {
+                    throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
+                }
+                let getList;
+                if (for_[3]) {
+                    let inListAST = parseTemplateNodeValue(`{${for_[2]}}`);
+                    if (!inListAST || inListAST.length != 1) {
+                        throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
+                    }
+                    getList = compileBinding(inListAST, for_[2]);
+                }
+                else {
+                    getList = compileKeypath(for_[2]);
+                }
+                this._itemName = for_[1];
+                this._list = new external_cellx_["Cell"](getList, { context: this.$context });
             }
-            this._itemName = for_[1];
-            this._prevList = [];
-            this._list = new external_cellx_["Cell"](getList, { context: this.$context });
             this._$itemsMap = new Map();
             this._initialized = true;
         }
         if (this.element[KEY_CONTENT_TEMPLATE]) {
-            this._list.onChange(this._onListChange, this);
+            let list = this._list;
+            if (list instanceof external_cellx_["Cell"] || list instanceof external_cellx_["ObservableList"]) {
+                list.onChange(this._onListChange, this);
+            }
             this._render(false);
         }
     }
@@ -5621,7 +5626,7 @@ let RnRepeat_RnRepeat = RnRepeat_1 = class RnRepeat extends BaseComponent_BaseCo
     _render(fromChangeEvent) {
         let prevList = this._prevList;
         let prevListLength = prevList.length;
-        let list = this._list.get();
+        let list = this._list instanceof external_cellx_["Cell"] ? this._list.get() : this._list;
         let $itemsMap = this._$itemsMap;
         let trackBy = this.trackBy;
         let startIndex = 0;
@@ -5841,7 +5846,10 @@ let RnRepeat_RnRepeat = RnRepeat_1 = class RnRepeat extends BaseComponent_BaseCo
             return;
         }
         this._active = false;
-        this._list.offChange(this._onListChange, this);
+        let list = this._list;
+        if (list instanceof external_cellx_["Cell"] || list instanceof external_cellx_["ObservableList"]) {
+            list.offChange(this._onListChange, this);
+        }
         let prevList = this._prevList;
         let $itemsMap = this._$itemsMap;
         let trackBy = this.trackBy;
@@ -5866,6 +5874,16 @@ RnRepeat_RnRepeat = RnRepeat_1 = __decorate([
                 property: 'paramFor',
                 type: String,
                 required: true,
+                readonly: true
+            },
+            in: {
+                property: 'paramIn',
+                type: Object,
+                readonly: true
+            },
+            inKeypath: {
+                property: 'paramInKeypath',
+                type: String,
                 readonly: true
             },
             trackBy: {
@@ -5928,7 +5946,7 @@ let RnIfThen_RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent_BaseCo
                 getIfValue = compileKeypath(if_);
             }
             else {
-                let ifAST = getTemplateNodeValueAST(`{${if_}}`);
+                let ifAST = parseTemplateNodeValue(`{${if_}}`);
                 if (!ifAST || ifAST.length != 1) {
                     throw new SyntaxError(`Invalid value in parameter "if" (${if_})`);
                 }
