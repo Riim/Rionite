@@ -1,6 +1,6 @@
 {
   "name": "@riim/rionite-template-walk",
-  "version": "0.37.70",
+  "version": "0.38.0",
   "description": "",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
@@ -25,6 +25,6 @@
     "typescript": "^3.7.2"
   },
   "dependencies": {
-    "@riim/rionite-template-parser": "^0.37.70"
+    "@riim/rionite-template-parser": "^0.38.0"
   }
 }
