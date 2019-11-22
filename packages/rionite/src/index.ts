@@ -41,7 +41,7 @@ export {
 	IBlock as ITemplateBlock,
 	KEY_CONTENT_TEMPLATE,
 	Template
-} from './Template';
+} from './Template2';
 export { registerComponent } from './registerComponent';
 export { RnIfThen } from './components/RnIfThen';
 export { RnIfElse } from './components/RnIfElse';

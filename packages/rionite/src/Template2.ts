@@ -1,5 +1,14 @@
 import { kebabCase } from '@riim/kebab-case';
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
+import {
+	NodeType as ParserNodeType,
+	TContent as TParserContent,
+	TElement as TParserElement,
+	TElementAttributes as TParserElementAttributes,
+	TemplateParser,
+	TNode as TParserNode,
+	TSuperCall as TParserSuperCall
+	} from '@riim/rionite-template-parser-2';
 import { Cell, IEvent } from 'cellx';
 import { BaseComponent, I$ComponentParamConfig, IPossiblyComponentElement } from './BaseComponent';
 import {
@@ -40,7 +49,6 @@ export interface IElementAttribute {
 	isTransformer: boolean;
 	name: string;
 	value: string;
-	pos: number;
 }
 
 export interface IElementAttributeList {
@@ -96,30 +104,6 @@ export interface IDebuggerCall extends INode {
 
 export const KEY_CONTENT_TEMPLATE = Symbol('contentTemplate');
 
-const escapee = new Map([
-	['/', '/'],
-	['\\', '\\'],
-	['b', '\b'],
-	['f', '\f'],
-	['n', '\n'],
-	['r', '\r'],
-	['t', '\t']
-]);
-
-const reWhitespace = /\s/;
-
-const reTagName = /[a-zA-Z][\-\w]*/gy;
-const reElementName = /[a-zA-Z][\-\w]*/gy;
-const reAttributeName = /[^\s'">/=,)]+/gy;
-const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
-
-const reTrimStartLine = /^[\x20\t]+/gm;
-const reTrimEndLine = /[\x20\t]+$/gm;
-
-function normalizeMultilineText(text: string): string {
-	return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
-}
-
 export const ELEMENT_NAME_DELIMITER = '__';
 
 export class Template {
@@ -135,10 +119,7 @@ export class Template {
 	_embedded: boolean;
 
 	parent: Template | null;
-	template: string;
-
-	_pos: number;
-	_chr: string;
+	template: TParserContent;
 
 	initialized = false;
 	block: IBlock | null;
@@ -147,7 +128,7 @@ export class Template {
 	_embeddedTemplates: Array<Template> | null;
 
 	constructor(
-		template: string | IBlock,
+		template: string | TParserContent | IBlock,
 		options?: {
 			_embedded?: boolean;
 			parent?: Template;
@@ -158,6 +139,10 @@ export class Template {
 		let parent = (this.parent = (options && options.parent) || null);
 
 		if (typeof template == 'string') {
+			template = new TemplateParser(template).parse();
+		}
+
+		if (Array.isArray(template)) {
 			this.template = template;
 			this.block = null;
 		} else {
@@ -246,11 +231,6 @@ export class Template {
 			return this.block;
 		}
 
-		this._pos = 0;
-		this._chr = this.template.charAt(0);
-
-		this._skipWhitespacesAndComments();
-
 		let block = (this.block = {
 			nodeType: NodeType.BLOCK,
 			content: null,
@@ -259,9 +239,9 @@ export class Template {
 
 		this._readContent(
 			this.parent ? null : block.elements['@root'].content,
+			this.template,
 			false,
 			null,
-			false,
 			component && (component.constructor as typeof BaseComponent)
 		);
 
@@ -270,65 +250,17 @@ export class Template {
 
 	_readContent(
 		targetContent: TContent | null,
+		content: TParserContent,
 		namespaceSVG: boolean,
 		superElName: string | null,
-		brackets: boolean,
 		componentCtor?: typeof BaseComponent | null
 	): TContent | null {
-		if (brackets) {
-			this._next(/* '{' */);
-			this._skipWhitespacesAndComments();
-		}
-
-		for (;;) {
-			switch (this._chr) {
-				case "'":
-				case '"':
-				case '`': {
-					(targetContent || (targetContent = [])).push({
-						nodeType: NodeType.TEXT,
-						value: this._readString()
-					} as ITextNode);
-
-					break;
-				}
-				case '': {
-					if (brackets) {
-						this._throwError(
-							'Unexpected end of template. Expected "}" to close block.'
-						);
-					}
-
-					return targetContent;
-				}
-				default: {
-					let chr = this._chr;
-
-					if (chr == 'd' && this.template.substr(this._pos, 9) == 'debugger!') {
-						this._chr = this.template.charAt((this._pos += 9));
-						(targetContent || (targetContent = [])).push({
-							nodeType: NodeType.DEBUGGER_CALL
-						} as IDebuggerCall);
-
-						break;
-					}
-
-					if (brackets) {
-						if (chr == '}') {
-							this._next();
-							return targetContent;
-						}
-
-						let superCall = this._readSuperCall(superElName);
-
-						if (superCall) {
-							(targetContent || (targetContent = [])).push(superCall);
-							break;
-						}
-					}
-
+		for (let node of content) {
+			switch (node[0]) {
+				case ParserNodeType.ELEMENT: {
 					targetContent = this._readElement(
 						targetContent,
+						node as TParserElement,
 						namespaceSVG,
 						superElName,
 						componentCtor
@@ -336,62 +268,54 @@ export class Template {
 
 					break;
 				}
-			}
+				case ParserNodeType.TEXT: {
+					(targetContent || (targetContent = [])).push({
+						nodeType: NodeType.TEXT,
+						value: node[1]
+					} as ITextNode);
 
-			this._skipWhitespacesAndComments();
+					break;
+				}
+				case ParserNodeType.SUPER_CALL: {
+					(targetContent || (targetContent = [])).push(
+						this._readSuperCall(node as TParserSuperCall, superElName)
+					);
+
+					break;
+				}
+				case ParserNodeType.DEBUGGER_CALL: {
+					(targetContent || (targetContent = [])).push({
+						nodeType: NodeType.DEBUGGER_CALL
+					} as IDebuggerCall);
+
+					break;
+				}
+			}
 		}
+
+		return targetContent;
 	}
 
 	_readElement(
 		targetContent: TContent | null,
+		elNode: TParserElement,
 		namespaceSVG: boolean,
 		superElName: string | null,
 		componentCtor?: typeof BaseComponent | null
 	): TContent | null {
-		let pos = this._pos;
-		let isTransformer = this._chr == '@';
+		let isTransformer = !!elNode[1];
+		let tagName = elNode[2] || null;
+		let elNames = elNode[3] as Array<string | null> | undefined;
 
-		if (isTransformer) {
-			this._next();
+		if (elNames && !elNames[0]) {
+			elNames[0] = null;
 		}
 
-		let tagName = this._readName(reTagName);
-
-		this._skipWhitespacesAndComments();
-
-		let elNames: Array<string | null> | undefined;
-		let elName: string | null | undefined;
-
-		if (this._chr == ':') {
-			this._next();
-
-			let pos = this._pos;
-
-			this._skipWhitespacesAndComments();
-
-			if (this._chr == ':') {
-				elNames = [null];
-				this._next();
-				this._skipWhitespacesAndComments();
-			}
-
-			for (let name; (name = this._readName(reElementName)); ) {
-				(elNames || (elNames = [])).push(name);
-
-				if (this._skipWhitespacesAndComments() != ':') {
-					break;
-				}
-
-				this._next();
-				this._skipWhitespacesAndComments();
-			}
-
-			if (!elNames || (!elNames[0] && elNames.length == 1)) {
-				this._throwError('Expected element name', pos);
-			}
-
-			elName = isTransformer ? elNames![0] && '@' + elNames![0] : elNames![0];
-		}
+		let elName: string | null = elNames
+			? isTransformer
+				? elNames[0] && '@' + elNames[0]
+				: elNames[0]
+			: null;
 
 		if (tagName) {
 			if (!namespaceSVG) {
@@ -412,16 +336,13 @@ export class Template {
 			}
 		} else {
 			if (!elName) {
-				this._throwError('Expected element', pos);
+				this._throwError('Expected element', elNode);
 			}
 
 			let superEl: IElement | undefined;
 
 			if (!this.parent || !(superEl = this.parent._elements[elName!])) {
-				throw this._throwError(
-					'Element.tagName is required',
-					isTransformer ? pos + 1 : pos
-				);
+				throw this._throwError('Element.tagName is required', elNode);
 			}
 
 			if (!namespaceSVG) {
@@ -440,15 +361,14 @@ export class Template {
 			$specifiedParams = new Set();
 		}
 
-		if (this._chr == '(') {
+		if (elNode[4]) {
 			attrs = this._readAttributes(
+				elNode[4],
 				namespaceSVG,
 				elName || superElName,
 				elComponentCtor && elComponentCtor[KEY_PARAMS_CONFIG],
 				$specifiedParams
 			);
-
-			this._skipWhitespaces();
 		}
 
 		let events: Map<string | symbol, string> | undefined;
@@ -499,12 +419,12 @@ export class Template {
 
 		let content: TContent | null | undefined;
 
-		if (this._chr == '{') {
+		if (elNode[5]) {
 			content = this._readContent(
 				null,
+				elNode[5],
 				namespaceSVG,
 				elName || superElName,
-				true,
 				componentCtor
 			);
 		}
@@ -528,7 +448,7 @@ export class Template {
 			let transformer = Template.elementTransformers[tagName];
 
 			if (!transformer) {
-				this._throwError(`Transformer "${tagName}" is not defined`, pos);
+				this._throwError(`Transformer "${tagName}" is not defined`, elNode);
 			}
 
 			content = transformer(el);
@@ -614,7 +534,7 @@ export class Template {
 						let transformer = Template.attributeTransformers[attr.name];
 
 						if (!transformer) {
-							this._throwError(`Transformer "${attr.name}" is not defined`, attr.pos);
+							this._throwError(`Transformer "${attr.name}" is not defined`, elNode);
 						}
 
 						el = transformer(el, attr);
@@ -723,167 +643,71 @@ export class Template {
 	}
 
 	_readAttributes(
+		elAttrs: TParserElementAttributes,
 		namespaceSVG: boolean,
 		superElName: string | null,
 		$paramsConfig?: Map<string, I$ComponentParamConfig> | null,
 		$specifiedParams?: Set<string>
 	): IElementAttributes | null {
-		this._next(/* '(' */);
-
-		if (this._skipWhitespacesAndComments() == ')') {
-			this._next();
-			return null;
-		}
-
-		let superCall: ISuperCall | null | undefined;
+		let superCall =
+			elAttrs[0] &&
+			this._readSuperCall(
+				[ParserNodeType.SUPER_CALL, elAttrs[0] === 1 ? '' : elAttrs[0]],
+				superElName
+			);
 
 		let attrIsValue: string | null | undefined;
 		let list: IElementAttributeList | undefined;
 
-		loop: for (let f = true; ; f = false) {
-			if (f && this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
-				let superElAttrs = superCall.element.attributes;
+		if (superCall) {
+			let superElAttrs = superCall.element.attributes;
 
-				if (superElAttrs) {
-					let superElAttrList = superElAttrs.list;
+			if (superElAttrs) {
+				let superElAttrList = superElAttrs.list;
 
-					attrIsValue = superElAttrs.attributeIsValue;
-					list = { __proto__: superElAttrList } as any;
+				attrIsValue = superElAttrs.attributeIsValue;
+				list = { __proto__: superElAttrList } as any;
 
-					if ($paramsConfig && superElAttrList) {
-						for (let i = 0, l = superElAttrList['length=']; i < l; i++) {
-							let attr = superElAttrList[i];
+				if ($paramsConfig && superElAttrList) {
+					for (let i = 0, l = superElAttrList['length=']; i < l; i++) {
+						let attr = superElAttrList[i];
 
-							if (!attr.isTransformer && $paramsConfig.has(attr.name)) {
-								$specifiedParams!.add($paramsConfig.get(attr.name)!.name);
-							}
+						if (!attr.isTransformer && $paramsConfig.has(attr.name)) {
+							$specifiedParams!.add($paramsConfig.get(attr.name)!.name);
 						}
 					}
 				}
+			}
+		}
 
-				this._skipWhitespacesAndComments();
-			} else {
-				let pos = this._pos;
-				let isTransformer = this._chr == '@';
-
-				if (isTransformer) {
-					this._next();
-				}
-
-				let name = this._readName(reAttributeName);
-
-				if (!name) {
-					throw this._throwError('Expected attribute name');
-				}
+		if (elAttrs[1]) {
+			for (let elAttr of elAttrs[1]) {
+				let isTransformer = !!elAttr[0];
+				let name = elAttr[1];
 
 				if (!isTransformer && !namespaceSVG) {
 					name = snakeCaseAttributeName(name, true);
 				}
 
 				let fullName = (isTransformer ? '@' : '') + name;
-				let value: string;
+				let value = elAttr[2];
 
-				if (this._skipWhitespacesAndComments() == '=') {
-					this._next();
-
-					let chr = this._skipWhitespaces();
-
-					if (chr == "'" || chr == '"' || chr == '`') {
-						value = this._readString();
-
-						if (fullName == 'is') {
-							attrIsValue = value;
-						} else {
-							(list || (list = { __proto__: null, 'length=': 0 } as any))[
-								list![fullName] === undefined
-									? (list![fullName] = list!['length=']++)
-									: list![fullName]
-							] = {
-								isTransformer,
-								name,
-								value,
-								pos
-							} as IElementAttribute;
-						}
-
-						this._skipWhitespacesAndComments();
-					} else {
-						value = '';
-
-						for (;;) {
-							if (!chr) {
-								this._throwError(
-									'Unexpected end of template. Expected "," or ")" to finalize attribute value.'
-								);
-							}
-
-							if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
-								value = value.trim();
-
-								if (fullName == 'is') {
-									attrIsValue = value;
-								} else {
-									(list || (list = { __proto__: null, 'length=': 0 } as any))[
-										list![fullName] === undefined
-											? (list![fullName] = list!['length=']++)
-											: list![fullName]
-									] = {
-										isTransformer,
-										name,
-										value,
-										pos
-									};
-								}
-
-								if (chr == '\n' || chr == '\r') {
-									this._skipWhitespacesAndComments();
-								}
-
-								break;
-							}
-
-							value += chr;
-							chr = this._next();
-						}
-					}
+				if (fullName == 'is') {
+					attrIsValue = value;
 				} else {
-					value = '';
-
-					if (fullName == 'is') {
-						attrIsValue = value;
-					} else {
-						(list || (list = { __proto__: null, 'length=': 0 } as any))[
-							list![fullName] === undefined
-								? (list![fullName] = list!['length=']++)
-								: list![fullName]
-						] = {
-							isTransformer,
-							name,
-							value,
-							pos
-						};
-					}
+					(list || (list = { __proto__: null, 'length=': 0 } as any))[
+						list![fullName] === undefined
+							? (list![fullName] = list!['length=']++)
+							: list![fullName]
+					] = {
+						isTransformer,
+						name,
+						value
+					} as IElementAttribute;
 				}
 
 				if ($paramsConfig && $paramsConfig.has(name)) {
 					$specifiedParams!.add($paramsConfig.get(name)!.name);
-				}
-			}
-
-			switch (this._chr) {
-				case ')': {
-					this._next();
-					break loop;
-				}
-				case ',': {
-					this._next();
-					this._skipWhitespacesAndComments();
-					break;
-				}
-				default: {
-					this._throwError(
-						'Unexpected end of template. Expected "," or ")" to finalize attribute value.'
-					);
 				}
 			}
 		}
@@ -896,192 +720,40 @@ export class Template {
 			  };
 	}
 
-	_readSuperCall(defaultElName: string | null): ISuperCall | null {
-		reSuperCall.lastIndex = this._pos;
-		let match = reSuperCall.exec(this.template);
-
-		if (match) {
-			if (!this.parent) {
-				this._throwError('SuperCall is impossible if there is no parent');
-			}
-
-			let elName: string =
-				match[1] ||
-				defaultElName ||
-				(this._throwError('SuperCall.elementName is required') as any);
-			let el =
-				(elName.charAt(0) == '@' && this.parent!._elements[elName.slice(1)]) ||
-				this.parent!._elements[elName];
-
-			if (!el) {
-				this._throwError(`Element "${elName}" is not defined`);
-			}
-
-			this._chr = this.template.charAt((this._pos = reSuperCall.lastIndex));
-
-			return {
-				nodeType: NodeType.SUPER_CALL,
-				elementName: elName,
-				element: el
-			};
+	_readSuperCall(superCallNode: TParserSuperCall, defaultElName: string | null): ISuperCall {
+		if (!this.parent) {
+			this._throwError('SuperCall is impossible if there is no parent', superCallNode);
 		}
 
-		return null;
-	}
+		let elName: string =
+			superCallNode[1] ||
+			defaultElName ||
+			(this._throwError('SuperCall.elementName is required', superCallNode) as any);
+		let el =
+			(elName.charAt(0) == '@' && this.parent!._elements[elName.slice(1)]) ||
+			this.parent!._elements[elName];
 
-	_readName(reName: RegExp): string | null {
-		reName.lastIndex = this._pos;
-		let match = reName.exec(this.template);
-
-		if (match) {
-			this._chr = this.template.charAt((this._pos = reName.lastIndex));
-			return match[0];
+		if (!el) {
+			this._throwError(`Element "${elName}" is not defined`, superCallNode);
 		}
 
-		return null;
+		return {
+			nodeType: NodeType.SUPER_CALL,
+			elementName: elName,
+			element: el
+		};
 	}
 
-	_readString(): string {
-		let quoteChar = this._chr;
-
-		// if (quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
-		// 	this._throwError('Expected string');
-		// }
-
-		let str = '';
-
-		for (let chr = this._next(); chr; ) {
-			if (chr == quoteChar) {
-				this._next();
-				return quoteChar == '`' ? normalizeMultilineText(str) : str;
-			}
-
-			if (chr == '\\') {
-				chr = this._next();
-
-				if (chr == 'x' || chr == 'u') {
-					let pos = this._pos + 1;
-					let code = parseInt(this.template.slice(pos, pos + (chr == 'x' ? 2 : 4)), 16);
-
-					if (!isFinite(code)) {
-						this._throwError(
-							`Invalid ${chr == 'x' ? 'hexadecimal' : 'unicode'} escape sequence`,
-							pos
-						);
-					}
-
-					str += String.fromCharCode(code);
-					chr = this._chr = this.template.charAt(
-						(this._pos = pos + (chr == 'x' ? 2 : 4))
-					);
-				} else if (escapee.has(chr)) {
-					str += escapee.get(chr);
-					chr = this._next();
-				} else {
-					this._throwError('Invalid escape sequence', this._pos - 1);
-				}
-			} else {
-				str += chr;
-				chr = this._next();
-			}
-		}
-
-		throw 1;
-	}
-
-	_skipWhitespaces(): string {
-		let chr = this._chr;
-
-		while (chr && reWhitespace.test(chr)) {
-			chr = this._next();
-		}
-
-		return chr;
-	}
-
-	_skipWhitespacesAndComments(): string {
-		let chr = this._chr;
-
-		loop1: for (;;) {
-			if (chr == '/') {
-				switch (this.template.charAt(this._pos + 1)) {
-					case '/': {
-						this._next();
-						while ((chr = this._next()) && chr != '\n' && chr != '\r') {}
-						break;
-					}
-					case '*': {
-						let pos = this._pos;
-
-						this._next();
-
-						loop2: for (;;) {
-							switch (this._next()) {
-								case '*': {
-									if (this._next() == '/') {
-										chr = this._next();
-										break loop2;
-									}
-
-									break;
-								}
-								case '': {
-									this._throwError(
-										'Expected "*/" to close multiline comment',
-										pos
-									);
-								}
-							}
-						}
-
-						break;
-					}
-					default: {
-						break loop1;
-					}
-				}
-			} else if (chr && reWhitespace.test(chr)) {
-				chr = this._next();
-			} else {
-				break;
-			}
-		}
-
-		return chr;
-	}
-
-	_next(/* current?: string */): string {
-		// if (current && current != this._chr) {
-		// 	this._throwError(`Expected "${current}" instead of "${this._chr}"`);
-		// }
-
-		return (this._chr = this.template.charAt(++this._pos));
-	}
-
-	_throwError(msg: string, pos = this._pos) {
-		let n = pos < 40 ? 40 - pos : 0;
-
-		throw new SyntaxError(
-			msg +
-				'\n' +
-				this.template
-					.slice(pos < 40 ? 0 : pos - 40, pos + 20)
-					.replace(/\t/g, ' ')
-					.replace(/\n|\r\n?/g, match => {
-						if (match.length == 2) {
-							n++;
-						}
-
-						return '↵';
-					}) +
-				'\n' +
-				'----------------------------------------'.slice(n) +
-				'↑'
-		);
+	_throwError(msg: string, node: TParserNode) {
+		throw {
+			type: TypeError,
+			message: msg,
+			node
+		};
 	}
 
 	extend(
-		template: string | IBlock,
+		template: string | TParserContent | IBlock,
 		options?: {
 			blockName?: string;
 			_embedded?: boolean;

@@ -11,7 +11,7 @@ import { compileKeypath } from '../lib/compileKeypath';
 import { keypathPattern } from '../lib/keypathPattern';
 import { removeNodes } from '../lib/removeNodes';
 import { parseTemplateNodeValue } from '../parseTemplateNodeValue';
-import { KEY_CONTENT_TEMPLATE } from '../Template';
+import { KEY_CONTENT_TEMPLATE } from '../Template2';
 import { RnRepeat } from './RnRepeat';
 
 const slice = Array.prototype.slice;

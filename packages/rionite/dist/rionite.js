@@ -7,7 +7,7 @@
 		exports["rionite"] = factory(require("cellx"), require("@riim/uid"), require("reflect-metadata"));
 	else
 		root["rionite"] = factory(root["cellx"], root["@riim/uid"], root["reflect-metadata"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__3__, __WEBPACK_EXTERNAL_MODULE__8__, __WEBPACK_EXTERNAL_MODULE__14__) {
+})(window, function(__WEBPACK_EXTERNAL_MODULE__4__, __WEBPACK_EXTERNAL_MODULE__9__, __WEBPACK_EXTERNAL_MODULE__15__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -91,7 +91,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 16);
+/******/ 	return __webpack_require__(__webpack_require__.s = 17);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -180,12 +180,360 @@ exports.snakeCaseAttributeName = snakeCaseAttributeName;
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__3__;
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var NodeType;
+(function (NodeType) {
+    NodeType[NodeType["ELEMENT"] = 1] = "ELEMENT";
+    NodeType[NodeType["ELEMENT_ATTRIBUTE"] = 2] = "ELEMENT_ATTRIBUTE";
+    NodeType[NodeType["TEXT"] = 3] = "TEXT";
+    NodeType[NodeType["SUPER_CALL"] = 4] = "SUPER_CALL";
+    NodeType[NodeType["DEBUGGER_CALL"] = 5] = "DEBUGGER_CALL";
+})(NodeType = exports.NodeType || (exports.NodeType = {}));
+const escapee = new Map([
+    ['/', '/'],
+    ['\\', '\\'],
+    ['b', '\b'],
+    ['f', '\f'],
+    ['n', '\n'],
+    ['r', '\r'],
+    ['t', '\t']
+]);
+const reWhitespace = /\s/;
+const reLineBreak = /\n|\r\n?/g;
+const reTagName = /[a-zA-Z][\-\w]*/gy;
+const reElementName = /[a-zA-Z][\-\w]*/gy;
+const reAttributeName = /[^\s'">/=,)]+/gy;
+const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
+const reTrimStartLine = /^[ \t]+/gm;
+const reTrimEndLine = /[ \t]+$/gm;
+function normalizeMultilineText(text) {
+    return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
+}
+class TemplateParser {
+    constructor(template) {
+        this.template = template;
+    }
+    parse() {
+        this._pos = 0;
+        this._chr = this.template.charAt(0);
+        this._skipWhitespacesAndComments();
+        return this._readContent(false);
+    }
+    _readContent(brackets) {
+        if (brackets) {
+            this._next( /* '{' */);
+            this._skipWhitespacesAndComments();
+        }
+        let content = [];
+        for (;;) {
+            switch (this._chr) {
+                case "'":
+                case '"':
+                case '`': {
+                    content.push([NodeType.TEXT, this._readString()]);
+                    break;
+                }
+                case '': {
+                    if (brackets) {
+                        this._throwError('Unexpected end of template. Expected "}" to close block.');
+                    }
+                    return content;
+                }
+                default: {
+                    let chr = this._chr;
+                    if (chr == 'd' && this.template.substr(this._pos, 9) == 'debugger!') {
+                        this._chr = this.template.charAt((this._pos += 9));
+                        content.push([NodeType.DEBUGGER_CALL]);
+                        break;
+                    }
+                    if (brackets) {
+                        if (chr == '}') {
+                            this._next();
+                            return content;
+                        }
+                        let superCall = this._readSuperCall();
+                        if (superCall) {
+                            content.push(superCall);
+                            break;
+                        }
+                    }
+                    this._readElement(content);
+                    break;
+                }
+            }
+            this._skipWhitespacesAndComments();
+        }
+    }
+    _readElement(targetContent) {
+        let pos = this._pos;
+        let isTransformer = this._chr == '@';
+        if (isTransformer) {
+            this._next();
+        }
+        let tagName = this._readName(reTagName);
+        this._skipWhitespacesAndComments();
+        let elNames;
+        if (this._chr == ':') {
+            this._next();
+            let pos = this._pos;
+            this._skipWhitespacesAndComments();
+            if (this._chr == ':') {
+                elNames = [undefined];
+                this._next();
+                this._skipWhitespacesAndComments();
+            }
+            for (let name; (name = this._readName(reElementName));) {
+                (elNames || (elNames = [])).push(name);
+                if (this._skipWhitespacesAndComments() != ':') {
+                    break;
+                }
+                this._next();
+                this._skipWhitespacesAndComments();
+            }
+            if (!elNames || (!elNames[0] && elNames.length == 1)) {
+                this._throwError('Expected element name', pos);
+            }
+        }
+        if (!tagName && !(elNames && elNames[0])) {
+            this._throwError('Expected element', pos);
+        }
+        let attrs;
+        if (this._chr == '(') {
+            attrs = this._readAttributes();
+            this._skipWhitespacesAndComments();
+        }
+        let content;
+        if (this._chr == '{') {
+            content = this._readContent(true);
+        }
+        targetContent.push([
+            NodeType.ELEMENT,
+            isTransformer ? 1 : undefined,
+            tagName || undefined,
+            elNames,
+            attrs,
+            content
+        ]);
+    }
+    _readAttributes() {
+        this._next( /* '(' */);
+        if (this._skipWhitespacesAndComments() == ')') {
+            this._next();
+            return [undefined, undefined];
+        }
+        let superCall;
+        let list;
+        loop: for (let f = true;; f = false) {
+            if (f && this._chr == 's' && (superCall = this._readSuperCall())) {
+                this._skipWhitespacesAndComments();
+            }
+            else {
+                let isTransformer = this._chr == '@';
+                if (isTransformer) {
+                    this._next();
+                }
+                let name = this._readName(reAttributeName);
+                if (!name) {
+                    throw this._throwError('Expected attribute name');
+                }
+                if (this._skipWhitespacesAndComments() == '=') {
+                    this._next();
+                    let chr = this._skipWhitespaces();
+                    if (chr == "'" || chr == '"' || chr == '`') {
+                        (list || (list = [])).push([
+                            isTransformer ? 1 : undefined,
+                            name,
+                            this._readString()
+                        ]);
+                        this._skipWhitespacesAndComments();
+                    }
+                    else {
+                        let value = '';
+                        for (;;) {
+                            if (!chr) {
+                                this._throwError('Unexpected end of template. Expected "," or ")" to finalize attribute value.');
+                            }
+                            if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
+                                (list || (list = [])).push([
+                                    isTransformer ? 1 : undefined,
+                                    name,
+                                    value.trim()
+                                ]);
+                                if (chr == '\n' || chr == '\r') {
+                                    this._skipWhitespacesAndComments();
+                                }
+                                break;
+                            }
+                            value += chr;
+                            chr = this._next();
+                        }
+                    }
+                }
+                else {
+                    (list || (list = [])).push([isTransformer ? 1 : undefined, name, '']);
+                }
+            }
+            switch (this._chr) {
+                case ')': {
+                    this._next();
+                    break loop;
+                }
+                case ',': {
+                    this._next();
+                    this._skipWhitespacesAndComments();
+                    break;
+                }
+                default: {
+                    this._throwError('Unexpected end of template. Expected "," or ")" to finalize attribute value.');
+                }
+            }
+        }
+        return [superCall ? superCall[1] || 1 : undefined, list];
+    }
+    _readSuperCall() {
+        reSuperCall.lastIndex = this._pos;
+        let match = reSuperCall.exec(this.template);
+        if (match) {
+            this._chr = this.template.charAt((this._pos = reSuperCall.lastIndex));
+            return [NodeType.SUPER_CALL, match[1]];
+        }
+        return null;
+    }
+    _readName(reName) {
+        reName.lastIndex = this._pos;
+        let match = reName.exec(this.template);
+        if (match) {
+            this._chr = this.template.charAt((this._pos = reName.lastIndex));
+            return match[0];
+        }
+        return null;
+    }
+    _readString() {
+        let quoteChar = this._chr;
+        // if (quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
+        // 	this._throwError('Expected string');
+        // }
+        let str = '';
+        for (let chr = this._next(); chr;) {
+            if (chr == quoteChar) {
+                this._next();
+                return quoteChar == '`' ? normalizeMultilineText(str) : str;
+            }
+            if (chr == '\\') {
+                chr = this._next();
+                if (chr == 'x' || chr == 'u') {
+                    let pos = this._pos + 1;
+                    let code = parseInt(this.template.slice(pos, pos + (chr == 'x' ? 2 : 4)), 16);
+                    if (!isFinite(code)) {
+                        this._throwError(`Invalid ${chr == 'x' ? 'hexadecimal' : 'unicode'} escape sequence`, pos);
+                    }
+                    str += String.fromCharCode(code);
+                    chr = this._chr = this.template.charAt((this._pos = pos + (chr == 'x' ? 2 : 4)));
+                }
+                else if (escapee.has(chr)) {
+                    str += escapee.get(chr);
+                    chr = this._next();
+                }
+                else {
+                    this._throwError('Invalid escape sequence', this._pos - 1);
+                }
+            }
+            else {
+                str += chr;
+                chr = this._next();
+            }
+        }
+        throw 1;
+    }
+    _skipWhitespaces() {
+        let chr = this._chr;
+        while (chr && reWhitespace.test(chr)) {
+            chr = this._next();
+        }
+        return chr;
+    }
+    _skipWhitespacesAndComments() {
+        let chr = this._chr;
+        loop1: for (;;) {
+            if (chr == '/') {
+                switch (this.template.charAt(this._pos + 1)) {
+                    case '/': {
+                        this._next();
+                        while ((chr = this._next()) && chr != '\n' && chr != '\r') { }
+                        break;
+                    }
+                    case '*': {
+                        let pos = this._pos;
+                        this._next();
+                        loop2: for (;;) {
+                            switch (this._next()) {
+                                case '*': {
+                                    if (this._next() == '/') {
+                                        chr = this._next();
+                                        break loop2;
+                                    }
+                                    break;
+                                }
+                                case '': {
+                                    this._throwError('Expected "*/" to close multiline comment', pos);
+                                }
+                            }
+                        }
+                        break;
+                    }
+                    default: {
+                        break loop1;
+                    }
+                }
+            }
+            else if (chr && reWhitespace.test(chr)) {
+                chr = this._next();
+            }
+            else {
+                break;
+            }
+        }
+        return chr;
+    }
+    _next( /* current?: string */) {
+        // if (current && current != this._chr) {
+        // 	this._throwError(`Expected "${current}" instead of "${this._chr}"`);
+        // }
+        return (this._chr = this.template.charAt(++this._pos));
+    }
+    _throwError(msg, pos = this._pos) {
+        let n = pos < 40 ? 40 - pos : 0;
+        throw new SyntaxError(msg +
+            '\n' +
+            this.template
+                .slice(pos < 40 ? 0 : pos - 40, pos + 20)
+                .replace(/\t/g, ' ')
+                .replace(reLineBreak, match => {
+                if (match.length == 2) {
+                    n++;
+                }
+                return '↵';
+            }) +
+            '\n' +
+            '----------------------------------------'.slice(n) +
+            '↑');
+    }
+}
+exports.TemplateParser = TemplateParser;
+
 
 /***/ }),
 /* 4 */
+/***/ (function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE__4__;
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -205,20 +553,20 @@ exports.escapeString = escapeString;
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var escapeHTML_1 = __webpack_require__(6);
+var escapeHTML_1 = __webpack_require__(7);
 exports.escapeHTML = escapeHTML_1.escapeHTML;
-var unescapeHTML_1 = __webpack_require__(7);
+var unescapeHTML_1 = __webpack_require__(8);
 exports.unescapeHTML = unescapeHTML_1.unescapeHTML;
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -241,7 +589,7 @@ exports.escapeHTML = escapeHTML;
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -264,19 +612,19 @@ exports.unescapeHTML = unescapeHTML;
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__8__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__9__;
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var camelize_1 = __webpack_require__(10);
+var camelize_1 = __webpack_require__(11);
 var cache = Object.create(null);
 function pascalize(str, useCache) {
     str = String(str);
@@ -290,7 +638,7 @@ exports.pascalize = pascalize;
 
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -309,14 +657,14 @@ exports.camelize = camelize;
 
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils_1 = __webpack_require__(12);
-var config_1 = __webpack_require__(13);
+const utils_1 = __webpack_require__(13);
+var config_1 = __webpack_require__(14);
 exports.configure = config_1.configure;
 let queue;
 function run() {
@@ -344,13 +692,13 @@ exports.defer = defer;
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const config_1 = __webpack_require__(13);
+const config_1 = __webpack_require__(14);
 function logError(...args) {
     config_1.config.logError(...args);
 }
@@ -358,7 +706,7 @@ exports.logError = logError;
 
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -377,13 +725,13 @@ exports.configure = configure;
 
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports) {
 
-module.exports = __WEBPACK_EXTERNAL_MODULE__14__;
+module.exports = __WEBPACK_EXTERNAL_MODULE__15__;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -399,7 +747,7 @@ exports.moveContent = moveContent;
 
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -414,11 +762,14 @@ var dist = __webpack_require__(1);
 // EXTERNAL MODULE: .-snake-case-attribute-name/dist/index.js
 var _snake_case_attribute_name_dist = __webpack_require__(2);
 
+// EXTERNAL MODULE: .-template-parser-2/dist/index.js
+var _template_parser_2_dist = __webpack_require__(3);
+
 // EXTERNAL MODULE: external "cellx"
-var external_cellx_ = __webpack_require__(3);
+var external_cellx_ = __webpack_require__(4);
 
 // EXTERNAL MODULE: ./node_modules/escape-string/dist/index.js
-var escape_string_dist = __webpack_require__(4);
+var escape_string_dist = __webpack_require__(5);
 
 // CONCATENATED MODULE: ./src/bindingToJSExpression.ts
 function formattersReducer(jsExpr, formatter) {
@@ -446,7 +797,7 @@ function bindingToJSExpression(binding) {
 }
 
 // EXTERNAL MODULE: ./node_modules/@riim/escape-html/dist/index.js
-var escape_html_dist = __webpack_require__(5);
+var escape_html_dist = __webpack_require__(6);
 
 // CONCATENATED MODULE: ./src/componentParamValueConverters.ts
 
@@ -551,7 +902,7 @@ const KEY_PARAM_VALUES = Symbol('paramValues');
 const KEY_CHILD_COMPONENTS = Symbol('childComponents');
 
 // EXTERNAL MODULE: external "@riim/uid"
-var uid_ = __webpack_require__(8);
+var uid_ = __webpack_require__(9);
 
 // CONCATENATED MODULE: ./src/config.ts
 const config_config = {
@@ -1482,7 +1833,8 @@ function handleEvent(evt) {
     }
 }
 
-// CONCATENATED MODULE: ./src/Template.ts
+// CONCATENATED MODULE: ./src/Template2.ts
+
 
 
 
@@ -1506,32 +1858,16 @@ var NodeType;
     NodeType[NodeType["DEBUGGER_CALL"] = 6] = "DEBUGGER_CALL";
 })(NodeType || (NodeType = {}));
 const KEY_CONTENT_TEMPLATE = Symbol('contentTemplate');
-const escapee = new Map([
-    ['/', '/'],
-    ['\\', '\\'],
-    ['b', '\b'],
-    ['f', '\f'],
-    ['n', '\n'],
-    ['r', '\r'],
-    ['t', '\t']
-]);
-const Template_reWhitespace = /\s/;
-const reTagName = /[a-zA-Z][\-\w]*/gy;
-const reElementName = /[a-zA-Z][\-\w]*/gy;
-const reAttributeName = /[^\s'">/=,)]+/gy;
-const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
-const reTrimStartLine = /^[\x20\t]+/gm;
-const reTrimEndLine = /[\x20\t]+$/gm;
-function normalizeMultilineText(text) {
-    return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
-}
 const ELEMENT_NAME_DELIMITER = '__';
-class Template_Template {
+class Template2_Template {
     constructor(template, options) {
         this.initialized = false;
         let embedded = (this._embedded = !!(options && options._embedded));
         let parent = (this.parent = (options && options.parent) || null);
         if (typeof template == 'string') {
+            template = new _template_parser_2_dist["TemplateParser"](template).parse();
+        }
+        if (Array.isArray(template)) {
             this.template = template;
             this.block = null;
         }
@@ -1577,7 +1913,7 @@ class Template_Template {
                     '@root': {
                         nodeType: NodeType.ELEMENT,
                         isTransformer: true,
-                        nsSVG: false,
+                        namespaceSVG: false,
                         tagName: 'section',
                         is: null,
                         names: ['root'],
@@ -1594,7 +1930,7 @@ class Template_Template {
             ? parent._embeddedTemplates
             : parent &&
                 parent._embeddedTemplates &&
-                parent._embeddedTemplates.map(template => new Template_Template({
+                parent._embeddedTemplates.map(template => new Template2_Template({
                     nodeType: NodeType.BLOCK,
                     content: template.block.content,
                     elements: this._elements
@@ -1608,137 +1944,92 @@ class Template_Template {
         if (this.block) {
             return this.block;
         }
-        this._pos = 0;
-        this._chr = this.template.charAt(0);
-        this._skipWhitespacesAndComments();
         let block = (this.block = {
             nodeType: NodeType.BLOCK,
             content: null,
             elements: this._elements
         });
-        this._readContent(this.parent ? null : block.elements['@root'].content, false, null, false, component && component.constructor);
+        this._readContent(this.parent ? null : block.elements['@root'].content, this.template, false, null, component && component.constructor);
         return block;
     }
-    _readContent(targetContent, nsSVG, superElName, brackets, componentCtor) {
-        if (brackets) {
-            this._next( /* '{' */);
-            this._skipWhitespacesAndComments();
-        }
-        for (;;) {
-            switch (this._chr) {
-                case "'":
-                case '"':
-                case '`': {
+    _readContent(targetContent, content, namespaceSVG, superElName, componentCtor) {
+        for (let node of content) {
+            switch (node[0]) {
+                case _template_parser_2_dist["NodeType"].ELEMENT: {
+                    targetContent = this._readElement(targetContent, node, namespaceSVG, superElName, componentCtor);
+                    break;
+                }
+                case _template_parser_2_dist["NodeType"].TEXT: {
                     (targetContent || (targetContent = [])).push({
                         nodeType: NodeType.TEXT,
-                        value: this._readString()
+                        value: node[1]
                     });
                     break;
                 }
-                case '': {
-                    if (brackets) {
-                        this._throwError('Unexpected end of template. Expected "}" to close block.');
-                    }
-                    return targetContent;
+                case _template_parser_2_dist["NodeType"].SUPER_CALL: {
+                    (targetContent || (targetContent = [])).push(this._readSuperCall(node, superElName));
+                    break;
                 }
-                default: {
-                    let chr = this._chr;
-                    if (chr == 'd' && this.template.substr(this._pos, 9) == 'debugger!') {
-                        this._chr = this.template.charAt((this._pos += 9));
-                        (targetContent || (targetContent = [])).push({
-                            nodeType: NodeType.DEBUGGER_CALL
-                        });
-                        break;
-                    }
-                    if (brackets) {
-                        if (chr == '}') {
-                            this._next();
-                            return targetContent;
-                        }
-                        let superCall = this._readSuperCall(superElName);
-                        if (superCall) {
-                            (targetContent || (targetContent = [])).push(superCall);
-                            break;
-                        }
-                    }
-                    targetContent = this._readElement(targetContent, nsSVG, superElName, componentCtor);
+                case _template_parser_2_dist["NodeType"].DEBUGGER_CALL: {
+                    (targetContent || (targetContent = [])).push({
+                        nodeType: NodeType.DEBUGGER_CALL
+                    });
                     break;
                 }
             }
-            this._skipWhitespacesAndComments();
         }
+        return targetContent;
     }
-    _readElement(targetContent, nsSVG, superElName, componentCtor) {
-        let pos = this._pos;
-        let isTransformer = this._chr == '@';
-        if (isTransformer) {
-            this._next();
+    _readElement(targetContent, elNode, namespaceSVG, superElName, componentCtor) {
+        let isTransformer = !!elNode[1];
+        let tagName = elNode[2] || null;
+        let elNames = elNode[3];
+        if (elNames && !elNames[0]) {
+            elNames[0] = null;
         }
-        let tagName = this._readName(reTagName);
-        this._skipWhitespacesAndComments();
-        let elNames;
-        let elName;
-        if (this._chr == ':') {
-            this._next();
-            let pos = this._pos;
-            this._skipWhitespacesAndComments();
-            if (this._chr == ':') {
-                elNames = [null];
-                this._next();
-                this._skipWhitespacesAndComments();
-            }
-            for (let name; (name = this._readName(reElementName));) {
-                (elNames || (elNames = [])).push(name);
-                if (this._skipWhitespacesAndComments() != ':') {
-                    break;
-                }
-                this._next();
-                this._skipWhitespacesAndComments();
-            }
-            if (!elNames || (!elNames[0] && elNames.length == 1)) {
-                this._throwError('Expected element name', pos);
-            }
-            elName = isTransformer ? elNames[0] && '@' + elNames[0] : elNames[0];
-        }
+        let elName = elNames
+            ? isTransformer
+                ? elNames[0] && '@' + elNames[0]
+                : elNames[0]
+            : null;
         if (tagName) {
-            if (!nsSVG) {
+            if (!namespaceSVG) {
                 if (tagName.toLowerCase() == 'svg') {
-                    nsSVG = true;
+                    namespaceSVG = true;
                     tagName = 'svg';
                 }
-                else {
+                else if (elName) {
                     let superEl;
                     if (this.parent && (superEl = this.parent._elements[elName])) {
-                        nsSVG = superEl.nsSVG;
+                        namespaceSVG = superEl.namespaceSVG;
                     }
                 }
             }
-            if (!isTransformer && !nsSVG) {
+            if (!isTransformer && !namespaceSVG) {
                 tagName = Object(dist["kebabCase"])(tagName, true);
             }
         }
         else {
             if (!elName) {
-                this._throwError('Expected element', pos);
+                this._throwError('Expected element', elNode);
             }
             let superEl;
             if (!this.parent || !(superEl = this.parent._elements[elName])) {
-                throw this._throwError('Element.tagName is required', isTransformer ? pos + 1 : pos);
+                throw this._throwError('Element.tagName is required', elNode);
             }
-            if (!nsSVG) {
-                nsSVG = superEl.nsSVG;
+            if (!namespaceSVG) {
+                namespaceSVG = superEl.namespaceSVG;
             }
             tagName = superEl.tagName;
         }
-        let elComponentCtor = isTransformer || nsSVG ? null : componentConstructors.get(tagName);
+        let elComponentCtor = isTransformer || namespaceSVG ? null : componentConstructors.get(tagName);
         let attrs;
         let $specifiedParams;
         if (elComponentCtor) {
             $specifiedParams = new Set();
         }
-        if (this._chr == '(') {
-            attrs = this._readAttributes(nsSVG, elName || superElName, elComponentCtor && elComponentCtor[KEY_PARAMS_CONFIG], $specifiedParams);
-            this._skipWhitespaces();
+        if (elNode[4]) {
+            attrs = this._readAttributes(elNode[4], namespaceSVG, elName || superElName, elComponentCtor && elComponentCtor[KEY_PARAMS_CONFIG], $specifiedParams);
         }
         let events;
         let domEvents;
@@ -1777,13 +2068,13 @@ class Template_Template {
             }
         }
         let content;
-        if (this._chr == '{') {
-            content = this._readContent(null, nsSVG, elName || superElName, true, componentCtor);
+        if (elNode[5]) {
+            content = this._readContent(null, elNode[5], namespaceSVG, elName || superElName, componentCtor);
         }
         let el = {
             nodeType: NodeType.ELEMENT,
             isTransformer,
-            nsSVG,
+            namespaceSVG,
             tagName,
             is: (attrs && attrs.attributeIsValue) || null,
             names: elNames || null,
@@ -1795,9 +2086,9 @@ class Template_Template {
             contentTemplateIndex: null
         };
         if (isTransformer) {
-            let transformer = Template_Template.elementTransformers[tagName];
+            let transformer = Template2_Template.elementTransformers[tagName];
             if (!transformer) {
-                this._throwError(`Transformer "${tagName}" is not defined`, pos);
+                this._throwError(`Transformer "${tagName}" is not defined`, elNode);
             }
             content = transformer(el);
             if (content && content.length) {
@@ -1805,14 +2096,14 @@ class Template_Template {
                 for (let i = 0, l = content.length; i < l; i++) {
                     let node = content[i];
                     if (node.nodeType == NodeType.ELEMENT) {
-                        if (!nsSVG &&
+                        if (!namespaceSVG &&
                             node.content &&
                             (node.tagName == 'template' ||
                                 node.tagName == 'rn-slot')) {
                             let contentEl = {
                                 nodeType: NodeType.ELEMENT,
                                 isTransformer: false,
-                                nsSVG: node.nsSVG,
+                                namespaceSVG: node.namespaceSVG,
                                 tagName: node.tagName,
                                 is: node.is,
                                 names: node.names,
@@ -1821,7 +2112,7 @@ class Template_Template {
                                 events: node.events,
                                 domEvents: node.domEvents,
                                 content: node.content,
-                                contentTemplateIndex: (this._embeddedTemplates || (this._embeddedTemplates = [])).push(new Template_Template({
+                                contentTemplateIndex: (this._embeddedTemplates || (this._embeddedTemplates = [])).push(new Template2_Template({
                                     nodeType: NodeType.BLOCK,
                                     content: node.content,
                                     elements: this._elements
@@ -1865,22 +2156,22 @@ class Template_Template {
                 for (let i = 0, l = attrList['length=']; i < l; i++) {
                     let attr = attrList[i];
                     if (attr.isTransformer) {
-                        let transformer = Template_Template.attributeTransformers[attr.name];
+                        let transformer = Template2_Template.attributeTransformers[attr.name];
                         if (!transformer) {
-                            this._throwError(`Transformer "${attr.name}" is not defined`, attr.pos);
+                            this._throwError(`Transformer "${attr.name}" is not defined`, elNode);
                         }
                         el = transformer(el, attr);
                         for (let i = 0, l = (el.content || []).length; i < l; i++) {
                             let node = el.content[i];
                             if (node.nodeType == NodeType.ELEMENT) {
-                                if (!nsSVG &&
+                                if (!namespaceSVG &&
                                     node.content &&
                                     (node.tagName == 'template' ||
                                         node.tagName == 'rn-slot')) {
                                     let contentEl = {
                                         nodeType: NodeType.ELEMENT,
                                         isTransformer: false,
-                                        nsSVG: node.nsSVG,
+                                        namespaceSVG: node.namespaceSVG,
                                         tagName: node.tagName,
                                         is: node.is,
                                         names: node.names,
@@ -1890,7 +2181,7 @@ class Template_Template {
                                         domEvents: node.domEvents,
                                         content: node.content,
                                         contentTemplateIndex: (this._embeddedTemplates ||
-                                            (this._embeddedTemplates = [])).push(new Template_Template({
+                                            (this._embeddedTemplates = [])).push(new Template2_Template({
                                             nodeType: NodeType.BLOCK,
                                             content: node.content,
                                             elements: this._elements
@@ -1928,7 +2219,7 @@ class Template_Template {
             }
             if (el.content && (el.tagName == 'template' || el.tagName == 'rn-slot')) {
                 el.contentTemplateIndex =
-                    (this._embeddedTemplates || (this._embeddedTemplates = [])).push(new Template_Template({
+                    (this._embeddedTemplates || (this._embeddedTemplates = [])).push(new Template2_Template({
                         nodeType: NodeType.BLOCK,
                         content: el.content,
                         elements: this._elements
@@ -1951,131 +2242,50 @@ class Template_Template {
         }
         return targetContent;
     }
-    _readAttributes(nsSVG, superElName, $paramsConfig, $specifiedParams) {
-        this._next( /* '(' */);
-        if (this._skipWhitespacesAndComments() == ')') {
-            this._next();
-            return null;
-        }
-        let superCall;
+    _readAttributes(elAttrs, namespaceSVG, superElName, $paramsConfig, $specifiedParams) {
+        let superCall = elAttrs[0] &&
+            this._readSuperCall([_template_parser_2_dist["NodeType"].SUPER_CALL, elAttrs[0] === 1 ? '' : elAttrs[0]], superElName);
         let attrIsValue;
         let list;
-        loop: for (let f = true;; f = false) {
-            if (f && this._chr == 's' && (superCall = this._readSuperCall(superElName))) {
-                let superElAttrs = superCall.element.attributes;
-                if (superElAttrs) {
-                    let superElAttrList = superElAttrs.list;
-                    attrIsValue = superElAttrs.attributeIsValue;
-                    list = { __proto__: superElAttrList };
-                    if ($paramsConfig && superElAttrList) {
-                        for (let i = 0, l = superElAttrList['length=']; i < l; i++) {
-                            let attr = superElAttrList[i];
-                            if (!attr.isTransformer && $paramsConfig.has(attr.name)) {
-                                $specifiedParams.add($paramsConfig.get(attr.name).name);
-                            }
+        if (superCall) {
+            let superElAttrs = superCall.element.attributes;
+            if (superElAttrs) {
+                let superElAttrList = superElAttrs.list;
+                attrIsValue = superElAttrs.attributeIsValue;
+                list = { __proto__: superElAttrList };
+                if ($paramsConfig && superElAttrList) {
+                    for (let i = 0, l = superElAttrList['length=']; i < l; i++) {
+                        let attr = superElAttrList[i];
+                        if (!attr.isTransformer && $paramsConfig.has(attr.name)) {
+                            $specifiedParams.add($paramsConfig.get(attr.name).name);
                         }
                     }
                 }
-                this._skipWhitespacesAndComments();
             }
-            else {
-                let pos = this._pos;
-                let isTransformer = this._chr == '@';
-                if (isTransformer) {
-                    this._next();
-                }
-                let name = this._readName(reAttributeName);
-                if (!name) {
-                    throw this._throwError('Expected attribute name');
-                }
-                if (!isTransformer && !nsSVG) {
+        }
+        if (elAttrs[1]) {
+            for (let elAttr of elAttrs[1]) {
+                let isTransformer = !!elAttr[0];
+                let name = elAttr[1];
+                if (!isTransformer && !namespaceSVG) {
                     name = Object(_snake_case_attribute_name_dist["snakeCaseAttributeName"])(name, true);
                 }
                 let fullName = (isTransformer ? '@' : '') + name;
-                let value;
-                if (this._skipWhitespacesAndComments() == '=') {
-                    this._next();
-                    let chr = this._skipWhitespaces();
-                    if (chr == "'" || chr == '"' || chr == '`') {
-                        value = this._readString();
-                        if (fullName == 'is') {
-                            attrIsValue = value;
-                        }
-                        else {
-                            (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
-                                ? (list[fullName] = list['length=']++)
-                                : list[fullName]] = {
-                                isTransformer,
-                                name,
-                                value,
-                                pos
-                            };
-                        }
-                        this._skipWhitespacesAndComments();
-                    }
-                    else {
-                        value = '';
-                        for (;;) {
-                            if (!chr) {
-                                this._throwError('Unexpected end of template. Expected "," or ")" to finalize attribute value.');
-                            }
-                            if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
-                                value = value.trim();
-                                if (fullName == 'is') {
-                                    attrIsValue = value;
-                                }
-                                else {
-                                    (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
-                                        ? (list[fullName] = list['length=']++)
-                                        : list[fullName]] = {
-                                        isTransformer,
-                                        name,
-                                        value,
-                                        pos
-                                    };
-                                }
-                                if (chr == '\n' || chr == '\r') {
-                                    this._skipWhitespacesAndComments();
-                                }
-                                break;
-                            }
-                            value += chr;
-                            chr = this._next();
-                        }
-                    }
+                let value = elAttr[2];
+                if (fullName == 'is') {
+                    attrIsValue = value;
                 }
                 else {
-                    value = '';
-                    if (fullName == 'is') {
-                        attrIsValue = value;
-                    }
-                    else {
-                        (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
-                            ? (list[fullName] = list['length=']++)
-                            : list[fullName]] = {
-                            isTransformer,
-                            name,
-                            value,
-                            pos
-                        };
-                    }
+                    (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
+                        ? (list[fullName] = list['length=']++)
+                        : list[fullName]] = {
+                        isTransformer,
+                        name,
+                        value
+                    };
                 }
                 if ($paramsConfig && $paramsConfig.has(name)) {
                     $specifiedParams.add($paramsConfig.get(name).name);
-                }
-            }
-            switch (this._chr) {
-                case ')': {
-                    this._next();
-                    break loop;
-                }
-                case ',': {
-                    this._next();
-                    this._skipWhitespacesAndComments();
-                    break;
-                }
-                default: {
-                    this._throwError('Unexpected end of template. Expected "," or ")" to finalize attribute value.');
                 }
             }
         }
@@ -2086,151 +2296,33 @@ class Template_Template {
                 list: list || null
             };
     }
-    _readSuperCall(defaultElName) {
-        reSuperCall.lastIndex = this._pos;
-        let match = reSuperCall.exec(this.template);
-        if (match) {
-            if (!this.parent) {
-                this._throwError('SuperCall is impossible if there is no parent');
-            }
-            let elName = match[1] ||
-                defaultElName ||
-                this._throwError('SuperCall.elementName is required');
-            let el = (elName.charAt(0) == '@' && this.parent._elements[elName.slice(1)]) ||
-                this.parent._elements[elName];
-            if (!el) {
-                this._throwError(`Element "${elName}" is not defined`);
-            }
-            this._chr = this.template.charAt((this._pos = reSuperCall.lastIndex));
-            return {
-                nodeType: NodeType.SUPER_CALL,
-                elementName: elName,
-                element: el
-            };
+    _readSuperCall(superCallNode, defaultElName) {
+        if (!this.parent) {
+            this._throwError('SuperCall is impossible if there is no parent', superCallNode);
         }
-        return null;
-    }
-    _readName(reName) {
-        reName.lastIndex = this._pos;
-        let match = reName.exec(this.template);
-        if (match) {
-            this._chr = this.template.charAt((this._pos = reName.lastIndex));
-            return match[0];
+        let elName = superCallNode[1] ||
+            defaultElName ||
+            this._throwError('SuperCall.elementName is required', superCallNode);
+        let el = (elName.charAt(0) == '@' && this.parent._elements[elName.slice(1)]) ||
+            this.parent._elements[elName];
+        if (!el) {
+            this._throwError(`Element "${elName}" is not defined`, superCallNode);
         }
-        return null;
+        return {
+            nodeType: NodeType.SUPER_CALL,
+            elementName: elName,
+            element: el
+        };
     }
-    _readString() {
-        let quoteChar = this._chr;
-        // if (quoteChar != "'" && quoteChar != '"' && quoteChar != '`') {
-        // 	this._throwError('Expected string');
-        // }
-        let str = '';
-        for (let chr = this._next(); chr;) {
-            if (chr == quoteChar) {
-                this._next();
-                return quoteChar == '`' ? normalizeMultilineText(str) : str;
-            }
-            if (chr == '\\') {
-                chr = this._next();
-                if (chr == 'x' || chr == 'u') {
-                    let pos = this._pos + 1;
-                    let code = parseInt(this.template.slice(pos, pos + (chr == 'x' ? 2 : 4)), 16);
-                    if (!isFinite(code)) {
-                        this._throwError(`Invalid ${chr == 'x' ? 'hexadecimal' : 'unicode'} escape sequence`, pos);
-                    }
-                    str += String.fromCharCode(code);
-                    chr = this._chr = this.template.charAt((this._pos = pos + (chr == 'x' ? 2 : 4)));
-                }
-                else if (escapee.has(chr)) {
-                    str += escapee.get(chr);
-                    chr = this._next();
-                }
-                else {
-                    this._throwError('Invalid escape sequence', this._pos - 1);
-                }
-            }
-            else {
-                str += chr;
-                chr = this._next();
-            }
-        }
-        throw 1;
-    }
-    _skipWhitespaces() {
-        let chr = this._chr;
-        while (chr && Template_reWhitespace.test(chr)) {
-            chr = this._next();
-        }
-        return chr;
-    }
-    _skipWhitespacesAndComments() {
-        let chr = this._chr;
-        loop1: for (;;) {
-            if (chr == '/') {
-                switch (this.template.charAt(this._pos + 1)) {
-                    case '/': {
-                        this._next();
-                        while ((chr = this._next()) && chr != '\n' && chr != '\r') { }
-                        break;
-                    }
-                    case '*': {
-                        let pos = this._pos;
-                        this._next();
-                        loop2: for (;;) {
-                            switch (this._next()) {
-                                case '*': {
-                                    if (this._next() == '/') {
-                                        chr = this._next();
-                                        break loop2;
-                                    }
-                                    break;
-                                }
-                                case '': {
-                                    this._throwError('Expected "*/" to close multiline comment', pos);
-                                }
-                            }
-                        }
-                        break;
-                    }
-                    default: {
-                        break loop1;
-                    }
-                }
-            }
-            else if (chr && Template_reWhitespace.test(chr)) {
-                chr = this._next();
-            }
-            else {
-                break;
-            }
-        }
-        return chr;
-    }
-    _next( /* current?: string */) {
-        // if (current && current != this._chr) {
-        // 	this._throwError(`Expected "${current}" instead of "${this._chr}"`);
-        // }
-        return (this._chr = this.template.charAt(++this._pos));
-    }
-    _throwError(msg, pos = this._pos) {
-        let n = pos < 40 ? 40 - pos : 0;
-        throw new SyntaxError(msg +
-            '\n' +
-            this.template
-                .slice(pos < 40 ? 0 : pos - 40, pos + 20)
-                .replace(/\t/g, ' ')
-                .replace(/\n|\r\n?/g, match => {
-                if (match.length == 2) {
-                    n++;
-                }
-                return '↵';
-            }) +
-            '\n' +
-            '----------------------------------------'.slice(n) +
-            '↑');
+    _throwError(msg, node) {
+        throw {
+            type: TypeError,
+            message: msg,
+            node
+        };
     }
     extend(template, options) {
-        return new Template_Template(template, {
+        return new Template2_Template(template, {
             __proto__: options,
             parent: this
         });
@@ -2249,10 +2341,10 @@ class Template_Template {
         return renderContent(document.createDocumentFragment(), block.content || block.elements['@root'].content, this, ownerComponent, context, result, parentComponent);
     }
 }
-Template_Template.elementTransformers = {
+Template2_Template.elementTransformers = {
     section: el => el.content
 };
-Template_Template.attributeTransformers = {};
+Template2_Template.attributeTransformers = {};
 function renderContent(targetNode, content, template, ownerComponent, context, result, parentComponent) {
     var _a;
     if (content) {
@@ -2275,7 +2367,7 @@ function renderContent(targetNode, content, template, ownerComponent, context, r
                     else {
                         let tagName = node.tagName;
                         let el;
-                        if (node.nsSVG) {
+                        if (node.namespaceSVG) {
                             el = document.createElementNS(svgNamespaceURI, tagName);
                         }
                         else if (node.is) {
@@ -2379,7 +2471,7 @@ function renderContent(targetNode, content, template, ownerComponent, context, r
                             }
                         }
                         if (className) {
-                            if (node.nsSVG) {
+                            if (node.namespaceSVG) {
                                 el.setAttribute('class', className);
                             }
                             else {
@@ -2467,12 +2559,12 @@ function renderElementClasses(elementNamesTemplate, elNames) {
     ['IfElse', 'rn-if-else'],
     ['Repeat', 'rn-repeat']
 ].forEach(([name, is]) => {
-    Template_Template.elementTransformers[name] = el => {
+    Template2_Template.elementTransformers[name] = el => {
         return [
             {
                 nodeType: NodeType.ELEMENT,
                 isTransformer: false,
-                nsSVG: el.nsSVG,
+                namespaceSVG: el.namespaceSVG,
                 tagName: 'template',
                 is,
                 names: el.names,
@@ -2491,11 +2583,11 @@ function renderElementClasses(elementNamesTemplate, elNames) {
     ['unless', 'rn-if-else'],
     ['for', 'rn-repeat']
 ].forEach(([name, is]) => {
-    Template_Template.attributeTransformers[name] = (el, attr) => {
+    Template2_Template.attributeTransformers[name] = (el, attr) => {
         return {
             nodeType: NodeType.ELEMENT,
             isTransformer: false,
-            nsSVG: false,
+            namespaceSVG: false,
             tagName: 'template',
             is,
             names: null,
@@ -2521,7 +2613,7 @@ function renderElementClasses(elementNamesTemplate, elNames) {
 });
 
 // EXTERNAL MODULE: ./node_modules/@riim/pascalize/dist/index.js
-var pascalize_dist = __webpack_require__(9);
+var pascalize_dist = __webpack_require__(10);
 
 // CONCATENATED MODULE: ./src/ComponentParams.ts
 
@@ -2656,7 +2748,7 @@ const elementConstructors = new Map([
 ]);
 
 // EXTERNAL MODULE: ./node_modules/@riim/defer/dist/index.js
-var defer_dist = __webpack_require__(11);
+var defer_dist = __webpack_require__(12);
 
 // CONCATENATED MODULE: ./src/lib/callWithInterruptionHandling.ts
 
@@ -2963,7 +3055,7 @@ function registerComponent(componentCtor) {
                 blockName: elIs
             });
         }
-        else if (template instanceof Template_Template) {
+        else if (template instanceof Template2_Template) {
             template.setBlockName(componentCtor._elementBlockNames);
         }
         else {
@@ -2971,7 +3063,7 @@ function registerComponent(componentCtor) {
                 ? parentComponentCtor.template.extend(template, {
                     blockName: elIs
                 })
-                : new Template_Template(template, { blockName: componentCtor._elementBlockNames });
+                : new Template2_Template(template, { blockName: componentCtor._elementBlockNames });
         }
     }
     inheritProperty(componentCtor, parentComponentCtor, 'events', 1);
@@ -3051,7 +3143,7 @@ function Component(config) {
 }
 
 // EXTERNAL MODULE: external "reflect-metadata"
-var external_reflect_metadata_ = __webpack_require__(14);
+var external_reflect_metadata_ = __webpack_require__(15);
 
 // CONCATENATED MODULE: ./src/decorators/Param.ts
 
@@ -3136,7 +3228,7 @@ function Interruptible(target, methodName, methodDesc) {
 }
 
 // EXTERNAL MODULE: ./node_modules/@riim/move-content/dist/index.js
-var move_content_dist = __webpack_require__(15);
+var move_content_dist = __webpack_require__(16);
 
 // CONCATENATED MODULE: ./src/attachChildComponentElements.ts
 
@@ -4708,7 +4800,7 @@ RnSlot_RnSlot = RnSlot_decorate([
 /* concated harmony reexport ComponentParams */__webpack_require__.d(__webpack_exports__, "ComponentParams", function() { return ComponentParams; });
 /* concated harmony reexport TemplateNodeType */__webpack_require__.d(__webpack_exports__, "TemplateNodeType", function() { return NodeType; });
 /* concated harmony reexport KEY_CONTENT_TEMPLATE */__webpack_require__.d(__webpack_exports__, "KEY_CONTENT_TEMPLATE", function() { return KEY_CONTENT_TEMPLATE; });
-/* concated harmony reexport Template */__webpack_require__.d(__webpack_exports__, "Template", function() { return Template_Template; });
+/* concated harmony reexport Template */__webpack_require__.d(__webpack_exports__, "Template", function() { return Template2_Template; });
 /* concated harmony reexport registerComponent */__webpack_require__.d(__webpack_exports__, "registerComponent", function() { return registerComponent; });
 /* concated harmony reexport RnIfThen */__webpack_require__.d(__webpack_exports__, "RnIfThen", function() { return RnIfThen_RnIfThen; });
 /* concated harmony reexport RnIfElse */__webpack_require__.d(__webpack_exports__, "RnIfElse", function() { return RnIfElse_RnIfElse; });

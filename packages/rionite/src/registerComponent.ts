@@ -8,7 +8,7 @@ import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { KEY_COMPONENT_SELF, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { elementConstructors } from './elementConstructors';
 import { ElementProtoMixin, KEY_RIONITE_COMPONENT_CONSTRUCTOR } from './ElementProtoMixin';
-import { Template } from './Template';
+import { Template } from './Template2';
 
 const hasOwn = Object.prototype.hasOwnProperty;
 const push = Array.prototype.push;

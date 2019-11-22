@@ -1,4 +1,4 @@
-import { NodeType, TemplateParser } from '../src/TemplateParser2';
+import { NodeType, TemplateParser } from '@riim/rionite-template-parser-2';
 
 describe('TemplateParser2', () => {
 	test('элемент', () => {

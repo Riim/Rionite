@@ -1,4 +1,4 @@
-import { KEY_CONTENT_TEMPLATE, NodeType, Template } from '../src/Template';
+import { KEY_CONTENT_TEMPLATE, NodeType, Template } from '../src/Template2';
 
 function fragmentToString(df: DocumentFragment): string {
 	let el = document.createElement('div');
@@ -6,7 +6,7 @@ function fragmentToString(df: DocumentFragment): string {
 	return el.innerHTML;
 }
 
-declare module '../src/Template' {
+declare module '../src/Template2' {
 	/* tslint:disable-next-line */
 	interface Template {
 		renderToString(): string;
@@ -22,7 +22,7 @@ Template.elementTransformers.Slot = el => {
 		{
 			nodeType: NodeType.ELEMENT,
 			isTransformer: false,
-			nsSVG: false,
+			namespaceSVG: false,
 			tagName: 'rn-slot',
 			is: null,
 			names: el.names,
@@ -47,7 +47,7 @@ describe('Template#parse', () => {
 				'@root': {
 					nodeType: NodeType.ELEMENT,
 					isTransformer: true,
-					nsSVG: false,
+					namespaceSVG: false,
 					tagName: 'section',
 					is: null,
 					names: ['root'],
@@ -56,7 +56,7 @@ describe('Template#parse', () => {
 						{
 							nodeType: NodeType.ELEMENT,
 							isTransformer: false,
-							nsSVG: false,
+							namespaceSVG: false,
 							tagName: 'b',
 							is: null,
 							names: null,
@@ -89,7 +89,7 @@ describe('Template#parse', () => {
 				'@root': {
 					nodeType: NodeType.ELEMENT,
 					isTransformer: true,
-					nsSVG: false,
+					namespaceSVG: false,
 					tagName: 'section',
 					is: null,
 					names: ['root'],
@@ -105,7 +105,7 @@ describe('Template#parse', () => {
 				el1: {
 					nodeType: NodeType.ELEMENT,
 					isTransformer: false,
-					nsSVG: false,
+					namespaceSVG: false,
 					tagName: 'b',
 					is: null,
 					names: ['el1'],
@@ -135,7 +135,7 @@ describe('Template#parse', () => {
 				'@root': {
 					nodeType: NodeType.ELEMENT,
 					isTransformer: true,
-					nsSVG: false,
+					namespaceSVG: false,
 					tagName: 'section',
 					is: null,
 					names: ['root'],
@@ -677,7 +677,7 @@ describe('Template#render', () => {
 				{
 					nodeType: NodeType.ELEMENT,
 					isTransformer: false,
-					nsSVG: false,
+					namespaceSVG: false,
 					tagName: 'b',
 					is: null,
 					names: el.names,
@@ -713,7 +713,7 @@ describe('Template#render', () => {
 				{
 					nodeType: NodeType.ELEMENT,
 					isTransformer: false,
-					nsSVG: false,
+					namespaceSVG: false,
 					tagName: 'b',
 					is: null,
 					names: el.names,
@@ -722,7 +722,7 @@ describe('Template#render', () => {
 						{
 							nodeType: NodeType.ELEMENT,
 							isTransformer: false,
-							nsSVG: false,
+							namespaceSVG: false,
 							tagName: 'u',
 							is: null,
 							names: null,

@@ -1,5 +1,6 @@
 import { kebabCase } from '@riim/kebab-case';
 import { moveContent } from '@riim/move-content';
+import { TContent } from '@riim/rionite-template-parser-2';
 import { nextUID } from '@riim/uid';
 import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
 import { attachChildComponentElements } from './attachChildComponentElements';
@@ -22,7 +23,7 @@ import { callWithInterruptionHandling } from './lib/callWithInterruptionHandling
 import { findChildComponents } from './lib/findChildComponents';
 import { InterruptError } from './lib/InterruptError';
 import { normalizeTextNodes } from './lib/normalizeTextNodes';
-import { IBlock, KEY_CONTENT_TEMPLATE, Template } from './Template';
+import { IBlock, KEY_CONTENT_TEMPLATE, Template } from './Template2';
 
 const hasOwn = Object.prototype.hasOwnProperty;
 const map = Array.prototype.map;
@@ -159,7 +160,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	static _blockNamesString: string;
 	static _elementBlockNames: Array<string>;
 
-	static template: string | IBlock | Template | null = null;
+	static template: string | TContent | IBlock | Template | null = null;
 
 	static get bindsInputContent() {
 		return this.template !== null;

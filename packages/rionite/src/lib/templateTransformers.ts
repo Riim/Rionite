@@ -1,4 +1,4 @@
-import { NodeType, Template } from '../Template';
+import { NodeType, Template } from '../Template2';
 
 [
 	['IfThen', 'rn-if-then'],
@@ -10,7 +10,7 @@ import { NodeType, Template } from '../Template';
 			{
 				nodeType: NodeType.ELEMENT,
 				isTransformer: false,
-				nsSVG: el.nsSVG,
+				namespaceSVG: el.namespaceSVG,
 				tagName: 'template',
 				is,
 				names: el.names,
@@ -34,7 +34,7 @@ import { NodeType, Template } from '../Template';
 		return {
 			nodeType: NodeType.ELEMENT,
 			isTransformer: false,
-			nsSVG: false,
+			namespaceSVG: false,
 			tagName: 'template',
 			is,
 			names: null,

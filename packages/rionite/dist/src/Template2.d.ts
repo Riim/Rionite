@@ -1,3 +1,4 @@
+import { TContent as TParserContent, TElement as TParserElement, TElementAttributes as TParserElementAttributes, TNode as TParserNode, TSuperCall as TParserSuperCall } from '@riim/rionite-template-parser-2';
 import { BaseComponent, I$ComponentParamConfig } from './BaseComponent';
 import { TContentBindingResult } from './bindContent';
 export declare enum NodeType {
@@ -16,7 +17,6 @@ export interface IElementAttribute {
     isTransformer: boolean;
     name: string;
     value: string;
-    pos: number;
 }
 export interface IElementAttributeList {
     [attrIndex: number]: IElementAttribute;
@@ -29,7 +29,7 @@ export interface IElementAttributes {
 export interface IElement extends INode {
     nodeType: NodeType.ELEMENT;
     isTransformer: boolean;
-    nsSVG: boolean;
+    namespaceSVG: boolean;
     tagName: string;
     is: string | null;
     names: Array<string | null> | null;
@@ -68,32 +68,25 @@ export declare class Template {
     static attributeTransformers: Record<string, (el: IElement, attr: IElementAttribute) => IElement>;
     _embedded: boolean;
     parent: Template | null;
-    template: string;
-    _pos: number;
-    _chr: string;
+    template: TParserContent;
     initialized: boolean;
     block: IBlock | null;
     _elements: Record<string, IElement>;
     _elementNamesTemplate: Array<string>;
     _embeddedTemplates: Array<Template> | null;
-    constructor(template: string | IBlock, options?: {
+    constructor(template: string | TParserContent | IBlock, options?: {
         _embedded?: boolean;
         parent?: Template;
         blockName?: string | Array<string>;
     });
     initialize(component?: BaseComponent | null): void;
     parse(component?: BaseComponent | null): IBlock;
-    _readContent(targetContent: TContent | null, nsSVG: boolean, superElName: string | null, brackets: boolean, componentCtor?: typeof BaseComponent | null): TContent | null;
-    _readElement(targetContent: TContent | null, nsSVG: boolean, superElName: string | null, componentCtor?: typeof BaseComponent | null): TContent | null;
-    _readAttributes(nsSVG: boolean, superElName: string | null, $paramsConfig?: Map<string, I$ComponentParamConfig> | null, $specifiedParams?: Set<string>): IElementAttributes | null;
-    _readSuperCall(defaultElName: string | null): ISuperCall | null;
-    _readName(reName: RegExp): string | null;
-    _readString(): string;
-    _skipWhitespaces(): string;
-    _skipWhitespacesAndComments(): string;
-    _next(): string;
-    _throwError(msg: string, pos?: number): void;
-    extend(template: string | IBlock, options?: {
+    _readContent(targetContent: TContent | null, content: TParserContent, namespaceSVG: boolean, superElName: string | null, componentCtor?: typeof BaseComponent | null): TContent | null;
+    _readElement(targetContent: TContent | null, elNode: TParserElement, namespaceSVG: boolean, superElName: string | null, componentCtor?: typeof BaseComponent | null): TContent | null;
+    _readAttributes(elAttrs: TParserElementAttributes, namespaceSVG: boolean, superElName: string | null, $paramsConfig?: Map<string, I$ComponentParamConfig> | null, $specifiedParams?: Set<string>): IElementAttributes | null;
+    _readSuperCall(superCallNode: TParserSuperCall, defaultElName: string | null): ISuperCall;
+    _throwError(msg: string, node: TParserNode): void;
+    extend(template: string | TParserContent | IBlock, options?: {
         blockName?: string;
         _embedded?: boolean;
     }): Template;

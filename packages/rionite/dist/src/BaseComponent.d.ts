@@ -1,8 +1,9 @@
+import { TContent } from '@riim/rionite-template-parser-2';
 import { EventEmitter, IEvent } from 'cellx';
 import { IBinding } from './componentBinding';
 import { IComponentParamValueСonverters } from './componentParamValueConverters';
 import { KEY_CHILD_COMPONENTS, KEY_COMPONENT_SELF, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
-import { IBlock, KEY_CONTENT_TEMPLATE, Template } from './Template';
+import { IBlock, KEY_CONTENT_TEMPLATE, Template } from './Template2';
 export interface IDisposable {
     dispose(): any;
     [key: string]: any;
@@ -74,7 +75,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     static i18n: Record<string, any> | null;
     static _blockNamesString: string;
     static _elementBlockNames: Array<string>;
-    static template: string | IBlock | Template | null;
+    static template: string | TContent | IBlock | Template | null;
     static get bindsInputContent(): boolean;
     static listenings: Array<IComponentListening> | null;
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;

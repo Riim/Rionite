@@ -1,6 +1,6 @@
 import { KEY_DOM_EVENTS } from '../handleDOMEvent';
 import { KEY_EVENTS } from '../handleEvent';
-import { KEY_CONTENT_TEMPLATE } from '../Template';
+import { KEY_CONTENT_TEMPLATE } from '../Template2';
 
 const IE = !!(document as any).documentMode || navigator.userAgent.indexOf('Edge/') != -1;
 

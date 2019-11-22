@@ -14,17 +14,6 @@ export type TNode = Array<any>;
 // export type TContent = Array<INode>;
 export type TContent = Array<TNode>;
 
-// export interface ISuperCall extends INode {
-// 	nodeType: NodeType.SUPER_CALL;
-// 	elementName: string | null;
-// }
-export type TSuperCall = [/* nodeType */ NodeType.SUPER_CALL, /* elementName */ string];
-
-// export interface IDebuggerCall extends INode {
-// 	nodeType: NodeType.DEBUGGER_CALL;
-// }
-export type TDebuggerCall = [/* nodeType */ NodeType.DEBUGGER_CALL];
-
 // export interface IElementAttribute extends INode {
 // 	nodeType: NodeType.ELEMENT_ATTRIBUTE;
 // 	isTransformer: boolean;
@@ -45,8 +34,8 @@ export type TElementAttributeList = Array<TElementAttribute>;
 // 	list: TElementAttributeList;
 // }
 export type TElementAttributes = [
-	/* superCall */ TSuperCall | undefined,
-	/* list */ TElementAttributeList
+	/* superCallElementName */ 1 | string | undefined,
+	/* list */ TElementAttributeList | undefined
 ];
 
 // export interface IElement extends INode {
@@ -71,6 +60,17 @@ export type TElement = [
 // 	value: string;
 // }
 export type TTextNode = [/* nodeType */ NodeType.TEXT, /* value */ string];
+
+// export interface ISuperCall extends INode {
+// 	nodeType: NodeType.SUPER_CALL;
+// 	elementName: string | null;
+// }
+export type TSuperCall = [/* nodeType */ NodeType.SUPER_CALL, /* elementName */ string | undefined];
+
+// export interface IDebuggerCall extends INode {
+// 	nodeType: NodeType.DEBUGGER_CALL;
+// }
+export type TDebuggerCall = [/* nodeType */ NodeType.DEBUGGER_CALL];
 
 const escapee = new Map([
 	['/', '/'],
@@ -249,11 +249,11 @@ export class TemplateParser {
 
 		if (this._skipWhitespacesAndComments() == ')') {
 			this._next();
-			return [undefined, []];
+			return [undefined, undefined];
 		}
 
 		let superCall: TSuperCall | null | undefined;
-		let list: TElementAttributeList = [];
+		let list: TElementAttributeList | undefined;
 
 		loop: for (let f = true; ; f = false) {
 			if (f && this._chr == 's' && (superCall = this._readSuperCall())) {
@@ -277,7 +277,12 @@ export class TemplateParser {
 					let chr = this._skipWhitespaces();
 
 					if (chr == "'" || chr == '"' || chr == '`') {
-						list.push([isTransformer ? 1 : undefined, name, this._readString()]);
+						(list || (list = [])).push([
+							isTransformer ? 1 : undefined,
+							name,
+							this._readString()
+						]);
+
 						this._skipWhitespacesAndComments();
 					} else {
 						let value = '';
@@ -290,7 +295,11 @@ export class TemplateParser {
 							}
 
 							if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
-								list.push([isTransformer ? 1 : undefined, name, value.trim()]);
+								(list || (list = [])).push([
+									isTransformer ? 1 : undefined,
+									name,
+									value.trim()
+								]);
 
 								if (chr == '\n' || chr == '\r') {
 									this._skipWhitespacesAndComments();
@@ -304,7 +313,7 @@ export class TemplateParser {
 						}
 					}
 				} else {
-					list.push([isTransformer ? 1 : undefined, name, '']);
+					(list || (list = [])).push([isTransformer ? 1 : undefined, name, '']);
 				}
 			}
 
@@ -326,7 +335,7 @@ export class TemplateParser {
 			}
 		}
 
-		return [superCall || undefined, list];
+		return [superCall ? superCall[1] || 1 : undefined, list];
 	}
 
 	_readSuperCall(): TSuperCall | null {

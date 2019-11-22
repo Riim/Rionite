@@ -8,7 +8,7 @@ import { IBinding } from '../componentBinding';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { cloneNode } from '../lib/cloneNode';
-import { KEY_CONTENT_TEMPLATE } from '../Template';
+import { KEY_CONTENT_TEMPLATE } from '../Template2';
 
 const KEY_SLOTS_CONTENT = Symbol('slotsContent');
 
