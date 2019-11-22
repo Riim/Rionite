@@ -53,7 +53,7 @@ module.exports = (env = {}) => {
 			// '@riim/move-content',
 			// '@riim/next-tick',
 			// '@riim/rionite-snake-case-attribute-name',
-			'@riim/uid',
+			'@riim/next-uid',
 			'cellx',
 			// 'escape-string'
 			'reflect-metadata'

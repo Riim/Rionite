@@ -28,12 +28,12 @@
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
     "jest": "^24.9.0",
-    "rollup": "^1.27.3",
+    "rollup": "^1.27.4",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-tslint": "^0.2.2",
     "rollup-plugin-typescript2": "^0.25.2",
-    "ts-jest": "^24.1.0",
+    "ts-jest": "^24.2.0",
     "tslint": "^5.20.1",
     "tslint-loader": "^3.6.0",
     "typescript": "^3.7.2",
@@ -47,10 +47,10 @@
     "@riim/kebab-case": "^1.0.0",
     "@riim/move-content": "^1.0.0",
     "@riim/next-tick": "^1.2.4",
+    "@riim/next-uid": "^1.1.0",
     "@riim/pascalize": "^1.0.1",
     "@riim/rionite-snake-case-attribute-name": "^0.38.0",
     "@riim/rionite-template-parser-2": "^0.38.1",
-    "@riim/uid": "^1.0.0",
     "cellx": "^1.9.16",
     "escape-string": "^1.0.2",
     "reflect-metadata": "^0.1.13"
@@ -68,7 +68,7 @@
     },
     "moduleNameMapper": {
       "cellx": "<rootDir>/node_modules/cellx/dist/cellx.umd.js",
-      "@riim/uid": "<rootDir>/node_modules/@riim/uid/dist/uid.umd.js"
+      "@riim/next-uid": "<rootDir>/node_modules/@riim/next-uid/dist/nextUID.umd.js"
     }
   }
 }

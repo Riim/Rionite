@@ -12,7 +12,7 @@ export default {
 		name: 'rionite',
 
 		globals: {
-			'@riim/uid': '@riim/uid',
+			'@riim/next-uid': '@riim/next-uid',
 			cellx: 'cellx'
 		}
 	},
@@ -25,7 +25,7 @@ export default {
 		// '@riim/move-content',
 		// '@riim/next-tick',
 		// '@riim/rionite-snake-case-attribute-name',
-		'@riim/uid',
+		'@riim/next-uid',
 		'cellx',
 		// 'escape-string'
 		'reflect-metadata'

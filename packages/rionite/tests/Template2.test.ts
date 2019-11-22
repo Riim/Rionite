@@ -20,7 +20,7 @@ describe('Template2', () => {
 
 		await bench
 			.setWarmupTime(3000)
-			.setMaxUnitTime(3000)
+			.setMaxUnitTime(6000)
 			.add('Template', () => {
 				new Template(template).parse();
 			})
