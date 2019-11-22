@@ -16,9 +16,6 @@
     "url": "https://github.com/Riim/Rionite/issues"
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
-  "publishConfig": {
-    "access": "public"
-  },
   "dependencies": {
     "@riim/rionite-template-parser-2": "^0.38.1"
   }
