@@ -1,6 +1,6 @@
 {
   "name": "rionite-template-loader",
-  "version": "0.38.0",
+  "version": "0.38.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@riim/rionite-template-parser-2": "^0.38.0"
+    "@riim/rionite-template-parser-2": "^0.38.1"
   }
 }
