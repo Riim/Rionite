@@ -1,6 +1,6 @@
 {
   "name": "@riim/rionite-template-parser",
-  "version": "0.38.0",
+  "version": "0.38.4",
   "description": "",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
