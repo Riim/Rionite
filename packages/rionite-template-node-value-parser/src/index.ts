@@ -76,16 +76,12 @@ const reRegExpModifiers = /[gimyu]+/gy;
 const reVacuum = /null|undefined|void 0/gy;
 
 export class TemplateNodeValueParser {
-	templateNodeValue: string;
-
 	_pos: number;
 	_chr: string;
 
 	result: TTemplateNodeValue;
 
-	constructor(templateNodeValue: string) {
-		this.templateNodeValue = templateNodeValue;
-	}
+	constructor(public templateNodeValue: string) {}
 
 	parse(index: number): TTemplateNodeValue {
 		let templateNodeValue = this.templateNodeValue;

@@ -1,8 +1,8 @@
-let reCamelCase = /^_?[a-z][0-9a-z]*$/i;
-let reLetters = /[A-Z][^A-Z]/g;
-let reLetters2 = /[A-Z]{2,}/g;
+const reCamelCase = /^_?[a-z][0-9a-z]*$/i;
+const reLetters = /[A-Z][^A-Z]/g;
+const reLetters2 = /[A-Z]{2,}/g;
 
-let cache = new Map<string, string>();
+const cache = new Map<string, string>();
 
 export function snakeCaseAttributeName(str: string, useCache?: boolean): string {
 	let value: string;

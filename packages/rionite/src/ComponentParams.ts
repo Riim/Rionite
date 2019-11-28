@@ -3,6 +3,18 @@ import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './
 import { componentParamValueСonverters } from './componentParamValueConverters';
 import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 
+const componentParamTypeMap = new Map<string, Function>([
+	['boolean', Boolean],
+	['number', Number],
+	['string', String]
+]);
+
+const componentParamTypeMap2 = new Map<Function, string>([
+	[Boolean, 'boolean'],
+	[Number, 'number'],
+	[String, 'string']
+]);
+
 export const KEY_COMPONENT_PARAMS_INITED = Symbol('componentParamsInited');
 
 function initParam(
@@ -34,20 +46,27 @@ function initParam(
 			}
 		}
 
-		type = type == 'object' ? (paramConfig as IComponentParamConfig).type : paramConfig;
+		type =
+			(type == 'object' ? (paramConfig as IComponentParamConfig).type : paramConfig) ||
+			Object;
 
-		if (defaultValue !== undefined && type !== eval) {
-			type = typeof defaultValue;
-
-			if (type == 'function') {
-				type = 'object';
-			}
+		if (defaultValue !== undefined && type == Object) {
+			type = componentParamTypeMap.get(typeof defaultValue) || Object;
 		}
 
 		valueСonverters = componentParamValueСonverters.get(type);
 
 		if (!valueСonverters) {
 			throw new TypeError('Unsupported parameter type');
+		}
+
+		if (
+			defaultValue !== undefined &&
+			type != Object &&
+			type != eval &&
+			componentParamTypeMap2.get(type) !== typeof defaultValue
+		) {
+			throw TypeError('Specified type does not match type of defaultValue');
 		}
 
 		$paramConfig.type = type;

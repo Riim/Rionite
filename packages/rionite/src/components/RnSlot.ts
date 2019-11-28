@@ -44,13 +44,13 @@ export class RnSlot extends BaseComponent {
 		return true;
 	}
 
-	$context: Record<string, any>;
+	declare $context: Record<string, any>;
 
-	name: string;
-	forTag: string;
-	paramFor: string;
-	cloneContent: boolean;
-	getContext: (
+	declare name: string;
+	declare forTag: string;
+	declare paramFor: string;
+	declare cloneContent: boolean;
+	declare getContext: (
 		this: BaseComponent,
 		context: Record<string, any>,
 		slot: RnSlot

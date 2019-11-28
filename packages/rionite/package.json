@@ -28,7 +28,7 @@
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
     "jest": "^24.9.0",
-    "rollup": "^1.27.4",
+    "rollup": "^1.27.5",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-tslint": "^0.2.2",
@@ -36,7 +36,7 @@
     "ts-jest": "^24.2.0",
     "tslint": "^5.20.1",
     "tslint-loader": "^3.6.0",
-    "typescript": "^3.7.2",
+    "typescript": "^3.7.3-insiders.20191123",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
   },
@@ -51,7 +51,7 @@
     "@riim/pascalize": "^1.0.1",
     "@riim/rionite-snake-case-attribute-name": "^0.38.0",
     "@riim/rionite-template-parser-2": "^0.38.1",
-    "cellx": "^1.9.16",
+    "cellx": "^1.9.19",
     "escape-string": "^1.0.2",
     "reflect-metadata": "^0.1.13"
   },

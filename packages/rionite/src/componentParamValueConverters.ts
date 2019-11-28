@@ -116,9 +116,3 @@ export const componentParamValueСonverters = new Map<any, IComponentParamValue�
 		}
 	]
 ]);
-
-componentParamValueСonverters.set('boolean', componentParamValueСonverters.get(Boolean)!);
-componentParamValueСonverters.set('number', componentParamValueСonverters.get(Number)!);
-componentParamValueСonverters.set('string', componentParamValueСonverters.get(String)!);
-componentParamValueСonverters.set('object', componentParamValueСonverters.get(Object)!);
-componentParamValueСonverters.set('eval', componentParamValueСonverters.get(eval)!);

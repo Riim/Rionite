@@ -33,8 +33,30 @@ function normalizeMultilineText(text) {
 }
 class TemplateParser {
     constructor(template) {
-        this._line = 1;
-        this.template = template;
+        Object.defineProperty(this, "template", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: template
+        });
+        Object.defineProperty(this, "_pos", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
+        Object.defineProperty(this, "_line", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: 1
+        });
+        Object.defineProperty(this, "_chr", {
+            enumerable: true,
+            configurable: true,
+            writable: true,
+            value: void 0
+        });
     }
     parse() {
         this._pos = 0;

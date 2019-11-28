@@ -98,13 +98,10 @@ function normalizeMultilineText(text: string): string {
 }
 
 export class TemplateParser {
-	template: string;
 	_pos: number;
 	_chr: string;
 
-	constructor(template: string) {
-		this.template = template;
-	}
+	constructor(public template: string) {}
 
 	parse(): TContent {
 		this._pos = 0;

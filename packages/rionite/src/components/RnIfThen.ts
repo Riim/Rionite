@@ -42,8 +42,8 @@ export class RnIfThen extends BaseComponent {
 		return true;
 	}
 
-	paramIf: string;
-	withUndefined: boolean;
+	declare paramIf: string;
+	declare withUndefined: boolean;
 
 	_elseMode = false;
 

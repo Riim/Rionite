@@ -2279,11 +2279,6 @@ window.innerHTML = (function (document) {
 	        }
 	    ]
 	]);
-	componentParamValueСonverters.set('boolean', componentParamValueСonverters.get(Boolean));
-	componentParamValueСonverters.set('number', componentParamValueСonverters.get(Number));
-	componentParamValueСonverters.set('string', componentParamValueСonverters.get(String));
-	componentParamValueСonverters.set('object', componentParamValueСonverters.get(Object));
-	componentParamValueСonverters.set('eval', componentParamValueСonverters.get(eval));
 
 	const KEY_COMPONENT_SELF = Symbol('componentSelf');
 	const KEY_PARAMS_CONFIG = Symbol('paramsConfig');
@@ -2438,6 +2433,30 @@ window.innerHTML = (function (document) {
 	const reVacuum = /null|undefined|void 0/gy;
 	class TemplateNodeValueParser {
 	    constructor(templateNodeValue) {
+	        Object.defineProperty(this, "templateNodeValue", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_pos", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_chr", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "result", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
 	        this.templateNodeValue = templateNodeValue;
 	    }
 	    parse(index) {
@@ -3187,7 +3206,54 @@ window.innerHTML = (function (document) {
 	const ELEMENT_NAME_DELIMITER = '__';
 	class Template {
 	    constructor(template, options) {
-	        this.initialized = false;
+	        Object.defineProperty(this, "_embedded", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "parent", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "template", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "initialized", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: false
+	        });
+	        Object.defineProperty(this, "block", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_elements", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_elementNamesTemplate", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_embeddedTemplates", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
 	        let embedded = (this._embedded = !!(options && options._embedded));
 	        let parent = (this.parent = (options && options.parent) || null);
 	        if (typeof template == 'string') {
@@ -3667,10 +3733,20 @@ window.innerHTML = (function (document) {
 	        return renderContent(document.createDocumentFragment(), block.content || block.elements['@root'].content, this, ownerComponent, context, result, parentComponent);
 	    }
 	}
-	Template.elementTransformers = {
-	    section: el => el.content
-	};
-	Template.attributeTransformers = {};
+	Object.defineProperty(Template, "elementTransformers", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: {
+	        section: el => el.content
+	    }
+	});
+	Object.defineProperty(Template, "attributeTransformers", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: {}
+	});
 	function renderContent(targetNode, content, template, ownerComponent, context, result, parentComponent) {
 	    var _a;
 	    if (content) {
@@ -3971,6 +4047,16 @@ window.innerHTML = (function (document) {
 	unwrapExports(dist$6);
 	var dist_1$6 = dist$6.pascalize;
 
+	const componentParamTypeMap = new Map([
+	    ['boolean', Boolean],
+	    ['number', Number],
+	    ['string', String]
+	]);
+	const componentParamTypeMap2 = new Map([
+	    [Boolean, 'boolean'],
+	    [Number, 'number'],
+	    [String, 'string']
+	]);
 	const KEY_COMPONENT_PARAMS_INITED = Symbol('componentParamsInited');
 	function initParam(component, $paramConfig, name, $specifiedParams) {
 	    if ($paramConfig === null) {
@@ -3993,16 +4079,21 @@ window.innerHTML = (function (document) {
 	                defaultValue = paramConfig;
 	            }
 	        }
-	        type = type == 'object' ? paramConfig.type : paramConfig;
-	        if (defaultValue !== undefined && type !== eval) {
-	            type = typeof defaultValue;
-	            if (type == 'function') {
-	                type = 'object';
-	            }
+	        type =
+	            (type == 'object' ? paramConfig.type : paramConfig) ||
+	                Object;
+	        if (defaultValue !== undefined && type == Object) {
+	            type = componentParamTypeMap.get(typeof defaultValue) || Object;
 	        }
 	        valueСonverters = componentParamValueСonverters.get(type);
 	        if (!valueСonverters) {
 	            throw new TypeError('Unsupported parameter type');
+	        }
+	        if (defaultValue !== undefined &&
+	            type != Object &&
+	            type != eval &&
+	            componentParamTypeMap2.get(type) !== typeof defaultValue) {
+	            throw TypeError('Specified type does not match type of defaultValue');
 	        }
 	        $paramConfig.type = type;
 	        $paramConfig.valueСonverters = valueСonverters;
@@ -4483,7 +4574,12 @@ window.innerHTML = (function (document) {
 	            }
 	        },
 	        _a = KEY_RIONITE_COMPONENT_CONSTRUCTOR,
-	        _b[_a] = componentCtor,
+	        Object.defineProperty(_b, _a, {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: componentCtor
+	        }),
 	        _b);
 	    let elProto = elCtor.prototype;
 	    elProto.constructor = elCtor;
@@ -4705,6 +4801,7 @@ window.innerHTML = (function (document) {
 	    return node;
 	}
 
+	var _b, _c, _d;
 	const hasOwn$2 = Object.prototype.hasOwnProperty;
 	const map = Array.prototype.map;
 	let currentComponent = null;
@@ -4723,13 +4820,120 @@ window.innerHTML = (function (document) {
 	class BaseComponent extends cellx.EventEmitter {
 	    constructor(el) {
 	        super();
-	        this._disposables = new Map();
-	        this._parentComponent = null;
-	        this.$inputContent = null;
-	        this.initializationWait = null;
-	        this._attached = false;
-	        this._initialized = false;
-	        this._isReady = false;
+	        Object.defineProperty(this, _b, {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_disposables", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: new Map()
+	        });
+	        Object.defineProperty(this, "_ownerComponent", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_parentComponent", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: null
+	        });
+	        Object.defineProperty(this, "element", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "$context", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "$specifiedParams", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, _c, {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "$inputContent", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: null
+	        });
+	        Object.defineProperty(this, "_bindings", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, _d, {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "initializationWait", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: null
+	        });
+	        Object.defineProperty(this, "_attached", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: false
+	        });
+	        Object.defineProperty(this, "_initialized", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: false
+	        });
+	        Object.defineProperty(this, "_isReady", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: false
+	        });
+	        Object.defineProperty(this, "_readyHooks", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_elementAttachedHooks", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_elementDetachedHooks", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_elementMovedHooks", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
 	        currentComponent = this;
 	        this[KEY_COMPONENT_SELF] = this;
 	        let ctor = this.constructor;
@@ -5208,14 +5412,55 @@ window.innerHTML = (function (document) {
 	        return container.getElementsByClassName(elementBlockNames[elementBlockNames.length - 1] + '__' + name);
 	    }
 	}
-	BaseComponent.EVENT_CHANGE = 'change';
-	BaseComponent.elementExtends = null;
-	BaseComponent.params = null;
-	BaseComponent.i18n = null;
-	BaseComponent.template = null;
-	BaseComponent.listenings = null;
-	BaseComponent.events = null;
-	BaseComponent.domEvents = null;
+	_b = KEY_COMPONENT_SELF, _c = KEY_PARAM_VALUES, _d = KEY_CHILD_COMPONENTS;
+	Object.defineProperty(BaseComponent, "EVENT_CHANGE", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: 'change'
+	});
+	Object.defineProperty(BaseComponent, "elementExtends", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: null
+	});
+	Object.defineProperty(BaseComponent, "params", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: null
+	});
+	Object.defineProperty(BaseComponent, "i18n", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: null
+	});
+	Object.defineProperty(BaseComponent, "template", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: null
+	});
+	Object.defineProperty(BaseComponent, "listenings", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: null
+	});
+	Object.defineProperty(BaseComponent, "events", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: null
+	});
+	Object.defineProperty(BaseComponent, "domEvents", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: null
+	});
 	const handledEvents = [
 	    'change',
 	    'click',
@@ -5341,7 +5586,36 @@ window.innerHTML = (function (document) {
 	exports.RnRepeat = RnRepeat_1 = class RnRepeat extends BaseComponent {
 	    constructor() {
 	        super(...arguments);
-	        this._active = false;
+	        Object.defineProperty(this, "_itemName", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_prevList", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_list", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_$itemsMap", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_active", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: false
+	        });
 	    }
 	    static get bindsInputContent() {
 	        return true;
@@ -5653,7 +5927,12 @@ window.innerHTML = (function (document) {
 	        $itemsMap.clear();
 	    }
 	};
-	exports.RnRepeat.EVENT_CHANGE = Symbol('change');
+	Object.defineProperty(exports.RnRepeat, "EVENT_CHANGE", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: Symbol('change')
+	});
 	exports.RnRepeat = RnRepeat_1 = __decorate([
 	    Component({
 	        elementIs: 'RnRepeat',
@@ -5693,10 +5972,36 @@ window.innerHTML = (function (document) {
 	exports.RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent {
 	    constructor() {
 	        super(...arguments);
-	        this._elseMode = false;
-	        this._nodes = null;
-	        this._childComponents = null;
-	        this._active = false;
+	        Object.defineProperty(this, "_elseMode", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: false
+	        });
+	        Object.defineProperty(this, "_if", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	        Object.defineProperty(this, "_nodes", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: null
+	        });
+	        Object.defineProperty(this, "_childComponents", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: null
+	        });
+	        Object.defineProperty(this, "_active", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: false
+	        });
 	    }
 	    static get bindsInputContent() {
 	        return true;
@@ -5821,7 +6126,12 @@ window.innerHTML = (function (document) {
 	        this._childComponents = null;
 	    }
 	};
-	exports.RnIfThen.EVENT_CHANGE = Symbol('change');
+	Object.defineProperty(exports.RnIfThen, "EVENT_CHANGE", {
+	    enumerable: true,
+	    configurable: true,
+	    writable: true,
+	    value: Symbol('change')
+	});
 	exports.RnIfThen = RnIfThen_1 = __decorate([
 	    Component({
 	        elementIs: 'RnIfThen',
@@ -5844,7 +6154,12 @@ window.innerHTML = (function (document) {
 	exports.RnIfElse = class RnIfElse extends exports.RnIfThen {
 	    constructor() {
 	        super(...arguments);
-	        this._elseMode = true;
+	        Object.defineProperty(this, "_elseMode", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: true
+	        });
 	    }
 	};
 	exports.RnIfElse = __decorate([
@@ -5909,6 +6224,15 @@ window.innerHTML = (function (document) {
 
 	const KEY_SLOTS_CONTENT = Symbol('slotsContent');
 	exports.RnSlot = class RnSlot extends BaseComponent {
+	    constructor() {
+	        super(...arguments);
+	        Object.defineProperty(this, "_childComponents", {
+	            enumerable: true,
+	            configurable: true,
+	            writable: true,
+	            value: void 0
+	        });
+	    }
 	    static get bindsInputContent() {
 	        return true;
 	    }

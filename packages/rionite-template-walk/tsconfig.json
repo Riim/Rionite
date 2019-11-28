@@ -3,7 +3,7 @@
 		"declaration": true,
 		"experimentalDecorators": true,
 		"lib": ["es2017", "dom"],
-		"module": "es2015",
+		"module": "commonjs",
 		"moduleResolution": "node",
 		"newLine": "lf",
 		"noImplicitAny": true,
@@ -13,7 +13,8 @@
 		"preserveConstEnums": true,
 		"strictNullChecks": true,
 		"suppressImplicitAnyIndexErrors": true,
-		"target": "es2017"
+		"target": "es2017",
+		"useDefineForClassFields": true
 	},
 	"files": [
 		"src/index.ts"

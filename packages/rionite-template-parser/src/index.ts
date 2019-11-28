@@ -91,14 +91,11 @@ function normalizeMultilineText(text: string): string {
 }
 
 export class TemplateParser {
-	template: string;
 	_pos: number;
 	_line = 1;
 	_chr: string;
 
-	constructor(template: string) {
-		this.template = template;
-	}
+	constructor(public template: string) {}
 
 	parse(): IBlock {
 		this._pos = 0;

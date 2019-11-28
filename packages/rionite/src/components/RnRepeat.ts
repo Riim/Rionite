@@ -110,12 +110,11 @@ export class RnRepeat extends BaseComponent {
 		return true;
 	}
 
-	paramFor: string;
-	paramIn: TList | null;
-	paramInKeypath: string | null;
-	trackBy: string;
-
-	beforeTemplate: boolean;
+	declare paramFor: string;
+	declare paramIn: TList | null;
+	declare paramInKeypath: string | null;
+	declare trackBy: string;
+	declare beforeTemplate: boolean;
 
 	_itemName: string;
 
