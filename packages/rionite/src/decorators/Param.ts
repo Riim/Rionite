@@ -1,7 +1,4 @@
-import 'reflect-metadata';
 import { BaseComponent, IComponentParamConfig } from '../BaseComponent';
-
-const types = new Set([Boolean, Number, String, Object]);
 
 export function Param(
 	target: Object,
@@ -41,11 +38,6 @@ export function Param(
 	}
 
 	config.property = propertyName;
-
-	if (!config.type) {
-		let type = (Reflect as any).getMetadata('design:type', target, propertyName);
-		config.type = types.has(type) ? type : Object;
-	}
 
 	let ctor = target!.constructor as typeof BaseComponent;
 

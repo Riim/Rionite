@@ -15,7 +15,7 @@ export declare class RnRepeat extends BaseComponent {
     paramFor: string;
     paramIn: TList | null;
     paramInKeypath: string | null;
-    trackBy: string;
+    trackBy: string | null;
     beforeTemplate: boolean;
     _itemName: string;
     _prevList: Array<any>;

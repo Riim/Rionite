@@ -23,16 +23,8 @@ const reKeypath = RegExp(`^${keypathPattern}$`);
 	elementExtends: 'template',
 
 	params: {
-		if: {
-			property: 'paramIf',
-			type: String,
-			required: true,
-			readonly: true
-		},
-		withUndefined: {
-			type: Boolean,
-			readonly: true
-		}
+		if: { property: 'paramIf', type: String, required: true, readonly: true },
+		withUndefined: { default: false, readonly: true }
 	}
 })
 export class RnIfThen extends BaseComponent {

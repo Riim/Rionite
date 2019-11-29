@@ -52,8 +52,7 @@
     "@riim/rionite-snake-case-attribute-name": "^0.38.4",
     "@riim/rionite-template-parser-2": "^0.38.4",
     "cellx": "^1.9.19",
-    "escape-string": "^1.0.2",
-    "reflect-metadata": "^0.1.13"
+    "escape-string": "^1.0.2"
   },
   "jest": {
     "moduleFileExtensions": [

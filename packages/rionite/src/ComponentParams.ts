@@ -34,24 +34,19 @@ function initParam(
 		defaultValue = $paramConfig.default;
 	} else {
 		let paramConfig = $paramConfig.paramConfig;
-		let type: any = typeof paramConfig;
+		let type: Function | undefined;
 
-		defaultValue = component[$paramConfig.property];
-
-		if (defaultValue === undefined) {
-			if (type == 'object') {
-				defaultValue = (paramConfig as IComponentParamConfig).default;
-			} else if (type != 'function') {
-				defaultValue = paramConfig;
-			}
+		if (typeof paramConfig == 'object') {
+			type = (paramConfig as IComponentParamConfig).type;
+			defaultValue = (paramConfig as IComponentParamConfig).default;
+		} else {
+			type = paramConfig;
 		}
 
-		type =
-			(type == 'object' ? (paramConfig as IComponentParamConfig).type : paramConfig) ||
-			Object;
-
-		if (defaultValue !== undefined && type == Object) {
-			type = componentParamTypeMap.get(typeof defaultValue) || Object;
+		if (!type) {
+			type =
+				(defaultValue !== undefined && componentParamTypeMap.get(typeof defaultValue)) ||
+				Object;
 		}
 
 		valueСonverters = componentParamValueСonverters.get(type);
@@ -64,7 +59,7 @@ function initParam(
 			defaultValue !== undefined &&
 			type != Object &&
 			type != eval &&
-			componentParamTypeMap2.get(type) !== typeof defaultValue
+			componentParamTypeMap2.get(type) != typeof defaultValue
 		) {
 			throw TypeError('Specified type does not match type of defaultValue');
 		}

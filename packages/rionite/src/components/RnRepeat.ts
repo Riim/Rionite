@@ -77,30 +77,11 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 	elementExtends: 'template',
 
 	params: {
-		for: {
-			property: 'paramFor',
-			type: String,
-			required: true,
-			readonly: true
-		},
-		in: {
-			property: 'paramIn',
-			type: Object,
-			readonly: true
-		},
-		inKeypath: {
-			property: 'paramInKeypath',
-			type: String,
-			readonly: true
-		},
-		trackBy: {
-			type: String,
-			readonly: true
-		},
-		beforeTemplate: {
-			type: Boolean,
-			readonly: true
-		}
+		for: { property: 'paramFor', type: String, required: true, readonly: true },
+		in: { property: 'paramIn', readonly: true },
+		inKeypath: { property: 'paramInKeypath', type: String, readonly: true },
+		trackBy: { type: String, readonly: true },
+		beforeTemplate: { default: false, readonly: true }
 	}
 })
 export class RnRepeat extends BaseComponent {
@@ -113,7 +94,7 @@ export class RnRepeat extends BaseComponent {
 	declare paramFor: string;
 	declare paramIn: TList | null;
 	declare paramInKeypath: string | null;
-	declare trackBy: string;
+	declare trackBy: string | null;
 	declare beforeTemplate: boolean;
 
 	_itemName: string;

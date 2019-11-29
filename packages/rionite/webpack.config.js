@@ -56,7 +56,6 @@ module.exports = (env = {}) => {
 			'@riim/next-uid',
 			'cellx',
 			// 'escape-string'
-			'reflect-metadata'
 		],
 
 		plugins,

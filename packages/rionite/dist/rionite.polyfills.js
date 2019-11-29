@@ -1660,8 +1660,8 @@ window.innerHTML = (function (document) {
 })(document);
 
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('cellx'), require('@riim/next-uid'), require('reflect-metadata')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'cellx', '@riim/next-uid', 'reflect-metadata'], factory) :
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('cellx'), require('@riim/next-uid')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'cellx', '@riim/next-uid'], factory) :
 	(global = global || self, factory(global.rionite = {}, global.cellx, global['@riim/next-uid']));
 }(this, (function (exports, cellx, nextUid) { 'use strict';
 
@@ -4069,21 +4069,18 @@ window.innerHTML = (function (document) {
 	    }
 	    else {
 	        let paramConfig = $paramConfig.paramConfig;
-	        let type = typeof paramConfig;
-	        defaultValue = component[$paramConfig.property];
-	        if (defaultValue === undefined) {
-	            if (type == 'object') {
-	                defaultValue = paramConfig.default;
-	            }
-	            else if (type != 'function') {
-	                defaultValue = paramConfig;
-	            }
+	        let type;
+	        if (typeof paramConfig == 'object') {
+	            type = paramConfig.type;
+	            defaultValue = paramConfig.default;
 	        }
-	        type =
-	            (type == 'object' ? paramConfig.type : paramConfig) ||
-	                Object;
-	        if (defaultValue !== undefined && type == Object) {
-	            type = componentParamTypeMap.get(typeof defaultValue) || Object;
+	        else {
+	            type = paramConfig;
+	        }
+	        if (!type) {
+	            type =
+	                (defaultValue !== undefined && componentParamTypeMap.get(typeof defaultValue)) ||
+	                    Object;
 	        }
 	        valueСonverters = componentParamValueСonverters.get(type);
 	        if (!valueСonverters) {
@@ -4092,7 +4089,7 @@ window.innerHTML = (function (document) {
 	        if (defaultValue !== undefined &&
 	            type != Object &&
 	            type != eval &&
-	            componentParamTypeMap2.get(type) !== typeof defaultValue) {
+	            componentParamTypeMap2.get(type) != typeof defaultValue) {
 	            throw TypeError('Specified type does not match type of defaultValue');
 	        }
 	        $paramConfig.type = type;
@@ -4626,7 +4623,6 @@ window.innerHTML = (function (document) {
 	    };
 	}
 
-	const types = new Set([Boolean, Number, String, Object]);
 	function Param(target, propertyName, _propertyDesc, name, config) {
 	    if (typeof propertyName != 'string') {
 	        if (target && typeof target != 'string') {
@@ -4645,10 +4641,6 @@ window.innerHTML = (function (document) {
 	        config = { type: config };
 	    }
 	    config.property = propertyName;
-	    if (!config.type) {
-	        let type = Reflect.getMetadata('design:type', target, propertyName);
-	        config.type = types.has(type) ? type : Object;
-	    }
 	    let ctor = target.constructor;
 	    ((ctor.hasOwnProperty('params') && ctor.params) || (ctor.params = {}))[name || propertyName] = config;
 	}
@@ -5938,30 +5930,11 @@ window.innerHTML = (function (document) {
 	        elementIs: 'RnRepeat',
 	        elementExtends: 'template',
 	        params: {
-	            for: {
-	                property: 'paramFor',
-	                type: String,
-	                required: true,
-	                readonly: true
-	            },
-	            in: {
-	                property: 'paramIn',
-	                type: Object,
-	                readonly: true
-	            },
-	            inKeypath: {
-	                property: 'paramInKeypath',
-	                type: String,
-	                readonly: true
-	            },
-	            trackBy: {
-	                type: String,
-	                readonly: true
-	            },
-	            beforeTemplate: {
-	                type: Boolean,
-	                readonly: true
-	            }
+	            for: { property: 'paramFor', type: String, required: true, readonly: true },
+	            in: { property: 'paramIn', readonly: true },
+	            inKeypath: { property: 'paramInKeypath', type: String, readonly: true },
+	            trackBy: { type: String, readonly: true },
+	            beforeTemplate: { default: false, readonly: true }
 	        }
 	    })
 	], exports.RnRepeat);
@@ -6137,16 +6110,8 @@ window.innerHTML = (function (document) {
 	        elementIs: 'RnIfThen',
 	        elementExtends: 'template',
 	        params: {
-	            if: {
-	                property: 'paramIf',
-	                type: String,
-	                required: true,
-	                readonly: true
-	            },
-	            withUndefined: {
-	                type: Boolean,
-	                readonly: true
-	            }
+	            if: { property: 'paramIf', type: String, required: true, readonly: true },
+	            withUndefined: { default: false, readonly: true }
 	        }
 	    })
 	], exports.RnIfThen);
@@ -6383,27 +6348,11 @@ window.innerHTML = (function (document) {
 	    Component({
 	        elementIs: 'RnSlot',
 	        params: {
-	            name: {
-	                type: String,
-	                readonly: true
-	            },
-	            forTag: {
-	                type: String,
-	                readonly: true
-	            },
-	            for: {
-	                property: 'paramFor',
-	                type: String,
-	                readonly: true
-	            },
-	            cloneContent: {
-	                default: false,
-	                readonly: true
-	            },
-	            getContext: {
-	                type: Object,
-	                readonly: true
-	            }
+	            name: { type: String, readonly: true },
+	            forTag: { type: String, readonly: true },
+	            for: { property: 'paramFor', type: String, readonly: true },
+	            cloneContent: { default: false, readonly: true },
+	            getContext: { readonly: true }
 	        }
 	    })
 	], exports.RnSlot);
