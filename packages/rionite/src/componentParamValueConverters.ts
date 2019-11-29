@@ -58,14 +58,11 @@ export const componentParamValue–°onverters = new Map<any, IComponentParamValue–
 	[
 		Object,
 		{
-			toData: (
-				rawValue: string | null,
-				defaultValue: object | null | undefined,
-				el: Element
-			): object | null => {
+			toData: (rawValue: string | null, defaultValue: any, el: Element): object | null => {
 				if (rawValue) {
 					let value =
-						el[KEY_COMPONENT_PARAM_VALUES] && el[KEY_COMPONENT_PARAM_VALUES].get(rawValue);
+						el[KEY_COMPONENT_PARAM_VALUES] &&
+						el[KEY_COMPONENT_PARAM_VALUES].get(rawValue);
 
 					if (!value) {
 						throw new TypeError('Value is not an object');
@@ -74,7 +71,7 @@ export const componentParamValue–°onverters = new Map<any, IComponentParamValue–
 					return value;
 				}
 
-				if (!defaultValue) {
+				if (defaultValue == null) {
 					return null;
 				}
 
@@ -103,7 +100,11 @@ export const componentParamValue–°onverters = new Map<any, IComponentParamValue–
 					return null;
 				}
 
-				if (defaultValue && typeof defaultValue == 'object' && (defaultValue as any).clone) {
+				if (
+					defaultValue &&
+					typeof defaultValue == 'object' &&
+					(defaultValue as any).clone
+				) {
 					return (defaultValue as any).clone.length
 						? (defaultValue as any).clone(true)
 						: (defaultValue as any).clone();

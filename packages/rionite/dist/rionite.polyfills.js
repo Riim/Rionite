@@ -2239,13 +2239,14 @@ window.innerHTML = (function (document) {
 	        {
 	            toData: (rawValue, defaultValue, el) => {
 	                if (rawValue) {
-	                    let value = el[KEY_COMPONENT_PARAM_VALUES] && el[KEY_COMPONENT_PARAM_VALUES].get(rawValue);
+	                    let value = el[KEY_COMPONENT_PARAM_VALUES] &&
+	                        el[KEY_COMPONENT_PARAM_VALUES].get(rawValue);
 	                    if (!value) {
 	                        throw new TypeError('Value is not an object');
 	                    }
 	                    return value;
 	                }
-	                if (!defaultValue) {
+	                if (defaultValue == null) {
 	                    return null;
 	                }
 	                if (typeof defaultValue == 'object' && defaultValue.clone) {
@@ -2268,7 +2269,9 @@ window.innerHTML = (function (document) {
 	                if (defaultValue == null) {
 	                    return null;
 	                }
-	                if (defaultValue && typeof defaultValue == 'object' && defaultValue.clone) {
+	                if (defaultValue &&
+	                    typeof defaultValue == 'object' &&
+	                    defaultValue.clone) {
 	                    return defaultValue.clone.length
 	                        ? defaultValue.clone(true)
 	                        : defaultValue.clone();
