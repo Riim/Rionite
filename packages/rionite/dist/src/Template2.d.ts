@@ -68,7 +68,7 @@ export declare class Template {
     static attributeTransformers: Record<string, (el: IElement, attr: IElementAttribute) => IElement>;
     _embedded: boolean;
     parent: Template | null;
-    template: TParserContent;
+    template: TParserContent | null;
     initialized: boolean;
     block: IBlock | null;
     _elements: Record<string, IElement>;

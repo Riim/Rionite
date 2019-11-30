@@ -135,7 +135,7 @@ export class Template {
 	_embedded: boolean;
 
 	parent: Template | null;
-	template: string;
+	template: string | null;
 
 	_pos: number;
 	_chr: string;
@@ -161,8 +161,12 @@ export class Template {
 			this.template = template;
 			this.block = null;
 		} else {
+			this.template = null;
 			this.block = template;
-			this._elements = template.elements;
+
+			if (this._embedded) {
+				this._elements = template.elements;
+			}
 		}
 
 		if (embedded) {
@@ -247,7 +251,7 @@ export class Template {
 		}
 
 		this._pos = 0;
-		this._chr = this.template.charAt(0);
+		this._chr = this.template!.charAt(0);
 
 		this._skipWhitespacesAndComments();
 
@@ -304,8 +308,8 @@ export class Template {
 				default: {
 					let chr = this._chr;
 
-					if (chr == 'd' && this.template.substr(this._pos, 9) == 'debugger!') {
-						this._chr = this.template.charAt((this._pos += 9));
+					if (chr == 'd' && this.template!.substr(this._pos, 9) == 'debugger!') {
+						this._chr = this.template!.charAt((this._pos += 9));
 						(targetContent || (targetContent = [])).push({
 							nodeType: NodeType.DEBUGGER_CALL
 						} as IDebuggerCall);
@@ -898,7 +902,7 @@ export class Template {
 
 	_readSuperCall(defaultElName: string | null): ISuperCall | null {
 		reSuperCall.lastIndex = this._pos;
-		let match = reSuperCall.exec(this.template);
+		let match = reSuperCall.exec(this.template!);
 
 		if (match) {
 			if (!this.parent) {
@@ -917,7 +921,7 @@ export class Template {
 				this._throwError(`Element "${elName}" is not defined`);
 			}
 
-			this._chr = this.template.charAt((this._pos = reSuperCall.lastIndex));
+			this._chr = this.template!.charAt((this._pos = reSuperCall.lastIndex));
 
 			return {
 				nodeType: NodeType.SUPER_CALL,
@@ -931,10 +935,10 @@ export class Template {
 
 	_readName(reName: RegExp): string | null {
 		reName.lastIndex = this._pos;
-		let match = reName.exec(this.template);
+		let match = reName.exec(this.template!);
 
 		if (match) {
-			this._chr = this.template.charAt((this._pos = reName.lastIndex));
+			this._chr = this.template!.charAt((this._pos = reName.lastIndex));
 			return match[0];
 		}
 
@@ -961,7 +965,7 @@ export class Template {
 
 				if (chr == 'x' || chr == 'u') {
 					let pos = this._pos + 1;
-					let code = parseInt(this.template.slice(pos, pos + (chr == 'x' ? 2 : 4)), 16);
+					let code = parseInt(this.template!.slice(pos, pos + (chr == 'x' ? 2 : 4)), 16);
 
 					if (!isFinite(code)) {
 						this._throwError(
@@ -971,7 +975,7 @@ export class Template {
 					}
 
 					str += String.fromCharCode(code);
-					chr = this._chr = this.template.charAt(
+					chr = this._chr = this.template!.charAt(
 						(this._pos = pos + (chr == 'x' ? 2 : 4))
 					);
 				} else if (escapee.has(chr)) {
@@ -1004,7 +1008,7 @@ export class Template {
 
 		loop1: for (;;) {
 			if (chr == '/') {
-				switch (this.template.charAt(this._pos + 1)) {
+				switch (this.template!.charAt(this._pos + 1)) {
 					case '/': {
 						this._next();
 						while ((chr = this._next()) && chr != '\n' && chr != '\r') {}
@@ -1055,7 +1059,7 @@ export class Template {
 		// 	this._throwError(`Expected "${current}" instead of "${this._chr}"`);
 		// }
 
-		return (this._chr = this.template.charAt(++this._pos));
+		return (this._chr = this.template!.charAt(++this._pos));
 	}
 
 	_throwError(msg: string, pos = this._pos) {
@@ -1064,8 +1068,7 @@ export class Template {
 		throw new SyntaxError(
 			msg +
 				'\n' +
-				this.template
-					.slice(pos < 40 ? 0 : pos - 40, pos + 20)
+				this.template!.slice(pos < 40 ? 0 : pos - 40, pos + 20)
 					.replace(/\t/g, ' ')
 					.replace(/\n|\r\n?/g, match => {
 						if (match.length == 2) {

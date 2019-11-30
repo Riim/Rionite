@@ -24,7 +24,7 @@ const reKeypath = RegExp(`^${keypathPattern}$`);
 
 	params: {
 		if: { property: 'paramIf', type: String, required: true, readonly: true },
-		withUndefined: { default: false, readonly: true }
+		withUndefined: { type: Boolean, readonly: true }
 	}
 })
 export class RnIfThen extends BaseComponent {
@@ -34,8 +34,10 @@ export class RnIfThen extends BaseComponent {
 		return true;
 	}
 
-	declare paramIf: string;
-	declare withUndefined: boolean;
+	$context: Record<string, any>;
+
+	paramIf: string;
+	withUndefined: boolean;
 
 	_elseMode = false;
 
@@ -121,7 +123,7 @@ export class RnIfThen extends BaseComponent {
 			let content = this.element[KEY_CONTENT_TEMPLATE]!.render(
 				null,
 				this.ownerComponent,
-				this.$context!,
+				this.$context,
 				contentBindingResult
 			);
 			let childComponents = contentBindingResult[0];

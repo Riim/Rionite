@@ -119,7 +119,7 @@ export class Template {
 	_embedded: boolean;
 
 	parent: Template | null;
-	template: TParserContent;
+	template: TParserContent | null;
 
 	initialized = false;
 	block: IBlock | null;
@@ -146,8 +146,12 @@ export class Template {
 			this.template = template;
 			this.block = null;
 		} else {
+			this.template = null;
 			this.block = template;
-			this._elements = template.elements;
+
+			if (this._embedded) {
+				this._elements = template.elements;
+			}
 		}
 
 		if (embedded) {
@@ -239,7 +243,7 @@ export class Template {
 
 		this._readContent(
 			this.parent ? null : block.elements['@root'].content,
-			this.template,
+			this.template!,
 			false,
 			null,
 			component && (component.constructor as typeof BaseComponent)

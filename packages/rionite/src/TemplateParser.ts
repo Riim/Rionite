@@ -67,8 +67,8 @@ const reElementName = /[a-zA-Z][\-\w]*/gy;
 const reAttributeName = /[^\s'">/=,)]+/gy;
 const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
 
-const reTrimStartLine = /^[ \t]+/gm;
-const reTrimEndLine = /[ \t]+$/gm;
+const reTrimStartLine = /^[\x20\t]+/gm;
+const reTrimEndLine = /[\x20\t]+$/gm;
 
 function normalizeMultilineText(text: string): string {
 	return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');

@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "typescript": "^3.7.3-insiders.20191123"
+    "typescript": "^3.7.2"
   }
 }

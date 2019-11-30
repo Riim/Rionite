@@ -81,7 +81,7 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 		in: { property: 'paramIn', readonly: true },
 		inKeypath: { property: 'paramInKeypath', type: String, readonly: true },
 		trackBy: { type: String, readonly: true },
-		beforeTemplate: { default: false, readonly: true }
+		beforeTemplate: { type: Boolean, readonly: true }
 	}
 })
 export class RnRepeat extends BaseComponent {
@@ -91,11 +91,13 @@ export class RnRepeat extends BaseComponent {
 		return true;
 	}
 
-	declare paramFor: string;
-	declare paramIn: TList | null;
-	declare paramInKeypath: string | null;
-	declare trackBy: string | null;
-	declare beforeTemplate: boolean;
+	$context: Record<string, any>;
+
+	paramFor: string;
+	paramIn: TList | null;
+	paramInKeypath: string | null;
+	trackBy: string | null;
+	beforeTemplate: boolean;
 
 	_itemName: string;
 
@@ -357,7 +359,6 @@ export class RnRepeat extends BaseComponent {
 					let itemCell = new Cell(null, { value: item });
 					let indexCell = new Cell(i);
 
-					let context = this.$context!;
 					let contentBindingResult: [
 						Array<BaseComponent> | null,
 						Array<IBinding> | null,
@@ -366,7 +367,7 @@ export class RnRepeat extends BaseComponent {
 					let content = this.element[KEY_CONTENT_TEMPLATE]!.render(
 						null,
 						this.ownerComponent,
-						Object.create(context, {
+						Object.create(this.$context, {
 							[this._itemName]: {
 								configurable: true,
 								enumerable: true,

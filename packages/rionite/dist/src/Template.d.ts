@@ -68,7 +68,7 @@ export declare class Template {
     static attributeTransformers: Record<string, (el: IElement, attr: IElementAttribute) => IElement>;
     _embedded: boolean;
     parent: Template | null;
-    template: string;
+    template: string | null;
     _pos: number;
     _chr: string;
     initialized: boolean;

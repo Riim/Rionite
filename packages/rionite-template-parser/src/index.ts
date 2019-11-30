@@ -83,19 +83,23 @@ const reElementName = /[a-zA-Z][\-\w]*/gy;
 const reAttributeName = /[^\s'">/=,)]+/gy;
 const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
 
-const reTrimStartLine = /^[ \t]+/gm;
-const reTrimEndLine = /[ \t]+$/gm;
+const reTrimStartLine = /^[\x20\t]+/gm;
+const reTrimEndLine = /[\x20\t]+$/gm;
 
 function normalizeMultilineText(text: string): string {
 	return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
 }
 
 export class TemplateParser {
+	template: string;
+
 	_pos: number;
 	_line = 1;
 	_chr: string;
 
-	constructor(public template: string) {}
+	constructor(template: string) {
+		this.template = template;
+	}
 
 	parse(): IBlock {
 		this._pos = 0;

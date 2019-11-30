@@ -19,7 +19,7 @@ const KEY_SLOTS_CONTENT = Symbol('slotsContent');
 		name: { type: String, readonly: true },
 		forTag: { type: String, readonly: true },
 		for: { property: 'paramFor', type: String, readonly: true },
-		cloneContent: { default: false, readonly: true },
+		cloneContent: { type: Boolean, readonly: true },
 		getContext: { readonly: true }
 	}
 })
@@ -28,13 +28,13 @@ export class RnSlot extends BaseComponent {
 		return true;
 	}
 
-	declare $context: Record<string, any>;
+	$context: Record<string, any>;
 
-	declare name: string | null;
-	declare forTag: string | null;
-	declare paramFor: string | null;
-	declare cloneContent: boolean;
-	declare getContext:
+	name: string | null;
+	forTag: string | null;
+	paramFor: string | null;
+	cloneContent: boolean;
+	getContext:
 		| ((this: BaseComponent, context: Record<string, any>, slot: RnSlot) => Record<string, any>)
 		| null;
 

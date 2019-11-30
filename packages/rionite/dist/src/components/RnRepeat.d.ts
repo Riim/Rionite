@@ -12,6 +12,7 @@ export declare type T$ItemsMap = Map<any, Array<I$Item>>;
 export declare class RnRepeat extends BaseComponent {
     static EVENT_CHANGE: symbol;
     static get bindsInputContent(): boolean;
+    $context: Record<string, any>;
     paramFor: string;
     paramIn: TList | null;
     paramInKeypath: string | null;

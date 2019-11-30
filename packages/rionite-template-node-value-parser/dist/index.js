@@ -38,30 +38,7 @@ const reRegExpModifiers = /[gimyu]+/gy;
 const reVacuum = /null|undefined|void 0/gy;
 class TemplateNodeValueParser {
     constructor(templateNodeValue) {
-        Object.defineProperty(this, "templateNodeValue", {
-            enumerable: true,
-            configurable: true,
-            writable: true,
-            value: templateNodeValue
-        });
-        Object.defineProperty(this, "_pos", {
-            enumerable: true,
-            configurable: true,
-            writable: true,
-            value: void 0
-        });
-        Object.defineProperty(this, "_chr", {
-            enumerable: true,
-            configurable: true,
-            writable: true,
-            value: void 0
-        });
-        Object.defineProperty(this, "result", {
-            enumerable: true,
-            configurable: true,
-            writable: true,
-            value: void 0
-        });
+        this.templateNodeValue = templateNodeValue;
     }
     parse(index) {
         let templateNodeValue = this.templateNodeValue;

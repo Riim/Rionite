@@ -3,6 +3,7 @@ import { BaseComponent } from '../BaseComponent';
 export declare class RnIfThen extends BaseComponent {
     static EVENT_CHANGE: symbol;
     static get bindsInputContent(): boolean;
+    $context: Record<string, any>;
     paramIf: string;
     withUndefined: boolean;
     _elseMode: boolean;

@@ -246,10 +246,10 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return this._isReady;
 	}
 
-	_readyHooks: Array<THook> | undefined;
-	_elementAttachedHooks: Array<THook> | undefined;
-	_elementDetachedHooks: Array<THook> | undefined;
-	_elementMovedHooks: Array<THook> | undefined;
+	_readyHooks: Array<THook> | null = null;
+	_elementAttachedHooks: Array<THook> | null = null;
+	_elementDetachedHooks: Array<THook> | null = null;
+	_elementMovedHooks: Array<THook> | null = null;
 
 	constructor(el?: HTMLElement) {
 		super();

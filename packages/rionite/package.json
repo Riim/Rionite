@@ -36,7 +36,7 @@
     "ts-jest": "^24.2.0",
     "tslint": "^5.20.1",
     "tslint-loader": "^3.6.0",
-    "typescript": "^3.7.3-insiders.20191123",
+    "typescript": "^3.7.2",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
   },
@@ -51,7 +51,7 @@
     "@riim/pascalize": "^1.0.1",
     "@riim/rionite-snake-case-attribute-name": "^0.38.4",
     "@riim/rionite-template-parser-2": "^0.38.4",
-    "cellx": "^1.9.19",
+    "cellx": "^1.9.20",
     "escape-string": "^1.0.2"
   },
   "jest": {

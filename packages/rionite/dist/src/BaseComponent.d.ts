@@ -102,10 +102,10 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     get initialized(): boolean;
     _isReady: boolean;
     get isReady(): boolean;
-    _readyHooks: Array<THook> | undefined;
-    _elementAttachedHooks: Array<THook> | undefined;
-    _elementDetachedHooks: Array<THook> | undefined;
-    _elementMovedHooks: Array<THook> | undefined;
+    _readyHooks: Array<THook> | null;
+    _elementAttachedHooks: Array<THook> | null;
+    _elementDetachedHooks: Array<THook> | null;
+    _elementMovedHooks: Array<THook> | null;
     constructor(el?: HTMLElement);
     onChange(listener: TListener, context?: any): this;
     offChange(listener: TListener, context?: any): this;
