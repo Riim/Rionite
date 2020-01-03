@@ -52,3 +52,4 @@ export {
 	RnRepeat
 } from './components/RnRepeat';
 export { RnSlot } from './components/RnSlot';
+export { RnHtml } from './components/RnHtml';

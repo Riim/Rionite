@@ -1,10 +1,6 @@
 import { BaseComponent, IComponentParamConfig } from '../BaseComponent';
 
-export function Param(
-	target: Object,
-	propertyName: string,
-	propertyDesc?: PropertyDescriptor
-): void;
+export function Param(target: any, propertyName: string, propertyDesc?: PropertyDescriptor): void;
 export function Param(
 	name?: string,
 	config?: IComponentParamConfig | Function

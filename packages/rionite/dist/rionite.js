@@ -4391,6 +4391,29 @@
 	    })
 	], exports.RnSlot);
 
+	exports.RnHtml = class RnHtml extends BaseComponent {
+	    ready() {
+	        this._setHtml();
+	    }
+	    elementAttached() {
+	        this.listenTo(this, 'change:html', this._onHtmlChange);
+	    }
+	    _onHtmlChange() {
+	        this._setHtml();
+	    }
+	    _setHtml() {
+	        this.element.innerHTML = this.html;
+	    }
+	};
+	exports.RnHtml = __decorate([
+	    Component({
+	        elementIs: 'RnHtml',
+	        params: {
+	            html: { type: String, required: true }
+	        }
+	    })
+	], exports.RnHtml);
+
 	exports.BaseComponent = BaseComponent;
 	exports.Callback = Callback;
 	exports.Component = Component;

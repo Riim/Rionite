@@ -1,13 +1,13 @@
 import { TContent } from '@riim/rionite-template-parser-2';
 import { IEvent } from 'cellx';
-import { BaseComponent, IComponentEvents } from '../BaseComponent';
+import { BaseComponent, IComponentEvents, IComponentParamConfig } from '../BaseComponent';
 import { registerComponent } from '../registerComponent';
 import { IBlock, Template } from '../Template2';
 
 export function Component<T extends BaseComponent>(config?: {
 	elementIs?: string;
 	elementExtends?: string | null;
-	params?: Record<string, any> | null;
+	params?: Record<string, IComponentParamConfig | Function> | null;
 	i18n?: Record<string, any> | null;
 	template?: string | TContent | IBlock | Template | null;
 	events?: IComponentEvents<T, IEvent<BaseComponent>> | null;
