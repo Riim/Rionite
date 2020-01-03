@@ -407,7 +407,7 @@ class TemplateParser {
     }
     _throwError(msg, pos = this._pos) {
         let n = pos < 40 ? 40 - pos : 0;
-        throw new SyntaxError(msg +
+        throw SyntaxError(msg +
             '\n' +
             this.template
                 .slice(pos < 40 ? 0 : pos - 40, pos + 20)

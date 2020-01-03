@@ -574,7 +574,7 @@ export class TemplateParser {
 	_throwError(msg: string, pos = this._pos) {
 		let n = pos < 40 ? 40 - pos : 0;
 
-		throw new SyntaxError(
+		throw SyntaxError(
 			msg +
 				'\n' +
 				this.template

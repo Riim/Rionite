@@ -143,9 +143,7 @@ export const ElementProtoMixin = {
 
 			if ($paramConfig.readonly) {
 				if (observedAttributesFeature) {
-					throw new TypeError(
-						`Cannot write to readonly parameter "${$paramConfig.name}"`
-					);
+					throw TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
 				}
 			} else {
 				let valueCell: Cell | null = component[$paramConfig.property + 'Cell'];

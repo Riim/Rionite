@@ -33,12 +33,12 @@ export interface IComponentParamConfig {
 export interface I$ComponentParamConfig {
     name: string;
     property: string;
-    type: Function | undefined;
-    valueСonverters: IComponentParamValueСonverters | undefined;
+    type: Function;
+    valueСonverters: IComponentParamValueСonverters;
     default: any;
     required: boolean;
     readonly: boolean;
-    paramConfig: any;
+    paramConfig: IComponentParamConfig | Function;
 }
 export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent> extends HTMLElement {
     $component?: T | null;

@@ -1065,7 +1065,7 @@ export class Template {
 	_throwError(msg: string, pos = this._pos) {
 		let n = pos < 40 ? 40 - pos : 0;
 
-		throw new SyntaxError(
+		throw SyntaxError(
 			msg +
 				'\n' +
 				this.template!.slice(pos < 40 ? 0 : pos - 40, pos + 20)

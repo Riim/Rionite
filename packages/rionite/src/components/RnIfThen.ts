@@ -65,7 +65,7 @@ export class RnIfThen extends BaseComponent {
 				let ifAST = parseTemplateNodeValue(`{${if_}}`);
 
 				if (!ifAST || ifAST.length != 1) {
-					throw new SyntaxError(`Invalid value in parameter "if" (${if_})`);
+					throw SyntaxError(`Invalid value in parameter "if" (${if_})`);
 				}
 
 				getIfValue = compileBinding(ifAST, if_);

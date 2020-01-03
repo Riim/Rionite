@@ -22,7 +22,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.4"
   },
   "dependencies": {
     "@riim/kebab-case": "^1.0.0"

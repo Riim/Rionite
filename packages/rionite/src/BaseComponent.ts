@@ -71,15 +71,15 @@ export interface I$ComponentParamConfig {
 	name: string;
 	property: string;
 
-	type: Function | undefined;
-	valueСonverters: IComponentParamValueСonverters | undefined;
+	type: Function;
+	valueСonverters: IComponentParamValueСonverters;
 
 	default: any;
 
 	required: boolean;
 	readonly: boolean;
 
-	paramConfig: any;
+	paramConfig: IComponentParamConfig | Function;
 }
 
 export interface IPossiblyComponentElement<T extends BaseComponent = BaseComponent>
@@ -261,7 +261,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		let ctor = this.constructor as typeof BaseComponent;
 
 		if (!elementConstructors.has(ctor.elementIs)) {
-			throw new TypeError('Component must be registered');
+			throw TypeError('Component must be registered');
 		}
 
 		if (!el) {

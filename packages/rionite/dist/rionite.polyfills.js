@@ -1726,10 +1726,10 @@ window.innerHTML = (function (document) {
 
 	var dist$1 = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
-	let reCamelCase = /^_?[a-z][0-9a-z]*$/i;
-	let reLetters = /[A-Z][^A-Z]/g;
-	let reLetters2 = /[A-Z]{2,}/g;
-	let cache = new Map();
+	const reCamelCase = /^_?[a-z][0-9a-z]*$/i;
+	const reLetters = /[A-Z][^A-Z]/g;
+	const reLetters2 = /[A-Z]{2,}/g;
+	const cache = new Map();
 	function snakeCaseAttributeName(str, useCache) {
 	    let value;
 	    return ((useCache && cache.get(str)) ||
@@ -1773,8 +1773,8 @@ window.innerHTML = (function (document) {
 	const reElementName = /[a-zA-Z][\-\w]*/gy;
 	const reAttributeName = /[^\s'">/=,)]+/gy;
 	const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
-	const reTrimStartLine = /^[ \t]+/gm;
-	const reTrimEndLine = /[ \t]+$/gm;
+	const reTrimStartLine = /^[\x20\t]+/gm;
+	const reTrimEndLine = /[\x20\t]+$/gm;
 	function normalizeMultilineText(text) {
 	    return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
 	}
@@ -2072,7 +2072,7 @@ window.innerHTML = (function (document) {
 	    }
 	    _throwError(msg, pos = this._pos) {
 	        let n = pos < 40 ? 40 - pos : 0;
-	        throw new SyntaxError(msg +
+	        throw SyntaxError(msg +
 	            '\n' +
 	            this.template
 	                .slice(pos < 40 ? 0 : pos - 40, pos + 20)
@@ -2242,7 +2242,7 @@ window.innerHTML = (function (document) {
 	                    let value = el[KEY_COMPONENT_PARAM_VALUES] &&
 	                        el[KEY_COMPONENT_PARAM_VALUES].get(rawValue);
 	                    if (!value) {
-	                        throw new TypeError('Value is not an object');
+	                        throw TypeError('Value is not an object');
 	                    }
 	                    return value;
 	                }
@@ -3972,77 +3972,7 @@ window.innerHTML = (function (document) {
 	unwrapExports(dist$6);
 	var dist_1$6 = dist$6.pascalize;
 
-	const componentParamTypeMap = new Map([
-	    ['boolean', Boolean],
-	    ['number', Number],
-	    ['string', String]
-	]);
-	const componentParamTypeMap2 = new Map([
-	    [Boolean, 'boolean'],
-	    [Number, 'number'],
-	    [String, 'string']
-	]);
 	const KEY_COMPONENT_PARAMS_INITED = Symbol('componentParamsInited');
-	function initParam(component, $paramConfig, name, $specifiedParams) {
-	    if ($paramConfig === null) {
-	        return;
-	    }
-	    let valueСonverters = $paramConfig.valueСonverters;
-	    let defaultValue;
-	    if (valueСonverters) {
-	        defaultValue = $paramConfig.default;
-	    }
-	    else {
-	        let paramConfig = $paramConfig.paramConfig;
-	        let type;
-	        if (typeof paramConfig == 'object') {
-	            type = paramConfig.type;
-	            defaultValue = paramConfig.default;
-	        }
-	        else {
-	            type = paramConfig;
-	        }
-	        if (!type) {
-	            type =
-	                (defaultValue !== undefined && componentParamTypeMap.get(typeof defaultValue)) ||
-	                    Object;
-	        }
-	        valueСonverters = componentParamValueСonverters.get(type);
-	        if (!valueСonverters) {
-	            throw new TypeError('Unsupported parameter type');
-	        }
-	        if (defaultValue !== undefined &&
-	            type != Object &&
-	            type != eval &&
-	            componentParamTypeMap2.get(type) != typeof defaultValue) {
-	            throw TypeError('Specified type does not match type of defaultValue');
-	        }
-	        $paramConfig.type = type;
-	        $paramConfig.valueСonverters = valueСonverters;
-	        $paramConfig.default = defaultValue;
-	    }
-	    let el = component.element;
-	    let snakeCaseName = dist_1$1(name, true);
-	    let rawValue = el.getAttribute(snakeCaseName);
-	    if (rawValue === null) {
-	        if ($paramConfig.required) {
-	            throw new TypeError(`Parameter "${name}" is required`);
-	        }
-	        if (defaultValue != null && defaultValue !== false && valueСonverters.toString) {
-	            el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue));
-	        }
-	    }
-	    else if ($specifiedParams) {
-	        $specifiedParams.add(name);
-	    }
-	    let value = valueСonverters.toData(rawValue, defaultValue, el);
-	    if (component[$paramConfig.property + 'Cell']) {
-	        component[$paramConfig.property + 'Cell'].set(value);
-	    }
-	    else {
-	        component[KEY_PARAM_VALUES].set(name, value);
-	    }
-	}
 	const ComponentParams = {
 	    init(component) {
 	        if (component[KEY_COMPONENT_PARAMS_INITED]) {
@@ -4055,12 +3985,33 @@ window.innerHTML = (function (document) {
 	        else {
 	            $specifiedParams = component.$specifiedParams = new Set();
 	        }
-	        let paramsConfig = component.constructor.params;
-	        if (paramsConfig) {
-	            let $paramsConfig = component.constructor[KEY_PARAMS_CONFIG];
-	            for (let name in paramsConfig) {
-	                if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
-	                    initParam(component, $paramsConfig.get(name), name, $specifiedParams);
+	        let $paramsConfig = component.constructor[KEY_PARAMS_CONFIG];
+	        if ($paramsConfig) {
+	            for (let [name, $paramConfig] of $paramsConfig) {
+	                let valueСonverters = $paramConfig.valueСonverters;
+	                let defaultValue = $paramConfig.default;
+	                let el = component.element;
+	                let snakeCaseName = dist_1$1(name, true);
+	                let rawValue = el.getAttribute(snakeCaseName);
+	                if (rawValue === null) {
+	                    if ($paramConfig.required) {
+	                        throw TypeError(`Parameter "${name}" is required`);
+	                    }
+	                    if (defaultValue != null &&
+	                        defaultValue !== false &&
+	                        valueСonverters.toString) {
+	                        el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue));
+	                    }
+	                }
+	                else if ($specifiedParams) {
+	                    $specifiedParams.add(name);
+	                }
+	                let value = valueСonverters.toData(rawValue, defaultValue, el);
+	                if (component[$paramConfig.property + 'Cell']) {
+	                    component[$paramConfig.property + 'Cell'].set(value);
+	                }
+	                else {
+	                    component[KEY_PARAM_VALUES].set(name, value);
 	                }
 	            }
 	        }
@@ -4298,7 +4249,7 @@ window.innerHTML = (function (document) {
 	            let $paramConfig = component.constructor[KEY_PARAMS_CONFIG].get(name);
 	            if ($paramConfig.readonly) {
 	                if (observedAttributesFeature) {
-	                    throw new TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
+	                    throw TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
 	                }
 	            }
 	            else {
@@ -4317,6 +4268,16 @@ window.innerHTML = (function (document) {
 
 	const hasOwn = Object.prototype.hasOwnProperty;
 	const push = Array.prototype.push;
+	const componentParamTypeMap = new Map([
+	    ['boolean', Boolean],
+	    ['number', Number],
+	    ['string', String]
+	]);
+	const componentParamTypeMap2 = new Map([
+	    [Boolean, 'boolean'],
+	    [Number, 'number'],
+	    [String, 'string']
+	]);
 	function inheritProperty(target, source, name, depth) {
 	    let obj = target[name];
 	    let parentObj = source[name];
@@ -4338,11 +4299,11 @@ window.innerHTML = (function (document) {
 	        ? componentCtor.elementIs
 	        : (componentCtor.elementIs = componentCtor.name);
 	    if (!elIs) {
-	        throw new TypeError('Static property "elementIs" is required');
+	        throw TypeError('Static property "elementIs" is required');
 	    }
 	    let kebabCaseElIs = dist_1(elIs, true);
 	    if (componentConstructors.has(kebabCaseElIs)) {
-	        throw new TypeError(`Component "${kebabCaseElIs}" already registered`);
+	        throw TypeError(`Component "${kebabCaseElIs}" already registered`);
 	    }
 	    let componentProto = componentCtor.prototype;
 	    let parentComponentCtor = Object.getPrototypeOf(componentProto)
@@ -4356,23 +4317,45 @@ window.innerHTML = (function (document) {
 	            continue;
 	        }
 	        let snakeCaseName = dist_1$1(name, true);
-	        let isObject = typeof paramConfig == 'object';
-	        let propertyName = (isObject && paramConfig.property) || name;
+	        let propertyName;
+	        let type;
+	        let valueСonverters;
+	        let defaultValue;
 	        let required;
 	        let readonly;
-	        if (isObject) {
+	        if (typeof paramConfig == 'object') {
+	            propertyName = paramConfig.property || name;
+	            type = paramConfig.type;
+	            defaultValue = paramConfig.default;
 	            required = paramConfig.required || false;
 	            readonly = paramConfig.readonly || false;
 	        }
 	        else {
+	            propertyName = name;
+	            type = paramConfig;
 	            required = readonly = false;
+	        }
+	        if (!type) {
+	            type =
+	                (defaultValue !== undefined && componentParamTypeMap.get(typeof defaultValue)) ||
+	                    Object;
+	        }
+	        valueСonverters = componentParamValueСonverters.get(type);
+	        if (!valueСonverters) {
+	            throw TypeError('Unsupported parameter type');
+	        }
+	        if (defaultValue !== undefined &&
+	            type != Object &&
+	            type != eval &&
+	            componentParamTypeMap2.get(type) != typeof defaultValue) {
+	            throw TypeError('Specified type does not match type of defaultValue');
 	        }
 	        let $paramConfig = {
 	            name,
 	            property: propertyName,
-	            type: undefined,
-	            valueСonverters: undefined,
-	            default: undefined,
+	            type,
+	            valueСonverters,
+	            default: defaultValue,
 	            required,
 	            readonly,
 	            paramConfig
@@ -4421,7 +4404,7 @@ window.innerHTML = (function (document) {
 	                    if (readonly) {
 	                        if (value !==
 	                            (valueCell ? valueCell.get() : self[KEY_PARAM_VALUES].get(name))) {
-	                            throw new TypeError(`Parameter "${name}" is readonly`);
+	                            throw TypeError(`Parameter "${name}" is readonly`);
 	                        }
 	                        return;
 	                    }
@@ -4477,7 +4460,7 @@ window.innerHTML = (function (document) {
 	        parentElCtor =
 	            elementConstructors.get(elExtends) || window[`HTML${dist_1$6(elExtends)}Element`];
 	        if (!parentElCtor) {
-	            throw new TypeError(`Component "${elExtends}" is not registered`);
+	            throw TypeError(`Component "${elExtends}" is not registered`);
 	        }
 	    }
 	    else {
@@ -4746,7 +4729,7 @@ window.innerHTML = (function (document) {
 	        this[KEY_COMPONENT_SELF] = this;
 	        let ctor = this.constructor;
 	        if (!elementConstructors.has(ctor.elementIs)) {
-	            throw new TypeError('Component must be registered');
+	            throw TypeError('Component must be registered');
 	        }
 	        if (!el) {
 	            el = document.createElement(dist_1(ctor.elementIs, true));
@@ -5378,13 +5361,13 @@ window.innerHTML = (function (document) {
 	            else {
 	                let for_ = this.paramFor.match(reForAttrValue);
 	                if (!for_) {
-	                    throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
+	                    throw SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
 	                }
 	                let getList;
 	                if (for_[3]) {
 	                    let inListAST = parseTemplateNodeValue(`{${for_[2]}}`);
 	                    if (!inListAST || inListAST.length != 1) {
-	                        throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
+	                        throw SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
 	                    }
 	                    getList = compileBinding(inListAST, for_[2]);
 	                }
@@ -5707,7 +5690,7 @@ window.innerHTML = (function (document) {
 	            else {
 	                let ifAST = parseTemplateNodeValue(`{${if_}}`);
 	                if (!ifAST || ifAST.length != 1) {
-	                    throw new SyntaxError(`Invalid value in parameter "if" (${if_})`);
+	                    throw SyntaxError(`Invalid value in parameter "if" (${if_})`);
 	                }
 	                getIfValue = compileBinding(ifAST, if_);
 	            }

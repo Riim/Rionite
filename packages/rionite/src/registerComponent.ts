@@ -5,6 +5,7 @@ import { Cell, EventEmitter } from 'cellx';
 import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './BaseComponent';
 import { componentConstructors } from './componentConstructors';
 import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
+import { componentParamValueСonverters, IComponentParamValueСonverters } from './componentParamValueConverters';
 import { KEY_COMPONENT_SELF, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { elementConstructors } from './elementConstructors';
 import { ElementProtoMixin, KEY_RIONITE_COMPONENT_CONSTRUCTOR } from './ElementProtoMixin';
@@ -12,6 +13,18 @@ import { Template } from './Template2';
 
 const hasOwn = Object.prototype.hasOwnProperty;
 const push = Array.prototype.push;
+
+const componentParamTypeMap = new Map<string, Function>([
+	['boolean', Boolean],
+	['number', Number],
+	['string', String]
+]);
+
+const componentParamTypeMap2 = new Map<Function, string>([
+	[Boolean, 'boolean'],
+	[Number, 'number'],
+	[String, 'string']
+]);
 
 function inheritProperty(
 	target: Record<string, any>,
@@ -43,13 +56,13 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 		: (componentCtor.elementIs = componentCtor.name);
 
 	if (!elIs) {
-		throw new TypeError('Static property "elementIs" is required');
+		throw TypeError('Static property "elementIs" is required');
 	}
 
 	let kebabCaseElIs = kebabCase(elIs, true);
 
 	if (componentConstructors.has(kebabCaseElIs)) {
-		throw new TypeError(`Component "${kebabCaseElIs}" already registered`);
+		throw TypeError(`Component "${kebabCaseElIs}" already registered`);
 	}
 
 	let componentProto = componentCtor.prototype;
@@ -63,7 +76,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 	let paramsConfig = componentCtor.params;
 
 	for (let name in paramsConfig) {
-		let paramConfig: IComponentParamConfig | null = paramsConfig[name];
+		let paramConfig: IComponentParamConfig | Function | null = paramsConfig[name];
 
 		if (paramConfig === null || paramConfig === Object.prototype[name]) {
 			continue;
@@ -71,32 +84,54 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 
 		let snakeCaseName = snakeCaseAttributeName(name, true);
 
-		let isObject = typeof paramConfig == 'object';
-
-		let propertyName = (isObject && paramConfig.property) || name;
-
+		let propertyName: string;
+		let type: Function | undefined;
+		let valueСonverters: IComponentParamValueСonverters | undefined;
+		let defaultValue: any;
 		let required: boolean;
 		let readonly: boolean;
 
-		if (isObject) {
+		if (typeof paramConfig == 'object') {
+			propertyName = paramConfig.property || name;
+			type = paramConfig.type;
+			defaultValue = paramConfig.default;
 			required = paramConfig.required || false;
 			readonly = paramConfig.readonly || false;
 		} else {
+			propertyName = name;
+			type = paramConfig;
 			required = readonly = false;
+		}
+
+		if (!type) {
+			type =
+				(defaultValue !== undefined && componentParamTypeMap.get(typeof defaultValue)) ||
+				Object;
+		}
+
+		valueСonverters = componentParamValueСonverters.get(type);
+
+		if (!valueСonverters) {
+			throw TypeError('Unsupported parameter type');
+		}
+
+		if (
+			defaultValue !== undefined &&
+			type != Object &&
+			type != eval &&
+			componentParamTypeMap2.get(type) != typeof defaultValue
+		) {
+			throw TypeError('Specified type does not match type of defaultValue');
 		}
 
 		let $paramConfig: I$ComponentParamConfig = {
 			name,
 			property: propertyName,
-
-			type: undefined,
-			valueСonverters: undefined,
-
-			default: undefined,
-
+			type,
+			valueСonverters,
+			default: defaultValue,
 			required,
 			readonly,
-
 			paramConfig
 		};
 
@@ -157,7 +192,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 							value !==
 							(valueCell ? valueCell.get() : self[KEY_PARAM_VALUES].get(name))
 						) {
-							throw new TypeError(`Parameter "${name}" is readonly`);
+							throw TypeError(`Parameter "${name}" is readonly`);
 						}
 
 						return;
@@ -227,7 +262,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 			elementConstructors.get(elExtends) || window[`HTML${pascalize(elExtends)}Element`];
 
 		if (!parentElCtor) {
-			throw new TypeError(`Component "${elExtends}" is not registered`);
+			throw TypeError(`Component "${elExtends}" is not registered`);
 		}
 	} else {
 		parentElCtor = HTMLElement;

@@ -130,7 +130,7 @@ export class RnRepeat extends BaseComponent {
 				let for_ = this.paramFor.match(reForAttrValue);
 
 				if (!for_) {
-					throw new SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
+					throw SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
 				}
 
 				let getList: (this: object) => any;
@@ -139,9 +139,7 @@ export class RnRepeat extends BaseComponent {
 					let inListAST = parseTemplateNodeValue(`{${for_[2]}}`);
 
 					if (!inListAST || inListAST.length != 1) {
-						throw new SyntaxError(
-							`Invalid value in parameter "for" (${this.paramFor})`
-						);
+						throw SyntaxError(`Invalid value in parameter "for" (${this.paramFor})`);
 					}
 
 					getList = compileBinding(inListAST, for_[2]);

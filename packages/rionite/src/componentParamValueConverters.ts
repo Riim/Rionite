@@ -65,7 +65,7 @@ export const componentParamValue–°onverters = new Map<any, IComponentParamValue–
 						el[KEY_COMPONENT_PARAM_VALUES].get(rawValue);
 
 					if (!value) {
-						throw new TypeError('Value is not an object');
+						throw TypeError('Value is not an object');
 					}
 
 					return value;
