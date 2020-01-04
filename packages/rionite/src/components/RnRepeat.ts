@@ -102,7 +102,7 @@ export class RnRepeat extends BaseComponent {
 	_itemName: string;
 
 	_prevList: Array<any>;
-	_list: TList | Cell<TList | undefined>;
+	_list: TList | Cell<TList | null | undefined> | null;
 
 	_$itemsMap: T$ItemsMap;
 
@@ -118,7 +118,7 @@ export class RnRepeat extends BaseComponent {
 		if (!this._initialized) {
 			this._prevList = [];
 
-			if (this.paramIn) {
+			if (this.$specifiedParams.has('in')) {
 				this._itemName = this.paramFor;
 				this._list = this.paramIn;
 			} else if (this.paramInKeypath) {
@@ -159,7 +159,7 @@ export class RnRepeat extends BaseComponent {
 		if (this.element[KEY_CONTENT_TEMPLATE]) {
 			let list = this._list;
 
-			if (list instanceof Cell || list instanceof ObservableList) {
+			if (list && (list instanceof Cell || list instanceof ObservableList)) {
 				list.onChange(this._onListChange, this);
 			}
 
@@ -488,7 +488,7 @@ export class RnRepeat extends BaseComponent {
 
 		let list = this._list;
 
-		if (list instanceof Cell || list instanceof ObservableList) {
+		if (list && (list instanceof Cell || list instanceof ObservableList)) {
 			list.offChange(this._onListChange, this);
 		}
 

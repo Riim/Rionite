@@ -5348,7 +5348,7 @@ window.innerHTML = (function (document) {
 	        this._active = true;
 	        if (!this._initialized) {
 	            this._prevList = [];
-	            if (this.paramIn) {
+	            if (this.$specifiedParams.has('in')) {
 	                this._itemName = this.paramFor;
 	                this._list = this.paramIn;
 	            }
@@ -5382,7 +5382,7 @@ window.innerHTML = (function (document) {
 	        }
 	        if (this.element[KEY_CONTENT_TEMPLATE]) {
 	            let list = this._list;
-	            if (list instanceof cellx.Cell || list instanceof cellx.ObservableList) {
+	            if (list && (list instanceof cellx.Cell || list instanceof cellx.ObservableList)) {
 	                list.onChange(this._onListChange, this);
 	            }
 	            this._render(false);
@@ -5630,7 +5630,7 @@ window.innerHTML = (function (document) {
 	        }
 	        this._active = false;
 	        let list = this._list;
-	        if (list instanceof cellx.Cell || list instanceof cellx.ObservableList) {
+	        if (list && (list instanceof cellx.Cell || list instanceof cellx.ObservableList)) {
 	            list.offChange(this._onListChange, this);
 	        }
 	        let prevList = this._prevList;

@@ -20,7 +20,7 @@ export declare class RnRepeat extends BaseComponent {
     beforeTemplate: boolean;
     _itemName: string;
     _prevList: Array<any>;
-    _list: TList | Cell<TList | undefined>;
+    _list: TList | Cell<TList | null | undefined> | null;
     _$itemsMap: T$ItemsMap;
     _active: boolean;
     elementConnected(): void;
