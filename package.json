@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/Riim/Rionite#readme",
   "devDependencies": {
-    "typescript": "^3.7.4"
+    "typescript": "^3.7.5"
   }
 }
