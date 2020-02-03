@@ -4385,14 +4385,14 @@
 	        this._setHtml();
 	    }
 	    _setHtml() {
-	        this.element.innerHTML = this.html;
+	        this.element.innerHTML = this.html || '';
 	    }
 	};
 	exports.RnHtml = __decorate([
 	    Component({
 	        elementIs: 'RnHtml',
 	        params: {
-	            html: { type: String, required: true }
+	            html: { type: String }
 	        }
 	    })
 	], exports.RnHtml);

@@ -5,7 +5,7 @@ import { Component } from '../decorators/Component';
 	elementIs: 'RnHtml',
 
 	params: {
-		html: { type: String, required: true }
+		html: { type: String }
 	}
 })
 export class RnHtml extends BaseComponent {
@@ -24,6 +24,6 @@ export class RnHtml extends BaseComponent {
 	}
 
 	_setHtml() {
-		this.element.innerHTML = this.html;
+		this.element.innerHTML = this.html || '';
 	}
 }
