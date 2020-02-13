@@ -648,11 +648,11 @@
 	    placeholder(value, placeholderValue) {
 	        return value === null ? placeholderValue : value;
 	    },
-	    and(value1, value2) {
-	        return value1 && value2;
+	    and(value1, ...values) {
+	        return values.reduce((result, valueN) => result && valueN, value1);
 	    },
-	    or(value1, value2) {
-	        return value1 || value2;
+	    or(value1, ...values) {
+	        return values.reduce((result, valueN) => result || valueN, value1);
 	    },
 	    cond(condition, value1, value2) {
 	        return condition ? value1 : value2;
@@ -724,10 +724,10 @@
 	        return value == null ? value : JSON.stringify(value);
 	    },
 	    t(msgid, ...args) {
-	        return config.getText('', msgid, args);
+	        return msgid && config.getText('', msgid, args);
 	    },
 	    pt(msgid, msgctxt, ...args) {
-	        return config.getText(msgctxt, msgid, args);
+	        return msgid && config.getText(msgctxt, msgid, args);
 	    },
 	    log(msg, ...optionalParams) {
 	        console.log(msg, ...optionalParams);

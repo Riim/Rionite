@@ -15,12 +15,12 @@ export const formatters: Record<string, Function> = {
 		return value === null ? placeholderValue : value;
 	},
 
-	and(value1: any, value2: any): any {
-		return value1 && value2;
+	and(value1: any, ...values: Array<any>): any {
+		return values.reduce((result, valueN) => result && valueN, value1);
 	},
 
-	or(value1: any, value2: any): any {
-		return value1 || value2;
+	or(value1: any, ...values: Array<any>): any {
+		return values.reduce((result, valueN) => result || valueN, value1);
 	},
 
 	cond(condition: any, value1: any, value2: any): any {
@@ -132,12 +132,12 @@ export const formatters: Record<string, Function> = {
 		return value == null ? value : JSON.stringify(value);
 	},
 
-	t(msgid: string, ...args: Array<any>): string {
-		return config.getText('', msgid, args);
+	t(msgid: string | null | false, ...args: Array<any>): string | null | false {
+		return msgid && config.getText('', msgid, args);
 	},
 
-	pt(msgid: string, msgctxt: string, ...args: Array<any>): string {
-		return config.getText(msgctxt, msgid, args);
+	pt(msgid: string | null | false, msgctxt: string, ...args: Array<any>): string | null | false {
+		return msgid && config.getText(msgctxt, msgid, args);
 	},
 
 	log(msg: any, ...optionalParams: Array<any>) {
