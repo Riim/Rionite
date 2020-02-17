@@ -2375,6 +2375,9 @@ window.innerHTML = (function (document) {
 	    key(target, key) {
 	        return target && target[key];
 	    },
+	    prop(target, name) {
+	        return target && target.map(item => item[name]);
+	    },
 	    contains(target, value) {
 	        return (!!target && (Array.isArray(target) ? target.includes(value) : target.contains(value)));
 	    },

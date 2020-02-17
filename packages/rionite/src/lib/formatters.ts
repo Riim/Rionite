@@ -115,6 +115,10 @@ export const formatters: Record<string, Function> = {
 		return target && target[key];
 	},
 
+	prop(target: Array<object> | ObservableList<object> | null | undefined, name: any): any {
+		return target && (target as Array<object>).map(item => item[name]);
+	},
+
 	contains(target: Array<any> | ObservableList | null | undefined, value: any): boolean {
 		return (
 			!!target && (Array.isArray(target) ? target.includes(value) : target.contains(value))
