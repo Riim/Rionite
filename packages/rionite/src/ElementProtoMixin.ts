@@ -1,5 +1,5 @@
 import { defer } from '@riim/defer';
-import { Cell } from 'cellx';
+import { Cell, KEY_VALUE_CELLS } from 'cellx';
 import { BaseComponent, IComponentElement } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
 import { config } from './config';
@@ -146,7 +146,10 @@ export const ElementProtoMixin = {
 					throw TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
 				}
 			} else {
-				let valueCell: Cell | null = component[$paramConfig.property + 'Cell'];
+				let valueCell = (
+					(component[KEY_VALUE_CELLS] as Map<string, Cell>) ||
+					(component[KEY_VALUE_CELLS] = new Map())
+				).get($paramConfig.property);
 				let value = $paramConfig.valueСonverters!.toData(
 					rawValue,
 					$paramConfig.default,

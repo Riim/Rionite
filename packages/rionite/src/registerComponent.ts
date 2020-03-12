@@ -1,7 +1,7 @@
 import { kebabCase } from '@riim/kebab-case';
 import { pascalize } from '@riim/pascalize';
 import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name';
-import { Cell, EventEmitter } from 'cellx';
+import { Cell, EventEmitter, KEY_VALUE_CELLS } from 'cellx';
 import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './BaseComponent';
 import { componentConstructors } from './componentConstructors';
 import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
@@ -139,20 +139,16 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 			.set(name, $paramConfig)
 			.set(snakeCaseName, $paramConfig);
 
-		Object.defineProperty(componentProto, propertyName + 'Cell', {
-			configurable: true,
-			enumerable: false,
-			writable: true,
-			value: null
-		});
-
 		let descriptor = {
 			configurable: true,
 			enumerable: true,
 
 			get(this: BaseComponent) {
 				let self = this[KEY_COMPONENT_SELF];
-				let valueCell: Cell | null = self[propertyName + 'Cell'];
+				let valueCell = (
+					(self[KEY_VALUE_CELLS] as Map<string, Cell>) ||
+					(self[KEY_VALUE_CELLS] = new Map())
+				).get(propertyName);
 
 				if (valueCell) {
 					return valueCell.get();
@@ -167,12 +163,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 						value
 					});
 
-					Object.defineProperty(self, propertyName + 'Cell', {
-						configurable: true,
-						enumerable: false,
-						writable: true,
-						value: valueCell
-					});
+					(self[KEY_VALUE_CELLS] as Map<string, Cell>).set(propertyName, valueCell);
 
 					if (Cell.currentlyPulling) {
 						return valueCell.get();
@@ -184,7 +175,10 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 
 			set(this: BaseComponent, value: any) {
 				let self = this[KEY_COMPONENT_SELF];
-				let valueCell: Cell | null = self[propertyName + 'Cell'];
+				let valueCell = (
+					(self[KEY_VALUE_CELLS] as Map<string, Cell>) ||
+					(self[KEY_VALUE_CELLS] = new Map())
+				).get(propertyName);
 
 				if (self[KEY_COMPONENT_PARAMS_INITED]) {
 					if (readonly) {

@@ -2348,9 +2348,11 @@
 	                else if ($specifiedParams) {
 	                    $specifiedParams.add(name);
 	                }
+	                let valueCell = (this[cellx.KEY_VALUE_CELLS] ||
+	                    (this[cellx.KEY_VALUE_CELLS] = new Map())).get($paramConfig.property);
 	                let value = valueСonverters.toData(rawValue, defaultValue, el);
-	                if (component[$paramConfig.property + 'Cell']) {
-	                    component[$paramConfig.property + 'Cell'].set(value);
+	                if (valueCell) {
+	                    valueCell.set(value);
 	                }
 	                else {
 	                    component[KEY_PARAM_VALUES].set(name, value);
@@ -2595,7 +2597,8 @@
 	                }
 	            }
 	            else {
-	                let valueCell = component[$paramConfig.property + 'Cell'];
+	                let valueCell = (component[cellx.KEY_VALUE_CELLS] ||
+	                    (component[cellx.KEY_VALUE_CELLS] = new Map())).get($paramConfig.property);
 	                let value = $paramConfig.valueСonverters.toData(rawValue, $paramConfig.default, this);
 	                if (valueCell) {
 	                    valueCell.set(value);
@@ -2705,18 +2708,13 @@
 	        (componentCtor[KEY_PARAMS_CONFIG] || (componentCtor[KEY_PARAMS_CONFIG] = new Map()))
 	            .set(name, $paramConfig)
 	            .set(snakeCaseName, $paramConfig);
-	        Object.defineProperty(componentProto, propertyName + 'Cell', {
-	            configurable: true,
-	            enumerable: false,
-	            writable: true,
-	            value: null
-	        });
 	        let descriptor = {
 	            configurable: true,
 	            enumerable: true,
 	            get() {
 	                let self = this[KEY_COMPONENT_SELF];
-	                let valueCell = self[propertyName + 'Cell'];
+	                let valueCell = (self[cellx.KEY_VALUE_CELLS] ||
+	                    (self[cellx.KEY_VALUE_CELLS] = new Map())).get(propertyName);
 	                if (valueCell) {
 	                    return valueCell.get();
 	                }
@@ -2727,12 +2725,7 @@
 	                        context: self,
 	                        value
 	                    });
-	                    Object.defineProperty(self, propertyName + 'Cell', {
-	                        configurable: true,
-	                        enumerable: false,
-	                        writable: true,
-	                        value: valueCell
-	                    });
+	                    self[cellx.KEY_VALUE_CELLS].set(propertyName, valueCell);
 	                    if (cellx.Cell.currentlyPulling) {
 	                        return valueCell.get();
 	                    }
@@ -2741,7 +2734,8 @@
 	            },
 	            set(value) {
 	                let self = this[KEY_COMPONENT_SELF];
-	                let valueCell = self[propertyName + 'Cell'];
+	                let valueCell = (self[cellx.KEY_VALUE_CELLS] ||
+	                    (self[cellx.KEY_VALUE_CELLS] = new Map())).get(propertyName);
 	                if (self[KEY_COMPONENT_PARAMS_INITED]) {
 	                    if (readonly) {
 	                        if (value !==
