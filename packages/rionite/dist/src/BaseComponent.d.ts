@@ -50,19 +50,16 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
     rioniteComponent: T;
     [KEY_CONTENT_TEMPLATE]?: Template;
 }
+export declare type THook = (this: BaseComponent, component?: BaseComponent) => any;
 export declare type TComponentListeningTarget<T = BaseComponent> = TListeningTarget | string | Array<TListeningTarget> | ((this: T, self: T) => TListeningTarget | string | Array<TListeningTarget>);
-export declare type TComponentListeningType<T = BaseComponent> = string | symbol | Array<string | symbol> | ((this: T, ctor: typeof BaseComponent) => string | symbol | Array<string | symbol>);
-export interface IComponentListening<T = BaseComponent> {
-    target?: TComponentListeningTarget<T>;
-    type: TComponentListeningType<T>;
-    listener: TListener | string;
-    useCapture?: boolean;
-}
+export declare type TComponentListeningEventType<T = BaseComponent> = string | symbol | Array<string | symbol> | ((this: T, ctor: typeof BaseComponent) => string | symbol | Array<string | symbol>);
 export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (this: T, evt: U, context: Record<string, any>, receiver: Element) => any;
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
     [elementName: string]: Record<string, TEventHandler<T, U>>;
 }
-export declare type THook = (this: BaseComponent) => void;
+export declare function callHooks(hooks: Array<Function>, context: object): void;
+export declare function onElementConnected(hook: THook): void;
+export declare function onElementDisconnected(hook: THook): void;
 export declare function onReady(hook: THook): void;
 export declare function onElementAttached(hook: THook): void;
 export declare function onElementDetached(hook: THook): void;
@@ -72,15 +69,20 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     static elementIs: string;
     static elementExtends: string | null;
     static params: Record<string, any> | null;
+    static [KEY_PARAMS_CONFIG]: Map<string, I$ComponentParamConfig> | null;
     static i18n: Record<string, any> | null;
     static _blockNamesString: string;
     static _elementBlockNames: Array<string>;
     static template: string | TContent | IBlock | Template | null;
     static get bindsInputContent(): boolean;
-    static listenings: Array<IComponentListening> | null;
+    static elementConnectedHooks: Array<THook> | null;
+    static elementDisconnectedHooks: Array<THook> | null;
+    static readyHooks: Array<THook> | null;
+    static elementAttachedHooks: Array<THook> | null;
+    static elementDetachedHooks: Array<THook> | null;
+    static elementMovedHooks: Array<THook> | null;
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
     static domEvents: IComponentEvents<BaseComponent, Event> | null;
-    static [KEY_PARAMS_CONFIG]: Map<string, I$ComponentParamConfig> | null;
     [KEY_COMPONENT_SELF]: this;
     _disposables: Map<string, IDisposable>;
     _ownerComponent: BaseComponent | undefined;
@@ -102,6 +104,8 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     get initialized(): boolean;
     _isReady: boolean;
     get isReady(): boolean;
+    _elementConnectedHooks: Array<THook> | null;
+    _elementDisconnectedHooks: Array<THook> | null;
     _readyHooks: Array<THook> | null;
     _elementAttachedHooks: Array<THook> | null;
     _elementDetachedHooks: Array<THook> | null;
@@ -110,9 +114,9 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     onChange(listener: TListener, context?: any): this;
     offChange(listener: TListener, context?: any): this;
     handleEvent(evt: IEvent<BaseComponent>): void;
-    listenTo(target: TListeningTarget | string | Array<TListeningTarget>, type: string | symbol | Array<string | symbol>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
+    listenTo(target: TListeningTarget | string | Array<TListeningTarget>, evtType: string | symbol | Array<string | symbol>, listener: TListener | Array<TListener>, context?: any, useCapture?: boolean): IDisposableListening;
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, listeners: Record<string | symbol, TListener | Array<TListener>>, context?: any, useCapture?: boolean): IDisposableListening;
-    _listenTo(target: EventEmitter | EventTarget, type: string | symbol, listener: TListener, context: any, useCapture: boolean): IDisposableListening;
+    _listenTo(target: EventEmitter | EventTarget, evtType: string | symbol, listener: TListener, context: any, useCapture: boolean): IDisposableListening;
     setTimeout(cb: Function, delay: number): IDisposableTimeout;
     setInterval(cb: Function, delay: number): IDisposableInterval;
     registerCallback(cb: Function): IDisposableCallback;

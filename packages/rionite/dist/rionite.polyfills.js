@@ -2366,8 +2366,8 @@ window.innerHTML = (function (document) {
 	    has(target, key) {
 	        return !!target && target.has(key);
 	    },
-	    hasOwn(target, propertyName) {
-	        return !!target && target.hasOwnProperty(propertyName);
+	    hasOwn(target, propName) {
+	        return !!target && target.hasOwnProperty(propName);
 	    },
 	    get(target, key) {
 	        return target && target.get(key);
@@ -2942,15 +2942,15 @@ window.innerHTML = (function (document) {
 	                            }
 	                            let keypath = attrValueAST[0].keypath.split('.');
 	                            (result[2] || (result[2] = [])).push(childComponent, $paramConfig.property, keypath.length == 1
-	                                ? (propertyName => function (evt) {
-	                                    this.ownerComponent[propertyName] = evt.data.value;
+	                                ? (propName => function (evt) {
+	                                    this.ownerComponent[propName] = evt.data.value;
 	                                })(keypath[0])
-	                                : ((propertyName, keypath) => {
+	                                : ((propName, keypath) => {
 	                                    let getPropertyHolder = compileKeypath(keypath, keypath.join('.'));
 	                                    return function (evt) {
-	                                        let propertyHolder = getPropertyHolder.call(this.ownerComponent);
-	                                        if (propertyHolder) {
-	                                            propertyHolder[propertyName] = evt.data.value;
+	                                        let propHolder = getPropertyHolder.call(this.ownerComponent);
+	                                        if (propHolder) {
+	                                            propHolder[propName] = evt.data.value;
 	                                        }
 	                                    };
 	                                })(keypath[keypath.length - 1], keypath.slice(0, -1)));
@@ -3778,15 +3778,16 @@ window.innerHTML = (function (document) {
 	                                                    }
 	                                                    let keypath = attrValueAST[0].keypath.split('.');
 	                                                    (result[2] || (result[2] = [])).push(nodeComponent, $paramConfig.property, keypath.length == 1
-	                                                        ? (propertyName => function (evt) {
-	                                                            this.ownerComponent[propertyName] = evt.data.value;
+	                                                        ? (propName => function (evt) {
+	                                                            this.ownerComponent[propName] = evt.data.value;
 	                                                        })(keypath[0])
-	                                                        : ((propertyName, keypath) => {
+	                                                        : ((propName, keypath) => {
 	                                                            let getPropertyHolder = compileKeypath(keypath, keypath.join('.'));
 	                                                            return function (evt) {
-	                                                                let propertyHolder = getPropertyHolder.call(this.ownerComponent);
-	                                                                if (propertyHolder) {
-	                                                                    propertyHolder[propertyName] = evt.data.value;
+	                                                                let propHolder = getPropertyHolder.call(this.ownerComponent);
+	                                                                if (propHolder) {
+	                                                                    propHolder[propName] =
+	                                                                        evt.data.value;
 	                                                                }
 	                                                            };
 	                                                        })(keypath[keypath.length - 1], keypath.slice(0, -1)));
@@ -4006,11 +4007,12 @@ window.innerHTML = (function (document) {
 	                        el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue));
 	                    }
 	                }
-	                else if ($specifiedParams) {
-	                    $specifiedParams.add(name);
+	                else {
+	                    if ($specifiedParams) {
+	                        $specifiedParams.add(name);
+	                    }
 	                }
-	                let valueCell = (this[cellx.KEY_VALUE_CELLS] ||
-	                    (this[cellx.KEY_VALUE_CELLS] = new Map())).get($paramConfig.property);
+	                let valueCell = (this[cellx.KEY_VALUE_CELLS] || (this[cellx.KEY_VALUE_CELLS] = new Map())).get($paramConfig.property);
 	                let value = valueСonverters.toData(rawValue, defaultValue, el);
 	                if (valueCell) {
 	                    valueCell.set(value);
@@ -4131,469 +4133,6 @@ window.innerHTML = (function (document) {
 	var dist_1$7 = dist$7.configure;
 	var dist_2$2 = dist$7.defer;
 
-	function callWithInterruptionHandling(fn, context) {
-	    let result = fn.call(context);
-	    if (result instanceof Promise) {
-	        result.catch(err => {
-	            if (!(err instanceof InterruptError)) {
-	                config.logError(err);
-	            }
-	        });
-	    }
-	}
-
-	let observedAttributesFeature_ = false;
-	window.customElements.define('test-observed-attributes-feature', class extends HTMLElement {
-	    static get observedAttributes() {
-	        return ['test'];
-	    }
-	    attributeChangedCallback() {
-	        observedAttributesFeature_ = true;
-	    }
-	});
-	document.createElement('test-observed-attributes-feature').setAttribute('test', '');
-	const observedAttributesFeature = observedAttributesFeature_;
-
-	const KEY_RIONITE_COMPONENT_CONSTRUCTOR = Symbol('rioniteComponentConstructor');
-	const KEY_ELEMENT_CONNECTED = Symbol('elementConnected');
-	let connectionStatusCallbacksSuppressed = false;
-	function suppressConnectionStatusCallbacks() {
-	    connectionStatusCallbacksSuppressed = true;
-	}
-	function resumeConnectionStatusCallbacks() {
-	    connectionStatusCallbacksSuppressed = false;
-	}
-	const ElementProtoMixin = {
-	    $component: null,
-	    get rioniteComponent() {
-	        return this.$component || new this.constructor[KEY_RIONITE_COMPONENT_CONSTRUCTOR](this);
-	    },
-	    [KEY_ELEMENT_CONNECTED]: false,
-	    connectedCallback() {
-	        this[KEY_ELEMENT_CONNECTED] = true;
-	        if (connectionStatusCallbacksSuppressed) {
-	            return;
-	        }
-	        let component = this.$component;
-	        if (component) {
-	            if (component._attached) {
-	                if (component._parentComponent === null) {
-	                    component._parentComponent = undefined;
-	                    component.elementConnected();
-	                    try {
-	                        callWithInterruptionHandling(component.elementMoved, component);
-	                    }
-	                    catch (err) {
-	                        config.logError(err);
-	                    }
-	                    if (component._elementMovedHooks) {
-	                        for (let elementMovedHook of component._elementMovedHooks) {
-	                            try {
-	                                callWithInterruptionHandling(elementMovedHook, component);
-	                            }
-	                            catch (err) {
-	                                config.logError(err);
-	                            }
-	                        }
-	                    }
-	                }
-	                else {
-	                    component.elementConnected();
-	                }
-	            }
-	            else {
-	                component._parentComponent = undefined;
-	                ComponentParams.init(component);
-	                component.elementConnected();
-	                component._attach();
-	            }
-	            return;
-	        }
-	        else {
-	            component = this.rioniteComponent;
-	            component._parentComponent = undefined;
-	            if (component.parentComponent && component._parentComponent._isReady) {
-	                ComponentParams.init(component);
-	                component.elementConnected();
-	                component._attach();
-	                return;
-	            }
-	        }
-	        dist_2$2(() => {
-	            if (!this[KEY_ELEMENT_CONNECTED]) {
-	                return;
-	            }
-	            let component = this.rioniteComponent;
-	            component._parentComponent = undefined;
-	            if (!component._attached && !component.parentComponent) {
-	                ComponentParams.init(component);
-	                component.elementConnected();
-	                component._attach();
-	            }
-	        });
-	    },
-	    disconnectedCallback() {
-	        this[KEY_ELEMENT_CONNECTED] = false;
-	        if (connectionStatusCallbacksSuppressed) {
-	            return;
-	        }
-	        let component = this.$component;
-	        if (component && component._attached) {
-	            component._parentComponent = null;
-	            component.elementDisconnected();
-	            dist_2$2(() => {
-	                if (component._parentComponent === null && component._attached) {
-	                    component._detach();
-	                }
-	            });
-	        }
-	    },
-	    attributeChangedCallback(name, _prevRawValue, rawValue) {
-	        let component = this.$component;
-	        if (component && component._isReady) {
-	            let $paramConfig = component.constructor[KEY_PARAMS_CONFIG].get(name);
-	            if ($paramConfig.readonly) {
-	                if (observedAttributesFeature) {
-	                    throw TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
-	                }
-	            }
-	            else {
-	                let valueCell = (component[cellx.KEY_VALUE_CELLS] ||
-	                    (component[cellx.KEY_VALUE_CELLS] = new Map())).get($paramConfig.property);
-	                let value = $paramConfig.valueСonverters.toData(rawValue, $paramConfig.default, this);
-	                if (valueCell) {
-	                    valueCell.set(value);
-	                }
-	                else {
-	                    component[KEY_PARAM_VALUES].set($paramConfig.name, value);
-	                }
-	            }
-	        }
-	    }
-	};
-
-	const hasOwn = Object.prototype.hasOwnProperty;
-	const push = Array.prototype.push;
-	const componentParamTypeMap = new Map([
-	    ['boolean', Boolean],
-	    ['number', Number],
-	    ['string', String]
-	]);
-	const componentParamTypeMap2 = new Map([
-	    [Boolean, 'boolean'],
-	    [Number, 'number'],
-	    [String, 'string']
-	]);
-	function inheritProperty(target, source, name, depth) {
-	    let obj = target[name];
-	    let parentObj = source[name];
-	    if (obj && parentObj && obj != parentObj) {
-	        let inheritedObj = (target[name] = { __proto__: parentObj });
-	        for (let key in obj) {
-	            if (hasOwn.call(obj, key)) {
-	                inheritedObj[key] = obj[key];
-	                if (depth) {
-	                    inheritProperty(inheritedObj, parentObj, key, depth - 1);
-	                }
-	            }
-	        }
-	    }
-	}
-	function registerComponent(componentCtor) {
-	    var _a, _b;
-	    let elIs = componentCtor.hasOwnProperty('elementIs')
-	        ? componentCtor.elementIs
-	        : (componentCtor.elementIs = componentCtor.name);
-	    if (!elIs) {
-	        throw TypeError('Static property "elementIs" is required');
-	    }
-	    let kebabCaseElIs = dist_1(elIs, true);
-	    if (componentConstructors.has(kebabCaseElIs)) {
-	        throw TypeError(`Component "${kebabCaseElIs}" already registered`);
-	    }
-	    let componentProto = componentCtor.prototype;
-	    let parentComponentCtor = Object.getPrototypeOf(componentProto)
-	        .constructor;
-	    inheritProperty(componentCtor, parentComponentCtor, 'params', 0);
-	    componentCtor[KEY_PARAMS_CONFIG] = null;
-	    let paramsConfig = componentCtor.params;
-	    for (let name in paramsConfig) {
-	        let paramConfig = paramsConfig[name];
-	        if (paramConfig === null || paramConfig === Object.prototype[name]) {
-	            continue;
-	        }
-	        let snakeCaseName = dist_1$1(name, true);
-	        let propertyName;
-	        let type;
-	        let valueСonverters;
-	        let defaultValue;
-	        let required;
-	        let readonly;
-	        if (typeof paramConfig == 'object') {
-	            propertyName = paramConfig.property || name;
-	            type = paramConfig.type;
-	            defaultValue = paramConfig.default;
-	            required = paramConfig.required || false;
-	            readonly = paramConfig.readonly || false;
-	        }
-	        else {
-	            propertyName = name;
-	            type = paramConfig;
-	            required = readonly = false;
-	        }
-	        if (!type) {
-	            type =
-	                (defaultValue !== undefined && componentParamTypeMap.get(typeof defaultValue)) ||
-	                    Object;
-	        }
-	        valueСonverters = componentParamValueСonverters.get(type);
-	        if (!valueСonverters) {
-	            throw TypeError('Unsupported parameter type');
-	        }
-	        if (defaultValue !== undefined &&
-	            type != Object &&
-	            type != eval &&
-	            componentParamTypeMap2.get(type) != typeof defaultValue) {
-	            throw TypeError('Specified type does not match type of defaultValue');
-	        }
-	        let $paramConfig = {
-	            name,
-	            property: propertyName,
-	            type,
-	            valueСonverters,
-	            default: defaultValue,
-	            required,
-	            readonly,
-	            paramConfig
-	        };
-	        (componentCtor[KEY_PARAMS_CONFIG] || (componentCtor[KEY_PARAMS_CONFIG] = new Map()))
-	            .set(name, $paramConfig)
-	            .set(snakeCaseName, $paramConfig);
-	        let descriptor = {
-	            configurable: true,
-	            enumerable: true,
-	            get() {
-	                let self = this[KEY_COMPONENT_SELF];
-	                let valueCell = (self[cellx.KEY_VALUE_CELLS] ||
-	                    (self[cellx.KEY_VALUE_CELLS] = new Map())).get(propertyName);
-	                if (valueCell) {
-	                    return valueCell.get();
-	                }
-	                let value = self[KEY_PARAM_VALUES].get(name);
-	                if (cellx.Cell.currentlyPulling || cellx.EventEmitter.currentlySubscribing) {
-	                    self[KEY_PARAM_VALUES].delete(name);
-	                    valueCell = new cellx.Cell(null, {
-	                        context: self,
-	                        value
-	                    });
-	                    self[cellx.KEY_VALUE_CELLS].set(propertyName, valueCell);
-	                    if (cellx.Cell.currentlyPulling) {
-	                        return valueCell.get();
-	                    }
-	                }
-	                return value;
-	            },
-	            set(value) {
-	                let self = this[KEY_COMPONENT_SELF];
-	                let valueCell = (self[cellx.KEY_VALUE_CELLS] ||
-	                    (self[cellx.KEY_VALUE_CELLS] = new Map())).get(propertyName);
-	                if (self[KEY_COMPONENT_PARAMS_INITED]) {
-	                    if (readonly) {
-	                        if (value !==
-	                            (valueCell ? valueCell.get() : self[KEY_PARAM_VALUES].get(name))) {
-	                            throw TypeError(`Parameter "${name}" is readonly`);
-	                        }
-	                        return;
-	                    }
-	                    if ($paramConfig.valueСonverters.toString) {
-	                        let rawValue = $paramConfig.valueСonverters.toString(value, $paramConfig.default);
-	                        if (rawValue === null) {
-	                            self.element.removeAttribute(snakeCaseName);
-	                        }
-	                        else {
-	                            self.element.setAttribute(snakeCaseName, rawValue);
-	                        }
-	                    }
-	                }
-	                if (valueCell) {
-	                    valueCell.set(value);
-	                }
-	                else {
-	                    self[KEY_PARAM_VALUES].set(name, value);
-	                }
-	            }
-	        };
-	        Object.defineProperty(componentProto, propertyName, descriptor);
-	    }
-	    inheritProperty(componentCtor, parentComponentCtor, 'i18n', 0);
-	    componentCtor._blockNamesString = elIs + ' ' + (parentComponentCtor._blockNamesString || '');
-	    componentCtor._elementBlockNames = [elIs];
-	    if (parentComponentCtor._elementBlockNames) {
-	        push.apply(componentCtor._elementBlockNames, parentComponentCtor._elementBlockNames);
-	    }
-	    let template = componentCtor.template;
-	    if (template !== null) {
-	        if (template === parentComponentCtor.template) {
-	            componentCtor.template = template.extend('', {
-	                blockName: elIs
-	            });
-	        }
-	        else if (template instanceof Template) {
-	            template.setBlockName(componentCtor._elementBlockNames);
-	        }
-	        else {
-	            componentCtor.template = parentComponentCtor.template
-	                ? parentComponentCtor.template.extend(template, {
-	                    blockName: elIs
-	                })
-	                : new Template(template, { blockName: componentCtor._elementBlockNames });
-	        }
-	    }
-	    inheritProperty(componentCtor, parentComponentCtor, 'events', 1);
-	    inheritProperty(componentCtor, parentComponentCtor, 'domEvents', 1);
-	    let elExtends = componentCtor.elementExtends;
-	    let parentElCtor;
-	    if (elExtends) {
-	        parentElCtor =
-	            elementConstructors.get(elExtends) || window[`HTML${dist_1$6(elExtends)}Element`];
-	        if (!parentElCtor) {
-	            throw TypeError(`Component "${elExtends}" is not registered`);
-	        }
-	    }
-	    else {
-	        parentElCtor = HTMLElement;
-	    }
-	    let elCtor = (_b = class extends parentElCtor {
-	            static get observedAttributes() {
-	                let paramsConfig = componentCtor.params;
-	                let attrs = [];
-	                for (let name in paramsConfig) {
-	                    if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
-	                        attrs.push(dist_1$1(name, true));
-	                    }
-	                }
-	                return attrs;
-	            }
-	        },
-	        _a = KEY_RIONITE_COMPONENT_CONSTRUCTOR,
-	        _b[_a] = componentCtor,
-	        _b);
-	    let elProto = elCtor.prototype;
-	    elProto.constructor = elCtor;
-	    let names = Object.getOwnPropertyNames(ElementProtoMixin);
-	    for (let name of names) {
-	        Object.defineProperty(elProto, name, Object.getOwnPropertyDescriptor(ElementProtoMixin, name));
-	    }
-	    names = Object.getOwnPropertySymbols(ElementProtoMixin);
-	    for (let name of names) {
-	        Object.defineProperty(elProto, name, Object.getOwnPropertyDescriptor(ElementProtoMixin, name));
-	    }
-	    componentConstructors.set(elIs, componentCtor).set(kebabCaseElIs, componentCtor);
-	    elementConstructors.set(elIs, elCtor);
-	    window.customElements.define(kebabCaseElIs, elCtor, elExtends ? { extends: elExtends } : undefined);
-	    return componentCtor;
-	}
-
-	function Component(config) {
-	    return (componentCtor) => {
-	        if (config) {
-	            if (config.elementIs !== undefined) {
-	                componentCtor.elementIs = config.elementIs;
-	            }
-	            if (config.elementExtends !== undefined) {
-	                componentCtor.elementExtends = config.elementExtends;
-	            }
-	            if (config.params !== undefined) {
-	                componentCtor.params = config.params;
-	            }
-	            if (config.i18n !== undefined) {
-	                componentCtor.i18n = config.i18n;
-	            }
-	            if (config.template !== undefined) {
-	                componentCtor.template = config.template;
-	            }
-	            if (config.events !== undefined) {
-	                componentCtor.events = config.events;
-	            }
-	            if (config.domEvents !== undefined) {
-	                componentCtor.domEvents = config.domEvents;
-	            }
-	        }
-	        registerComponent(componentCtor);
-	    };
-	}
-
-	function Param(target, propertyName, _propertyDesc, name, config) {
-	    if (typeof propertyName != 'string') {
-	        if (target && typeof target != 'string') {
-	            config = target;
-	        }
-	        else {
-	            name = target;
-	            config = propertyName;
-	        }
-	        return (target, propertyName, propertyDesc) => Param(target, propertyName, propertyDesc, name, config);
-	    }
-	    if (!config) {
-	        config = {};
-	    }
-	    else if (typeof config == 'function') {
-	        config = { type: config };
-	    }
-	    config.property = propertyName;
-	    let ctor = target.constructor;
-	    ((ctor.hasOwnProperty('params') && ctor.params) || (ctor.params = {}))[name || propertyName] = config;
-	}
-
-	const hasOwn$1 = Object.prototype.hasOwnProperty;
-	function Listen(evtType, optionsOrTarget, useCapture) {
-	    return (target, methodName, _methodDesc) => {
-	        let options = optionsOrTarget &&
-	            typeof optionsOrTarget == 'object' &&
-	            !Array.isArray(optionsOrTarget) &&
-	            Object.getPrototypeOf(optionsOrTarget) === Object.prototype
-	            ? optionsOrTarget
-	            : null;
-	        (hasOwn$1.call(target.constructor, 'listenings')
-	            ? target.constructor.listenings ||
-	                (target.constructor.listenings = [])
-	            : (target.constructor.listenings = (target.constructor.listenings || []).slice())).push({
-	            target: options ? options.target : optionsOrTarget,
-	            type: evtType,
-	            listener: methodName,
-	            useCapture: options ? options.useCapture : useCapture
-	        });
-	    };
-	}
-
-	function Callback(target, methodName, methodDesc) {
-	    if (!methodDesc) {
-	        methodDesc = Object.getOwnPropertyDescriptor(target, methodName);
-	    }
-	    let method = methodDesc.value;
-	    methodDesc.value = function (...args) {
-	        return this._attached ? method.call(this, ...args) : Promise.resolve();
-	    };
-	    return methodDesc;
-	}
-
-	function Interruptible(target, methodName, methodDesc) {
-	    if (!methodDesc) {
-	        methodDesc = Object.getOwnPropertyDescriptor(target, methodName);
-	    }
-	    let method = methodDesc.value;
-	    methodDesc.value = function (...args) {
-	        let result = method.call(this, ...args);
-	        result.catch(err => {
-	            if (!(err instanceof InterruptError)) {
-	                throw err;
-	            }
-	        });
-	        return result;
-	    };
-	    return methodDesc;
-	}
-
 	var dist$8 = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	function moveContent(target, source) {
@@ -4612,7 +4151,11 @@ window.innerHTML = (function (document) {
 	    for (let component of childComponents) {
 	        component._parentComponent = undefined;
 	        ComponentParams.init(component);
-	        component.elementConnected();
+	        callHooks([
+	            component.elementConnected,
+	            ...(component.constructor.elementConnectedHooks || []),
+	            ...(component._elementConnectedHooks || [])
+	        ], component);
 	        component._attach();
 	    }
 	}
@@ -4693,8 +4236,27 @@ window.innerHTML = (function (document) {
 	    return node;
 	}
 
-	const hasOwn$2 = Object.prototype.hasOwnProperty;
+	const hasOwn = Object.prototype.hasOwnProperty;
 	const map = Array.prototype.map;
+	function callHooks(hooks, context) {
+	    for (let hook of hooks) {
+	        let result;
+	        try {
+	            result = hook.length ? hook.call(context, context) : hook.call(context);
+	        }
+	        catch (err) {
+	            config.logError(err);
+	            return;
+	        }
+	        if (result instanceof Promise) {
+	            result.catch(err => {
+	                if (!(err instanceof InterruptError)) {
+	                    config.logError(err);
+	                }
+	            });
+	        }
+	    }
+	}
 	let currentComponent = null;
 	function onReady(hook) {
 	    (currentComponent._readyHooks || (currentComponent._readyHooks = [])).push(hook);
@@ -4718,6 +4280,8 @@ window.innerHTML = (function (document) {
 	        this._attached = false;
 	        this._initialized = false;
 	        this._isReady = false;
+	        this._elementConnectedHooks = null;
+	        this._elementDisconnectedHooks = null;
 	        this._readyHooks = null;
 	        this._elementAttachedHooks = null;
 	        this._elementDetachedHooks = null;
@@ -4791,26 +4355,26 @@ window.innerHTML = (function (document) {
 	        }
 	        handleEvent(evt);
 	    }
-	    listenTo(target, type, listener, context, useCapture) {
+	    listenTo(target, evtType, listener, context, useCapture) {
 	        if (typeof target == 'string') {
 	            target = this.$(target);
 	        }
 	        let listenings;
-	        if (typeof type == 'object') {
+	        if (typeof evtType == 'object') {
 	            listenings = [];
-	            if (Array.isArray(type)) {
-	                for (let i = 0, l = type.length; i < l; i++) {
-	                    listenings.push(this.listenTo(target, type[i], listener, context, useCapture));
+	            if (Array.isArray(evtType)) {
+	                for (let i = 0, l = evtType.length; i < l; i++) {
+	                    listenings.push(this.listenTo(target, evtType[i], listener, context, useCapture));
 	                }
 	            }
 	            else {
-	                for (let type_ in type) {
-	                    if (hasOwn$2.call(type, type_)) {
-	                        listenings.push(this.listenTo(target, type_, type[type_], listener, context));
+	                for (let evtType_ in evtType) {
+	                    if (hasOwn.call(evtType, evtType_)) {
+	                        listenings.push(this.listenTo(target, evtType_, evtType[evtType_], listener, context));
 	                    }
 	                }
-	                for (let type_ of Object.getOwnPropertySymbols(type)) {
-	                    listenings.push(this.listenTo(target, type_, type[type_], listener, context));
+	                for (let evtType_ of Object.getOwnPropertySymbols(evtType)) {
+	                    listenings.push(this.listenTo(target, evtType_, evtType[evtType_], listener, context));
 	                }
 	            }
 	        }
@@ -4820,17 +4384,19 @@ window.innerHTML = (function (document) {
 	                target instanceof HTMLCollection) {
 	                listenings = [];
 	                for (let i = 0, l = target.length; i < l; i++) {
-	                    listenings.push(this.listenTo(target[i], type, listener, context, useCapture));
-	                }
-	            }
-	            else if (Array.isArray(listener)) {
-	                listenings = [];
-	                for (let i = 0, l = listener.length; i < l; i++) {
-	                    listenings.push(this.listenTo(target, type, listener[i], context, useCapture));
+	                    listenings.push(this.listenTo(target[i], evtType, listener, context, useCapture));
 	                }
 	            }
 	            else {
-	                return this._listenTo(target, type, listener, context !== undefined ? context : this, useCapture || false);
+	                if (Array.isArray(listener)) {
+	                    listenings = [];
+	                    for (let i = 0, l = listener.length; i < l; i++) {
+	                        listenings.push(this.listenTo(target, evtType, listener[i], context, useCapture));
+	                    }
+	                }
+	                else {
+	                    return this._listenTo(target, evtType, listener, context !== undefined ? context : this, useCapture || false);
+	                }
 	            }
 	        }
 	        let id = nextUid.nextUID();
@@ -4847,27 +4413,27 @@ window.innerHTML = (function (document) {
 	        this._disposables.set(id, listening);
 	        return listening;
 	    }
-	    _listenTo(target, type, listener, context, useCapture) {
+	    _listenTo(target, evtType, listener, context, useCapture) {
 	        if (!target) {
 	            throw TypeError('"target" is required');
 	        }
 	        if (target instanceof cellx.EventEmitter) {
-	            target.on(type, listener, context);
+	            target.on(evtType, listener, context);
 	        }
 	        else {
 	            if (target !== context) {
 	                listener = listener.bind(context);
 	            }
-	            target.addEventListener(type, listener, useCapture);
+	            target.addEventListener(evtType, listener, useCapture);
 	        }
 	        let id = nextUid.nextUID();
 	        let stopListening = () => {
 	            if (this._disposables.has(id)) {
 	                if (target instanceof cellx.EventEmitter) {
-	                    target.off(type, listener, context);
+	                    target.off(evtType, listener, context);
 	                }
 	                else {
-	                    target.removeEventListener(type, listener, useCapture);
+	                    target.removeEventListener(evtType, listener, useCapture);
 	                }
 	                this._disposables.delete(id);
 	            }
@@ -4950,7 +4516,11 @@ window.innerHTML = (function (document) {
 	        }
 	        this._parentComponent = undefined;
 	        ComponentParams.init(this);
-	        this.elementConnected();
+	        callHooks([
+	            this.elementConnected,
+	            ...(this.constructor.elementConnectedHooks || []),
+	            ...(this._elementConnectedHooks || [])
+	        ], this);
 	        return this._attach();
 	    }
 	    _attach() {
@@ -5054,87 +4624,27 @@ window.innerHTML = (function (document) {
 	                    }
 	                }
 	            }
-	            try {
-	                callWithInterruptionHandling(this.ready, this);
-	            }
-	            catch (err) {
-	                config.logError(err);
-	            }
-	            if (this._readyHooks) {
-	                for (let readyHook of this._readyHooks) {
-	                    try {
-	                        callWithInterruptionHandling(readyHook, this);
-	                    }
-	                    catch (err) {
-	                        config.logError(err);
-	                    }
-	                }
-	            }
+	            callHooks([
+	                this.ready,
+	                ...(this.constructor.readyHooks || []),
+	                ...(this._readyHooks || [])
+	            ], this);
 	            this._isReady = true;
 	        }
-	        try {
-	            callWithInterruptionHandling(this.elementAttached, this);
-	        }
-	        catch (err) {
-	            config.logError(err);
-	        }
-	        if (this._elementAttachedHooks) {
-	            for (let elementAttachedHook of this._elementAttachedHooks) {
-	                try {
-	                    callWithInterruptionHandling(elementAttachedHook, this);
-	                }
-	                catch (err) {
-	                    config.logError(err);
-	                }
-	            }
-	        }
-	        let listenings = this.constructor.listenings;
-	        if (listenings) {
-	            for (let listening of listenings) {
-	                let target = listening.target;
-	                if (target) {
-	                    if (typeof target == 'function') {
-	                        target = target.call(this, this);
-	                    }
-	                    if (typeof target == 'string' && target.charAt(0) == '@') {
-	                        target = Function(`return this.${target.slice(1)};`).call(this);
-	                    }
-	                }
-	                else {
-	                    target = this;
-	                }
-	                try {
-	                    this.listenTo(target, typeof listening.type == 'function'
-	                        ? listening.type.call(this, this.constructor)
-	                        : listening.type, typeof listening.listener == 'string'
-	                        ? this[listening.listener]
-	                        : listening.listener, this, listening.useCapture);
-	                }
-	                catch (err) {
-	                    config.logError(err);
-	                }
-	            }
-	        }
+	        callHooks([
+	            this.elementAttached,
+	            ...(this.constructor.elementAttachedHooks || []),
+	            ...(this._elementAttachedHooks || [])
+	        ], this);
 	        return this.initializationWait;
 	    }
 	    _detach() {
 	        this._attached = false;
-	        try {
-	            callWithInterruptionHandling(this.elementDetached, this);
-	        }
-	        catch (err) {
-	            config.logError(err);
-	        }
-	        if (this._elementDetachedHooks) {
-	            for (let elementDetachedHook of this._elementDetachedHooks) {
-	                try {
-	                    callWithInterruptionHandling(elementDetachedHook, this);
-	                }
-	                catch (err) {
-	                    config.logError(err);
-	                }
-	            }
-	        }
+	        callHooks([
+	            this.elementDetached,
+	            ...(this.constructor.elementDetachedHooks || []),
+	            ...(this._elementDetachedHooks || [])
+	        ], this);
 	        this.dispose();
 	    }
 	    dispose() {
@@ -5205,7 +4715,12 @@ window.innerHTML = (function (document) {
 	BaseComponent.params = null;
 	BaseComponent.i18n = null;
 	BaseComponent.template = null;
-	BaseComponent.listenings = null;
+	BaseComponent.elementConnectedHooks = null;
+	BaseComponent.elementDisconnectedHooks = null;
+	BaseComponent.readyHooks = null;
+	BaseComponent.elementAttachedHooks = null;
+	BaseComponent.elementDetachedHooks = null;
+	BaseComponent.elementMovedHooks = null;
 	BaseComponent.events = null;
 	BaseComponent.domEvents = null;
 	const handledEvents = [
@@ -5225,6 +4740,490 @@ window.innerHTML = (function (document) {
 	        document.body.addEventListener(type, handleDOMEvent);
 	    }
 	});
+
+	let observedAttributesFeature_ = false;
+	window.customElements.define('test-observed-attributes-feature', class extends HTMLElement {
+	    static get observedAttributes() {
+	        return ['test'];
+	    }
+	    attributeChangedCallback() {
+	        observedAttributesFeature_ = true;
+	    }
+	});
+	document.createElement('test-observed-attributes-feature').setAttribute('test', '');
+	const observedAttributesFeature = observedAttributesFeature_;
+
+	const KEY_RIONITE_COMPONENT_CONSTRUCTOR = Symbol('rioniteComponentConstructor');
+	const KEY_ELEMENT_CONNECTED = Symbol('elementConnected');
+	let connectionStatusCallbacksSuppressed = false;
+	function suppressConnectionStatusCallbacks() {
+	    connectionStatusCallbacksSuppressed = true;
+	}
+	function resumeConnectionStatusCallbacks() {
+	    connectionStatusCallbacksSuppressed = false;
+	}
+	const ElementProtoMixin = {
+	    $component: null,
+	    get rioniteComponent() {
+	        return this.$component || new this.constructor[KEY_RIONITE_COMPONENT_CONSTRUCTOR](this);
+	    },
+	    [KEY_ELEMENT_CONNECTED]: false,
+	    connectedCallback() {
+	        this[KEY_ELEMENT_CONNECTED] = true;
+	        if (connectionStatusCallbacksSuppressed) {
+	            return;
+	        }
+	        let component = this.$component;
+	        if (component) {
+	            if (component._attached) {
+	                if (component._parentComponent === null) {
+	                    component._parentComponent = undefined;
+	                    callHooks([
+	                        component.elementConnected,
+	                        ...(component.constructor
+	                            .elementConnectedHooks || []),
+	                        ...(component._elementConnectedHooks || []),
+	                        component.elementMoved,
+	                        ...(component.constructor.elementMovedHooks ||
+	                            []),
+	                        ...(component._elementMovedHooks || [])
+	                    ], component);
+	                }
+	                else {
+	                    callHooks([
+	                        component.elementConnected,
+	                        ...(component.constructor
+	                            .elementConnectedHooks || []),
+	                        ...(component._elementConnectedHooks || [])
+	                    ], component);
+	                }
+	            }
+	            else {
+	                component._parentComponent = undefined;
+	                ComponentParams.init(component);
+	                callHooks([
+	                    component.elementConnected,
+	                    ...(component.constructor.elementConnectedHooks ||
+	                        []),
+	                    ...(component._elementConnectedHooks || [])
+	                ], component);
+	                component._attach();
+	            }
+	            return;
+	        }
+	        else {
+	            component = this.rioniteComponent;
+	            component._parentComponent = undefined;
+	            if (component.parentComponent && component._parentComponent._isReady) {
+	                ComponentParams.init(component);
+	                callHooks([
+	                    component.elementConnected,
+	                    ...(component.constructor.elementConnectedHooks ||
+	                        []),
+	                    ...(component._elementConnectedHooks || [])
+	                ], component);
+	                component._attach();
+	                return;
+	            }
+	        }
+	        dist_2$2(() => {
+	            if (!this[KEY_ELEMENT_CONNECTED]) {
+	                return;
+	            }
+	            let component = this.rioniteComponent;
+	            component._parentComponent = undefined;
+	            if (!component._attached && !component.parentComponent) {
+	                ComponentParams.init(component);
+	                callHooks([
+	                    component.elementConnected,
+	                    ...(component.constructor.elementConnectedHooks ||
+	                        []),
+	                    ...(component._elementConnectedHooks || [])
+	                ], component);
+	                component._attach();
+	            }
+	        });
+	    },
+	    disconnectedCallback() {
+	        this[KEY_ELEMENT_CONNECTED] = false;
+	        if (connectionStatusCallbacksSuppressed) {
+	            return;
+	        }
+	        let component = this.$component;
+	        if (component && component._attached) {
+	            component._parentComponent = null;
+	            callHooks([
+	                component.elementDisconnected,
+	                ...(component.constructor.elementDisconnectedHooks ||
+	                    []),
+	                ...(component._elementDisconnectedHooks || [])
+	            ], component);
+	            dist_2$2(() => {
+	                if (component._parentComponent === null && component._attached) {
+	                    component._detach();
+	                }
+	            });
+	        }
+	    },
+	    attributeChangedCallback(name, _prevRawValue, rawValue) {
+	        let component = this.$component;
+	        if (component && component._isReady) {
+	            let $paramConfig = component.constructor[KEY_PARAMS_CONFIG].get(name);
+	            if ($paramConfig.readonly) {
+	                if (observedAttributesFeature) {
+	                    throw TypeError(`Cannot write to readonly parameter "${$paramConfig.name}"`);
+	                }
+	            }
+	            else {
+	                let valueCell = (component[cellx.KEY_VALUE_CELLS] || (component[cellx.KEY_VALUE_CELLS] = new Map())).get($paramConfig.property);
+	                let value = $paramConfig.valueСonverters.toData(rawValue, $paramConfig.default, this);
+	                if (valueCell) {
+	                    valueCell.set(value);
+	                }
+	                else {
+	                    component[KEY_PARAM_VALUES].set($paramConfig.name, value);
+	                }
+	            }
+	        }
+	    }
+	};
+
+	const hasOwn$1 = Object.prototype.hasOwnProperty;
+	const push = Array.prototype.push;
+	const componentParamTypeMap = new Map([
+	    ['boolean', Boolean],
+	    ['number', Number],
+	    ['string', String]
+	]);
+	const componentParamTypeMap2 = new Map([
+	    [Boolean, 'boolean'],
+	    [Number, 'number'],
+	    [String, 'string']
+	]);
+	function inheritProperty(target, source, name, depth) {
+	    let obj = target[name];
+	    let parentObj = source[name];
+	    if (obj && parentObj && obj != parentObj) {
+	        let inheritedObj = (target[name] = { __proto__: parentObj });
+	        for (let key in obj) {
+	            if (hasOwn$1.call(obj, key)) {
+	                inheritedObj[key] = obj[key];
+	                if (depth) {
+	                    inheritProperty(inheritedObj, parentObj, key, depth - 1);
+	                }
+	            }
+	        }
+	    }
+	}
+	function registerComponent(componentCtor) {
+	    var _a, _b;
+	    let elIs = componentCtor.hasOwnProperty('elementIs')
+	        ? componentCtor.elementIs
+	        : (componentCtor.elementIs = componentCtor.name);
+	    if (!elIs) {
+	        throw TypeError('Static property "elementIs" is required');
+	    }
+	    let kebabCaseElIs = dist_1(elIs, true);
+	    if (componentConstructors.has(kebabCaseElIs)) {
+	        throw TypeError(`Component "${kebabCaseElIs}" already registered`);
+	    }
+	    let componentProto = componentCtor.prototype;
+	    let parentComponentCtor = Object.getPrototypeOf(componentProto)
+	        .constructor;
+	    inheritProperty(componentCtor, parentComponentCtor, 'params', 0);
+	    componentCtor[KEY_PARAMS_CONFIG] = null;
+	    let paramsConfig = componentCtor.params;
+	    for (let name in paramsConfig) {
+	        let paramConfig = paramsConfig[name];
+	        if (paramConfig === null || paramConfig === Object.prototype[name]) {
+	            continue;
+	        }
+	        let snakeCaseName = dist_1$1(name, true);
+	        let propName;
+	        let type;
+	        let valueСonverters;
+	        let defaultValue;
+	        let required;
+	        let readonly;
+	        if (typeof paramConfig == 'object') {
+	            propName = paramConfig.property || name;
+	            type = paramConfig.type;
+	            defaultValue = paramConfig.default;
+	            required = paramConfig.required || false;
+	            readonly = paramConfig.readonly || false;
+	        }
+	        else {
+	            propName = name;
+	            type = paramConfig;
+	            required = readonly = false;
+	        }
+	        if (!type) {
+	            type =
+	                (defaultValue !== undefined && componentParamTypeMap.get(typeof defaultValue)) ||
+	                    Object;
+	        }
+	        valueСonverters = componentParamValueСonverters.get(type);
+	        if (!valueСonverters) {
+	            throw TypeError('Unsupported parameter type');
+	        }
+	        if (defaultValue !== undefined &&
+	            type != Object &&
+	            type != eval &&
+	            componentParamTypeMap2.get(type) != typeof defaultValue) {
+	            throw TypeError('Specified type does not match type of defaultValue');
+	        }
+	        let $paramConfig = {
+	            name,
+	            property: propName,
+	            type,
+	            valueСonverters,
+	            default: defaultValue,
+	            required,
+	            readonly,
+	            paramConfig
+	        };
+	        (componentCtor[KEY_PARAMS_CONFIG] || (componentCtor[KEY_PARAMS_CONFIG] = new Map()))
+	            .set(name, $paramConfig)
+	            .set(snakeCaseName, $paramConfig);
+	        let descriptor = {
+	            configurable: true,
+	            enumerable: true,
+	            get() {
+	                let self = this[KEY_COMPONENT_SELF];
+	                let valueCell = (self[cellx.KEY_VALUE_CELLS] || (self[cellx.KEY_VALUE_CELLS] = new Map())).get(propName);
+	                if (valueCell) {
+	                    return valueCell.get();
+	                }
+	                let value = self[KEY_PARAM_VALUES].get(name);
+	                if (cellx.Cell.currentlyPulling || cellx.EventEmitter.currentlySubscribing) {
+	                    self[KEY_PARAM_VALUES].delete(name);
+	                    valueCell = new cellx.Cell(null, {
+	                        context: self,
+	                        value
+	                    });
+	                    self[cellx.KEY_VALUE_CELLS].set(propName, valueCell);
+	                    if (cellx.Cell.currentlyPulling) {
+	                        return valueCell.get();
+	                    }
+	                }
+	                return value;
+	            },
+	            set(value) {
+	                let self = this[KEY_COMPONENT_SELF];
+	                let valueCell = (self[cellx.KEY_VALUE_CELLS] || (self[cellx.KEY_VALUE_CELLS] = new Map())).get(propName);
+	                if (self[KEY_COMPONENT_PARAMS_INITED]) {
+	                    if (readonly) {
+	                        if (value !==
+	                            (valueCell ? valueCell.get() : self[KEY_PARAM_VALUES].get(name))) {
+	                            throw TypeError(`Parameter "${name}" is readonly`);
+	                        }
+	                        return;
+	                    }
+	                    if ($paramConfig.valueСonverters.toString) {
+	                        let rawValue = $paramConfig.valueСonverters.toString(value, $paramConfig.default);
+	                        if (rawValue === null) {
+	                            self.element.removeAttribute(snakeCaseName);
+	                        }
+	                        else {
+	                            self.element.setAttribute(snakeCaseName, rawValue);
+	                        }
+	                    }
+	                }
+	                if (valueCell) {
+	                    valueCell.set(value);
+	                }
+	                else {
+	                    self[KEY_PARAM_VALUES].set(name, value);
+	                }
+	            }
+	        };
+	        Object.defineProperty(componentProto, propName, descriptor);
+	    }
+	    inheritProperty(componentCtor, parentComponentCtor, 'i18n', 0);
+	    componentCtor._blockNamesString = elIs + ' ' + (parentComponentCtor._blockNamesString || '');
+	    componentCtor._elementBlockNames = [elIs];
+	    if (parentComponentCtor._elementBlockNames) {
+	        push.apply(componentCtor._elementBlockNames, parentComponentCtor._elementBlockNames);
+	    }
+	    let template = componentCtor.template;
+	    if (template !== null) {
+	        if (template === parentComponentCtor.template) {
+	            componentCtor.template = template.extend('', {
+	                blockName: elIs
+	            });
+	        }
+	        else if (template instanceof Template) {
+	            template.setBlockName(componentCtor._elementBlockNames);
+	        }
+	        else {
+	            componentCtor.template = parentComponentCtor.template
+	                ? parentComponentCtor.template.extend(template, {
+	                    blockName: elIs
+	                })
+	                : new Template(template, { blockName: componentCtor._elementBlockNames });
+	        }
+	    }
+	    inheritProperty(componentCtor, parentComponentCtor, 'events', 1);
+	    inheritProperty(componentCtor, parentComponentCtor, 'domEvents', 1);
+	    let elExtends = componentCtor.elementExtends;
+	    let parentElCtor;
+	    if (elExtends) {
+	        parentElCtor =
+	            elementConstructors.get(elExtends) || window[`HTML${dist_1$6(elExtends)}Element`];
+	        if (!parentElCtor) {
+	            throw TypeError(`Component "${elExtends}" is not registered`);
+	        }
+	    }
+	    else {
+	        parentElCtor = HTMLElement;
+	    }
+	    let elCtor = (_b = class extends parentElCtor {
+	            static get observedAttributes() {
+	                let paramsConfig = componentCtor.params;
+	                let attrs = [];
+	                for (let name in paramsConfig) {
+	                    if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
+	                        attrs.push(dist_1$1(name, true));
+	                    }
+	                }
+	                return attrs;
+	            }
+	        },
+	        _a = KEY_RIONITE_COMPONENT_CONSTRUCTOR,
+	        _b[_a] = componentCtor,
+	        _b);
+	    let elProto = elCtor.prototype;
+	    elProto.constructor = elCtor;
+	    let names = Object.getOwnPropertyNames(ElementProtoMixin);
+	    for (let name of names) {
+	        Object.defineProperty(elProto, name, Object.getOwnPropertyDescriptor(ElementProtoMixin, name));
+	    }
+	    names = Object.getOwnPropertySymbols(ElementProtoMixin);
+	    for (let name of names) {
+	        Object.defineProperty(elProto, name, Object.getOwnPropertyDescriptor(ElementProtoMixin, name));
+	    }
+	    componentConstructors.set(elIs, componentCtor).set(kebabCaseElIs, componentCtor);
+	    elementConstructors.set(elIs, elCtor);
+	    window.customElements.define(kebabCaseElIs, elCtor, elExtends ? { extends: elExtends } : undefined);
+	    return componentCtor;
+	}
+
+	function Component(config) {
+	    return (componentCtor) => {
+	        if (config) {
+	            if (config.elementIs !== undefined) {
+	                componentCtor.elementIs = config.elementIs;
+	            }
+	            if (config.elementExtends !== undefined) {
+	                componentCtor.elementExtends = config.elementExtends;
+	            }
+	            if (config.params !== undefined) {
+	                componentCtor.params = config.params;
+	            }
+	            if (config.i18n !== undefined) {
+	                componentCtor.i18n = config.i18n;
+	            }
+	            if (config.template !== undefined) {
+	                componentCtor.template = config.template;
+	            }
+	            if (config.events !== undefined) {
+	                componentCtor.events = config.events;
+	            }
+	            if (config.domEvents !== undefined) {
+	                componentCtor.domEvents = config.domEvents;
+	            }
+	        }
+	        registerComponent(componentCtor);
+	    };
+	}
+
+	function Param(target, propName, _propDesc, name, config) {
+	    if (typeof propName != 'string') {
+	        if (target && typeof target != 'string') {
+	            config = target;
+	        }
+	        else {
+	            name = target;
+	            config = propName;
+	        }
+	        return (target, propName, propDesc) => Param(target, propName, propDesc, name, config);
+	    }
+	    if (!config) {
+	        config = {};
+	    }
+	    else if (typeof config == 'function') {
+	        config = { type: config };
+	    }
+	    config.property = propName;
+	    let ctor = target.constructor;
+	    ((ctor.hasOwnProperty('params') && ctor.params) || (ctor.params = {}))[name || propName] = config;
+	}
+
+	const hasOwn$2 = Object.prototype.hasOwnProperty;
+	function Listen(evtType, optionsOrTarget, useCapture) {
+	    return (target, methodName, _methodDesc) => {
+	        let options = optionsOrTarget &&
+	            typeof optionsOrTarget == 'object' &&
+	            !Array.isArray(optionsOrTarget) &&
+	            Object.getPrototypeOf(optionsOrTarget) === Object.prototype
+	            ? optionsOrTarget
+	            : null;
+	        let listeningTarget = options
+	            ? options.target
+	            : optionsOrTarget;
+	        if (options) {
+	            useCapture = options.useCapture;
+	        }
+	        (hasOwn$2.call(target.constructor, 'elementAttachedHooks')
+	            ? target.constructor.elementAttachedHooks ||
+	                (target.constructor.elementAttachedHooks = [])
+	            : (target.constructor.elementAttachedHooks = (target.constructor.elementAttachedHooks || []).slice())).push((component) => {
+	            let target = listeningTarget;
+	            if (target) {
+	                if (typeof target == 'function') {
+	                    target = target.call(component, component);
+	                }
+	                if (typeof target == 'string' && target.charAt(0) == '@') {
+	                    target = Function(`return this.${target.slice(1)};`).call(component);
+	                }
+	            }
+	            else {
+	                target = component;
+	            }
+	            component.listenTo(target, typeof evtType == 'function'
+	                ? evtType.call(component, component.constructor)
+	                : evtType, component[methodName], component, useCapture);
+	        });
+	    };
+	}
+
+	function Callback(target, methodName, methodDesc) {
+	    if (!methodDesc) {
+	        methodDesc = Object.getOwnPropertyDescriptor(target, methodName);
+	    }
+	    let method = methodDesc.value;
+	    methodDesc.value = function (...args) {
+	        return this._attached ? method.call(this, ...args) : Promise.resolve();
+	    };
+	    return methodDesc;
+	}
+
+	function Interruptible(target, methodName, methodDesc) {
+	    if (!methodDesc) {
+	        methodDesc = Object.getOwnPropertyDescriptor(target, methodName);
+	    }
+	    let method = methodDesc.value;
+	    methodDesc.value = function (...args) {
+	        let result = method.call(this, ...args);
+	        result.catch(err => {
+	            if (!(err instanceof InterruptError)) {
+	                throw err;
+	            }
+	        });
+	        return result;
+	    };
+	    return methodDesc;
+	}
 
 	/*! *****************************************************************************
 	Copyright (c) Microsoft Corporation. All rights reserved.
