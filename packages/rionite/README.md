@@ -21,7 +21,8 @@ import { BaseComponent, Component, Param } from 'rionite';
     template: 'Hello, {paramName}!'
 })
 class HelloUser extends BaseComponent {
-    @Param paramName: string;
+    @Param
+	paramName: string;
 
     elementAttached() {
         // Сработает при появлении элемента `<hello-world>` в документе.
@@ -37,8 +38,6 @@ class HelloUser extends BaseComponent {
 
 </script>
 ```
-
-Можно использовать ES.Next синтаксис:
 
 Элемент в приведённом примере отрендерится в следующий вид:
 ```html
@@ -100,7 +99,8 @@ import { BaseComponent, Component } from 'rionite';
     `
 })
 class SimpleCounter extends BaseComponent {
-    @Observable value = 0;
+    @Observable
+	value = 0;
 
     _onButtonClick() {
         this.value++;
