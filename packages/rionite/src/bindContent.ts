@@ -139,23 +139,23 @@ export function bindContent(
 								childComponent!,
 								$paramConfig.property,
 								keypath.length == 1
-									? (propertyName =>
+									? (propName =>
 											function(evt: IEvent) {
-												this.ownerComponent[propertyName] = evt.data.value;
+												this.ownerComponent[propName] = evt.data.value;
 											})(keypath[0])
-									: ((propertyName, keypath) => {
+									: ((propName, keypath) => {
 											let getPropertyHolder = compileKeypath(
 												keypath,
 												keypath.join('.')
 											);
 
 											return function(evt: IEvent) {
-												let propertyHolder = getPropertyHolder.call(
+												let propHolder = getPropertyHolder.call(
 													this.ownerComponent
 												);
 
-												if (propertyHolder) {
-													propertyHolder[propertyName] = evt.data.value;
+												if (propHolder) {
+													propHolder[propName] = evt.data.value;
 												}
 											};
 									  })(keypath[keypath.length - 1], keypath.slice(0, -1))

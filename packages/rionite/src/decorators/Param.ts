@@ -1,30 +1,30 @@
 import { BaseComponent, IComponentParamConfig } from '../BaseComponent';
 
-export function Param(target: any, propertyName: string, propertyDesc?: PropertyDescriptor): void;
+export function Param(target: any, propName: string, propDesc?: PropertyDescriptor): void;
 export function Param(
 	name?: string,
 	config?: IComponentParamConfig | Function
-): (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor) => void;
+): (target: Object, propName: string, propDesc?: PropertyDescriptor) => void;
 export function Param(
 	config?: IComponentParamConfig | Function
-): (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor) => void;
+): (target: Object, propName: string, propDesc?: PropertyDescriptor) => void;
 export function Param(
 	target?: Object | string | IComponentParamConfig | Function,
-	propertyName?: string | IComponentParamConfig | Function,
-	_propertyDesc?: PropertyDescriptor,
+	propName?: string | IComponentParamConfig | Function,
+	_propDesc?: PropertyDescriptor,
 	name?: string,
 	config?: IComponentParamConfig | Function
 ): any {
-	if (typeof propertyName != 'string') {
+	if (typeof propName != 'string') {
 		if (target && typeof target != 'string') {
 			config = target;
 		} else {
 			name = target;
-			config = propertyName;
+			config = propName;
 		}
 
-		return (target: Object, propertyName: string, propertyDesc?: PropertyDescriptor): void =>
-			(Param as any)(target, propertyName, propertyDesc, name, config);
+		return (target: Object, propName: string, propDesc?: PropertyDescriptor): void =>
+			(Param as any)(target, propName, propDesc, name, config);
 	}
 
 	if (!config) {
@@ -33,11 +33,11 @@ export function Param(
 		config = { type: config };
 	}
 
-	config.property = propertyName;
+	config.property = propName;
 
 	let ctor = target!.constructor as typeof BaseComponent;
 
 	((ctor.hasOwnProperty('params') && ctor.params) || (ctor.params = {}))[
-		name || propertyName
+		name || propName
 	] = config;
 }

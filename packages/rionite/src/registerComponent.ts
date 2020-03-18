@@ -84,7 +84,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 
 		let snakeCaseName = snakeCaseAttributeName(name, true);
 
-		let propertyName: string;
+		let propName: string;
 		let type: Function | undefined;
 		let valueСonverters: IComponentParamValueСonverters | undefined;
 		let defaultValue: any;
@@ -92,13 +92,13 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 		let readonly: boolean;
 
 		if (typeof paramConfig == 'object') {
-			propertyName = paramConfig.property || name;
+			propName = paramConfig.property || name;
 			type = paramConfig.type;
 			defaultValue = paramConfig.default;
 			required = paramConfig.required || false;
 			readonly = paramConfig.readonly || false;
 		} else {
-			propertyName = name;
+			propName = name;
 			type = paramConfig;
 			required = readonly = false;
 		}
@@ -126,7 +126,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 
 		let $paramConfig: I$ComponentParamConfig = {
 			name,
-			property: propertyName,
+			property: propName,
 			type,
 			valueСonverters,
 			default: defaultValue,
@@ -145,10 +145,9 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 
 			get(this: BaseComponent) {
 				let self = this[KEY_COMPONENT_SELF];
-				let valueCell = (
-					(self[KEY_VALUE_CELLS] as Map<string, Cell>) ||
-					(self[KEY_VALUE_CELLS] = new Map())
-				).get(propertyName);
+				let valueCell = (self[KEY_VALUE_CELLS] || (self[KEY_VALUE_CELLS] = new Map())).get(
+					propName
+				);
 
 				if (valueCell) {
 					return valueCell.get();
@@ -163,7 +162,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 						value
 					});
 
-					(self[KEY_VALUE_CELLS] as Map<string, Cell>).set(propertyName, valueCell);
+					self[KEY_VALUE_CELLS]!.set(propName, valueCell);
 
 					if (Cell.currentlyPulling) {
 						return valueCell.get();
@@ -175,10 +174,9 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 
 			set(this: BaseComponent, value: any) {
 				let self = this[KEY_COMPONENT_SELF];
-				let valueCell = (
-					(self[KEY_VALUE_CELLS] as Map<string, Cell>) ||
-					(self[KEY_VALUE_CELLS] = new Map())
-				).get(propertyName);
+				let valueCell = (self[KEY_VALUE_CELLS] || (self[KEY_VALUE_CELLS] = new Map())).get(
+					propName
+				);
 
 				if (self[KEY_COMPONENT_PARAMS_INITED]) {
 					if (readonly) {
@@ -214,7 +212,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 			}
 		};
 
-		Object.defineProperty(componentProto, propertyName, descriptor);
+		Object.defineProperty(componentProto, propName, descriptor);
 	}
 
 	inheritProperty(componentCtor, parentComponentCtor, 'i18n', 0);

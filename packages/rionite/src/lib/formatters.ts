@@ -103,8 +103,8 @@ export const formatters: Record<string, Function> = {
 		return !!target && target.has(key);
 	},
 
-	hasOwn(target: Object | null | undefined, propertyName: string | number): boolean {
-		return !!target && target.hasOwnProperty(propertyName);
+	hasOwn(target: Object | null | undefined, propName: string | number): boolean {
+		return !!target && target.hasOwnProperty(propName);
 	},
 
 	get(target: { get(key: any): any } | null | undefined, key: any): any {

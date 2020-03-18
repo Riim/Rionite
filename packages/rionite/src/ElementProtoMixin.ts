@@ -1,10 +1,8 @@
 import { defer } from '@riim/defer';
-import { Cell, KEY_VALUE_CELLS } from 'cellx';
-import { BaseComponent, IComponentElement } from './BaseComponent';
+import { KEY_VALUE_CELLS } from 'cellx';
+import { BaseComponent, callHooks, IComponentElement } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
-import { config } from './config';
 import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
-import { callWithInterruptionHandling } from './lib/callWithInterruptionHandling';
 import { observedAttributesFeature } from './lib/observedAttributesFeature';
 
 export const KEY_RIONITE_COMPONENT_CONSTRUCTOR = Symbol('rioniteComponentConstructor');
@@ -43,32 +41,45 @@ export const ElementProtoMixin = {
 				if (component._parentComponent === null) {
 					component._parentComponent = undefined;
 
-					component.elementConnected();
-
-					try {
-						callWithInterruptionHandling(component.elementMoved, component);
-					} catch (err) {
-						config.logError(err);
-					}
-
-					if (component._elementMovedHooks) {
-						for (let elementMovedHook of component._elementMovedHooks) {
-							try {
-								callWithInterruptionHandling(elementMovedHook, component);
-							} catch (err) {
-								config.logError(err);
-							}
-						}
-					}
+					callHooks(
+						[
+							component.elementConnected,
+							...((component.constructor as typeof BaseComponent)
+								.elementConnectedHooks || []),
+							...(component._elementConnectedHooks || []),
+							component.elementMoved,
+							...((component.constructor as typeof BaseComponent).elementMovedHooks ||
+								[]),
+							...(component._elementMovedHooks || [])
+						],
+						component
+					);
 				} else {
-					component.elementConnected();
+					callHooks(
+						[
+							component.elementConnected,
+							...((component.constructor as typeof BaseComponent)
+								.elementConnectedHooks || []),
+							...(component._elementConnectedHooks || [])
+						],
+						component
+					);
 				}
 			} else {
 				component._parentComponent = undefined;
 
 				ComponentParams.init(component);
 
-				component.elementConnected();
+				callHooks(
+					[
+						component.elementConnected,
+						...((component.constructor as typeof BaseComponent).elementConnectedHooks ||
+							[]),
+						...(component._elementConnectedHooks || [])
+					],
+					component
+				);
+
 				component._attach();
 			}
 
@@ -81,7 +92,16 @@ export const ElementProtoMixin = {
 			if (component.parentComponent && component._parentComponent!._isReady) {
 				ComponentParams.init(component);
 
-				component.elementConnected();
+				callHooks(
+					[
+						component.elementConnected,
+						...((component.constructor as typeof BaseComponent).elementConnectedHooks ||
+							[]),
+						...(component._elementConnectedHooks || [])
+					],
+					component
+				);
+
 				component._attach();
 
 				return;
@@ -100,7 +120,16 @@ export const ElementProtoMixin = {
 			if (!component._attached && !component.parentComponent) {
 				ComponentParams.init(component);
 
-				component.elementConnected();
+				callHooks(
+					[
+						component.elementConnected,
+						...((component.constructor as typeof BaseComponent).elementConnectedHooks ||
+							[]),
+						...(component._elementConnectedHooks || [])
+					],
+					component
+				);
+
 				component._attach();
 			}
 		});
@@ -118,7 +147,15 @@ export const ElementProtoMixin = {
 		if (component && component._attached) {
 			component._parentComponent = null;
 
-			component.elementDisconnected();
+			callHooks(
+				[
+					component.elementDisconnected,
+					...((component.constructor as typeof BaseComponent).elementDisconnectedHooks ||
+						[]),
+					...(component._elementDisconnectedHooks || [])
+				],
+				component
+			);
 
 			defer(() => {
 				if (component!._parentComponent === null && component!._attached) {
@@ -147,8 +184,7 @@ export const ElementProtoMixin = {
 				}
 			} else {
 				let valueCell = (
-					(component[KEY_VALUE_CELLS] as Map<string, Cell>) ||
-					(component[KEY_VALUE_CELLS] = new Map())
+					component[KEY_VALUE_CELLS] || (component[KEY_VALUE_CELLS] = new Map())
 				).get($paramConfig.property);
 				let value = $paramConfig.valueСonverters!.toData(
 					rawValue,

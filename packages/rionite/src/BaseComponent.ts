@@ -19,7 +19,6 @@ import { elementConstructors } from './elementConstructors';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from './ElementProtoMixin';
 import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
-import { callWithInterruptionHandling } from './lib/callWithInterruptionHandling';
 import { findChildComponents } from './lib/findChildComponents';
 import { InterruptError } from './lib/InterruptError';
 import { normalizeTextNodes } from './lib/normalizeTextNodes';
@@ -95,24 +94,19 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
 	[KEY_CONTENT_TEMPLATE]?: Template;
 }
 
+export type THook = (this: BaseComponent, component?: BaseComponent) => any;
+
 export type TComponentListeningTarget<T = BaseComponent> =
 	| TListeningTarget
 	| string
 	| Array<TListeningTarget>
 	| ((this: T, self: T) => TListeningTarget | string | Array<TListeningTarget>);
 
-export type TComponentListeningType<T = BaseComponent> =
+export type TComponentListeningEventType<T = BaseComponent> =
 	| string
 	| symbol
 	| Array<string | symbol>
 	| ((this: T, ctor: typeof BaseComponent) => string | symbol | Array<string | symbol>);
-
-export interface IComponentListening<T = BaseComponent> {
-	target?: TComponentListeningTarget<T>;
-	type: TComponentListeningType<T>;
-	listener: TListener | string;
-	useCapture?: boolean;
-}
 
 export type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (
 	this: T,
@@ -125,10 +119,40 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	[elementName: string]: Record<string, TEventHandler<T, U>>;
 }
 
-export type THook = (this: BaseComponent) => void;
+export function callHooks(hooks: Array<Function>, context: object) {
+	for (let hook of hooks) {
+		let result;
+
+		try {
+			result = hook.length ? hook.call(context, context) : hook.call(context);
+		} catch (err) {
+			config.logError(err);
+			return;
+		}
+
+		if (result instanceof Promise) {
+			result.catch(err => {
+				if (!(err instanceof InterruptError)) {
+					config.logError(err);
+				}
+			});
+		}
+	}
+}
 
 let currentComponent: BaseComponent | null = null;
 
+export function onElementConnected(hook: THook) {
+	(
+		currentComponent!._elementConnectedHooks || (currentComponent!._elementConnectedHooks = [])
+	).push(hook);
+}
+export function onElementDisconnected(hook: THook) {
+	(
+		currentComponent!._elementDisconnectedHooks ||
+		(currentComponent!._elementDisconnectedHooks = [])
+	).push(hook);
+}
 export function onReady(hook: THook) {
 	(currentComponent!._readyHooks || (currentComponent!._readyHooks = [])).push(hook);
 }
@@ -155,6 +179,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	static elementExtends: string | null = null;
 
 	static params: Record<string, any> | null = null;
+	static [KEY_PARAMS_CONFIG]: Map<string, I$ComponentParamConfig> | null;
+
 	static i18n: Record<string, any> | null = null;
 
 	static _blockNamesString: string;
@@ -166,12 +192,15 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return this.template !== null;
 	}
 
-	static listenings: Array<IComponentListening> | null = null;
+	static elementConnectedHooks: Array<THook> | null = null;
+	static elementDisconnectedHooks: Array<THook> | null = null;
+	static readyHooks: Array<THook> | null = null;
+	static elementAttachedHooks: Array<THook> | null = null;
+	static elementDetachedHooks: Array<THook> | null = null;
+	static elementMovedHooks: Array<THook> | null = null;
 
 	static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null = null;
 	static domEvents: IComponentEvents<BaseComponent, Event> | null = null;
-
-	static [KEY_PARAMS_CONFIG]: Map<string, I$ComponentParamConfig> | null;
 
 	[KEY_COMPONENT_SELF]: this;
 
@@ -246,6 +275,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return this._isReady;
 	}
 
+	_elementConnectedHooks: Array<THook> | null = null;
+	_elementDisconnectedHooks: Array<THook> | null = null;
 	_readyHooks: Array<THook> | null = null;
 	_elementAttachedHooks: Array<THook> | null = null;
 	_elementDetachedHooks: Array<THook> | null = null;
@@ -299,7 +330,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	listenTo(
 		target: TListeningTarget | string | Array<TListeningTarget>,
-		type: string | symbol | Array<string | symbol>,
+		evtType: string | symbol | Array<string | symbol>,
 		listener: TListener | Array<TListener>,
 		context?: any,
 		useCapture?: boolean
@@ -312,7 +343,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	): IDisposableListening;
 	listenTo(
 		target: TListeningTarget | string | Array<TListeningTarget>,
-		type:
+		evtType:
 			| string
 			| symbol
 			| Array<string | symbol>
@@ -327,25 +358,27 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 		let listenings: Array<IDisposableListening>;
 
-		if (typeof type == 'object') {
+		if (typeof evtType == 'object') {
 			listenings = [];
 
-			if (Array.isArray(type)) {
-				for (let i = 0, l = type.length; i < l; i++) {
-					listenings.push(this.listenTo(target, type[i], listener, context, useCapture));
+			if (Array.isArray(evtType)) {
+				for (let i = 0, l = evtType.length; i < l; i++) {
+					listenings.push(
+						this.listenTo(target, evtType[i], listener, context, useCapture)
+					);
 				}
 			} else {
-				for (let type_ in type) {
-					if (hasOwn.call(type, type_)) {
+				for (let evtType_ in evtType) {
+					if (hasOwn.call(evtType, evtType_)) {
 						listenings.push(
-							this.listenTo(target, type_, type[type_], listener, context)
+							this.listenTo(target, evtType_, evtType[evtType_], listener, context)
 						);
 					}
 				}
 
-				for (let type_ of Object.getOwnPropertySymbols(type)) {
+				for (let evtType_ of Object.getOwnPropertySymbols(evtType)) {
 					listenings.push(
-						this.listenTo(target, type_, type[type_ as any], listener, context)
+						this.listenTo(target, evtType_, evtType[evtType_ as any], listener, context)
 					);
 				}
 			}
@@ -358,22 +391,28 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				listenings = [];
 
 				for (let i = 0, l = target.length; i < l; i++) {
-					listenings.push(this.listenTo(target[i], type, listener, context, useCapture));
-				}
-			} else if (Array.isArray(listener)) {
-				listenings = [];
-
-				for (let i = 0, l = listener.length; i < l; i++) {
-					listenings.push(this.listenTo(target, type, listener[i], context, useCapture));
+					listenings.push(
+						this.listenTo(target[i], evtType, listener, context, useCapture)
+					);
 				}
 			} else {
-				return this._listenTo(
-					target as EventEmitter | EventTarget,
-					type,
-					listener,
-					context !== undefined ? context : this,
-					useCapture || false
-				);
+				if (Array.isArray(listener)) {
+					listenings = [];
+
+					for (let i = 0, l = listener.length; i < l; i++) {
+						listenings.push(
+							this.listenTo(target, evtType, listener[i], context, useCapture)
+						);
+					}
+				} else {
+					return this._listenTo(
+						target as EventEmitter | EventTarget,
+						evtType,
+						listener,
+						context !== undefined ? context : this,
+						useCapture || false
+					);
+				}
 			}
 		}
 
@@ -398,7 +437,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	_listenTo(
 		target: EventEmitter | EventTarget,
-		type: string | symbol,
+		evtType: string | symbol,
 		listener: TListener,
 		context: any,
 		useCapture: boolean
@@ -408,13 +447,13 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		}
 
 		if (target instanceof EventEmitter) {
-			target.on(type, listener, context);
+			target.on(evtType, listener, context);
 		} else {
 			if (target !== context) {
 				listener = listener.bind(context);
 			}
 
-			target.addEventListener(type as string, listener, useCapture);
+			target.addEventListener(evtType as string, listener, useCapture);
 		}
 
 		let id = nextUID();
@@ -422,9 +461,9 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		let stopListening = () => {
 			if (this._disposables.has(id)) {
 				if (target instanceof EventEmitter) {
-					target.off(type, listener, context);
+					target.off(evtType, listener, context);
 				} else {
-					target.removeEventListener(type as string, listener, useCapture);
+					target.removeEventListener(evtType as string, listener, useCapture);
 				}
 
 				this._disposables.delete(id);
@@ -533,7 +572,15 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 		ComponentParams.init(this);
 
-		this.elementConnected();
+		callHooks(
+			[
+				this.elementConnected,
+				...((this.constructor as typeof BaseComponent).elementConnectedHooks || []),
+				...(this._elementConnectedHooks || [])
+			],
+			this
+		);
+
 		return this._attach();
 	}
 
@@ -690,76 +737,26 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				}
 			}
 
-			try {
-				callWithInterruptionHandling(this.ready, this);
-			} catch (err) {
-				config.logError(err);
-			}
-
-			if (this._readyHooks) {
-				for (let readyHook of this._readyHooks) {
-					try {
-						callWithInterruptionHandling(readyHook, this);
-					} catch (err) {
-						config.logError(err);
-					}
-				}
-			}
+			callHooks(
+				[
+					this.ready,
+					...((this.constructor as typeof BaseComponent).readyHooks || []),
+					...(this._readyHooks || [])
+				],
+				this
+			);
 
 			this._isReady = true;
 		}
 
-		try {
-			callWithInterruptionHandling(this.elementAttached, this);
-		} catch (err) {
-			config.logError(err);
-		}
-
-		if (this._elementAttachedHooks) {
-			for (let elementAttachedHook of this._elementAttachedHooks) {
-				try {
-					callWithInterruptionHandling(elementAttachedHook, this);
-				} catch (err) {
-					config.logError(err);
-				}
-			}
-		}
-
-		let listenings = (this.constructor as typeof BaseComponent).listenings;
-
-		if (listenings) {
-			for (let listening of listenings) {
-				let target = listening.target;
-
-				if (target) {
-					if (typeof target == 'function') {
-						target = target.call(this, this);
-					}
-
-					if (typeof target == 'string' && target.charAt(0) == '@') {
-						target = Function(`return this.${target.slice(1)};`).call(this);
-					}
-				} else {
-					target = this;
-				}
-
-				try {
-					this.listenTo(
-						target as TListeningTarget,
-						typeof listening.type == 'function'
-							? listening.type.call(this, this.constructor)
-							: listening.type,
-						typeof listening.listener == 'string'
-							? this[listening.listener]
-							: listening.listener,
-						this,
-						listening.useCapture
-					);
-				} catch (err) {
-					config.logError(err);
-				}
-			}
-		}
+		callHooks(
+			[
+				this.elementAttached,
+				...((this.constructor as typeof BaseComponent).elementAttachedHooks || []),
+				...(this._elementAttachedHooks || [])
+			],
+			this
+		);
 
 		return this.initializationWait;
 	}
@@ -767,21 +764,14 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	_detach() {
 		this._attached = false;
 
-		try {
-			callWithInterruptionHandling(this.elementDetached, this);
-		} catch (err) {
-			config.logError(err);
-		}
-
-		if (this._elementDetachedHooks) {
-			for (let elementDetachedHook of this._elementDetachedHooks) {
-				try {
-					callWithInterruptionHandling(elementDetachedHook, this);
-				} catch (err) {
-					config.logError(err);
-				}
-			}
-		}
+		callHooks(
+			[
+				this.elementDetached,
+				...((this.constructor as typeof BaseComponent).elementDetachedHooks || []),
+				...(this._elementDetachedHooks || [])
+			],
+			this
+		);
 
 		this.dispose();
 	}

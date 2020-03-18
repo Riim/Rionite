@@ -1,4 +1,4 @@
-import { BaseComponent } from './BaseComponent';
+import { BaseComponent, callHooks } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
 
 export function attachChildComponentElements(childComponents: Array<BaseComponent>) {
@@ -7,7 +7,15 @@ export function attachChildComponentElements(childComponents: Array<BaseComponen
 
 		ComponentParams.init(component);
 
-		component.elementConnected();
+		callHooks(
+			[
+				component.elementConnected,
+				...((component.constructor as typeof BaseComponent).elementConnectedHooks || []),
+				...(component._elementConnectedHooks || [])
+			],
+			component
+		);
+
 		component._attach();
 	}
 }
