@@ -6,12 +6,15 @@ import { setAttribute } from '../lib/setAttribute';
 const hasOwn = Object.prototype.hasOwnProperty;
 
 export function Attr(target: BaseComponent, propName: string, _propDesc?: PropertyDescriptor): any {
-	(hasOwn.call(target.constructor, 'elementAttachedHooks')
-		? (target.constructor as typeof BaseComponent).elementAttachedHooks ||
-		  ((target.constructor as typeof BaseComponent).elementAttachedHooks = [])
-		: ((target.constructor as typeof BaseComponent).elementAttachedHooks = (
-				(target.constructor as typeof BaseComponent).elementAttachedHooks || []
-		  ).slice())
+	let lifecycleHooks = hasOwn.call(target.constructor, '_lifecycleHooks')
+		? (target.constructor as typeof BaseComponent)._lifecycleHooks
+		: ((target.constructor as typeof BaseComponent)._lifecycleHooks = ({
+				__proto__: (target.constructor as typeof BaseComponent)._lifecycleHooks
+		  } as any) as typeof BaseComponent._lifecycleHooks);
+
+	(hasOwn.call(lifecycleHooks, 'elementAttached')
+		? lifecycleHooks.elementAttached
+		: (lifecycleHooks.elementAttached = lifecycleHooks.elementAttached.slice())
 	).push((component: BaseComponent) => {
 		let attrName = snakeCaseAttributeName(propName, true);
 

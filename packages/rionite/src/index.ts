@@ -26,7 +26,7 @@ export {
 	TComponentListeningEventType,
 	TEventHandler,
 	IComponentEvents,
-	THook,
+	TComponentLifecycleHook,
 	onReady,
 	onElementAttached,
 	onElementDetached,

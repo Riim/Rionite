@@ -1,6 +1,6 @@
 import { defer } from '@riim/defer';
 import { KEY_VALUE_CELLS } from 'cellx';
-import { BaseComponent, callHooks, IComponentElement } from './BaseComponent';
+import { BaseComponent, callLifecycleHooks, IComponentElement } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
 import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { observedAttributesFeature } from './lib/observedAttributesFeature';
@@ -41,26 +41,32 @@ export const ElementProtoMixin = {
 				if (component._parentComponent === null) {
 					component._parentComponent = undefined;
 
-					callHooks(
+					callLifecycleHooks(
 						[
 							component.elementConnected,
-							...((component.constructor as typeof BaseComponent)
-								.elementConnectedHooks || []),
-							...(component._elementConnectedHooks || []),
-							component.elementMoved,
-							...((component.constructor as typeof BaseComponent).elementMovedHooks ||
+							...(component.constructor as typeof BaseComponent)._lifecycleHooks
+								.elementConnected,
+							...((component._lifecycleHooks &&
+								component._lifecycleHooks.elementConnected) ||
 								[]),
-							...(component._elementMovedHooks || [])
+							component.elementMoved,
+							...(component.constructor as typeof BaseComponent)._lifecycleHooks
+								.elementMoved,
+							...((component._lifecycleHooks &&
+								component._lifecycleHooks.elementMoved) ||
+								[])
 						],
 						component
 					);
 				} else {
-					callHooks(
+					callLifecycleHooks(
 						[
 							component.elementConnected,
-							...((component.constructor as typeof BaseComponent)
-								.elementConnectedHooks || []),
-							...(component._elementConnectedHooks || [])
+							...(component.constructor as typeof BaseComponent)._lifecycleHooks
+								.elementConnected,
+							...((component._lifecycleHooks &&
+								component._lifecycleHooks.elementConnected) ||
+								[])
 						],
 						component
 					);
@@ -70,12 +76,14 @@ export const ElementProtoMixin = {
 
 				ComponentParams.init(component);
 
-				callHooks(
+				callLifecycleHooks(
 					[
 						component.elementConnected,
-						...((component.constructor as typeof BaseComponent).elementConnectedHooks ||
-							[]),
-						...(component._elementConnectedHooks || [])
+						...(component.constructor as typeof BaseComponent)._lifecycleHooks
+							.elementConnected,
+						...((component._lifecycleHooks &&
+							component._lifecycleHooks.elementConnected) ||
+							[])
 					],
 					component
 				);
@@ -92,12 +100,14 @@ export const ElementProtoMixin = {
 			if (component.parentComponent && component._parentComponent!._isReady) {
 				ComponentParams.init(component);
 
-				callHooks(
+				callLifecycleHooks(
 					[
 						component.elementConnected,
-						...((component.constructor as typeof BaseComponent).elementConnectedHooks ||
-							[]),
-						...(component._elementConnectedHooks || [])
+						...(component.constructor as typeof BaseComponent)._lifecycleHooks
+							.elementConnected,
+						...((component._lifecycleHooks &&
+							component._lifecycleHooks.elementConnected) ||
+							[])
 					],
 					component
 				);
@@ -120,12 +130,14 @@ export const ElementProtoMixin = {
 			if (!component._attached && !component.parentComponent) {
 				ComponentParams.init(component);
 
-				callHooks(
+				callLifecycleHooks(
 					[
 						component.elementConnected,
-						...((component.constructor as typeof BaseComponent).elementConnectedHooks ||
-							[]),
-						...(component._elementConnectedHooks || [])
+						...(component.constructor as typeof BaseComponent)._lifecycleHooks
+							.elementConnected,
+						...((component._lifecycleHooks &&
+							component._lifecycleHooks.elementConnected) ||
+							[])
 					],
 					component
 				);
@@ -147,12 +159,14 @@ export const ElementProtoMixin = {
 		if (component && component._attached) {
 			component._parentComponent = null;
 
-			callHooks(
+			callLifecycleHooks(
 				[
 					component.elementDisconnected,
-					...((component.constructor as typeof BaseComponent).elementDisconnectedHooks ||
-						[]),
-					...(component._elementDisconnectedHooks || [])
+					...(component.constructor as typeof BaseComponent)._lifecycleHooks
+						.elementDisconnected,
+					...((component._lifecycleHooks &&
+						component._lifecycleHooks.elementDisconnected) ||
+						[])
 				],
 				component
 			);

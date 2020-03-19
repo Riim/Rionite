@@ -50,20 +50,20 @@ export interface IComponentElement<T extends BaseComponent = BaseComponent> exte
     rioniteComponent: T;
     [KEY_CONTENT_TEMPLATE]?: Template;
 }
-export declare type THook = (this: BaseComponent, component?: BaseComponent) => any;
+export declare type TComponentLifecycleHook = (this: BaseComponent, component?: BaseComponent) => any;
 export declare type TComponentListeningTarget<T = BaseComponent> = TListeningTarget | string | Array<TListeningTarget> | ((this: T, self: T) => TListeningTarget | string | Array<TListeningTarget>);
 export declare type TComponentListeningEventType<T = BaseComponent> = string | symbol | Array<string | symbol> | ((this: T, ctor: typeof BaseComponent) => string | symbol | Array<string | symbol>);
 export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = IEvent | Event> = (this: T, evt: U, context: Record<string, any>, receiver: Element) => any;
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
     [elementName: string]: Record<string, TEventHandler<T, U>>;
 }
-export declare function callHooks(hooks: Array<Function>, context: object): void;
-export declare function onElementConnected(hook: THook): void;
-export declare function onElementDisconnected(hook: THook): void;
-export declare function onReady(hook: THook): void;
-export declare function onElementAttached(hook: THook): void;
-export declare function onElementDetached(hook: THook): void;
-export declare function onElementMoved(hook: THook): void;
+export declare function callLifecycleHooks(lifecycleHooks: Array<Function>, context: object): void;
+export declare function onElementConnected(lifecycleHook: TComponentLifecycleHook): void;
+export declare function onElementDisconnected(lifecycleHook: TComponentLifecycleHook): void;
+export declare function onReady(lifecycleHook: TComponentLifecycleHook): void;
+export declare function onElementAttached(lifecycleHook: TComponentLifecycleHook): void;
+export declare function onElementDetached(lifecycleHook: TComponentLifecycleHook): void;
+export declare function onElementMoved(lifecycleHook: TComponentLifecycleHook): void;
 export declare class BaseComponent extends EventEmitter implements IDisposable {
     static EVENT_CHANGE: string | symbol;
     static elementIs: string;
@@ -75,12 +75,14 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     static _elementBlockNames: Array<string>;
     static template: string | TContent | IBlock | Template | null;
     static get bindsInputContent(): boolean;
-    static elementConnectedHooks: Array<THook> | null;
-    static elementDisconnectedHooks: Array<THook> | null;
-    static readyHooks: Array<THook> | null;
-    static elementAttachedHooks: Array<THook> | null;
-    static elementDetachedHooks: Array<THook> | null;
-    static elementMovedHooks: Array<THook> | null;
+    static _lifecycleHooks: {
+        elementConnected: TComponentLifecycleHook[];
+        elementDisconnected: TComponentLifecycleHook[];
+        ready: TComponentLifecycleHook[];
+        elementAttached: TComponentLifecycleHook[];
+        elementDetached: TComponentLifecycleHook[];
+        elementMoved: TComponentLifecycleHook[];
+    };
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
     static domEvents: IComponentEvents<BaseComponent, Event> | null;
     [KEY_COMPONENT_SELF]: this;
@@ -104,12 +106,14 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     get initialized(): boolean;
     _isReady: boolean;
     get isReady(): boolean;
-    _elementConnectedHooks: Array<THook> | null;
-    _elementDisconnectedHooks: Array<THook> | null;
-    _readyHooks: Array<THook> | null;
-    _elementAttachedHooks: Array<THook> | null;
-    _elementDetachedHooks: Array<THook> | null;
-    _elementMovedHooks: Array<THook> | null;
+    _lifecycleHooks: {
+        elementConnected?: Array<TComponentLifecycleHook>;
+        elementDisconnected?: Array<TComponentLifecycleHook>;
+        ready?: Array<TComponentLifecycleHook>;
+        elementAttached?: Array<TComponentLifecycleHook>;
+        elementDetached?: Array<TComponentLifecycleHook>;
+        elementMoved?: Array<TComponentLifecycleHook>;
+    } | null;
     constructor(el?: HTMLElement);
     onChange(listener: TListener, context?: any): this;
     offChange(listener: TListener, context?: any): this;
