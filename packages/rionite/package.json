@@ -1,6 +1,6 @@
 {
   "name": "rionite",
-  "version": "0.39.2",
+  "version": "0.39.3",
   "description": "Реактивная обёртка над [custom-elements](https://www.w3.org/TR/custom-elements/).",
   "main": "dist/rionite.polyfills.js",
   "typings": "dist/src/index.d.ts",
