@@ -1,6 +1,5 @@
 import { kebabCase } from '@riim/kebab-case';
 import { moveContent } from '@riim/move-content';
-import { nextUID } from '@riim/next-uid';
 import { TContent } from '@riim/rionite-template-parser-2';
 import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
 import { attachChildComponentElements } from './attachChildComponentElements';
@@ -133,7 +132,7 @@ export function callLifecycleHooks(lifecycleHooks: Array<Function>, context: obj
 		}
 
 		if (result instanceof Promise) {
-			result.catch(err => {
+			result.catch((err) => {
 				if (!(err instanceof InterruptError)) {
 					config.logError(err);
 				}
@@ -215,7 +214,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	[KEY_COMPONENT_SELF]: this;
 
-	_disposables = new Map<string, IDisposable>();
+	_disposables = new Set<IDisposable>();
 
 	_ownerComponent: BaseComponent | undefined;
 
@@ -429,21 +428,20 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			}
 		}
 
-		let id = nextUID();
-
-		let stopListening = () => {
+		let listening: IDisposableListening;
+		let stop = () => {
 			for (let i = listenings.length; i; ) {
 				listenings[--i].stop();
 			}
 
-			this._disposables.delete(id);
+			this._disposables.delete(listening);
 		};
 
-		let listening = {
-			stop: stopListening,
-			dispose: stopListening
+		listening = {
+			stop,
+			dispose: stop
 		};
-		this._disposables.set(id, listening);
+		this._disposables.add(listening);
 
 		return listening;
 	}
@@ -469,94 +467,86 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			target.addEventListener(evtType as string, listener, useCapture);
 		}
 
-		let id = nextUID();
-
-		let stopListening = () => {
-			if (this._disposables.has(id)) {
+		let listening: IDisposableListening;
+		let stop = () => {
+			if (this._disposables.has(listening)) {
 				if (target instanceof EventEmitter) {
 					target.off(evtType, listener, context);
 				} else {
 					target.removeEventListener(evtType as string, listener, useCapture);
 				}
 
-				this._disposables.delete(id);
+				this._disposables.delete(listening);
 			}
 		};
 
-		let listening = {
-			stop: stopListening,
-			dispose: stopListening
+		listening = {
+			stop,
+			dispose: stop
 		};
-		this._disposables.set(id, listening);
+		this._disposables.add(listening);
 
 		return listening;
 	}
 
 	setTimeout(cb: Function, delay: number): IDisposableTimeout {
-		let id = nextUID();
-
+		let timeout: IDisposableTimeout;
 		let timeoutId = setTimeout(() => {
-			this._disposables.delete(id);
+			this._disposables.delete(timeout);
 			cb.call(this);
 		}, delay);
-
-		let clearTimeout_ = () => {
-			if (this._disposables.has(id)) {
+		let clear = () => {
+			if (this._disposables.has(timeout)) {
 				clearTimeout(timeoutId);
-				this._disposables.delete(id);
+				this._disposables.delete(timeout);
 			}
 		};
 
-		let timeout = {
-			clear: clearTimeout_,
-			dispose: clearTimeout_
+		timeout = {
+			clear,
+			dispose: clear
 		};
-		this._disposables.set(id, timeout);
+		this._disposables.add(timeout);
 
 		return timeout;
 	}
 
 	setInterval(cb: Function, delay: number): IDisposableInterval {
-		let id = nextUID();
-
+		let interval: IDisposableInterval;
 		let intervalId = setInterval(() => {
 			cb.call(this);
 		}, delay);
-
-		let clearInterval_ = () => {
-			if (this._disposables.has(id)) {
+		let clear = () => {
+			if (this._disposables.has(interval)) {
 				clearInterval(intervalId);
-				this._disposables.delete(id);
+				this._disposables.delete(interval);
 			}
 		};
 
-		let interval = {
-			clear: clearInterval_,
-			dispose: clearInterval_
+		interval = {
+			clear,
+			dispose: clear
 		};
-		this._disposables.set(id, interval);
+		this._disposables.add(interval);
 
 		return interval;
 	}
 
 	registerCallback(cb: Function): IDisposableCallback {
-		let id = nextUID();
-		let disposable = this;
-
-		let cancelCallback = () => {
-			this._disposables.delete(id);
+		let registeredCallback: IDisposableCallback;
+		let cancel = () => {
+			this._disposables.delete(registeredCallback);
 		};
 
-		let registeredCallback = function registeredCallback() {
-			if (disposable._disposables.has(id)) {
-				disposable._disposables.delete(id);
-				return cb.apply(disposable, arguments);
+		registeredCallback = ((...args) => {
+			if (this._disposables.has(registeredCallback)) {
+				this._disposables.delete(registeredCallback);
+				return cb.apply(this, args);
 			}
-		} as IDisposableCallback;
-		registeredCallback.cancel = cancelCallback;
-		registeredCallback.dispose = cancelCallback;
-
-		this._disposables.set(id, registeredCallback);
+		}) as IDisposableCallback;
+		registeredCallback.cancel = cancel;
+		registeredCallback.dispose = cancel;
+		this._disposables.add(registeredCallback);
 
 		return registeredCallback;
 	}
@@ -627,7 +617,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 							this._attach();
 						}
 					},
-					err => {
+					(err) => {
 						if (!(err instanceof InterruptError)) {
 							config.logError(err);
 						}

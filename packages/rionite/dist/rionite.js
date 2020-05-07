@@ -2590,7 +2590,7 @@
 	            return;
 	        }
 	        if (result instanceof Promise) {
-	            result.catch(err => {
+	            result.catch((err) => {
 	                if (!(err instanceof InterruptError)) {
 	                    config.logError(err);
 	                }
@@ -2618,7 +2618,7 @@
 	class BaseComponent extends cellx.EventEmitter {
 	    constructor(el) {
 	        super();
-	        this._disposables = new Map();
+	        this._disposables = new Set();
 	        this._parentComponent = null;
 	        this.$inputContent = null;
 	        this.initializationWait = null;
@@ -2739,18 +2739,18 @@
 	                }
 	            }
 	        }
-	        let id = nextUid.nextUID();
-	        let stopListening = () => {
+	        let listening;
+	        let stop = () => {
 	            for (let i = listenings.length; i;) {
 	                listenings[--i].stop();
 	            }
-	            this._disposables.delete(id);
+	            this._disposables.delete(listening);
 	        };
-	        let listening = {
-	            stop: stopListening,
-	            dispose: stopListening
+	        listening = {
+	            stop,
+	            dispose: stop
 	        };
-	        this._disposables.set(id, listening);
+	        this._disposables.add(listening);
 	        return listening;
 	    }
 	    _listenTo(target, evtType, listener, context, useCapture) {
@@ -2766,77 +2766,76 @@
 	            }
 	            target.addEventListener(evtType, listener, useCapture);
 	        }
-	        let id = nextUid.nextUID();
-	        let stopListening = () => {
-	            if (this._disposables.has(id)) {
+	        let listening;
+	        let stop = () => {
+	            if (this._disposables.has(listening)) {
 	                if (target instanceof cellx.EventEmitter) {
 	                    target.off(evtType, listener, context);
 	                }
 	                else {
 	                    target.removeEventListener(evtType, listener, useCapture);
 	                }
-	                this._disposables.delete(id);
+	                this._disposables.delete(listening);
 	            }
 	        };
-	        let listening = {
-	            stop: stopListening,
-	            dispose: stopListening
+	        listening = {
+	            stop,
+	            dispose: stop
 	        };
-	        this._disposables.set(id, listening);
+	        this._disposables.add(listening);
 	        return listening;
 	    }
 	    setTimeout(cb, delay) {
-	        let id = nextUid.nextUID();
+	        let timeout;
 	        let timeoutId = setTimeout(() => {
-	            this._disposables.delete(id);
+	            this._disposables.delete(timeout);
 	            cb.call(this);
 	        }, delay);
-	        let clearTimeout_ = () => {
-	            if (this._disposables.has(id)) {
+	        let clear = () => {
+	            if (this._disposables.has(timeout)) {
 	                clearTimeout(timeoutId);
-	                this._disposables.delete(id);
+	                this._disposables.delete(timeout);
 	            }
 	        };
-	        let timeout = {
-	            clear: clearTimeout_,
-	            dispose: clearTimeout_
+	        timeout = {
+	            clear,
+	            dispose: clear
 	        };
-	        this._disposables.set(id, timeout);
+	        this._disposables.add(timeout);
 	        return timeout;
 	    }
 	    setInterval(cb, delay) {
-	        let id = nextUid.nextUID();
+	        let interval;
 	        let intervalId = setInterval(() => {
 	            cb.call(this);
 	        }, delay);
-	        let clearInterval_ = () => {
-	            if (this._disposables.has(id)) {
+	        let clear = () => {
+	            if (this._disposables.has(interval)) {
 	                clearInterval(intervalId);
-	                this._disposables.delete(id);
+	                this._disposables.delete(interval);
 	            }
 	        };
-	        let interval = {
-	            clear: clearInterval_,
-	            dispose: clearInterval_
+	        interval = {
+	            clear,
+	            dispose: clear
 	        };
-	        this._disposables.set(id, interval);
+	        this._disposables.add(interval);
 	        return interval;
 	    }
 	    registerCallback(cb) {
-	        let id = nextUid.nextUID();
-	        let disposable = this;
-	        let cancelCallback = () => {
-	            this._disposables.delete(id);
+	        let registeredCallback;
+	        let cancel = () => {
+	            this._disposables.delete(registeredCallback);
 	        };
-	        let registeredCallback = function registeredCallback() {
-	            if (disposable._disposables.has(id)) {
-	                disposable._disposables.delete(id);
-	                return cb.apply(disposable, arguments);
+	        registeredCallback = ((...args) => {
+	            if (this._disposables.has(registeredCallback)) {
+	                this._disposables.delete(registeredCallback);
+	                return cb.apply(this, args);
 	            }
-	        };
-	        registeredCallback.cancel = cancelCallback;
-	        registeredCallback.dispose = cancelCallback;
-	        this._disposables.set(id, registeredCallback);
+	        });
+	        registeredCallback.cancel = cancel;
+	        registeredCallback.dispose = cancel;
+	        this._disposables.add(registeredCallback);
 	        return registeredCallback;
 	    }
 	    $interruptIfNotAttached(value) {
@@ -2887,7 +2886,7 @@
 	                    if (this._attached) {
 	                        this._attach();
 	                    }
-	                }, err => {
+	                }, (err) => {
 	                    if (!(err instanceof InterruptError)) {
 	                        config.logError(err);
 	                    }

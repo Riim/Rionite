@@ -86,7 +86,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
     static domEvents: IComponentEvents<BaseComponent, Event> | null;
     [KEY_COMPONENT_SELF]: this;
-    _disposables: Map<string, IDisposable>;
+    _disposables: Set<IDisposable>;
     _ownerComponent: BaseComponent | undefined;
     get ownerComponent(): BaseComponent;
     set ownerComponent(ownerComponent: BaseComponent);
