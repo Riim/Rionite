@@ -783,7 +783,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		this._freezeBindings();
 
 		for (let disposable of this._disposables) {
-			disposable[1].dispose();
+			disposable.dispose();
 		}
 
 		return this;
