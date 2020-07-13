@@ -10,10 +10,10 @@ export function Interruptible(
 	}
 	let method = methodDesc!.value;
 
-	methodDesc!.value = function(...args: Array<any>) {
+	methodDesc!.value = function (...args: Array<any>) {
 		let result: Promise<any> = method.call(this, ...args);
 
-		result.catch(err => {
+		result.catch((err) => {
 			if (!(err instanceof InterruptError)) {
 				throw err;
 			}

@@ -10,8 +10,8 @@ export function Callback(
 	}
 	let method = methodDesc!.value;
 
-	methodDesc!.value = function(this: BaseComponent, ...args: Array<any>) {
-		return this._attached ? method.call(this, ...args) : Promise.resolve();
+	methodDesc!.value = function (this: BaseComponent, ...args: Array<any>) {
+		return this._isConnected ? method.call(this, ...args) : Promise.resolve();
 	};
 
 	return methodDesc!;

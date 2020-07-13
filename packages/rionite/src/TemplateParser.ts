@@ -487,7 +487,7 @@ export class TemplateParser {
 				this.template
 					.slice(pos < 40 ? 0 : pos - 40, pos + 20)
 					.replace(/\t/g, ' ')
-					.replace(reLineBreak, match => {
+					.replace(reLineBreak, (match) => {
 						if (match.length == 2) {
 							n++;
 						}

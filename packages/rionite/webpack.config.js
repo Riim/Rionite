@@ -28,12 +28,6 @@ module.exports = (env = {}) => {
 				{
 					test: /\.ts$/,
 					exclude: /(?:node_modules|bower_components)/,
-					enforce: 'pre',
-					loader: 'tslint-loader'
-				},
-				{
-					test: /\.ts$/,
-					exclude: /(?:node_modules|bower_components)/,
 					loader: 'awesome-typescript-loader'
 				}
 			]

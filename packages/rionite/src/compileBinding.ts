@@ -18,7 +18,7 @@ export function compileBinding(
 			`var tmp; return ${bindingToJSExpression(binding[0] as ITemplateNodeValueBinding)};`
 		) as any;
 
-		cache.set(cacheKey, function() {
+		cache.set(cacheKey, function () {
 			return inner.call(this, formatters, KEY_COMPONENT_SELF);
 		});
 	}

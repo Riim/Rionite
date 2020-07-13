@@ -139,8 +139,8 @@ export function bindContent(
 								childComponent!,
 								$paramConfig.property,
 								keypath.length == 1
-									? (propName =>
-											function(evt: IEvent) {
+									? ((propName) =>
+											function (evt: IEvent) {
 												this.ownerComponent[propName] = evt.data.value;
 											})(keypath[0])
 									: ((propName, keypath) => {
@@ -149,7 +149,7 @@ export function bindContent(
 												keypath.join('.')
 											);
 
-											return function(evt: IEvent) {
+											return function (evt: IEvent) {
 												let propHolder = getPropertyHolder.call(
 													this.ownerComponent
 												);

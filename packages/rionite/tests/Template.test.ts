@@ -7,7 +7,6 @@ function fragmentToString(df: DocumentFragment): string {
 }
 
 declare module '../src/Template2' {
-	/* tslint:disable-next-line */
 	interface Template {
 		renderToString(): string;
 	}

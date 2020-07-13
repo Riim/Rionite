@@ -1,6 +1,6 @@
 import { defer } from '@riim/defer';
 import { KEY_VALUE_CELLS } from 'cellx';
-import { BaseComponent, callLifecycleHooks, IComponentElement } from './BaseComponent';
+import { BaseComponent, callLifecycle, IComponentElement } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
 import { KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { observedAttributesFeature } from './lib/observedAttributesFeature';
@@ -37,11 +37,11 @@ export const ElementProtoMixin = {
 		let component = this.$component;
 
 		if (component) {
-			if (component._attached) {
+			if (component._isConnected) {
 				if (component._parentComponent === null) {
 					component._parentComponent = undefined;
 
-					callLifecycleHooks(
+					callLifecycle(
 						[
 							component.elementConnected,
 							...(component.constructor as typeof BaseComponent)._lifecycleHooks
@@ -59,7 +59,7 @@ export const ElementProtoMixin = {
 						component
 					);
 				} else {
-					callLifecycleHooks(
+					callLifecycle(
 						[
 							component.elementConnected,
 							...(component.constructor as typeof BaseComponent)._lifecycleHooks
@@ -76,7 +76,7 @@ export const ElementProtoMixin = {
 
 				ComponentParams.init(component);
 
-				callLifecycleHooks(
+				callLifecycle(
 					[
 						component.elementConnected,
 						...(component.constructor as typeof BaseComponent)._lifecycleHooks
@@ -88,7 +88,7 @@ export const ElementProtoMixin = {
 					component
 				);
 
-				component._attach();
+				component._connect();
 			}
 
 			return;
@@ -100,7 +100,7 @@ export const ElementProtoMixin = {
 			if (component.parentComponent && component._parentComponent!._isReady) {
 				ComponentParams.init(component);
 
-				callLifecycleHooks(
+				callLifecycle(
 					[
 						component.elementConnected,
 						...(component.constructor as typeof BaseComponent)._lifecycleHooks
@@ -112,7 +112,7 @@ export const ElementProtoMixin = {
 					component
 				);
 
-				component._attach();
+				component._connect();
 
 				return;
 			}
@@ -127,10 +127,10 @@ export const ElementProtoMixin = {
 
 			component._parentComponent = undefined;
 
-			if (!component._attached && !component.parentComponent) {
+			if (!component._isConnected && !component.parentComponent) {
 				ComponentParams.init(component);
 
-				callLifecycleHooks(
+				callLifecycle(
 					[
 						component.elementConnected,
 						...(component.constructor as typeof BaseComponent)._lifecycleHooks
@@ -142,7 +142,7 @@ export const ElementProtoMixin = {
 					component
 				);
 
-				component._attach();
+				component._connect();
 			}
 		});
 	},
@@ -156,10 +156,10 @@ export const ElementProtoMixin = {
 
 		let component = this.$component;
 
-		if (component && component._attached) {
+		if (component && component._isConnected) {
 			component._parentComponent = null;
 
-			callLifecycleHooks(
+			callLifecycle(
 				[
 					component.elementDisconnected,
 					...(component.constructor as typeof BaseComponent)._lifecycleHooks
@@ -172,8 +172,8 @@ export const ElementProtoMixin = {
 			);
 
 			defer(() => {
-				if (component!._parentComponent === null && component!._attached) {
-					component!._detach();
+				if (component!._parentComponent === null && component!._isConnected) {
+					component!._disconnect();
 				}
 			});
 		}

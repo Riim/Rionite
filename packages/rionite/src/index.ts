@@ -28,8 +28,8 @@ export {
 	IComponentEvents,
 	TComponentLifecycleHook,
 	onReady,
-	onElementAttached,
-	onElementDetached,
+	onConnected,
+	onDisconnected,
 	onElementMoved,
 	BaseComponent
 } from './BaseComponent';

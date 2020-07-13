@@ -2,12 +2,12 @@ import { kebabCase } from '@riim/kebab-case';
 import { moveContent } from '@riim/move-content';
 import { TContent } from '@riim/rionite-template-parser-2';
 import { EventEmitter, IEvent, TListener as TEventEmitterListener } from 'cellx';
-import { attachChildComponentElements } from './attachChildComponentElements';
 import { bindContent } from './bindContent';
 import { freezeBindings, IBinding, unfreezeBindings } from './componentBinding';
 import { ComponentParams } from './ComponentParams';
 import { IComponentParamValueСonverters } from './componentParamValueConverters';
 import { config } from './config';
+import { connectChildComponentElements } from './connectChildComponentElements';
 import {
 	KEY_CHILD_COMPONENTS,
 	KEY_COMPONENT_SELF,
@@ -118,14 +118,14 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 	[elementName: string]: Record<string, TEventHandler<T, U>>;
 }
 
-export function callLifecycleHooks(lifecycleHooks: Array<Function>, context: object) {
-	for (let lifecycleHook of lifecycleHooks) {
+export function callLifecycle(lifecycle: Array<Function>, context: object) {
+	for (let lifecycleFn of lifecycle) {
 		let result;
 
 		try {
-			result = lifecycleHook.length
-				? lifecycleHook.call(context, context)
-				: lifecycleHook.call(context);
+			result = lifecycleFn.length
+				? lifecycleFn.call(context, context)
+				: lifecycleFn.call(context);
 		} catch (err) {
 			config.logError(err);
 			return;
@@ -161,16 +161,16 @@ export function onReady(lifecycleHook: TComponentLifecycleHook) {
 		(currentComponent!._lifecycleHooks!.ready = [])
 	).push(lifecycleHook);
 }
-export function onElementAttached(lifecycleHook: TComponentLifecycleHook) {
+export function onConnected(lifecycleHook: TComponentLifecycleHook) {
 	(
-		(currentComponent!._lifecycleHooks || (currentComponent!._lifecycleHooks = {}))
-			.elementAttached || (currentComponent!._lifecycleHooks!.elementAttached = [])
+		(currentComponent!._lifecycleHooks || (currentComponent!._lifecycleHooks = {})).connected ||
+		(currentComponent!._lifecycleHooks!.connected = [])
 	).push(lifecycleHook);
 }
-export function onElementDetached(lifecycleHook: TComponentLifecycleHook) {
+export function onDisconnected(lifecycleHook: TComponentLifecycleHook) {
 	(
 		(currentComponent!._lifecycleHooks || (currentComponent!._lifecycleHooks = {}))
-			.elementDetached || (currentComponent!._lifecycleHooks!.elementDetached = [])
+			.disconnected || (currentComponent!._lifecycleHooks!.disconnected = [])
 	).push(lifecycleHook);
 }
 export function onElementMoved(lifecycleHook: TComponentLifecycleHook) {
@@ -204,8 +204,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		elementConnected: [] as Array<TComponentLifecycleHook>,
 		elementDisconnected: [] as Array<TComponentLifecycleHook>,
 		ready: [] as Array<TComponentLifecycleHook>,
-		elementAttached: [] as Array<TComponentLifecycleHook>,
-		elementDetached: [] as Array<TComponentLifecycleHook>,
+		connected: [] as Array<TComponentLifecycleHook>,
+		disconnected: [] as Array<TComponentLifecycleHook>,
 		elementMoved: [] as Array<TComponentLifecycleHook>
 	};
 
@@ -270,11 +270,6 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	initializationWait: Promise<any> | null = null;
 
-	_attached = false;
-	get attached() {
-		return this._attached;
-	}
-
 	_initialized = false;
 	get initialized() {
 		return this._initialized;
@@ -285,12 +280,17 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return this._isReady;
 	}
 
+	_isConnected = false;
+	get isConnected() {
+		return this._isConnected;
+	}
+
 	_lifecycleHooks: {
 		elementConnected?: Array<TComponentLifecycleHook>;
 		elementDisconnected?: Array<TComponentLifecycleHook>;
 		ready?: Array<TComponentLifecycleHook>;
-		elementAttached?: Array<TComponentLifecycleHook>;
-		elementDetached?: Array<TComponentLifecycleHook>;
+		connected?: Array<TComponentLifecycleHook>;
+		disconnected?: Array<TComponentLifecycleHook>;
 		elementMoved?: Array<TComponentLifecycleHook>;
 	} | null = null;
 
@@ -551,8 +551,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return registeredCallback;
 	}
 
-	$interruptIfNotAttached<V>(value: V): V {
-		if (!this._attached) {
+	$interruptIfNotConnected<V>(value: V): V {
+		if (!this._isConnected) {
 			throw InterruptError();
 		}
 
@@ -562,12 +562,12 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	_beforeInitializationWait() {}
 	_afterInitializationWait() {}
 
-	attach(ownerComponent?: BaseComponent): Promise<any> | null {
+	connect(ownerComponent?: BaseComponent): Promise<any> | null {
 		if (ownerComponent) {
 			this._ownerComponent = ownerComponent;
 		}
 
-		if (this._attached) {
+		if (this._isConnected) {
 			return this.initializationWait;
 		}
 
@@ -575,7 +575,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 		ComponentParams.init(this);
 
-		callLifecycleHooks(
+		callLifecycle(
 			[
 				this.elementConnected,
 				...(this.constructor as typeof BaseComponent)._lifecycleHooks.elementConnected,
@@ -584,11 +584,11 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			this
 		);
 
-		return this._attach();
+		return this._connect();
 	}
 
-	_attach(): Promise<any> | null {
-		this._attached = true;
+	_connect(): Promise<any> | null {
+		this._isConnected = true;
 
 		if (this._initialized) {
 			if (!this._isReady) {
@@ -613,8 +613,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					() => {
 						this._initialized = true;
 
-						if (this._attached) {
-							this._attach();
+						if (this._isConnected) {
+							this._connect();
 						}
 					},
 					(err) => {
@@ -636,7 +636,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			let childComponents = findChildComponents(this.element);
 
 			if (childComponents) {
-				attachChildComponentElements(childComponents);
+				connectChildComponentElements(childComponents);
 			}
 		} else {
 			let el = this.element;
@@ -661,7 +661,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					this._bindings = contentBindingResult[1];
 
 					if (childComponents) {
-						attachChildComponentElements(childComponents);
+						connectChildComponentElements(childComponents);
 					}
 
 					if (backBindings) {
@@ -676,7 +676,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					this._bindings = null;
 
 					if (this[KEY_CHILD_COMPONENTS]) {
-						attachChildComponentElements(this[KEY_CHILD_COMPONENTS]);
+						connectChildComponentElements(this[KEY_CHILD_COMPONENTS]);
 					}
 				}
 			} else {
@@ -727,7 +727,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				resumeConnectionStatusCallbacks();
 
 				if (childComponents) {
-					attachChildComponentElements(childComponents);
+					connectChildComponentElements(childComponents);
 				}
 
 				if (backBindings) {
@@ -740,7 +740,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				}
 			}
 
-			callLifecycleHooks(
+			callLifecycle(
 				[
 					this.ready,
 					...(this.constructor as typeof BaseComponent)._lifecycleHooks.ready,
@@ -752,11 +752,11 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			this._isReady = true;
 		}
 
-		callLifecycleHooks(
+		callLifecycle(
 			[
-				this.elementAttached,
-				...(this.constructor as typeof BaseComponent)._lifecycleHooks.elementAttached,
-				...((this._lifecycleHooks && this._lifecycleHooks.elementAttached) || [])
+				this.connected,
+				...(this.constructor as typeof BaseComponent)._lifecycleHooks.connected,
+				...((this._lifecycleHooks && this._lifecycleHooks.connected) || [])
 			],
 			this
 		);
@@ -764,14 +764,14 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return this.initializationWait;
 	}
 
-	_detach() {
-		this._attached = false;
+	_disconnect() {
+		this._isConnected = false;
 
-		callLifecycleHooks(
+		callLifecycle(
 			[
-				this.elementDetached,
-				...(this.constructor as typeof BaseComponent)._lifecycleHooks.elementDetached,
-				...((this._lifecycleHooks && this._lifecycleHooks.elementDetached) || [])
+				this.disconnected,
+				...(this.constructor as typeof BaseComponent)._lifecycleHooks.disconnected,
+				...((this._lifecycleHooks && this._lifecycleHooks.disconnected) || [])
 			],
 			this
 		);
@@ -819,8 +819,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	elementDisconnected() {}
 	initialize(): Promise<any> | void {}
 	ready() {}
-	elementAttached() {}
-	elementDetached() {}
+	connected() {}
+	disconnected() {}
 	elementMoved() {}
 
 	// Utils

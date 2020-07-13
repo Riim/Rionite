@@ -7,7 +7,7 @@ export declare const ElementProtoMixin: {
     $component: null;
     readonly rioniteComponent: BaseComponent;
     [KEY_ELEMENT_CONNECTED]: boolean;
-    connectedCallback(this: IComponentElement<BaseComponent>): void;
-    disconnectedCallback(this: IComponentElement<BaseComponent>): void;
-    attributeChangedCallback(this: IComponentElement<BaseComponent>, name: string, _prevRawValue: string | null, rawValue: string | null): void;
+    connectedCallback(this: IComponentElement): void;
+    disconnectedCallback(this: IComponentElement): void;
+    attributeChangedCallback(this: IComponentElement, name: string, _prevRawValue: string | null, rawValue: string | null): void;
 };

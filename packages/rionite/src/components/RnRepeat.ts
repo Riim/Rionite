@@ -1,10 +1,10 @@
 import { nextTick } from '@riim/next-tick';
 import { Cell, ObservableList, TListener } from 'cellx';
 import { moveContent } from '../../node_modules/@riim/move-content';
-import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
 import { compileBinding } from '../compileBinding';
 import { IBinding } from '../componentBinding';
+import { connectChildComponentElements } from '../connectChildComponentElements';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
@@ -181,12 +181,12 @@ export class RnRepeat extends BaseComponent {
 		}
 	}
 
-	_attach() {
-		this._attached = true;
+	_connect() {
+		this._isConnected = true;
 		return null;
 	}
-	_detach() {
-		this._attached = false;
+	_disconnect() {
+		this._isConnected = false;
 	}
 
 	_render(fromChangeEvent: boolean) {
@@ -369,13 +369,13 @@ export class RnRepeat extends BaseComponent {
 							[this._itemName]: {
 								configurable: true,
 								enumerable: true,
-								get: (itemCell => () => itemCell.get())(itemCell)
+								get: ((itemCell) => () => itemCell.get())(itemCell)
 							},
 
 							$index: {
 								configurable: true,
 								enumerable: true,
-								get: (indexCell => () => indexCell.get())(indexCell)
+								get: ((indexCell) => () => indexCell.get())(indexCell)
 							}
 						}),
 						contentBindingResult
@@ -423,7 +423,7 @@ export class RnRepeat extends BaseComponent {
 					lastNode = newLastNode;
 
 					if (childComponents) {
-						attachChildComponentElements(childComponents);
+						connectChildComponentElements(childComponents);
 					}
 
 					if (backBindings) {
@@ -442,7 +442,7 @@ export class RnRepeat extends BaseComponent {
 			}
 
 			if (removedValues.size) {
-				($itemsMap => {
+				(($itemsMap) => {
 					removedValues.forEach((_removedCount, value) => {
 						for (let $item of $itemsMap.get(value)!) {
 							offBindings($item.bindings);

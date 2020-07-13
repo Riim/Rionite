@@ -57,12 +57,12 @@ export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = I
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
     [elementName: string]: Record<string, TEventHandler<T, U>>;
 }
-export declare function callLifecycleHooks(lifecycleHooks: Array<Function>, context: object): void;
+export declare function callLifecycle(lifecycle: Array<Function>, context: object): void;
 export declare function onElementConnected(lifecycleHook: TComponentLifecycleHook): void;
 export declare function onElementDisconnected(lifecycleHook: TComponentLifecycleHook): void;
 export declare function onReady(lifecycleHook: TComponentLifecycleHook): void;
-export declare function onElementAttached(lifecycleHook: TComponentLifecycleHook): void;
-export declare function onElementDetached(lifecycleHook: TComponentLifecycleHook): void;
+export declare function onConnected(lifecycleHook: TComponentLifecycleHook): void;
+export declare function onDisconnected(lifecycleHook: TComponentLifecycleHook): void;
 export declare function onElementMoved(lifecycleHook: TComponentLifecycleHook): void;
 export declare class BaseComponent extends EventEmitter implements IDisposable {
     static EVENT_CHANGE: string | symbol;
@@ -79,8 +79,8 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
         elementConnected: TComponentLifecycleHook[];
         elementDisconnected: TComponentLifecycleHook[];
         ready: TComponentLifecycleHook[];
-        elementAttached: TComponentLifecycleHook[];
-        elementDetached: TComponentLifecycleHook[];
+        connected: TComponentLifecycleHook[];
+        disconnected: TComponentLifecycleHook[];
         elementMoved: TComponentLifecycleHook[];
     };
     static events: IComponentEvents<BaseComponent, IEvent<BaseComponent>> | null;
@@ -100,18 +100,18 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     _bindings: Array<IBinding> | null;
     [KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
     initializationWait: Promise<any> | null;
-    _attached: boolean;
-    get attached(): boolean;
     _initialized: boolean;
     get initialized(): boolean;
     _isReady: boolean;
     get isReady(): boolean;
+    _isConnected: boolean;
+    get isConnected(): boolean;
     _lifecycleHooks: {
         elementConnected?: Array<TComponentLifecycleHook>;
         elementDisconnected?: Array<TComponentLifecycleHook>;
         ready?: Array<TComponentLifecycleHook>;
-        elementAttached?: Array<TComponentLifecycleHook>;
-        elementDetached?: Array<TComponentLifecycleHook>;
+        connected?: Array<TComponentLifecycleHook>;
+        disconnected?: Array<TComponentLifecycleHook>;
         elementMoved?: Array<TComponentLifecycleHook>;
     } | null;
     constructor(el?: HTMLElement);
@@ -124,12 +124,12 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     setTimeout(cb: Function, delay: number): IDisposableTimeout;
     setInterval(cb: Function, delay: number): IDisposableInterval;
     registerCallback(cb: Function): IDisposableCallback;
-    $interruptIfNotAttached<V>(value: V): V;
+    $interruptIfNotConnected<V>(value: V): V;
     _beforeInitializationWait(): void;
     _afterInitializationWait(): void;
-    attach(ownerComponent?: BaseComponent): Promise<any> | null;
-    _attach(): Promise<any> | null;
-    _detach(): void;
+    connect(ownerComponent?: BaseComponent): Promise<any> | null;
+    _connect(): Promise<any> | null;
+    _disconnect(): void;
     dispose(): BaseComponent;
     _freezeBindings(): void;
     _unfreezeBindings(): void;
@@ -138,8 +138,8 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     elementDisconnected(): void;
     initialize(): Promise<any> | void;
     ready(): void;
-    elementAttached(): void;
-    elementDetached(): void;
+    connected(): void;
+    disconnected(): void;
     elementMoved(): void;
     $<R = BaseComponent | Element>(name: string, container?: Element | BaseComponent | string): R | null;
     $$<R = BaseComponent | Element>(name: string, container?: Element | BaseComponent | string): Array<R>;

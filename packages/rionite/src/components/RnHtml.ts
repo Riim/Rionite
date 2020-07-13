@@ -15,7 +15,7 @@ export class RnHtml extends BaseComponent {
 		this._setHtml();
 	}
 
-	elementAttached() {
+	connected() {
 		this.listenTo(this, 'change:html', this._onHtmlChange);
 	}
 

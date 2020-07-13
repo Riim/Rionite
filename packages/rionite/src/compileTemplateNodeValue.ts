@@ -46,7 +46,7 @@ export function compileTemplateNodeValue(
 		cache.set(
 			cacheKey,
 			useComponentParamValues
-				? function(cell: Cell<any, IAttributeBindingCellMeta>): any {
+				? function (cell: Cell<any, IAttributeBindingCellMeta>): any {
 						let value = inner.call(this, formatters, KEY_COMPONENT_SELF);
 
 						if (value && (typeof value == 'object' || typeof value == 'function')) {
@@ -62,7 +62,7 @@ export function compileTemplateNodeValue(
 
 						return value;
 				  }
-				: function(): string {
+				: function (): string {
 						let value = inner.call(this, formatters);
 						return value == null ? '' : value + '';
 				  }

@@ -8,6 +8,6 @@ export declare class RnSlot extends BaseComponent {
     cloneContent: boolean;
     getContext: ((this: BaseComponent, context: Record<string, any>, slot: RnSlot) => Record<string, any>) | null;
     _childComponents: Array<BaseComponent> | null;
-    _attach(): null;
-    _detach(): void;
+    _connect(): null;
+    _disconnect(): void;
 }

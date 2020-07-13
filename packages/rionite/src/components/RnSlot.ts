@@ -1,10 +1,10 @@
 import { moveContent } from '@riim/move-content';
 import { getUID } from '@riim/next-uid';
 import { TListener } from 'cellx';
-import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent, IComponentElement } from '../BaseComponent';
 import { bindContent } from '../bindContent';
 import { IBinding } from '../componentBinding';
+import { connectChildComponentElements } from '../connectChildComponentElements';
 import { Component } from '../decorators/Component';
 import { resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { cloneNode } from '../lib/cloneNode';
@@ -40,14 +40,14 @@ export class RnSlot extends BaseComponent {
 
 	_childComponents: Array<BaseComponent> | null;
 
-	_attach() {
-		this._attached = true;
+	_connect() {
+		this._isConnected = true;
 
 		if (this._isReady) {
 			this._unfreezeBindings();
 
 			if (this._childComponents) {
-				attachChildComponentElements(this._childComponents);
+				connectChildComponentElements(this._childComponents);
 			}
 
 			return null;
@@ -219,7 +219,7 @@ export class RnSlot extends BaseComponent {
 		}
 
 		if (childComponents) {
-			attachChildComponentElements(childComponents);
+			connectChildComponentElements(childComponents);
 		}
 
 		if (backBindings) {
@@ -236,8 +236,8 @@ export class RnSlot extends BaseComponent {
 		return null;
 	}
 
-	_detach() {
-		this._attached = false;
+	_disconnect() {
+		this._isConnected = false;
 		this._freezeBindings();
 	}
 }

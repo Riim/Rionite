@@ -61,7 +61,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 								}
 
 								if (result instanceof Promise) {
-									result.catch(err => {
+									result.catch((err) => {
 										if (!(err instanceof InterruptError)) {
 											config.logError(err);
 										}
@@ -88,7 +88,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 							}
 
 							if (result instanceof Promise) {
-								result.catch(err => {
+								result.catch((err) => {
 									if (!(err instanceof InterruptError)) {
 										config.logError(err);
 									}

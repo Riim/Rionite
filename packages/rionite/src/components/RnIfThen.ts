@@ -1,10 +1,10 @@
 import { nextTick } from '@riim/next-tick';
 import { Cell, TListener } from 'cellx';
 import { moveContent } from '../../node_modules/@riim/move-content';
-import { attachChildComponentElements } from '../attachChildComponentElements';
 import { BaseComponent } from '../BaseComponent';
 import { compileBinding } from '../compileBinding';
 import { IBinding } from '../componentBinding';
+import { connectChildComponentElements } from '../connectChildComponentElements';
 import { Component } from '../decorators/Component';
 import { KEY_ELEMENT_CONNECTED, resumeConnectionStatusCallbacks, suppressConnectionStatusCallbacks } from '../ElementProtoMixin';
 import { compileKeypath } from '../lib/compileKeypath';
@@ -72,7 +72,7 @@ export class RnIfThen extends BaseComponent {
 			}
 
 			this._if = new Cell<boolean>(
-				function() {
+				function () {
 					return !!getIfValue.call(this);
 				},
 				{ context: this.$context }
@@ -101,12 +101,12 @@ export class RnIfThen extends BaseComponent {
 		}
 	}
 
-	_attach() {
-		this._attached = true;
+	_connect() {
+		this._isConnected = true;
 		return null;
 	}
-	_detach() {
-		this._attached = false;
+	_disconnect() {
+		this._isConnected = false;
 	}
 
 	_render(changed: boolean) {
@@ -154,7 +154,7 @@ export class RnIfThen extends BaseComponent {
 			resumeConnectionStatusCallbacks();
 
 			if (childComponents) {
-				attachChildComponentElements(childComponents);
+				connectChildComponentElements(childComponents);
 			}
 
 			if (backBindings) {

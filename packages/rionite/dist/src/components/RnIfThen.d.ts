@@ -14,8 +14,8 @@ export declare class RnIfThen extends BaseComponent {
     elementConnected(): void;
     elementDisconnected(): void;
     _onIfChange(): void;
-    _attach(): null;
-    _detach(): void;
+    _connect(): null;
+    _disconnect(): void;
     _render(changed: boolean): void;
     _deactivate(): void;
     _deactivateChildComponents(): void;

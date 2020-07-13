@@ -57,7 +57,7 @@ export function handleDOMEvent(evt: Event) {
 								}
 
 								if (result instanceof Promise) {
-									result.catch(err => {
+									result.catch((err) => {
 										if (!(err instanceof InterruptError)) {
 											config.logError(err);
 										}
@@ -80,7 +80,7 @@ export function handleDOMEvent(evt: Event) {
 					}
 
 					if (result instanceof Promise) {
-						result.catch(err => {
+						result.catch((err) => {
 							if (!(err instanceof InterruptError)) {
 								config.logError(err);
 							}

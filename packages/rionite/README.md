@@ -24,13 +24,13 @@ class HelloUser extends BaseComponent {
     @Param
 	paramName: string;
 
-    elementAttached() {
+    connected() {
         // Сработает при появлении элемента `<hello-world>` в документе.
         // `this.element` — ссылка на появившийся элемент.
         // Отличное место для добавления обработчиков событий.
     },
 
-    elementDetached() {
+    disconnected() {
         // Сработает при удалении элемента `<hello-world>` из документа.
         // Не забыть снять добавленные обработчики событий.
     }

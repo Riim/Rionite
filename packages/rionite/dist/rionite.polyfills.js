@@ -2942,7 +2942,7 @@ window.innerHTML = (function (document) {
 	                            }
 	                            let keypath = attrValueAST[0].keypath.split('.');
 	                            (result[2] || (result[2] = [])).push(childComponent, $paramConfig.property, keypath.length == 1
-	                                ? (propName => function (evt) {
+	                                ? ((propName) => function (evt) {
 	                                    this.ownerComponent[propName] = evt.data.value;
 	                                })(keypath[0])
 	                                : ((propName, keypath) => {
@@ -3049,7 +3049,7 @@ window.innerHTML = (function (document) {
 	                                    return;
 	                                }
 	                                if (result instanceof Promise) {
-	                                    result.catch(err => {
+	                                    result.catch((err) => {
 	                                        if (!(err instanceof InterruptError)) {
 	                                            config.logError(err);
 	                                        }
@@ -3067,7 +3067,7 @@ window.innerHTML = (function (document) {
 	                        return;
 	                    }
 	                    if (result instanceof Promise) {
-	                        result.catch(err => {
+	                        result.catch((err) => {
 	                            if (!(err instanceof InterruptError)) {
 	                                config.logError(err);
 	                            }
@@ -3124,7 +3124,7 @@ window.innerHTML = (function (document) {
 	                                    return;
 	                                }
 	                                if (result instanceof Promise) {
-	                                    result.catch(err => {
+	                                    result.catch((err) => {
 	                                        if (!(err instanceof InterruptError)) {
 	                                            config.logError(err);
 	                                        }
@@ -3141,7 +3141,7 @@ window.innerHTML = (function (document) {
 	                                return;
 	                            }
 	                            if (result instanceof Promise) {
-	                                result.catch(err => {
+	                                result.catch((err) => {
 	                                    if (!(err instanceof InterruptError)) {
 	                                        config.logError(err);
 	                                    }
@@ -3260,7 +3260,7 @@ window.innerHTML = (function (document) {
 	            ? parent._embeddedTemplates
 	            : parent &&
 	                parent._embeddedTemplates &&
-	                parent._embeddedTemplates.map(template => new Template({
+	                parent._embeddedTemplates.map((template) => new Template({
 	                    nodeType: exports.TemplateNodeType.BLOCK,
 	                    content: template.block.content,
 	                    elements: this._elements
@@ -3659,7 +3659,7 @@ window.innerHTML = (function (document) {
 	    }
 	    setBlockName(blockName) {
 	        if (Array.isArray(blockName)) {
-	            (this._elementNamesTemplate = blockName.map(blockName => blockName + ELEMENT_NAME_DELIMITER)).push('');
+	            (this._elementNamesTemplate = blockName.map((blockName) => blockName + ELEMENT_NAME_DELIMITER)).push('');
 	        }
 	        else {
 	            this._elementNamesTemplate[0] = blockName + ELEMENT_NAME_DELIMITER;
@@ -3672,7 +3672,7 @@ window.innerHTML = (function (document) {
 	    }
 	}
 	Template.elementTransformers = {
-	    section: el => el.content
+	    section: (el) => el.content
 	};
 	Template.attributeTransformers = {};
 	function renderContent(targetNode, content, template, ownerComponent, context, result, parentComponent) {
@@ -3778,7 +3778,7 @@ window.innerHTML = (function (document) {
 	                                                    }
 	                                                    let keypath = attrValueAST[0].keypath.split('.');
 	                                                    (result[2] || (result[2] = [])).push(nodeComponent, $paramConfig.property, keypath.length == 1
-	                                                        ? (propName => function (evt) {
+	                                                        ? ((propName) => function (evt) {
 	                                                            this.ownerComponent[propName] = evt.data.value;
 	                                                        })(keypath[0])
 	                                                        : ((propName, keypath) => {
@@ -4147,19 +4147,6 @@ window.innerHTML = (function (document) {
 	unwrapExports(dist$8);
 	var dist_1$8 = dist$8.moveContent;
 
-	function attachChildComponentElements(childComponents) {
-	    for (let component of childComponents) {
-	        component._parentComponent = undefined;
-	        ComponentParams.init(component);
-	        callLifecycleHooks([
-	            component.elementConnected,
-	            ...component.constructor._lifecycleHooks.elementConnected,
-	            ...((component._lifecycleHooks && component._lifecycleHooks.elementConnected) || [])
-	        ], component);
-	        component._attach();
-	    }
-	}
-
 	const KEY_FROZEN_STATE = Symbol('frozenState');
 	function freezeBinding(binding) {
 	    let changeEvent = binding._events.get(cellx.Cell.EVENT_CHANGE);
@@ -4192,6 +4179,19 @@ window.innerHTML = (function (document) {
 	        unfreezeBinding(binding);
 	    }
 	    cellx.Cell.release();
+	}
+
+	function connectChildComponentElements(childComponents) {
+	    for (let component of childComponents) {
+	        component._parentComponent = undefined;
+	        ComponentParams.init(component);
+	        callLifecycle([
+	            component.elementConnected,
+	            ...component.constructor._lifecycleHooks.elementConnected,
+	            ...((component._lifecycleHooks && component._lifecycleHooks.elementConnected) || [])
+	        ], component);
+	        component._connect();
+	    }
 	}
 
 	function findChildComponents(node, childComponents) {
@@ -4238,13 +4238,13 @@ window.innerHTML = (function (document) {
 
 	const hasOwn = Object.prototype.hasOwnProperty;
 	const map = Array.prototype.map;
-	function callLifecycleHooks(lifecycleHooks, context) {
-	    for (let lifecycleHook of lifecycleHooks) {
+	function callLifecycle(lifecycle, context) {
+	    for (let lifecycleFn of lifecycle) {
 	        let result;
 	        try {
-	            result = lifecycleHook.length
-	                ? lifecycleHook.call(context, context)
-	                : lifecycleHook.call(context);
+	            result = lifecycleFn.length
+	                ? lifecycleFn.call(context, context)
+	                : lifecycleFn.call(context);
 	        }
 	        catch (err) {
 	            config.logError(err);
@@ -4264,13 +4264,13 @@ window.innerHTML = (function (document) {
 	    ((currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {})).ready ||
 	        (currentComponent._lifecycleHooks.ready = [])).push(lifecycleHook);
 	}
-	function onElementAttached(lifecycleHook) {
-	    ((currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {}))
-	        .elementAttached || (currentComponent._lifecycleHooks.elementAttached = [])).push(lifecycleHook);
+	function onConnected(lifecycleHook) {
+	    ((currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {})).connected ||
+	        (currentComponent._lifecycleHooks.connected = [])).push(lifecycleHook);
 	}
-	function onElementDetached(lifecycleHook) {
+	function onDisconnected(lifecycleHook) {
 	    ((currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {}))
-	        .elementDetached || (currentComponent._lifecycleHooks.elementDetached = [])).push(lifecycleHook);
+	        .disconnected || (currentComponent._lifecycleHooks.disconnected = [])).push(lifecycleHook);
 	}
 	function onElementMoved(lifecycleHook) {
 	    ((currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {}))
@@ -4283,9 +4283,9 @@ window.innerHTML = (function (document) {
 	        this._parentComponent = null;
 	        this.$inputContent = null;
 	        this.initializationWait = null;
-	        this._attached = false;
 	        this._initialized = false;
 	        this._isReady = false;
+	        this._isConnected = false;
 	        this._lifecycleHooks = null;
 	        currentComponent = this;
 	        this[KEY_COMPONENT_SELF] = this;
@@ -4330,14 +4330,14 @@ window.innerHTML = (function (document) {
 	        }
 	        return (this._parentComponent = null);
 	    }
-	    get attached() {
-	        return this._attached;
-	    }
 	    get initialized() {
 	        return this._initialized;
 	    }
 	    get isReady() {
 	        return this._isReady;
+	    }
+	    get isConnected() {
+	        return this._isConnected;
 	    }
 	    onChange(listener, context) {
 	        return this.on(this.constructor.EVENT_CHANGE, listener, context);
@@ -4499,32 +4499,32 @@ window.innerHTML = (function (document) {
 	        this._disposables.add(registeredCallback);
 	        return registeredCallback;
 	    }
-	    $interruptIfNotAttached(value) {
-	        if (!this._attached) {
+	    $interruptIfNotConnected(value) {
+	        if (!this._isConnected) {
 	            throw InterruptError();
 	        }
 	        return value;
 	    }
 	    _beforeInitializationWait() { }
 	    _afterInitializationWait() { }
-	    attach(ownerComponent) {
+	    connect(ownerComponent) {
 	        if (ownerComponent) {
 	            this._ownerComponent = ownerComponent;
 	        }
-	        if (this._attached) {
+	        if (this._isConnected) {
 	            return this.initializationWait;
 	        }
 	        this._parentComponent = undefined;
 	        ComponentParams.init(this);
-	        callLifecycleHooks([
+	        callLifecycle([
 	            this.elementConnected,
 	            ...this.constructor._lifecycleHooks.elementConnected,
 	            ...((this._lifecycleHooks && this._lifecycleHooks.elementConnected) || [])
 	        ], this);
-	        return this._attach();
+	        return this._connect();
 	    }
-	    _attach() {
-	        this._attached = true;
+	    _connect() {
+	        this._isConnected = true;
 	        if (this._initialized) {
 	            if (!this._isReady) {
 	                this._afterInitializationWait();
@@ -4544,8 +4544,8 @@ window.innerHTML = (function (document) {
 	                this._beforeInitializationWait();
 	                return (this.initializationWait = initializationWait.then(() => {
 	                    this._initialized = true;
-	                    if (this._attached) {
-	                        this._attach();
+	                    if (this._isConnected) {
+	                        this._connect();
 	                    }
 	                }, (err) => {
 	                    if (!(err instanceof InterruptError)) {
@@ -4560,7 +4560,7 @@ window.innerHTML = (function (document) {
 	            this._unfreezeBindings();
 	            let childComponents = findChildComponents(this.element);
 	            if (childComponents) {
-	                attachChildComponentElements(childComponents);
+	                connectChildComponentElements(childComponents);
 	            }
 	        }
 	        else {
@@ -4576,7 +4576,7 @@ window.innerHTML = (function (document) {
 	                    let backBindings = contentBindingResult[2];
 	                    this._bindings = contentBindingResult[1];
 	                    if (childComponents) {
-	                        attachChildComponentElements(childComponents);
+	                        connectChildComponentElements(childComponents);
 	                    }
 	                    if (backBindings) {
 	                        for (let i = backBindings.length; i; i -= 3) {
@@ -4587,7 +4587,7 @@ window.innerHTML = (function (document) {
 	                else {
 	                    this._bindings = null;
 	                    if (this[KEY_CHILD_COMPONENTS]) {
-	                        attachChildComponentElements(this[KEY_CHILD_COMPONENTS]);
+	                        connectChildComponentElements(this[KEY_CHILD_COMPONENTS]);
 	                    }
 	                }
 	            }
@@ -4616,7 +4616,7 @@ window.innerHTML = (function (document) {
 	                this.element.appendChild(content);
 	                resumeConnectionStatusCallbacks();
 	                if (childComponents) {
-	                    attachChildComponentElements(childComponents);
+	                    connectChildComponentElements(childComponents);
 	                }
 	                if (backBindings) {
 	                    for (let i = backBindings.length; i; i -= 3) {
@@ -4624,26 +4624,26 @@ window.innerHTML = (function (document) {
 	                    }
 	                }
 	            }
-	            callLifecycleHooks([
+	            callLifecycle([
 	                this.ready,
 	                ...this.constructor._lifecycleHooks.ready,
 	                ...((this._lifecycleHooks && this._lifecycleHooks.ready) || [])
 	            ], this);
 	            this._isReady = true;
 	        }
-	        callLifecycleHooks([
-	            this.elementAttached,
-	            ...this.constructor._lifecycleHooks.elementAttached,
-	            ...((this._lifecycleHooks && this._lifecycleHooks.elementAttached) || [])
+	        callLifecycle([
+	            this.connected,
+	            ...this.constructor._lifecycleHooks.connected,
+	            ...((this._lifecycleHooks && this._lifecycleHooks.connected) || [])
 	        ], this);
 	        return this.initializationWait;
 	    }
-	    _detach() {
-	        this._attached = false;
-	        callLifecycleHooks([
-	            this.elementDetached,
-	            ...this.constructor._lifecycleHooks.elementDetached,
-	            ...((this._lifecycleHooks && this._lifecycleHooks.elementDetached) || [])
+	    _disconnect() {
+	        this._isConnected = false;
+	        callLifecycle([
+	            this.disconnected,
+	            ...this.constructor._lifecycleHooks.disconnected,
+	            ...((this._lifecycleHooks && this._lifecycleHooks.disconnected) || [])
 	        ], this);
 	        this.dispose();
 	    }
@@ -4678,8 +4678,8 @@ window.innerHTML = (function (document) {
 	    elementDisconnected() { }
 	    initialize() { }
 	    ready() { }
-	    elementAttached() { }
-	    elementDetached() { }
+	    connected() { }
+	    disconnected() { }
 	    elementMoved() { }
 	    // Utils
 	    $(name, container) {
@@ -4719,8 +4719,8 @@ window.innerHTML = (function (document) {
 	    elementConnected: [],
 	    elementDisconnected: [],
 	    ready: [],
-	    elementAttached: [],
-	    elementDetached: [],
+	    connected: [],
+	    disconnected: [],
 	    elementMoved: []
 	};
 	BaseComponent.events = null;
@@ -4777,10 +4777,10 @@ window.innerHTML = (function (document) {
 	        }
 	        let component = this.$component;
 	        if (component) {
-	            if (component._attached) {
+	            if (component._isConnected) {
 	                if (component._parentComponent === null) {
 	                    component._parentComponent = undefined;
-	                    callLifecycleHooks([
+	                    callLifecycle([
 	                        component.elementConnected,
 	                        ...component.constructor._lifecycleHooks
 	                            .elementConnected,
@@ -4796,7 +4796,7 @@ window.innerHTML = (function (document) {
 	                    ], component);
 	                }
 	                else {
-	                    callLifecycleHooks([
+	                    callLifecycle([
 	                        component.elementConnected,
 	                        ...component.constructor._lifecycleHooks
 	                            .elementConnected,
@@ -4809,7 +4809,7 @@ window.innerHTML = (function (document) {
 	            else {
 	                component._parentComponent = undefined;
 	                ComponentParams.init(component);
-	                callLifecycleHooks([
+	                callLifecycle([
 	                    component.elementConnected,
 	                    ...component.constructor._lifecycleHooks
 	                        .elementConnected,
@@ -4817,7 +4817,7 @@ window.innerHTML = (function (document) {
 	                        component._lifecycleHooks.elementConnected) ||
 	                        [])
 	                ], component);
-	                component._attach();
+	                component._connect();
 	            }
 	            return;
 	        }
@@ -4826,7 +4826,7 @@ window.innerHTML = (function (document) {
 	            component._parentComponent = undefined;
 	            if (component.parentComponent && component._parentComponent._isReady) {
 	                ComponentParams.init(component);
-	                callLifecycleHooks([
+	                callLifecycle([
 	                    component.elementConnected,
 	                    ...component.constructor._lifecycleHooks
 	                        .elementConnected,
@@ -4834,7 +4834,7 @@ window.innerHTML = (function (document) {
 	                        component._lifecycleHooks.elementConnected) ||
 	                        [])
 	                ], component);
-	                component._attach();
+	                component._connect();
 	                return;
 	            }
 	        }
@@ -4844,9 +4844,9 @@ window.innerHTML = (function (document) {
 	            }
 	            let component = this.rioniteComponent;
 	            component._parentComponent = undefined;
-	            if (!component._attached && !component.parentComponent) {
+	            if (!component._isConnected && !component.parentComponent) {
 	                ComponentParams.init(component);
-	                callLifecycleHooks([
+	                callLifecycle([
 	                    component.elementConnected,
 	                    ...component.constructor._lifecycleHooks
 	                        .elementConnected,
@@ -4854,7 +4854,7 @@ window.innerHTML = (function (document) {
 	                        component._lifecycleHooks.elementConnected) ||
 	                        [])
 	                ], component);
-	                component._attach();
+	                component._connect();
 	            }
 	        });
 	    },
@@ -4864,9 +4864,9 @@ window.innerHTML = (function (document) {
 	            return;
 	        }
 	        let component = this.$component;
-	        if (component && component._attached) {
+	        if (component && component._isConnected) {
 	            component._parentComponent = null;
-	            callLifecycleHooks([
+	            callLifecycle([
 	                component.elementDisconnected,
 	                ...component.constructor._lifecycleHooks
 	                    .elementDisconnected,
@@ -4875,8 +4875,8 @@ window.innerHTML = (function (document) {
 	                    [])
 	            ], component);
 	            dist_2$2(() => {
-	                if (component._parentComponent === null && component._attached) {
-	                    component._detach();
+	                if (component._parentComponent === null && component._isConnected) {
+	                    component._disconnect();
 	                }
 	            });
 	        }
@@ -5195,9 +5195,9 @@ window.innerHTML = (function (document) {
 	            : (target.constructor._lifecycleHooks = {
 	                __proto__: target.constructor._lifecycleHooks
 	            });
-	        (hasOwn$2.call(lifecycleHooks, 'elementAttached')
-	            ? lifecycleHooks.elementAttached
-	            : (lifecycleHooks.elementAttached = lifecycleHooks.elementAttached.slice())).push((component) => {
+	        (hasOwn$2.call(lifecycleHooks, 'connected')
+	            ? lifecycleHooks.connected
+	            : (lifecycleHooks.connected = lifecycleHooks.connected.slice())).push((component) => {
 	            let target = listeningTarget;
 	            if (target) {
 	                if (typeof target == 'function') {
@@ -5223,7 +5223,7 @@ window.innerHTML = (function (document) {
 	    }
 	    let method = methodDesc.value;
 	    methodDesc.value = function (...args) {
-	        return this._attached ? method.call(this, ...args) : Promise.resolve();
+	        return this._isConnected ? method.call(this, ...args) : Promise.resolve();
 	    };
 	    return methodDesc;
 	}
@@ -5235,7 +5235,7 @@ window.innerHTML = (function (document) {
 	    let method = methodDesc.value;
 	    methodDesc.value = function (...args) {
 	        let result = method.call(this, ...args);
-	        result.catch(err => {
+	        result.catch((err) => {
 	            if (!(err instanceof InterruptError)) {
 	                throw err;
 	            }
@@ -5246,18 +5246,18 @@ window.innerHTML = (function (document) {
 	}
 
 	/*! *****************************************************************************
-	Copyright (c) Microsoft Corporation. All rights reserved.
-	Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-	this file except in compliance with the License. You may obtain a copy of the
-	License at http://www.apache.org/licenses/LICENSE-2.0
+	Copyright (c) Microsoft Corporation.
 
-	THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-	KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-	WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-	MERCHANTABLITY OR NON-INFRINGEMENT.
+	Permission to use, copy, modify, and/or distribute this software for any
+	purpose with or without fee is hereby granted.
 
-	See the Apache Version 2.0 License for specific language governing permissions
-	and limitations under the License.
+	THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+	REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+	AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+	INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+	LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+	OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+	PERFORMANCE OF THIS SOFTWARE.
 	***************************************************************************** */
 
 	function __decorate(decorators, target, key, desc) {
@@ -5416,12 +5416,12 @@ window.innerHTML = (function (document) {
 	            this._render(true);
 	        }
 	    }
-	    _attach() {
-	        this._attached = true;
+	    _connect() {
+	        this._isConnected = true;
 	        return null;
 	    }
-	    _detach() {
-	        this._attached = false;
+	    _disconnect() {
+	        this._isConnected = false;
 	    }
 	    _render(fromChangeEvent) {
 	        let prevList = this._prevList;
@@ -5556,12 +5556,12 @@ window.innerHTML = (function (document) {
 	                        [this._itemName]: {
 	                            configurable: true,
 	                            enumerable: true,
-	                            get: (itemCell => () => itemCell.get())(itemCell)
+	                            get: ((itemCell) => () => itemCell.get())(itemCell)
 	                        },
 	                        $index: {
 	                            configurable: true,
 	                            enumerable: true,
-	                            get: (indexCell => () => indexCell.get())(indexCell)
+	                            get: ((indexCell) => () => indexCell.get())(indexCell)
 	                        }
 	                    }), contentBindingResult);
 	                    let childComponents = contentBindingResult[0];
@@ -5595,7 +5595,7 @@ window.innerHTML = (function (document) {
 	                    resumeConnectionStatusCallbacks();
 	                    lastNode = newLastNode;
 	                    if (childComponents) {
-	                        attachChildComponentElements(childComponents);
+	                        connectChildComponentElements(childComponents);
 	                    }
 	                    if (backBindings) {
 	                        for (let i = backBindings.length; i; i -= 3) {
@@ -5607,7 +5607,7 @@ window.innerHTML = (function (document) {
 	                }
 	            }
 	            if (removedValues.size) {
-	                ($itemsMap => {
+	                (($itemsMap) => {
 	                    removedValues.forEach((_removedCount, value) => {
 	                        for (let $item of $itemsMap.get(value)) {
 	                            offBindings($item.bindings);
@@ -5732,12 +5732,12 @@ window.innerHTML = (function (document) {
 	            this._render(true);
 	        }
 	    }
-	    _attach() {
-	        this._attached = true;
+	    _connect() {
+	        this._isConnected = true;
 	        return null;
 	    }
-	    _detach() {
-	        this._attached = false;
+	    _disconnect() {
+	        this._isConnected = false;
 	    }
 	    _render(changed) {
 	        if (this._elseMode
@@ -5763,7 +5763,7 @@ window.innerHTML = (function (document) {
 	            this.element.parentNode.insertBefore(content, this.element);
 	            resumeConnectionStatusCallbacks();
 	            if (childComponents) {
-	                attachChildComponentElements(childComponents);
+	                connectChildComponentElements(childComponents);
 	            }
 	            if (backBindings) {
 	                for (let i = backBindings.length; i; i -= 3) {
@@ -5895,12 +5895,12 @@ window.innerHTML = (function (document) {
 	    static get bindsInputContent() {
 	        return true;
 	    }
-	    _attach() {
-	        this._attached = true;
+	    _connect() {
+	        this._isConnected = true;
 	        if (this._isReady) {
 	            this._unfreezeBindings();
 	            if (this._childComponents) {
-	                attachChildComponentElements(this._childComponents);
+	                connectChildComponentElements(this._childComponents);
 	            }
 	            return null;
 	        }
@@ -6023,7 +6023,7 @@ window.innerHTML = (function (document) {
 	            resumeConnectionStatusCallbacks();
 	        }
 	        if (childComponents) {
-	            attachChildComponentElements(childComponents);
+	            connectChildComponentElements(childComponents);
 	        }
 	        if (backBindings) {
 	            for (let i = backBindings.length; i; i -= 3) {
@@ -6033,8 +6033,8 @@ window.innerHTML = (function (document) {
 	        this._isReady = true;
 	        return null;
 	    }
-	    _detach() {
-	        this._attached = false;
+	    _disconnect() {
+	        this._isConnected = false;
 	        this._freezeBindings();
 	    }
 	};
@@ -6055,7 +6055,7 @@ window.innerHTML = (function (document) {
 	    ready() {
 	        this._setHtml();
 	    }
-	    elementAttached() {
+	    connected() {
 	        this.listenTo(this, 'change:html', this._onHtmlChange);
 	    }
 	    _onHtmlChange() {
@@ -6089,8 +6089,8 @@ window.innerHTML = (function (document) {
 	exports.Template = Template;
 	exports.configure = configure;
 	exports.formatters = formatters;
-	exports.onElementAttached = onElementAttached;
-	exports.onElementDetached = onElementDetached;
+	exports.onConnected = onConnected;
+	exports.onDisconnected = onDisconnected;
 	exports.onElementMoved = onElementMoved;
 	exports.onReady = onReady;
 	exports.registerComponent = registerComponent;

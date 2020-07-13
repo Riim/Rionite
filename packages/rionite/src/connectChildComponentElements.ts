@@ -1,13 +1,13 @@
-import { BaseComponent, callLifecycleHooks } from './BaseComponent';
+import { BaseComponent, callLifecycle } from './BaseComponent';
 import { ComponentParams } from './ComponentParams';
 
-export function attachChildComponentElements(childComponents: Array<BaseComponent>) {
+export function connectChildComponentElements(childComponents: Array<BaseComponent>) {
 	for (let component of childComponents) {
 		component._parentComponent = undefined;
 
 		ComponentParams.init(component);
 
-		callLifecycleHooks(
+		callLifecycle(
 			[
 				component.elementConnected,
 				...(component.constructor as typeof BaseComponent)._lifecycleHooks.elementConnected,
@@ -16,6 +16,6 @@ export function attachChildComponentElements(childComponents: Array<BaseComponen
 			component
 		);
 
-		component._attach();
+		component._connect();
 	}
 }

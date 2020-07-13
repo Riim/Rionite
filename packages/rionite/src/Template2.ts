@@ -108,7 +108,7 @@ export const ELEMENT_NAME_DELIMITER = '__';
 
 export class Template {
 	static elementTransformers: Record<string, (el: IElement) => TContent | null> = {
-		section: el => el.content
+		section: (el) => el.content
 	};
 
 	static attributeTransformers: Record<
@@ -213,7 +213,7 @@ export class Template {
 			: parent &&
 			  parent._embeddedTemplates &&
 			  parent._embeddedTemplates.map(
-					template =>
+					(template) =>
 						new Template(
 							{
 								nodeType: NodeType.BLOCK,
@@ -772,7 +772,7 @@ export class Template {
 	setBlockName(blockName: string | Array<string>): Template {
 		if (Array.isArray(blockName)) {
 			(this._elementNamesTemplate = blockName.map(
-				blockName => blockName + ELEMENT_NAME_DELIMITER
+				(blockName) => blockName + ELEMENT_NAME_DELIMITER
 			)).push('');
 		} else {
 			this._elementNamesTemplate[0] = blockName + ELEMENT_NAME_DELIMITER;
@@ -992,8 +992,8 @@ function renderContent<T extends Node = Element>(
 														nodeComponent!,
 														$paramConfig.property,
 														keypath.length == 1
-															? (propName =>
-																	function(evt: IEvent) {
+															? ((propName) =>
+																	function (evt: IEvent) {
 																		this.ownerComponent[
 																			propName
 																		] = evt.data.value;
@@ -1004,7 +1004,7 @@ function renderContent<T extends Node = Element>(
 																		keypath.join('.')
 																	);
 
-																	return function(evt: IEvent) {
+																	return function (evt: IEvent) {
 																		let propHolder = getPropertyHolder.call(
 																			this.ownerComponent
 																		);
