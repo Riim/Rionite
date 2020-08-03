@@ -16,11 +16,19 @@ export const formatters: Record<string, Function> = {
 	},
 
 	and(value1: any, ...values: Array<any>): any {
-		return values.reduce((result, valueN) => result && valueN, value1);
+		return value1 && values.every((valueN) => valueN);
+	},
+
+	andNot(value1: any, ...values: Array<any>): any {
+		return value1 && !values.every((valueN) => valueN);
 	},
 
 	or(value1: any, ...values: Array<any>): any {
-		return values.reduce((result, valueN) => result || valueN, value1);
+		return value1 || values.some((valueN) => valueN);
+	},
+
+	orNot(value1: any, ...values: Array<any>): any {
+		return value1 || !values.some((valueN) => valueN);
 	},
 
 	cond(condition: any, value1: any, value2: any): any {
@@ -116,7 +124,7 @@ export const formatters: Record<string, Function> = {
 	},
 
 	prop(target: Array<object> | ObservableList<object> | null | undefined, name: any): any {
-		return target && (target as Array<object>).map(item => item[name]);
+		return target && (target as Array<object>).map((item) => item[name]);
 	},
 
 	contains(target: Array<any> | ObservableList | null | undefined, value: any): boolean {

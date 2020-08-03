@@ -1067,19 +1067,21 @@ export class Template {
 
 		throw SyntaxError(
 			msg +
-				'\n' +
-				this.template!.slice(pos < 40 ? 0 : pos - 40, pos + 20)
-					.replace(/\t/g, ' ')
-					.replace(/\n|\r\n?/g, (match) => {
-						if (match.length == 2) {
-							n++;
-						}
+				(pos == -1
+					? ''
+					: '\n' +
+					  this.template!.slice(pos < 40 ? 0 : pos - 40, pos + 20)
+							.replace(/\t/g, ' ')
+							.replace(/\n|\r\n?/g, (match) => {
+								if (match.length == 2) {
+									n++;
+								}
 
-						return '↵';
-					}) +
-				'\n' +
-				'----------------------------------------'.slice(n) +
-				'↑'
+								return '↵';
+							}) +
+					  '\n' +
+					  '----------------------------------------'.slice(n) +
+					  '↑')
 		);
 	}
 
