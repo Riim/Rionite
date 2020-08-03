@@ -2279,8 +2279,8 @@
 	// 	];
 	// });
 	[
-	    ['if', 'rn-if-then'],
-	    ['unless', 'rn-if-else'],
+	    ['if', 'rn-condition'],
+	    ['unless', 'rn-condition'],
 	    ['for', 'rn-repeat']
 	].forEach(([name, is]) => {
 	    Template.attributeTransformers[name] = (el, attr) => ({
