@@ -1662,7 +1662,7 @@ window.innerHTML = (function (document) {
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('cellx'), require('@riim/next-uid')) :
 	typeof define === 'function' && define.amd ? define(['exports', 'cellx', '@riim/next-uid'], factory) :
-	(global = global || self, factory(global.rionite = {}, global.cellx, global['@riim/next-uid']));
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.rionite = {}, global.cellx, global['@riim/next-uid']));
 }(this, (function (exports, cellx, nextUid) { 'use strict';
 
 	if (!('firstElementChild' in DocumentFragment.prototype)) {
@@ -4239,6 +4239,7 @@ window.innerHTML = (function (document) {
 	const hasOwn = Object.prototype.hasOwnProperty;
 	const map = Array.prototype.map;
 	function callLifecycle(lifecycle, context) {
+	    let promises;
 	    for (let lifecycleFn of lifecycle) {
 	        let result;
 	        try {
@@ -4248,16 +4249,17 @@ window.innerHTML = (function (document) {
 	        }
 	        catch (err) {
 	            config.logError(err);
-	            return;
+	            return null;
 	        }
 	        if (result instanceof Promise) {
-	            result.catch((err) => {
+	            (promises || (promises = [])).push(result.catch((err) => {
 	                if (!(err instanceof InterruptError)) {
 	                    config.logError(err);
 	                }
-	            });
+	            }));
 	        }
 	    }
+	    return promises || null;
 	}
 	let currentComponent = null;
 	function onReady(lifecycleHook) {
@@ -4282,7 +4284,8 @@ window.innerHTML = (function (document) {
 	        this._disposables = new Set();
 	        this._parentComponent = null;
 	        this.$inputContent = null;
-	        this.initializationWait = null;
+	        this.initializationPromise = null;
+	        this.readyPromise = null;
 	        this._initialized = false;
 	        this._isReady = false;
 	        this._isConnected = false;
@@ -4512,7 +4515,7 @@ window.innerHTML = (function (document) {
 	            this._ownerComponent = ownerComponent;
 	        }
 	        if (this._isConnected) {
-	            return this.initializationWait;
+	            return this.initializationPromise;
 	        }
 	        this._parentComponent = undefined;
 	        ComponentParams.init(this);
@@ -4532,17 +4535,17 @@ window.innerHTML = (function (document) {
 	        }
 	        else {
 	            currentComponent = this;
-	            let initializationWait;
+	            let initializationPromise;
 	            try {
-	                initializationWait = this.initialize();
+	                initializationPromise = this.initialize();
 	            }
 	            catch (err) {
 	                config.logError(err);
 	                return null;
 	            }
-	            if (initializationWait) {
+	            if (initializationPromise) {
 	                this._beforeInitializationWait();
-	                return (this.initializationWait = initializationWait.then(() => {
+	                return (this.initializationPromise = initializationPromise.then(() => {
 	                    this._initialized = true;
 	                    if (this._isConnected) {
 	                        this._connect();
@@ -4556,6 +4559,7 @@ window.innerHTML = (function (document) {
 	            this._initialized = true;
 	        }
 	        let ctor = this.constructor;
+	        let readyPromises;
 	        if (this._isReady) {
 	            this._unfreezeBindings();
 	            let childComponents = findChildComponents(this.element);
@@ -4624,19 +4628,43 @@ window.innerHTML = (function (document) {
 	                    }
 	                }
 	            }
-	            callLifecycle([
+	            readyPromises = callLifecycle([
 	                this.ready,
 	                ...this.constructor._lifecycleHooks.ready,
 	                ...((this._lifecycleHooks && this._lifecycleHooks.ready) || [])
 	            ], this);
+	            if (readyPromises) {
+	                this.readyPromise = Promise.all(readyPromises).finally(() => {
+	                    this.readyPromise = null;
+	                });
+	            }
 	            this._isReady = true;
 	        }
-	        callLifecycle([
-	            this.connected,
-	            ...this.constructor._lifecycleHooks.connected,
-	            ...((this._lifecycleHooks && this._lifecycleHooks.connected) || [])
-	        ], this);
-	        return this.initializationWait;
+	        // readyPromises, this.readyPromise - 2
+	        // !readyPromises, this.readyPromise - 0
+	        // !readyPromises, !this.readyPromise - 1
+	        if (readyPromises || !this.readyPromise) {
+	            if (readyPromises) {
+	                this.readyPromise.finally(() => {
+	                    if (this._isConnected) {
+	                        callLifecycle([
+	                            this.connected,
+	                            ...this.constructor._lifecycleHooks
+	                                .connected,
+	                            ...((this._lifecycleHooks && this._lifecycleHooks.connected) || [])
+	                        ], this);
+	                    }
+	                });
+	            }
+	            else {
+	                callLifecycle([
+	                    this.connected,
+	                    ...this.constructor._lifecycleHooks.connected,
+	                    ...((this._lifecycleHooks && this._lifecycleHooks.connected) || [])
+	                ], this);
+	            }
+	        }
+	        return this.initializationPromise;
 	    }
 	    _disconnect() {
 	        this._isConnected = false;

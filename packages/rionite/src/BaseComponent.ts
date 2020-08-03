@@ -119,6 +119,8 @@ export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = I
 }
 
 export function callLifecycle(lifecycle: Array<Function>, context: object) {
+	let promises: Array<Promise<any>> | undefined;
+
 	for (let lifecycleFn of lifecycle) {
 		let result;
 
@@ -128,17 +130,21 @@ export function callLifecycle(lifecycle: Array<Function>, context: object) {
 				: lifecycleFn.call(context);
 		} catch (err) {
 			config.logError(err);
-			return;
+			return null;
 		}
 
 		if (result instanceof Promise) {
-			result.catch((err) => {
-				if (!(err instanceof InterruptError)) {
-					config.logError(err);
-				}
-			});
+			(promises || (promises = [])).push(
+				result.catch((err) => {
+					if (!(err instanceof InterruptError)) {
+						config.logError(err);
+					}
+				})
+			);
 		}
 	}
+
+	return promises || null;
 }
 
 let currentComponent: BaseComponent | null = null;
@@ -268,7 +274,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	[KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
 
-	initializationWait: Promise<any> | null = null;
+	initializationPromise: Promise<any> | null = null;
+	readyPromise: Promise<any> | null = null;
 
 	_initialized = false;
 	get initialized() {
@@ -568,7 +575,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		}
 
 		if (this._isConnected) {
-			return this.initializationWait;
+			return this.initializationPromise;
 		}
 
 		this._parentComponent = undefined;
@@ -597,19 +604,19 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		} else {
 			currentComponent = this;
 
-			let initializationWait: Promise<any> | void;
+			let initializationPromise: Promise<any> | void;
 
 			try {
-				initializationWait = this.initialize();
+				initializationPromise = this.initialize();
 			} catch (err) {
 				config.logError(err);
 				return null;
 			}
 
-			if (initializationWait) {
+			if (initializationPromise) {
 				this._beforeInitializationWait();
 
-				return (this.initializationWait = initializationWait.then(
+				return (this.initializationPromise = initializationPromise.then(
 					() => {
 						this._initialized = true;
 
@@ -629,6 +636,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		}
 
 		let ctor = this.constructor as typeof BaseComponent;
+		let readyPromises: ReturnType<typeof callLifecycle> | undefined;
 
 		if (this._isReady) {
 			this._unfreezeBindings();
@@ -740,7 +748,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				}
 			}
 
-			callLifecycle(
+			readyPromises = callLifecycle(
 				[
 					this.ready,
 					...(this.constructor as typeof BaseComponent)._lifecycleHooks.ready,
@@ -749,19 +757,46 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				this
 			);
 
+			if (readyPromises) {
+				this.readyPromise = Promise.all(readyPromises).finally(() => {
+					this.readyPromise = null;
+				});
+			}
+
 			this._isReady = true;
 		}
 
-		callLifecycle(
-			[
-				this.connected,
-				...(this.constructor as typeof BaseComponent)._lifecycleHooks.connected,
-				...((this._lifecycleHooks && this._lifecycleHooks.connected) || [])
-			],
-			this
-		);
+		// readyPromises, this.readyPromise - 2
+		// !readyPromises, this.readyPromise - 0
+		// !readyPromises, !this.readyPromise - 1
+		if (readyPromises || !this.readyPromise) {
+			if (readyPromises) {
+				this.readyPromise!.finally(() => {
+					if (this._isConnected) {
+						callLifecycle(
+							[
+								this.connected,
+								...(this.constructor as typeof BaseComponent)._lifecycleHooks
+									.connected,
+								...((this._lifecycleHooks && this._lifecycleHooks.connected) || [])
+							],
+							this
+						);
+					}
+				});
+			} else {
+				callLifecycle(
+					[
+						this.connected,
+						...(this.constructor as typeof BaseComponent)._lifecycleHooks.connected,
+						...((this._lifecycleHooks && this._lifecycleHooks.connected) || [])
+					],
+					this
+				);
+			}
+		}
 
-		return this.initializationWait;
+		return this.initializationPromise;
 	}
 
 	_disconnect() {

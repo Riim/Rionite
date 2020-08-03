@@ -57,7 +57,7 @@ export declare type TEventHandler<T extends BaseComponent = BaseComponent, U = I
 export interface IComponentEvents<T extends BaseComponent = BaseComponent, U = IEvent | Event> {
     [elementName: string]: Record<string, TEventHandler<T, U>>;
 }
-export declare function callLifecycle(lifecycle: Array<Function>, context: object): void;
+export declare function callLifecycle(lifecycle: Array<Function>, context: object): Promise<any>[] | null;
 export declare function onElementConnected(lifecycleHook: TComponentLifecycleHook): void;
 export declare function onElementDisconnected(lifecycleHook: TComponentLifecycleHook): void;
 export declare function onReady(lifecycleHook: TComponentLifecycleHook): void;
@@ -99,7 +99,8 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     $inputContent: DocumentFragment | null;
     _bindings: Array<IBinding> | null;
     [KEY_CHILD_COMPONENTS]: Array<BaseComponent>;
-    initializationWait: Promise<any> | null;
+    initializationPromise: Promise<any> | null;
+    readyPromise: Promise<any> | null;
     _initialized: boolean;
     get initialized(): boolean;
     _isReady: boolean;
