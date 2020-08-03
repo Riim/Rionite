@@ -7,7 +7,7 @@ export declare class RnCondition extends BaseComponent {
     paramIf: string;
     paramUnless: string;
     acceptPending: boolean;
-    _unlessMode: boolean;
+    _unless: boolean;
     _conditionCell: Cell<boolean | undefined>;
     _nodes: Array<Node> | null;
     _childComponents: Array<BaseComponent> | null;

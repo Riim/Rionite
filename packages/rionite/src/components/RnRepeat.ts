@@ -14,7 +14,6 @@ import { removeNodes } from '../lib/removeNodes';
 import { parseTemplateNodeValue } from '../parseTemplateNodeValue';
 import { KEY_CONTENT_TEMPLATE } from '../Template2';
 import { RnCondition } from './RnCondition';
-import { RnIfThen } from './RnIfThen';
 
 const slice = Array.prototype.slice;
 
@@ -66,11 +65,7 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 		for (let i = childComponents.length; i; ) {
 			let childComponent = childComponents[--i];
 
-			if (
-				childComponent instanceof RnIfThen ||
-				childComponent instanceof RnCondition ||
-				childComponent instanceof RnRepeat
-			) {
+			if (childComponent instanceof RnCondition || childComponent instanceof RnRepeat) {
 				childComponent._deactivate();
 			}
 		}

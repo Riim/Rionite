@@ -1,29 +1,6 @@
 import { NodeType, Template } from '../Template2';
 
 [
-	['IfThen', 'rn-if-then'],
-	['IfElse', 'rn-if-else'],
-	['Repeat', 'rn-repeat']
-].forEach(([name, is]) => {
-	Template.elementTransformers[name] = (el) => [
-		{
-			nodeType: NodeType.ELEMENT,
-			isTransformer: false,
-			namespaceSVG: el.namespaceSVG,
-			tagName: 'template',
-			is,
-			names: el.names,
-			attributes: el.attributes,
-			$specifiedParams: null,
-			events: null,
-			domEvents: null,
-			content: el.content,
-			contentTemplateIndex: null
-		}
-	];
-});
-
-[
 	['cond', 'rn-condition'],
 	['repeat', 'rn-repeat']
 ].forEach(([name, is]) => {

@@ -14,8 +14,6 @@ export { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export { NodeType as TemplateNodeType, IBlock as ITemplateBlock, KEY_CONTENT_TEMPLATE, Template } from './Template2';
 export { registerComponent } from './registerComponent';
-export { RnIfThen } from './components/RnIfThen';
-export { RnIfElse } from './components/RnIfElse';
 export { RnCondition } from './components/RnCondition';
 export { TList as TRnRepeatList, I$Item as IRnRepeatItem, T$ItemsMap as TRnRepeatItemsMap, RnRepeat } from './components/RnRepeat';
 export { RnSlot } from './components/RnSlot';

@@ -3890,28 +3890,6 @@ window.innerHTML = (function (document) {
 	}
 
 	[
-	    ['IfThen', 'rn-if-then'],
-	    ['IfElse', 'rn-if-else'],
-	    ['Repeat', 'rn-repeat']
-	].forEach(([name, is]) => {
-	    Template.elementTransformers[name] = (el) => [
-	        {
-	            nodeType: exports.TemplateNodeType.ELEMENT,
-	            isTransformer: false,
-	            namespaceSVG: el.namespaceSVG,
-	            tagName: 'template',
-	            is,
-	            names: el.names,
-	            attributes: el.attributes,
-	            $specifiedParams: null,
-	            events: null,
-	            domEvents: null,
-	            content: el.content,
-	            contentTemplateIndex: null
-	        }
-	    ];
-	});
-	[
 	    ['cond', 'rn-condition'],
 	    ['repeat', 'rn-repeat']
 	].forEach(([name, is]) => {
@@ -5394,167 +5372,8 @@ window.innerHTML = (function (document) {
 	    }
 	}
 
-	var RnCondition_1;
-	const slice = Array.prototype.slice;
-	const reKeypath$1 = RegExp(`^${keypathPattern}$`);
-	exports.RnCondition = RnCondition_1 = class RnCondition extends BaseComponent {
-	    constructor() {
-	        super(...arguments);
-	        this._nodes = null;
-	        this._childComponents = null;
-	        this._active = false;
-	    }
-	    static get bindsInputContent() {
-	        return true;
-	    }
-	    elementConnected() {
-	        if (this._active) {
-	            return;
-	        }
-	        this._active = true;
-	        if (!this._initialized) {
-	            let condition = this.paramIf;
-	            if (condition) {
-	                condition = condition.trim();
-	                this._unlessMode = false;
-	            }
-	            else {
-	                condition = this.paramUnless;
-	                if (condition) {
-	                    condition = condition.trim();
-	                    this._unlessMode = true;
-	                }
-	                else {
-	                    throw TypeError('Parameter "if" is required');
-	                }
-	            }
-	            let getConditionResult;
-	            if (reKeypath$1.test(condition)) {
-	                getConditionResult = compileKeypath(condition);
-	            }
-	            else {
-	                let conditionAST = parseTemplateNodeValue(`{${condition}}`);
-	                if (!conditionAST || conditionAST.length != 1) {
-	                    throw SyntaxError(`Invalid value in parameter "${(this.paramIf || '').trim() ? 'if' : 'unless'}" (${condition})`);
-	                }
-	                getConditionResult = compileBinding(conditionAST, condition);
-	            }
-	            this._conditionCell = new cellx.Cell(() => !!getConditionResult.call(this.$context));
-	            this._initialized = true;
-	        }
-	        if (this.element[KEY_CONTENT_TEMPLATE]) {
-	            this._conditionCell.onChange(this._onIfChange, this);
-	            this._render(false);
-	        }
-	    }
-	    elementDisconnected() {
-	        nextTick(() => {
-	            if (!this.element[KEY_ELEMENT_CONNECTED]) {
-	                this._deactivate();
-	            }
-	        });
-	    }
-	    _onIfChange() {
-	        if (this.element.parentNode) {
-	            this._render(true);
-	        }
-	    }
-	    _connect() {
-	        this._isConnected = true;
-	        return null;
-	    }
-	    _disconnect() {
-	        this._isConnected = false;
-	    }
-	    _render(changed) {
-	        let conditionResult = this._conditionCell.get();
-	        if (this._unlessMode
-	            ? !conditionResult && (conditionResult !== undefined || this.acceptPending)
-	            : conditionResult) {
-	            let contentBindingResult = [null, null, null];
-	            let content = this.element[KEY_CONTENT_TEMPLATE].render(null, this.ownerComponent, this.$context, contentBindingResult);
-	            let childComponents = contentBindingResult[0];
-	            let backBindings = contentBindingResult[2];
-	            this._nodes = slice.call(content.childNodes);
-	            this._childComponents = childComponents;
-	            this._bindings = contentBindingResult[1];
-	            if (childComponents) {
-	                for (let i = childComponents.length; i;) {
-	                    let childComponent = childComponents[--i];
-	                    if (childComponent.element.firstChild &&
-	                        childComponent.constructor.bindsInputContent) {
-	                        childComponent.$inputContent = dist_1$8(document.createDocumentFragment(), childComponent.element);
-	                    }
-	                }
-	            }
-	            suppressConnectionStatusCallbacks();
-	            this.element.parentNode.insertBefore(content, this.element);
-	            resumeConnectionStatusCallbacks();
-	            if (childComponents) {
-	                connectChildComponentElements(childComponents);
-	            }
-	            if (backBindings) {
-	                for (let i = backBindings.length; i; i -= 3) {
-	                    backBindings[i - 3].on('change:' + backBindings[i - 2], backBindings[i - 1]);
-	                }
-	            }
-	        }
-	        else {
-	            let nodes = this._nodes;
-	            if (nodes) {
-	                removeNodes(nodes);
-	                this._destroyBindings();
-	                this._nodes = null;
-	                this._deactivateChildComponents();
-	            }
-	        }
-	        if (changed) {
-	            cellx.Cell.release();
-	            this.emit(RnCondition_1.EVENT_CHANGE);
-	        }
-	    }
-	    _deactivate() {
-	        if (!this._active) {
-	            return;
-	        }
-	        this._active = false;
-	        this._conditionCell.offChange(this._onIfChange, this);
-	        let nodes = this._nodes;
-	        if (nodes) {
-	            removeNodes(nodes);
-	            this._destroyBindings();
-	            this._nodes = null;
-	            this._deactivateChildComponents();
-	        }
-	    }
-	    _deactivateChildComponents() {
-	        let childComponents = this._childComponents;
-	        if (childComponents) {
-	            for (let i = childComponents.length; i;) {
-	                let childComponent = childComponents[--i];
-	                if (childComponent instanceof RnCondition_1 || childComponent instanceof exports.RnRepeat) {
-	                    childComponent._deactivate();
-	                }
-	            }
-	        }
-	        this._childComponents = null;
-	    }
-	};
-	exports.RnCondition.EVENT_CHANGE = Symbol('change');
-	exports.RnCondition = RnCondition_1 = __decorate([
-	    Component({
-	        elementIs: 'RnCondition',
-	        elementExtends: 'template',
-	        params: {
-	            if: { property: 'paramIf', type: String, readonly: true },
-	            unless: { property: 'paramUnless', type: String, readonly: true },
-	            acceptPending: { type: Boolean, readonly: true }
-	        }
-	    })
-	], exports.RnCondition);
-
 	var RnRepeat_1;
-	const slice$1 = Array.prototype.slice;
+	const slice = Array.prototype.slice;
 	const reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+in\\s+(${keypathPattern}(?:\\s*(.*\\S))?)\\s*$`);
 	function getItem(list, index) {
 	    return Array.isArray(list) ? list[index] : list.get(index);
@@ -5581,9 +5400,7 @@ window.innerHTML = (function (document) {
 	    if (childComponents) {
 	        for (let i = childComponents.length; i;) {
 	            let childComponent = childComponents[--i];
-	            if (childComponent instanceof exports.RnIfThen ||
-	                childComponent instanceof exports.RnCondition ||
-	                childComponent instanceof exports.RnRepeat) {
+	            if (childComponent instanceof exports.RnCondition || childComponent instanceof exports.RnRepeat) {
 	                childComponent._deactivate();
 	            }
 	        }
@@ -5809,7 +5626,7 @@ window.innerHTML = (function (document) {
 	                    let new$Item = {
 	                        item: itemCell,
 	                        index: indexCell,
-	                        nodes: slice$1.call(content.childNodes),
+	                        nodes: slice.call(content.childNodes),
 	                        bindings: contentBindingResult[1],
 	                        childComponents
 	                    };
@@ -5918,13 +5735,12 @@ window.innerHTML = (function (document) {
 	    })
 	], exports.RnRepeat);
 
-	var RnIfThen_1;
-	const slice$2 = Array.prototype.slice;
-	const reKeypath$2 = RegExp(`^${keypathPattern}$`);
-	exports.RnIfThen = RnIfThen_1 = class RnIfThen extends BaseComponent {
+	var RnCondition_1;
+	const slice$1 = Array.prototype.slice;
+	const reKeypath$1 = RegExp(`^${keypathPattern}$`);
+	exports.RnCondition = RnCondition_1 = class RnCondition extends BaseComponent {
 	    constructor() {
 	        super(...arguments);
-	        this._elseMode = false;
 	        this._nodes = null;
 	        this._childComponents = null;
 	        this._active = false;
@@ -5938,25 +5754,37 @@ window.innerHTML = (function (document) {
 	        }
 	        this._active = true;
 	        if (!this._initialized) {
-	            let if_ = this.paramIf.trim();
-	            let getIfValue;
-	            if (reKeypath$2.test(if_)) {
-	                getIfValue = compileKeypath(if_);
+	            let condition = this.paramIf;
+	            if (condition) {
+	                condition = condition.trim();
+	                this._unless = false;
 	            }
 	            else {
-	                let ifAST = parseTemplateNodeValue(`{${if_}}`);
-	                if (!ifAST || ifAST.length != 1) {
-	                    throw SyntaxError(`Invalid value in parameter "if" (${if_})`);
+	                condition = this.paramUnless;
+	                if (condition) {
+	                    condition = condition.trim();
+	                    this._unless = true;
 	                }
-	                getIfValue = compileBinding(ifAST, if_);
+	                else {
+	                    throw TypeError('Parameter "if" is required');
+	                }
 	            }
-	            this._if = new cellx.Cell(function () {
-	                return !!getIfValue.call(this);
-	            }, { context: this.$context });
+	            let getConditionResult;
+	            if (reKeypath$1.test(condition)) {
+	                getConditionResult = compileKeypath(condition);
+	            }
+	            else {
+	                let conditionAST = parseTemplateNodeValue(`{${condition}}`);
+	                if (!conditionAST || conditionAST.length != 1) {
+	                    throw SyntaxError(`Invalid value in parameter "${(this.paramIf || '').trim() ? 'if' : 'unless'}" (${condition})`);
+	                }
+	                getConditionResult = compileBinding(conditionAST, condition);
+	            }
+	            this._conditionCell = new cellx.Cell(() => !!getConditionResult.call(this.$context));
 	            this._initialized = true;
 	        }
 	        if (this.element[KEY_CONTENT_TEMPLATE]) {
-	            this._if.onChange(this._onIfChange, this);
+	            this._conditionCell.onChange(this._onIfChange, this);
 	            this._render(false);
 	        }
 	    }
@@ -5980,14 +5808,15 @@ window.innerHTML = (function (document) {
 	        this._isConnected = false;
 	    }
 	    _render(changed) {
-	        if (this._elseMode
-	            ? !this._if.get() && (this._if.get() !== undefined || this.withUndefined)
-	            : this._if.get()) {
+	        let conditionResult = this._conditionCell.get();
+	        if (this._unless
+	            ? !conditionResult && (conditionResult !== undefined || this.acceptPending)
+	            : conditionResult) {
 	            let contentBindingResult = [null, null, null];
 	            let content = this.element[KEY_CONTENT_TEMPLATE].render(null, this.ownerComponent, this.$context, contentBindingResult);
 	            let childComponents = contentBindingResult[0];
 	            let backBindings = contentBindingResult[2];
-	            this._nodes = slice$2.call(content.childNodes);
+	            this._nodes = slice$1.call(content.childNodes);
 	            this._childComponents = childComponents;
 	            this._bindings = contentBindingResult[1];
 	            if (childComponents) {
@@ -6022,7 +5851,7 @@ window.innerHTML = (function (document) {
 	        }
 	        if (changed) {
 	            cellx.Cell.release();
-	            this.emit(RnIfThen_1.EVENT_CHANGE);
+	            this.emit(RnCondition_1.EVENT_CHANGE);
 	        }
 	    }
 	    _deactivate() {
@@ -6030,7 +5859,7 @@ window.innerHTML = (function (document) {
 	            return;
 	        }
 	        this._active = false;
-	        this._if.offChange(this._onIfChange, this);
+	        this._conditionCell.offChange(this._onIfChange, this);
 	        let nodes = this._nodes;
 	        if (nodes) {
 	            removeNodes(nodes);
@@ -6044,7 +5873,7 @@ window.innerHTML = (function (document) {
 	        if (childComponents) {
 	            for (let i = childComponents.length; i;) {
 	                let childComponent = childComponents[--i];
-	                if (childComponent instanceof RnIfThen_1 || childComponent instanceof exports.RnRepeat) {
+	                if (childComponent instanceof RnCondition_1 || childComponent instanceof exports.RnRepeat) {
 	                    childComponent._deactivate();
 	                }
 	            }
@@ -6052,30 +5881,18 @@ window.innerHTML = (function (document) {
 	        this._childComponents = null;
 	    }
 	};
-	exports.RnIfThen.EVENT_CHANGE = Symbol('change');
-	exports.RnIfThen = RnIfThen_1 = __decorate([
+	exports.RnCondition.EVENT_CHANGE = Symbol('change');
+	exports.RnCondition = RnCondition_1 = __decorate([
 	    Component({
-	        elementIs: 'RnIfThen',
+	        elementIs: 'RnCondition',
 	        elementExtends: 'template',
 	        params: {
-	            if: { property: 'paramIf', type: String, required: true, readonly: true },
-	            withUndefined: { type: Boolean, readonly: true }
+	            if: { property: 'paramIf', type: String, readonly: true },
+	            unless: { property: 'paramUnless', type: String, readonly: true },
+	            acceptPending: { type: Boolean, readonly: true }
 	        }
 	    })
-	], exports.RnIfThen);
-
-	exports.RnIfElse = class RnIfElse extends exports.RnIfThen {
-	    constructor() {
-	        super(...arguments);
-	        this._elseMode = true;
-	    }
-	};
-	exports.RnIfElse = __decorate([
-	    Component({
-	        elementIs: 'RnIfElse',
-	        elementExtends: 'template'
-	    })
-	], exports.RnIfElse);
+	], exports.RnCondition);
 
 	const IE = !!document.documentMode || navigator.userAgent.indexOf('Edge/') != -1;
 	function cloneNode(node) {

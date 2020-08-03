@@ -41,7 +41,7 @@ export class RnCondition extends BaseComponent {
 	paramUnless: string;
 	acceptPending: boolean;
 
-	_unlessMode: boolean;
+	_unless: boolean;
 
 	_conditionCell: Cell<boolean | undefined>;
 
@@ -62,13 +62,13 @@ export class RnCondition extends BaseComponent {
 
 			if (condition) {
 				condition = condition.trim();
-				this._unlessMode = false;
+				this._unless = false;
 			} else {
 				condition = this.paramUnless;
 
 				if (condition) {
 					condition = condition.trim();
-					this._unlessMode = true;
+					this._unless = true;
 				} else {
 					throw TypeError('Parameter "if" is required');
 				}
@@ -129,7 +129,7 @@ export class RnCondition extends BaseComponent {
 		let conditionResult = this._conditionCell.get();
 
 		if (
-			this._unlessMode
+			this._unless
 				? !conditionResult && (conditionResult !== undefined || this.acceptPending)
 				: conditionResult
 		) {

@@ -42,8 +42,6 @@ export {
 	Template
 } from './Template2';
 export { registerComponent } from './registerComponent';
-export { RnIfThen } from './components/RnIfThen';
-export { RnIfElse } from './components/RnIfElse';
 export { RnCondition } from './components/RnCondition';
 export {
 	TList as TRnRepeatList,
