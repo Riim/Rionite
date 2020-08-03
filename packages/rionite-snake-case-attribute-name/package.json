@@ -1,6 +1,6 @@
 {
   "name": "@riim/rionite-snake-case-attribute-name",
-  "version": "0.40.0",
+  "version": "0.41.0",
   "description": "",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
