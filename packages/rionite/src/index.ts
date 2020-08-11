@@ -37,7 +37,17 @@ export { KEY_ELEMENT_CONNECTED } from './ElementProtoMixin';
 export { ComponentParams } from './ComponentParams';
 export {
 	NodeType as TemplateNodeType,
+	INode as ITemplateNode,
+	TContent as TTemplateContent,
+	IElementAttribute as ITemplateElementAttribute,
+	IElementAttributeList as ITemplateElementAttributeList,
+	IElementAttributes as ITemplateElementAttributes,
+	IElement as ITemplateElement,
+	ITextNode as ITemplateTextNode,
 	IBlock as ITemplateBlock,
+	IElementCall as ITemplateElementCall,
+	ISuperCall as ITemplateSuperCall,
+	IDebuggerCall as ITemplateDebuggerCall,
 	KEY_CONTENT_TEMPLATE,
 	Template
 } from './Template2';

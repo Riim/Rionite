@@ -2293,6 +2293,7 @@
 	        attributes: {
 	            attributeIsValue: is,
 	            list: {
+	                [name]: 0,
 	                0: {
 	                    isTransformer: false,
 	                    name,

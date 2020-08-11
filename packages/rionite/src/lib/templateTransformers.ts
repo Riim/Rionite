@@ -67,6 +67,7 @@ import { NodeType, Template } from '../Template2';
 		attributes: {
 			attributeIsValue: is,
 			list: {
+				[name]: 0 as any,
 				0: {
 					isTransformer: false,
 					name,
