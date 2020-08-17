@@ -16,19 +16,19 @@ export const formatters: Record<string, Function> = {
 	},
 
 	and(value1: any, ...values: Array<any>): any {
-		return value1 && values.every((valueN) => valueN);
+		return values.reduce((result, valueN) => result && valueN, value1);
 	},
 
 	andNot(value1: any, ...values: Array<any>): any {
-		return value1 && !values.every((valueN) => valueN);
+		return values.reduce((result, valueN) => result && !valueN, value1);
 	},
 
 	or(value1: any, ...values: Array<any>): any {
-		return value1 || values.some((valueN) => valueN);
+		return values.reduce((result, valueN) => result || valueN, value1);
 	},
 
 	orNot(value1: any, ...values: Array<any>): any {
-		return value1 || !values.some((valueN) => valueN);
+		return values.reduce((result, valueN) => result || !valueN, value1);
 	},
 
 	cond(condition: any, value1: any, value2: any): any {
@@ -127,9 +127,17 @@ export const formatters: Record<string, Function> = {
 		return target && (target as Array<object>).map((item) => item[name]);
 	},
 
-	contains(target: Array<any> | ObservableList | null | undefined, value: any): boolean {
+	contains(
+		target: Array<any> | ObservableList | null | undefined,
+		...values: Array<any>
+	): boolean {
 		return (
-			!!target && (Array.isArray(target) ? target.includes(value) : target.contains(value))
+			!!target &&
+			values.every(
+				Array.isArray(target)
+					? (value) => target.includes(value)
+					: (value) => target.contains(value)
+			)
 		);
 	},
 

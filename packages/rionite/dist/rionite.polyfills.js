@@ -2310,16 +2310,16 @@ window.innerHTML = (function (document) {
 	        return value === null ? placeholderValue : value;
 	    },
 	    and(value1, ...values) {
-	        return value1 && values.every((valueN) => valueN);
+	        return values.reduce((result, valueN) => result && valueN, value1);
 	    },
 	    andNot(value1, ...values) {
-	        return value1 && !values.every((valueN) => valueN);
+	        return values.reduce((result, valueN) => result && !valueN, value1);
 	    },
 	    or(value1, ...values) {
-	        return value1 || values.some((valueN) => valueN);
+	        return values.reduce((result, valueN) => result || valueN, value1);
 	    },
 	    orNot(value1, ...values) {
-	        return value1 || !values.some((valueN) => valueN);
+	        return values.reduce((result, valueN) => result || !valueN, value1);
 	    },
 	    cond(condition, value1, value2) {
 	        return condition ? value1 : value2;
@@ -2384,8 +2384,11 @@ window.innerHTML = (function (document) {
 	    prop(target, name) {
 	        return target && target.map((item) => item[name]);
 	    },
-	    contains(target, value) {
-	        return (!!target && (Array.isArray(target) ? target.includes(value) : target.contains(value)));
+	    contains(target, ...values) {
+	        return (!!target &&
+	            values.every(Array.isArray(target)
+	                ? (value) => target.includes(value)
+	                : (value) => target.contains(value)));
 	    },
 	    join(target, separator = ', ') {
 	        return target && target.join(separator);
