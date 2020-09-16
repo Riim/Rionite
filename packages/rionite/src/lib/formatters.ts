@@ -1,5 +1,5 @@
 import { getUID } from '@riim/next-uid';
-import { ObservableList } from 'cellx';
+import { ObservableList } from 'cellx-collections';
 import { config } from '../config';
 
 export const formatters: Record<string, Function> = {

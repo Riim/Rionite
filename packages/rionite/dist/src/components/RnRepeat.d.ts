@@ -1,4 +1,5 @@
-import { Cell, ObservableList } from 'cellx';
+import { Cell } from 'cellx';
+import { ObservableList } from 'cellx-collections';
 import { BaseComponent } from '../BaseComponent';
 export declare type TList = Array<any> | ObservableList<any>;
 export interface I$Item {

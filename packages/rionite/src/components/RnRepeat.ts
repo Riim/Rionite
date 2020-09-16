@@ -1,5 +1,6 @@
 import { nextTick } from '@riim/next-tick';
-import { Cell, ObservableList, TListener } from 'cellx';
+import { Cell, TListener } from 'cellx';
+import { ObservableList } from 'cellx-collections';
 import { moveContent } from '../../node_modules/@riim/move-content';
 import { BaseComponent } from '../BaseComponent';
 import { compileBinding } from '../compileBinding';

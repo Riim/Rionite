@@ -1660,10 +1660,10 @@ window.innerHTML = (function (document) {
 })(document);
 
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('cellx'), require('@riim/next-uid')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'cellx', '@riim/next-uid'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.rionite = {}, global.cellx, global['@riim/next-uid']));
-}(this, (function (exports, cellx, nextUid) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('cellx'), require('@riim/next-uid'), require('cellx-collections')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'cellx', '@riim/next-uid', 'cellx-collections'], factory) :
+	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.rionite = {}, global.cellx, global['@riim/next-uid'], global.cellxCollections));
+}(this, (function (exports, cellx, nextUid, cellxCollections) { 'use strict';
 
 	if (!('firstElementChild' in DocumentFragment.prototype)) {
 	    Object.defineProperty(DocumentFragment.prototype, 'firstElementChild', {
@@ -5459,7 +5459,7 @@ window.innerHTML = (function (document) {
 	        }
 	        if (this.element[KEY_CONTENT_TEMPLATE]) {
 	            let list = this._list;
-	            if (list && (list instanceof cellx.Cell || list instanceof cellx.ObservableList)) {
+	            if (list && (list instanceof cellx.Cell || list instanceof cellxCollections.ObservableList)) {
 	                list.onChange(this._onListChange, this);
 	            }
 	            this._render(false);
@@ -5707,7 +5707,7 @@ window.innerHTML = (function (document) {
 	        }
 	        this._active = false;
 	        let list = this._list;
-	        if (list && (list instanceof cellx.Cell || list instanceof cellx.ObservableList)) {
+	        if (list && (list instanceof cellx.Cell || list instanceof cellxCollections.ObservableList)) {
 	            list.offChange(this._onListChange, this);
 	        }
 	        let prevList = this._prevList;
