@@ -139,6 +139,7 @@ class TemplateParser {
                     elNames = [];
                     if (this._chr == '!') {
                         override = true;
+                        this._next();
                     }
                 }
                 elNames.push(name);

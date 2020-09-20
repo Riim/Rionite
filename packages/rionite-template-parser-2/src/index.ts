@@ -211,6 +211,7 @@ export class TemplateParser {
 
 					if ((this._chr as string) == '!') {
 						override = 1;
+						this._next();
 					}
 				}
 

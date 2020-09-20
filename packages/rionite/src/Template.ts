@@ -401,6 +401,7 @@ export class Template {
 
 					if ((this._chr as string) == '!') {
 						override = true;
+						this._next();
 					}
 				}
 
