@@ -2,7 +2,11 @@ import { Cell, IEvent, TListener } from 'cellx';
 import { BaseComponent } from './BaseComponent';
 import { IBinding } from './componentBinding';
 import { TTemplateNodeValueAST } from './TemplateNodeValueParser';
-export declare type TContentBindingResult = [Array<BaseComponent> | null, Array<IBinding> | null, Array<BaseComponent | string | TListener> | null];
+export declare type TContentBindingResult = [
+    Array<BaseComponent> | null,
+    Array<IBinding> | null,
+    Array<BaseComponent | string | TListener> | null
+];
 export declare const KEY_CONTEXT: unique symbol;
 export declare const templateNodeValueASTCache: Map<string, TTemplateNodeValueAST | null>;
 export interface IAttributeBindingCellMeta {

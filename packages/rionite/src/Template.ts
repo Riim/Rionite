@@ -12,12 +12,13 @@ import {
 import { compileTemplateNodeValue } from './compileTemplateNodeValue';
 import { IBinding } from './componentBinding';
 import { componentConstructors } from './componentConstructors';
+import { config } from './config';
 import { KEY_CHILD_COMPONENTS, KEY_PARAMS_CONFIG } from './Constants';
 import { KEY_DOM_EVENTS } from './handleDOMEvent';
 import { KEY_EVENTS } from './handleEvent';
 import { compileKeypath } from './lib/compileKeypath';
 import { setAttribute } from './lib/setAttribute';
-import { svgNamespaceURI } from './lib/svgNamespaceURI';
+import { SVG_NAMESPACE_URI } from './lib/SVG_NAMESPACE_URI';
 import { parseTemplateNodeValue } from './parseTemplateNodeValue';
 import { ITemplateNodeValueBinding } from './TemplateNodeValueParser';
 
@@ -55,11 +56,11 @@ export interface IElementAttributes {
 
 export interface IElement extends INode {
 	nodeType: NodeType.ELEMENT;
+	names: Array<string | null> | null;
 	isTransformer: boolean;
 	namespaceSVG: boolean;
 	tagName: string;
 	is: string | null;
-	names: Array<string | null> | null;
 	attributes: IElementAttributes | null;
 	$specifiedParams: Set<string> | null;
 	events: Map<string | symbol, string> | null;
@@ -208,11 +209,11 @@ export class Template {
 						__proto__: null as any,
 						'@root': {
 							nodeType: NodeType.ELEMENT,
+							names: ['root'],
 							isTransformer: true,
 							namespaceSVG: false,
 							tagName: 'section',
 							is: null,
-							names: ['root'],
 							attributes: null,
 							$specifiedParams: null,
 							events: null,
@@ -270,6 +271,20 @@ export class Template {
 		);
 
 		return block;
+	}
+
+	_setElement(name: string, override: boolean, el: IElement) {
+		if (this._elements[name]) {
+			if (override) {
+				config.logError(`Overriding non-existing element "${name}"`);
+			}
+		} else {
+			if (!override) {
+				config.logError(`Definition of an existing element "${name}"`);
+			}
+		}
+
+		this._elements[name] = el;
 	}
 
 	_readContent(
@@ -364,6 +379,7 @@ export class Template {
 		this._skipWhitespacesAndComments();
 
 		let elNames: Array<string | null> | undefined;
+		let override = false;
 		let elName: string | null | undefined;
 
 		if (this._chr == ':') {
@@ -380,7 +396,15 @@ export class Template {
 			}
 
 			for (let name; (name = this._readName(reElementName)); ) {
-				(elNames || (elNames = [])).push(name);
+				if (!elNames) {
+					elNames = [];
+
+					if ((this._chr as string) == '!') {
+						override = true;
+					}
+				}
+
+				elNames.push(name);
 
 				if (this._skipWhitespacesAndComments() != ':') {
 					break;
@@ -515,11 +539,11 @@ export class Template {
 
 		let el: IElement = {
 			nodeType: NodeType.ELEMENT,
+			names: elNames || null,
 			isTransformer,
 			namespaceSVG,
 			tagName,
 			is: (attrs && attrs.attributeIsValue) || null,
-			names: elNames || null,
 			attributes: attrs || null,
 			$specifiedParams: $specifiedParams || null,
 			events: events || null,
@@ -552,11 +576,11 @@ export class Template {
 						) {
 							let contentEl: IElement = {
 								nodeType: NodeType.ELEMENT,
+								names: (node as IElement).names,
 								isTransformer: false,
 								namespaceSVG: (node as IElement).namespaceSVG,
 								tagName: (node as IElement).tagName,
 								is: (node as IElement).is,
-								names: (node as IElement).names,
 								attributes: (node as IElement).attributes,
 								$specifiedParams: (node as IElement).$specifiedParams,
 								events: (node as IElement).events,
@@ -583,7 +607,7 @@ export class Template {
 							let elName = contentEl.names && contentEl.names[0];
 
 							if (elName) {
-								this._elements[elName] = contentEl;
+								this._setElement(elName, override, contentEl);
 								content[i] = {
 									nodeType: NodeType.ELEMENT_CALL,
 									name: elName
@@ -595,7 +619,7 @@ export class Template {
 							let elName = (node as IElement).names && (node as IElement).names![0];
 
 							if (elName) {
-								this._elements[elName] = node as IElement;
+								this._setElement(elName, override, node as IElement);
 								content[i] = {
 									nodeType: NodeType.ELEMENT_CALL,
 									name: elName
@@ -635,11 +659,11 @@ export class Template {
 								) {
 									let contentEl: IElement = {
 										nodeType: NodeType.ELEMENT,
+										names: (node as IElement).names,
 										isTransformer: false,
 										namespaceSVG: (node as IElement).namespaceSVG,
 										tagName: (node as IElement).tagName,
 										is: (node as IElement).is,
-										names: (node as IElement).names,
 										attributes: (node as IElement).attributes,
 										$specifiedParams: (node as IElement).$specifiedParams,
 										events: (node as IElement).events,
@@ -667,7 +691,7 @@ export class Template {
 									let elName = contentEl.names && contentEl.names[0];
 
 									if (elName) {
-										this._elements[elName] = contentEl;
+										this._setElement(elName, override, contentEl);
 										el.content![i] = {
 											nodeType: NodeType.ELEMENT_CALL,
 											name: elName
@@ -680,7 +704,7 @@ export class Template {
 										(node as IElement).names && (node as IElement).names![0];
 
 									if (elName) {
-										this._elements[elName] = node as IElement;
+										this._setElement(elName, override, node as IElement);
 										el.content![i] = {
 											nodeType: NodeType.ELEMENT_CALL,
 											name: elName
@@ -691,6 +715,8 @@ export class Template {
 						}
 					}
 				}
+
+				elName = el.names && el.names[0];
 			}
 
 			if (el.content && (el.tagName == 'template' || el.tagName == 'rn-slot')) {
@@ -709,12 +735,10 @@ export class Template {
 						)
 					) - 1;
 			}
-
-			elName = el.names && el.names[0];
 		}
 
 		if (elName) {
-			this._elements[elName] = el;
+			this._setElement(elName, override, el);
 			(targetContent || (targetContent = [])).push({
 				nodeType: NodeType.ELEMENT_CALL,
 				name: elName
@@ -1179,7 +1203,7 @@ function renderContent<T extends Node = Element>(
 						let el: Element;
 
 						if ((node as IElement).namespaceSVG) {
-							el = document.createElementNS(svgNamespaceURI, tagName);
+							el = document.createElementNS(SVG_NAMESPACE_URI, tagName);
 						} else if ((node as IElement).is) {
 							el = (window as any).innerHTML(
 								document.createElement('div'),

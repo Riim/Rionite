@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.walkAttributes = exports.walkContent = exports.walk = void 0;
 const rionite_template_parser_1 = require("@riim/rionite-template-parser");
 function walk(node, callbacks) {
     if (Array.isArray(node)) {

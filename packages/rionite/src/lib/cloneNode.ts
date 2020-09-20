@@ -2,7 +2,7 @@ import { KEY_DOM_EVENTS } from '../handleDOMEvent';
 import { KEY_EVENTS } from '../handleEvent';
 import { KEY_CONTENT_TEMPLATE } from '../Template2';
 
-const IE = !!(document as any).documentMode || navigator.userAgent.indexOf('Edge/') != -1;
+const isEdge = !!(document as any).documentMode || navigator.userAgent.indexOf('Edge/') != -1;
 
 export function cloneNode<T extends Node>(node: T): T {
 	let copy!: Node;
@@ -26,7 +26,7 @@ export function cloneNode<T extends Node>(node: T): T {
 					document.createElement('div'),
 					`<${tagName} is="${is}">`
 				).firstChild;
-			} else if (IE) {
+			} else if (isEdge) {
 				copy = (window as any).innerHTML(document.createElement('div'), `<${tagName}>`)
 					.firstChild;
 			} else {

@@ -18,7 +18,7 @@ function stringify(value) {
 	return JSON.stringify(value);
 }
 
-module.exports = function(content) {
+module.exports = function (content) {
 	return `const template = ${stringify(
 		new TemplateParser(content).parse()
 	)};\nexport default template;`;

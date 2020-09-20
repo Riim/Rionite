@@ -18,7 +18,7 @@ const reLineBreak = /\n|\r\n?/;
 const reComment = /\/\/ ?;;; ?(\S.*)/;
 const reCommentValue = /^ ?;;; ?(\S.*)/;
 
-module.exports = options => {
+module.exports = (options) => {
 	// Plural forms:
 	// http://docs.translatehouse.org/projects/localization-guide/en/latest/l10n/pluralforms.html?id=l10n/pluralforms
 	let languages = (options && options.languages) || [
@@ -72,7 +72,7 @@ module.exports = options => {
 		}
 	};
 
-	let onData = function(file, _encoding, cb) {
+	let onData = function (file, _encoding, cb) {
 		let content = file.contents.toString();
 
 		switch (path.extname(file.path)) {
@@ -117,7 +117,7 @@ module.exports = options => {
 					}
 				}
 
-				let walk = node => {
+				let walk = (node) => {
 					if (node.kind == ts.SyntaxKind.CallExpression) {
 						let nodeExpr = node.expression;
 
@@ -159,10 +159,7 @@ module.exports = options => {
 										: fileComments[lineIndex - 1] &&
 										  !fileComments[lineIndex - 1].afterLine &&
 										  fileComments[lineIndex - 1].value),
-								path
-									.relative(process.cwd(), file.path)
-									.split(path.sep)
-									.join('/') +
+								path.relative(process.cwd(), file.path).split(path.sep).join('/') +
 									':' +
 									lineIndex
 							);
@@ -216,7 +213,7 @@ module.exports = options => {
 					}
 				});
 
-				let handleNode = node => {
+				let handleNode = (node) => {
 					let index = node.value.indexOf('{');
 
 					if (index == -1) {
@@ -234,7 +231,7 @@ module.exports = options => {
 									valueNode.value.charAt(0) == '"') &&
 								valueNode.formatters &&
 								(formatter = valueNode.formatters.find(
-									formatter => formatter.name == 't' || formatter.name == 'pt'
+									(formatter) => formatter.name == 't' || formatter.name == 'pt'
 								))
 							)
 						) {
@@ -265,10 +262,7 @@ module.exports = options => {
 									? fileComments.get(node.line).value
 									: fileComments.get(node.line - 1) &&
 									  fileComments.get(node.line - 1).value),
-							path
-								.relative(process.cwd(), file.path)
-								.split(path.sep)
-								.join('/') +
+							path.relative(process.cwd(), file.path).split(path.sep).join('/') +
 								':' +
 								node.line
 						);
@@ -285,16 +279,13 @@ module.exports = options => {
 			case '.njk': {
 				let ast = nunjucks.parser.parse(content);
 
-				nunjucksWalk.walk(nunjucksWalk.normalize(ast), node => {
+				nunjucksWalk.walk(nunjucksWalk.normalize(ast), (node) => {
 					if (node.type == 'Filter' && node.name.value == 't') {
 						addTranslation(
 							'',
 							node.args.children[0].value,
 							null,
-							path
-								.relative(process.cwd(), file.path)
-								.split(path.sep)
-								.join('/') +
+							path.relative(process.cwd(), file.path).split(path.sep).join('/') +
 								':' +
 								node.args.children[0].lineno
 						);
@@ -311,7 +302,7 @@ module.exports = options => {
 	let poStream = through.obj();
 	let jsonStream = through.obj();
 
-	let onEnd = function(cb) {
+	let onEnd = function (cb) {
 		if (translations.length == 0) {
 			poStream.push(null);
 			jsonStream.push(null);
@@ -328,7 +319,9 @@ module.exports = options => {
 			};
 
 			if (existingPOFiles.has(language.code)) {
-				poData = gettextParser.po.parse(existingPOFiles.get(language.code).contents.toString());
+				poData = gettextParser.po.parse(
+					existingPOFiles.get(language.code).contents.toString()
+				);
 
 				for (let msgctxt of Object.keys(poData.translations)) {
 					let contextTranslations = poData.translations[msgctxt];

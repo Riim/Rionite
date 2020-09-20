@@ -1,4 +1,3 @@
-import './lib/polyfills';
 import './lib/templateTransformers';
 export { configure } from './config';
 export { InterruptError } from './lib/InterruptError';

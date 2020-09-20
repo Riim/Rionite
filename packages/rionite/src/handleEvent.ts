@@ -26,7 +26,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 	componentStack.length = 0;
 
 	let evtType = evt.type;
-	let attrName = typeof evtType == 'string' ? 'oncomponent-' + (evtType as string) : null;
+	let attrName = typeof evtType == 'string' ? 'oncomponent-' + evtType : null;
 	let receivers: Array<Element> | null | undefined;
 
 	for (;;) {

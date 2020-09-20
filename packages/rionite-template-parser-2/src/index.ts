@@ -14,6 +14,17 @@ export type TNode = Array<any>;
 // export type TContent = Array<INode>;
 export type TContent = Array<TNode>;
 
+// export interface ISuperCall extends INode {
+// 	nodeType: NodeType.SUPER_CALL;
+// 	elementName: string | null;
+// }
+export type TSuperCall = [/* nodeType */ NodeType.SUPER_CALL, /* elementName */ string | undefined];
+
+// export interface IDebuggerCall extends INode {
+// 	nodeType: NodeType.DEBUGGER_CALL;
+// }
+export type TDebuggerCall = [/* nodeType */ NodeType.DEBUGGER_CALL];
+
 // export interface IElementAttribute extends INode {
 // 	nodeType: NodeType.ELEMENT_ATTRIBUTE;
 // 	isTransformer: boolean;
@@ -40,17 +51,19 @@ export type TElementAttributes = [
 
 // export interface IElement extends INode {
 // 	nodeType: NodeType.ELEMENT;
+// 	names: Array<string | null> | null;
+// 	override: boolean;
 // 	isTransformer: boolean;
 // 	tagName: string | null;
-// 	names: Array<string | null> | null;
 // 	attributes: IElementAttributes | null;
 // 	content: TContent | null;
 // }
 export type TElement = [
 	/* nodeType */ NodeType.ELEMENT,
+	/* names */ Array<string | undefined> | undefined,
+	/* override */ 1 | undefined,
 	/* isTransformer */ 1 | undefined,
 	/* tagName */ string | undefined,
-	/* names */ Array<string | undefined> | undefined,
 	/* attributes */ TElementAttributes | undefined,
 	/* content */ TContent | undefined
 ];
@@ -60,17 +73,6 @@ export type TElement = [
 // 	value: string;
 // }
 export type TTextNode = [/* nodeType */ NodeType.TEXT, /* value */ string];
-
-// export interface ISuperCall extends INode {
-// 	nodeType: NodeType.SUPER_CALL;
-// 	elementName: string | null;
-// }
-export type TSuperCall = [/* nodeType */ NodeType.SUPER_CALL, /* elementName */ string | undefined];
-
-// export interface IDebuggerCall extends INode {
-// 	nodeType: NodeType.DEBUGGER_CALL;
-// }
-export type TDebuggerCall = [/* nodeType */ NodeType.DEBUGGER_CALL];
 
 const escapee = new Map([
 	['/', '/'],
@@ -188,6 +190,7 @@ export class TemplateParser {
 		this._skipWhitespacesAndComments();
 
 		let elNames: Array<string | undefined> | undefined;
+		let override: 1 | undefined;
 
 		if (this._chr == ':') {
 			this._next();
@@ -203,7 +206,15 @@ export class TemplateParser {
 			}
 
 			for (let name; (name = this._readName(reElementName)); ) {
-				(elNames || (elNames = [])).push(name);
+				if (!elNames) {
+					elNames = [];
+
+					if ((this._chr as string) == '!') {
+						override = 1;
+					}
+				}
+
+				elNames.push(name);
 
 				if (this._skipWhitespacesAndComments() != ':') {
 					break;
@@ -237,9 +248,10 @@ export class TemplateParser {
 
 		targetContent.push([
 			NodeType.ELEMENT,
+			elNames,
+			override,
 			isTransformer ? 1 : undefined,
 			tagName || undefined,
-			elNames,
 			attrs,
 			content
 		] as TElement);
@@ -489,7 +501,7 @@ export class TemplateParser {
 				this.template
 					.slice(pos < 40 ? 0 : pos - 40, pos + 20)
 					.replace(/\t/g, ' ')
-					.replace(reLineBreak, match => {
+					.replace(reLineBreak, (match) => {
 						if (match.length == 2) {
 							n++;
 						}

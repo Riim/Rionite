@@ -37,9 +37,9 @@ export interface IElementAttributes {
 
 export interface IElement extends INode {
 	nodeType: NodeType.ELEMENT;
+	names: Array<string | null> | null;
 	isTransformer: boolean;
 	tagName: string | null;
-	names: Array<string | null> | null;
 	attributes: IElementAttributes | null;
 	content: TContent | null;
 }
@@ -217,9 +217,9 @@ export class TemplateParser {
 
 		targetContent.push({
 			nodeType: NodeType.ELEMENT,
+			names: elNames || null,
 			isTransformer,
 			tagName,
-			names: elNames || null,
 			attributes: attrs || null,
 			content: content || null
 		} as IElement);

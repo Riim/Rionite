@@ -9,14 +9,15 @@ export function compileKeypath(
 ): (this: object) => any;
 export function compileKeypath(
 	keypath: string | Array<string>,
-	cacheKey: string = keypath as any
+	cacheKey = keypath as string
 ): (this: object) => any {
 	return (
 		cache.get(cacheKey) ||
 		cache
-			.set(cacheKey, Function(
-				`var tmp; return ${keypathToJSExpression(keypath, cacheKey)};`
-			) as any)
+			.set(
+				cacheKey,
+				Function(`var tmp; return ${keypathToJSExpression(keypath, cacheKey)};`) as any
+			)
 			.get(cacheKey)!
 	);
 }

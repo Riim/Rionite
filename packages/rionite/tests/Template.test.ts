@@ -12,20 +12,23 @@ declare module '../src/Template2' {
 	}
 }
 
-Template.prototype.renderToString = function(): string {
+Template.prototype.renderToString = function (): string {
 	return fragmentToString(this.render());
 };
 
-Template.elementTransformers.Slot = el => {
+Template.elementTransformers.Slot = (el) => {
 	return [
 		{
 			nodeType: NodeType.ELEMENT,
+			names: el.names,
 			isTransformer: false,
 			namespaceSVG: false,
 			tagName: 'rn-slot',
 			is: null,
-			names: el.names,
 			attributes: el.attributes,
+			$specifiedParams: null,
+			events: null,
+			domEvents: null,
 			content: el.content,
 			contentTemplateIndex: null
 		}
@@ -45,20 +48,20 @@ describe('Template#parse', () => {
 			elements: {
 				'@root': {
 					nodeType: NodeType.ELEMENT,
+					names: ['root'],
 					isTransformer: true,
 					namespaceSVG: false,
 					tagName: 'section',
 					is: null,
-					names: ['root'],
 					attributes: null,
 					content: [
 						{
 							nodeType: NodeType.ELEMENT,
+							names: null,
 							isTransformer: false,
 							namespaceSVG: false,
 							tagName: 'b',
 							is: null,
-							names: null,
 							attributes: null,
 							content: [
 								{
@@ -87,11 +90,11 @@ describe('Template#parse', () => {
 			elements: {
 				'@root': {
 					nodeType: NodeType.ELEMENT,
+					names: ['root'],
 					isTransformer: true,
 					namespaceSVG: false,
 					tagName: 'section',
 					is: null,
-					names: ['root'],
 					attributes: null,
 					content: [
 						{
@@ -103,11 +106,11 @@ describe('Template#parse', () => {
 				},
 				el1: {
 					nodeType: NodeType.ELEMENT,
+					names: ['el1'],
 					isTransformer: false,
 					namespaceSVG: false,
 					tagName: 'b',
 					is: null,
-					names: ['el1'],
 					attributes: null,
 					content: [
 						{
@@ -133,18 +136,20 @@ describe('Template#parse', () => {
 			elements: {
 				'@root': {
 					nodeType: NodeType.ELEMENT,
+					names: ['root'],
 					isTransformer: true,
 					namespaceSVG: false,
 					tagName: 'section',
 					is: null,
-					names: ['root'],
 					attributes: null,
 					content: [
 						{
 							nodeType: NodeType.ELEMENT,
+							names: null,
+							isTransformer: false,
+							namespaceSVG: false,
 							tagName: 'template',
 							is: null,
-							names: null,
 							attributes: null,
 							content: [
 								{
@@ -627,7 +632,7 @@ describe('Template#render', () => {
 	});
 
 	test('transformer', () => {
-		Template.elementTransformers.test = _el => {
+		Template.elementTransformers.test = (_el) => {
 			return [
 				{ nodeType: NodeType.TEXT, value: '1' },
 				{ nodeType: NodeType.TEXT, value: '2' },
@@ -648,7 +653,7 @@ describe('Template#render', () => {
 	});
 
 	test('transformer (2)', () => {
-		Template.elementTransformers.test = el => {
+		Template.elementTransformers.test = (el) => {
 			return [
 				{ nodeType: NodeType.TEXT, value: '[' },
 				...el.content!,
@@ -671,16 +676,19 @@ describe('Template#render', () => {
 	});
 
 	test('доопределение атрибутов transformer-а', () => {
-		Template.elementTransformers.test = el => {
+		Template.elementTransformers.test = (el) => {
 			return [
 				{
 					nodeType: NodeType.ELEMENT,
+					names: el.names,
 					isTransformer: false,
 					namespaceSVG: false,
 					tagName: 'b',
 					is: null,
-					names: el.names,
 					attributes: el.attributes,
+					$specifiedParams: null,
+					events: null,
+					domEvents: null,
 					content: el.content,
 					contentTemplateIndex: null
 				}
@@ -707,25 +715,31 @@ describe('Template#render', () => {
 	});
 
 	test('доопределение атрибутов и содержимого transformer-а', () => {
-		Template.elementTransformers.test = el => {
+		Template.elementTransformers.test = (el) => {
 			return [
 				{
 					nodeType: NodeType.ELEMENT,
+					names: el.names,
 					isTransformer: false,
 					namespaceSVG: false,
 					tagName: 'b',
 					is: null,
-					names: el.names,
 					attributes: el.attributes,
+					$specifiedParams: null,
+					events: null,
+					domEvents: null,
 					content: el.content && [
 						{
 							nodeType: NodeType.ELEMENT,
+							names: null,
 							isTransformer: false,
 							namespaceSVG: false,
 							tagName: 'u',
 							is: null,
-							names: null,
 							attributes: null,
+							$specifiedParams: null,
+							events: null,
+							domEvents: null,
 							content: el.content,
 							contentTemplateIndex: null
 						}

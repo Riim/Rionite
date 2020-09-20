@@ -7,11 +7,11 @@ import { NodeType, Template } from '../Template2';
 	Template.elementTransformers[name] = (el) => [
 		{
 			nodeType: NodeType.ELEMENT,
+			names: el.names,
 			isTransformer: false,
 			namespaceSVG: el.namespaceSVG,
 			tagName: 'template',
 			is,
-			names: el.names,
 			attributes: el.attributes,
 			$specifiedParams: null,
 			events: null,
@@ -26,11 +26,11 @@ import { NodeType, Template } from '../Template2';
 // 	Template.elementTransformers[name] = (el) => [
 // 		{
 // 			nodeType: NodeType.ELEMENT,
+// 			names: el.names,
 // 			isTransformer: false,
 // 			namespaceSVG: el.namespaceSVG,
 // 			tagName: 'template',
 // 			is: 'rn-condition',
-// 			names: el.names,
 // 			attributes: {
 // 				attributeIsValue: 'rn-condition',
 // 				list: {
@@ -59,11 +59,11 @@ import { NodeType, Template } from '../Template2';
 ].forEach(([name, is]) => {
 	Template.attributeTransformers[name] = (el, attr) => ({
 		nodeType: NodeType.ELEMENT,
+		names: null,
 		isTransformer: false,
 		namespaceSVG: false,
 		tagName: 'template',
 		is,
-		names: null,
 		attributes: {
 			attributeIsValue: is,
 			list: {

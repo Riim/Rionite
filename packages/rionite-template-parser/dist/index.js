@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TemplateParser = exports.NodeType = void 0;
 var NodeType;
 (function (NodeType) {
     NodeType[NodeType["BLOCK"] = 1] = "BLOCK";
@@ -123,6 +124,7 @@ class TemplateParser {
         let tagName = this._readName(reTagName);
         this._skipWhitespacesAndReadComments(targetContent);
         let elNames;
+        let override;
         if (this._chr == ':') {
             this._next();
             let pos = this._pos;
@@ -133,7 +135,13 @@ class TemplateParser {
                 this._skipWhitespacesAndReadComments(targetContent);
             }
             for (let name; (name = this._readName(reElementName));) {
-                (elNames || (elNames = [])).push(name);
+                if (!elNames) {
+                    elNames = [];
+                    if (this._chr == '!') {
+                        override = true;
+                    }
+                }
+                elNames.push(name);
                 if (this._skipWhitespacesAndReadComments(targetContent) != ':') {
                     break;
                 }
@@ -158,9 +166,10 @@ class TemplateParser {
         }
         targetContent.push({
             nodeType: NodeType.ELEMENT,
+            names: elNames || null,
+            override: override || false,
             isTransformer,
             tagName,
-            names: elNames || null,
             attributes: attrs || null,
             content: content || null,
             pos,
@@ -412,7 +421,7 @@ class TemplateParser {
             this.template
                 .slice(pos < 40 ? 0 : pos - 40, pos + 20)
                 .replace(/\t/g, ' ')
-                .replace(reLineBreak, match => {
+                .replace(reLineBreak, (match) => {
                 if (match.length == 2) {
                     n++;
                 }

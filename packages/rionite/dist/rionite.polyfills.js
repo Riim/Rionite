@@ -1627,72 +1627,11 @@ window.innerHTML = (function (document) {
   });
 }(document));
 
-;(function(d) {
-	if ('content' in d.createElement('template')) {
-		return;
-	}
-
-	var style = d.createElement('style');
-	style.type = 'text/css';
-	style.textContent = 'template { display: none !important }';
-	d.getElementsByTagName('head')[0].appendChild(style);
-
-	Object.defineProperty(HTMLElement.prototype, 'content', {
-		configurable: true,
-		enumerable: true,
-
-		get: function() {
-			if (this.__$$content__) {
-				return this.__$$content__;
-			}
-
-			if (this.tagName == 'TEMPLATE') {
-				var df = (this.__$$content__ = d.createDocumentFragment());
-
-				for (var child; (child = this.firstChild); ) {
-					df.appendChild(child);
-				}
-
-				return df;
-			}
-		}
-	});
-})(document);
-
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('cellx'), require('@riim/next-uid'), require('cellx-collections')) :
 	typeof define === 'function' && define.amd ? define(['exports', 'cellx', '@riim/next-uid', 'cellx-collections'], factory) :
 	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.rionite = {}, global.cellx, global['@riim/next-uid'], global.cellxCollections));
 }(this, (function (exports, cellx, nextUid, cellxCollections) { 'use strict';
-
-	if (!('firstElementChild' in DocumentFragment.prototype)) {
-	    Object.defineProperty(DocumentFragment.prototype, 'firstElementChild', {
-	        configurable: true,
-	        enumerable: false,
-	        get() {
-	            for (let child = this.firstChild; child; child = child.nextSibling) {
-	                if (child.nodeType == Node.ELEMENT_NODE) {
-	                    return child;
-	                }
-	            }
-	            return null;
-	        }
-	    });
-	}
-	if (!('nextElementSibling' in DocumentFragment.prototype)) {
-	    Object.defineProperty(DocumentFragment.prototype, 'nextElementSibling', {
-	        configurable: true,
-	        enumerable: false,
-	        get() {
-	            for (let child = this.nextSibling; child; child = child.nextSibling) {
-	                if (child.nodeType == Node.ELEMENT_NODE) {
-	                    return child;
-	                }
-	            }
-	            return null;
-	        }
-	    });
-	}
 
 	function unwrapExports (x) {
 		return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -1750,6 +1689,7 @@ window.innerHTML = (function (document) {
 
 	var dist$2 = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.TemplateParser = exports.NodeType = void 0;
 	var NodeType;
 	(function (NodeType) {
 	    NodeType[NodeType["ELEMENT"] = 1] = "ELEMENT";
@@ -1842,6 +1782,7 @@ window.innerHTML = (function (document) {
 	        let tagName = this._readName(reTagName);
 	        this._skipWhitespacesAndComments();
 	        let elNames;
+	        let override;
 	        if (this._chr == ':') {
 	            this._next();
 	            let pos = this._pos;
@@ -1852,7 +1793,13 @@ window.innerHTML = (function (document) {
 	                this._skipWhitespacesAndComments();
 	            }
 	            for (let name; (name = this._readName(reElementName));) {
-	                (elNames || (elNames = [])).push(name);
+	                if (!elNames) {
+	                    elNames = [];
+	                    if (this._chr == '!') {
+	                        override = 1;
+	                    }
+	                }
+	                elNames.push(name);
 	                if (this._skipWhitespacesAndComments() != ':') {
 	                    break;
 	                }
@@ -1877,9 +1824,10 @@ window.innerHTML = (function (document) {
 	        }
 	        targetContent.push([
 	            NodeType.ELEMENT,
+	            elNames,
+	            override,
 	            isTransformer ? 1 : undefined,
 	            tagName || undefined,
-	            elNames,
 	            attrs,
 	            content
 	        ]);
@@ -2077,7 +2025,7 @@ window.innerHTML = (function (document) {
 	            this.template
 	                .slice(pos < 40 ? 0 : pos - 40, pos + 20)
 	                .replace(/\t/g, ' ')
-	                .replace(reLineBreak, match => {
+	                .replace(reLineBreak, (match) => {
 	                if (match.length == 2) {
 	                    n++;
 	                }
@@ -2092,8 +2040,8 @@ window.innerHTML = (function (document) {
 	});
 
 	unwrapExports(dist$2);
-	var dist_1$2 = dist$2.NodeType;
-	var dist_2 = dist$2.TemplateParser;
+	var dist_1$2 = dist$2.TemplateParser;
+	var dist_2 = dist$2.NodeType;
 
 	var dist$3 = createCommonjsModule(function (module, exports) {
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -2826,20 +2774,17 @@ window.innerHTML = (function (document) {
 	            .get(cacheKey));
 	}
 
-	const svgNamespaceURI = 'http://www.w3.org/2000/svg';
+	const SVG_NAMESPACE_URI = 'http://www.w3.org/2000/svg';
 
 	function setAttribute(el, name, value) {
-	    if (value === true) {
-	        value = '';
-	    }
-	    if (el.namespaceURI == svgNamespaceURI) {
+	    if (el.namespaceURI == SVG_NAMESPACE_URI) {
 	        if (name == 'xlink:href' || name == 'href' || name == 'xmlns') {
 	            let ns = name == 'xmlns' ? 'http://www.w3.org/2000/xmlns/' : 'http://www.w3.org/1999/xlink';
-	            if (value === false || value == null) {
+	            if (value == null || value === false) {
 	                el.removeAttributeNS(ns, name);
 	            }
 	            else {
-	                el.setAttributeNS(ns, name, value);
+	                el.setAttributeNS(ns, name, value === true ? '' : value);
 	            }
 	            return el;
 	        }
@@ -2848,11 +2793,11 @@ window.innerHTML = (function (document) {
 	        el.className = value;
 	        return el;
 	    }
-	    if (value === false || value == null) {
+	    if (value == null || value === false) {
 	        el.removeAttribute(name);
 	    }
 	    else {
-	        el.setAttribute(name, value);
+	        el.setAttribute(name, value === true ? '' : value);
 	    }
 	    return el;
 	}
@@ -3201,7 +3146,7 @@ window.innerHTML = (function (document) {
 	        let embedded = (this._embedded = !!(options && options._embedded));
 	        let parent = (this.parent = (options && options.parent) || null);
 	        if (typeof template == 'string') {
-	            template = new dist_2(template).parse();
+	            template = new dist_1$2(template).parse();
 	        }
 	        if (Array.isArray(template)) {
 	            this.template = template;
@@ -3251,11 +3196,11 @@ window.innerHTML = (function (document) {
 	                    __proto__: null,
 	                    '@root': {
 	                        nodeType: exports.TemplateNodeType.ELEMENT,
+	                        names: ['root'],
 	                        isTransformer: true,
 	                        namespaceSVG: false,
 	                        tagName: 'section',
 	                        is: null,
-	                        names: ['root'],
 	                        attributes: null,
 	                        $specifiedParams: null,
 	                        events: null,
@@ -3291,25 +3236,38 @@ window.innerHTML = (function (document) {
 	        this._readContent(this.parent ? null : block.elements['@root'].content, this.template, false, null, component && component.constructor);
 	        return block;
 	    }
+	    _setElement(name, override, el) {
+	        if (this._elements[name]) {
+	            if (override) {
+	                config.logError(`Explicit overriding non-existing element "${name}"`);
+	            }
+	        }
+	        else {
+	            if (!override) {
+	                config.logError(`Implicit overriding of element "${name}"`);
+	            }
+	        }
+	        this._elements[name] = el;
+	    }
 	    _readContent(targetContent, content, namespaceSVG, superElName, componentCtor) {
 	        for (let node of content) {
 	            switch (node[0]) {
-	                case dist_1$2.ELEMENT: {
+	                case dist_2.ELEMENT: {
 	                    targetContent = this._readElement(targetContent, node, namespaceSVG, superElName, componentCtor);
 	                    break;
 	                }
-	                case dist_1$2.TEXT: {
+	                case dist_2.TEXT: {
 	                    (targetContent || (targetContent = [])).push({
 	                        nodeType: exports.TemplateNodeType.TEXT,
 	                        value: node[1]
 	                    });
 	                    break;
 	                }
-	                case dist_1$2.SUPER_CALL: {
+	                case dist_2.SUPER_CALL: {
 	                    (targetContent || (targetContent = [])).push(this._readSuperCall(node, superElName));
 	                    break;
 	                }
-	                case dist_1$2.DEBUGGER_CALL: {
+	                case dist_2.DEBUGGER_CALL: {
 	                    (targetContent || (targetContent = [])).push({
 	                        nodeType: exports.TemplateNodeType.DEBUGGER_CALL
 	                    });
@@ -3320,9 +3278,10 @@ window.innerHTML = (function (document) {
 	        return targetContent;
 	    }
 	    _readElement(targetContent, elNode, namespaceSVG, superElName, componentCtor) {
-	        let isTransformer = !!elNode[1];
-	        let tagName = elNode[2] || null;
-	        let elNames = elNode[3];
+	        let elNames = elNode[1];
+	        let override = elNode[2] == 1;
+	        let isTransformer = !!elNode[3];
+	        let tagName = elNode[4] || null;
 	        if (elNames && !elNames[0]) {
 	            elNames[0] = null;
 	        }
@@ -3367,8 +3326,8 @@ window.innerHTML = (function (document) {
 	        if (elComponentCtor) {
 	            $specifiedParams = new Set();
 	        }
-	        if (elNode[4]) {
-	            attrs = this._readAttributes(elNode[4], namespaceSVG, elName || superElName, elComponentCtor && elComponentCtor[KEY_PARAMS_CONFIG], $specifiedParams);
+	        if (elNode[5]) {
+	            attrs = this._readAttributes(elNode[5], namespaceSVG, elName || superElName, elComponentCtor && elComponentCtor[KEY_PARAMS_CONFIG], $specifiedParams);
 	        }
 	        let events;
 	        let domEvents;
@@ -3407,16 +3366,16 @@ window.innerHTML = (function (document) {
 	            }
 	        }
 	        let content;
-	        if (elNode[5]) {
-	            content = this._readContent(null, elNode[5], namespaceSVG, elName || superElName, componentCtor);
+	        if (elNode[6]) {
+	            content = this._readContent(null, elNode[6], namespaceSVG, elName || superElName, componentCtor);
 	        }
 	        let el = {
 	            nodeType: exports.TemplateNodeType.ELEMENT,
+	            names: elNames || null,
 	            isTransformer,
 	            namespaceSVG,
 	            tagName,
 	            is: (attrs && attrs.attributeIsValue) || null,
-	            names: elNames || null,
 	            attributes: attrs || null,
 	            $specifiedParams: $specifiedParams || null,
 	            events: events || null,
@@ -3441,11 +3400,11 @@ window.innerHTML = (function (document) {
 	                                node.tagName == 'rn-slot')) {
 	                            let contentEl = {
 	                                nodeType: exports.TemplateNodeType.ELEMENT,
+	                                names: node.names,
 	                                isTransformer: false,
 	                                namespaceSVG: node.namespaceSVG,
 	                                tagName: node.tagName,
 	                                is: node.is,
-	                                names: node.names,
 	                                attributes: node.attributes,
 	                                $specifiedParams: node.$specifiedParams,
 	                                events: node.events,
@@ -3462,7 +3421,7 @@ window.innerHTML = (function (document) {
 	                            };
 	                            let elName = contentEl.names && contentEl.names[0];
 	                            if (elName) {
-	                                this._elements[elName] = contentEl;
+	                                this._setElement(elName, override, contentEl);
 	                                content[i] = {
 	                                    nodeType: exports.TemplateNodeType.ELEMENT_CALL,
 	                                    name: elName
@@ -3475,7 +3434,7 @@ window.innerHTML = (function (document) {
 	                        else {
 	                            let elName = node.names && node.names[0];
 	                            if (elName) {
-	                                this._elements[elName] = node;
+	                                this._setElement(elName, override, node);
 	                                content[i] = {
 	                                    nodeType: exports.TemplateNodeType.ELEMENT_CALL,
 	                                    name: elName
@@ -3509,11 +3468,11 @@ window.innerHTML = (function (document) {
 	                                        node.tagName == 'rn-slot')) {
 	                                    let contentEl = {
 	                                        nodeType: exports.TemplateNodeType.ELEMENT,
+	                                        names: node.names,
 	                                        isTransformer: false,
 	                                        namespaceSVG: node.namespaceSVG,
 	                                        tagName: node.tagName,
 	                                        is: node.is,
-	                                        names: node.names,
 	                                        attributes: node.attributes,
 	                                        $specifiedParams: node.$specifiedParams,
 	                                        events: node.events,
@@ -3531,7 +3490,7 @@ window.innerHTML = (function (document) {
 	                                    };
 	                                    let elName = contentEl.names && contentEl.names[0];
 	                                    if (elName) {
-	                                        this._elements[elName] = contentEl;
+	                                        this._setElement(elName, override, contentEl);
 	                                        el.content[i] = {
 	                                            nodeType: exports.TemplateNodeType.ELEMENT_CALL,
 	                                            name: elName
@@ -3544,7 +3503,7 @@ window.innerHTML = (function (document) {
 	                                else {
 	                                    let elName = node.names && node.names[0];
 	                                    if (elName) {
-	                                        this._elements[elName] = node;
+	                                        this._setElement(elName, override, node);
 	                                        el.content[i] = {
 	                                            nodeType: exports.TemplateNodeType.ELEMENT_CALL,
 	                                            name: elName
@@ -3555,6 +3514,7 @@ window.innerHTML = (function (document) {
 	                        }
 	                    }
 	                }
+	                elName = el.names && el.names[0];
 	            }
 	            if (el.content && (el.tagName == 'template' || el.tagName == 'rn-slot')) {
 	                el.contentTemplateIndex =
@@ -3567,10 +3527,9 @@ window.innerHTML = (function (document) {
 	                        parent: this
 	                    })) - 1;
 	            }
-	            elName = el.names && el.names[0];
 	        }
 	        if (elName) {
-	            this._elements[elName] = el;
+	            this._setElement(elName, override, el);
 	            (targetContent || (targetContent = [])).push({
 	                nodeType: exports.TemplateNodeType.ELEMENT_CALL,
 	                name: elName
@@ -3583,7 +3542,7 @@ window.innerHTML = (function (document) {
 	    }
 	    _readAttributes(elAttrs, namespaceSVG, superElName, $paramsConfig, $specifiedParams) {
 	        let superCall = elAttrs[0] &&
-	            this._readSuperCall([dist_1$2.SUPER_CALL, elAttrs[0] === 1 ? '' : elAttrs[0]], superElName);
+	            this._readSuperCall([dist_2.SUPER_CALL, elAttrs[0] === 1 ? '' : elAttrs[0]], superElName);
 	        let attrIsValue;
 	        let list;
 	        if (superCall) {
@@ -3707,7 +3666,7 @@ window.innerHTML = (function (document) {
 	                        let tagName = node.tagName;
 	                        let el;
 	                        if (node.namespaceSVG) {
-	                            el = document.createElementNS(svgNamespaceURI, tagName);
+	                            el = document.createElementNS(SVG_NAMESPACE_URI, tagName);
 	                        }
 	                        else if (node.is) {
 	                            el = window.innerHTML(document.createElement('div'), `<${tagName} is="${node.is}">`).firstChild;
@@ -3899,11 +3858,11 @@ window.innerHTML = (function (document) {
 	    Template.elementTransformers[name] = (el) => [
 	        {
 	            nodeType: exports.TemplateNodeType.ELEMENT,
+	            names: el.names,
 	            isTransformer: false,
 	            namespaceSVG: el.namespaceSVG,
 	            tagName: 'template',
 	            is,
-	            names: el.names,
 	            attributes: el.attributes,
 	            $specifiedParams: null,
 	            events: null,
@@ -3917,11 +3876,11 @@ window.innerHTML = (function (document) {
 	// 	Template.elementTransformers[name] = (el) => [
 	// 		{
 	// 			nodeType: NodeType.ELEMENT,
+	// 			names: el.names,
 	// 			isTransformer: false,
 	// 			namespaceSVG: el.namespaceSVG,
 	// 			tagName: 'template',
 	// 			is: 'rn-condition',
-	// 			names: el.names,
 	// 			attributes: {
 	// 				attributeIsValue: 'rn-condition',
 	// 				list: {
@@ -3949,11 +3908,11 @@ window.innerHTML = (function (document) {
 	].forEach(([name, is]) => {
 	    Template.attributeTransformers[name] = (el, attr) => ({
 	        nodeType: exports.TemplateNodeType.ELEMENT,
+	        names: null,
 	        isTransformer: false,
 	        namespaceSVG: false,
 	        tagName: 'template',
 	        is,
-	        names: null,
 	        attributes: {
 	            attributeIsValue: is,
 	            list: {
@@ -4242,31 +4201,6 @@ window.innerHTML = (function (document) {
 	        }
 	    }
 	    return childComponents || null;
-	}
-
-	function normalizeTextNodes(node) {
-	    for (let child = node.firstChild; child;) {
-	        switch (child.nodeType) {
-	            case Node.ELEMENT_NODE: {
-	                normalizeTextNodes(child);
-	                child = child.nextSibling;
-	                break;
-	            }
-	            case Node.TEXT_NODE: {
-	                let nextChild = child.nextSibling;
-	                if (nextChild && nextChild.nodeType == Node.TEXT_NODE) {
-	                    do {
-	                        child.nodeValue += nextChild.nodeValue;
-	                        node.removeChild(nextChild);
-	                        nextChild = child.nextSibling;
-	                    } while (nextChild && nextChild.nodeType == Node.TEXT_NODE);
-	                }
-	                child = nextChild;
-	                break;
-	            }
-	        }
-	    }
-	    return node;
 	}
 
 	const hasOwn = Object.prototype.hasOwnProperty;
@@ -4632,7 +4566,7 @@ window.innerHTML = (function (document) {
 	                if (el.firstChild) {
 	                    suppressConnectionStatusCallbacks();
 	                    dist_1$8(this.$inputContent ||
-	                        (this.$inputContent = document.createDocumentFragment()), normalizeTextNodes(el));
+	                        (this.$inputContent = document.createDocumentFragment()), el);
 	                    resumeConnectionStatusCallbacks();
 	                }
 	                let contentBindingResult = [null, null, null];
@@ -4786,7 +4720,7 @@ window.innerHTML = (function (document) {
 	};
 	BaseComponent.events = null;
 	BaseComponent.domEvents = null;
-	const handledEvents = [
+	const handledEventTypes = [
 	    'change',
 	    'click',
 	    'dblclick',
@@ -4799,7 +4733,7 @@ window.innerHTML = (function (document) {
 	];
 	document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	    document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
-	    for (let type of handledEvents) {
+	    for (let type of handledEventTypes) {
 	        document.body.addEventListener(type, handleDOMEvent);
 	    }
 	});
@@ -5898,7 +5832,7 @@ window.innerHTML = (function (document) {
 	    })
 	], exports.RnCondition);
 
-	const IE = !!document.documentMode || navigator.userAgent.indexOf('Edge/') != -1;
+	const isEdge = !!document.documentMode || navigator.userAgent.indexOf('Edge/') != -1;
 	function cloneNode(node) {
 	    let copy;
 	    switch (node.nodeType) {
@@ -5915,7 +5849,7 @@ window.innerHTML = (function (document) {
 	            if (is) {
 	                copy = window.innerHTML(document.createElement('div'), `<${tagName} is="${is}">`).firstChild;
 	            }
-	            else if (IE) {
+	            else if (isEdge) {
 	                copy = window.innerHTML(document.createElement('div'), `<${tagName}>`)
 	                    .firstChild;
 	            }

@@ -25,7 +25,8 @@ export default {
 		// '@riim/next-tick',
 		// '@riim/rionite-snake-case-attribute-name',
 		'@riim/next-uid',
-		'cellx',
+		'cellx-collections',
+		'cellx'
 		// 'escape-string'
 	],
 

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TemplateNodeValueParser = exports.TemplateNodeValueNodeType = exports.keypathToJSExpression = void 0;
 const namePattern = '[$_a-zA-Z][$\\w]*';
 const keypathPattern = `(?:${namePattern}|\\d+)(?:\\.(?:${namePattern}|\\d+))*`;
 const cache = new Map();

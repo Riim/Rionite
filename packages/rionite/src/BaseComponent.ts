@@ -20,7 +20,6 @@ import { handleDOMEvent } from './handleDOMEvent';
 import { handleEvent } from './handleEvent';
 import { findChildComponents } from './lib/findChildComponents';
 import { InterruptError } from './lib/InterruptError';
-import { normalizeTextNodes } from './lib/normalizeTextNodes';
 import { IBlock, KEY_CONTENT_TEMPLATE, Template } from './Template2';
 
 const hasOwn = Object.prototype.hasOwnProperty;
@@ -693,7 +692,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					moveContent(
 						this.$inputContent ||
 							(this.$inputContent = document.createDocumentFragment()),
-						normalizeTextNodes(el)
+						el
 					);
 					resumeConnectionStatusCallbacks();
 				}
@@ -865,6 +864,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		container?: Element | BaseComponent | string
 	): R | null {
 		let elList = this._getElementList(name, container);
+
 		return (elList && elList.length
 			? (elList[0] as IPossiblyComponentElement).$component || elList[0]
 			: null) as any;
@@ -905,7 +905,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	}
 }
 
-const handledEvents = [
+const handledEventTypes = [
 	'change',
 	'click',
 	'dblclick',
@@ -920,7 +920,7 @@ const handledEvents = [
 document.addEventListener('DOMContentLoaded', function onDOMContentLoaded() {
 	document.removeEventListener('DOMContentLoaded', onDOMContentLoaded);
 
-	for (let type of handledEvents) {
+	for (let type of handledEventTypes) {
 		document.body.addEventListener(type, handleDOMEvent);
 	}
 });

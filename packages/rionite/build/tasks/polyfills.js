@@ -6,7 +6,6 @@ gulp.task('polyfills', () => {
 		.src([
 			'polyfills/document-register-element.max.js',
 			'polyfills/innerHTML.max.js',
-			'polyfills/template-tag.js',
 			'dist/rionite.js'
 		])
 		.pipe(concat('rionite.polyfills.js'))

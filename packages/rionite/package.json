@@ -30,27 +30,26 @@
     "@riim/pascalize": "^1.0.1",
     "@riim/rionite-snake-case-attribute-name": "^0.42.0",
     "@riim/rionite-template-parser-2": "^0.42.0",
-    "@types/jest": "^26.0.8",
+    "@types/jest": "^26.0.14",
     "awesome-typescript-loader": "^5.2.1",
     "benchmark-util": "^1.0.1",
-    "document-register-element": "^1.14.3",
     "escape-string": "^1.0.2",
     "gulp": "^4.0.2",
     "gulp-concat": "^2.6.1",
-    "jest": "^26.2.2",
-    "rollup": "^2.23.0",
+    "jest": "^26.4.2",
+    "rollup": "^2.27.1",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-typescript2": "^0.27.1",
-    "ts-jest": "^26.1.4",
-    "typescript": "^3.9.7",
-    "webpack": "^4.44.1",
+    "rollup-plugin-typescript2": "^0.27.2",
+    "ts-jest": "^26.3.0",
+    "typescript": "^4.0.3",
+    "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
     "@riim/next-uid": "^1.1.0",
     "cellx": "^1.10.17",
-    "cellx-collections": "^1.0.0"
+    "cellx-collections": "^1.0.1"
   },
   "jest": {
     "moduleFileExtensions": [

@@ -11,8 +11,8 @@ export function snakeCaseAttributeName(str: string, useCache?: boolean): string 
 		(useCache && cache.get(str)) ||
 		((value = reCamelCase.test(str)
 			? str
-					.replace(reLetters, word => '_' + word)
-					.replace(reLetters2, word => '_' + word)
+					.replace(reLetters, (word) => '_' + word)
+					.replace(reLetters2, (word) => '_' + word)
 					.toLowerCase()
 			: str),
 		useCache && cache.set(str, value),

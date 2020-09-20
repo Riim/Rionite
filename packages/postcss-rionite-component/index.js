@@ -13,7 +13,7 @@ const reModifierParams = /^\s*(?:(?:not\s+)?[a-z][\-_0-9a-z]*(?:=[\-_0-9a-z]*)?\
 const reModifierNotModePrefix = /^not\s/i;
 
 function createWalkAtRulesCallback(_topAtRuleName, componentName) {
-	return atRule => {
+	return (atRule) => {
 		let atRuleName = atRule.name;
 
 		if (atRuleName != ELEMENT && atRuleName != MODIFIER) {
@@ -29,8 +29,8 @@ function createWalkAtRulesCallback(_topAtRuleName, componentName) {
 				.split(',')
 				.map(
 					atRuleName == ELEMENT
-						? elName => `& .${componentName}__${elName.trim()}`
-						: modifier => {
+						? (elName) => `& .${componentName}__${elName.trim()}`
+						: (modifier) => {
 								modifier = modifier.trim();
 
 								let notMode = false;
@@ -43,7 +43,7 @@ function createWalkAtRulesCallback(_topAtRuleName, componentName) {
 								return (
 									(notMode ? '&:not([' : '&[') +
 									modifier
-										.replace(/^[^=]+/, name =>
+										.replace(/^[^=]+/, (name) =>
 											snakeCaseAttributeName(name, true)
 										)
 										.replace(/=(\d+)$/, "='$1'") +
@@ -64,17 +64,17 @@ function createWalkAtRulesCallback(_topAtRuleName, componentName) {
 	};
 }
 
-module.exports = postcss.plugin('postcss-rionite-component', opts => {
-	return root => {
+module.exports = postcss.plugin('postcss-rionite-component', (opts) => {
+	return (root) => {
 		let componentNames;
 		let componentSelector;
 
-		root.walkAtRules(COMPONENT, atRule => {
+		root.walkAtRules(COMPONENT, (atRule) => {
 			if (atRule.parent != root || !reComponentParams.test(atRule.params)) {
 				return;
 			}
 
-			componentNames = atRule.params.split(':').map(componentName => componentName.trim());
+			componentNames = atRule.params.split(':').map((componentName) => componentName.trim());
 			componentSelector = '.' + componentNames.join('.');
 			let rule = new postcss.rule({ selector: componentSelector });
 

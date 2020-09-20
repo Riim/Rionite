@@ -29,9 +29,9 @@ export interface IElementAttributes {
 }
 export interface IElement extends INode {
     nodeType: NodeType.ELEMENT;
+    names: Array<string | null> | null;
     isTransformer: boolean;
     tagName: string | null;
-    names: Array<string | null> | null;
     attributes: IElementAttributes | null;
     content: TContent | null;
 }

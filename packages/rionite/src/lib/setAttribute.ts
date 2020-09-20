@@ -1,19 +1,15 @@
-import { svgNamespaceURI } from './svgNamespaceURI';
+import { SVG_NAMESPACE_URI } from './SVG_NAMESPACE_URI';
 
 export function setAttribute(el: Element, name: string, value: any): Element {
-	if (value === true) {
-		value = '';
-	}
-
-	if (el.namespaceURI == svgNamespaceURI) {
+	if (el.namespaceURI == SVG_NAMESPACE_URI) {
 		if (name == 'xlink:href' || name == 'href' || name == 'xmlns') {
 			let ns =
 				name == 'xmlns' ? 'http://www.w3.org/2000/xmlns/' : 'http://www.w3.org/1999/xlink';
 
-			if (value === false || value == null) {
+			if (value == null || value === false) {
 				el.removeAttributeNS(ns, name);
 			} else {
-				el.setAttributeNS(ns, name, value);
+				el.setAttributeNS(ns, name, value === true ? '' : value);
 			}
 
 			return el;
@@ -23,10 +19,10 @@ export function setAttribute(el: Element, name: string, value: any): Element {
 		return el;
 	}
 
-	if (value === false || value == null) {
+	if (value == null || value === false) {
 		el.removeAttribute(name);
 	} else {
-		el.setAttribute(name, value);
+		el.setAttribute(name, value === true ? '' : value);
 	}
 
 	return el;

@@ -28,11 +28,11 @@ export interface IElementAttributes {
 }
 export interface IElement extends INode {
     nodeType: NodeType.ELEMENT;
+    names: Array<string | null> | null;
     isTransformer: boolean;
     namespaceSVG: boolean;
     tagName: string;
     is: string | null;
-    names: Array<string | null> | null;
     attributes: IElementAttributes | null;
     $specifiedParams: Set<string> | null;
     events: Map<string | symbol, string> | null;
@@ -81,6 +81,7 @@ export declare class Template {
     });
     initialize(component?: BaseComponent | null): void;
     parse(component?: BaseComponent | null): IBlock;
+    _setElement(name: string, override: boolean, el: IElement): void;
     _readContent(targetContent: TContent | null, content: TParserContent, namespaceSVG: boolean, superElName: string | null, componentCtor?: typeof BaseComponent | null): TContent | null;
     _readElement(targetContent: TContent | null, elNode: TParserElement, namespaceSVG: boolean, superElName: string | null, componentCtor?: typeof BaseComponent | null): TContent | null;
     _readAttributes(elAttrs: TParserElementAttributes, namespaceSVG: boolean, superElName: string | null, $paramsConfig?: Map<string, I$ComponentParamConfig> | null, $specifiedParams?: Set<string>): IElementAttributes | null;

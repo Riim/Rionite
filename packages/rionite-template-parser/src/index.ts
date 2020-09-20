@@ -41,9 +41,10 @@ export interface IElementAttributes {
 
 export interface IElement extends INode {
 	nodeType: NodeType.ELEMENT;
+	names: Array<string | null> | null;
+	override: boolean;
 	isTransformer: boolean;
 	tagName: string | null;
-	names: Array<string | null> | null;
 	attributes: IElementAttributes | null;
 	content: TContent | null;
 }
@@ -214,6 +215,7 @@ export class TemplateParser {
 		this._skipWhitespacesAndReadComments(targetContent);
 
 		let elNames: Array<string | null> | undefined;
+		let override: boolean | undefined;
 
 		if (this._chr == ':') {
 			this._next();
@@ -229,7 +231,15 @@ export class TemplateParser {
 			}
 
 			for (let name; (name = this._readName(reElementName)); ) {
-				(elNames || (elNames = [])).push(name);
+				if (!elNames) {
+					elNames = [];
+
+					if ((this._chr as string) == '!') {
+						override = true;
+					}
+				}
+
+				elNames.push(name);
 
 				if (this._skipWhitespacesAndReadComments(targetContent) != ':') {
 					break;
@@ -263,9 +273,10 @@ export class TemplateParser {
 
 		targetContent.push({
 			nodeType: NodeType.ELEMENT,
+			names: elNames || null,
+			override: override || false,
 			isTransformer,
 			tagName,
-			names: elNames || null,
 			attributes: attrs || null,
 			content: content || null,
 			pos,
@@ -580,7 +591,7 @@ export class TemplateParser {
 				this.template
 					.slice(pos < 40 ? 0 : pos - 40, pos + 20)
 					.replace(/\t/g, ' ')
-					.replace(reLineBreak, match => {
+					.replace(reLineBreak, (match) => {
 						if (match.length == 2) {
 							n++;
 						}
