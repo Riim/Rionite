@@ -275,12 +275,12 @@ export class Template {
 
 	_setElement(name: string, override: boolean, el: IElement) {
 		if (this._elements[name]) {
-			if (override) {
-				config.logError(`Overriding non-existing element "${name}"`);
+			if (!override) {
+				config.logError(`Implicit overriding of element "${name}"`);
 			}
 		} else {
-			if (!override) {
-				config.logError(`Definition of an existing element "${name}"`);
+			if (override) {
+				config.logError(`Overriding of non-existent element "${name}"`);
 			}
 		}
 

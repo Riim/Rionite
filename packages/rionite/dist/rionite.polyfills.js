@@ -3240,13 +3240,13 @@ window.innerHTML = (function (document) {
 	    }
 	    _setElement(name, override, el) {
 	        if (this._elements[name]) {
-	            if (override) {
-	                config.logError(`Explicit overriding non-existing element "${name}"`);
+	            if (!override) {
+	                config.logError(`Implicit overriding of element "${name}"`);
 	            }
 	        }
 	        else {
-	            if (!override) {
-	                config.logError(`Implicit overriding of element "${name}"`);
+	            if (override) {
+	                config.logError(`Overriding of non-existent element "${name}"`);
 	            }
 	        }
 	        this._elements[name] = el;
