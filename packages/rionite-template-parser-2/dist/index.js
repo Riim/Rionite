@@ -163,7 +163,10 @@ class TemplateParser {
                 }
                 let name = this._readName(reAttributeName);
                 if (!name) {
-                    throw this._throwError('Expected attribute name');
+                    name = '`' + this._readString();
+                    if (!name) {
+                        throw this._throwError('Expected attribute name');
+                    }
                 }
                 if (this._skipWhitespacesAndComments() == '=') {
                     this._next();

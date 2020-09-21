@@ -3453,8 +3453,7 @@ window.innerHTML = (function (document) {
 	        else {
 	            let attrList = attrs && attrs.list;
 	            if (attrList) {
-	                for (let i = 0, l = attrList['length=']; i < l; i++) {
-	                    let attr = attrList[i];
+	                for (let attr of attrList) {
 	                    if (attr.isTransformer) {
 	                        let transformer = Template.attributeTransformers[attr.name];
 	                        if (!transformer) {
@@ -3552,10 +3551,9 @@ window.innerHTML = (function (document) {
 	            if (superElAttrs) {
 	                let superElAttrList = superElAttrs.list;
 	                attrIsValue = superElAttrs.attributeIsValue;
-	                list = { __proto__: superElAttrList };
+	                list = superElAttrList === null || superElAttrList === void 0 ? void 0 : superElAttrList.slice(0);
 	                if ($paramsConfig && superElAttrList) {
-	                    for (let i = 0, l = superElAttrList['length=']; i < l; i++) {
-	                        let attr = superElAttrList[i];
+	                    for (let attr of superElAttrList) {
 	                        if (!attr.isTransformer && $paramsConfig.has(attr.name)) {
 	                            $specifiedParams.add($paramsConfig.get(attr.name).name);
 	                        }
@@ -3566,23 +3564,39 @@ window.innerHTML = (function (document) {
 	        if (elAttrs[1]) {
 	            for (let elAttr of elAttrs[1]) {
 	                let isTransformer = !!elAttr[0];
-	                let name = elAttr[1];
-	                if (!isTransformer && !namespaceSVG) {
-	                    name = dist_1$1(name, true);
-	                }
-	                let fullName = (isTransformer ? '@' : '') + name;
+	                let backquote = elAttr[1].charAt(0) == '`';
+	                let rawName = backquote ? elAttr[1].slice(1) : elAttr[1];
+	                let name = !isTransformer && !namespaceSVG && !backquote
+	                    ? dist_1$1(rawName, true)
+	                    : rawName;
 	                let value = elAttr[2];
-	                if (fullName == 'is') {
+	                if (name == 'is' && !isTransformer) {
 	                    attrIsValue = value;
 	                }
 	                else {
-	                    (list || (list = { __proto__: null, 'length=': 0 }))[list[fullName] === undefined
-	                        ? (list[fullName] = list['length=']++)
-	                        : list[fullName]] = {
-	                        isTransformer,
-	                        name,
-	                        value
-	                    };
+	                    let index;
+	                    if (list &&
+	                        (index = list.findIndex((attr) => attr.name == name && attr.isTransformer == isTransformer)) != -1) {
+	                        let rawNames = list[index].rawNames;
+	                        list[index] = {
+	                            isTransformer,
+	                            rawNames: rawName != name && (!rawNames || !rawNames.includes(rawName))
+	                                ? rawNames
+	                                    ? rawNames.concat(rawName)
+	                                    : [rawName]
+	                                : rawNames,
+	                            name,
+	                            value
+	                        };
+	                    }
+	                    else {
+	                        (list || (list = [])).push({
+	                            isTransformer,
+	                            rawNames: rawName == name ? null : [rawName],
+	                            name,
+	                            value
+	                        });
+	                    }
 	                }
 	                if ($paramsConfig && $paramsConfig.has(name)) {
 	                    $specifiedParams.add($paramsConfig.get(name).name);
@@ -3693,8 +3707,7 @@ window.innerHTML = (function (document) {
 	                            if (nodeComponent) {
 	                                $paramsConfig = nodeComponent.constructor[KEY_PARAMS_CONFIG];
 	                            }
-	                            for (let i = 0, l = attrList['length=']; i < l; i++) {
-	                                let attr = attrList[i];
+	                            for (let attr of attrList) {
 	                                if (attr.isTransformer) {
 	                                    continue;
 	                                }
@@ -3862,7 +3875,7 @@ window.innerHTML = (function (document) {
 	            nodeType: exports.TemplateNodeType.ELEMENT,
 	            names: el.names,
 	            isTransformer: false,
-	            namespaceSVG: el.namespaceSVG,
+	            namespaceSVG: false,
 	            tagName: 'template',
 	            is,
 	            attributes: el.attributes,
@@ -3874,35 +3887,37 @@ window.innerHTML = (function (document) {
 	        }
 	    ];
 	});
-	// ['if', 'unless'].forEach((name) => {
-	// 	Template.elementTransformers[name] = (el) => [
-	// 		{
-	// 			nodeType: NodeType.ELEMENT,
-	// 			names: el.names,
-	// 			isTransformer: false,
-	// 			namespaceSVG: el.namespaceSVG,
-	// 			tagName: 'template',
-	// 			is: 'rn-condition',
-	// 			attributes: {
-	// 				attributeIsValue: 'rn-condition',
-	// 				list: {
-	// 					[name]: 0 as any,
-	// 					0: {
-	// 						isTransformer: false,
-	// 						name,
-	// 						value: el.attributes!.list![0].name
-	// 					},
-	// 					'length=': 1
-	// 				}
-	// 			},
-	// 			$specifiedParams: null,
-	// 			events: null,
-	// 			domEvents: null,
-	// 			content: el.content,
-	// 			contentTemplateIndex: null
-	// 		}
-	// 	];
-	// });
+	['if', 'unless'].forEach((name) => {
+	    Template.elementTransformers[name] = (el) => {
+	        var _a;
+	        return [
+	            {
+	                nodeType: exports.TemplateNodeType.ELEMENT,
+	                names: el.names,
+	                isTransformer: false,
+	                namespaceSVG: false,
+	                tagName: 'template',
+	                is: 'rn-condition',
+	                attributes: {
+	                    attributeIsValue: 'rn-condition',
+	                    list: [
+	                        {
+	                            isTransformer: false,
+	                            rawNames: null,
+	                            name,
+	                            value: ((_a = el.attributes.list[0].rawNames) === null || _a === void 0 ? void 0 : _a[0]) || el.attributes.list[0].name
+	                        }
+	                    ]
+	                },
+	                $specifiedParams: null,
+	                events: null,
+	                domEvents: null,
+	                content: el.content,
+	                contentTemplateIndex: null
+	            }
+	        ];
+	    };
+	});
 	[
 	    ['if', 'rn-condition'],
 	    ['unless', 'rn-condition'],
@@ -3917,15 +3932,14 @@ window.innerHTML = (function (document) {
 	        is,
 	        attributes: {
 	            attributeIsValue: is,
-	            list: {
-	                [name]: 0,
-	                0: {
+	            list: [
+	                {
 	                    isTransformer: false,
+	                    rawNames: null,
 	                    name,
 	                    value: attr.value
-	                },
-	                'length=': 1
-	            }
+	                }
+	            ]
 	        },
 	        $specifiedParams: null,
 	        events: null,

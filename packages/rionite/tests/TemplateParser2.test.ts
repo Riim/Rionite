@@ -8,6 +8,6 @@ describe('TemplateParser2', () => {
 					'text'
 				}
 			`).parse()
-		).toMatchObject([[NodeType.ELEMENT, , 'b', , , [[NodeType.TEXT, 'text']]]]);
+		).toMatchObject([[NodeType.ELEMENT, , , , 'b', , [[NodeType.TEXT, 'text']]]]);
 	});
 });

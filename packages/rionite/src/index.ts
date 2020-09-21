@@ -39,7 +39,7 @@ export {
 	INode as ITemplateNode,
 	TContent as TTemplateContent,
 	IElementAttribute as ITemplateElementAttribute,
-	IElementAttributeList as ITemplateElementAttributeList,
+	TElementAttributeList as TTemplateElementAttributeList,
 	IElementAttributes as ITemplateElementAttributes,
 	IElement as ITemplateElement,
 	ITextNode as ITemplateTextNode,

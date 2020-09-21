@@ -15,16 +15,14 @@ export interface INode {
 export declare type TContent = Array<INode>;
 export interface IElementAttribute {
     isTransformer: boolean;
+    rawNames: Array<string> | null;
     name: string;
     value: string;
 }
-export interface IElementAttributeList {
-    [attrIndex: number]: IElementAttribute;
-    'length=': number;
-}
+export declare type TElementAttributeList = Array<IElementAttribute>;
 export interface IElementAttributes {
     attributeIsValue: string | null;
-    list: IElementAttributeList | null;
+    list: TElementAttributeList | null;
 }
 export interface IElement extends INode {
     nodeType: NodeType.ELEMENT;

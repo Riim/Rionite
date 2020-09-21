@@ -48,18 +48,16 @@ export type TContent = Array<INode>;
 
 export interface IElementAttribute {
 	isTransformer: boolean;
+	rawNames: Array<string> | null;
 	name: string;
 	value: string;
 }
 
-export interface IElementAttributeList {
-	[attrIndex: number]: IElementAttribute;
-	'length=': number;
-}
+export type TElementAttributeList = Array<IElementAttribute>;
 
 export interface IElementAttributes {
 	attributeIsValue: string | null;
-	list: IElementAttributeList | null;
+	list: TElementAttributeList | null;
 }
 
 export interface IElement extends INode {
@@ -547,9 +545,7 @@ export class Template {
 			let attrList = attrs && attrs.list;
 
 			if (attrList) {
-				for (let i = 0, l = attrList['length=']; i < l; i++) {
-					let attr = attrList[i];
-
+				for (let attr of attrList) {
 					if (attr.isTransformer) {
 						let transformer = Template.attributeTransformers[attr.name];
 
@@ -677,7 +673,7 @@ export class Template {
 			);
 
 		let attrIsValue: string | null | undefined;
-		let list: IElementAttributeList | undefined;
+		let list: TElementAttributeList | undefined;
 
 		if (superCall) {
 			let superElAttrs = superCall.element.attributes;
@@ -686,12 +682,10 @@ export class Template {
 				let superElAttrList = superElAttrs.list;
 
 				attrIsValue = superElAttrs.attributeIsValue;
-				list = { __proto__: superElAttrList } as any;
+				list = superElAttrList?.slice(0);
 
 				if ($paramsConfig && superElAttrList) {
-					for (let i = 0, l = superElAttrList['length=']; i < l; i++) {
-						let attr = superElAttrList[i];
-
+					for (let attr of superElAttrList) {
 						if (!attr.isTransformer && $paramsConfig.has(attr.name)) {
 							$specifiedParams!.add($paramsConfig.get(attr.name)!.name);
 						}
@@ -703,27 +697,46 @@ export class Template {
 		if (elAttrs[1]) {
 			for (let elAttr of elAttrs[1]) {
 				let isTransformer = !!elAttr[0];
-				let name = elAttr[1];
-
-				if (!isTransformer && !namespaceSVG) {
-					name = snakeCaseAttributeName(name, true);
-				}
-
-				let fullName = (isTransformer ? '@' : '') + name;
+				let backquote = elAttr[1].charAt(0) == '`';
+				let rawName = backquote ? elAttr[1].slice(1) : elAttr[1];
+				let name =
+					!isTransformer && !namespaceSVG && !backquote
+						? snakeCaseAttributeName(rawName, true)
+						: rawName;
 				let value = elAttr[2];
 
-				if (fullName == 'is') {
+				if (name == 'is' && !isTransformer) {
 					attrIsValue = value;
 				} else {
-					(list || (list = { __proto__: null, 'length=': 0 } as any))[
-						list![fullName] === undefined
-							? (list![fullName] = list!['length=']++)
-							: list![fullName]
-					] = {
-						isTransformer,
-						name,
-						value
-					} as IElementAttribute;
+					let index: number | undefined;
+
+					if (
+						list &&
+						(index = list.findIndex(
+							(attr) => attr.name == name && attr.isTransformer == isTransformer
+						)) != -1
+					) {
+						let rawNames = list[index].rawNames;
+
+						list[index] = {
+							isTransformer,
+							rawNames:
+								rawName != name && (!rawNames || !rawNames.includes(rawName))
+									? rawNames
+										? rawNames.concat(rawName)
+										: [rawName]
+									: rawNames,
+							name,
+							value
+						};
+					} else {
+						(list || (list = [])).push({
+							isTransformer,
+							rawNames: rawName == name ? null : [rawName],
+							name,
+							value
+						});
+					}
 				}
 
 				if ($paramsConfig && $paramsConfig.has(name)) {
@@ -908,9 +921,7 @@ function renderContent<T extends Node = Element>(
 								$paramsConfig = nodeComponent.constructor[KEY_PARAMS_CONFIG];
 							}
 
-							for (let i = 0, l = attrList['length=']; i < l; i++) {
-								let attr = attrList[i];
-
+							for (let attr of attrList) {
 								if (attr.isTransformer) {
 									continue;
 								}

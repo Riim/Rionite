@@ -248,7 +248,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						i:el1 {
+						i:el1! {
 							'text'
 						}
 					`,
@@ -273,7 +273,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						b:el1 {
+						b:el1! {
 							'other text'
 						}
 					`,
@@ -295,7 +295,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						:el1 {
+						:el1! {
 							'text'
 						}
 					`,
@@ -319,7 +319,7 @@ describe('Template#render', () => {
 			t2
 				.extend(
 					`
-						:el1 {
+						:el1! {
 							'text'
 						}
 					`,
@@ -341,7 +341,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						:el1 (super!)
+						:el1! (super!)
 					`,
 					{ blockName: 'block1-x' }
 				)
@@ -358,7 +358,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				:el1 (super!, attrName=value2)
+				:el1! (super!, attrName=value2)
 			`,
 			{ blockName: 'block1-x' }
 		);
@@ -367,7 +367,7 @@ describe('Template#render', () => {
 			t2
 				.extend(
 					`
-						:el1 (super!, attr_name=value3)
+						:el1! (super!, attr_name=value3)
 					`,
 					{ blockName: 'block1-x-x' }
 				)
@@ -387,7 +387,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						:el1 (super!, attr1=value0, attr3=value3)
+						:el1! (super!, attr1=value0, attr3=value3)
 					`,
 					{ blockName: 'block1-x' }
 				)
@@ -409,7 +409,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						:el1 (super!)
+						:el1! (super!)
 					`,
 					{ blockName: 'block1-x' }
 				)
@@ -431,7 +431,7 @@ describe('Template#render', () => {
 			t2
 				.extend(
 					`
-						:el1 (super!)
+						:el1! (super!)
 					`,
 					{ blockName: 'block1-x-x' }
 				)
@@ -454,8 +454,8 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						:el1 (super.el2!, class=_mod2)
-						:el2 (super.el1!, class=_mod1)
+						:el1! (super.el2!, class=_mod2)
+						:el2! (super.el1!, class=_mod1)
 					`,
 					{ blockName: 'block1-x' }
 				)
@@ -479,7 +479,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						u:el1 {
+						u:el1! {
 							b {
 								super!
 							}
@@ -504,7 +504,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						i:el2 {
+						i:el2! {
 							super!
 						}
 					`,
@@ -532,7 +532,7 @@ describe('Template#render', () => {
 			t2
 				.extend(
 					`
-						u:el1 {
+						u:el1! {
 							b {
 								super!
 							}
@@ -556,7 +556,7 @@ describe('Template#render', () => {
 
 		let t2 = t1.extend(
 			`
-				u:el1 {
+				u:el1! {
 					b {
 						super!
 					}
@@ -569,7 +569,7 @@ describe('Template#render', () => {
 			t2
 				.extend(
 					`
-						s:el1 {
+						s:el1! {
 							u {
 								super!
 							}
@@ -595,7 +595,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						u:el1 {
+						u:el1! {
 							b:el2 {
 								super.el1!
 							}
@@ -706,7 +706,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						@:test (super!, attr2=value2)
+						@:test! (super!, attr2=value2)
 					`,
 					{ blockName: 'block1-x' }
 				)
@@ -762,7 +762,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						@:test (super!, attr2=value2) {
+						@:test! (super!, attr2=value2) {
 							s {
 								super!
 							}
@@ -788,7 +788,7 @@ describe('Template#render', () => {
 			t1
 				.extend(
 					`
-						@:root {
+						@:root! {
 							u {
 								super!
 							}
@@ -878,7 +878,7 @@ describe('Template#render', () => {
 					}
 				}
 
-				div:el1 {
+				div:el1! {
 					'text2'
 				}
 			`,
@@ -904,7 +904,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				:template1 {
+				:template1! {
 					b {
 						super!
 					}
@@ -955,7 +955,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				:el1 {
+				:el1! {
 					'text'
 				}
 			`,
@@ -981,7 +981,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				span:el1 {
+				span:el1! {
 					'text'
 				}
 			`,
@@ -1009,7 +1009,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				:el1 {
+				:el1! {
 					span {
 						super!
 					}
@@ -1039,7 +1039,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				:el1 {
+				:el1! {
 					span:el2 {
 						super.el1!
 					}
@@ -1069,7 +1069,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				:el1 {
+				:el1! {
 					span {
 						super!
 					}
@@ -1099,7 +1099,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				:el1 {
+				:el1! {
 					span:el2 {
 						super.el1!
 					}
@@ -1127,7 +1127,7 @@ describe('Template#render', () => {
 		);
 		let t2 = t1.extend(
 			`
-				:el1 (super!, attr1=value2)
+				:el1! (super!, attr1=value2)
 			`,
 			{ blockName: 'block1-x' }
 		);
