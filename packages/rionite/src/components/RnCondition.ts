@@ -25,7 +25,7 @@ const reKeypath = RegExp(`^${keypathPattern}$`);
 	params: {
 		if: { property: 'paramIf', type: String, readonly: true },
 		unless: { property: 'paramUnless', type: String, readonly: true },
-		acceptPending: { type: Boolean, readonly: true }
+		trueWhenPending: { type: Boolean, readonly: true }
 	}
 })
 export class RnCondition extends BaseComponent {
@@ -39,7 +39,7 @@ export class RnCondition extends BaseComponent {
 
 	paramIf: string;
 	paramUnless: string;
-	acceptPending: boolean;
+	trueWhenPending: boolean;
 
 	_unless: boolean;
 
@@ -130,7 +130,7 @@ export class RnCondition extends BaseComponent {
 
 		if (
 			this._unless
-				? !conditionResult && (conditionResult !== undefined || this.acceptPending)
+				? !conditionResult && (conditionResult !== undefined || this.trueWhenPending)
 				: conditionResult
 		) {
 			let contentBindingResult: [

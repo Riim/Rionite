@@ -6,7 +6,7 @@ export declare class RnCondition extends BaseComponent {
     $context: Record<string, any>;
     paramIf: string;
     paramUnless: string;
-    acceptPending: boolean;
+    trueWhenPending: boolean;
     _unless: boolean;
     _conditionCell: Cell<boolean | undefined>;
     _nodes: Array<Node> | null;

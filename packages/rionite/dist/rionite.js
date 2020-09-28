@@ -4135,7 +4135,7 @@
 	    _render(changed) {
 	        let conditionResult = this._conditionCell.get();
 	        if (this._unless
-	            ? !conditionResult && (conditionResult !== undefined || this.acceptPending)
+	            ? !conditionResult && (conditionResult !== undefined || this.trueWhenPending)
 	            : conditionResult) {
 	            let contentBindingResult = [null, null, null];
 	            let content = this.element[KEY_CONTENT_TEMPLATE].render(null, this.ownerComponent, this.$context, contentBindingResult);
@@ -4214,7 +4214,7 @@
 	        params: {
 	            if: { property: 'paramIf', type: String, readonly: true },
 	            unless: { property: 'paramUnless', type: String, readonly: true },
-	            acceptPending: { type: Boolean, readonly: true }
+	            trueWhenPending: { type: Boolean, readonly: true }
 	        }
 	    })
 	], exports.RnCondition);
