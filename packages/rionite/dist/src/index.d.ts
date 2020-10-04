@@ -4,6 +4,7 @@ export { InterruptError } from './lib/InterruptError';
 export { formatters } from './lib/formatters';
 export { Component } from './decorators/Component';
 export { Param } from './decorators/Param';
+export { Attr } from './decorators/Attr';
 export { Listen } from './decorators/Listen';
 export { Callback } from './decorators/Callback';
 export { Interruptible } from './decorators/Interruptible';

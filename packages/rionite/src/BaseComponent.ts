@@ -22,9 +22,6 @@ import { findChildComponents } from './lib/findChildComponents';
 import { InterruptError } from './lib/InterruptError';
 import { IBlock, KEY_CONTENT_TEMPLATE, Template } from './Template2';
 
-const hasOwn = Object.prototype.hasOwnProperty;
-const map = Array.prototype.map;
-
 export interface IDisposable {
 	dispose(): any;
 	[key: string]: any;
@@ -387,7 +384,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				}
 			} else {
 				for (let evtType_ in evtType) {
-					if (hasOwn.call(evtType, evtType_)) {
+					if (Object.prototype.hasOwnProperty.call(evtType, evtType_)) {
 						listenings.push(
 							this.listenTo(target, evtType_, evtType[evtType_], listener, context)
 						);
@@ -877,7 +874,10 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		let elList = this._getElementList(name, container);
 
 		return elList
-			? map.call(elList, (el: IPossiblyComponentElement) => el.$component || el)
+			? Array.prototype.map.call(
+					elList,
+					(el: IPossiblyComponentElement) => el.$component || el
+			  )
 			: [];
 	}
 

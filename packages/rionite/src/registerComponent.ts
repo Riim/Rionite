@@ -11,9 +11,6 @@ import { elementConstructors } from './elementConstructors';
 import { ElementProtoMixin, KEY_RIONITE_COMPONENT_CONSTRUCTOR } from './ElementProtoMixin';
 import { Template } from './Template2';
 
-const hasOwn = Object.prototype.hasOwnProperty;
-const push = Array.prototype.push;
-
 const componentParamTypeMap = new Map<string, Function>([
 	['boolean', Boolean],
 	['number', Number],
@@ -39,7 +36,7 @@ function inheritProperty(
 		let inheritedObj: Record<string, any> = (target[name] = { __proto__: parentObj });
 
 		for (let key in obj) {
-			if (hasOwn.call(obj, key)) {
+			if (Object.prototype.hasOwnProperty.call(obj, key)) {
 				inheritedObj[key] = obj[key];
 
 				if (depth) {
@@ -222,7 +219,10 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 	componentCtor._elementBlockNames = [elIs];
 
 	if (parentComponentCtor._elementBlockNames) {
-		push.apply(componentCtor._elementBlockNames, parentComponentCtor._elementBlockNames);
+		Array.prototype.push.apply(
+			componentCtor._elementBlockNames,
+			parentComponentCtor._elementBlockNames
+		);
 	}
 
 	let template = componentCtor.template;

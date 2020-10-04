@@ -14,8 +14,6 @@ import { parseTemplateNodeValue } from '../parseTemplateNodeValue';
 import { KEY_CONTENT_TEMPLATE } from '../Template2';
 import { RnRepeat } from './RnRepeat';
 
-const slice = Array.prototype.slice;
-
 const reKeypath = RegExp(`^${keypathPattern}$`);
 
 @Component({
@@ -147,7 +145,7 @@ export class RnCondition extends BaseComponent {
 			let childComponents = contentBindingResult[0];
 			let backBindings = contentBindingResult[2];
 
-			this._nodes = slice.call(content.childNodes);
+			this._nodes = Array.prototype.slice.call(content.childNodes);
 			this._childComponents = childComponents;
 			this._bindings = contentBindingResult[1];
 

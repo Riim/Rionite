@@ -2590,8 +2590,6 @@
 	    return childComponents || null;
 	}
 
-	const hasOwn = Object.prototype.hasOwnProperty;
-	const map = Array.prototype.map;
 	function callLifecycle(lifecycle, context) {
 	    let promises;
 	    for (let lifecycleFn of lifecycle) {
@@ -2727,7 +2725,7 @@
 	            }
 	            else {
 	                for (let evtType_ in evtType) {
-	                    if (hasOwn.call(evtType, evtType_)) {
+	                    if (Object.prototype.hasOwnProperty.call(evtType, evtType_)) {
 	                        listenings.push(this.listenTo(target, evtType_, evtType[evtType_], listener, context));
 	                    }
 	                }
@@ -3073,7 +3071,7 @@
 	    $$(name, container) {
 	        let elList = this._getElementList(name, container);
 	        return elList
-	            ? map.call(elList, (el) => el.$component || el)
+	            ? Array.prototype.map.call(elList, (el) => el.$component || el)
 	            : [];
 	    }
 	    _getElementList(name, container) {
@@ -3286,8 +3284,6 @@
 	    }
 	};
 
-	const hasOwn$1 = Object.prototype.hasOwnProperty;
-	const push = Array.prototype.push;
 	const componentParamTypeMap = new Map([
 	    ['boolean', Boolean],
 	    ['number', Number],
@@ -3304,7 +3300,7 @@
 	    if (obj && parentObj && obj != parentObj) {
 	        let inheritedObj = (target[name] = { __proto__: parentObj });
 	        for (let key in obj) {
-	            if (hasOwn$1.call(obj, key)) {
+	            if (Object.prototype.hasOwnProperty.call(obj, key)) {
 	                inheritedObj[key] = obj[key];
 	                if (depth) {
 	                    inheritProperty(inheritedObj, parentObj, key, depth - 1);
@@ -3441,7 +3437,7 @@
 	    componentCtor._blockNamesString = elIs + ' ' + (parentComponentCtor._blockNamesString || '');
 	    componentCtor._elementBlockNames = [elIs];
 	    if (parentComponentCtor._elementBlockNames) {
-	        push.apply(componentCtor._elementBlockNames, parentComponentCtor._elementBlockNames);
+	        Array.prototype.push.apply(componentCtor._elementBlockNames, parentComponentCtor._elementBlockNames);
 	    }
 	    let template = componentCtor.template;
 	    if (template !== null) {
@@ -3557,7 +3553,23 @@
 	    ((ctor.hasOwnProperty('params') && ctor.params) || (ctor.params = {}))[name || propName] = config;
 	}
 
-	const hasOwn$2 = Object.prototype.hasOwnProperty;
+	function Attr(target, propName, _propDesc) {
+	    let lifecycleHooks = Object.prototype.hasOwnProperty.call(target.constructor, '_lifecycleHooks')
+	        ? target.constructor._lifecycleHooks
+	        : (target.constructor._lifecycleHooks = {
+	            __proto__: target.constructor._lifecycleHooks
+	        });
+	    (Object.prototype.hasOwnProperty.call(lifecycleHooks, 'connected')
+	        ? lifecycleHooks.connected
+	        : (lifecycleHooks.connected = lifecycleHooks.connected.slice())).push((component) => {
+	        let attrName = dist_1$1(propName, true);
+	        setAttribute(this.element, attrName, this[propName]);
+	        component.listenTo(component, cellx.Cell.EVENT_CHANGE + ':' + propName, function () {
+	            setAttribute(this.element, attrName, this[propName]);
+	        });
+	    });
+	}
+
 	function Listen(evtType, optionsOrTarget, useCapture) {
 	    return (target, methodName, _methodDesc) => {
 	        let options = optionsOrTarget &&
@@ -3572,12 +3584,12 @@
 	        if (options) {
 	            useCapture = options.useCapture;
 	        }
-	        let lifecycleHooks = hasOwn$2.call(target.constructor, '_lifecycleHooks')
+	        let lifecycleHooks = Object.prototype.hasOwnProperty.call(target.constructor, '_lifecycleHooks')
 	            ? target.constructor._lifecycleHooks
 	            : (target.constructor._lifecycleHooks = {
 	                __proto__: target.constructor._lifecycleHooks
 	            });
-	        (hasOwn$2.call(lifecycleHooks, 'connected')
+	        (Object.prototype.hasOwnProperty.call(lifecycleHooks, 'connected')
 	            ? lifecycleHooks.connected
 	            : (lifecycleHooks.connected = lifecycleHooks.connected.slice())).push((component) => {
 	            let target = listeningTarget;
@@ -3698,7 +3710,6 @@
 	}
 
 	var RnRepeat_1;
-	const slice = Array.prototype.slice;
 	const reForAttrValue = RegExp(`^\\s*(${namePattern})\\s+in\\s+(${keypathPattern}(?:\\s*(.*\\S))?)\\s*$`);
 	function getItem(list, index) {
 	    return Array.isArray(list) ? list[index] : list.get(index);
@@ -3951,7 +3962,7 @@
 	                    let new$Item = {
 	                        item: itemCell,
 	                        index: indexCell,
-	                        nodes: slice.call(content.childNodes),
+	                        nodes: Array.prototype.slice.call(content.childNodes),
 	                        bindings: contentBindingResult[1],
 	                        childComponents
 	                    };
@@ -4061,7 +4072,6 @@
 	], exports.RnRepeat);
 
 	var RnCondition_1;
-	const slice$1 = Array.prototype.slice;
 	const reKeypath$1 = RegExp(`^${keypathPattern}$`);
 	exports.RnCondition = RnCondition_1 = class RnCondition extends BaseComponent {
 	    constructor() {
@@ -4141,7 +4151,7 @@
 	            let content = this.element[KEY_CONTENT_TEMPLATE].render(null, this.ownerComponent, this.$context, contentBindingResult);
 	            let childComponents = contentBindingResult[0];
 	            let backBindings = contentBindingResult[2];
-	            this._nodes = slice$1.call(content.childNodes);
+	            this._nodes = Array.prototype.slice.call(content.childNodes);
 	            this._childComponents = childComponents;
 	            this._bindings = contentBindingResult[1];
 	            if (childComponents) {
@@ -4456,6 +4466,7 @@
 	    })
 	], exports.RnHtml);
 
+	exports.Attr = Attr;
 	exports.BaseComponent = BaseComponent;
 	exports.Callback = Callback;
 	exports.Component = Component;

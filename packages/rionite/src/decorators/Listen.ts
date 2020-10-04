@@ -5,8 +5,6 @@ import {
 	TListeningTarget
 	} from '../BaseComponent';
 
-const hasOwn = Object.prototype.hasOwnProperty;
-
 export function Listen<T = BaseComponent>(
 	evtType: TComponentListeningEventType<T>,
 	options?: {
@@ -48,13 +46,16 @@ export function Listen<T = BaseComponent>(
 			useCapture = options.useCapture;
 		}
 
-		let lifecycleHooks = hasOwn.call(target.constructor, '_lifecycleHooks')
+		let lifecycleHooks = Object.prototype.hasOwnProperty.call(
+			target.constructor,
+			'_lifecycleHooks'
+		)
 			? (target.constructor as typeof BaseComponent)._lifecycleHooks
 			: ((target.constructor as typeof BaseComponent)._lifecycleHooks = ({
 					__proto__: (target.constructor as typeof BaseComponent)._lifecycleHooks
 			  } as any) as typeof BaseComponent._lifecycleHooks);
 
-		(hasOwn.call(lifecycleHooks, 'connected')
+		(Object.prototype.hasOwnProperty.call(lifecycleHooks, 'connected')
 			? lifecycleHooks.connected
 			: (lifecycleHooks.connected = lifecycleHooks.connected.slice())
 		).push((component: BaseComponent) => {

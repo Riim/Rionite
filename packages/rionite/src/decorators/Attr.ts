@@ -3,16 +3,14 @@ import { Cell } from 'cellx';
 import { BaseComponent } from '../BaseComponent';
 import { setAttribute } from '../lib/setAttribute';
 
-const hasOwn = Object.prototype.hasOwnProperty;
-
 export function Attr(target: BaseComponent, propName: string, _propDesc?: PropertyDescriptor): any {
-	let lifecycleHooks = hasOwn.call(target.constructor, '_lifecycleHooks')
+	let lifecycleHooks = Object.prototype.hasOwnProperty.call(target.constructor, '_lifecycleHooks')
 		? (target.constructor as typeof BaseComponent)._lifecycleHooks
 		: ((target.constructor as typeof BaseComponent)._lifecycleHooks = ({
 				__proto__: (target.constructor as typeof BaseComponent)._lifecycleHooks
 		  } as any) as typeof BaseComponent._lifecycleHooks);
 
-	(hasOwn.call(lifecycleHooks, 'connected')
+	(Object.prototype.hasOwnProperty.call(lifecycleHooks, 'connected')
 		? lifecycleHooks.connected
 		: (lifecycleHooks.connected = lifecycleHooks.connected.slice())
 	).push((component: BaseComponent) => {

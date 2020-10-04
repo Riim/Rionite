@@ -16,8 +16,6 @@ import { parseTemplateNodeValue } from '../parseTemplateNodeValue';
 import { KEY_CONTENT_TEMPLATE } from '../Template2';
 import { RnCondition } from './RnCondition';
 
-const slice = Array.prototype.slice;
-
 export type TList = Array<any> | ObservableList<any>;
 
 export interface I$Item {
@@ -386,7 +384,7 @@ export class RnRepeat extends BaseComponent {
 					let new$Item = {
 						item: itemCell,
 						index: indexCell,
-						nodes: slice.call(content.childNodes),
+						nodes: Array.prototype.slice.call(content.childNodes),
 						bindings: contentBindingResult[1],
 						childComponents
 					};
