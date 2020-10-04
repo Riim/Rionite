@@ -3563,7 +3563,7 @@
 	        ? lifecycleHooks.connected
 	        : (lifecycleHooks.connected = lifecycleHooks.connected.slice())).push((component) => {
 	        let attrName = dist_1$1(propName, true);
-	        setAttribute(this.element, attrName, this[propName]);
+	        setAttribute(component.element, attrName, component[propName]);
 	        component.listenTo(component, cellx.Cell.EVENT_CHANGE + ':' + propName, function () {
 	            setAttribute(this.element, attrName, this[propName]);
 	        });

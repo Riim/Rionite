@@ -16,7 +16,7 @@ export function Attr(target: BaseComponent, propName: string, _propDesc?: Proper
 	).push((component: BaseComponent) => {
 		let attrName = snakeCaseAttributeName(propName, true);
 
-		setAttribute(this.element, attrName, this[propName]);
+		setAttribute(component.element, attrName, component[propName]);
 
 		component.listenTo(component, Cell.EVENT_CHANGE + ':' + propName, function (
 			this: BaseComponent
