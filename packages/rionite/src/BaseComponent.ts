@@ -514,12 +514,15 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return timeout;
 	}
 
-	setInterval(cb: Function, delay: number): IDisposableInterval {
+	setInterval(cb: (clear: () => void) => any, delay: number): IDisposableInterval {
 		let interval: IDisposableInterval;
+		let clear: () => void;
 		let intervalId = setInterval(() => {
-			cb.call(this);
+			if (cb.call(this, clear) === false) {
+				clear();
+			}
 		}, delay);
-		let clear = () => {
+		clear = () => {
 			if (this._disposables.has(interval)) {
 				clearInterval(intervalId);
 				this._disposables.delete(interval);

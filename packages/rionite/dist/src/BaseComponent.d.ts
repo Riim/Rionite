@@ -123,7 +123,7 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     listenTo(target: TListeningTarget | string | Array<TListeningTarget>, listeners: Record<string | symbol, TListener | Array<TListener>>, context?: any, useCapture?: boolean): IDisposableListening;
     _listenTo(target: EventEmitter | EventTarget, evtType: string | symbol, listener: TListener, context: any, useCapture: boolean): IDisposableListening;
     setTimeout(cb: Function, delay: number): IDisposableTimeout;
-    setInterval(cb: Function, delay: number): IDisposableInterval;
+    setInterval(cb: (clear: () => void) => any, delay: number): IDisposableInterval;
     registerCallback(cb: Function): IDisposableCallback;
     $interruptIfNotConnected<V>(value: V): V;
     _beforeInitializationWait(): void;

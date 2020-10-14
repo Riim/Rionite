@@ -4452,10 +4452,13 @@ window.innerHTML = (function (document) {
 	    }
 	    setInterval(cb, delay) {
 	        let interval;
+	        let clear;
 	        let intervalId = setInterval(() => {
-	            cb.call(this);
+	            if (cb.call(this, clear) === false) {
+	                clear();
+	            }
 	        }, delay);
-	        let clear = () => {
+	        clear = () => {
 	            if (this._disposables.has(interval)) {
 	                clearInterval(intervalId);
 	                this._disposables.delete(interval);
