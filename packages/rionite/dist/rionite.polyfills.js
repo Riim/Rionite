@@ -4194,9 +4194,10 @@ window.innerHTML = (function (document) {
 	        component._parentComponent = undefined;
 	        ComponentParams.init(component);
 	        callLifecycle([
-	            component.elementConnected,
 	            ...component.constructor._lifecycleHooks.elementConnected,
-	            ...((component._lifecycleHooks && component._lifecycleHooks.elementConnected) || [])
+	            ...((component._lifecycleHooks && component._lifecycleHooks.elementConnected) ||
+	                []),
+	            component.elementConnected
 	        ], component);
 	        component._connect();
 	    }
@@ -4242,7 +4243,7 @@ window.innerHTML = (function (document) {
 	    }
 	    return promises || null;
 	}
-	let currentComponent = null;
+	let currentComponent;
 	function onReady(lifecycleHook) {
 	    ((currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {})).ready ||
 	        (currentComponent._lifecycleHooks.ready = [])).push(lifecycleHook);
@@ -4501,9 +4502,9 @@ window.innerHTML = (function (document) {
 	        this._parentComponent = undefined;
 	        ComponentParams.init(this);
 	        callLifecycle([
-	            this.elementConnected,
 	            ...this.constructor._lifecycleHooks.elementConnected,
-	            ...((this._lifecycleHooks && this._lifecycleHooks.elementConnected) || [])
+	            ...((this._lifecycleHooks && this._lifecycleHooks.elementConnected) || []),
+	            this.elementConnected
 	        ], this);
 	        return this._connect();
 	    }
@@ -4610,9 +4611,9 @@ window.innerHTML = (function (document) {
 	                }
 	            }
 	            readyPromises = callLifecycle([
-	                this.ready,
 	                ...this.constructor._lifecycleHooks.ready,
-	                ...((this._lifecycleHooks && this._lifecycleHooks.ready) || [])
+	                ...((this._lifecycleHooks && this._lifecycleHooks.ready) || []),
+	                this.ready
 	            ], this);
 	            if (readyPromises) {
 	                this.readyPromise = Promise.all(readyPromises).finally(() => {
@@ -4629,19 +4630,19 @@ window.innerHTML = (function (document) {
 	                this.readyPromise.finally(() => {
 	                    if (this._isConnected) {
 	                        callLifecycle([
-	                            this.connected,
 	                            ...this.constructor._lifecycleHooks
 	                                .connected,
-	                            ...((this._lifecycleHooks && this._lifecycleHooks.connected) || [])
+	                            ...((this._lifecycleHooks && this._lifecycleHooks.connected) || []),
+	                            this.connected
 	                        ], this);
 	                    }
 	                });
 	            }
 	            else {
 	                callLifecycle([
-	                    this.connected,
 	                    ...this.constructor._lifecycleHooks.connected,
-	                    ...((this._lifecycleHooks && this._lifecycleHooks.connected) || [])
+	                    ...((this._lifecycleHooks && this._lifecycleHooks.connected) || []),
+	                    this.connected
 	                ], this);
 	            }
 	        }
@@ -4650,9 +4651,9 @@ window.innerHTML = (function (document) {
 	    _disconnect() {
 	        this._isConnected = false;
 	        callLifecycle([
-	            this.disconnected,
 	            ...this.constructor._lifecycleHooks.disconnected,
-	            ...((this._lifecycleHooks && this._lifecycleHooks.disconnected) || [])
+	            ...((this._lifecycleHooks && this._lifecycleHooks.disconnected) || []),
+	            this.disconnected
 	        ], this);
 	        this.dispose();
 	    }
@@ -4790,28 +4791,28 @@ window.innerHTML = (function (document) {
 	                if (component._parentComponent === null) {
 	                    component._parentComponent = undefined;
 	                    callLifecycle([
-	                        component.elementConnected,
 	                        ...component.constructor._lifecycleHooks
 	                            .elementConnected,
 	                        ...((component._lifecycleHooks &&
 	                            component._lifecycleHooks.elementConnected) ||
 	                            []),
-	                        component.elementMoved,
+	                        component.elementConnected,
 	                        ...component.constructor._lifecycleHooks
 	                            .elementMoved,
 	                        ...((component._lifecycleHooks &&
 	                            component._lifecycleHooks.elementMoved) ||
-	                            [])
+	                            []),
+	                        component.elementMoved
 	                    ], component);
 	                }
 	                else {
 	                    callLifecycle([
-	                        component.elementConnected,
 	                        ...component.constructor._lifecycleHooks
 	                            .elementConnected,
 	                        ...((component._lifecycleHooks &&
 	                            component._lifecycleHooks.elementConnected) ||
-	                            [])
+	                            []),
+	                        component.elementConnected
 	                    ], component);
 	                }
 	            }
@@ -4819,12 +4820,12 @@ window.innerHTML = (function (document) {
 	                component._parentComponent = undefined;
 	                ComponentParams.init(component);
 	                callLifecycle([
-	                    component.elementConnected,
 	                    ...component.constructor._lifecycleHooks
 	                        .elementConnected,
 	                    ...((component._lifecycleHooks &&
 	                        component._lifecycleHooks.elementConnected) ||
-	                        [])
+	                        []),
+	                    component.elementConnected
 	                ], component);
 	                component._connect();
 	            }
@@ -4836,12 +4837,12 @@ window.innerHTML = (function (document) {
 	            if (component.parentComponent && component._parentComponent._isReady) {
 	                ComponentParams.init(component);
 	                callLifecycle([
-	                    component.elementConnected,
 	                    ...component.constructor._lifecycleHooks
 	                        .elementConnected,
 	                    ...((component._lifecycleHooks &&
 	                        component._lifecycleHooks.elementConnected) ||
-	                        [])
+	                        []),
+	                    component.elementConnected
 	                ], component);
 	                component._connect();
 	                return;
@@ -4856,12 +4857,12 @@ window.innerHTML = (function (document) {
 	            if (!component._isConnected && !component.parentComponent) {
 	                ComponentParams.init(component);
 	                callLifecycle([
-	                    component.elementConnected,
 	                    ...component.constructor._lifecycleHooks
 	                        .elementConnected,
 	                    ...((component._lifecycleHooks &&
 	                        component._lifecycleHooks.elementConnected) ||
-	                        [])
+	                        []),
+	                    component.elementConnected
 	                ], component);
 	                component._connect();
 	            }
@@ -4876,12 +4877,12 @@ window.innerHTML = (function (document) {
 	        if (component && component._isConnected) {
 	            component._parentComponent = null;
 	            callLifecycle([
-	                component.elementDisconnected,
 	                ...component.constructor._lifecycleHooks
 	                    .elementDisconnected,
 	                ...((component._lifecycleHooks &&
 	                    component._lifecycleHooks.elementDisconnected) ||
-	                    [])
+	                    []),
+	                component.elementDisconnected
 	            ], component);
 	            dist_2$2(() => {
 	                if (component._parentComponent === null && component._isConnected) {
@@ -5199,24 +5200,41 @@ window.innerHTML = (function (document) {
 	    });
 	}
 
-	function Listen(evtType, optionsOrTarget, useCapture) {
-	    return (target, methodName, _methodDesc) => {
-	        let options = optionsOrTarget &&
-	            typeof optionsOrTarget == 'object' &&
-	            !Array.isArray(optionsOrTarget) &&
-	            Object.getPrototypeOf(optionsOrTarget) === Object.prototype
-	            ? optionsOrTarget
+	function Ref(target, propName, _propDesc, name) {
+	    if (!propName) {
+	        return (target, propName, propDesc) => Ref(target, propName, propDesc, name);
+	    }
+	    if (!name) {
+	        name = propName;
+	    }
+	    let lifecycleHooks = Object.prototype.hasOwnProperty.call(target.constructor, '_lifecycleHooks')
+	        ? target.constructor._lifecycleHooks
+	        : (target.constructor._lifecycleHooks = {
+	            __proto__: target.constructor._lifecycleHooks
+	        });
+	    (Object.prototype.hasOwnProperty.call(lifecycleHooks, 'ready')
+	        ? lifecycleHooks.ready
+	        : (lifecycleHooks.ready = lifecycleHooks.ready.slice())).push((component) => {
+	        component[propName] = component.$(name);
+	    });
+	}
+
+	function Listen(evtType, target, useCapture) {
+	    return (target_, methodName, _methodDesc) => {
+	        let options = target &&
+	            typeof target == 'object' &&
+	            !Array.isArray(target) &&
+	            Object.getPrototypeOf(target) === Object.prototype
+	            ? target
 	            : null;
-	        let listeningTarget = options
-	            ? options.target
-	            : optionsOrTarget;
+	        let listeningTarget = options ? options.target : target;
 	        if (options) {
 	            useCapture = options.useCapture;
 	        }
-	        let lifecycleHooks = Object.prototype.hasOwnProperty.call(target.constructor, '_lifecycleHooks')
-	            ? target.constructor._lifecycleHooks
-	            : (target.constructor._lifecycleHooks = {
-	                __proto__: target.constructor._lifecycleHooks
+	        let lifecycleHooks = Object.prototype.hasOwnProperty.call(target_.constructor, '_lifecycleHooks')
+	            ? target_.constructor._lifecycleHooks
+	            : (target_.constructor._lifecycleHooks = {
+	                __proto__: target_.constructor._lifecycleHooks
 	            });
 	        (Object.prototype.hasOwnProperty.call(lifecycleHooks, 'connected')
 	            ? lifecycleHooks.connected
@@ -6108,6 +6126,7 @@ window.innerHTML = (function (document) {
 	exports.KEY_PARAM_VALUES = KEY_PARAM_VALUES;
 	exports.Listen = Listen;
 	exports.Param = Param;
+	exports.Ref = Ref;
 	exports.Template = Template;
 	exports.configure = configure;
 	exports.formatters = formatters;

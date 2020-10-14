@@ -7,6 +7,11 @@ import {
 
 export function Listen<T = BaseComponent>(
 	evtType: TComponentListeningEventType<T>,
+	target: TComponentListeningTarget<T>,
+	useCapture?: boolean
+): any;
+export function Listen<T = BaseComponent>(
+	evtType: TComponentListeningEventType<T>,
 	options?: {
 		target?: TComponentListeningTarget<T>;
 		useCapture?: boolean;
@@ -14,45 +19,38 @@ export function Listen<T = BaseComponent>(
 ): any;
 export function Listen<T = BaseComponent>(
 	evtType: TComponentListeningEventType<T>,
-	target: TComponentListeningTarget<T>,
-	useCapture?: boolean
-): any;
-export function Listen<T = BaseComponent>(
-	evtType: TComponentListeningEventType<T>,
-	optionsOrTarget?:
+	target?:
+		| TComponentListeningTarget<T>
 		| {
 				target?: TComponentListeningTarget<T>;
 				useCapture?: boolean;
-		  }
-		| TComponentListeningTarget<T>,
+		  },
 	useCapture?: boolean
 ) {
-	return (target: BaseComponent, methodName: string, _methodDesc?: PropertyDescriptor): void => {
+	return (target_: BaseComponent, methodName: string, _methodDesc?: PropertyDescriptor): void => {
 		let options =
-			optionsOrTarget &&
-			typeof optionsOrTarget == 'object' &&
-			!Array.isArray(optionsOrTarget) &&
-			Object.getPrototypeOf(optionsOrTarget) === Object.prototype
-				? (optionsOrTarget as {
+			target &&
+			typeof target == 'object' &&
+			!Array.isArray(target) &&
+			Object.getPrototypeOf(target) === Object.prototype
+				? (target as {
 						target?: TComponentListeningTarget;
 						useCapture?: boolean;
 				  })
 				: null;
-		let listeningTarget = options
-			? options.target
-			: (optionsOrTarget as TComponentListeningTarget<T>);
+		let listeningTarget = options ? options.target : (target as TComponentListeningTarget<T>);
 
 		if (options) {
 			useCapture = options.useCapture;
 		}
 
 		let lifecycleHooks = Object.prototype.hasOwnProperty.call(
-			target.constructor,
+			target_.constructor,
 			'_lifecycleHooks'
 		)
-			? (target.constructor as typeof BaseComponent)._lifecycleHooks
-			: ((target.constructor as typeof BaseComponent)._lifecycleHooks = ({
-					__proto__: (target.constructor as typeof BaseComponent)._lifecycleHooks
+			? (target_.constructor as typeof BaseComponent)._lifecycleHooks
+			: ((target_.constructor as typeof BaseComponent)._lifecycleHooks = ({
+					__proto__: (target_.constructor as typeof BaseComponent)._lifecycleHooks
 			  } as any) as typeof BaseComponent._lifecycleHooks);
 
 		(Object.prototype.hasOwnProperty.call(lifecycleHooks, 'connected')

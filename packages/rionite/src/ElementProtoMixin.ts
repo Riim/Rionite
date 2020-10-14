@@ -43,30 +43,31 @@ export const ElementProtoMixin = {
 
 					callLifecycle(
 						[
-							component.elementConnected,
 							...(component.constructor as typeof BaseComponent)._lifecycleHooks
 								.elementConnected,
 							...((component._lifecycleHooks &&
 								component._lifecycleHooks.elementConnected) ||
 								[]),
-							component.elementMoved,
+							component.elementConnected,
+
 							...(component.constructor as typeof BaseComponent)._lifecycleHooks
 								.elementMoved,
 							...((component._lifecycleHooks &&
 								component._lifecycleHooks.elementMoved) ||
-								[])
+								[]),
+							component.elementMoved
 						],
 						component
 					);
 				} else {
 					callLifecycle(
 						[
-							component.elementConnected,
 							...(component.constructor as typeof BaseComponent)._lifecycleHooks
 								.elementConnected,
 							...((component._lifecycleHooks &&
 								component._lifecycleHooks.elementConnected) ||
-								[])
+								[]),
+							component.elementConnected
 						],
 						component
 					);
@@ -78,12 +79,12 @@ export const ElementProtoMixin = {
 
 				callLifecycle(
 					[
-						component.elementConnected,
 						...(component.constructor as typeof BaseComponent)._lifecycleHooks
 							.elementConnected,
 						...((component._lifecycleHooks &&
 							component._lifecycleHooks.elementConnected) ||
-							[])
+							[]),
+						component.elementConnected
 					],
 					component
 				);
@@ -102,12 +103,12 @@ export const ElementProtoMixin = {
 
 				callLifecycle(
 					[
-						component.elementConnected,
 						...(component.constructor as typeof BaseComponent)._lifecycleHooks
 							.elementConnected,
 						...((component._lifecycleHooks &&
 							component._lifecycleHooks.elementConnected) ||
-							[])
+							[]),
+						component.elementConnected
 					],
 					component
 				);
@@ -132,12 +133,12 @@ export const ElementProtoMixin = {
 
 				callLifecycle(
 					[
-						component.elementConnected,
 						...(component.constructor as typeof BaseComponent)._lifecycleHooks
 							.elementConnected,
 						...((component._lifecycleHooks &&
 							component._lifecycleHooks.elementConnected) ||
-							[])
+							[]),
+						component.elementConnected
 					],
 					component
 				);
@@ -161,12 +162,12 @@ export const ElementProtoMixin = {
 
 			callLifecycle(
 				[
-					component.elementDisconnected,
 					...(component.constructor as typeof BaseComponent)._lifecycleHooks
 						.elementDisconnected,
 					...((component._lifecycleHooks &&
 						component._lifecycleHooks.elementDisconnected) ||
-						[])
+						[]),
+					component.elementDisconnected
 				],
 				component
 			);
