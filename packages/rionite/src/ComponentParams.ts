@@ -19,44 +19,49 @@ export const ComponentParams = {
 			$specifiedParams = component.$specifiedParams = new Set();
 		}
 
-		let $paramsConfig = (component.constructor as typeof BaseComponent)[KEY_PARAMS_CONFIG];
+		let paramsConfig = (component.constructor as typeof BaseComponent).params;
 
-		if ($paramsConfig) {
-			for (let [name, $paramConfig] of $paramsConfig) {
-				let valueСonverters = $paramConfig.valueСonverters;
-				let defaultValue = $paramConfig.default;
+		if (paramsConfig) {
+			let $paramsConfig = (component.constructor as typeof BaseComponent)[KEY_PARAMS_CONFIG];
 
-				let el = component.element;
-				let snakeCaseName = snakeCaseAttributeName(name, true);
-				let rawValue = el.getAttribute(snakeCaseName);
+			for (let name in paramsConfig) {
+				if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
+					let $paramConfig = $paramsConfig!.get(name)!;
+					let valueСonverters = $paramConfig.valueСonverters;
+					let defaultValue = $paramConfig.default;
 
-				if (rawValue === null) {
-					if ($paramConfig.required) {
-						throw TypeError(`Parameter "${name}" is required`);
+					let el = component.element;
+					let snakeCaseName = snakeCaseAttributeName(name, true);
+					let rawValue = el.getAttribute(snakeCaseName);
+
+					if (rawValue === null) {
+						if ($paramConfig.required) {
+							throw TypeError(`Parameter "${name}" is required`);
+						}
+
+						if (
+							defaultValue != null &&
+							defaultValue !== false &&
+							valueСonverters.toString
+						) {
+							el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue)!);
+						}
+					} else {
+						if ($specifiedParams) {
+							$specifiedParams.add(name);
+						}
 					}
 
-					if (
-						defaultValue != null &&
-						defaultValue !== false &&
-						valueСonverters.toString
-					) {
-						el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue)!);
-					}
-				} else {
-					if ($specifiedParams) {
-						$specifiedParams.add(name);
-					}
-				}
+					let valueCell = (
+						this[KEY_VALUE_CELLS] || (this[KEY_VALUE_CELLS] = new Map())
+					).get($paramConfig.property);
+					let value = valueСonverters.toData(rawValue, defaultValue, el);
 
-				let valueCell = (this[KEY_VALUE_CELLS] || (this[KEY_VALUE_CELLS] = new Map())).get(
-					$paramConfig.property
-				);
-				let value = valueСonverters.toData(rawValue, defaultValue, el);
-
-				if (valueCell) {
-					valueCell.set(value);
-				} else {
-					component[KEY_PARAM_VALUES].set(name, value);
+					if (valueCell) {
+						valueCell.set(value);
+					} else {
+						component[KEY_PARAM_VALUES].set(name, value);
+					}
 				}
 			}
 		}

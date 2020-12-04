@@ -2368,36 +2368,40 @@
 	        else {
 	            $specifiedParams = component.$specifiedParams = new Set();
 	        }
-	        let $paramsConfig = component.constructor[KEY_PARAMS_CONFIG];
-	        if ($paramsConfig) {
-	            for (let [name, $paramConfig] of $paramsConfig) {
-	                let valueСonverters = $paramConfig.valueСonverters;
-	                let defaultValue = $paramConfig.default;
-	                let el = component.element;
-	                let snakeCaseName = dist_1$1(name, true);
-	                let rawValue = el.getAttribute(snakeCaseName);
-	                if (rawValue === null) {
-	                    if ($paramConfig.required) {
-	                        throw TypeError(`Parameter "${name}" is required`);
+	        let paramsConfig = component.constructor.params;
+	        if (paramsConfig) {
+	            let $paramsConfig = component.constructor[KEY_PARAMS_CONFIG];
+	            for (let name in paramsConfig) {
+	                if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {
+	                    let $paramConfig = $paramsConfig.get(name);
+	                    let valueСonverters = $paramConfig.valueСonverters;
+	                    let defaultValue = $paramConfig.default;
+	                    let el = component.element;
+	                    let snakeCaseName = dist_1$1(name, true);
+	                    let rawValue = el.getAttribute(snakeCaseName);
+	                    if (rawValue === null) {
+	                        if ($paramConfig.required) {
+	                            throw TypeError(`Parameter "${name}" is required`);
+	                        }
+	                        if (defaultValue != null &&
+	                            defaultValue !== false &&
+	                            valueСonverters.toString) {
+	                            el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue));
+	                        }
 	                    }
-	                    if (defaultValue != null &&
-	                        defaultValue !== false &&
-	                        valueСonverters.toString) {
-	                        el.setAttribute(snakeCaseName, valueСonverters.toString(defaultValue));
+	                    else {
+	                        if ($specifiedParams) {
+	                            $specifiedParams.add(name);
+	                        }
 	                    }
-	                }
-	                else {
-	                    if ($specifiedParams) {
-	                        $specifiedParams.add(name);
+	                    let valueCell = (this[cellx.KEY_VALUE_CELLS] || (this[cellx.KEY_VALUE_CELLS] = new Map())).get($paramConfig.property);
+	                    let value = valueСonverters.toData(rawValue, defaultValue, el);
+	                    if (valueCell) {
+	                        valueCell.set(value);
 	                    }
-	                }
-	                let valueCell = (this[cellx.KEY_VALUE_CELLS] || (this[cellx.KEY_VALUE_CELLS] = new Map())).get($paramConfig.property);
-	                let value = valueСonverters.toData(rawValue, defaultValue, el);
-	                if (valueCell) {
-	                    valueCell.set(value);
-	                }
-	                else {
-	                    component[KEY_PARAM_VALUES].set(name, value);
+	                    else {
+	                        component[KEY_PARAM_VALUES].set(name, value);
+	                    }
 	                }
 	            }
 	        }
