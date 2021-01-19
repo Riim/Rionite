@@ -93,30 +93,29 @@ export const ElementProtoMixin = {
 			}
 
 			return;
-		} else {
-			component = this.rioniteComponent;
+		}
 
-			component._parentComponent = undefined;
+		component = this.rioniteComponent;
 
-			if (component.parentComponent && component._parentComponent!._isReady) {
-				ComponentParams.init(component);
+		component._parentComponent = undefined;
 
-				callLifecycle(
-					[
-						...(component.constructor as typeof BaseComponent)._lifecycleHooks
-							.elementConnected,
-						...((component._lifecycleHooks &&
-							component._lifecycleHooks.elementConnected) ||
-							[]),
-						component.elementConnected
-					],
-					component
-				);
+		if (component.parentComponent && component._parentComponent!._isReady) {
+			ComponentParams.init(component);
 
-				component._connect();
+			callLifecycle(
+				[
+					...(component.constructor as typeof BaseComponent)._lifecycleHooks
+						.elementConnected,
+					...((component._lifecycleHooks && component._lifecycleHooks.elementConnected) ||
+						[]),
+					component.elementConnected
+				],
+				component
+			);
 
-				return;
-			}
+			component._connect();
+
+			return;
 		}
 
 		defer(() => {

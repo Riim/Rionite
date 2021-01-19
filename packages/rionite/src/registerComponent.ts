@@ -4,7 +4,7 @@ import { snakeCaseAttributeName } from '@riim/rionite-snake-case-attribute-name'
 import { Cell, EventEmitter, KEY_VALUE_CELLS } from 'cellx';
 import { BaseComponent, I$ComponentParamConfig, IComponentParamConfig } from './BaseComponent';
 import { componentConstructors } from './componentConstructors';
-import { KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
+import { ComponentParams, KEY_COMPONENT_PARAMS_INITED } from './ComponentParams';
 import { componentParamValueСonverters, IComponentParamValueСonverters } from './componentParamValueConverters';
 import { KEY_COMPONENT_SELF, KEY_PARAM_VALUES, KEY_PARAMS_CONFIG } from './Constants';
 import { elementConstructors } from './elementConstructors';
@@ -141,6 +141,8 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 			enumerable: true,
 
 			get(this: BaseComponent) {
+				ComponentParams.init(this);
+
 				let self = this[KEY_COMPONENT_SELF];
 				let valueCell = (self[KEY_VALUE_CELLS] || (self[KEY_VALUE_CELLS] = new Map())).get(
 					propName

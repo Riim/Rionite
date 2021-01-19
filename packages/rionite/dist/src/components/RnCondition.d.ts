@@ -14,7 +14,7 @@ export declare class RnCondition extends BaseComponent {
     _active: boolean;
     elementConnected(): void;
     elementDisconnected(): void;
-    _onIfChange(): void;
+    _onConditionChange(): void;
     _connect(): null;
     _disconnect(): void;
     _render(changed: boolean): void;

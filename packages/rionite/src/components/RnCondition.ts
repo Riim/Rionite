@@ -96,7 +96,7 @@ export class RnCondition extends BaseComponent {
 		}
 
 		if (this.element[KEY_CONTENT_TEMPLATE]) {
-			this._conditionCell.onChange(this._onIfChange, this);
+			this._conditionCell.onChange(this._onConditionChange, this);
 			this._render(false);
 		}
 	}
@@ -109,7 +109,7 @@ export class RnCondition extends BaseComponent {
 		});
 	}
 
-	_onIfChange() {
+	_onConditionChange() {
 		if (this.element.parentNode) {
 			this._render(true);
 		}
@@ -206,7 +206,7 @@ export class RnCondition extends BaseComponent {
 
 		this._active = false;
 
-		this._conditionCell.offChange(this._onIfChange, this);
+		this._conditionCell.offChange(this._onConditionChange, this);
 
 		let nodes = this._nodes;
 

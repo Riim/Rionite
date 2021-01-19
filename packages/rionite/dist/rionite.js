@@ -3209,22 +3209,19 @@
 	            }
 	            return;
 	        }
-	        else {
-	            component = this.rioniteComponent;
-	            component._parentComponent = undefined;
-	            if (component.parentComponent && component._parentComponent._isReady) {
-	                ComponentParams.init(component);
-	                callLifecycle([
-	                    ...component.constructor._lifecycleHooks
-	                        .elementConnected,
-	                    ...((component._lifecycleHooks &&
-	                        component._lifecycleHooks.elementConnected) ||
-	                        []),
-	                    component.elementConnected
-	                ], component);
-	                component._connect();
-	                return;
-	            }
+	        component = this.rioniteComponent;
+	        component._parentComponent = undefined;
+	        if (component.parentComponent && component._parentComponent._isReady) {
+	            ComponentParams.init(component);
+	            callLifecycle([
+	                ...component.constructor._lifecycleHooks
+	                    .elementConnected,
+	                ...((component._lifecycleHooks && component._lifecycleHooks.elementConnected) ||
+	                    []),
+	                component.elementConnected
+	            ], component);
+	            component._connect();
+	            return;
 	        }
 	        dist_2$2(() => {
 	            if (!this[KEY_ELEMENT_CONNECTED]) {
@@ -3391,6 +3388,7 @@
 	            configurable: true,
 	            enumerable: true,
 	            get() {
+	                ComponentParams.init(this);
 	                let self = this[KEY_COMPONENT_SELF];
 	                let valueCell = (self[cellx.KEY_VALUE_CELLS] || (self[cellx.KEY_VALUE_CELLS] = new Map())).get(propName);
 	                if (valueCell) {
@@ -4144,7 +4142,7 @@
 	            this._initialized = true;
 	        }
 	        if (this.element[KEY_CONTENT_TEMPLATE]) {
-	            this._conditionCell.onChange(this._onIfChange, this);
+	            this._conditionCell.onChange(this._onConditionChange, this);
 	            this._render(false);
 	        }
 	    }
@@ -4155,7 +4153,7 @@
 	            }
 	        });
 	    }
-	    _onIfChange() {
+	    _onConditionChange() {
 	        if (this.element.parentNode) {
 	            this._render(true);
 	        }
@@ -4219,7 +4217,7 @@
 	            return;
 	        }
 	        this._active = false;
-	        this._conditionCell.offChange(this._onIfChange, this);
+	        this._conditionCell.offChange(this._onConditionChange, this);
 	        let nodes = this._nodes;
 	        if (nodes) {
 	            removeNodes(nodes);
