@@ -11,11 +11,11 @@ import { Component } from '../decorators/Component';
 export class RnHtml extends BaseComponent {
 	html: string;
 
-	ready() {
+	override ready() {
 		this._setHtml();
 	}
 
-	connected() {
+	override connected() {
 		this.listenTo(this, 'change:html', this._onHtmlChange);
 	}
 

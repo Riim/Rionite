@@ -20,6 +20,7 @@ export function compileTemplateNodeValue(
 		let inner: (formatters: Record<string, Function>) => any;
 
 		if (templateNodeValueAST.length == 1) {
+			// eslint-disable-next-line @typescript-eslint/no-implied-eval
 			inner = Function(
 				'formatters, KEY_COMPONENT_SELF',
 				`var tmp; return ${bindingToJSExpression(
@@ -37,6 +38,7 @@ export function compileTemplateNodeValue(
 				);
 			}
 
+			// eslint-disable-next-line @typescript-eslint/no-implied-eval
 			inner = Function(
 				'formatters, KEY_COMPONENT_SELF',
 				`var tmp; return [${fragments.join(', ')}].join('');`

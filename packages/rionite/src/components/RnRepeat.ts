@@ -53,7 +53,7 @@ function insertBefore(nodes: Array<Node>, beforeNode: Node, parentNode: Node): N
 
 function offBindings(bindings: Array<Cell> | null) {
 	if (bindings) {
-		for (let i = bindings.length; i; ) {
+		for (let i = bindings.length; i != 0; ) {
 			bindings[--i].off();
 		}
 	}
@@ -61,7 +61,7 @@ function offBindings(bindings: Array<Cell> | null) {
 
 function deactivateChildComponents(childComponents: Array<BaseComponent> | null) {
 	if (childComponents) {
-		for (let i = childComponents.length; i; ) {
+		for (let i = childComponents.length; i != 0; ) {
 			let childComponent = childComponents[--i];
 
 			if (childComponent instanceof RnCondition || childComponent instanceof RnRepeat) {
@@ -84,13 +84,13 @@ function deactivateChildComponents(childComponents: Array<BaseComponent> | null)
 	}
 })
 export class RnRepeat extends BaseComponent {
-	static EVENT_CHANGE = Symbol('change');
+	static override EVENT_CHANGE = Symbol('change');
 
-	static get bindsInputContent() {
+	static override get bindsInputContent() {
 		return true;
 	}
 
-	$context: Record<string, any>;
+	override $context: Record<string, any>;
 
 	paramFor: string;
 	paramIn: TList | null;
@@ -107,7 +107,7 @@ export class RnRepeat extends BaseComponent {
 
 	_active = false;
 
-	elementConnected() {
+	override elementConnected() {
 		if (this._active) {
 			return;
 		}
@@ -166,7 +166,7 @@ export class RnRepeat extends BaseComponent {
 		}
 	}
 
-	elementDisconnected() {
+	override elementDisconnected() {
 		nextTick(() => {
 			if (!this.element[KEY_ELEMENT_CONNECTED]) {
 				this._deactivate();
@@ -180,11 +180,11 @@ export class RnRepeat extends BaseComponent {
 		}
 	}
 
-	_connect() {
+	override _connect() {
 		this._isConnected = true;
 		return null;
 	}
-	_disconnect() {
+	override _disconnect() {
 		this._isConnected = false;
 	}
 
@@ -219,7 +219,7 @@ export class RnRepeat extends BaseComponent {
 						} else {
 							new$ItemsMap.set(value, [$item]);
 						}
-						if (!$items.length) {
+						if ($items.length == 0) {
 							$itemsMap.delete(value);
 						}
 
@@ -254,7 +254,7 @@ export class RnRepeat extends BaseComponent {
 									} else {
 										new$ItemsMap.set(value, [$item]);
 									}
-									if (!$items.length) {
+									if ($items.length == 0) {
 										$itemsMap.delete(value);
 									}
 
@@ -290,7 +290,7 @@ export class RnRepeat extends BaseComponent {
 										} else {
 											new$ItemsMap.set(iiValue, [ii$Items.shift()!]);
 										}
-										if (!ii$Items.length) {
+										if (ii$Items.length == 0) {
 											$itemsMap.delete(iiValue);
 										}
 
@@ -329,7 +329,7 @@ export class RnRepeat extends BaseComponent {
 
 								for (let k = startIndex; k < foundIndex; k++) {
 									let kValue = trackBy ? prevList[k][trackBy] : prevList[k];
-									let index = removedValues.get(kValue) || 0;
+									let index = removedValues.get(kValue) ?? 0;
 
 									removeNodes($itemsMap.get(kValue)![index].nodes);
 									removedValues.set(kValue, index + 1);
@@ -338,9 +338,10 @@ export class RnRepeat extends BaseComponent {
 								let lastFoundValue = trackBy
 									? prevList[j - 1][trackBy]
 									: prevList[j - 1];
-								let nodes = new$ItemsMap.get(lastFoundValue)![
-									removedValues.get(lastFoundValue) || 0
-								].nodes;
+								let nodes =
+									new$ItemsMap.get(lastFoundValue)![
+										removedValues.get(lastFoundValue) ?? 0
+									].nodes;
 								lastNode = nodes[nodes.length - 1];
 
 								startIndex = j;
@@ -368,13 +369,19 @@ export class RnRepeat extends BaseComponent {
 							[this._itemName]: {
 								configurable: true,
 								enumerable: true,
-								get: ((itemCell) => () => itemCell.get())(itemCell)
+								get: (
+									(itemCell) => () =>
+										itemCell.get()
+								)(itemCell)
 							},
 
 							$index: {
 								configurable: true,
 								enumerable: true,
-								get: ((indexCell) => () => indexCell.get())(indexCell)
+								get: (
+									(indexCell) => () =>
+										indexCell.get()
+								)(indexCell)
 							}
 						}),
 						contentBindingResult
@@ -396,13 +403,12 @@ export class RnRepeat extends BaseComponent {
 					}
 
 					if (childComponents) {
-						for (let i = childComponents.length; i; ) {
+						for (let i = childComponents.length; i != 0; ) {
 							let childComponent = childComponents[--i];
 
 							if (
 								childComponent.element.firstChild &&
-								(childComponent.constructor as typeof BaseComponent)
-									.bindsInputContent
+								childComponent.constructor.bindsInputContent
 							) {
 								childComponent.$inputContent = moveContent(
 									document.createDocumentFragment(),
@@ -426,7 +432,7 @@ export class RnRepeat extends BaseComponent {
 					}
 
 					if (backBindings) {
-						for (let i = backBindings.length; i; i -= 3) {
+						for (let i = backBindings.length; i != 0; i -= 3) {
 							(backBindings[i - 3] as BaseComponent).on(
 								'change:' + backBindings[i - 2],
 								backBindings[i - 1] as TListener
@@ -440,14 +446,14 @@ export class RnRepeat extends BaseComponent {
 				}
 			}
 
-			if (removedValues.size) {
+			if (removedValues.size != 0) {
 				(($itemsMap) => {
-					removedValues.forEach((_removedCount, value) => {
+					for (let value of removedValues.values()) {
 						for (let $item of $itemsMap.get(value)!) {
 							offBindings($item.bindings);
 							deactivateChildComponents($item.childComponents);
 						}
-					});
+					}
 				})($itemsMap);
 			}
 
@@ -470,7 +476,7 @@ export class RnRepeat extends BaseComponent {
 			return;
 		}
 
-		this._prevList = list ? (Array.isArray(list) ? list.slice() : list!.toArray()) : [];
+		this._prevList = list ? (Array.isArray(list) ? list.slice() : list.toArray()) : [];
 
 		if (fromChangeEvent) {
 			Cell.release();

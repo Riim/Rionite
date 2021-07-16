@@ -9,20 +9,14 @@ export function findChildComponents(
 			let childComponent = (child as IPossiblyComponentElement).$component;
 
 			if (childComponent) {
-				(childComponents || (childComponents = [])).push(childComponent);
+				(childComponents ?? (childComponents = [])).push(childComponent);
 			}
 
-			if (
-				child.firstChild &&
-				!(
-					childComponent &&
-					(childComponent.constructor as typeof BaseComponent).bindsInputContent
-				)
-			) {
+			if (child.firstChild && !childComponent?.constructor.bindsInputContent) {
 				childComponents = findChildComponents(child, childComponents);
 			}
 		}
 	}
 
-	return childComponents || null;
+	return childComponents ?? null;
 }

@@ -14,12 +14,12 @@ export function walk(
 	if (Array.isArray(node)) {
 		walkContent(node, callbacks);
 	} else {
-		if (node.nodeType == NodeType.ELEMENT && (node as IElement).attributes) {
-			walkAttributes((node as IElement).attributes!, callbacks);
+		if (node.nodeType == NodeType.ELEMENT && node.attributes) {
+			walkAttributes(node.attributes, callbacks);
 		}
 
-		if ((node as IBlock | IElement).content) {
-			walkContent((node as IElement).content!, callbacks);
+		if (node.content) {
+			walkContent(node.content, callbacks);
 		}
 	}
 }

@@ -121,16 +121,17 @@ export function callLifecycle(lifecycle: Array<Function>, context: object) {
 		let result;
 
 		try {
-			result = lifecycleFn.length
-				? lifecycleFn.call(context, context)
-				: lifecycleFn.call(context);
+			result =
+				lifecycleFn.length == 0
+					? lifecycleFn.call(context)
+					: lifecycleFn.call(context, context);
 		} catch (err) {
 			config.logError(err);
 			return null;
 		}
 
 		if (result instanceof Promise) {
-			(promises || (promises = [])).push(
+			(promises ?? (promises = [])).push(
 				result.catch((err) => {
 					if (!(err instanceof InterruptError)) {
 						config.logError(err);
@@ -140,46 +141,28 @@ export function callLifecycle(lifecycle: Array<Function>, context: object) {
 		}
 	}
 
-	return promises || null;
+	return promises ?? null;
 }
 
 let currentComponent: BaseComponent;
 
 export function onElementConnected(lifecycleHook: TComponentLifecycleHook) {
-	(
-		(currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {}))
-			.elementConnected || (currentComponent._lifecycleHooks!.elementConnected = [])
-	).push(lifecycleHook);
+	currentComponent._lifecycleHooks.elementConnected.push(lifecycleHook);
 }
 export function onElementDisconnected(lifecycleHook: TComponentLifecycleHook) {
-	(
-		(currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {}))
-			.elementDisconnected || (currentComponent._lifecycleHooks!.elementDisconnected = [])
-	).push(lifecycleHook);
+	currentComponent._lifecycleHooks.elementDisconnected.push(lifecycleHook);
 }
 export function onReady(lifecycleHook: TComponentLifecycleHook) {
-	(
-		(currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {})).ready ||
-		(currentComponent._lifecycleHooks.ready = [])
-	).push(lifecycleHook);
+	currentComponent._lifecycleHooks.ready.push(lifecycleHook);
 }
 export function onConnected(lifecycleHook: TComponentLifecycleHook) {
-	(
-		(currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {})).connected ||
-		(currentComponent._lifecycleHooks!.connected = [])
-	).push(lifecycleHook);
+	currentComponent._lifecycleHooks.connected.push(lifecycleHook);
 }
 export function onDisconnected(lifecycleHook: TComponentLifecycleHook) {
-	(
-		(currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {}))
-			.disconnected || (currentComponent._lifecycleHooks!.disconnected = [])
-	).push(lifecycleHook);
+	currentComponent._lifecycleHooks.disconnected.push(lifecycleHook);
 }
 export function onElementMoved(lifecycleHook: TComponentLifecycleHook) {
-	(
-		(currentComponent._lifecycleHooks || (currentComponent._lifecycleHooks = {}))
-			.elementMoved || (currentComponent._lifecycleHooks!.elementMoved = [])
-	).push(lifecycleHook);
+	currentComponent._lifecycleHooks.elementMoved.push(lifecycleHook);
 }
 
 export class BaseComponent extends EventEmitter implements IDisposable {
@@ -288,15 +271,16 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return this._isConnected;
 	}
 
-	_lifecycleHooks: {
-		elementConnected?: Array<TComponentLifecycleHook>;
-		elementDisconnected?: Array<TComponentLifecycleHook>;
-		ready?: Array<TComponentLifecycleHook>;
-		connected?: Array<TComponentLifecycleHook>;
-		disconnected?: Array<TComponentLifecycleHook>;
-		elementMoved?: Array<TComponentLifecycleHook>;
-	} | null = null;
+	_lifecycleHooks = {
+		elementConnected: [] as Array<TComponentLifecycleHook>,
+		elementDisconnected: [] as Array<TComponentLifecycleHook>,
+		ready: [] as Array<TComponentLifecycleHook>,
+		connected: [] as Array<TComponentLifecycleHook>,
+		disconnected: [] as Array<TComponentLifecycleHook>,
+		elementMoved: [] as Array<TComponentLifecycleHook>
+	};
 
+	override ['constructor']: typeof BaseComponent;
 	constructor(el?: HTMLElement) {
 		super();
 
@@ -304,7 +288,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 		this[KEY_COMPONENT_SELF] = this;
 
-		let ctor = this.constructor as typeof BaseComponent;
+		let ctor = this.constructor;
 
 		if (!elementConstructors.has(ctor.elementIs)) {
 			throw TypeError('Component must be registered');
@@ -321,14 +305,14 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	}
 
 	onChange(listener: TListener, context?: any): this {
-		return this.on((this.constructor as typeof BaseComponent).EVENT_CHANGE, listener, context);
+		return this.on(this.constructor.EVENT_CHANGE, listener, context);
 	}
 
 	offChange(listener: TListener, context?: any): this {
-		return this.off((this.constructor as typeof BaseComponent).EVENT_CHANGE, listener, context);
+		return this.off(this.constructor.EVENT_CHANGE, listener, context);
 	}
 
-	handleEvent(evt: IEvent<BaseComponent>) {
+	override handleEvent(evt: IEvent<BaseComponent>) {
 		super.handleEvent(evt);
 
 		if (evt.bubbles !== false && !evt.propagationStopped) {
@@ -421,11 +405,11 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					}
 				} else {
 					return this._listenTo(
-						target as EventEmitter | EventTarget,
+						target,
 						evtType,
 						listener,
 						context !== undefined ? context : this,
-						useCapture || false
+						useCapture ?? false
 					);
 				}
 			}
@@ -433,7 +417,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 		let listening: IDisposableListening;
 		let stop = () => {
-			for (let i = listenings.length; i; ) {
+			for (let i = listenings.length; i != 0; ) {
 				listenings[--i].stop();
 			}
 
@@ -565,7 +549,9 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return value;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	_beforeInitializationWait() {}
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	_afterInitializationWait() {}
 
 	connect(ownerComponent?: BaseComponent): Promise<any> | null {
@@ -583,8 +569,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 		callLifecycle(
 			[
-				...(this.constructor as typeof BaseComponent)._lifecycleHooks.elementConnected,
-				...((this._lifecycleHooks && this._lifecycleHooks.elementConnected) || []),
+				...this.constructor._lifecycleHooks.elementConnected,
+				...this._lifecycleHooks.elementConnected,
 				this.elementConnected
 			],
 			this
@@ -634,7 +620,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			this._initialized = true;
 		}
 
-		let ctor = this.constructor as typeof BaseComponent;
+		let ctor = this.constructor;
 		let readyPromises: ReturnType<typeof callLifecycle> | undefined;
 
 		if (this._isReady) {
@@ -672,7 +658,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					}
 
 					if (backBindings) {
-						for (let i = backBindings.length; i; i -= 3) {
+						for (let i = backBindings.length; i != 0; i -= 3) {
 							(backBindings[i - 3] as BaseComponent).on(
 								'change:' + backBindings[i - 2],
 								backBindings[i - 1] as TEventEmitterListener
@@ -690,7 +676,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				if (el.firstChild) {
 					suppressConnectionStatusCallbacks();
 					moveContent(
-						this.$inputContent ||
+						this.$inputContent ??
 							(this.$inputContent = document.createDocumentFragment()),
 						el
 					);
@@ -714,12 +700,12 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				this._bindings = contentBindingResult[1];
 
 				if (childComponents) {
-					for (let i = childComponents.length; i; ) {
+					for (let i = childComponents.length; i != 0; ) {
 						let childComponent = childComponents[--i];
 
 						if (
 							childComponent.element.firstChild &&
-							(childComponent.constructor as typeof BaseComponent).bindsInputContent
+							childComponent.constructor.bindsInputContent
 						) {
 							childComponent.$inputContent = moveContent(
 								document.createDocumentFragment(),
@@ -738,7 +724,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 				}
 
 				if (backBindings) {
-					for (let i = backBindings.length; i; i -= 3) {
+					for (let i = backBindings.length; i != 0; i -= 3) {
 						(backBindings[i - 3] as BaseComponent).on(
 							'change:' + backBindings[i - 2],
 							backBindings[i - 1] as TEventEmitterListener
@@ -749,8 +735,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 			readyPromises = callLifecycle(
 				[
-					...(this.constructor as typeof BaseComponent)._lifecycleHooks.ready,
-					...((this._lifecycleHooks && this._lifecycleHooks.ready) || []),
+					...this.constructor._lifecycleHooks.ready,
+					...this._lifecycleHooks.ready,
 					this.ready
 				],
 				this
@@ -774,9 +760,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 					if (this._isConnected) {
 						callLifecycle(
 							[
-								...(this.constructor as typeof BaseComponent)._lifecycleHooks
-									.connected,
-								...((this._lifecycleHooks && this._lifecycleHooks.connected) || []),
+								...this.constructor._lifecycleHooks.connected,
+								...this._lifecycleHooks.connected,
 								this.connected
 							],
 							this
@@ -786,8 +771,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			} else {
 				callLifecycle(
 					[
-						...(this.constructor as typeof BaseComponent)._lifecycleHooks.connected,
-						...((this._lifecycleHooks && this._lifecycleHooks.connected) || []),
+						...this.constructor._lifecycleHooks.connected,
+						...this._lifecycleHooks.connected,
 						this.connected
 					],
 					this
@@ -803,8 +788,8 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 		callLifecycle(
 			[
-				...(this.constructor as typeof BaseComponent)._lifecycleHooks.disconnected,
-				...((this._lifecycleHooks && this._lifecycleHooks.disconnected) || []),
+				...this.constructor._lifecycleHooks.disconnected,
+				...this._lifecycleHooks.disconnected,
 				this.disconnected
 			],
 			this
@@ -839,7 +824,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		let bindings = this._bindings;
 
 		if (bindings) {
-			for (let i = bindings.length; i; ) {
+			for (let i = bindings.length; i != 0; ) {
 				bindings[--i].off();
 			}
 
@@ -849,12 +834,19 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 
 	// Callbacks
 
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	elementConnected() {}
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	elementDisconnected() {}
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	initialize(): Promise<any> | void {}
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	ready() {}
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	connected() {}
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	disconnected() {}
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	elementMoved() {}
 
 	// Utils
@@ -865,9 +857,11 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	): R | null {
 		let elList = this._getElementList(name, container);
 
-		return (elList && elList.length
-			? (elList[0] as IPossiblyComponentElement).$component || elList[0]
-			: null) as any;
+		return (
+			elList && elList.length != 0
+				? (elList[0] as IPossiblyComponentElement).$component ?? elList[0]
+				: null
+		) as any;
 	}
 
 	$$<R = BaseComponent | Element>(
@@ -879,7 +873,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		return elList
 			? Array.prototype.map.call(
 					elList,
-					(el: IPossiblyComponentElement) => el.$component || el
+					(el: IPossiblyComponentElement) => el.$component ?? el
 			  )
 			: [];
 	}
@@ -900,9 +894,9 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			container = this.element;
 		}
 
-		let elementBlockNames = (this.constructor as typeof BaseComponent)._elementBlockNames;
+		let elementBlockNames = this.constructor._elementBlockNames;
 
-		return container.getElementsByClassName(
+		return (container as Element).getElementsByClassName(
 			elementBlockNames[elementBlockNames.length - 1] + '__' + name
 		);
 	}

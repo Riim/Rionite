@@ -11,7 +11,7 @@ export function Param(
 export function Param(
 	target?: BaseComponent | string | IComponentParamConfig | Function,
 	propName?: string | IComponentParamConfig | Function,
-	_propDesc?: PropertyDescriptor,
+	propDesc?: PropertyDescriptor,
 	name?: string,
 	config?: IComponentParamConfig | Function
 ): any {
@@ -35,9 +35,9 @@ export function Param(
 
 	config.property = propName;
 
-	let ctor = target!.constructor as typeof BaseComponent;
+	let ctor = (target as BaseComponent).constructor;
 
-	((ctor.hasOwnProperty('params') && ctor.params) || (ctor.params = {}))[
-		name || propName
+	((Object.prototype.hasOwnProperty.call(ctor, 'params') && ctor.params) || (ctor.params = {}))[
+		name ?? propName
 	] = config;
 }

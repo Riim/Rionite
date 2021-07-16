@@ -27,14 +27,14 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 
 	let evtType = evt.type;
 	let attrName = typeof evtType == 'string' ? 'oncomponent-' + evtType : null;
-	let receivers: Array<Element> | null | undefined;
+	let receivers: Array<Element> | null = null;
 
 	for (;;) {
 		if (
 			(el[KEY_EVENTS] && el[KEY_EVENTS].has(evtType)) ||
 			(attrName && el.hasAttribute(attrName))
 		) {
-			(receivers || (receivers = [])).push(el);
+			(receivers ?? (receivers = [])).push(el);
 		}
 
 		if (el.parentElement == ownerComponent.element) {
@@ -44,8 +44,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 						let elName = receiver[KEY_EVENTS].get(evtType);
 
 						if (elName) {
-							let events = (ownerComponent.constructor as typeof BaseComponent)
-								.events!;
+							let events = ownerComponent.constructor.events!;
 							let handler = events[elName][evtType as any];
 
 							if (handler) {
@@ -101,7 +100,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 				receivers.length = 0;
 			}
 
-			if (!componentStack.length) {
+			if (componentStack.length == 0) {
 				break;
 			}
 
@@ -122,7 +121,7 @@ export function handleEvent(evt: IEvent<BaseComponent>) {
 			let component = (el as IPossiblyComponentElement).$component;
 
 			if (component && component.ownerComponent != ownerComponent) {
-				componentStack.push([ownerComponent, receivers || null]);
+				componentStack.push([ownerComponent, receivers]);
 				ownerComponent = component.ownerComponent;
 				receivers = null;
 			}

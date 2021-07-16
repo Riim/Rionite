@@ -27,7 +27,7 @@ export function Listen<T = BaseComponent>(
 		  },
 	useCapture?: boolean
 ) {
-	return (target_: BaseComponent, methodName: string, _methodDesc?: PropertyDescriptor): void => {
+	return (target_: BaseComponent, methodName: string): void => {
 		let options =
 			target &&
 			typeof target == 'object' &&
@@ -48,10 +48,10 @@ export function Listen<T = BaseComponent>(
 			target_.constructor,
 			'_lifecycleHooks'
 		)
-			? (target_.constructor as typeof BaseComponent)._lifecycleHooks
-			: ((target_.constructor as typeof BaseComponent)._lifecycleHooks = ({
-					__proto__: (target_.constructor as typeof BaseComponent)._lifecycleHooks
-			  } as any) as typeof BaseComponent._lifecycleHooks);
+			? target_.constructor._lifecycleHooks
+			: (target_.constructor._lifecycleHooks = {
+					__proto__: target_.constructor._lifecycleHooks
+			  } as any as typeof BaseComponent._lifecycleHooks);
 
 		(Object.prototype.hasOwnProperty.call(lifecycleHooks, 'connected')
 			? lifecycleHooks.connected
@@ -65,6 +65,7 @@ export function Listen<T = BaseComponent>(
 				}
 
 				if (typeof target == 'string' && target.charAt(0) == '@') {
+					// eslint-disable-next-line @typescript-eslint/no-implied-eval
 					target = Function(`return this.${target.slice(1)};`).call(component);
 				}
 			} else {

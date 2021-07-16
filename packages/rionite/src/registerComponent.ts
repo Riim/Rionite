@@ -48,7 +48,7 @@ function inheritProperty(
 }
 
 export function registerComponent(componentCtor: typeof BaseComponent) {
-	let elIs = componentCtor.hasOwnProperty('elementIs')
+	let elIs = Object.prototype.hasOwnProperty.call(componentCtor, 'elementIs')
 		? componentCtor.elementIs
 		: (componentCtor.elementIs = componentCtor.name);
 
@@ -63,8 +63,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 	}
 
 	let componentProto = componentCtor.prototype;
-	let parentComponentCtor = Object.getPrototypeOf(componentProto)
-		.constructor as typeof BaseComponent;
+	let parentComponentCtor = Object.getPrototypeOf(componentProto).constructor;
 
 	inheritProperty(componentCtor, parentComponentCtor, 'params', 0);
 
@@ -89,11 +88,11 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 		let readonly: boolean;
 
 		if (typeof paramConfig == 'object') {
-			propName = paramConfig.property || name;
+			propName = paramConfig.property ?? name;
 			type = paramConfig.type;
 			defaultValue = paramConfig.default;
-			required = paramConfig.required || false;
-			readonly = paramConfig.readonly || false;
+			required = paramConfig.required ?? false;
+			readonly = paramConfig.readonly ?? false;
 		} else {
 			propName = name;
 			type = paramConfig;
@@ -102,8 +101,9 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 
 		if (!type) {
 			type =
-				(defaultValue !== undefined && componentParamTypeMap.get(typeof defaultValue)) ||
-				Object;
+				defaultValue === undefined
+					? Object
+					: componentParamTypeMap.get(typeof defaultValue) ?? Object;
 		}
 
 		valueСonverters = componentParamValueСonverters.get(type);
@@ -132,7 +132,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 			paramConfig
 		};
 
-		(componentCtor[KEY_PARAMS_CONFIG] || (componentCtor[KEY_PARAMS_CONFIG] = new Map()))!
+		(componentCtor[KEY_PARAMS_CONFIG] ?? (componentCtor[KEY_PARAMS_CONFIG] = new Map()))!
 			.set(name, $paramConfig)
 			.set(snakeCaseName, $paramConfig);
 
@@ -144,9 +144,9 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 				ComponentParams.init(this);
 
 				let self = this[KEY_COMPONENT_SELF];
-				let valueCell = (self[KEY_VALUE_CELLS] || (self[KEY_VALUE_CELLS] = new Map())).get(
-					propName
-				);
+				let valueCell: Cell | undefined = (
+					self[KEY_VALUE_CELLS] ?? (self[KEY_VALUE_CELLS] = new Map())
+				).get(propName);
 
 				if (valueCell) {
 					return valueCell.get();
@@ -173,7 +173,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 
 			set(this: BaseComponent, value: any) {
 				let self = this[KEY_COMPONENT_SELF];
-				let valueCell = (self[KEY_VALUE_CELLS] || (self[KEY_VALUE_CELLS] = new Map())).get(
+				let valueCell = (self[KEY_VALUE_CELLS] ?? (self[KEY_VALUE_CELLS] = new Map())).get(
 					propName
 				);
 
@@ -189,8 +189,8 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 						return;
 					}
 
-					if ($paramConfig.valueСonverters!.toString) {
-						let rawValue = $paramConfig.valueСonverters!.toString(
+					if ($paramConfig.valueСonverters.toString) {
+						let rawValue = $paramConfig.valueСonverters.toString(
 							value,
 							$paramConfig.default
 						);
@@ -221,10 +221,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 	componentCtor._elementBlockNames = [elIs];
 
 	if (parentComponentCtor._elementBlockNames) {
-		Array.prototype.push.apply(
-			componentCtor._elementBlockNames,
-			parentComponentCtor._elementBlockNames
-		);
+		componentCtor._elementBlockNames.push(...parentComponentCtor._elementBlockNames);
 	}
 
 	let template = componentCtor.template;
@@ -253,7 +250,7 @@ export function registerComponent(componentCtor: typeof BaseComponent) {
 
 	if (elExtends) {
 		parentElCtor =
-			elementConstructors.get(elExtends) || window[`HTML${pascalize(elExtends)}Element`];
+			elementConstructors.get(elExtends) ?? window[`HTML${pascalize(elExtends)}Element`];
 
 		if (!parentElCtor) {
 			throw TypeError(`Component "${elExtends}" is not registered`);

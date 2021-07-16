@@ -12,10 +12,11 @@ export function compileKeypath(
 	cacheKey = keypath as string
 ): (this: object) => any {
 	return (
-		cache.get(cacheKey) ||
+		cache.get(cacheKey) ??
 		cache
 			.set(
 				cacheKey,
+				// eslint-disable-next-line @typescript-eslint/no-implied-eval
 				Function(`var tmp; return ${keypathToJSExpression(keypath, cacheKey)};`) as any
 			)
 			.get(cacheKey)!

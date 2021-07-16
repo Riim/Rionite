@@ -1,4 +1,4 @@
-import { BaseComponent, IPossiblyComponentElement, TEventHandler } from './BaseComponent';
+import { IPossiblyComponentElement, TEventHandler } from './BaseComponent';
 import { KEY_CONTEXT } from './bindContent';
 import { config } from './config';
 import { InterruptError } from './lib/InterruptError';
@@ -23,12 +23,12 @@ export function handleDOMEvent(evt: Event) {
 		}
 
 		if ((el[KEY_DOM_EVENTS] && el[KEY_DOM_EVENTS].has(evtType)) || el.hasAttribute(attrName)) {
-			(receivers || (receivers = [])).push(el);
+			(receivers ?? (receivers = [])).push(el);
 		}
 
 		let component = (parentEl as IPossiblyComponentElement).$component;
 
-		if (component && receivers && receivers.length) {
+		if (component && receivers && receivers.length != 0) {
 			let i = 0;
 
 			do {
@@ -39,7 +39,7 @@ export function handleDOMEvent(evt: Event) {
 					let elName = receiver[KEY_DOM_EVENTS].get(evtType);
 
 					if (elName) {
-						let events = (component.constructor as typeof BaseComponent).domEvents;
+						let events = component.constructor.domEvents;
 
 						if (events && events[elName]) {
 							handler = events[elName][evtType];

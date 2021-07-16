@@ -14,7 +14,7 @@ function keypathToJSExpression(keypath, cacheKey = keypath) {
         else {
             let index = keyCount - 2;
             let fragments = Array(index);
-            while (index) {
+            while (index != 0) {
                 fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
             }
             cache.set(cacheKey, `(tmp = this['${keys[0]}'])${fragments.join('')} && tmp['${keys[keyCount - 1]}']`);
@@ -66,7 +66,8 @@ class TemplateNodeValueParser {
         if (value) {
             let result = this.result;
             let resultLen = result.length;
-            if (resultLen && result[resultLen - 1].nodeType == TemplateNodeValueNodeType.TEXT) {
+            if (resultLen != 0 &&
+                result[resultLen - 1].nodeType == TemplateNodeValueNodeType.TEXT) {
                 result[resultLen - 1].value += value;
             }
             else {
@@ -91,7 +92,7 @@ class TemplateNodeValueParser {
         if (keypath || value) {
             let formatters;
             for (let formatter; this._skipWhitespaces() == '|' && (formatter = this._readFormatter());) {
-                (formatters || (formatters = [])).push(formatter);
+                (formatters !== null && formatters !== void 0 ? formatters : (formatters = [])).push(formatter);
             }
             if (this._chr == '}') {
                 this._next();
@@ -99,8 +100,8 @@ class TemplateNodeValueParser {
                     nodeType: TemplateNodeValueNodeType.BINDING,
                     prefix,
                     keypath,
-                    value: value || null,
-                    formatters: formatters || null,
+                    value: value !== null && value !== void 0 ? value : null,
+                    formatters: formatters !== null && formatters !== void 0 ? formatters : null,
                     raw: this.templateNodeValue.slice(pos, this._pos)
                 };
             }
@@ -149,18 +150,19 @@ class TemplateNodeValueParser {
         return null;
     }
     _readFormatterArguments() {
+        var _a;
         let pos = this._pos;
         this._next( /* '(' */);
         let args;
         if (this._skipWhitespaces() != ')') {
             for (;;) {
-                let arg = this._readValue() || this._readKeypath(true);
+                let arg = (_a = this._readValue()) !== null && _a !== void 0 ? _a : this._readKeypath(true);
                 if (!(arg && (this._skipWhitespaces() == ',' || this._chr == ')'))) {
                     this._pos = pos;
                     this._chr = this.templateNodeValue.charAt(pos);
                     return null;
                 }
-                (args || (args = [])).push(arg);
+                (args !== null && args !== void 0 ? args : (args = [])).push(arg);
                 if (this._chr == ')') {
                     break;
                 }
@@ -169,7 +171,7 @@ class TemplateNodeValueParser {
             }
         }
         this._next();
-        return args || null;
+        return args !== null && args !== void 0 ? args : null;
     }
     _readValue() {
         switch (this._chr) {
@@ -197,6 +199,7 @@ class TemplateNodeValueParser {
         return null;
     }
     _readObject() {
+        var _a;
         let pos = this._pos;
         this._next( /* '{' */);
         let obj = '{';
@@ -205,7 +208,7 @@ class TemplateNodeValueParser {
             if (key && this._skipWhitespaces() == ':') {
                 this._next();
                 this._skipWhitespaces();
-                let valueOrKeypath = this._readValue() || this._readKeypath(true);
+                let valueOrKeypath = (_a = this._readValue()) !== null && _a !== void 0 ? _a : this._readKeypath(true);
                 if (valueOrKeypath) {
                     if (this._skipWhitespaces() == ',') {
                         obj += key + ':' + valueOrKeypath + ',';
@@ -229,6 +232,7 @@ class TemplateNodeValueParser {
         return this._readName();
     }
     _readArray() {
+        var _a;
         let pos = this._pos;
         this._next( /* '[' */);
         let arr = '[';
@@ -238,7 +242,7 @@ class TemplateNodeValueParser {
                 this._next();
             }
             else {
-                let valueOrKeypath = this._readValue() || this._readKeypath(true);
+                let valueOrKeypath = (_a = this._readValue()) !== null && _a !== void 0 ? _a : this._readKeypath(true);
                 if (valueOrKeypath) {
                     arr += valueOrKeypath;
                 }

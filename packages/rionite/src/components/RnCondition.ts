@@ -27,13 +27,13 @@ const reKeypath = RegExp(`^${keypathPattern}$`);
 	}
 })
 export class RnCondition extends BaseComponent {
-	static EVENT_CHANGE = Symbol('change');
+	static override EVENT_CHANGE = Symbol('change');
 
-	static get bindsInputContent() {
+	static override get bindsInputContent() {
 		return true;
 	}
 
-	$context: Record<string, any>;
+	override $context: Record<string, any>;
 
 	paramIf: string;
 	paramUnless: string;
@@ -48,7 +48,7 @@ export class RnCondition extends BaseComponent {
 
 	_active = false;
 
-	elementConnected() {
+	override elementConnected() {
 		if (this._active) {
 			return;
 		}
@@ -101,7 +101,7 @@ export class RnCondition extends BaseComponent {
 		}
 	}
 
-	elementDisconnected() {
+	override elementDisconnected() {
 		nextTick(() => {
 			if (!this.element[KEY_ELEMENT_CONNECTED]) {
 				this._deactivate();
@@ -115,11 +115,11 @@ export class RnCondition extends BaseComponent {
 		}
 	}
 
-	_connect() {
+	override _connect() {
 		this._isConnected = true;
 		return null;
 	}
-	_disconnect() {
+	override _disconnect() {
 		this._isConnected = false;
 	}
 
@@ -150,12 +150,12 @@ export class RnCondition extends BaseComponent {
 			this._bindings = contentBindingResult[1];
 
 			if (childComponents) {
-				for (let i = childComponents.length; i; ) {
+				for (let i = childComponents.length; i != 0; ) {
 					let childComponent = childComponents[--i];
 
 					if (
 						childComponent.element.firstChild &&
-						(childComponent.constructor as typeof BaseComponent).bindsInputContent
+						childComponent.constructor.bindsInputContent
 					) {
 						childComponent.$inputContent = moveContent(
 							document.createDocumentFragment(),
@@ -174,7 +174,7 @@ export class RnCondition extends BaseComponent {
 			}
 
 			if (backBindings) {
-				for (let i = backBindings.length; i; i -= 3) {
+				for (let i = backBindings.length; i != 0; i -= 3) {
 					(backBindings[i - 3] as BaseComponent).on(
 						'change:' + backBindings[i - 2],
 						backBindings[i - 1] as TListener
@@ -223,7 +223,7 @@ export class RnCondition extends BaseComponent {
 		let childComponents = this._childComponents;
 
 		if (childComponents) {
-			for (let i = childComponents.length; i; ) {
+			for (let i = childComponents.length; i != 0; ) {
 				let childComponent = childComponents[--i];
 
 				if (childComponent instanceof RnCondition || childComponent instanceof RnRepeat) {

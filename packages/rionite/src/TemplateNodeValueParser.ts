@@ -40,7 +40,8 @@ const reWhitespace = /\s/;
 const reName = RegExp(namePattern, 'gy');
 const reKeypath = RegExp(keypathPattern, 'gy');
 const reBoolean = /false|true/gy;
-const reNumber = /(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)/gy;
+const reNumber =
+	/(?:[+-]\s*)?(?:0b[01]+|0[0-7]+|0x[0-9a-fA-F]+|(?:(?:0|[1-9]\d*)(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?|Infinity|NaN)/gy;
 const reRegExpModifiers = /[gimyu]+/gy;
 const reVacuum = /null|undefined|void 0/gy;
 
@@ -91,7 +92,10 @@ export class TemplateNodeValueParser {
 			let result = this.result;
 			let resultLen = result.length;
 
-			if (resultLen && result[resultLen - 1].nodeType == TemplateNodeValueNodeType.TEXT) {
+			if (
+				resultLen != 0 &&
+				result[resultLen - 1].nodeType == TemplateNodeValueNodeType.TEXT
+			) {
 				(result[resultLen - 1] as ITemplateNodeValueText).value += value;
 			} else {
 				result.push({
@@ -127,7 +131,7 @@ export class TemplateNodeValueParser {
 				this._skipWhitespaces() == '|' && (formatter = this._readFormatter());
 
 			) {
-				(formatters || (formatters = [])).push(formatter);
+				(formatters ?? (formatters = [])).push(formatter);
 			}
 
 			if (this._chr == '}') {
@@ -137,8 +141,8 @@ export class TemplateNodeValueParser {
 					nodeType: TemplateNodeValueNodeType.BINDING,
 					prefix,
 					keypath,
-					value: value || null,
-					formatters: formatters || null,
+					value: value ?? null,
+					formatters: formatters ?? null,
 					raw: this.templateNodeValue.slice(pos, this._pos)
 				};
 			}
@@ -209,7 +213,7 @@ export class TemplateNodeValueParser {
 
 		if (this._skipWhitespaces() != ')') {
 			for (;;) {
-				let arg = this._readValue() || this._readKeypath(true);
+				let arg = this._readValue() ?? this._readKeypath(true);
 
 				if (!(arg && (this._skipWhitespaces() == ',' || this._chr == ')'))) {
 					this._pos = pos;
@@ -218,7 +222,7 @@ export class TemplateNodeValueParser {
 					return null;
 				}
 
-				(args || (args = [])).push(arg);
+				(args ?? (args = [])).push(arg);
 
 				if (this._chr == ')') {
 					break;
@@ -231,7 +235,7 @@ export class TemplateNodeValueParser {
 
 		this._next();
 
-		return args || null;
+		return args ?? null;
 	}
 
 	_readValue(): string | null {
@@ -279,7 +283,7 @@ export class TemplateNodeValueParser {
 				this._next();
 				this._skipWhitespaces();
 
-				let valueOrKeypath = this._readValue() || this._readKeypath(true);
+				let valueOrKeypath = this._readValue() ?? this._readKeypath(true);
 
 				if (valueOrKeypath) {
 					if (this._skipWhitespaces() == ',') {
@@ -320,7 +324,7 @@ export class TemplateNodeValueParser {
 				arr += ',';
 				this._next();
 			} else {
-				let valueOrKeypath = this._readValue() || this._readKeypath(true);
+				let valueOrKeypath = this._readValue() ?? this._readKeypath(true);
 
 				if (valueOrKeypath) {
 					arr += valueOrKeypath;

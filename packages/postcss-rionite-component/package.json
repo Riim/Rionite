@@ -19,7 +19,7 @@
   "dependencies": {
     "@riim/escape-regexp": "^1.0.0",
     "@riim/rionite-snake-case-attribute-name": "^0.42.6",
-    "postcss": "^7.0.26",
-    "postcss-nested": "^4.2.1"
+    "postcss": "^8.3.5",
+    "postcss-nested": "^5.0.5"
   }
 }

@@ -24,11 +24,11 @@ export interface IAttributeBindingCellMeta {
 }
 
 export function onAttributeBindingCellChange(evt: IEvent<Cell<any, IAttributeBindingCellMeta>>) {
-	setAttribute(evt.target.meta!.element, evt.target.meta!.attributeName, evt.data.value);
+	setAttribute(evt.target.meta!.element, evt.target.meta!.attributeName, evt.data['value']);
 }
 
 export function onTextNodeBindingCellChange(evt: IEvent<Cell<string, { textNode: Text }>>) {
-	evt.target.meta!.textNode.nodeValue = evt.data.value;
+	evt.target.meta!.textNode.nodeValue = evt.data['value'];
 }
 
 export function bindContent(
@@ -52,7 +52,7 @@ export function bindContent(
 
 				let attrs = (child as Element).attributes;
 
-				for (let i = attrs.length; i; ) {
+				for (let i = attrs.length; i != 0; ) {
 					let attr = attrs[--i];
 					let attrName = attr.name;
 					let targetAttrName: string;
@@ -123,7 +123,7 @@ export function bindContent(
 
 							setAttribute(child as Element, targetAttrName, cell.get());
 
-							(result[1] || (result[1] = [])).push(cell as IBinding);
+							(result[1] ?? (result[1] = [])).push(cell as IBinding);
 						}
 
 						if ($paramConfig && (bindingPrefix === '->' || bindingPrefix === '<->')) {
@@ -131,17 +131,17 @@ export function bindContent(
 								(child as Element).removeAttribute(attrName);
 							}
 
-							let keypath = (attrValueAST[0] as ITemplateNodeValueBinding).keypath!.split(
-								'.'
-							);
+							let keypath = (
+								attrValueAST[0] as ITemplateNodeValueBinding
+							).keypath!.split('.');
 
-							(result[2] || (result[2] = [])).push(
+							(result[2] ?? (result[2] = [])).push(
 								childComponent!,
 								$paramConfig.property,
 								keypath.length == 1
 									? ((propName) =>
 											function (evt: IEvent) {
-												this.ownerComponent[propName] = evt.data.value;
+												this.ownerComponent[propName] = evt.data['value'];
 											})(keypath[0])
 									: ((propName, keypath) => {
 											let getPropertyHolder = compileKeypath(
@@ -155,7 +155,7 @@ export function bindContent(
 												);
 
 												if (propHolder) {
-													propHolder[propName] = evt.data.value;
+													propHolder[propName] = evt.data['value'];
 												}
 											};
 									  })(keypath[keypath.length - 1], keypath.slice(0, -1))
@@ -175,14 +175,13 @@ export function bindContent(
 							(parentComponent[KEY_CHILD_COMPONENTS] = [])
 						).push(childComponent);
 					} else {
-						(result[0] || (result[0] = [])).push(childComponent);
+						(result[0] ?? (result[0] = [])).push(childComponent);
 					}
 				}
 
 				if (
 					child.firstChild &&
-					(!childComponent ||
-						!(childComponent.constructor as typeof BaseComponent).bindsInputContent)
+					(!childComponent || !childComponent.constructor.bindsInputContent)
 				) {
 					bindContent(child as Element, ownerComponent, context, result, childComponent);
 				}
@@ -218,7 +217,7 @@ export function bindContent(
 
 					child.nodeValue = cell.get();
 
-					(result[1] || (result[1] = [])).push(cell as IBinding);
+					(result[1] ?? (result[1] = [])).push(cell as IBinding);
 				}
 
 				break;

@@ -108,13 +108,14 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     _isConnected: boolean;
     get isConnected(): boolean;
     _lifecycleHooks: {
-        elementConnected?: Array<TComponentLifecycleHook>;
-        elementDisconnected?: Array<TComponentLifecycleHook>;
-        ready?: Array<TComponentLifecycleHook>;
-        connected?: Array<TComponentLifecycleHook>;
-        disconnected?: Array<TComponentLifecycleHook>;
-        elementMoved?: Array<TComponentLifecycleHook>;
-    } | null;
+        elementConnected: TComponentLifecycleHook[];
+        elementDisconnected: TComponentLifecycleHook[];
+        ready: TComponentLifecycleHook[];
+        connected: TComponentLifecycleHook[];
+        disconnected: TComponentLifecycleHook[];
+        elementMoved: TComponentLifecycleHook[];
+    };
+    ['constructor']: typeof BaseComponent;
     constructor(el?: HTMLElement);
     onChange(listener: TListener, context?: any): this;
     offChange(listener: TListener, context?: any): this;

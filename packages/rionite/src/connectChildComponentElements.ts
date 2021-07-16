@@ -9,9 +9,8 @@ export function connectChildComponentElements(childComponents: Array<BaseCompone
 
 		callLifecycle(
 			[
-				...(component.constructor as typeof BaseComponent)._lifecycleHooks.elementConnected,
-				...((component._lifecycleHooks && component._lifecycleHooks.elementConnected) ||
-					[]),
+				...component.constructor._lifecycleHooks.elementConnected,
+				...component._lifecycleHooks.elementConnected,
 				component.elementConnected
 			],
 			component

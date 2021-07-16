@@ -1,9 +1,9 @@
 import { NodeType, Template } from '../Template2';
 
-[
+for (let [name, is] of [
 	['cond', 'rn-condition'],
 	['repeat', 'rn-repeat']
-].forEach(([name, is]) => {
+]) {
 	Template.elementTransformers[name] = (el) => [
 		{
 			nodeType: NodeType.ELEMENT,
@@ -20,9 +20,9 @@ import { NodeType, Template } from '../Template2';
 			contentTemplateIndex: null
 		}
 	];
-});
+}
 
-['if', 'unless'].forEach((name) => {
+for (let name of ['if', 'unless']) {
 	Template.elementTransformers[name] = (el) => [
 		{
 			nodeType: NodeType.ELEMENT,
@@ -38,7 +38,7 @@ import { NodeType, Template } from '../Template2';
 						isTransformer: false,
 						rawNames: null,
 						name,
-						value: el.attributes!.list![0].rawNames?.[0] || el.attributes!.list![0].name
+						value: el.attributes!.list![0].rawNames?.[0] ?? el.attributes!.list![0].name
 					}
 				]
 			},
@@ -49,13 +49,13 @@ import { NodeType, Template } from '../Template2';
 			contentTemplateIndex: null
 		}
 	];
-});
+}
 
-[
+for (let [name, is] of [
 	['if', 'rn-condition'],
 	['unless', 'rn-condition'],
 	['for', 'rn-repeat']
-].forEach(([name, is]) => {
+]) {
 	Template.attributeTransformers[name] = (el, attr) => ({
 		nodeType: NodeType.ELEMENT,
 		names: null,
@@ -80,4 +80,4 @@ import { NodeType, Template } from '../Template2';
 		content: [el],
 		contentTemplateIndex: null
 	});
-});
+}

@@ -49,7 +49,7 @@ export function cloneNode<T extends Node>(node: T): T {
 				let attr = attrs.item(i)!;
 
 				if (!is || attr.name != 'is') {
-					(copy as Element).setAttributeNS(attr.namespaceURI!, attr.name, attr.value);
+					(copy as Element).setAttributeNS(attr.namespaceURI, attr.name, attr.value);
 				}
 			}
 

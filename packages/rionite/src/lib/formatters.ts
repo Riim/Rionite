@@ -68,11 +68,11 @@ export const formatters: Record<string, Function> = {
 	},
 
 	startsWith(str: string | null | undefined, searchString: string, pos?: number): boolean {
-		return (str || '').startsWith(searchString, pos);
+		return (str ?? '').startsWith(searchString, pos);
 	},
 
 	endsWith(str: string | null | undefined, searchString: string, pos?: number): boolean {
-		return (str || '').endsWith(searchString, pos);
+		return (str ?? '').endsWith(searchString, pos);
 	},
 
 	padStart(
@@ -112,7 +112,7 @@ export const formatters: Record<string, Function> = {
 	},
 
 	hasOwn(target: Object | null | undefined, propName: string | number): boolean {
-		return !!target && target.hasOwnProperty(propName);
+		return !!target && Object.prototype.hasOwnProperty.call(target, propName);
 	},
 
 	get(target: { get(key: any): any } | null | undefined, key: any): any {

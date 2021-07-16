@@ -10,13 +10,12 @@ export function compileBinding(
 	cacheKey: string
 ): (this: object) => any {
 	if (!cache.has(cacheKey)) {
-		let inner: (
-			formatters: Record<string, Function>,
-			KEY_COMPONENT_SELF: symbol
-		) => any = Function(
-			'formatters, KEY_COMPONENT_SELF',
-			`var tmp; return ${bindingToJSExpression(binding[0] as ITemplateNodeValueBinding)};`
-		) as any;
+		let inner: (formatters: Record<string, Function>, KEY_COMPONENT_SELF: symbol) => any =
+			// eslint-disable-next-line @typescript-eslint/no-implied-eval
+			Function(
+				'formatters, KEY_COMPONENT_SELF',
+				`var tmp; return ${bindingToJSExpression(binding[0] as ITemplateNodeValueBinding)};`
+			) as any;
 
 		cache.set(cacheKey, function () {
 			return inner.call(this, formatters, KEY_COMPONENT_SELF);

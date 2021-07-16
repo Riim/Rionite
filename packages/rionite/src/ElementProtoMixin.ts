@@ -22,7 +22,10 @@ export const ElementProtoMixin = {
 	$component: null,
 
 	get rioniteComponent(): BaseComponent {
-		return this.$component || new this.constructor[KEY_RIONITE_COMPONENT_CONSTRUCTOR](this);
+		return (
+			(this as typeof ElementProtoMixin).$component ??
+			new this.constructor[KEY_RIONITE_COMPONENT_CONSTRUCTOR](this)
+		);
 	},
 
 	[KEY_ELEMENT_CONNECTED]: false,
@@ -43,18 +46,12 @@ export const ElementProtoMixin = {
 
 					callLifecycle(
 						[
-							...(component.constructor as typeof BaseComponent)._lifecycleHooks
-								.elementConnected,
-							...((component._lifecycleHooks &&
-								component._lifecycleHooks.elementConnected) ||
-								[]),
+							...component.constructor._lifecycleHooks.elementConnected,
+							...component._lifecycleHooks.elementConnected,
 							component.elementConnected,
 
-							...(component.constructor as typeof BaseComponent)._lifecycleHooks
-								.elementMoved,
-							...((component._lifecycleHooks &&
-								component._lifecycleHooks.elementMoved) ||
-								[]),
+							...component.constructor._lifecycleHooks.elementMoved,
+							...component._lifecycleHooks.elementMoved,
 							component.elementMoved
 						],
 						component
@@ -62,11 +59,8 @@ export const ElementProtoMixin = {
 				} else {
 					callLifecycle(
 						[
-							...(component.constructor as typeof BaseComponent)._lifecycleHooks
-								.elementConnected,
-							...((component._lifecycleHooks &&
-								component._lifecycleHooks.elementConnected) ||
-								[]),
+							...component.constructor._lifecycleHooks.elementConnected,
+							...component._lifecycleHooks.elementConnected,
 							component.elementConnected
 						],
 						component
@@ -79,11 +73,8 @@ export const ElementProtoMixin = {
 
 				callLifecycle(
 					[
-						...(component.constructor as typeof BaseComponent)._lifecycleHooks
-							.elementConnected,
-						...((component._lifecycleHooks &&
-							component._lifecycleHooks.elementConnected) ||
-							[]),
+						...component.constructor._lifecycleHooks.elementConnected,
+						...component._lifecycleHooks.elementConnected,
 						component.elementConnected
 					],
 					component
@@ -104,10 +95,8 @@ export const ElementProtoMixin = {
 
 			callLifecycle(
 				[
-					...(component.constructor as typeof BaseComponent)._lifecycleHooks
-						.elementConnected,
-					...((component._lifecycleHooks && component._lifecycleHooks.elementConnected) ||
-						[]),
+					...component.constructor._lifecycleHooks.elementConnected,
+					...component._lifecycleHooks.elementConnected,
 					component.elementConnected
 				],
 				component
@@ -132,11 +121,8 @@ export const ElementProtoMixin = {
 
 				callLifecycle(
 					[
-						...(component.constructor as typeof BaseComponent)._lifecycleHooks
-							.elementConnected,
-						...((component._lifecycleHooks &&
-							component._lifecycleHooks.elementConnected) ||
-							[]),
+						...component.constructor._lifecycleHooks.elementConnected,
+						...component._lifecycleHooks.elementConnected,
 						component.elementConnected
 					],
 					component
@@ -161,11 +147,8 @@ export const ElementProtoMixin = {
 
 			callLifecycle(
 				[
-					...(component.constructor as typeof BaseComponent)._lifecycleHooks
-						.elementDisconnected,
-					...((component._lifecycleHooks &&
-						component._lifecycleHooks.elementDisconnected) ||
-						[]),
+					...component.constructor._lifecycleHooks.elementDisconnected,
+					...component._lifecycleHooks.elementDisconnected,
 					component.elementDisconnected
 				],
 				component
@@ -188,9 +171,7 @@ export const ElementProtoMixin = {
 		let component = this.$component;
 
 		if (component && component._isReady) {
-			let $paramConfig = (component.constructor as typeof BaseComponent)[
-				KEY_PARAMS_CONFIG
-			]!.get(name)!;
+			let $paramConfig = component.constructor[KEY_PARAMS_CONFIG]!.get(name)!;
 
 			if ($paramConfig.readonly) {
 				if (observedAttributesFeature) {
@@ -198,9 +179,9 @@ export const ElementProtoMixin = {
 				}
 			} else {
 				let valueCell = (
-					component[KEY_VALUE_CELLS] || (component[KEY_VALUE_CELLS] = new Map())
+					component[KEY_VALUE_CELLS] ?? (component[KEY_VALUE_CELLS] = new Map())
 				).get($paramConfig.property);
-				let value = $paramConfig.valueСonverters!.toData(
+				let value = $paramConfig.valueСonverters.toData(
 					rawValue,
 					$paramConfig.default,
 					this

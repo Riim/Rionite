@@ -2,18 +2,22 @@
 	"compilerOptions": {
 		"declaration": true,
 		"experimentalDecorators": true,
-		"lib": ["ES2017", "DOM"],
+		"lib": ["ES2019", "DOM"],
 		"module": "CommonJS",
 		"moduleResolution": "Node",
 		"newLine": "lf",
 		"noImplicitAny": true,
+		"noImplicitOverride": true,
 		"noImplicitReturns": true,
+		"noPropertyAccessFromIndexSignature": true,
 		"noUnusedLocals": true,
 		"outDir": "dist",
 		"preserveConstEnums": true,
+		"resolveJsonModule": true,
 		"strictNullChecks": true,
 		"suppressImplicitAnyIndexErrors": true,
-		"target": "ES2017"
+		"target": "ES2017",
+		"useDefineForClassFields": false
 	},
 	"files": [
 		"src/index.ts"

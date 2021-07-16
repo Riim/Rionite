@@ -16,7 +16,7 @@ export function keypathToJSExpression(
 			let index = keyCount - 2;
 			let fragments = Array(index);
 
-			while (index) {
+			while (index != 0) {
 				fragments[--index] = ` && (tmp = tmp['${keys[index + 1]}'])`;
 			}
 

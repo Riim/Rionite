@@ -87,10 +87,10 @@ const escapee = new Map([
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
 
-const reTagName = /[a-zA-Z][\-\w]*/gy;
-const reElementName = /[a-zA-Z][\-\w]*/gy;
+const reTagName = /[a-zA-Z][-\w]*/gy;
+const reElementName = /[a-zA-Z][-\w]*/gy;
 const reAttributeName = /[^\s'">/=,)]+/gy;
-const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
+const reSuperCall = /super(?:\.([a-zA-Z][-\w]*))?!/gy;
 
 const reTrimStartLine = /^[\x20\t]+/gm;
 const reTrimEndLine = /[\x20\t]+$/gm;
@@ -252,7 +252,7 @@ export class TemplateParser {
 			elNames,
 			override,
 			isTransformer ? 1 : undefined,
-			tagName || undefined,
+			tagName ?? undefined,
 			attrs,
 			content
 		] as TElement);
@@ -295,7 +295,7 @@ export class TemplateParser {
 					let chr = this._skipWhitespaces();
 
 					if (chr == "'" || chr == '"' || chr == '`') {
-						(list || (list = [])).push([
+						(list ?? (list = [])).push([
 							isTransformer ? 1 : undefined,
 							name,
 							this._readString()
@@ -313,7 +313,7 @@ export class TemplateParser {
 							}
 
 							if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
-								(list || (list = [])).push([
+								(list ?? (list = [])).push([
 									isTransformer ? 1 : undefined,
 									name,
 									value.trim()
@@ -331,7 +331,7 @@ export class TemplateParser {
 						}
 					}
 				} else {
-					(list || (list = [])).push([isTransformer ? 1 : undefined, name, '']);
+					(list ?? (list = [])).push([isTransformer ? 1 : undefined, name, '']);
 				}
 			}
 
@@ -353,7 +353,7 @@ export class TemplateParser {
 			}
 		}
 
-		return [superCall ? superCall[1] || 1 : undefined, list];
+		return [superCall ? superCall[1] ?? 1 : undefined, list];
 	}
 
 	_readSuperCall(): TSuperCall | null {

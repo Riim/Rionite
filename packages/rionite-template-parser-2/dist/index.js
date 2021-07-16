@@ -20,10 +20,10 @@ const escapee = new Map([
 ]);
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
-const reTagName = /[a-zA-Z][\-\w]*/gy;
-const reElementName = /[a-zA-Z][\-\w]*/gy;
+const reTagName = /[a-zA-Z][-\w]*/gy;
+const reElementName = /[a-zA-Z][-\w]*/gy;
 const reAttributeName = /[^\s'">/=,)]+/gy;
-const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
+const reSuperCall = /super(?:\.([a-zA-Z][-\w]*))?!/gy;
 const reTrimStartLine = /^[\x20\t]+/gm;
 const reTrimEndLine = /[\x20\t]+$/gm;
 function normalizeMultilineText(text) {
@@ -139,12 +139,13 @@ class TemplateParser {
             elNames,
             override,
             isTransformer ? 1 : undefined,
-            tagName || undefined,
+            tagName !== null && tagName !== void 0 ? tagName : undefined,
             attrs,
             content
         ]);
     }
     _readAttributes() {
+        var _a;
         this._next( /* '(' */);
         if (this._skipWhitespacesAndComments() == ')') {
             this._next();
@@ -172,7 +173,7 @@ class TemplateParser {
                     this._next();
                     let chr = this._skipWhitespaces();
                     if (chr == "'" || chr == '"' || chr == '`') {
-                        (list || (list = [])).push([
+                        (list !== null && list !== void 0 ? list : (list = [])).push([
                             isTransformer ? 1 : undefined,
                             name,
                             this._readString()
@@ -186,7 +187,7 @@ class TemplateParser {
                                 this._throwError('Unexpected end of template. Expected "," or ")" to finalize attribute value.');
                             }
                             if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
-                                (list || (list = [])).push([
+                                (list !== null && list !== void 0 ? list : (list = [])).push([
                                     isTransformer ? 1 : undefined,
                                     name,
                                     value.trim()
@@ -202,7 +203,7 @@ class TemplateParser {
                     }
                 }
                 else {
-                    (list || (list = [])).push([isTransformer ? 1 : undefined, name, '']);
+                    (list !== null && list !== void 0 ? list : (list = [])).push([isTransformer ? 1 : undefined, name, '']);
                 }
             }
             switch (this._chr) {
@@ -220,7 +221,7 @@ class TemplateParser {
                 }
             }
         }
-        return [superCall ? superCall[1] || 1 : undefined, list];
+        return [superCall ? (_a = superCall[1]) !== null && _a !== void 0 ? _a : 1 : undefined, list];
     }
     _readSuperCall() {
         reSuperCall.lastIndex = this._pos;

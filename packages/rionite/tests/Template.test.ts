@@ -16,7 +16,7 @@ Template.prototype.renderToString = function (): string {
 	return fragmentToString(this.render());
 };
 
-Template.elementTransformers.Slot = (el) => {
+Template.elementTransformers['Slot'] = (el) => {
 	return [
 		{
 			nodeType: NodeType.ELEMENT,
@@ -632,7 +632,7 @@ describe('Template#render', () => {
 	});
 
 	test('transformer', () => {
-		Template.elementTransformers.test = (_el) => {
+		Template.elementTransformers['test'] = (_el) => {
 			return [
 				{ nodeType: NodeType.TEXT, value: '1' },
 				{ nodeType: NodeType.TEXT, value: '2' },
@@ -653,7 +653,7 @@ describe('Template#render', () => {
 	});
 
 	test('transformer (2)', () => {
-		Template.elementTransformers.test = (el) => {
+		Template.elementTransformers['test'] = (el) => {
 			return [
 				{ nodeType: NodeType.TEXT, value: '[' },
 				...el.content!,
@@ -676,7 +676,7 @@ describe('Template#render', () => {
 	});
 
 	test('доопределение атрибутов transformer-а', () => {
-		Template.elementTransformers.test = (el) => {
+		Template.elementTransformers['test'] = (el) => {
 			return [
 				{
 					nodeType: NodeType.ELEMENT,
@@ -715,7 +715,7 @@ describe('Template#render', () => {
 	});
 
 	test('доопределение атрибутов и содержимого transformer-а', () => {
-		Template.elementTransformers.test = (el) => {
+		Template.elementTransformers['test'] = (el) => {
 			return [
 				{
 					nodeType: NodeType.ELEMENT,

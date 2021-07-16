@@ -23,10 +23,10 @@ const escapee = new Map([
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
 const reWhitespaces = /\s+/gy;
-const reTagName = /[a-zA-Z][\-\w]*/gy;
-const reElementName = /[a-zA-Z][\-\w]*/gy;
+const reTagName = /[a-zA-Z][-\w]*/gy;
+const reElementName = /[a-zA-Z][-\w]*/gy;
 const reAttributeName = /[^\s'">/=,)]+/gy;
-const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
+const reSuperCall = /super(?:\.([a-zA-Z][-\w]*))?!/gy;
 const reTrimStartLine = /^[\x20\t]+/gm;
 const reTrimEndLine = /[\x20\t]+$/gm;
 function normalizeMultilineText(text) {
@@ -153,7 +153,7 @@ class TemplateParser {
                 this._throwError('Expected element name', pos);
             }
         }
-        if (!tagName && !(elNames && elNames[0])) {
+        if (!tagName && !(elNames === null || elNames === void 0 ? void 0 : elNames[0])) {
             this._throwError('Expected element', pos);
         }
         let attrs;
@@ -167,12 +167,12 @@ class TemplateParser {
         }
         targetContent.push({
             nodeType: NodeType.ELEMENT,
-            names: elNames || null,
-            override: override || false,
+            names: elNames !== null && elNames !== void 0 ? elNames : null,
+            override: override !== null && override !== void 0 ? override : false,
             isTransformer,
             tagName,
-            attributes: attrs || null,
-            content: content || null,
+            attributes: attrs !== null && attrs !== void 0 ? attrs : null,
+            content: content !== null && content !== void 0 ? content : null,
             pos,
             line
         });
@@ -272,7 +272,7 @@ class TemplateParser {
             }
         }
         return {
-            superCall: superCall || null,
+            superCall: superCall !== null && superCall !== void 0 ? superCall : null,
             list
         };
     }
@@ -366,6 +366,7 @@ class TemplateParser {
                         }
                         case '': {
                             this._throwError('Expected "*/" to close multiline comment', pos + 2);
+                            break;
                         }
                         default: {
                             value += this._chr;

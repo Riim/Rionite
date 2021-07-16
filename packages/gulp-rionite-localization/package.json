@@ -21,9 +21,9 @@
     "@riim/rionite-template-node-value-parser": "^0.42.6",
     "@riim/rionite-template-parser": "^0.42.11",
     "@riim/rionite-template-walk": "^0.42.11",
-    "gettext-parser": "^4.0.2",
-    "nunjucks": "^3.2.0",
-    "through2": "^3.0.1",
-    "vinyl": "^2.2.0"
+    "gettext-parser": "^4.0.4",
+    "nunjucks": "^3.2.3",
+    "through2": "^4.0.2",
+    "vinyl": "^2.2.1"
   }
 }

@@ -7,9 +7,9 @@ const COMPONENT = 'component';
 const ELEMENT = 'el';
 const MODIFIER = 'mod';
 
-const reComponentParams = /^\s*(?:[a-z][\-_0-9a-z]*\s*(?::\s*|$))+/i;
-const reElementParams = /^\s*(?:[a-z][\-_0-9a-z]*\s*(?:,\s*|$))+/i;
-const reModifierParams = /^\s*(?:(?:not\s+)?[a-z][\-_0-9a-z]*(?:=[\-_0-9a-z]*)?\s*(?:,\s*|$))+/i;
+const reComponentParams = /^\s*(?:[a-z][-_0-9a-z]*\s*(?::\s*|$))+/i;
+const reElementParams = /^\s*(?:[a-z][-_0-9a-z]*\s*(?:,\s*|$))+/i;
+const reModifierParams = /^\s*(?:(?:not\s+)?[a-z][-_0-9a-z]*(?:=[-_0-9a-z]*)?\s*(?:,\s*|$))+/i;
 const reModifierNotModePrefix = /^not\s/i;
 
 function createWalkAtRulesCallback(_topAtRuleName, componentName) {

@@ -2,17 +2,21 @@
 	"compilerOptions": {
 		"declaration": true,
 		"experimentalDecorators": true,
-		"lib": ["es2017", "dom"],
-		"module": "es2015",
-		"moduleResolution": "node",
+		"lib": ["ES2019", "DOM"],
+		"module": "ESNext",
+		"moduleResolution": "Node",
 		"newLine": "lf",
 		"noImplicitAny": true,
+		"noImplicitOverride": true,
 		"noImplicitReturns": true,
+		"noPropertyAccessFromIndexSignature": true,
 		"noUnusedLocals": true,
 		"outDir": "dist",
 		"preserveConstEnums": true,
+		"resolveJsonModule": true,
 		"strictNullChecks": true,
 		"suppressImplicitAnyIndexErrors": true,
-		"target": "es2017"
+		"target": "ES2017",
+		"useDefineForClassFields": false
 	}
 }

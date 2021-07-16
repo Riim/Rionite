@@ -19,10 +19,10 @@ export const ComponentParams = {
 			$specifiedParams = component.$specifiedParams = new Set();
 		}
 
-		let paramsConfig = (component.constructor as typeof BaseComponent).params;
+		let paramsConfig = component.constructor.params;
 
 		if (paramsConfig) {
-			let $paramsConfig = (component.constructor as typeof BaseComponent)[KEY_PARAMS_CONFIG];
+			let $paramsConfig = component.constructor[KEY_PARAMS_CONFIG];
 
 			for (let name in paramsConfig) {
 				if (paramsConfig[name] !== null && paramsConfig[name] !== Object.prototype[name]) {

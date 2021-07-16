@@ -75,10 +75,10 @@ export const componentParamValue–°onverters = new Map<any, IComponentParamValue–
 					return null;
 				}
 
-				if (typeof defaultValue == 'object' && (defaultValue as any).clone) {
-					return (defaultValue as any).clone.length
-						? (defaultValue as any).clone(true)
-						: (defaultValue as any).clone();
+				if (typeof defaultValue == 'object' && defaultValue.clone) {
+					return defaultValue.clone.length != 0
+						? defaultValue.clone(true)
+						: defaultValue.clone();
 				}
 
 				return defaultValue;
@@ -93,6 +93,7 @@ export const componentParamValue–°onverters = new Map<any, IComponentParamValue–
 		{
 			toData: (rawValue: string | null, defaultValue: any): any => {
 				if (rawValue !== null) {
+					// eslint-disable-next-line @typescript-eslint/no-implied-eval
 					return Function(`return ${unescapeHTML(rawValue)};`)();
 				}
 
@@ -100,14 +101,10 @@ export const componentParamValue–°onverters = new Map<any, IComponentParamValue–
 					return null;
 				}
 
-				if (
-					defaultValue &&
-					typeof defaultValue == 'object' &&
-					(defaultValue as any).clone
-				) {
-					return (defaultValue as any).clone.length
-						? (defaultValue as any).clone(true)
-						: (defaultValue as any).clone();
+				if (defaultValue && typeof defaultValue == 'object' && defaultValue.clone) {
+					return defaultValue.clone.length != 0
+						? defaultValue.clone(true)
+						: defaultValue.clone();
 				}
 
 				return defaultValue;

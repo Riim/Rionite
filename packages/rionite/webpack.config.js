@@ -1,11 +1,18 @@
 const path = require('path');
 const webpack = require('webpack');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 module.exports = (env = {}) => {
 	let plugins = [
 		new webpack.DefinePlugin({
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
 		}),
+
+		new ESLintPlugin({
+			extensions: ['ts', 'js']
+			// , fix: true
+		}),
+
 		new webpack.optimize.ModuleConcatenationPlugin()
 	];
 
@@ -27,8 +34,8 @@ module.exports = (env = {}) => {
 			rules: [
 				{
 					test: /\.ts$/,
-					exclude: /(?:node_modules|bower_components)/,
-					loader: 'awesome-typescript-loader'
+					exclude: /node_modules/,
+					loader: 'ts-loader'
 				}
 			]
 		},
@@ -56,13 +63,9 @@ module.exports = (env = {}) => {
 		plugins,
 
 		node: {
-			console: false,
 			global: false,
-			process: false,
 			__filename: false,
-			__dirname: false,
-			Buffer: false,
-			setImmediate: false
+			__dirname: false
 		}
 	};
 };

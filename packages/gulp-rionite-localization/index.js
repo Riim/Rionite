@@ -91,7 +91,7 @@ module.exports = (options) => {
 					let lineIndex2 /* : number | undefined */;
 					let prevAfterLine = false;
 
-					for (let i = lines.length; i; ) {
+					for (let i = lines.length; i != 0; ) {
 						let index;
 
 						if ((index = lines[--i].search(reComment)) != -1) {
@@ -122,7 +122,7 @@ module.exports = (options) => {
 						let nodeExpr = node.expression;
 
 						if (
-							(nodeExpr.escapedText == 't' && node.arguments.length) ||
+							(nodeExpr.escapedText == 't' && node.arguments.length != 0) ||
 							(nodeExpr.escapedText == 'pt' && node.arguments.length >= 2)
 						) {
 							let firstArg = node.arguments[0];
@@ -340,8 +340,8 @@ module.exports = (options) => {
 					charset: 'utf-8',
 
 					headers: {
-						'project-id-version': 'PREX',
-						'language-team': 'https://prex.app/',
+						'project-id-version': '',
+						'language-team': '',
 						'content-type': 'text/plain; charset=utf-8',
 						'pot-creation-date': new Date()
 							.toISOString()

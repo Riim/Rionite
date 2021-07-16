@@ -79,15 +79,15 @@ const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
 
 const reWhitespaces = /\s+/gy;
-const reTagName = /[a-zA-Z][\-\w]*/gy;
-const reElementName = /[a-zA-Z][\-\w]*/gy;
+const reTagName = /[a-zA-Z][-\w]*/gy;
+const reElementName = /[a-zA-Z][-\w]*/gy;
 const reAttributeName = /[^\s'">/=,)]+/gy;
-const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
+const reSuperCall = /super(?:\.([a-zA-Z][-\w]*))?!/gy;
 
 const reTrimStartLine = /^[\x20\t]+/gm;
 const reTrimEndLine = /[\x20\t]+$/gm;
 
-function normalizeMultilineText(text: string): string {
+function normalizeMultilineText(text: string) {
 	return text.replace(reTrimStartLine, '').replace(reTrimEndLine, '');
 }
 
@@ -255,7 +255,7 @@ export class TemplateParser {
 			}
 		}
 
-		if (!tagName && !(elNames && elNames[0])) {
+		if (!tagName && !(elNames?.[0])) {
 			this._throwError('Expected element', pos);
 		}
 
@@ -274,12 +274,12 @@ export class TemplateParser {
 
 		targetContent.push({
 			nodeType: NodeType.ELEMENT,
-			names: elNames || null,
-			override: override || false,
+			names: elNames ?? null,
+			override: override ?? false,
 			isTransformer,
 			tagName,
-			attributes: attrs || null,
-			content: content || null,
+			attributes: attrs ?? null,
+			content: content ?? null,
 			pos,
 			line
 		} as IElement);
@@ -400,7 +400,7 @@ export class TemplateParser {
 		}
 
 		return {
-			superCall: superCall || null,
+			superCall: superCall ?? null,
 			list
 		};
 	}
@@ -521,6 +521,7 @@ export class TemplateParser {
 						}
 						case '': {
 							this._throwError('Expected "*/" to close multiline comment', pos + 2);
+							break;
 						}
 						default: {
 							value += this._chr;

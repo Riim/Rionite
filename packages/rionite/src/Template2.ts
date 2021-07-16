@@ -134,8 +134,8 @@ export class Template {
 			blockName?: string | Array<string>;
 		}
 	) {
-		let embedded = (this._embedded = !!(options && options._embedded));
-		let parent = (this.parent = (options && options.parent) || null);
+		let embedded = (this._embedded = !!options?._embedded);
+		let parent = (this.parent = options?.parent ?? null);
 
 		if (typeof template == 'string') {
 			template = new TemplateParser(template).parse();
@@ -245,7 +245,7 @@ export class Template {
 			this.template!,
 			false,
 			null,
-			component && (component.constructor as typeof BaseComponent)
+			component?.constructor
 		);
 
 		return block;
@@ -286,7 +286,7 @@ export class Template {
 					break;
 				}
 				case ParserNodeType.TEXT: {
-					(targetContent || (targetContent = [])).push({
+					(targetContent ?? (targetContent = [])).push({
 						nodeType: NodeType.TEXT,
 						value: node[1]
 					} as ITextNode);
@@ -294,14 +294,14 @@ export class Template {
 					break;
 				}
 				case ParserNodeType.SUPER_CALL: {
-					(targetContent || (targetContent = [])).push(
+					(targetContent ?? (targetContent = [])).push(
 						this._readSuperCall(node as TParserSuperCall, superElName)
 					);
 
 					break;
 				}
 				case ParserNodeType.DEBUGGER_CALL: {
-					(targetContent || (targetContent = [])).push({
+					(targetContent ?? (targetContent = [])).push({
 						nodeType: NodeType.DEBUGGER_CALL
 					} as IDebuggerCall);
 
@@ -323,7 +323,7 @@ export class Template {
 		let elNames = elNode[1] as Array<string | null> | undefined;
 		let override = elNode[2] == 1;
 		let isTransformer = !!elNode[3];
-		let tagName = elNode[4] || null;
+		let tagName = elNode[4] ?? null;
 
 		if (elNames && !elNames[0]) {
 			elNames[0] = null;
@@ -340,11 +340,13 @@ export class Template {
 				if (tagName.toLowerCase() == 'svg') {
 					namespaceSVG = true;
 					tagName = 'svg';
-				} else if (elName) {
-					let superEl: IElement | undefined;
+				} else {
+					if (elName) {
+						let superEl: IElement | undefined;
 
-					if (this.parent && (superEl = this.parent._elements[elName])) {
-						namespaceSVG = superEl.namespaceSVG;
+						if (this.parent && (superEl = this.parent._elements[elName])) {
+							namespaceSVG = superEl.namespaceSVG;
+						}
 					}
 				}
 			}
@@ -383,7 +385,7 @@ export class Template {
 			attrs = this._readAttributes(
 				elNode[5],
 				namespaceSVG,
-				elName || superElName,
+				elName ?? superElName,
 				elComponentCtor && elComponentCtor[KEY_PARAMS_CONFIG],
 				$specifiedParams
 			);
@@ -406,18 +408,18 @@ export class Template {
 
 					for (let type in elEvents) {
 						if (elEvents[type] !== Object.prototype[type]) {
-							(events || (events = new Map())).set(type, name);
+							(events ?? (events = new Map())).set(type, name);
 						}
 					}
 
 					while (elEvents) {
 						for (let type of Object.getOwnPropertySymbols(elEvents)) {
 							if (!events || !events.has(type)) {
-								(events || (events = new Map())).set(type, name);
+								(events ?? (events = new Map())).set(type, name);
 							}
 						}
 
-						elEvents = elEvents.__proto__ as any;
+						elEvents = (elEvents as any).__proto__;
 
 						if (elEvents == Object.prototype) {
 							break;
@@ -428,7 +430,7 @@ export class Template {
 
 					for (let type in elDOMEvents) {
 						if (elDOMEvents[type] !== Object.prototype[type]) {
-							(domEvents || (domEvents = new Map())).set(type, name);
+							(domEvents ?? (domEvents = new Map())).set(type, name);
 						}
 					}
 				}
@@ -442,23 +444,23 @@ export class Template {
 				null,
 				elNode[6],
 				namespaceSVG,
-				elName || superElName,
+				elName ?? superElName,
 				componentCtor
 			);
 		}
 
 		let el: IElement = {
 			nodeType: NodeType.ELEMENT,
-			names: elNames || null,
+			names: elNames ?? null,
 			isTransformer,
 			namespaceSVG,
 			tagName,
-			is: (attrs && attrs.attributeIsValue) || null,
-			attributes: attrs || null,
-			$specifiedParams: $specifiedParams || null,
-			events: events || null,
-			domEvents: domEvents || null,
-			content: content || null,
+			is: attrs?.attributeIsValue ?? null,
+			attributes: attrs ?? null,
+			$specifiedParams: $specifiedParams ?? null,
+			events: events ?? null,
+			domEvents: domEvents ?? null,
+			content: content ?? null,
 			contentTemplateIndex: null
 		};
 
@@ -471,7 +473,7 @@ export class Template {
 
 			content = transformer(el);
 
-			if (content && content.length) {
+			if (content && content.length != 0) {
 				el.content = content;
 
 				for (let i = 0, l = content.length; i < l; i++) {
@@ -498,7 +500,7 @@ export class Template {
 								content: (node as IElement).content,
 								contentTemplateIndex:
 									(
-										this._embeddedTemplates || (this._embeddedTemplates = [])
+										this._embeddedTemplates ?? (this._embeddedTemplates = [])
 									).push(
 										new Template(
 											{
@@ -555,7 +557,7 @@ export class Template {
 
 						el = transformer(el, attr);
 
-						for (let i = 0, l = (el.content || []).length; i < l; i++) {
+						for (let i = 0, l = (el.content ?? []).length; i < l; i++) {
 							let node = el.content![i];
 
 							if (node.nodeType == NodeType.ELEMENT) {
@@ -579,7 +581,7 @@ export class Template {
 										content: (node as IElement).content,
 										contentTemplateIndex:
 											(
-												this._embeddedTemplates ||
+												this._embeddedTemplates ??
 												(this._embeddedTemplates = [])
 											).push(
 												new Template(
@@ -629,7 +631,7 @@ export class Template {
 
 			if (el.content && (el.tagName == 'template' || el.tagName == 'rn-slot')) {
 				el.contentTemplateIndex =
-					(this._embeddedTemplates || (this._embeddedTemplates = [])).push(
+					(this._embeddedTemplates ?? (this._embeddedTemplates = [])).push(
 						new Template(
 							{
 								nodeType: NodeType.BLOCK,
@@ -647,12 +649,12 @@ export class Template {
 
 		if (elName) {
 			this._setElement(elName, override, el);
-			(targetContent || (targetContent = [])).push({
+			(targetContent ?? (targetContent = [])).push({
 				nodeType: NodeType.ELEMENT_CALL,
 				name: elName
 			} as IElementCall);
 		} else {
-			(targetContent || (targetContent = [])).push(el);
+			(targetContent ?? (targetContent = [])).push(el);
 		}
 
 		return targetContent;
@@ -730,7 +732,7 @@ export class Template {
 							value
 						};
 					} else {
-						(list || (list = [])).push({
+						(list ?? (list = [])).push({
 							isTransformer,
 							rawNames: rawName == name ? null : [rawName],
 							name,
@@ -748,8 +750,8 @@ export class Template {
 		return attrIsValue == null && !list
 			? null
 			: {
-					attributeIsValue: attrIsValue || null,
-					list: list || null
+					attributeIsValue: attrIsValue ?? null,
+					list: list ?? null
 			  };
 	}
 
@@ -759,8 +761,8 @@ export class Template {
 		}
 
 		let elName: string =
-			superCallNode[1] ||
-			defaultElName ||
+			superCallNode[1] ??
+			defaultElName ??
 			(this._throwError('SuperCall.elementName is required', superCallNode) as any);
 		let el =
 			(elName.charAt(0) == '@' && this.parent!._elements[elName.slice(1)]) ||
@@ -821,7 +823,7 @@ export class Template {
 
 		return renderContent(
 			document.createDocumentFragment(),
-			block.content || block.elements['@root'].content,
+			block.content ?? block.elements['@root'].content,
 			this,
 			ownerComponent,
 			context,
@@ -895,13 +897,12 @@ function renderContent<T extends Node = Element>(
 						let className: string | null | undefined;
 
 						if (nodeComponent) {
-							className = (nodeComponent.constructor as typeof BaseComponent)
-								._blockNamesString;
+							className = nodeComponent.constructor._blockNamesString;
 						}
 
 						if ((node as IElement).names) {
 							className =
-								(className || '') +
+								(className ?? '') +
 								renderElementClasses(
 									template._elementNamesTemplate,
 									(node as IElement).names!
@@ -930,7 +931,7 @@ function renderContent<T extends Node = Element>(
 								let attrValue: any = attr.value;
 
 								if (attrName == 'class') {
-									attrValue = (className || '') + attrValue;
+									attrValue = (className ?? '') + attrValue;
 									className = null;
 								}
 
@@ -991,7 +992,7 @@ function renderContent<T extends Node = Element>(
 
 													attrValue = cell.get();
 
-													(result[1] || (result[1] = [])).push(
+													(result[1] ?? (result[1] = [])).push(
 														cell as IBinding
 													);
 												}
@@ -1011,11 +1012,11 @@ function renderContent<T extends Node = Element>(
 														attrValue = null;
 													}
 
-													let keypath = (attrValueAST[0] as ITemplateNodeValueBinding).keypath!.split(
-														'.'
-													);
+													let keypath = (
+														attrValueAST[0] as ITemplateNodeValueBinding
+													).keypath!.split('.');
 
-													(result[2] || (result[2] = [])).push(
+													(result[2] ?? (result[2] = [])).push(
 														nodeComponent!,
 														$paramConfig.property,
 														keypath.length == 1
@@ -1023,22 +1024,24 @@ function renderContent<T extends Node = Element>(
 																	function (evt: IEvent) {
 																		this.ownerComponent[
 																			propName
-																		] = evt.data.value;
+																		] = evt.data['value'];
 																	})(keypath[0])
 															: ((propName, keypath) => {
-																	let getPropertyHolder = compileKeypath(
-																		keypath,
-																		keypath.join('.')
-																	);
+																	let getPropertyHolder =
+																		compileKeypath(
+																			keypath,
+																			keypath.join('.')
+																		);
 
 																	return function (evt: IEvent) {
-																		let propHolder = getPropertyHolder.call(
-																			this.ownerComponent
-																		);
+																		let propHolder =
+																			getPropertyHolder.call(
+																				this.ownerComponent
+																			);
 
 																		if (propHolder) {
 																			propHolder[propName] =
-																				evt.data.value;
+																				evt.data['value'];
 																		}
 																	};
 															  })(
@@ -1086,19 +1089,18 @@ function renderContent<T extends Node = Element>(
 									(parentComponent[KEY_CHILD_COMPONENTS] = [])
 								).push(nodeComponent);
 							} else {
-								(result![0] || (result![0] = [])).push(nodeComponent);
+								(result![0] ?? (result![0] = [])).push(nodeComponent);
 							}
 						}
 
 						if ((node as IElement).contentTemplateIndex !== null) {
-							el[KEY_CONTENT_TEMPLATE] = template._embeddedTemplates![
-								(node as IElement).contentTemplateIndex!
-							];
+							el[KEY_CONTENT_TEMPLATE] =
+								template._embeddedTemplates![
+									(node as IElement).contentTemplateIndex!
+								];
 						} else if (
 							result &&
-							(!nodeComponent ||
-								!(nodeComponent.constructor as typeof BaseComponent)
-									.bindsInputContent)
+							(!nodeComponent || !nodeComponent.constructor.bindsInputContent)
 						) {
 							renderContent(
 								el,
@@ -1153,7 +1155,7 @@ function renderContent<T extends Node = Element>(
 									document.createTextNode(cell.get())
 								);
 
-								(result[1] || (result[1] = [])).push(cell as IBinding);
+								(result[1] ?? (result[1] = [])).push(cell as IBinding);
 							}
 
 							break;

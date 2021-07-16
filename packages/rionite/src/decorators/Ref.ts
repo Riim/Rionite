@@ -23,10 +23,10 @@ export function Ref(
 		target!.constructor,
 		'_lifecycleHooks'
 	)
-		? (target!.constructor as typeof BaseComponent)._lifecycleHooks
-		: ((target!.constructor as typeof BaseComponent)._lifecycleHooks = ({
-				__proto__: (target!.constructor as typeof BaseComponent)._lifecycleHooks
-		  } as any) as typeof BaseComponent._lifecycleHooks);
+		? (target as BaseComponent).constructor._lifecycleHooks
+		: ((target as BaseComponent).constructor._lifecycleHooks = {
+				__proto__: (target as BaseComponent).constructor._lifecycleHooks
+		  } as any as typeof BaseComponent._lifecycleHooks);
 
 	(Object.prototype.hasOwnProperty.call(lifecycleHooks, 'ready')
 		? lifecycleHooks.ready
