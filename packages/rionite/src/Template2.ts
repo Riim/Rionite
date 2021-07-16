@@ -557,7 +557,7 @@ export class Template {
 
 						el = transformer(el, attr);
 
-						for (let i = 0, l = (el.content ?? []).length; i < l; i++) {
+						for (let i = 0, l = el.content?.length ?? 0; i < l; i++) {
 							let node = el.content![i];
 
 							if (node.nodeType == NodeType.ELEMENT) {
@@ -670,7 +670,7 @@ export class Template {
 		let superCall =
 			elAttrs[0] &&
 			this._readSuperCall(
-				[ParserNodeType.SUPER_CALL, elAttrs[0] === 1 ? '' : elAttrs[0]],
+				[ParserNodeType.SUPER_CALL, elAttrs[0] === 1 ? undefined : elAttrs[0]],
 				superElName
 			);
 

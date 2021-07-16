@@ -88,10 +88,10 @@ const escapee = new Map([
 ]);
 const reWhitespace = /\s/;
 const reLineBreak = /\n|\r\n?/g;
-const reTagName = /[a-zA-Z][\-\w]*/gy;
-const reElementName = /[a-zA-Z][\-\w]*/gy;
+const reTagName = /[a-zA-Z][-\w]*/gy;
+const reElementName = /[a-zA-Z][-\w]*/gy;
 const reAttributeName = /[^\s'">/=,)]+/gy;
-const reSuperCall = /super(?:\.([a-zA-Z][\-\w]*))?!/gy;
+const reSuperCall = /super(?:\.([a-zA-Z][-\w]*))?!/gy;
 const reTrimStartLine = /^[\x20\t]+/gm;
 const reTrimEndLine = /[\x20\t]+$/gm;
 function normalizeMultilineText(text) {
@@ -207,12 +207,13 @@ class TemplateParser {
             elNames,
             override,
             isTransformer ? 1 : undefined,
-            tagName || undefined,
+            tagName !== null && tagName !== void 0 ? tagName : undefined,
             attrs,
             content
         ]);
     }
     _readAttributes() {
+        var _a;
         this._next( /* '(' */);
         if (this._skipWhitespacesAndComments() == ')') {
             this._next();
@@ -240,7 +241,7 @@ class TemplateParser {
                     this._next();
                     let chr = this._skipWhitespaces();
                     if (chr == "'" || chr == '"' || chr == '`') {
-                        (list || (list = [])).push([
+                        (list !== null && list !== void 0 ? list : (list = [])).push([
                             isTransformer ? 1 : undefined,
                             name,
                             this._readString()
@@ -254,7 +255,7 @@ class TemplateParser {
                                 this._throwError('Unexpected end of template. Expected "," or ")" to finalize attribute value.');
                             }
                             if (chr == ',' || chr == ')' || chr == '\n' || chr == '\r') {
-                                (list || (list = [])).push([
+                                (list !== null && list !== void 0 ? list : (list = [])).push([
                                     isTransformer ? 1 : undefined,
                                     name,
                                     value.trim()
@@ -270,7 +271,7 @@ class TemplateParser {
                     }
                 }
                 else {
-                    (list || (list = [])).push([isTransformer ? 1 : undefined, name, '']);
+                    (list !== null && list !== void 0 ? list : (list = [])).push([isTransformer ? 1 : undefined, name, '']);
                 }
             }
             switch (this._chr) {
@@ -288,7 +289,7 @@ class TemplateParser {
                 }
             }
         }
-        return [superCall ? superCall[1] || 1 : undefined, list];
+        return [superCall ? (_a = superCall[1]) !== null && _a !== void 0 ? _a : 1 : undefined, list];
     }
     _readSuperCall() {
         reSuperCall.lastIndex = this._pos;
@@ -2024,7 +2025,7 @@ class Template {
         return targetContent;
     }
     _readElement(targetContent, elNode, namespaceSVG, superElName, componentCtor) {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g;
         let elNames = elNode[1];
         let override = elNode[2] == 1;
         let isTransformer = !!elNode[3];
@@ -2207,7 +2208,7 @@ class Template {
                             this._throwError(`Transformer "${attr.name}" is not defined`, elNode);
                         }
                         el = transformer(el, attr);
-                        for (let i = 0, l = ((_d = el.content) !== null && _d !== void 0 ? _d : []).length; i < l; i++) {
+                        for (let i = 0, l = (_e = (_d = el.content) === null || _d === void 0 ? void 0 : _d.length) !== null && _e !== void 0 ? _e : 0; i < l; i++) {
                             let node = el.content[i];
                             if (node.nodeType == NodeType.ELEMENT) {
                                 if (!namespaceSVG &&
@@ -2226,7 +2227,7 @@ class Template {
                                         events: node.events,
                                         domEvents: node.domEvents,
                                         content: node.content,
-                                        contentTemplateIndex: ((_e = this._embeddedTemplates) !== null && _e !== void 0 ? _e : (this._embeddedTemplates = [])).push(new Template({
+                                        contentTemplateIndex: ((_f = this._embeddedTemplates) !== null && _f !== void 0 ? _f : (this._embeddedTemplates = [])).push(new Template({
                                             nodeType: NodeType.BLOCK,
                                             content: node.content,
                                             elements: this._elements
@@ -2265,7 +2266,7 @@ class Template {
             }
             if (el.content && (el.tagName == 'template' || el.tagName == 'rn-slot')) {
                 el.contentTemplateIndex =
-                    ((_f = this._embeddedTemplates) !== null && _f !== void 0 ? _f : (this._embeddedTemplates = [])).push(new Template({
+                    ((_g = this._embeddedTemplates) !== null && _g !== void 0 ? _g : (this._embeddedTemplates = [])).push(new Template({
                         nodeType: NodeType.BLOCK,
                         content: el.content,
                         elements: this._elements
@@ -2289,7 +2290,7 @@ class Template {
     }
     _readAttributes(elAttrs, namespaceSVG, superElName, $paramsConfig, $specifiedParams) {
         let superCall = elAttrs[0] &&
-            this._readSuperCall([rionite_template_parser_2_dist.NodeType.SUPER_CALL, elAttrs[0] === 1 ? '' : elAttrs[0]], superElName);
+            this._readSuperCall([rionite_template_parser_2_dist.NodeType.SUPER_CALL, elAttrs[0] === 1 ? undefined : elAttrs[0]], superElName);
         let attrIsValue;
         let list;
         if (superCall) {
