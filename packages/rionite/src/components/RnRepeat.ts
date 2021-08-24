@@ -448,7 +448,7 @@ export class RnRepeat extends BaseComponent {
 
 			if (removedValues.size != 0) {
 				(($itemsMap) => {
-					for (let value of removedValues.values()) {
+					for (let value of removedValues.keys()) {
 						for (let $item of $itemsMap.get(value)!) {
 							offBindings($item.bindings);
 							deactivateChildComponents($item.childComponents);

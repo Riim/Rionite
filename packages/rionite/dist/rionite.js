@@ -4349,7 +4349,7 @@ let RnRepeat = RnRepeat_1 = class RnRepeat extends BaseComponent {
             }
             if (removedValues.size != 0) {
                 (($itemsMap) => {
-                    for (let value of removedValues.values()) {
+                    for (let value of removedValues.keys()) {
                         for (let $item of $itemsMap.get(value)) {
                             offBindings($item.bindings);
                             deactivateChildComponents($item.childComponents);
@@ -4516,7 +4516,7 @@ let RnCondition = RnCondition_1 = class RnCondition extends BaseComponent {
         let conditionResult = this._conditionCell.get();
         if (this._unless
             ? !conditionResult && (conditionResult !== undefined || this.trueWhenPending)
-            : conditionResult) {
+            : conditionResult || (conditionResult === undefined && this.trueWhenPending)) {
             let contentBindingResult = [null, null, null];
             let content = this.element[KEY_CONTENT_TEMPLATE].render(null, this.ownerComponent, this.$context, contentBindingResult);
             let childComponents = contentBindingResult[0];

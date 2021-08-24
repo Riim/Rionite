@@ -129,7 +129,7 @@ export class RnCondition extends BaseComponent {
 		if (
 			this._unless
 				? !conditionResult && (conditionResult !== undefined || this.trueWhenPending)
-				: conditionResult
+				: conditionResult || (conditionResult === undefined && this.trueWhenPending)
 		) {
 			let contentBindingResult: [
 				Array<BaseComponent> | null,
