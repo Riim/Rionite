@@ -1,6 +1,6 @@
 {
   "name": "gulp-rionite-localization",
-  "version": "0.42.21",
+  "version": "0.42.25",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -18,9 +18,9 @@
   "homepage": "https://github.com/Riim/Rionite#readme",
   "dependencies": {
     "@riim/nunjucks-walk": "^1.0.0",
-    "@riim/rionite-template-node-value-parser": "^0.42.21",
-    "@riim/rionite-template-parser": "^0.42.21",
-    "@riim/rionite-template-walk": "^0.42.21",
+    "@riim/rionite-template-node-value-parser": "^0.42.25",
+    "@riim/rionite-template-parser": "^0.42.25",
+    "@riim/rionite-template-walk": "^0.42.25",
     "gettext-parser": "^4.0.4",
     "nunjucks": "^3.2.3",
     "through2": "^4.0.2",
