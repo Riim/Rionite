@@ -347,7 +347,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			| symbol
 			| Array<string | symbol>
 			| Record<string | symbol, TListener | Array<TListener>>,
-		listener?: TListener | Array<TListener> | any,
+		listener?: any,
 		context?: any,
 		useCapture?: boolean
 	): IDisposableListening {
@@ -751,33 +751,28 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			this._isReady = true;
 		}
 
-		// readyPromises, this.readyPromise - 2
-		// !readyPromises, this.readyPromise - 0
-		// !readyPromises, !this.readyPromise - 1
-		if (readyPromises || !this.readyPromise) {
-			if (readyPromises) {
-				this.readyPromise!.finally(() => {
-					if (this._isConnected) {
-						callLifecycle(
-							[
-								...this.constructor._lifecycleHooks.connected,
-								...this._lifecycleHooks.connected,
-								this.connected
-							],
-							this
-						);
-					}
-				});
-			} else {
-				callLifecycle(
-					[
-						...this.constructor._lifecycleHooks.connected,
-						...this._lifecycleHooks.connected,
-						this.connected
-					],
-					this
-				);
-			}
+		if (readyPromises) {
+			this.readyPromise!.finally(() => {
+				if (this._isConnected) {
+					callLifecycle(
+						[
+							...this.constructor._lifecycleHooks.connected,
+							...this._lifecycleHooks.connected,
+							this.connected
+						],
+						this
+					);
+				}
+			});
+		} else if (!this.readyPromise) {
+			callLifecycle(
+				[
+					...this.constructor._lifecycleHooks.connected,
+					...this._lifecycleHooks.connected,
+					this.connected
+				],
+				this
+			);
 		}
 
 		return this.initializationPromise;
@@ -849,13 +844,11 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	elementMoved() {}
 
-	// Utils
-
 	$<R = BaseComponent | Element>(
 		name: string,
 		container?: Element | BaseComponent | string
 	): R | null {
-		let elList = this._getElementList(name, container);
+		let elList = this._$$(name, container);
 
 		return (
 			elList && elList.length != 0
@@ -868,7 +861,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 		name: string,
 		container?: Element | BaseComponent | string
 	): Array<R> {
-		let elList = this._getElementList(name, container);
+		let elList = this._$$(name, container);
 
 		return elList
 			? Array.prototype.map.call(
@@ -878,7 +871,7 @@ export class BaseComponent extends EventEmitter implements IDisposable {
 			: [];
 	}
 
-	_getElementList(
+	_$$(
 		name: string,
 		container?: Element | BaseComponent | string
 	): HTMLCollectionOf<Element> | undefined {

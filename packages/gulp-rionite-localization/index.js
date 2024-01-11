@@ -279,8 +279,8 @@ module.exports = (options) => {
 			case '.njk': {
 				let ast = nunjucks.parser.parse(content);
 
-				nunjucksWalk.walk(nunjucksWalk.normalize(ast), (node) => {
-					if (node.type == 'Filter' && node.name.value == 't') {
+				nunjucksWalk.walk(ast, (node) => {
+					if (node.name?.value === 't') {
 						addTranslation(
 							'',
 							node.args.children[0].value,

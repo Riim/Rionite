@@ -18,8 +18,8 @@ export function cloneNode<T extends Node>(node: T): T {
 			break;
 		}
 		case Node.ELEMENT_NODE: {
-			let tagName = ((node as any) as Element).tagName.toLowerCase();
-			let is = ((node as any) as Element).getAttribute('is');
+			let tagName = (node as any as Element).tagName.toLowerCase();
+			let is = (node as any as Element).getAttribute('is');
 
 			if (is) {
 				copy = (window as any).innerHTML(
@@ -27,10 +27,12 @@ export function cloneNode<T extends Node>(node: T): T {
 					`<${tagName} is="${is}">`
 				).firstChild;
 			} else if (isEdge) {
-				copy = (window as any).innerHTML(document.createElement('div'), `<${tagName}>`)
-					.firstChild;
+				copy = (window as any).innerHTML(
+					document.createElement('div'),
+					`<${tagName}>`
+				).firstChild;
 			} else {
-				copy = document.createElementNS(node.namespaceURI, tagName);
+				copy = document.createElementNS((node as any as Element).namespaceURI, tagName);
 			}
 
 			if ((tagName == 'template' || tagName == 'rn-slot') && node[KEY_CONTENT_TEMPLATE]) {
@@ -43,7 +45,7 @@ export function cloneNode<T extends Node>(node: T): T {
 				copy[KEY_DOM_EVENTS] = node[KEY_DOM_EVENTS];
 			}
 
-			let attrs = ((node as any) as Element).attributes;
+			let attrs = (node as any as Element).attributes;
 
 			for (let i = 0, l = attrs.length; i < l; i++) {
 				let attr = attrs.item(i)!;
@@ -61,6 +63,7 @@ export function cloneNode<T extends Node>(node: T): T {
 		}
 		case Node.TEXT_NODE: {
 			copy = document.createTextNode(node.nodeValue!);
+
 			break;
 		}
 	}

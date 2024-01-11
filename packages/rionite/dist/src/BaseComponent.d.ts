@@ -145,5 +145,5 @@ export declare class BaseComponent extends EventEmitter implements IDisposable {
     elementMoved(): void;
     $<R = BaseComponent | Element>(name: string, container?: Element | BaseComponent | string): R | null;
     $$<R = BaseComponent | Element>(name: string, container?: Element | BaseComponent | string): Array<R>;
-    _getElementList(name: string, container?: Element | BaseComponent | string): HTMLCollectionOf<Element> | undefined;
+    _$$(name: string, container?: Element | BaseComponent | string): HTMLCollectionOf<Element> | undefined;
 }

@@ -141,6 +141,7 @@ export class TemplateParser {
 
 						if (superCall) {
 							content.push(superCall);
+
 							break;
 						}
 					}
@@ -316,11 +317,13 @@ export class TemplateParser {
 			switch (this._chr) {
 				case ')': {
 					this._next();
+
 					break loop;
 				}
 				case ',': {
 					this._next();
 					this._skipWhitespacesAndComments();
+
 					break;
 				}
 				default: {
@@ -432,6 +435,7 @@ export class TemplateParser {
 					case '/': {
 						this._next();
 						while ((chr = this._next()) && chr != '\n' && chr != '\r') {}
+
 						break;
 					}
 					case '*': {
@@ -444,6 +448,7 @@ export class TemplateParser {
 								case '*': {
 									if (this._next() == '/') {
 										chr = this._next();
+
 										break loop2;
 									}
 

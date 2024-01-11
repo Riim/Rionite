@@ -320,9 +320,11 @@ export class TemplateNodeValueParser {
 					if (this._skipWhitespaces() == ',') {
 						obj += key + ':' + valueOrKeypath + ',';
 						this._next();
+
 						continue;
 					} else if (this._chr == '}') {
 						obj += key + ':' + valueOrKeypath + '}';
+
 						break;
 					}
 				}

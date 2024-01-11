@@ -91,4 +91,6 @@ export declare class Template {
     }): Template;
     setBlockName(blockName: string | Array<string>): Template;
     render(component?: BaseComponent | null, ownerComponent?: BaseComponent, context?: object, result?: TContentBindingResult, parentComponent?: BaseComponent): DocumentFragment;
+    _renderContent<T extends Node = Element>(targetNode: T, content: TContent | null, template: Template, ownerComponent?: BaseComponent, context?: object, result?: TContentBindingResult, parentComponent?: BaseComponent): T;
+    _renderElementClasses(elementNamesTemplate: Array<string>, elNames: Array<string | null>): string;
 }

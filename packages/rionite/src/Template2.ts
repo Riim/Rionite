@@ -821,7 +821,7 @@ export class Template {
 	): DocumentFragment {
 		let block = this.parse(component);
 
-		return renderContent(
+		return this._renderContent(
 			document.createDocumentFragment(),
 			block.content ?? block.elements['@root'].content,
 			this,
@@ -831,357 +831,370 @@ export class Template {
 			parentComponent
 		);
 	}
-}
 
-function renderContent<T extends Node = Element>(
-	targetNode: T,
-	content: TContent | null,
-	template: Template,
-	ownerComponent?: BaseComponent,
-	context?: object,
-	result?: TContentBindingResult,
-	parentComponent?: BaseComponent
-): T {
-	if (content) {
-		for (let node of content) {
-			switch (node.nodeType) {
-				case NodeType.ELEMENT_CALL: {
-					node = template._elements[(node as IElementCall).name];
-					break;
-				}
-				case NodeType.SUPER_CALL: {
-					renderContent(
-						targetNode,
-						(node as ISuperCall).element.content,
-						template,
-						ownerComponent,
-						context,
-						result,
-						parentComponent
-					);
+	_renderContent<T extends Node = Element>(
+		targetNode: T,
+		content: TContent | null,
+		template: Template,
+		ownerComponent?: BaseComponent,
+		context?: object,
+		result?: TContentBindingResult,
+		parentComponent?: BaseComponent
+	): T {
+		if (content) {
+			for (let node of content) {
+				switch (node.nodeType) {
+					case NodeType.ELEMENT_CALL: {
+						node = template._elements[(node as IElementCall).name];
 
-					continue;
-				}
-			}
-
-			switch (node.nodeType) {
-				case NodeType.ELEMENT: {
-					if ((node as IElement).isTransformer) {
-						renderContent(
+						break;
+					}
+					case NodeType.SUPER_CALL: {
+						this._renderContent(
 							targetNode,
-							(node as IElement).content,
+							(node as ISuperCall).element.content,
 							template,
 							ownerComponent,
 							context,
 							result,
 							parentComponent
 						);
-					} else {
-						let tagName = (node as IElement).tagName;
-						let el: Element;
 
-						if ((node as IElement).namespaceSVG) {
-							el = document.createElementNS(SVG_NAMESPACE_URI, tagName);
-						} else if ((node as IElement).is) {
-							el = (window as any).innerHTML(
-								document.createElement('div'),
-								`<${tagName} is="${(node as IElement).is}">`
-							).firstChild as Element;
-						} else {
-							el = document.createElement(tagName);
-						}
-
-						let nodeComponent =
-							result && (el as IPossiblyComponentElement).rioniteComponent;
-
-						let className: string | null | undefined;
-
-						if (nodeComponent) {
-							className = nodeComponent.constructor._blockNamesString;
-						}
-
-						if ((node as IElement).names) {
-							className =
-								(className ?? '') +
-								renderElementClasses(
-									template._elementNamesTemplate,
-									(node as IElement).names!
-								);
-						}
-
-						let attrList =
-							(node as IElement).attributes && (node as IElement).attributes!.list;
-
-						if (attrList) {
-							let $paramsConfig:
-								| Map<string, I$ComponentParamConfig>
-								| null
-								| undefined;
-
-							if (nodeComponent) {
-								$paramsConfig = nodeComponent.constructor[KEY_PARAMS_CONFIG];
-							}
-
-							for (let attr of attrList) {
-								if (attr.isTransformer) {
-									continue;
-								}
-
-								let attrName = attr.name;
-								let attrValue: any = attr.value;
-
-								if (attrName == 'class') {
-									attrValue = (className ?? '') + attrValue;
-									className = null;
-								}
-
-								if (result) {
-									if (
-										!attrName.lastIndexOf('oncomponent-', 0) ||
-										!attrName.lastIndexOf('on-', 0)
-									) {
-										el[KEY_CONTEXT] = context;
-									}
-
-									if (attrValue) {
-										let attrValueAST = parseTemplateNodeValue(attrValue);
-
-										if (attrValueAST) {
-											let bindingPrefix =
-												attrValueAST.length == 1
-													? (attrValueAST[0] as ITemplateNodeValueBinding)
-															.prefix
-													: null;
-
-											if (
-												bindingPrefix === '=' ||
-												(bindingPrefix === null &&
-													($paramsConfig && $paramsConfig.get(attrName))
-														?.readonly)
-											) {
-												attrValue = compileTemplateNodeValue(
-													attrValueAST,
-													attrValue,
-													true
-												).call(context, {
-													meta: {
-														element: el,
-														attributeName: attrName
-													}
-												});
-											} else {
-												if (bindingPrefix !== '->') {
-													let cell = new Cell<
-														any,
-														IAttributeBindingCellMeta
-													>(
-														compileTemplateNodeValue(
-															attrValueAST,
-															attrValue,
-															attrValueAST.length == 1
-														),
-														{
-															context,
-															meta: {
-																element: el,
-																attributeName: attrName
-															},
-															onChange: onAttributeBindingCellChange
-														}
-													);
-
-													attrValue = cell.get();
-
-													(result[1] ?? (result[1] = [])).push(
-														cell as IBinding
-													);
-												}
-
-												let $paramConfig =
-													$paramsConfig && $paramsConfig.get(attrName);
-
-												if (
-													$paramConfig &&
-													(bindingPrefix === '->' ||
-														bindingPrefix === '<->')
-												) {
-													if (
-														bindingPrefix == '->' &&
-														attrName.charAt(0) != '_'
-													) {
-														attrValue = null;
-													}
-
-													let keypath = (
-														attrValueAST[0] as ITemplateNodeValueBinding
-													).keypath!.split('.');
-
-													(result[2] ?? (result[2] = [])).push(
-														nodeComponent!,
-														$paramConfig.property,
-														keypath.length == 1
-															? ((propName) =>
-																	function (evt: IEvent) {
-																		this.ownerComponent[
-																			propName
-																		] = evt.data['value'];
-																	})(keypath[0])
-															: ((propName, keypath) => {
-																	let getPropertyHolder =
-																		compileKeypath(
-																			keypath,
-																			keypath.join('.')
-																		);
-
-																	return function (evt: IEvent) {
-																		let propHolder =
-																			getPropertyHolder.call(
-																				this.ownerComponent
-																			);
-
-																		if (propHolder) {
-																			propHolder[propName] =
-																				evt.data['value'];
-																		}
-																	};
-															  })(
-																	keypath[keypath.length - 1],
-																	keypath.slice(0, -1)
-															  )
-													);
-												}
-											}
-										}
-									}
-								}
-
-								if (attrValue !== false && attrValue != null) {
-									setAttribute(el, attrName, attrValue);
-								}
-							}
-						}
-
-						if (className) {
-							if ((node as IElement).namespaceSVG) {
-								el.setAttribute('class', className);
-							} else {
-								el.className = className;
-							}
-						}
-
-						if ((node as IElement).events) {
-							el[KEY_EVENTS] = (node as IElement).events;
-							el[KEY_CONTEXT] = context;
-						}
-						if ((node as IElement).domEvents) {
-							el[KEY_DOM_EVENTS] = (node as IElement).domEvents;
-							el[KEY_CONTEXT] = context;
-						}
-
-						if (nodeComponent) {
-							nodeComponent._ownerComponent = ownerComponent;
-							nodeComponent.$context = context;
-							nodeComponent.$specifiedParams = (node as IElement).$specifiedParams!;
-
-							if (parentComponent) {
-								(
-									parentComponent[KEY_CHILD_COMPONENTS] ||
-									(parentComponent[KEY_CHILD_COMPONENTS] = [])
-								).push(nodeComponent);
-							} else {
-								(result![0] ?? (result![0] = [])).push(nodeComponent);
-							}
-						}
-
-						if ((node as IElement).contentTemplateIndex !== null) {
-							el[KEY_CONTENT_TEMPLATE] =
-								template._embeddedTemplates![
-									(node as IElement).contentTemplateIndex!
-								];
-						} else if (
-							result &&
-							(!nodeComponent || !nodeComponent.constructor.bindsInputContent)
-						) {
-							renderContent(
-								el,
+						break;
+					}
+					case NodeType.ELEMENT: {
+						if ((node as IElement).isTransformer) {
+							this._renderContent(
+								targetNode,
 								(node as IElement).content,
 								template,
 								ownerComponent,
 								context,
 								result,
-								nodeComponent
+								parentComponent
 							);
 						} else {
-							renderContent(el, (node as IElement).content, template);
-						}
+							let tagName = (node as IElement).tagName;
+							let el: Element;
 
-						targetNode.appendChild(el);
-					}
-
-					break;
-				}
-				case NodeType.TEXT: {
-					let nodeValue = (node as ITextNode).value;
-
-					if (result) {
-						let nodeValueAST = parseTemplateNodeValue(nodeValue);
-
-						if (nodeValueAST) {
-							if (
-								nodeValueAST.length == 1 &&
-								(nodeValueAST[0] as ITemplateNodeValueBinding).prefix === '='
-							) {
-								targetNode.appendChild(
-									document.createTextNode(
-										compileTemplateNodeValue(
-											nodeValueAST,
-											nodeValue,
-											false
-										).call(context)
-									)
-								);
+							if ((node as IElement).namespaceSVG) {
+								el = document.createElementNS(SVG_NAMESPACE_URI, tagName);
+							} else if ((node as IElement).is) {
+								el = (window as any).innerHTML(
+									document.createElement('div'),
+									`<${tagName} is="${(node as IElement).is}">`
+								).firstChild as Element;
 							} else {
-								let meta = { textNode: null as any };
-								let cell = new Cell<string, { textNode: Text }>(
-									compileTemplateNodeValue(nodeValueAST, nodeValue, false),
-									{
-										context,
-										meta,
-										onChange: onTextNodeBindingCellChange
-									}
-								);
-
-								meta.textNode = targetNode.appendChild(
-									document.createTextNode(cell.get())
-								);
-
-								(result[1] ?? (result[1] = [])).push(cell as IBinding);
+								el = document.createElement(tagName);
 							}
 
-							break;
+							let nodeComponent =
+								result && (el as IPossiblyComponentElement).rioniteComponent;
+
+							let className: string | null | undefined;
+
+							if (nodeComponent) {
+								className = nodeComponent.constructor._blockNamesString;
+							}
+
+							if ((node as IElement).names) {
+								className =
+									(className ?? '') +
+									this._renderElementClasses(
+										template._elementNamesTemplate,
+										(node as IElement).names!
+									);
+							}
+
+							let attrList =
+								(node as IElement).attributes &&
+								(node as IElement).attributes!.list;
+
+							if (attrList) {
+								let $paramsConfig:
+									| Map<string, I$ComponentParamConfig>
+									| null
+									| undefined;
+
+								if (nodeComponent) {
+									$paramsConfig = nodeComponent.constructor[KEY_PARAMS_CONFIG];
+								}
+
+								for (let attr of attrList) {
+									if (attr.isTransformer) {
+										continue;
+									}
+
+									let attrName = attr.name;
+									let attrValue: any = attr.value;
+
+									if (attrName == 'class') {
+										attrValue = (className ?? '') + attrValue;
+										className = null;
+									}
+
+									if (result) {
+										if (
+											!attrName.lastIndexOf('oncomponent-', 0) ||
+											!attrName.lastIndexOf('on-', 0)
+										) {
+											el[KEY_CONTEXT] = context;
+										}
+
+										if (attrValue) {
+											let attrValueAST = parseTemplateNodeValue(attrValue);
+
+											if (attrValueAST) {
+												let bindingPrefix =
+													attrValueAST.length == 1
+														? (
+																attrValueAST[0] as ITemplateNodeValueBinding
+														  ).prefix
+														: null;
+
+												if (
+													bindingPrefix === '=' ||
+													(bindingPrefix === null &&
+														(
+															$paramsConfig &&
+															$paramsConfig.get(attrName)
+														)?.readonly)
+												) {
+													attrValue = compileTemplateNodeValue(
+														attrValueAST,
+														attrValue,
+														true
+													).call(context, {
+														meta: {
+															element: el,
+															attributeName: attrName
+														}
+													});
+												} else {
+													if (bindingPrefix !== '->') {
+														let cell = new Cell<
+															any,
+															IAttributeBindingCellMeta
+														>(
+															compileTemplateNodeValue(
+																attrValueAST,
+																attrValue,
+																attrValueAST.length == 1
+															),
+															{
+																context,
+																meta: {
+																	element: el,
+																	attributeName: attrName
+																},
+																onChange:
+																	onAttributeBindingCellChange
+															}
+														);
+
+														attrValue = cell.get();
+
+														(result[1] ?? (result[1] = [])).push(
+															cell as IBinding
+														);
+													}
+
+													let $paramConfig =
+														$paramsConfig &&
+														$paramsConfig.get(attrName);
+
+													if (
+														$paramConfig &&
+														(bindingPrefix === '->' ||
+															bindingPrefix === '<->')
+													) {
+														if (
+															bindingPrefix == '->' &&
+															attrName.charAt(0) != '_'
+														) {
+															attrValue = null;
+														}
+
+														let keypath = (
+															attrValueAST[0] as ITemplateNodeValueBinding
+														).keypath!.split('.');
+
+														(result[2] ?? (result[2] = [])).push(
+															nodeComponent!,
+															$paramConfig.property,
+															keypath.length == 1
+																? ((propName) =>
+																		function (evt: IEvent) {
+																			this.ownerComponent[
+																				propName
+																			] = evt.data['value'];
+																		})(keypath[0])
+																: ((propName, keypath) => {
+																		let getPropertyHolder =
+																			compileKeypath(
+																				keypath,
+																				keypath.join('.')
+																			);
+
+																		return function (
+																			evt: IEvent
+																		) {
+																			let propHolder =
+																				getPropertyHolder.call(
+																					this
+																						.ownerComponent
+																				);
+
+																			if (propHolder) {
+																				propHolder[
+																					propName
+																				] =
+																					evt.data[
+																						'value'
+																					];
+																			}
+																		};
+																  })(
+																		keypath[keypath.length - 1],
+																		keypath.slice(0, -1)
+																  )
+														);
+													}
+												}
+											}
+										}
+									}
+
+									if (attrValue !== false && attrValue != null) {
+										setAttribute(el, attrName, attrValue);
+									}
+								}
+							}
+
+							if (className) {
+								if ((node as IElement).namespaceSVG) {
+									el.setAttribute('class', className);
+								} else {
+									el.className = className;
+								}
+							}
+
+							if ((node as IElement).events) {
+								el[KEY_EVENTS] = (node as IElement).events;
+								el[KEY_CONTEXT] = context;
+							}
+							if ((node as IElement).domEvents) {
+								el[KEY_DOM_EVENTS] = (node as IElement).domEvents;
+								el[KEY_CONTEXT] = context;
+							}
+
+							if (nodeComponent) {
+								nodeComponent._ownerComponent = ownerComponent;
+								nodeComponent.$context = context;
+								nodeComponent.$specifiedParams = (
+									node as IElement
+								).$specifiedParams!;
+
+								if (parentComponent) {
+									(
+										parentComponent[KEY_CHILD_COMPONENTS] ||
+										(parentComponent[KEY_CHILD_COMPONENTS] = [])
+									).push(nodeComponent);
+								} else {
+									(result![0] ?? (result![0] = [])).push(nodeComponent);
+								}
+							}
+
+							if ((node as IElement).contentTemplateIndex !== null) {
+								el[KEY_CONTENT_TEMPLATE] =
+									template._embeddedTemplates![
+										(node as IElement).contentTemplateIndex!
+									];
+							} else if (
+								result &&
+								(!nodeComponent || !nodeComponent.constructor.bindsInputContent)
+							) {
+								this._renderContent(
+									el,
+									(node as IElement).content,
+									template,
+									ownerComponent,
+									context,
+									result,
+									nodeComponent
+								);
+							} else {
+								this._renderContent(el, (node as IElement).content, template);
+							}
+
+							targetNode.appendChild(el);
 						}
+
+						break;
 					}
+					case NodeType.TEXT: {
+						let nodeValue = (node as ITextNode).value;
 
-					targetNode.appendChild(document.createTextNode(nodeValue));
+						if (result) {
+							let nodeValueAST = parseTemplateNodeValue(nodeValue);
 
-					break;
+							if (nodeValueAST) {
+								if (
+									nodeValueAST.length == 1 &&
+									(nodeValueAST[0] as ITemplateNodeValueBinding).prefix === '='
+								) {
+									targetNode.appendChild(
+										document.createTextNode(
+											compileTemplateNodeValue(
+												nodeValueAST,
+												nodeValue,
+												false
+											).call(context)
+										)
+									);
+								} else {
+									let meta = { textNode: null as any };
+									let cell = new Cell<string, { textNode: Text }>(
+										compileTemplateNodeValue(nodeValueAST, nodeValue, false),
+										{
+											context,
+											meta,
+											onChange: onTextNodeBindingCellChange
+										}
+									);
+
+									meta.textNode = targetNode.appendChild(
+										document.createTextNode(cell.get())
+									);
+
+									(result[1] ?? (result[1] = [])).push(cell as IBinding);
+								}
+
+								break;
+							}
+						}
+
+						targetNode.appendChild(document.createTextNode(nodeValue));
+
+						break;
+					}
 				}
 			}
 		}
+
+		return targetNode;
 	}
 
-	return targetNode;
-}
+	_renderElementClasses(
+		elementNamesTemplate: Array<string>,
+		elNames: Array<string | null>
+	): string {
+		let elClasses = '';
 
-function renderElementClasses(
-	elementNamesTemplate: Array<string>,
-	elNames: Array<string | null>
-): string {
-	let elClasses = '';
+		for (let i = elNames[0] ? 0 : 1, l = elNames.length; i < l; i++) {
+			elClasses += elementNamesTemplate.join(elNames[i] + ' ');
+		}
 
-	for (let i = elNames[0] ? 0 : 1, l = elNames.length; i < l; i++) {
-		elClasses += elementNamesTemplate.join(elNames[i] + ' ');
+		return elClasses;
 	}
-
-	return elClasses;
 }

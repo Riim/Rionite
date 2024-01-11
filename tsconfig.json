@@ -1,0 +1,26 @@
+{
+	"compilerOptions": {
+		"alwaysStrict": true,
+		"experimentalDecorators": true,
+		"lib": ["ES2019", "DOM"],
+		"module": "ESNext",
+		"moduleResolution": "Node",
+		"newLine": "lf",
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitAny": true,
+		"noImplicitOverride": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": false,
+		"outDir": "dist",
+		"preserveConstEnums": true,
+		"resolveJsonModule": true,
+		"strictBindCallApply": true,
+		"strictFunctionTypes": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": false,
+		"target": "ES2017"
+	}
+}

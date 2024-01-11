@@ -161,6 +161,7 @@ export class TemplateParser {
 
 						if (nextChr == '/' || nextChr == '*') {
 							this._readComment(content);
+
 							break;
 						}
 					} else if (chr == 'd' && this.template.substr(this._pos, 9) == 'debugger!') {
@@ -187,6 +188,7 @@ export class TemplateParser {
 
 						if (superCall) {
 							content.push(superCall);
+
 							break;
 						}
 					}
@@ -384,11 +386,13 @@ export class TemplateParser {
 			switch (this._chr) {
 				case ')': {
 					this._next();
+
 					break loop;
 				}
 				case ',': {
 					this._next();
 					this._skipWhitespacesAndReadComments(targetContent);
+
 					break;
 				}
 				default: {
@@ -512,6 +516,7 @@ export class TemplateParser {
 						case '*': {
 							if (this._next() == '/') {
 								this._next();
+
 								break loop;
 							}
 
@@ -521,6 +526,7 @@ export class TemplateParser {
 						}
 						case '': {
 							this._throwError('Expected "*/" to close multiline comment', pos + 2);
+
 							break;
 						}
 						default: {
